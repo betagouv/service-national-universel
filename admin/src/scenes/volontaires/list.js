@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters, StateProvider } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
 import { HiAdjustments } from "react-icons/hi";
-import { Formik, Field } from "formik";
+import { Formik } from "formik";
 
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
@@ -20,6 +20,7 @@ import {
   translate,
   translatePhase1,
   getFilterLabel,
+  getSelectedFilterLabel,
   YOUNG_STATUS_COLORS,
   isInRuralArea,
   formatLongDateFR,
@@ -38,6 +39,7 @@ import {
   department2region,
   translateFileStatusPhase1,
   translateStatusMilitaryPreparationFiles,
+  translateFilter,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -49,6 +51,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { ModalContainer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
+import ExportFieldCard from "./components/ExportFieldCard";
 
 const FILTERS = [
   "SEARCH",
@@ -84,7 +87,6 @@ const FILTERS = [
   "ALLERGIES",
   "COHESION_PARTICIPATION",
   "COHESION_JDM",
-  "COHESION_PRESENCE",
   "DEPART",
   "DEPART_MOTIF",
   "SAME_DEPARTMENT_SPORT",
@@ -335,100 +337,149 @@ export default function VolontaireList() {
     });
   }
 
-  const COLUMNS = [
+  const fieldsAvailable = [
     {
       title: "Identité du volontaire",
-      desc: "Prénom, nom, sexe, cohorte, cohorte d'origine.",
+      desc: ["Prénom", "Nom", "Sexe", "Cohorte", "Cohorte d'origine"],
       value: "identity",
     },
     {
       title: "Contact du volontaire",
-      desc: "Email, téléphone",
+      desc: ["Email", "Téléphone"],
       value: "contact",
     },
     {
       title: "Date et lieu de naissance du volontaire",
-      desc: "Date de naissance, pays de naissance, ville de naissance, code postal de naissance.",
+      desc: ["Date de naissance", "Pays de naissance", "Ville de naissance", "Code postal de naissance"],
       value: "birth",
     },
     {
       title: "Lieu de résidence du volontaire",
-      desc: "Adresse postale, code postal, ville, pays, nom et prénom de l'hébergeur, lien avec l'hébergeur, adresse - étranger, code postal - étranger, ville - étranger, pays - étranger.",
+      desc: [
+        "Adresse postale",
+        "Code postal",
+        "Ville, pays, nom et prénom de l'hébergeur",
+        "Lien avec l'hébergeur",
+        "Adresse - étranger",
+        "Code postal - étranger",
+        "Ville - étranger",
+        "Pays - étranger",
+      ],
       value: "address",
     },
     {
       title: "Localisation du volontaire",
-      desc: "Département, académie, région.",
+      desc: ["Département", "Académie", "Région"],
       value: "location",
     },
     {
       title: "Situation scolaire",
-      desc: "Niveau, type d'établissement, nom de l'établissement, code postal de l'établissement, ville de l'établissement, département de l'établissement, UAI de l'établissement.",
+      desc: [
+        "Niveau",
+        "Type d'établissement",
+        "Nom de l'établissement",
+        "Code postal de l'établissement",
+        "Ville de l'établissement",
+        "Département de l'établissement",
+        "UAI de l'établissement",
+      ],
       value: "schoolSituation",
     },
     {
       title: "Situation particulière",
-      desc: "Quartier Prioritaire de la ville, Zone Rurale, Handicap, PPS, PAI, Aménagement spécifique, Nature de l'aménagement spécifique, Aménagement pour mobilité réduite, Besoin d'être affecté(e) dans le département de résidence, Allergies ou intolérances alimentaires, Activité de haut-niveau, Nature de l'activité de haut-niveau, Activités de haut niveau nécessitant d'être affecté dans le département de résidence, Document activité de haut-niveau, Structure médico-sociale, Nom de la structure médico-sociale, Adresse de la structure médico-sociale, Code postal de la structure médico-sociale, Ville de la structure médico-sociale",
+      desc: [
+        "Quartier Prioritaire de la ville",
+        "Zone Rurale",
+        "Handicap",
+        "PPS",
+        "PAI",
+        "Aménagement spécifique",
+        "Nature de l'aménagement spécifique",
+        "Aménagement pour mobilité réduite",
+        "Besoin d'être affecté(e) dans le département de résidence",
+        "Allergies ou intolérances alimentaires",
+        "Activité de haut-niveau",
+        "Nature de l'activité de haut-niveau",
+        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence",
+        "Document activité de haut-niveau",
+        "Structure médico-sociale",
+        "Nom de la structure médico-sociale",
+        "Adresse de la structure médico-sociale",
+        "Code postal de la structure médico-sociale",
+        "Ville de la structure médico-sociale",
+      ],
       value: "situation",
     },
     {
       title: "Représentant légal 1",
-      desc: "Statut, nom, prénom, email, téléphone, adresse, code postal, ville, département et région du représentant légal.",
+      desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
       value: "representative1",
     },
     {
       title: "Représentant légal 2",
-      desc: "Statut, nom, prénom, email, téléphone, adresse, code postal, ville, département et région du représentant légal.",
+      desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
       value: "representative2",
     },
     {
       title: "Consentement",
-      desc: "Consentement des représentants légaux.",
+      desc: ["Consentement des représentants légaux."],
       value: "consent",
     },
     {
       title: "Statut",
-      desc: "Statut général, statut phase 1, statut phase 2, statut phase 3, date du dernier statut.",
+      desc: ["Statut général", "Statut phase 1", "Statut phase 2", "Statut phase 3", "Date du dernier statut"],
       value: "status",
     },
     {
       title: "Phase 1 - Affectation ",
-      desc: "ID, code, nom, ville, département et région du centre.",
+      desc: ["ID", "Code", "Nom", "Ville", "Département et région du centre"],
       value: "phase1Affectation",
     },
     {
       title: "Phase 1 - Transport",
-      desc: "Autonomie, numéro de bus, point de rassemblement, dates d'aller et de retour.",
+      desc: ["Autonomie", "Numéro de bus", "Point de rassemblement", "Dates d'aller et de retour"],
       value: "phase1Transport",
     },
     {
       title: "Phase 1 - Statut des documents",
-      desc: "Droit à l'image, autotest PCR, règlement intérieur, fiche sanitaire.",
+      desc: ["Droit à l'image", "Autotest PCR", "Règlement intérieur", "Fiche sanitaire"],
       value: "phase1DocumentStatus",
     },
     {
       title: "Phase 1 - Accords",
-      desc: "Accords pour droit à l'image et autotests PCR.",
+      desc: ["Accords pour droit à l'image et autotests PCR."],
       value: "phase1DocumentAgreement",
     },
     {
       title: "Phase 1 - Présence",
-      desc: "Présence à l'arrivé, présence à la JDM, date de départ, motif de départ.",
+      desc: ["Présence à l'arrivé", "Présence à la JDM", "Date de départ", "Motif de départ"],
       value: "phase1Attendance",
     },
     {
       title: "Phase 2",
-      desc: "Domaines MIG 1, MIG 2 et MIG 3, projet professionnel, période privilégiée, choix de périodes, mobilité, mobilité autour d'un proche, information du proche, mode de transport, format de mission, engagement hors SNU, souhait MIG",
+      desc: [
+        "Domaines MIG 1, MIG 2 et MIG 3",
+        "Projet professionnel",
+        "Période privilégiée",
+        "Choix de périodes",
+        "Mobilité",
+        "Mobilité autour d'un proche",
+        "Information du proche",
+        "Mode de transport",
+        "Format de mission",
+        "Engagement hors SNU",
+        "Souhait MIG",
+      ],
       value: "phase2",
     },
     {
       title: "Compte",
-      desc: "Dates de création, d'édition et de dernière connexion.",
+      desc: ["Dates de création, d'édition et de dernière connexion."],
       value: "accountDetails",
     },
     {
       title: "Désistement",
-      desc: "Raison et message du désistement.",
+      desc: ["Raison du désistement", "Message de désistement"],
       value: "desistement",
     },
   ];
@@ -451,104 +502,70 @@ export default function VolontaireList() {
                   <ModalContainer>
                     <Formik
                       initialValues={{
-                        checked: [
-                          "identity",
-                          "contact",
-                          "birth",
-                          "address",
-                          "location",
-                          "schoolSituation",
-                          "situation",
-                          "representative1",
-                          "representative2",
-                          "consent",
-                          "status",
-                          "phase1Affectation",
-                          "phase1Transport",
-                          "phase1DocumentStatus",
-                          "phase1DocumentAgreement",
-                          "phase1Attendance",
-                          "phase2",
-                          "accountDetails",
-                          "desistement",
-                        ],
+                        checked: fieldsAvailable.map((e) => e.value),
                       }}>
                       {({ values, setFieldValue }) => (
                         <>
-                          <div className="text-xl">Sélectionnez les données à exporter</div>
-                          <div className="flex w-full p-4">
-                            <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
-                            <div className="w-1/2 text-right">
-                              {values.checked == "" ? (
-                                <div
-                                  className="text-snu-purple-300 cursor-pointer hover:underline"
-                                  onClick={() =>
-                                    setFieldValue("checked", [
-                                      "identity",
-                                      "contact",
-                                      "birth",
-                                      "address",
-                                      "location",
-                                      "schoolSituation",
-                                      "situation",
-                                      "representative1",
-                                      "representative2",
-                                      "consent",
-                                      "status",
-                                      "phase1Affectation",
-                                      "phase1Transport",
-                                      "phase1DocumentStatus",
-                                      "phase1DocumentAgreement",
-                                      "phase1Attendance",
-                                      "phase2",
-                                      "accountDetails",
-                                      "desistement",
-                                    ])
-                                  }>
-                                  Tout sélectionner
-                                </div>
-                              ) : (
-                                <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
-                                  Tout déselectionner
-                                </div>
-                              )}
+                          <div className="w-full px-4">
+                            <div className="text-2xl text-center mb-4">Sélectionnez les données à exporter</div>
+
+                            <SelectedFilters
+                              showClearAll={false}
+                              render={(props) => {
+                                const { selectedValues } = props;
+                                let areAllFiltersEmpty = true;
+                                for (const item of Object.keys(selectedValues)) {
+                                  if (selectedValues[item].value.length > 0) areAllFiltersEmpty = false;
+                                }
+                                if (!areAllFiltersEmpty) {
+                                  return (
+                                    <div className="rounded-xl bg-gray-50 py-3">
+                                      <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
+                                      <div className="mt-2 mx-auto text-center text-base text-gray-600">
+                                        {Object.values(selectedValues)
+                                          .filter((e) => e.value.length > 0)
+                                          .map((e) => getSelectedFilterLabel(e.value[0], translateFilter(e.label)))
+                                          .join(" • ")}
+                                      </div>
+                                    </div>
+                                  );
+                                } else {
+                                  return <div></div>;
+                                }
+                              }}
+                            />
+
+                            <div className="flex pt-4 pb-1">
+                              <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
+                              <div className="w-1/2 text-right flex flex-row-reverse">
+                                {values.checked == "" ? (
+                                  <div
+                                    className="text-snu-purple-300 cursor-pointer"
+                                    onClick={() =>
+                                      setFieldValue(
+                                        "checked",
+                                        fieldsAvailable.map((e) => e.value),
+                                      )
+                                    }>
+                                    Tout sélectionner
+                                  </div>
+                                ) : (
+                                  <div className="text-snu-purple-300 cursor-pointer" onClick={() => setFieldValue("checked", [])}>
+                                    Tout déselectionner
+                                  </div>
+                                )}
+                                <StateProvider
+                                  render={({ searchState }) => {
+                                    return <div className="mr-2">{searchState.result.hits?.total} résultats</div>;
+                                  }}
+                                />
+                              </div>
                             </div>
                           </div>
 
                           <div className="h-[60vh] overflow-auto grid grid-cols-2 gap-4 w-full p-3">
-                            {COLUMNS.map((cat) => (
-                              <div
-                                key={cat.value}
-                                className="rounded-xl border-2 border-gray-100 px-3 py-2 hover:shadow-ninaButton cursor-pointer"
-                                onClick={() => {
-                                  if (!values.checked.includes(cat.value)) {
-                                    const newValues = [...values.checked, cat.value];
-                                    setFieldValue("checked", newValues);
-                                  } else {
-                                    const newValues = values.checked.filter((item) => item !== cat.value);
-                                    setFieldValue("checked", newValues);
-                                  }
-                                }}>
-                                <div className="flex justify-between w-full">
-                                  <div className="text-left text-lg w-3/4">{cat.title}</div>
-                                  <div className="h-4">
-                                    <Field type="checkbox" name="checked" value={cat.value} />
-                                  </div>
-                                </div>
-                                {cat.desc.length > 150 ? (
-                                  cat.desc.length > 300 ? (
-                                    <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-64 duration-300">
-                                      {cat.desc}
-                                    </div>
-                                  ) : (
-                                    <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-36 duration-300">
-                                      {cat.desc}
-                                    </div>
-                                  )
-                                ) : (
-                                  <div className="w-full text-gray-400 text-left h-10">{cat.desc}</div>
-                                )}
-                              </div>
+                            {fieldsAvailable.map((cat) => (
+                              <ExportFieldCard key={cat.value} field={cat} values={values} setFieldValue={setFieldValue} />
                             ))}
                           </div>
                           <div className="flex gap-2 justify-center mb-3">
@@ -984,7 +1001,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Confirmation de participations au séjour de cohésion", "Confirmation de participations au séjour de cohésion")}
+                  renderLabel={(items) => getFilterLabel(items, "Confirmation de participation au séjour de cohésion", "Confirmation de participation au séjour de cohésion")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
