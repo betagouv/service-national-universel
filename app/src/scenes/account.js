@@ -193,7 +193,7 @@ export default function Account() {
             <div style={{ marginBottom: "1.5rem" }}>
               <AddressInputV2
                 countryByDefault="France"
-                keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
                 values={values}
                 handleChange={handleChange}
                 errors={errors}

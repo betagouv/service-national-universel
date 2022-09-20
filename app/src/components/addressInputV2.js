@@ -6,6 +6,7 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
+import validator from "validator";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -152,7 +153,10 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) =>
+                (!v && requiredMessage) ||
+                (values[keys.country] === "France" && !validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")
+              }
               className="form-control"
               placeholder="Code postal"
               name={keys.zip}
