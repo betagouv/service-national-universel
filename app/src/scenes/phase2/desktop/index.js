@@ -124,7 +124,7 @@ export default function IndexDesktop() {
 
       {/* BEGIN LINKS */}
       <div className="mx-10 mt-4">
-        <div className="flex gap-2">
+        <div className="flex space-x-5 mb-4">
           {referentManagerPhase2 ? (
             <div className="w-1/3 border border-gray-200 rounded-lg py-2 px-3 flex flex-col justify-around">
               <div className="flex items-center justify-between">
