@@ -16,7 +16,7 @@ export default function ExportComponent({
   transform,
   searchType = "export",
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
-  fieldsToExport = "*",
+  fieldsToExport,
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -31,6 +31,8 @@ export default function ExportComponent({
         "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
     });
   };
+
+  useEffect(() => {});
 
   useEffect(() => {
     if (searchType === "_msearch") {
