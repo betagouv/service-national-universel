@@ -14,6 +14,7 @@ const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
+const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
 
 // doubt ? -> https://crontab.guru/
 
@@ -85,6 +86,14 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     missionOutdated.handler();
     missionOutdated.handlerNotice1Week();
   });
+
+  // everyday at 1:00 UTC
+  // Activer un jour apres avertissement des jeunes
+  // cron.schedule("0 7 * * *", () => {
+  //   applicationOutaded.handler();
+  //   applicationOutaded.handlerNotice1Week();
+  //   applicationOutaded.handlerNotice13Days();
+  // });
 
   cron.schedule(everyHours(1), () => {
     computeGoalsInscription.handler();
