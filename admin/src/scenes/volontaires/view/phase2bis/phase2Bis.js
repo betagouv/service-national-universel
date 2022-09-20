@@ -7,18 +7,16 @@ import DownloadAttestationButton from "../../../../components/buttons/DownloadAt
 import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
 import SelectStatus from "../../../../components/selectStatus";
 import api from "../../../../services/api";
-import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
+import { colors, ENABLE_PM, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
 import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
 import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
 import WrapperPhase2 from "../wrapper";
 import ApplicationList2 from "./applicationList2";
-import GrayListIcon from "../../../../assets/listIconGray.svg";
-import SettingIconGray from "../../../../assets/settingsPhase2Gray.svg";
-import BlueListIcon from "../../../../assets/listIconBlue.svg";
-import BlueSettingIcon from "../../../../assets/settingsPhase2Blue.svg";
 import Preferences from "./preferences";
 // import Pencil from "../../../../assets/pencil.svg";
+import { HiOutlineAdjustments } from "react-icons/hi";
+import Menu from "../../../../assets/icons/Menu";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
@@ -91,26 +89,26 @@ export default function Phase2({ young, onChange }) {
           <div className="flex border-b-[1px] border-b-gray-200 ">
             {blocOpened === "missions" && (
               <>
-                <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500 ">
-                  <img src={BlueListIcon} />
+                <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500 items-center">
+                  <Menu className="text-blue-600 " />
                   <div className="text-sm text-blue-600 font-medium ml-2">Missions candidatées</div>
                 </div>
                 <div className="ml-8 py-4 flex ">
-                  <img className="w-2/12" src={SettingIconGray} />
+                  <HiOutlineAdjustments className=" w-5 h-5 text-gray-300 " />
                   <div
                     className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
                     onClick={() => {
                       setBlocOpened("preferences");
                     }}>
-                    Préférences
+                    Préférences de missions
                   </div>
                 </div>
               </>
             )}
             {blocOpened === "preferences" && (
               <>
-                <div className="ml-8 py-4 flex">
-                  <img className="w-1/12" src={GrayListIcon} />
+                <div className="ml-8 py-4 flex items-center">
+                  <Menu className="text-gray-300 " />
                   <div
                     className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
                     onClick={() => {
@@ -120,8 +118,8 @@ export default function Phase2({ young, onChange }) {
                   </div>
                 </div>
                 <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500">
-                  <img src={BlueSettingIcon} />
-                  <div className="text-sm text-blue-600 font-medium ml-2 ">Préférences</div>
+                  <HiOutlineAdjustments className=" w-5 h-5 text-blue-600 " />
+                  <div className="text-sm text-blue-600 font-medium ml-2 ">Préférences de missions</div>
                 </div>
 
                 {/* A rajouter prochain ticket */}

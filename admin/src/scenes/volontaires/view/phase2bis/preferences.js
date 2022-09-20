@@ -5,14 +5,13 @@ import CheckboxInput from "../../../../assets/checkboxInput.svg";
 import CheckboxUnchecked from "../../../../assets/checkboxUnchecked.svg";
 import ToggleChecked from "../../../../assets/toggleChecked.svg";
 import ToggleUnchecked from "../../../../assets/toggleUnchecked.svg";
-import BorderBottom from "../../../../assets/borderBottom.svg";
 
 export default function Preferences({ young }) {
   const transportArray = [TRANSPORT.PUBLIC_TRANSPORT, TRANSPORT.BIKE, TRANSPORT.MOTOR, TRANSPORT.CARPOOLING, TRANSPORT.OTHER];
   return (
     <div className="flex flex-col items-center justify-center">
       {/* bloc1 */}
-      <div className="flex items-center flex-col mt-7  ">
+      <div className="flex items-center flex-col mt-7 border-b-[1px] border-b-gray-200 py-14 w-3/4 ">
         <div className="flex w-full justify-center space-x-7 mb-4">
           <div className="flex basis-[40%] flex-col border-[1px] border-gray-200 px-[13px] py-[9px] rounded-md">
             {" "}
@@ -54,11 +53,9 @@ export default function Preferences({ young }) {
             {young.engaged && <div className="text-sm text-gray-800">{young.engagedDescription}</div>}
           </div>
         </div>
-
-        <img className="my-11" src={BorderBottom} />
       </div>
       {/* bloc2 */}
-      <div className="flex items-center flex-col ">
+      <div className="flex items-center flex-col border-b-[1px] border-b-gray-200 py-14 w-3/4">
         <div className="text-sm font-bold text-[#242526] mb-7 ">Domaines favoris</div>
         <div className="flex items-center justify-center space-x-12">
           {young.domains.map((domain, index) => {
@@ -70,10 +67,9 @@ export default function Preferences({ young }) {
             );
           })}
         </div>
-        <img className="my-11" src={BorderBottom} />
       </div>
       {/* bloc3 */}
-      <div className="flex items-center flex-col ">
+      <div className="flex items-center flex-col border-b-[1px] border-b-gray-200 py-14 w-1/4 ">
         <div className="text-sm font-bold text-[#242526] mb-7 ">Format préféré</div>
         {young.missionFormat === "CONTINUOUS" ? (
           <div className="flex space-x-4">
@@ -86,10 +82,9 @@ export default function Preferences({ young }) {
             <div className="text-sm font-bold text-gray-700 border-b-2 border-blue-600 py-1">Répartie sur des heures</div>
           </div>
         )}
-        <img className="my-11" src={BorderBottom} />
       </div>
       {/* bloc4 */}
-      <div className="flex items-center flex-col ">
+      <div className="flex items-center flex-col border-b-[1px] border-b-gray-200 py-14 w-3/4">
         <div className="text-sm font-bold text-[#242526] mb-7 ">Période de réalisation de la mission</div>
         <div className="flex space-x-3 mb-4 flex-col">
           <div className="flex space-x-4 items-center mb-4">
@@ -108,10 +103,9 @@ export default function Preferences({ young }) {
             </div>
           )}
         </div>
-        <img className="my-11" src={BorderBottom} />
       </div>
       {/* bloc5 */}
-      <div className="flex items-center flex-col mb-20">
+      <div className="flex items-center flex-col mb-20  py-14 w-3/4">
         <div className="text-sm font-bold text-[#242526] mb-7 ">Moyen(s) de transport privilégié(s)</div>
         <div className="flex space-x-3 mb-4">
           {transportArray.map((transport, index) => {
