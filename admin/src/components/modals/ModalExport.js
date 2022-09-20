@@ -14,7 +14,6 @@ export default function ModalExport({ transform, exportFields, filters, getExpor
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFields, setSelectedFields] = useState(exportFields.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
-  console.log("🚀 ~ file: list.js ~ line 115 ~ VolontaireList ~ fields", fieldsToExport);
 
   return (
     <>

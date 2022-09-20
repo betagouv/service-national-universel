@@ -28,8 +28,7 @@ async function* scrollSearch(params, client) {
 
 // Can get more than 10k results.
 // The es param is given to scroll function
-async function allRecords({ index, query, client = esClient, fieldsToExport = "*" }) {
-  console.log("🚀 ~ file: utils.js ~ line 32 ~ allRecords ~ fieldsToExport", fieldsToExport);
+async function allRecords({ index, query, client = esClient, fieldsToExport }) {
   const params = {
     index,
     scroll: "1m",
