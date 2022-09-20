@@ -1,8 +1,6 @@
 import React from "react";
 import { translate as t, TRANSPORT } from "../../../../utils";
 import IconDomainRounded from "../../../../components/IconDomainRounded";
-import CheckboxInput from "../../../../assets/checkboxInput.svg";
-import CheckboxUnchecked from "../../../../assets/checkboxUnchecked.svg";
 import ToggleChecked from "../../../../assets/toggleChecked.svg";
 import ToggleUnchecked from "../../../../assets/toggleUnchecked.svg";
 
@@ -126,22 +124,19 @@ export default function Preferences({ young }) {
         </div>
         <div className="text-sm font-bold text-[#242526] mb-7 ">Périmètre de recherche</div>
         <div className="flex space-x-7">
-          <div>
-            <input id="main-address" name="main-address" type="radio" checked={young.mobilityNearHome === "true"} className="hidden" />
-            <label htmlFor="main-address" className="mr-2">
+          <div className="flex items-center space-x-4">
+            <input id="main-address" name="main-address" type="Checkbox" checked={young.mobilityNearHome === "true"} />
+            {/* <label htmlFor="main-address" className="mr-2">
               {young.mobilityNearHome === "true" ? <img src={CheckboxInput} /> : <img src={CheckboxUnchecked} />}
-            </label>
+            </label> */}
             <label htmlFor="main-address">
               <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
               <br />
               <span className="text-[15px] text-gray-700">{young.city}</span>
             </label>
           </div>
-          <div>
-            <input id="school-address" name="school-address" type="radio" checked={young.mobilityNearSchool === "true"} className="hidden" />
-            <label htmlFor="school-address" className="mr-2">
-              {young.mobilityNearSchool === "true" ? <img src={CheckboxInput} /> : <img src={CheckboxUnchecked} />}
-            </label>
+          <div className="flex items-center space-x-4">
+            <input id="school-address" name="school-address" type="checkbox" checked={young.mobilityNearSchool === "true"} />
             <label htmlFor="school-address">
               <span className="text-[13px] text-gray-700">Autour de l'établissement</span>
               <br />
@@ -150,11 +145,8 @@ export default function Preferences({ young }) {
           </div>
           <div>
             {young.mobilityNearRelativeCity ? (
-              <div className="flex items-center gap-2">
-                <input id="second-address" name="address" type="checkbox" checked={young.mobilityNearRelative === "true"} className="hidden" />
-                <label htmlFor="second-address" className="mr-2">
-                  {young.mobilityNearRelative === "true" ? <img src={CheckboxInput} /> : <img src={CheckboxUnchecked} />}
-                </label>
+              <div className="flex items-center space-x-4">
+                <input id="second-address" name="address" type="checkbox" checked={young.mobilityNearRelative === "true"} />
                 <label htmlFor="second-address">
                   <span className="text-[13px] text-gray-700">Autour de l&apos;adresse de mon proche</span>
                   <br />
@@ -162,7 +154,7 @@ export default function Preferences({ young }) {
                 </label>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-4">
                 <input id="second-address" name="address" type="checkbox" value={young.city} disabled />
                 <label htmlFor="second-address">
                   <span className="text-[13px] text-gray-400">Autour de l&apos;adresse de mon proche</span>
