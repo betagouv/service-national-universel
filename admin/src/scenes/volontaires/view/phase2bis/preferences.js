@@ -67,7 +67,7 @@ export default function Preferences({ young }) {
         </div>
       </div>
       {/* bloc3 */}
-      <div className="flex items-center flex-col border-b-[1px] border-b-gray-200 py-14 w-1/4 ">
+      <div className="flex items-center flex-col border-b-[1px] border-b-gray-200 py-14 w-2/4 ">
         <div className="text-sm font-bold text-[#242526] mb-7 ">Format préféré</div>
         {young.missionFormat === "CONTINUOUS" ? (
           <div className="flex space-x-4">

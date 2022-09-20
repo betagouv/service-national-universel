@@ -1,13 +1,12 @@
 import React from "react";
 import { useState } from "react";
 import { Col, Row } from "reactstrap";
-import styled from "styled-components";
 import { Box, BoxTitle } from "../../../../components/box";
 import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
 import SelectStatus from "../../../../components/selectStatus";
 import api from "../../../../services/api";
-import { colors, ENABLE_PM, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
+import { ENABLE_PM, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
 import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
 import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
@@ -61,12 +60,12 @@ export default function Phase2({ young, onChange }) {
                   margin: 0,
                   borderBottom: "2px solid #f4f5f7",
                 }}>
-                <HourTitle>Heures de MIG prévisionnelles</HourTitle>
-                <HourDetail>{young.phase2NumberHoursEstimated || "0"}h</HourDetail>
+                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
+                <div className="font-bold text-2xl text-[#242526]">{young.phase2NumberHoursEstimated || "0"}h</div>
               </Row>
               <Row style={{ height: "50%", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "1rem", margin: 0 }}>
-                <HourTitle>Heures de MIG réalisées</HourTitle>
-                <HourDetail>{young.phase2NumberHoursDone || "0"}h sur 84h</HourDetail>
+                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
+                <div className="font-bold text-2xl text-[#242526]">{young.phase2NumberHoursDone || "0"}h sur 84h</div>
               </Row>
             </Col>
             <Col md={4} sm={4} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -150,12 +149,3 @@ export default function Phase2({ young, onChange }) {
     </div>
   );
 }
-
-const HourTitle = styled.div`
-  text-transform: uppercase;
-  color: ${colors.grey};
-  font-size: 0.8rem;
-`;
-const HourDetail = styled.div`
-  font-size: 1.2rem;
-`;
