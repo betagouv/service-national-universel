@@ -513,15 +513,11 @@ export default function VolontaireList() {
                               showClearAll={false}
                               render={(props) => {
                                 const { selectedValues } = props;
-                                console.log("🚀 ~ file: list.js ~ line 516 ~ VolontaireList ~ selectedValues", selectedValues);
-                                console.log("🚀 ~ file: list.js ~ line 519 ~ VolontaireList ~ Object.keys(selectedValues)", Object.keys(selectedValues));
                                 let areAllFiltersEmpty = true;
-                                console.log("🚀 ~ file: list.js ~ line 523 ~ VolontaireList ~ areAllFiltersEmpty", areAllFiltersEmpty);
                                 for (const item of Object.keys(selectedValues)) {
                                   if (selectedValues[item].value.length > 0) areAllFiltersEmpty = false;
                                 }
                                 if (!areAllFiltersEmpty) {
-                                  console.log("🚀 ~ file: list.js ~ line 523 ~ VolontaireList ~ areAllFiltersEmpty", areAllFiltersEmpty);
                                   return (
                                     <div className="rounded-xl bg-gray-50 py-3">
                                       <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
