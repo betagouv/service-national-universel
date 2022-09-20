@@ -16,7 +16,6 @@ const clean = async () => {
     total++;
     if (diffDays(application.createdAt, now) > 14) {
       countAutoCancel++;
-      console.log(`${application._id} ${application.status} ${application.createdAt} : outdated waiting acceptation application.`);
       application.set({ status: APPLICATION_STATUS.CANCEL });
       await application.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
     }
