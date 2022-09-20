@@ -1,3 +1,15 @@
+# [1.132.0](https://github.com/betagouv/service-national-universel/compare/v1.131.0...v1.132.0) (2022-09-20)
+
+
+### Bug Fixes
+
+* **app:** Ajouter le module “vérification d’adresse” sur le profil d’un volontaire ([#1804](https://github.com/betagouv/service-national-universel/issues/1804)) ([ec25ef2](https://github.com/betagouv/service-national-universel/commit/ec25ef2bf7ddc7dddbf67df7721874308d25f47f))
+
+
+### Features
+
+* **api:** Phase 2 : délai d’acceptation de la proposition de mission ([#1805](https://github.com/betagouv/service-national-universel/issues/1805)) ([551618b](https://github.com/betagouv/service-national-universel/commit/551618bd8955f83429aef536a5b24dd215e8120c))
+
 # [1.131.0](https://github.com/betagouv/service-national-universel/compare/v1.130.1...v1.131.0) (2022-09-19)
 
 
