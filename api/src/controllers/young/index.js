@@ -425,9 +425,9 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
     }
 
-    if (value?.status === YOUNG_STATUS.ABANDONED) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.ABANDON, {
-        emailTo: [{ name: `${value.firstName} ${value.lastName}`, email: value.email }],
+    if (value?.status === YOUNG_STATUS.WITHDRAWN) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
           message: value.withdrawnMessage,
         },
