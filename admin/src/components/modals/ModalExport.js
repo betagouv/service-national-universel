@@ -37,7 +37,7 @@ export default function ModalExport({ title, transform, exportFields, filters, g
                       <div className="mt-2 mx-auto text-center text-base text-gray-600">
                         {Object.values(selectedValues)
                           .filter((e) => e.value.length > 0)
-                          .map((e) => getSelectedFilterLabel(e.value[0], translateFilter(e.label)))
+                          .map((e) => getSelectedFilterLabel(e.value, translateFilter(e.label)))
                           .join(" • ")}
                       </div>
                     </div>
