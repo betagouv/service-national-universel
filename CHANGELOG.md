@@ -1,3 +1,20 @@
+# [1.133.0](https://github.com/betagouv/service-national-universel/compare/v1.132.0...v1.133.0) (2022-09-21)
+
+
+### Bug Fixes
+
+* **api:** Phase 2 - Reparamétrage notif missions dispo ([#1811](https://github.com/betagouv/service-national-universel/issues/1811)) ([c5de4bf](https://github.com/betagouv/service-national-universel/commit/c5de4bfcf9e193f23cba8b94e3874f6b8b1d73bf))
+* Mauvaises gestion message d'erreur ([d4c4eb7](https://github.com/betagouv/service-national-universel/commit/d4c4eb76271cd7a4b04586db9c03984f10a6343b))
+* **admin:** Front  admin screen phase2 - missions candidatées, préférences de missions([#1795](https://github.com/betagouv/service-national-universel/issues/1795)) ([2d00632](https://github.com/betagouv/service-national-universel/commit/2d0063252b6bcce08d72d26d35ef76ba992c6eda))
+* **admin:** input mission duration ([6b3ab88](https://github.com/betagouv/service-national-universel/commit/6b3ab8810cde8994693967e7bb6fce45b3d02921))
+
+
+### Features
+
+* **api:** active cron délai d’acceptation de la proposition de mission ([312ad94](https://github.com/betagouv/service-national-universel/commit/312ad944cc477c6c1a65bdff3da526d7837dfb52))
+* Notif desistement ([#1810](https://github.com/betagouv/service-national-universel/issues/1810)) ([6a54159](https://github.com/betagouv/service-national-universel/commit/6a541591821b9ddd739e2de217193953476d1304))
+* **app:** lighter es query for exports ([#1807](https://github.com/betagouv/service-national-universel/issues/1807)) ([1c77ef5](https://github.com/betagouv/service-national-universel/commit/1c77ef5a8841e93507b72fb124c1b5a0b7fab4d5))
+
 # [1.132.0](https://github.com/betagouv/service-national-universel/compare/v1.131.0...v1.132.0) (2022-09-20)
 
 
