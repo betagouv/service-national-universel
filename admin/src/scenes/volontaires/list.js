@@ -128,8 +128,8 @@ export default function VolontaireList() {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         if (!meetingPoint) meetingPoint = {};
       }
-      data.domains = [];
-      data.periodRanking = [];
+      if (!data.domains) data.domains = [];
+      if (!data.periodRanking) data.periodRanking = [];
       const allFields = {
         identity: {
           Prénom: data.firstName,
@@ -345,7 +345,7 @@ export default function VolontaireList() {
                 <Title>Volontaires</Title>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
-                <ModalExport transform={transform} exportFields={youngExportFields} filters={FILTERS} getExportQuery={getExportQuery} />
+                <ModalExport title="Exporter les volontaires" transform={transform} exportFields={youngExportFields} filters={FILTERS} getExportQuery={getExportQuery} />
 
                 {user.role === ROLES.REFERENT_DEPARTMENT && (
                   <ExportComponent

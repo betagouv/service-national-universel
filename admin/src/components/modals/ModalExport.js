@@ -10,14 +10,14 @@ import { ModalContainer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import ExportFieldCard from "../ExportFieldCard";
 
-export default function ModalExport({ transform, exportFields, filters, getExportQuery }) {
+export default function ModalExport({ title, transform, exportFields, filters, getExportQuery }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFields, setSelectedFields] = useState(exportFields.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
   return (
     <>
-      <LoadingButton onClick={() => setIsOpen(true)}>Exporter les volontaires</LoadingButton>
+      <LoadingButton onClick={() => setIsOpen(true)}>{title}</LoadingButton>
       <Modal toggle={() => setIsOpen(false)} isOpen={isOpen} onCancel={() => setIsOpen(false)} size="xl" centered>
         <ModalContainer>
           <div className="w-full px-4">
