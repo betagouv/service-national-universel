@@ -60,6 +60,12 @@ export default function Create() {
           highSkilledActivityProofFiles: [],
           imageRightFiles: [],
           cohort: options[0],
+          files: {
+            cniFiles: [],
+            parentConsentmentFiles: [],
+            highSkilledActivityProofFiles: [],
+            imageRightFiles: [],
+          },
         }}
         validateOnBlur={false}
         validateOnChange={false}
