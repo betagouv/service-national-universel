@@ -128,6 +128,8 @@ export default function VolontaireList() {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         if (!meetingPoint) meetingPoint = {};
       }
+      data.domains = [];
+      data.periodRanking = [];
       const allFields = {
         identity: {
           Prénom: data.firstName,
