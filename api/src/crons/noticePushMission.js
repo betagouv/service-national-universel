@@ -155,7 +155,6 @@ const getMissions = async ({ young }) => {
     });
     return response?.body?.responses[0]?.hits?.hits;
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
   }
