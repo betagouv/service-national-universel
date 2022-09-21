@@ -124,10 +124,10 @@ export default function IndexDesktop() {
 
       {/* BEGIN LINKS */}
       <div className="mx-10 mt-4">
-        <div className="flex gap-2">
+        <div className="flex space-x-5 mb-4">
           {referentManagerPhase2 ? (
             <div className="w-1/3 border border-gray-200 rounded-lg py-2 px-3 flex flex-col justify-around">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between  ml-3">
                 <div className="font-bold">Contacter mon référent</div>
                 <MdOutlineContentCopy
                   className="text-gray-400 hover:text-blue-600 cursor-pointer"
@@ -138,7 +138,7 @@ export default function IndexDesktop() {
                   }}
                 />
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600  ml-3">
                 {referentManagerPhase2.firstName} {referentManagerPhase2.lastName} - {referentManagerPhase2.email}
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function IndexDesktop() {
               target="_blank"
               rel="noreferrer"
               className="flex flex-1 gap-1 items-start justify-between p-3">
-              <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la mission d’intérêt général</div>
+              <div className="font-bold flex-1 text-gray-800 ml-3">J’ai des questions sur la mission d’intérêt général</div>
               <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
             </a>
           </div>
@@ -159,14 +159,14 @@ export default function IndexDesktop() {
               target="_blank"
               rel="noreferrer"
               className="flex gap-1 items-start justify-between p-3">
-              <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la reconnaissance d’engagement</div>
+              <div className="font-bold flex-1 text-gray-800 ml-3">J’ai des questions sur la reconnaissance d’engagement</div>
               <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
             </a>
           </div>
         </div>
         <Link to="/ma-preparation-militaire" onClick={() => plausibleEvent("Phase2/CTA - PM - PartezPM")}>
           <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
-            <Medaille className="text-gray-400" />
+            <Medaille className="text-gray-400 ml-3" />
             <div className="w-full">
               <div className="flex items-center justify-between">
                 <div className="font-bold text-base text-gray-800"> Partez en préparation militaire</div>
