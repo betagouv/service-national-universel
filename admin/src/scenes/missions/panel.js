@@ -100,15 +100,15 @@ export default function PanelView({ onChange, mission }) {
         </div>
       </div>
       <Info title="Candidatures">
-        <Details title="Volontaire(s) ayant candidaté" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length} />
+        <Details title="Volontaire(s) ayant candidaté" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length || "0"} />
         {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && (
-          <Details title="Volontaire(s) ayant reçu une proposition de mission" value={applications?.filter((e) => e.status == "WAITING_ACCEPTATION").length} />
+          <Details title="Volontaire(s) ayant reçu une proposition de mission" value={applications?.filter((e) => e.status == "WAITING_ACCEPTATION").length || "0"} />
         )}
-        <Details title="Place(s) proposée(s)" value={mission.placesTotal} />
-        <Details title="Place(s) occupés(s)" value={mission.placesTotal - mission.placesLeft} />
-        <Details title="Place(s) disponible(s)" value={mission.placesLeft} />
+        <Details title="Place(s) proposée(s)" value={mission.placesTotal || "0"} />
+        <Details title="Place(s) occupés(s)" value={mission.placesTotal - mission.placesLeft || "0"} />
+        <Details title="Place(s) disponible(s)" value={mission.placesLeft || "0"} />
         <Link to={`/mission/${mission._id}/youngs`}>
-          <PanelActionButton icon="eye" title="Consulter tous les volontaires" />
+          <PanelActionButton icon="eye" title="Consulter toutes les candidatures" />
         </Link>
       </Info>
       <Info title="La structure">
