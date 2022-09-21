@@ -83,7 +83,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     const { user, body } = req;
     if (user.role === ROLES.ADMIN) {
       if (req.params.action === "export") {
-        const response = await allRecords("young", req.body.query);
+        const response = await allRecords("young", body.query, esClient, body.fieldsToExport);
         return res.status(200).send({ ok: true, data: response });
       } else {
         const response = await esClient.msearch({ index: "young", body });

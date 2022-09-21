@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters, StateProvider } from "@appbaseio/reactivesearch";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
 import { HiAdjustments } from "react-icons/hi";
-import { Formik } from "formik";
 
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
@@ -20,7 +19,6 @@ import {
   translate,
   translatePhase1,
   getFilterLabel,
-  getSelectedFilterLabel,
   YOUNG_STATUS_COLORS,
   isInRuralArea,
   formatLongDateFR,
@@ -39,7 +37,6 @@ import {
   department2region,
   translateFileStatusPhase1,
   translateStatusMilitaryPreparationFiles,
-  translateFilter,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -48,10 +45,8 @@ import plausibleEvent from "../../services/pausible";
 import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import { ModalContainer } from "../../components/modals/Modal";
-import ModalButton from "../../components/buttons/ModalButton";
-import ExportFieldCard from "./components/ExportFieldCard";
+import { youngExportFields } from "snu-lib";
+import ModalExport from "../../components/modals/ModalExport";
 
 const FILTERS = [
   "SEARCH",
@@ -107,42 +102,19 @@ export default function VolontaireList() {
     setInfosClick(!infosClick);
   };
 
-  const [columnModalOpen, setColumnModalOpen] = useState(false);
-
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await api.get("/cohesion-center");
-      setCenters(data);
-    })();
-    (async () => {
-      const { data } = await api.get("/meeting-point/all");
-      setMeetingPoints(data);
-    })();
-    (async () => {
-      const { data } = await api.get("/session-phase1/");
-      setSessionsPhase1(data);
-    })();
-  }, []);
-  const getDefaultQuery = () => ({
-    query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] } } } },
-    sort: [{ "lastName.keyword": "asc" }],
-    track_total_hits: true,
-  });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-
   async function transform(data, values) {
     let all = data;
-    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-    if (schoolsId?.length) {
-      const { responses } = await api.esQuery("school", {
-        query: { bool: { must: { ids: { values: schoolsId } } } },
-        size: ES_NO_LIMIT,
-      });
-      if (responses.length) {
-        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+    if (values.includes("schoolSituation")) {
+      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+      if (schoolsId?.length) {
+        const { responses } = await api.esQuery("school", {
+          query: { bool: { must: { ids: { values: schoolsId } } } },
+          size: ES_NO_LIMIT,
+        });
+        if (responses.length) {
+          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+        }
       }
     }
     return all.map((data) => {
@@ -156,7 +128,9 @@ export default function VolontaireList() {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         if (!meetingPoint) meetingPoint = {};
       }
-      const COLUMNS = {
+      if (!data.domains) data.domains = [];
+      if (!data.periodRanking) data.periodRanking = [];
+      const allFields = {
         identity: {
           Prénom: data.firstName,
           Nom: data.lastName,
@@ -328,161 +302,37 @@ export default function VolontaireList() {
         },
       };
 
-      let columns = { ID: data._id };
+      let fields = { ID: data._id };
       for (const element of values) {
         let key;
-        for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
+        for (key in allFields[element]) fields[key] = allFields[element][key];
       }
-      return columns;
+      return fields;
     });
   }
 
-  const fieldsAvailable = [
-    {
-      title: "Identité du volontaire",
-      desc: ["Prénom", "Nom", "Sexe", "Cohorte", "Cohorte d'origine"],
-      value: "identity",
-    },
-    {
-      title: "Contact du volontaire",
-      desc: ["Email", "Téléphone"],
-      value: "contact",
-    },
-    {
-      title: "Date et lieu de naissance du volontaire",
-      desc: ["Date de naissance", "Pays de naissance", "Ville de naissance", "Code postal de naissance"],
-      value: "birth",
-    },
-    {
-      title: "Lieu de résidence du volontaire",
-      desc: [
-        "Adresse postale",
-        "Code postal",
-        "Ville, pays, nom et prénom de l'hébergeur",
-        "Lien avec l'hébergeur",
-        "Adresse - étranger",
-        "Code postal - étranger",
-        "Ville - étranger",
-        "Pays - étranger",
-      ],
-      value: "address",
-    },
-    {
-      title: "Localisation du volontaire",
-      desc: ["Département", "Académie", "Région"],
-      value: "location",
-    },
-    {
-      title: "Situation scolaire",
-      desc: [
-        "Niveau",
-        "Type d'établissement",
-        "Nom de l'établissement",
-        "Code postal de l'établissement",
-        "Ville de l'établissement",
-        "Département de l'établissement",
-        "UAI de l'établissement",
-      ],
-      value: "schoolSituation",
-    },
-    {
-      title: "Situation particulière",
-      desc: [
-        "Quartier Prioritaire de la ville",
-        "Zone Rurale",
-        "Handicap",
-        "PPS",
-        "PAI",
-        "Aménagement spécifique",
-        "Nature de l'aménagement spécifique",
-        "Aménagement pour mobilité réduite",
-        "Besoin d'être affecté(e) dans le département de résidence",
-        "Allergies ou intolérances alimentaires",
-        "Activité de haut-niveau",
-        "Nature de l'activité de haut-niveau",
-        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence",
-        "Document activité de haut-niveau",
-        "Structure médico-sociale",
-        "Nom de la structure médico-sociale",
-        "Adresse de la structure médico-sociale",
-        "Code postal de la structure médico-sociale",
-        "Ville de la structure médico-sociale",
-      ],
-      value: "situation",
-    },
-    {
-      title: "Représentant légal 1",
-      desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
-      value: "representative1",
-    },
-    {
-      title: "Représentant légal 2",
-      desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
-      value: "representative2",
-    },
-    {
-      title: "Consentement",
-      desc: ["Consentement des représentants légaux."],
-      value: "consent",
-    },
-    {
-      title: "Statut",
-      desc: ["Statut général", "Statut phase 1", "Statut phase 2", "Statut phase 3", "Date du dernier statut"],
-      value: "status",
-    },
-    {
-      title: "Phase 1 - Affectation ",
-      desc: ["ID", "Code", "Nom", "Ville", "Département et région du centre"],
-      value: "phase1Affectation",
-    },
-    {
-      title: "Phase 1 - Transport",
-      desc: ["Autonomie", "Numéro de bus", "Point de rassemblement", "Dates d'aller et de retour"],
-      value: "phase1Transport",
-    },
-    {
-      title: "Phase 1 - Statut des documents",
-      desc: ["Droit à l'image", "Autotest PCR", "Règlement intérieur", "Fiche sanitaire"],
-      value: "phase1DocumentStatus",
-    },
-    {
-      title: "Phase 1 - Accords",
-      desc: ["Accords pour droit à l'image et autotests PCR."],
-      value: "phase1DocumentAgreement",
-    },
-    {
-      title: "Phase 1 - Présence",
-      desc: ["Présence à l'arrivé", "Présence à la JDM", "Date de départ", "Motif de départ"],
-      value: "phase1Attendance",
-    },
-    {
-      title: "Phase 2",
-      desc: [
-        "Domaines MIG 1, MIG 2 et MIG 3",
-        "Projet professionnel",
-        "Période privilégiée",
-        "Choix de périodes",
-        "Mobilité",
-        "Mobilité autour d'un proche",
-        "Information du proche",
-        "Mode de transport",
-        "Format de mission",
-        "Engagement hors SNU",
-        "Souhait MIG",
-      ],
-      value: "phase2",
-    },
-    {
-      title: "Compte",
-      desc: ["Dates de création, d'édition et de dernière connexion."],
-      value: "accountDetails",
-    },
-    {
-      title: "Désistement",
-      desc: ["Raison du désistement", "Message de désistement"],
-      value: "desistement",
-    },
-  ];
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get("/cohesion-center");
+      setCenters(data);
+    })();
+    (async () => {
+      const { data } = await api.get("/meeting-point/all");
+      setMeetingPoints(data);
+    })();
+    (async () => {
+      const { data } = await api.get("/session-phase1/");
+      setSessionsPhase1(data);
+    })();
+  }, []);
+  const getDefaultQuery = () => ({
+    query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] } } } },
+    sort: [{ "lastName.keyword": "asc" }],
+    track_total_hits: true,
+  });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
     <div>
@@ -495,101 +345,7 @@ export default function VolontaireList() {
                 <Title>Volontaires</Title>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
-                {/* Column selection modal */}
-
-                <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
-                <Modal toggle={() => setColumnModalOpen(false)} isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
-                  <ModalContainer>
-                    <Formik
-                      initialValues={{
-                        checked: fieldsAvailable.map((e) => e.value),
-                      }}>
-                      {({ values, setFieldValue }) => (
-                        <>
-                          <div className="w-full px-4">
-                            <div className="text-2xl text-center mb-4">Sélectionnez les données à exporter</div>
-
-                            <SelectedFilters
-                              showClearAll={false}
-                              render={(props) => {
-                                const { selectedValues } = props;
-                                let areAllFiltersEmpty = true;
-                                for (const item of Object.keys(selectedValues)) {
-                                  if (selectedValues[item].value.length > 0) areAllFiltersEmpty = false;
-                                }
-                                if (!areAllFiltersEmpty) {
-                                  return (
-                                    <div className="rounded-xl bg-gray-50 py-3">
-                                      <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
-                                      <div className="mt-2 mx-auto text-center text-base text-gray-600">
-                                        {Object.values(selectedValues)
-                                          .filter((e) => e.value.length > 0)
-                                          .map((e) => getSelectedFilterLabel(e.value[0], translateFilter(e.label)))
-                                          .join(" • ")}
-                                      </div>
-                                    </div>
-                                  );
-                                } else {
-                                  return <div></div>;
-                                }
-                              }}
-                            />
-
-                            <div className="flex pt-4 pb-1">
-                              <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
-                              <div className="w-1/2 text-right flex flex-row-reverse">
-                                {values.checked == "" ? (
-                                  <div
-                                    className="text-snu-purple-300 cursor-pointer"
-                                    onClick={() =>
-                                      setFieldValue(
-                                        "checked",
-                                        fieldsAvailable.map((e) => e.value),
-                                      )
-                                    }>
-                                    Tout sélectionner
-                                  </div>
-                                ) : (
-                                  <div className="text-snu-purple-300 cursor-pointer" onClick={() => setFieldValue("checked", [])}>
-                                    Tout déselectionner
-                                  </div>
-                                )}
-                                <StateProvider
-                                  render={({ searchState }) => {
-                                    return <div className="mr-2">{searchState.result.hits?.total} résultats</div>;
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="h-[60vh] overflow-auto grid grid-cols-2 gap-4 w-full p-3">
-                            {fieldsAvailable.map((cat) => (
-                              <ExportFieldCard key={cat.value} field={cat} values={values} setFieldValue={setFieldValue} />
-                            ))}
-                          </div>
-                          <div className="flex gap-2 justify-center mb-3">
-                            <div className="w-1/2 p-0.5">
-                              <ModalButton onClick={() => setColumnModalOpen(false)}>Annuler</ModalButton>
-                            </div>
-                            <div className="flex mt-2 w-1/2 h-10">
-                              <ExportComponent
-                                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-                                title="Exporter les volontaires"
-                                defaultQuery={getExportQuery}
-                                exportTitle="Volontaires"
-                                index="young"
-                                react={{ and: FILTERS }}
-                                transform={(data) => transform(data, values.checked)}
-                              />
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </Formik>
-                  </ModalContainer>
-                </Modal>
-                {/* End column selection modal */}
+                <ModalExport title="Exporter les volontaires" transform={transform} exportFields={youngExportFields} filters={FILTERS} getExportQuery={getExportQuery} />
 
                 {user.role === ROLES.REFERENT_DEPARTMENT && (
                   <ExportComponent
