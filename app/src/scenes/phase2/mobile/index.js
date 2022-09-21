@@ -121,7 +121,7 @@ export default function IndexPhase2Mobile() {
       <div className="mx-3 mt-10 space-y-4">
         {referentManagerPhase2 ? (
           <div
-            className="border border-gray-200 rounded-[8px] py-2 px-3 flex flex-col justify-around w-full"
+            className="border border-gray-200 rounded-lg py-2 px-3 flex flex-col justify-around w-full"
             onClick={() => {
               copyToClipboard(referentManagerPhase2.email);
               toastr.info("L'email de votre référent a été copié dans le presse-papier");
@@ -136,7 +136,7 @@ export default function IndexPhase2Mobile() {
             </div>
           </div>
         ) : null}
-        <div className="flex border-[1px] border-gray-200 rounded-[8px] cursor-pointer">
+        <div className="flex border-[1px] border-gray-200 rounded-lg cursor-pointer">
           <a
             href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`}
             target="_blank"
@@ -146,7 +146,7 @@ export default function IndexPhase2Mobile() {
             <ArrowUpRight className="text-gray-400 text-2xl" />
           </a>
         </div>
-        <div className="border-[1px] border-gray-200 rounded-[8px]">
+        <div className="border-[1px] border-gray-200 rounded-lg">
           <a
             href={`https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise`}
             target="_blank"
@@ -157,7 +157,7 @@ export default function IndexPhase2Mobile() {
           </a>
         </div>
         <Link to="/ma-preparation-militaire" onClick={() => plausibleEvent("Phase2/CTA - PM - PartezPM")}>
-          <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-[8px] mt-3 p-3 flex items-center gap-4">
+          <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
             <Medaille className="text-gray-400" />
             <div className="w-full">
               <div className="flex items-center justify-between">
