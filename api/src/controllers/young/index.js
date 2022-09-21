@@ -425,6 +425,15 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
     }
 
+    if (value?.status === YOUNG_STATUS.ABANDONED) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.ABANDON, {
+        emailTo: [{ name: `${value.firstName} ${value.lastName}`, email: value.email }],
+        params: {
+          message: value.withdrawnMessage,
+        },
+      });
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
