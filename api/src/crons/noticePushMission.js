@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../../.env-prod" });
+require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const esClient = require("../es");
 const path = require("path");
@@ -32,7 +32,7 @@ exports.handler = async () => {
     }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
-      const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")).length;
+      const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(obj)).length;
       if (applicationsCount < 15) {
         const esMissions = await getMissions({ young });
         const missions = esMissions?.map((mission) => ({
