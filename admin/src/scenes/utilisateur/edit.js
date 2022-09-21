@@ -132,7 +132,7 @@ export default function Edit(props) {
       history.go(0);
     } catch (e) {
       setLoadingChangeStructure(false);
-      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
+      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.message);
     }
   }
 

@@ -42,7 +42,7 @@ export default function WaitingRealisation() {
           dispatch(setYoung(data));
           history.push(`/`);
         } catch (e) {
-          return toastr.error("Une erreur s'est produite ", e?.error?.message);
+          return toastr.error("Une erreur s'est produite ", e?.message);
         }
       }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (

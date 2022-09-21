@@ -170,7 +170,7 @@ export default function CreateMission({ young, onSend }) {
           history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
         } catch (e) {
           console.log("ERRROR", e);
-          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
+          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.message);
         }
       }}>
       {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, validateField }) => (

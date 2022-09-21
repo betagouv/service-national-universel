@@ -59,7 +59,7 @@ export default function Edit(props) {
           toastr.success("Enregistrée");
         } catch (e) {
           setLoading(false);
-          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", e?.error?.message);
+          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", e?.message);
         }
       }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
