@@ -1,3 +1,4 @@
+require("dotenv").config({ path: "./../../.env-prod" });
 require("../mongo");
 const esClient = require("../es");
 const path = require("path");
@@ -6,7 +7,7 @@ const { capture } = require("../sentry");
 const Young = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, translate, formatStringDate, END_DATE_PHASE1 } = require("snu-lib");
 const { APP_URL } = require("../config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
@@ -18,52 +19,54 @@ exports.handler = async () => {
     let countMissionSent = {};
     let countMissionSentCohort = {};
 
+    const cohort = Object.keys(END_DATE_PHASE1).filter((key) => {
+      const diff = diffYear(END_DATE_PHASE1[key], new Date());
+      return diff < 1;
+    });
+
     const cursor = Young.find({
-      cohort: { $nin: ["2019", "2020", "2021"] },
+      cohort: { $in: cohort },
       status: "VALIDATED",
       statusPhase1: "DONE",
       statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
     }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
-      const esMissions = await getMissions({ young });
-
-      const missions = esMissions?.map((mission) => ({
-        structureName: mission._source.structureName?.toUpperCase(),
-        name: mission._source.name,
-        startAt: formatStringDate(mission._source.startAt),
-        endAt: formatStringDate(mission._source.endAt),
-        address: `${mission._source.city}, ${mission._source.zip}`,
-        domains: mission._source.domains?.map(translate)?.join(", "),
-        cta: `${APP_URL}/mission/${mission._id}`,
-      }));
-
-      countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
-      if (!missions) return;
-      countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
-
-      if (missions?.length > 0) {
-        countHit++;
-
-        // send a mail to the young
-        let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
-        let cc = getCcOfYoung({ template, young });
-        sendTemplate(template, {
-          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-          params: {
-            missions,
-            cta: `${APP_URL}/mission?utm_campaign=transactionnel+nouvelles+mig+publiees&utm_source=notifauto&utm_medium=mail+237+acceder`,
-          },
-          cc,
-        });
-
-        // stock the list in young
-        const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
-
-        // This is used in order to minimize risk of version conflict.
-        const youngForUpdate = await Young.findOne({ _id: young._id });
-        youngForUpdate.set({ missionsInMail });
-        await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
+      const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")).length;
+      if (applicationsCount < 15) {
+        const esMissions = await getMissions({ young });
+        const missions = esMissions?.map((mission) => ({
+          structureName: mission._source.structureName?.toUpperCase(),
+          name: mission._source.name,
+          startAt: formatStringDate(mission._source.startAt),
+          endAt: formatStringDate(mission._source.endAt),
+          address: `${mission._source.city}, ${mission._source.zip}`,
+          domains: mission._source.domains?.map(translate)?.join(", "),
+          cta: `${APP_URL}/mission/${mission._id}`,
+        }));
+        countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
+        if (!missions) return;
+        countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
+        if (missions?.length > 0) {
+          countHit++;
+          // send a mail to the young
+          let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
+          let cc = getCcOfYoung({ template, young });
+          sendTemplate(template, {
+            emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+            params: {
+              missions,
+              cta: `${APP_URL}/mission?utm_campaign=transactionnel+nouvelles+mig+publiees&utm_source=notifauto&utm_medium=mail+237+acceder`,
+            },
+            cc,
+          });
+          // stock the list in young
+          const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
+          // This is used in order to minimize risk of version conflict.
+          const youngForUpdate = await Young.findOne({ _id: young._id });
+          youngForUpdate.set({ missionsInMail });
+          await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
+        }
       }
     });
     slack.info({
@@ -156,4 +159,10 @@ const getMissions = async ({ young }) => {
     capture(e);
     slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
   }
+};
+
+const diffYear = (date1, date2) => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return d2.getFullYear() - d1.getFullYear();
 };
