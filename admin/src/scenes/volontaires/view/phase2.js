@@ -13,7 +13,6 @@ import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
 import WrapperPhase2 from "./wrapper";
-
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   React.useEffect(() => {
