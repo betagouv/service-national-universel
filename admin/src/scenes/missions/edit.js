@@ -531,13 +531,24 @@ export default function Edit(props) {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <input type="number" min={1} max={100} name="duration" id="duration" onChange={handleChange} value={values.duration} />
+                            <input
+                              type="text"
+                              name="duration"
+                              id="duration"
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
+                                if (re.test(value) || !value) {
+                                  handleChange({ target: { value: value, name: "duration" } });
+                                }
+                              }}
+                              value={values.duration}
+                            />
                             <Field
                               hidden
                               value={values.duration}
                               name="duration"
-                              onChange={handleChange}
-                              validate={(v) => (parseInt(v) < 1 || parseInt(v) > 100) && "Le nombre saisi doit être compris entre 1 et 100"}
+                              validate={(v) => (parseInt(v) < 1 || parseInt(v) > 99) && "Le nombre saisi doit être compris entre 1 et 100"}
                             />
                             <ErrorMessage errors={errors} touched={touched} name="duration" />
                           </Col>
