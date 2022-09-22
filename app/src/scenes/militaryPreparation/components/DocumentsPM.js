@@ -1,11 +1,11 @@
 import React from "react";
-import FileCard from "./FileCard";
+import { AiOutlineInfoCircle } from "react-icons/ai";
+import { BsChevronDown } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import { translateStatusMilitaryPreparationFiles } from "../../../utils";
+import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
-import { BsChevronDown } from "react-icons/bs";
-import { translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
-import { AiOutlineInfoCircle } from "react-icons/ai";
 
 export default function DocumentsPM({ docRef = null, showHelp = true }) {
   const young = useSelector((state) => state.Auth.young);

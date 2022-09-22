@@ -1,12 +1,10 @@
+import { Formik } from "formik";
 import React from "react";
+import { useDispatch } from "react-redux";
 import { Modal } from "reactstrap";
 import DndFileInput from "../../../components/dndFileInputV2";
-import api from "../../../services/api";
-import { toastr } from "react-redux-toastr";
-import { Formik } from "formik";
-import { urlWithScheme, translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
-import { useDispatch } from "react-redux";
+import { urlWithScheme } from "../../../utils";
 
 export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsubTitle = null, name, template = null, young }) {
   const dispatch = useDispatch();
