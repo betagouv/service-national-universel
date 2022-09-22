@@ -187,7 +187,7 @@ export default function Done() {
                     <div className="text-sm leading-5 font-medium text-gray-800 mt-3 px-2 text-justify">
                       Vous recevrez automatiquement votre certificat individuel de participation après le séjour. Vous n’avez rien à faire.
                     </div>
-                    <div className="text-sm leading-5 text-gray-500 mt-3 px-2 text-justify">
+                    <div className="text-[13px] leading-5 text-gray-500 mt-3 px-2 text-justify">
                       <RiErrorWarningFill className="w-4 h-4 inline mr-1 align-text-bottom" />
                       Attention, si vous n’avez pas pu participer à la Journée défense et mémoire (JDM), vous devrez tout de même réaliser votre JDC.
                     </div>
@@ -205,11 +205,11 @@ export default function Done() {
                       {FaqOpen ? (
                         <div className="ml-2">
                           <div className="text-sm leading-5 font-medium text-gray-800 mt-3">Je n’ai pas reçu mon certificat...</div>
-                          <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                          <div className="text-[13px] leading-5 text-gray-500 text-justify mt-1">
                             Rapprochez-vous de votre CSNJ (Centre du service national et de la jeunesse de votre lieu de résidence) pour vérifier votre situation.
                           </div>
                           <div className="text-sm leading-5 font-medium text-gray-800 mt-3">J’ai quand même reçu ma convocation à la JDC...</div>
-                          <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                          <div className="text-[13px] leading-5 text-gray-500 text-justify mt-1">
                             Dans ce cas, transmettez votre attestation de réalisation de phase 1 au CSNJ afin de recevoir votre CIP à la JDC.
                           </div>
                         </div>
@@ -248,7 +248,7 @@ export default function Done() {
                       className="text-sm px-2 leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
                       En savoir plus sur le recensement
                     </a>
-                    <div className="text-sm leading-5 text-gray-500 mt-3 px-2 text-justify">
+                    <div className="text-[13px] leading-5 text-[#738297] mt-3 px-2 text-justify">
                       <RiErrorWarningFill className="w-4 h-4 inline mr-1 align-text-bottom" />
                       Attention, si vous n’avez pas pu participer à la Journée défense et mémoire (JDM), vous devrez tout de même réaliser votre JDC.
                     </div>
@@ -265,7 +265,7 @@ export default function Done() {
                       </div>
                       {Faq2Open ? (
                         <>
-                          <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                          <div className="text-[13px] leading-5 text-[#738297] text-justify mt-1">
                             Transmettez votre attestation de réalisation de la phase 1 à votre CSNJ pour obtenir votre certificat de participation à la JDC.
                           </div>
                           <a
