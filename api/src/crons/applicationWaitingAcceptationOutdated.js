@@ -18,14 +18,14 @@ const clean = async () => {
     total++;
     if (diffDays(application.createdAt, now) >= 14) {
       countAutoCancel++;
+      application.set({ status: APPLICATION_STATUS.CANCEL });
+      await application.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
       const young = await YoungModel.findById(application.youngId);
       if (young) {
         const applications = await ApplicationModel.find({ youngId: young._id.toString() });
         young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
         await young.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
       }
-      application.set({ status: APPLICATION_STATUS.CANCEL });
-      await application.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
     }
   });
   slack.success({ title: "outdated waiting acceptation application", text: `${countAutoCancel}/${total} applications has been archived !` });
