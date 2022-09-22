@@ -225,7 +225,7 @@ export default function Done() {
                     if (checkOpen) setCheckOpen(false);
                   }}>
                   <div className="flex items-center gap-3">
-                    <XCircleFill className="text-red-500 w-4 h-4" />
+                    <XCircleFill className="text-red-500 w-5 h-5" />
                     <div className="text-base font-bold">
                       Je n’ai <strong>pas</strong> effectué mon recensement <br /> citoyen
                     </div>
@@ -445,7 +445,7 @@ export default function Done() {
                   if (checkOpen) setCheckOpen(false);
                 }}>
                 <div className="flex items-center gap-3">
-                  <XCircleFill className="text-red-500 w-4 h-4" />
+                  <XCircleFill className="text-red-500 w-5 h-5" />
                   <div className="text-base font-bold">
                     Je n’ai <strong>pas</strong> effectué mon recensement citoyen
                   </div>
