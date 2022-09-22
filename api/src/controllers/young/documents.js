@@ -177,7 +177,6 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     }
 
     const content = buffer.toString("base64");
-    console.log("🚀 ~ file: documents.js ~ line 180 ~ router.post ~ content", type);
 
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
     let cc = getCcOfYoung({ template: emailTemplate, young });
