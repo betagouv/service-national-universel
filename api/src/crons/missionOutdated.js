@@ -81,6 +81,13 @@ const cancelApplications = async (mission) => {
     let statusComment = "La mission a été archivée.";
     let sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED_AUTO;
 
+    const young = await YoungObject.findById(application.youngId);
+    if (young) {
+      const applications = await ApplicationObject.find({ youngId: young._id.toString() });
+      young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+      await young.save({ fromUser: { firstName: `Cron ${fileName}` } });
+    }
+
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser: { firstName: `Cron ${fileName}` } });
 

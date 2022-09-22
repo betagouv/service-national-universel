@@ -4,6 +4,7 @@ const { capture } = require("../sentry");
 const slack = require("../slack");
 const ApplicationModel = require("../models/application");
 const StructureModel = require("../models/structure");
+const YoungModel = require("../models/young");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const { APP_URL } = require("../config");
 const { sendTemplate } = require("../sendinblue");
@@ -17,6 +18,12 @@ const clean = async () => {
     total++;
     if (diffDays(application.createdAt, now) >= 14) {
       countAutoCancel++;
+      const young = await YoungModel.findById(application.youngId);
+      if (young) {
+        const applications = await ApplicationModel.find({ youngId: young._id.toString() });
+        young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+        await young.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
+      }
       application.set({ status: APPLICATION_STATUS.CANCEL });
       await application.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
     }
