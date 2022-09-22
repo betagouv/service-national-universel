@@ -15,7 +15,7 @@ import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
 import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, translateApplication, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { ModalContainer } from "../../components/modals/Modal";
@@ -315,7 +315,7 @@ export default function List() {
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateApplication(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
