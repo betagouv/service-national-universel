@@ -84,6 +84,13 @@ const cancelApplications = async (mission) => {
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser: { firstName: `Cron ${fileName}` } });
 
+    const young = await YoungObject.findById(application.youngId);
+    if (young) {
+      const applications = await ApplicationObject.find({ youngId: young._id.toString() });
+      young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+      await young.save({ fromUser: { firstName: `Cron ${fileName}` } });
+    }
+
     if (sendinblueTemplate) {
       const young = await YoungObject.findById(application.youngId);
       let cc = getCcOfYoung({ template: sendinblueTemplate, young });
