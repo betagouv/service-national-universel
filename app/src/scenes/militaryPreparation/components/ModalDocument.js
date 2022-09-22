@@ -9,6 +9,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
 
 export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsubTitle = null, name, template = null, young }) {
+  const dispatch = useDispatch();
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
       <div className="w-full">
@@ -32,7 +33,13 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
 
           <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
             <div className="flex mt-2 items-center justify-center">
-              <DndFileInput className="flex flex-col items-center" value={undefined} name={name} path={`/young/${young._id}/documents/${name}`} />
+              <DndFileInput
+                className="flex flex-col items-center"
+                value={undefined}
+                name={name}
+                path={`/young/${young._id}/documents/${name}`}
+                onChange={(res) => dispatch(setYoung(res?.young))}
+              />
             </div>
           </Formik>
           <button className="my-4 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={onCancel}>
