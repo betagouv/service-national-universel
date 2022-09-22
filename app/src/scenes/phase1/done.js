@@ -255,7 +255,7 @@ export default function Done() {
                       className="text-sm px-2 leading-5 cursor-pointer underline text-blue-600 hover:underline">
                       En savoir plus
                     </a>
-                    <div className="w-full rounded-lg bg-gray-100 mt-3 py-3 px-2 cursor-pointer ">
+                    <div className="w-full rounded-lg bg-gray-100 mt-3 py-3 px-3 cursor-pointer ">
                       <div className="text-sm leading-6 font-medium" onClick={() => setFaq2Open(!Faq2Open)}>
                         Vous ne souhaitez par réaliser votre JDC ?
                       </div>
