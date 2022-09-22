@@ -1,3 +1,15 @@
+## [1.133.1](https://github.com/betagouv/service-national-universel/compare/v1.133.0...v1.133.1) (2022-09-22)
+
+
+### Bug Fixes
+
+* **api:** cron syncro phase2ApplicationStatus ([#1812](https://github.com/betagouv/service-national-universel/issues/1812)) ([4f0022a](https://github.com/betagouv/service-national-universel/commit/4f0022a1168c45f5f06d4fe6dea3a0e32af88b75))
+* **api:** delete military files in phase2 ([f0d0b0a](https://github.com/betagouv/service-national-universel/commit/f0d0b0a291d20e74c409681b9b79e0f051ac6fd8))
+* **api:** Template 173 cta ([#1815](https://github.com/betagouv/service-national-universel/issues/1815)) ([c440e8a](https://github.com/betagouv/service-national-universel/commit/c440e8a351fb1f405198176792ff0b1ef6f47565))
+* **app:** Alignment ([d75cd6c](https://github.com/betagouv/service-national-universel/commit/d75cd6c5ee2a3b59e9dbf8611a24fe2a43c8efac))
+* **app:** Front corrections validated phase1 screen ([#1814](https://github.com/betagouv/service-national-universel/issues/1814)) ([f6a3955](https://github.com/betagouv/service-national-universel/commit/f6a3955258e39012690d15f4807b9ab8820999a2))
+* translate application status ([31c4fa7](https://github.com/betagouv/service-national-universel/commit/31c4fa7adc270d04a6fabef44b3c4a1a5e12eddc))
+
 # [1.133.0](https://github.com/betagouv/service-national-universel/compare/v1.132.0...v1.133.0) (2022-09-21)
 
 
