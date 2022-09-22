@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toastr } from "react-redux-toastr";
 import FileIcon from "../../../assets/FileIcon";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
 import { FILE_STATUS_PHASE1, SENDINBLUE_TEMPLATES, translate, translateFileStatusPhase1 } from "../../../utils";
 import ButtonPlain from "./ButtonPlain";
-import ModalDocument from "./ModalDocument";
+// import ModalDocument from "./ModalDocument";
+import Download from "../../../assets/icons/Download";
+import MoreMenu from "../../../assets/icons/MoreMenu";
+import { Modal } from "reactstrap";
+import CloseSvg from "../../../assets/Close";
+import { Formik, Field } from "formik";
+import ModalButton from "../../../components//buttons/ModalButton";
+import Select from "../../../components/Select";
+import DndFileInput from "../../../components/dndFileInput";
+import { ModalContainer } from "../../../components/modals/Modal";
+import Switch from "react-switch";
 
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
@@ -19,7 +29,11 @@ export default function DocumentPhase1(props) {
   const [dataAutoTestPCR, setDataAutoTestPCR] = useState();
   const [isOpenImg, setIsOpenImg] = useState(false);
   const [isOpenAut, setIsOpenAut] = useState(false);
+  const [checkedImg, setCheckedImg] = useState(false);
+  const [checkedAut, setCheckedAut] = useState(false);
   const options = [FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED];
+  const ref = useRef(null);
+
   const medicalFileOptions = [
     { value: "RECEIVED", label: "Réceptionné" },
     { value: "TO_DOWNLOAD", label: "Non téléchargé" },
@@ -77,6 +91,7 @@ export default function DocumentPhase1(props) {
       } else {
         setStatusCohesionStayMedical("RECEIVED");
       }
+
       setStatusAutoTestPCR(young.autoTestPCRFilesStatus);
       setStatusImageRight(young.imageRightFilesStatus);
       setStatusRules(young.rulesYoung);
@@ -88,6 +103,11 @@ export default function DocumentPhase1(props) {
         autoTestPCR: young.autoTestPCR,
         autoTestPCRFiles: young.files.autoTestPCRFiles,
       });
+      if (young.imageRight && young.imageRight === "true") {
+        setCheckedImg(true);
+      } else {
+        setCheckedImg(false);
+      }
     }
   }, [young]);
 
@@ -155,7 +175,23 @@ export default function DocumentPhase1(props) {
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpenImg(false);
+        setIsOpenAut(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   if (!dataImageRight && !dataAutoTestPCR) return null;
+  console.log("young", young);
+  console.log("dataImageRight", dataImageRight);
+  console.log("checkedimg==>", checkedImg);
 
   return (
     <>
@@ -165,7 +201,7 @@ export default function DocumentPhase1(props) {
             <div className="flex row justify-center mx-2 mb-3 w-full ">
               <select
                 disabled={loading}
-                className="form-control w-full mx-6 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                className="form-control w-full mx-3 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                 value={statusRules}
                 name="rules"
                 onChange={(e) => needModal(e)}>
@@ -179,6 +215,7 @@ export default function DocumentPhase1(props) {
             <FileIcon icon="reglement" filled={young.rulesYoung === "true"} />
             <p className="text-base font-bold mt-2">Règlement intérieur</p>
           </section>
+
           {statusRules !== "true" && (
             <ButtonPlain
               tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
@@ -194,7 +231,7 @@ export default function DocumentPhase1(props) {
             <div className="flex row justify-center mx-2 mb-3 w-full">
               <select
                 disabled={loading}
-                className="form-control w-full mx-6 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                className="form-control w-full mx-3 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                 value={statusCohesionStayMedical}
                 name="cohesionStayMedical"
                 onChange={(e) => needModal(e)}>
@@ -219,11 +256,11 @@ export default function DocumentPhase1(props) {
           )}
         </div>
         <div className="flex flex-col justify-center items-center basis-1/4">
-          <section className="bg-gray-50 rounded-[7px] m-2 flex flex-col items-center justify-start py-3 h-[300px] w-full">
+          <section className="bg-gray-50 rounded-[7px] m-2 flex flex-col items-center justify-start py-3 h-[300px] w-full relative">
             <div className="flex row justify-center mx-2 mb-3 w-full">
               <select
                 disabled={loading}
-                className="form-control w-full mx-6 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                className="form-control w-full mx-3 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                 value={statusImageRight}
                 name="imageRight"
                 onChange={(e) => needModal(e)}>
@@ -239,9 +276,47 @@ export default function DocumentPhase1(props) {
             <p className="text-gray-500">
               Accord : {dataImageRight.imageRight && young.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
             </p>
-            <ButtonPlain onClick={() => setIsOpenImg(true)}>Gérer le document</ButtonPlain>
+            {/* <ButtonPlain onClick={() => setIsOpenImg(true)}>Gérer le document</ButtonPlain> */}
+            {dataImageRight.imageRight && (
+              <div className="flex flex-col justify-end items-end w-full px-7 mt-1">
+                <div className="transition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
+                  <Download
+                    className=" text-indigo-100 bg-blue-600 "
+                    onClick={() => {
+                      console.log("clic");
+                    }}
+                  />
+                </div>
+                <div
+                  className="transition duration-150 flex rounded-full p-2 items-center bg-[#e5e7eb] justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer h-8 w-8 hover:border-2 hover:border-blue-600 mt-1"
+                  onClick={() => {
+                    setIsOpenImg(true);
+                  }}>
+                  <MoreMenu className="text-indigo-100" />
+                </div>
+              </div>
+            )}
+            {isOpenImg && (
+              <div className="rounded-md bg-white border border-gray-300  shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] absolute -bottom-[68px] right-6 w-60 " ref={ref}>
+                <div className="relative w-full">
+                  <TestModal
+                    // initialValues={{ dataImageRight, checked: checkedImg }}
+                    values={{ dataImageRight, checked: checkedImg }}
+                    updateYoung={updateYoung}
+                    young={young}
+                    name="imageRight"
+                    nameFiles="imageRightFiles"
+                    title="Consentement de droit à l'image"
+                    comment={young.imageRightFilesComment}
+                    // checked={checkedImg}
+                    setChecked={setCheckedImg}
+                  />
+                </div>
+              </div>
+            )}
           </section>
-          <ModalDocument
+
+          {/* <ModalDocument
             isOpen={isOpenImg}
             onCancel={() => setIsOpenImg(false)}
             initialValues={dataImageRight}
@@ -251,7 +326,7 @@ export default function DocumentPhase1(props) {
             nameFiles="imageRightFiles"
             title="Consentement de droit à l'image"
             comment={young.imageRightFilesComment}
-          />
+          /> */}
           {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
             <ButtonPlain
               tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
@@ -267,7 +342,7 @@ export default function DocumentPhase1(props) {
             <div className="flex row justify-center mx-2 mb-3 w-full">
               <select
                 disabled={loading}
-                className="form-control w-full mx-6 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                className="form-control w-full mx-3 py-[8px] pr-[13px] pl-[17px] h-[40px] text-xs text-medium rounded-[6px] border-[1px] border-gray-300 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                 value={statusAutoTestPCR}
                 name="autoTestPCR"
                 onChange={(e) => needModal(e)}>
@@ -322,3 +397,257 @@ export default function DocumentPhase1(props) {
     </>
   );
 }
+
+const TestModal = ({ values, young, updateYoung, name, nameFiles, comment, setChecked, required, errorMessage = "Vous devez téléverser un document justificatif" }) => {
+  const [addedFile, setAddedFile] = useState();
+
+  console.log("checked==>", values.checked);
+
+  const handleChangeToggle = async (newValue) => {
+    console.log("name==>", name);
+    console.log("newValue", newValue);
+    try {
+      const { ok, code } = await api.put(`/young/${young._id}/phase1Files/${name}`, newValue);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Mis à jour!");
+      updateYoung();
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+    }
+  };
+
+  const handleSubmit = () => {
+    console.log("test submit ok!");
+  };
+
+  return (
+    <>
+      <div className="w-full border-b border-b-gray-300 p-2 ">
+        <div className="flex items-center justify-start space-x-4">
+          {name && (
+            <Switch
+              uncheckedIcon={false}
+              checkedIcon={false}
+              offColor="#E5E7EB"
+              onColor="#16A34A"
+              width={36}
+              height={16}
+              checked={values.checked}
+              onChange={() => {
+                setChecked(!values.checked);
+                handleChangeToggle(!values.checked);
+              }}
+            />
+          )}
+          <div>
+            Accord : <span>{values.checked ? "Oui" : "Non"}</span>{" "}
+          </div>
+        </div>
+
+        {/* <section className="flex flex-col items-center rounded-lg  w-[90%] lg:w-[70%]">
+            <DndFileInput
+              placeholder="un document justificatif"
+              errorMessage="Vous devez téléverser un document justificatif"
+              value={undefined} // Since this is a modal, the component will handle the data fetching by itself
+              path={`/young/${young._id}/documents/${nameFiles}`}
+              name={nameFiles}
+            />
+          </section>
+          {comment && (
+            <section className="flex flex-col items-center bg-gray-50 rounded-lg p-10 w-[90%] lg:w-[70%] my-4">
+              <p className="w-[90%]">
+                <strong>Correction demandée :</strong>
+                <br /> <em>&ldquo;{comment}&rdquo;</em>
+              </p>
+            </section>
+          )} */}
+      </div>
+      <div className="p-2">
+        <label htmlFor="file-drop" className="mb-2 cursor-pointer">
+          Téléverser le Document
+        </label>
+        <input
+          type="file"
+          id="file-drop"
+          className="hidden"
+          onChange={(event) => {
+            setAddedFile(event.target.files[0]);
+            handleSubmit();
+          }}
+        />
+        <div>Supprimer le document</div>
+      </div>
+    </>
+  );
+};
+
+// const TestModal = ({ initialValues, young, updateYoung, title, name, nameFiles, comment, setChecked }) => {
+//   console.log("checked==>", initialValues.checked);
+//   return (
+//     <>
+//       <div className="w-full border-b border-b-gray-300 p-2">
+//         <Formik
+//           initialValues={initialValues}
+//           validateOnChange={false}
+//           validateOnBlur={false}
+//           onSubmit={async (values) => {
+//             try {
+//               const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/${name}`, values);
+//               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+//               toastr.success("Mis à jour!");
+//               updateYoung();
+//             } catch (e) {
+//               console.log(e);
+//               toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+//             }
+//           }}>
+//           {({ values, handleChange, handleSubmit }) => (
+//             <>
+//               <div className="p-2 text-center w-full flex flex-col items-center">
+//                 {values[nameFiles]?.length && !name ? null : (
+//                   <div className="flex items-center space-x-4">
+//                     {name && (
+//                       <Switch
+//                         uncheckedIcon={false}
+//                         checkedIcon={false}
+//                         offColor="#E5E7EB"
+//                         onColor="#16A34A"
+//                         width={36}
+//                         height={16}
+//                         checked={values.checked}
+//                         onChange={() => {
+//                           setChecked(!values.checked), handleChange(!values.checked);
+//                         }}
+//                       />
+
+//                       //  <Select
+//                       //   id="agreement"
+//                       //   placeholder="Non renseigné"
+//                       //   name={name}
+//                       //   values={values}
+//                       //   handleChange={(e) => {
+//                       //     handleChange(e), handleSubmit();
+//                       //   }}
+//                       //   title="Accord :"
+//                       //   options={[
+//                       //     { value: "true", label: "Oui" },
+//                       //     { value: "false", label: "Non" },
+//                       //   ]}
+//                       // />
+//                     )}
+//                     <div>
+//                       Accord : <span>{values.checked ? "Oui" : "Non"}</span>{" "}
+//                     </div>
+//                   </div>
+//                 )}
+
+//                 <section className="flex flex-col items-center rounded-lg  w-[90%] lg:w-[70%]">
+//                   <DndFileInput
+//                     placeholder="un document justificatif"
+//                     errorMessage="Vous devez téléverser un document justificatif"
+//                     value={undefined} // Since this is a modal, the component will handle the data fetching by itself
+//                     path={`/young/${young._id}/documents/${nameFiles}`}
+//                     name={nameFiles}
+//                   />
+//                 </section>
+//                 {comment && (
+//                   <section className="flex flex-col items-center bg-gray-50 rounded-lg p-10 w-[90%] lg:w-[70%] my-4">
+//                     <p className="w-[90%]">
+//                       <strong>Correction demandée :</strong>
+//                       <br /> <em>&ldquo;{comment}&rdquo;</em>
+//                     </p>
+//                   </section>
+//                 )}
+//               </div>
+//             </>
+//           )}
+//         </Formik>
+//       </div>
+//       <div className="p-2">
+//         <div>Téléverser le Document</div>
+//         <div>Supprimer le document</div>
+//       </div>
+//     </>
+//   );
+// };
+
+const ModalDocument = ({ isOpen, onCancel, initialValues, young, updateYoung, title, name, nameFiles, comment }) => {
+  return (
+    <Modal centered isOpen={isOpen} toggle={onCancel} size="lg">
+      {/* modalContainer */}
+      <ModalContainer className="flex justify-center items-center flex-col bg-white">
+        <CloseSvg className="close-icon hover:cursor-pointer absolute right-0 top-0" height={10} width={10} onClick={onCancel} />
+        <Formik
+          initialValues={initialValues}
+          validateOnChange={false}
+          validateOnBlur={false}
+          onSubmit={async (values) => {
+            try {
+              const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/${name}`, values);
+              if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+              toastr.success("Mis à jour!");
+              updateYoung();
+            } catch (e) {
+              console.log(e);
+              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+            }
+          }}>
+          {({ values, handleChange, handleSubmit }) => (
+            <>
+              <div className="p-2 text-center w-full flex flex-col items-center">
+                <div className="mb-4">
+                  <h3 className="mb-3">{title}</h3>
+                  {values[nameFiles]?.length && !name ? null : (
+                    <div className="px-3 py-6 my-2 mx-auto">
+                      {!values[nameFiles]?.length && (
+                        <p className="mb-3 text-gray-500">
+                          <em>Le volontaire n&apos;a pas encore renseigné sa pièce justificative.</em>
+                        </p>
+                      )}
+                      {name && (
+                        <Select
+                          placeholder="Non renseigné"
+                          name={name}
+                          values={values}
+                          handleChange={(e) => {
+                            handleChange(e), handleSubmit();
+                          }}
+                          title="Accord :"
+                          options={[
+                            { value: "true", label: "Oui" },
+                            { value: "false", label: "Non" },
+                          ]}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <section className="flex flex-col items-center rounded-lg  w-[90%] lg:w-[70%]">
+                  <DndFileInput
+                    placeholder="un document justificatif"
+                    errorMessage="Vous devez téléverser un document justificatif"
+                    value={undefined} // Since this is a modal, the component will handle the data fetching by itself
+                    path={`/young/${young._id}/documents/${nameFiles}`}
+                    name={nameFiles}
+                  />
+                </section>
+                {comment && (
+                  <section className="flex flex-col items-center bg-gray-50 rounded-lg p-10 w-[90%] lg:w-[70%] my-4">
+                    <p className="w-[90%]">
+                      <strong>Correction demandée :</strong>
+                      <br /> <em>&ldquo;{comment}&rdquo;</em>
+                    </p>
+                  </section>
+                )}
+              </div>
+            </>
+          )}
+        </Formik>
+        <div>
+          <ModalButton onClick={onCancel}>Retour</ModalButton>
+        </div>
+      </ModalContainer>
+    </Modal>
+  );
+};
