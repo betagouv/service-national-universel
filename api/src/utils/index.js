@@ -349,10 +349,10 @@ const updateStatusPhase2 = async (young, fromUser) => {
     young.set({
       statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
       statusPhase2ValidatedAt: Date.now(),
-      militaryPreparationFilesIdentity: [],
-      militaryPreparationFilesCensus: [],
-      militaryPreparationFilesAuthorization: [],
-      militaryPreparationFilesCertificate: [],
+      "files.militaryPreparationFilesIdentity": [],
+      "files.militaryPreparationFilesCensus": [],
+      "files.militaryPreparationFilesAuthorization": [],
+      "files.militaryPreparationFilesCertificate": [],
       statusMilitaryPreparationFiles: undefined,
     });
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
