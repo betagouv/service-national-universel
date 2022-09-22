@@ -170,9 +170,7 @@ export default function Done() {
                   onClick={() => {
                     setCheckOpen(!checkOpen);
                     setFaqOpen(false);
-                    if (differOpen === true) {
-                      setDifferOpen(false);
-                    }
+                    if (differOpen) setDifferOpen(false);
                   }}>
                   <div className="flex items-center gap-3">
                     <CheckCircleFill className="text-green-500 w-5 h-5" />
@@ -224,9 +222,7 @@ export default function Done() {
                   onClick={() => {
                     setDifferOpen(!differOpen);
                     setFaq2Open(false);
-                    if (checkOpen === true) {
-                      setCheckOpen(false);
-                    }
+                    if (checkOpen) setCheckOpen(false);
                   }}>
                   <div className="flex items-center gap-3">
                     <XCircleFill className="text-red-500 w-4 h-4" />
@@ -394,9 +390,7 @@ export default function Done() {
                 onClick={() => {
                   setCheckOpen(!checkOpen);
                   setFaqOpen(false);
-                  if (differOpen === true) {
-                    setDifferOpen(false);
-                  }
+                  if (differOpen) setDifferOpen(false);
                 }}>
                 <div className="flex items-center gap-3">
                   <CheckCircleFill className="text-green-500 w-5 h-5" />
@@ -448,9 +442,7 @@ export default function Done() {
                 onClick={() => {
                   setDifferOpen(!differOpen);
                   setFaq2Open(false);
-                  if (checkOpen === true) {
-                    setCheckOpen(false);
-                  }
+                  if (checkOpen) setCheckOpen(false);
                 }}>
                 <div className="flex items-center gap-3">
                   <XCircleFill className="text-red-500 w-4 h-4" />
