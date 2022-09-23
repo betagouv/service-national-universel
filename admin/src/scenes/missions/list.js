@@ -65,7 +65,7 @@ export default function List() {
 
   async function transform(data, selectedFields) {
     let all = data;
-    if ("tutor".includes(selectedFields)) {
+    if (selectedFields.includes("tutor")) {
       const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
       if (tutorIds?.length) {
         const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
@@ -75,14 +75,12 @@ export default function List() {
         }
       }
     }
-    if ("structure".includes(selectedFields)) {
-      console.log("🚀 ~ file: list.js ~ line 80 ~ transform ~ data.structureId", data.structureId);
-      const structureIds = [data.structureId];
+    if (selectedFields.includes("structureInfo", "structureLocation")) {
+      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
       const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
-      console.log("🚀 ~ file: list.js ~ line 80 ~ transform ~ responses", responses);
       if (responses?.length) {
-        const structure = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all.structure = structure;
+        const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        all = all.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
       }
     }
     return all.map((data) => {
