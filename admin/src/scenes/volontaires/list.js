@@ -354,6 +354,7 @@ export default function VolontaireList() {
                 <ModalExport
                   isOpen={isExportOpen}
                   setIsOpen={setIsExportOpen}
+                  index="young"
                   transform={transform}
                   exportFields={youngExportFields}
                   filters={FILTERS}

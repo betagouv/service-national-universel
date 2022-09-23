@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import ExportComponent from "../../components/ExportXlsx";
-import { getSelectedFilterLabel, translateFilter } from "../../utils";
+import { getSelectedFilterLabel, translateFilter, capitalizeFirstLetter } from "../../utils";
 import { Modal } from "reactstrap";
 import { SelectedFilters, StateProvider } from "@appbaseio/reactivesearch";
 import plausibleEvent from "../../services/pausible";
 import { ModalContainer } from "../../components/modals/Modal";
-import ModalButton from "../../components/buttons/ModalButton";
 import ExportFieldCard from "../ExportFieldCard";
+import { translateIndexes } from "snu-lib";
 
-export default function ModalExport({ isOpen, setIsOpen, transform, exportFields, filters, getExportQuery }) {
+export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery }) {
   const [selectedFields, setSelectedFields] = useState(exportFields.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
@@ -75,11 +75,11 @@ export default function ModalExport({ isOpen, setIsOpen, transform, exportFields
           </button>
           <div className="flex w-full">
             <ExportComponent
-              handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-              title="Exporter les volontaires"
+              handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
+              title={`Exporter les ${translateIndexes(index)}`}
               defaultQuery={getExportQuery}
-              exportTitle="Volontaires"
-              index="young"
+              exportTitle={capitalizeFirstLetter(translateIndexes(index))}
+              index={index}
               react={{ and: filters }}
               transform={(data) => transform(data, selectedFields)}
               fieldsToExport={fieldsToExport}

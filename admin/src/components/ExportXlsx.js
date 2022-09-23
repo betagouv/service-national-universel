@@ -75,8 +75,8 @@ export default function ExportComponent({
   }
 
   return (
-    <div className={index == "young" && "w-full"}>
-      <LoadingButton className={index == "young" && "w-full"} onClick={onClick}>
+    <div className={setIsOpen && "w-full"}>
+      <LoadingButton className={setIsOpen && "w-full"} onClick={onClick}>
         {title}
       </LoadingButton>
       <ModalConfirm
