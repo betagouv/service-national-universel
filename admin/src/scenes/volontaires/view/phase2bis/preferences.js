@@ -6,6 +6,7 @@ import ToggleUnchecked from "../../../../assets/toggleUnchecked.svg";
 
 export default function Preferences({ young }) {
   const transportArray = [TRANSPORT.PUBLIC_TRANSPORT, TRANSPORT.BIKE, TRANSPORT.MOTOR, TRANSPORT.CARPOOLING, TRANSPORT.OTHER];
+
   return (
     <div className="flex flex-col items-center justify-center">
       {/* bloc1 */}
@@ -60,7 +61,7 @@ export default function Preferences({ young }) {
             return (
               <div key={index} className="flex flex-col items-center">
                 <IconDomainRounded domain={domain} />
-                <div className="text-xs text-gray-700 font-medium lowercase mt-2">{domain}</div>
+                <div className="text-xs text-gray-700 font-medium lowercase mt-2">{t(domain)}</div>
               </div>
             );
           })}

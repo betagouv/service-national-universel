@@ -41,56 +41,6 @@ export default function ApplicationList({ young, onChangeApplication }) {
   if (!applications) return <Loader />;
   return (
     <div className="p-1">
-      <div className="flex mx-14 mb-2 justify-end">
-        {/* <div>Filtre</div> */}
-        <div>
-          <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div className="py-2">
-              <ExportComponent
-                defaultQuery={getExportQuery}
-                title="Exporter les candidatures"
-                exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
-                index="application"
-                transform={(all) => {
-                  return all.map((data) => {
-                    return {
-                      _id: data._id,
-                      Cohorte: data.youngCohort,
-                      Prénom: data.youngFirstName,
-                      Nom: data.youngLastName,
-                      "Date de naissance": data.youngBirthdateAt,
-                      Email: data.youngEmail,
-                      Téléphone: young.phone,
-                      "Adresse du volontaire": young.address,
-                      "Code postal du volontaire": young.zip,
-                      "Ville du volontaire": young.city,
-                      "Département du volontaire": young.department,
-                      "Prénom représentant légal 1": young.parent1FirstName,
-                      "Nom représentant légal 1": young.parent1LastName,
-                      "Email représentant légal 1": young.parent1Email,
-                      "Téléphone représentant légal 1": young.parent1Phone,
-                      "Prénom représentant légal 2": young.parent2LastName,
-                      "Nom représentant légal 2": young.parent2LastName,
-                      "Email représentant légal 2": young.parent2Email,
-                      "Téléphone représentant légal 2": young.parent2Phone,
-                      Choix: data.priority,
-                      "Nom de la mission": data.missionName,
-                      "Département de la mission": data.missionDepartment,
-                      "Région de la mission": data.missionRegion,
-                      "Candidature créée lé": data.createdAt,
-                      "Candidature mise à jour le": data.updatedAt,
-                      "Statut de la candidature": translate(data.status),
-                      Tuteur: data.tutorName,
-                      "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
-                    };
-                  });
-                }}
-              />
-            </div>
-          </ReactiveBase>
-        </div>
-      </div>
-
       {/* Mission card */}
       <div className="mx-14 ">
         {applications.map((hit, i) => (

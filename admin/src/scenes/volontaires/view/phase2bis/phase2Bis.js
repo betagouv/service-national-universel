@@ -1,12 +1,11 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Box, BoxTitle } from "../../../../components/box";
 import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
 import SelectStatus from "../../../../components/selectStatus";
 import api from "../../../../services/api";
-import { ENABLE_PM, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
+import { ENABLE_PM, ES_NO_LIMIT, translate, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
 import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
 import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
@@ -14,12 +13,19 @@ import WrapperPhase2 from "../wrapper";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
 // import Pencil from "../../../../assets/pencil.svg";
+import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import Menu from "../../../../assets/icons/Menu";
+import Pencil from "../../../../assets/icons/Pencil";
+import ExportComponent from "../../../../components/ExportXlsx";
+import { apiURL } from "../../../../config";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   const [blocOpened, setBlocOpened] = useState("missions");
+
+  const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
+  const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   React.useEffect(() => {
     (async () => {
@@ -85,49 +91,86 @@ export default function Phase2({ young, onChange }) {
 
         <Toolbox young={young} />
         <Box>
-          <div className="flex border-b-[1px] border-b-gray-200 ">
-            {blocOpened === "missions" && (
-              <>
-                <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500 items-center">
-                  <Menu className="text-blue-600 " />
-                  <div className="text-sm text-blue-600 font-medium ml-2">Missions candidatées</div>
-                </div>
-                <div className="ml-8 py-4 flex ">
-                  <HiOutlineAdjustments className=" w-5 h-5 text-gray-300 " />
-                  <div
-                    className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
-                    onClick={() => {
-                      setBlocOpened("preferences");
-                    }}>
-                    Préférences de missions
-                  </div>
-                </div>
-              </>
-            )}
-            {blocOpened === "preferences" && (
-              <>
-                <div className="ml-8 py-4 flex items-center">
-                  <Menu className="text-gray-300 " />
-                  <div
-                    className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
-                    onClick={() => {
-                      setBlocOpened("missions");
-                    }}>
-                    Missions candidatées
-                  </div>
-                </div>
-                <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500">
-                  <HiOutlineAdjustments className=" w-5 h-5 text-blue-600 " />
-                  <div className="text-sm text-blue-600 font-medium ml-2 ">Préférences de missions</div>
-                </div>
+          <div className="flex border-b-[1px] border-b-gray-200 mb-3 items-center justify-between mx-8">
+            <div className="flex items-center">
+              <div
+                className={`py-4 flex border-b-[2px] items-center cursor-pointer ${blocOpened === "missions" ? "border-blue-500" : "border-transparent"}`}
+                onClick={() => {
+                  setBlocOpened("missions");
+                }}>
+                <Menu className={blocOpened === "missions" ? "text-blue-600" : "text-gray-500"} />
+                <div className={`text-sm font-medium ml-2 ${blocOpened === "missions" ? "text-blue-600" : "text-gray-500"}`}>Missions candidatées</div>
+              </div>
+              <div
+                className={`ml-8 py-4 flex border-b-[2px] items-center cursor-pointer ${blocOpened === "preferences" ? "border-blue-500" : "border-transparent"}`}
+                onClick={() => {
+                  setBlocOpened("preferences");
+                }}>
+                <HiOutlineAdjustments className={`w-5 h-5 ${blocOpened === "preferences" ? "text-blue-600" : "text-gray-500"}`} />
+                <div className={`text-sm font-medium ml-2 ${blocOpened === "preferences" ? "text-blue-600" : "text-gray-500"}`}>Préférences de missions</div>
+              </div>
+            </div>
 
-                {/* A rajouter prochain ticket */}
-                {/* <div className="bg-blue-100 rounded-[28px] px-[9px] py-[7px] flex items-center h-[32px] space-x-2 ">
-                    <img src={Pencil} />
-                    <div className="text-blue-600 text-xs font-medium cursor-pointer">Modifier</div>
-                  </div> */}
-              </>
-            )}
+            {blocOpened === "preferences" ? (
+              <div className="flex items-center gap-2 bg-blue-100 rounded-[28px] px-[9px] py-[7px]  h-[32px]">
+                <Pencil className="h-4 w-4 text-blue-600" />
+                <div className="text-blue-600 text-xs font-medium cursor-pointer">Modifier</div>
+              </div>
+            ) : null}
+
+            {blocOpened === "missions" ? (
+              <div className="flex">
+                <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+                  <div className="py-2">
+                    <ExportComponent
+                      defaultQuery={getExportQuery}
+                      title="Exporter les candidatures"
+                      exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
+                      index="application"
+                      css={{
+                        override: true,
+                        button: "border-blue-600 text-blue-600 border-[1px] rounded-md px-2.5 py-1.5 text-sm hover:bg-blue-600 hover:text-white",
+                        loadingButton: "border-[1px] rounded-md px-2.5 py-1.5 text-sm bg-blue-600 text-white opacity-70",
+                      }}
+                      transform={(all) => {
+                        return all.map((data) => {
+                          return {
+                            _id: data._id,
+                            Cohorte: data.youngCohort,
+                            Prénom: data.youngFirstName,
+                            Nom: data.youngLastName,
+                            "Date de naissance": data.youngBirthdateAt,
+                            Email: data.youngEmail,
+                            Téléphone: young.phone,
+                            "Adresse du volontaire": young.address,
+                            "Code postal du volontaire": young.zip,
+                            "Ville du volontaire": young.city,
+                            "Département du volontaire": young.department,
+                            "Prénom représentant légal 1": young.parent1FirstName,
+                            "Nom représentant légal 1": young.parent1LastName,
+                            "Email représentant légal 1": young.parent1Email,
+                            "Téléphone représentant légal 1": young.parent1Phone,
+                            "Prénom représentant légal 2": young.parent2LastName,
+                            "Nom représentant légal 2": young.parent2LastName,
+                            "Email représentant légal 2": young.parent2Email,
+                            "Téléphone représentant légal 2": young.parent2Phone,
+                            Choix: data.priority,
+                            "Nom de la mission": data.missionName,
+                            "Département de la mission": data.missionDepartment,
+                            "Région de la mission": data.missionRegion,
+                            "Candidature créée lé": data.createdAt,
+                            "Candidature mise à jour le": data.updatedAt,
+                            "Statut de la candidature": translate(data.status),
+                            Tuteur: data.tutorName,
+                            "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
+                          };
+                        });
+                      }}
+                    />
+                  </div>
+                </ReactiveBase>
+              </div>
+            ) : null}
           </div>
           {blocOpened === "missions" && <ApplicationList2 young={young} onChangeApplication={onChange} />}
           {blocOpened === "preferences" && <Preferences young={young} />}
