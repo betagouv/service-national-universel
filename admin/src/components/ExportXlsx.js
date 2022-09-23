@@ -17,6 +17,7 @@ export default function ExportComponent({
   searchType = "export",
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
   fieldsToExport = "*",
+  setIsOpen,
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -57,7 +58,10 @@ export default function ExportComponent({
               currentQuery={query.current}
               data={data}
               loading={loading}
-              onFinish={() => setExporting(false)}
+              onFinish={() => {
+                setExporting(false);
+                setIsOpen(false);
+              }}
               index={index}
               exportTitle={exportTitle}
               transform={transform}
@@ -71,8 +75,10 @@ export default function ExportComponent({
   }
 
   return (
-    <>
-      <LoadingButton onClick={onClick}>{title}</LoadingButton>
+    <div className={index == "young" && "w-full"}>
+      <LoadingButton className={index == "young" && "w-full"} onClick={onClick}>
+        {title}
+      </LoadingButton>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -83,7 +89,7 @@ export default function ExportComponent({
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -123,11 +129,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
     }
   }, [run, status]);
 
-  return (
-    <div>
-      <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>
-    </div>
-  );
+  return <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>;
 }
 
 async function toArrayOfArray(results, transform) {
