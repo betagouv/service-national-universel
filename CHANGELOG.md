@@ -1,3 +1,17 @@
+# [1.134.0](https://github.com/betagouv/service-national-universel/compare/v1.133.1...v1.134.0) (2022-09-23)
+
+
+### Bug Fixes
+
+* **admin:** front opti ([#1819](https://github.com/betagouv/service-national-universel/issues/1819)) ([a4cebba](https://github.com/betagouv/service-national-universel/commit/a4cebba24f18bfd911034906d98fa8f0967f636b))
+* **api:** Update profile referent ([0112380](https://github.com/betagouv/service-national-universel/commit/0112380981956174588e1227e63cdfd121a051a2))
+* **redirect:** Tentaive correction alerte sentry ([#1817](https://github.com/betagouv/service-national-universel/issues/1817)) ([1d4e3e8](https://github.com/betagouv/service-national-universel/commit/1d4e3e886d0e9acd9c7956ddac393e384db3bd11))
+
+
+### Features
+
+* **api/cron:** Add template SIB 199 ([#1820](https://github.com/betagouv/service-national-universel/issues/1820)) ([5cd0ade](https://github.com/betagouv/service-national-universel/commit/5cd0ade050d5ba4b3537197563556861fa58a536))
+
 ## [1.133.1](https://github.com/betagouv/service-national-universel/compare/v1.133.0...v1.133.1) (2022-09-22)
 
 
