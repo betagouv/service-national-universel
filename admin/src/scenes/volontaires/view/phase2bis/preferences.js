@@ -33,7 +33,7 @@ export default function Preferences({ young }) {
         <div className="flex w-full justify-center space-x-7">
           {" "}
           <div className="flex basis-[40%] justify-between px-[13px] py-[9px]">
-            <div className="text-sm text-gray-500 font-bold text-[#242526] ">Bénévole en parallèle ?</div>
+            <div className="text-sm font-bold text-[#242526] ">Bénévole en parallèle ?</div>
             {/* Toggle button */}
             {young.engaged && young.engaged === "true" ? (
               <div className="flex space-x-2">
@@ -48,7 +48,7 @@ export default function Preferences({ young }) {
             )}
           </div>
           <div className="flex basis-[40%] flex-col border-[1px] border-gray-200 px-[13px] py-[9px] rounded-md">
-            <div className="text-xs text-gray-500">Description de l'activité</div>
+            <div className="text-xs text-gray-500">Description de l&quot;activité</div>
             {young.engaged && <div className="text-sm text-gray-800">{young.engagedDescription}</div>}
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function Preferences({ young }) {
           <div className="flex items-center space-x-4">
             <input id="school-address" name="school-address" type="checkbox" checked={young.mobilityNearSchool === "true"} />
             <label htmlFor="school-address">
-              <span className="text-[13px] text-gray-700">Autour de l'établissement</span>
+              <span className="text-[13px] text-gray-700">Autour de l&quot;établissement</span>
               <br />
               <span className="text-[15px] text-gray-700">{young.schoolCity}</span>
             </label>

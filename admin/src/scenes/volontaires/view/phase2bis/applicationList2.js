@@ -1,26 +1,19 @@
-import { ReactiveBase, ReactiveComponent } from "@appbaseio/reactivesearch";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import Loader from "../../../../components/Loader";
-import { apiURL } from "../../../../config";
-import api from "../../../../services/api";
-import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, translate, translateApplication, ROLES, colors, SENDINBLUE_TEMPLATES } from "../../../../utils";
-import { capture } from "../../../../sentry";
-import IconDomain from "../../../../components/IconDomain";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
+import IconDomain from "../../../../components/IconDomain";
+import Loader from "../../../../components/Loader";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import * as FileSaver from "file-saver";
-import * as XLSX from "xlsx";
-import dayjs from "dayjs";
-import LoadingButton from "../../../../components/buttons/LoadingButton";
+import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
+import { capture } from "../../../../sentry";
+import api from "../../../../services/api";
+import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../utils";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
-  const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   useEffect(() => {
@@ -155,149 +148,6 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
     </div>
   );
 };
-
-const ExportComponent = ({ handleClick, title, exportTitle, index, react, transform, searchType = "export", defaultQuery = () => ({ query: { query: { match_all: {} } } }) }) => {
-  const [exporting, setExporting] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const query = useRef(defaultQuery().query);
-  const onClick = () => {
-    handleClick?.();
-    setModal({
-      isOpen: true,
-      onConfirm: () => setExporting(true),
-      title: "Téléchargement",
-      message:
-        "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
-    });
-  };
-
-  useEffect(() => {
-    if (searchType === "_msearch") {
-      query.current = defaultQuery().query;
-    }
-  }, [defaultQuery()]);
-
-  if (exporting) {
-    return (
-      <ReactiveComponent
-        defaultQuery={() => ({ ...defaultQuery(), size: 1 })}
-        componentId="EXPORT"
-        react={react}
-        onQueryChange={(prev, next) => {
-          if (searchType !== "_msearch") {
-            query.current = next.query;
-          }
-        }}
-        render={(props) => {
-          const { setQuery, data, loading } = props;
-          return (
-            <Loading
-              setQuery={setQuery}
-              currentQuery={query.current}
-              data={data}
-              loading={loading}
-              onFinish={() => setExporting(false)}
-              index={index}
-              exportTitle={exportTitle}
-              transform={transform}
-              searchType={searchType}
-            />
-          );
-        }}
-      />
-    );
-  }
-
-  return (
-    <>
-      <button className="bg-write text-blue-600 border-blue-600 border-[1px] font-ubuntu text-sm rounded-lg p-2" onClick={onClick}>
-        {title}
-      </button>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
-    </>
-  );
-};
-
-function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType }) {
-  const STATUS_LOADING = "Récupération des données";
-  const STATUS_TRANSFORM = "Mise en forme";
-  const STATUS_EXPORT = "Création du fichier";
-  const [status, setStatus] = useState(null);
-  const [data, setData] = useState([]);
-
-  const [run, setRun] = useState(false);
-
-  useEffect(() => {
-    if (loading === false) setRun(true);
-  }, [loading]);
-
-  useEffect(() => {
-    if (!run) return;
-
-    if (!status) {
-      setStatus(STATUS_LOADING);
-    } else if (status === STATUS_LOADING) {
-      getAllResults(index, currentQuery, searchType).then((results) => {
-        setData(results);
-        setStatus(STATUS_TRANSFORM);
-      });
-    } else if (status === STATUS_TRANSFORM) {
-      toArrayOfArray(data, transform).then((results) => {
-        setData(results);
-        setStatus(STATUS_EXPORT);
-      });
-    } else if (status === STATUS_EXPORT) {
-      const fileName = `${exportTitle}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`;
-
-      exportData(fileName, data);
-      onFinish();
-    }
-  }, [run, status]);
-
-  return (
-    <div>
-      <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>
-    </div>
-  );
-}
-
-async function toArrayOfArray(results, transform) {
-  const data = transform ? await transform(results) : results;
-  let columns = Object.keys(data[0] ?? []);
-  return [columns, ...data.map((item) => Object.values(item))];
-}
-
-async function getAllResults(index, query, searchType) {
-  let result;
-  if (searchType === "_msearch") {
-    result = await api.esQuery(index, query);
-    if (!result.responses.length) return [];
-    return result.responses[0];
-  } else {
-    result = await api.post(`/es/${index}/export`, { query });
-    if (!result.data.length) return [];
-    return result.data;
-  }
-}
-
-async function exportData(fileName, csv) {
-  const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  const fileExtension = ".xlsx";
-  const ws = XLSX.utils.aoa_to_sheet(csv);
-  const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  const resultData = new Blob([excelBuffer], { type: fileType });
-  FileSaver.saveAs(resultData, fileName + fileExtension);
-}
 
 const lookUpAuthorizedStatus = ({ status, role }) => {
   if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(role)) {
