@@ -17,7 +17,7 @@ import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import Menu from "../../../../assets/icons/Menu";
 import Pencil from "../../../../assets/icons/Pencil";
-import ExportComponent from "../../../../components/ExportXlsx";
+import ExportComponent from "../../../../components/ExportXlsxV2";
 import { apiURL } from "../../../../config";
 
 export default function Phase2({ young, onChange }) {
@@ -127,11 +127,8 @@ export default function Phase2({ young, onChange }) {
                       title="Exporter les candidatures"
                       exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
                       index="application"
-                      css={{
-                        override: true,
-                        button: "border-blue-600 text-blue-600 border-[1px] rounded-md px-2.5 py-1.5 text-sm hover:bg-blue-600 hover:text-white",
-                        loadingButton: "border-[1px] rounded-md px-2.5 py-1.5 text-sm bg-blue-600 text-white opacity-70",
-                      }}
+                      styleButton="border-blue-600 text-blue-600 border-[1px] rounded-md px-2.5 py-1.5 text-sm hover:bg-blue-600 hover:text-white"
+                      styleLoadingButton="border-[1px] rounded-md px-2.5 py-1.5 text-sm bg-blue-600 text-white opacity-70"
                       transform={(all) => {
                         return all.map((data) => {
                           return {

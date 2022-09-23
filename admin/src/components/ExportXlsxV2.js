@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import LoadingButton from "./buttons/LoadingButton";
+import LoadingButtonV2 from "./buttons/LoadingButtonV2";
 import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
 import dayjs from "dayjs";
@@ -17,6 +17,8 @@ export default function ExportComponent({
   searchType = "export",
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
   fieldsToExport = "*",
+  styleButton,
+  styleLoadingButton,
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -63,6 +65,7 @@ export default function ExportComponent({
               transform={transform}
               searchType={searchType}
               fieldsToExport={fieldsToExport}
+              styleLoadingButton={styleLoadingButton}
             />
           );
         }}
@@ -72,7 +75,10 @@ export default function ExportComponent({
 
   return (
     <>
-      <LoadingButton onClick={onClick}>{title}</LoadingButton>
+      <LoadingButtonV2 onClick={onClick} style={styleButton}>
+        {title}
+      </LoadingButtonV2>
+
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -87,7 +93,7 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fieldsToExport }) {
+function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fieldsToExport, styleLoadingButton }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
@@ -125,7 +131,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
 
   return (
     <div>
-      <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>
+      <LoadingButtonV2 loading={loading || run} loadingText={status} style={styleLoadingButton}></LoadingButtonV2>
     </div>
   );
 }
