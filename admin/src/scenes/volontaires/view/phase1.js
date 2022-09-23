@@ -36,6 +36,7 @@ import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
 import WrapperPhase1 from "./wrapper";
+import Select from "../../../components/Select2";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -44,7 +45,8 @@ export default function Phase1(props) {
   const [cohesionCenter, setCohesionCenter] = useState();
   const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+  // const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState();
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
   const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
   const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
@@ -197,7 +199,7 @@ export default function Phase1(props) {
                 <div className="flex items-center justify-between">
                   <div className="text-gray-500">Présence à l&apos;arrivée</div>
                   <select
-                    className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer min-w-1/4`}
+                    className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer min-w-1/4 `}
                     value={young.cohesionStayPresence || ""}
                     onChange={(e) => {
                       setModalPointagePresenceArrivee({
@@ -219,6 +221,16 @@ export default function Phase1(props) {
                       </option>
                     ))}
                   </select>
+                  <Select
+                    options={[
+                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                      { label: "Présent", value: "true" },
+                      { label: "Absent", value: "false" },
+                    ]}
+                    onChange={setModalPointagePresenceArrivee}
+                    value={young.cohesionStayPresence || ""}
+                    placeholder={young.cohesionStayPresence === "true" ? "Présent" : "Absent"}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-gray-500">Présence JDM</div>
