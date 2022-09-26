@@ -11,7 +11,6 @@ import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
@@ -25,7 +24,6 @@ import {
   translatePhase1,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS,
   YOUNG_STATUS_PHASE1_MOTIF,
   isTemporaryAffected,
 } from "../../../utils";
