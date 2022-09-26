@@ -18,6 +18,7 @@ export default function ExportComponent({
   searchType = "export",
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
   fieldsToExport = "*",
+  setIsOpen,
   css = { override: false },
 }) {
   const [exporting, setExporting] = useState(false);
@@ -59,7 +60,10 @@ export default function ExportComponent({
               currentQuery={query.current}
               data={data}
               loading={loading}
-              onFinish={() => setExporting(false)}
+              onFinish={() => {
+                setExporting(false);
+                if (setIsOpen) setIsOpen(false);
+              }}
               index={index}
               exportTitle={exportTitle}
               transform={transform}
@@ -74,7 +78,7 @@ export default function ExportComponent({
   }
 
   return (
-    <>
+    <div className={setIsOpen && "w-full"}>
       {css?.override ? (
         <LoadingButtonV2 onClick={onClick} style={css.button}>
           {title}
@@ -92,7 +96,7 @@ export default function ExportComponent({
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -133,7 +137,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
   }, [run, status]);
 
   return (
-    <div>
+    <div className={fieldsToExport !== "*" && "w-full"}>
       {css?.override ? (
         <LoadingButtonV2 loading={loading || run} loadingText={status} style={css.loadingButton}></LoadingButtonV2>
       ) : (
