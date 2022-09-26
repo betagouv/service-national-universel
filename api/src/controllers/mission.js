@@ -26,7 +26,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (req.user.role === ROLES.SUPERVISOR) var structure = await StructureObject.findById(checkedMission.structureId);
+    let structure = {};
+    if (req.user.role === ROLES.SUPERVISOR) structure = await StructureObject.findById(checkedMission.structureId);
 
     if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
