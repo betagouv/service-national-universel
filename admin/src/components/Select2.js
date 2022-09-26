@@ -1,16 +1,11 @@
 import React, { useEffect } from "react";
 import { BsCheck2 } from "react-icons/bs";
-import { IoMdClose } from "react-icons/io";
 import ChevronDown from "../assets/icons/ChevronDown";
 
 export default function Select({ options, value, placeholder, Icon = null, alignItems = "left", onChange }) {
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState("");
   const ref = React.useRef(null);
-
-  console.log("value", value);
-  console.log("options==>", options);
-  console.log("onChange==>", onChange);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -47,7 +42,7 @@ export default function Select({ options, value, placeholder, Icon = null, align
       <div className="relative">
         {/* select item */}
         <button
-          className="flex justify-between items-center gap-3 bg-gray-100 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[250px]"
+          className="flex justify-between items-center gap-3 bg-white px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait border-[1px] border-gray-200 text-black  min-w-1/4"
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2">
@@ -61,8 +56,8 @@ export default function Select({ options, value, placeholder, Icon = null, align
         <div
           className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute ${
             alignItems === "right" ? "right-0" : "left-0"
-          } border-3 border-red-600 shadow overflow-hidden z-50`}>
-          <div className="disabled px-3 p-2 text-gray-300">Présence à l'arrivée</div>
+          } border-3 shadow overflow-hidden z-50`}>
+          <div className="disabled px-3 p-2 text-gray-300">Présence à l&apos;arrivée</div>
           {options.map((option, index) => (
             <div
               key={option?.key || index}
