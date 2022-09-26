@@ -91,7 +91,6 @@ export default function List() {
       }
       const allFields = {
         missionInfo: {
-          _id: data._id,
           "Titre de la mission": data.name,
           "Date du début": formatDateFRTimezoneUTC(data.startAt),
           "Date de fin": formatDateFRTimezoneUTC(data.endAt),
@@ -151,7 +150,7 @@ export default function List() {
         },
       };
 
-      let fields = {};
+      let fields = { _id: data._id };
       for (const element of selectedFields) {
         let key;
         for (key in allFields[element]) fields[key] = allFields[element][key];
