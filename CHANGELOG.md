@@ -1,3 +1,15 @@
+# [1.135.0](https://github.com/betagouv/service-national-universel/compare/v1.134.0...v1.135.0) (2022-09-26)
+
+
+### Bug Fixes
+
+* **api:** allow supervisors to create or edit missions ([#1822](https://github.com/betagouv/service-national-universel/issues/1822)) ([4b0135a](https://github.com/betagouv/service-national-universel/commit/4b0135a108028517f310e3856b26e674a801e834))
+
+
+### Features
+
+* **api, admin:** export modal for missions ([#1818](https://github.com/betagouv/service-national-universel/issues/1818)) ([477fed3](https://github.com/betagouv/service-national-universel/commit/477fed3702d20b37638f24b81277f74860beb6de))
+
 # [1.134.0](https://github.com/betagouv/service-national-universel/compare/v1.133.1...v1.134.0) (2022-09-23)
 
 
