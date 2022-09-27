@@ -15,99 +15,115 @@ export default function Applications() {
   const [missions, setMissions] = useState();
   const [applications, setApplications] = useState();
   const [stats, setStats] = useState();
+  const [statsAPI, setStatsAPI] = useState();
+  const [statsES, setStatsES] = useState();
   const history = useHistory();
   const structureId = user.structureId;
+  const [ESToggle, setESToggle] = useState(false);
 
-  // async function appendMissions(structure) {
-  //   const missionsResponse = await api.get(`/structure/${structure}/mission`);
-  //   if (!missionsResponse.ok) {
-  //     toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
-  //     return history.push("/");
-  //   }
-  //   return missionsResponse.data;
-  // }
+  const handleChange = () => {
+    setESToggle(!ESToggle);
+  };
 
-  // async function initMissions(structure) {
-  //   const m = await appendMissions(structure);
-  //   if (user.role === ROLES.SUPERVISOR) {
-  //     const subStructures = await api.get(`/structure/${structure}/children`);
-  //     if (!subStructures.ok) {
-  //       toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
-  //       return history.push("/");
-  //     }
-  //     for (let i = 0; i < subStructures.data.length; i++) {
-  //       const subStructure = subStructures.data[i];
-  //       const tempMissions = await appendMissions(subStructure._id);
-  //       m.push(...tempMissions);
-  //     }
-  //   }
-  //   setMissions(m);
-  // }
+  async function appendMissions(structure) {
+    const missionsResponse = await api.get(`/structure/${structure}/mission`);
+    if (!missionsResponse.ok) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
+      return history.push("/");
+    }
+    return missionsResponse.data;
+  }
 
-  // // Get all missions from structure then get all applications int order to display the volontaires' list.
-  // useEffect(() => {
-  //   if (!structureId) return setMissions([]);
-  //   initMissions(structureId);
-  // }, [structureId, user]);
+  async function initMissions(structure) {
+    const m = await appendMissions(structure);
+    if (user.role === ROLES.SUPERVISOR) {
+      const subStructures = await api.get(`/structure/${structure}/children`);
+      if (!subStructures.ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
+        return history.push("/");
+      }
+      for (let i = 0; i < subStructures.data.length; i++) {
+        const subStructure = subStructures.data[i];
+        const tempMissions = await appendMissions(subStructure._id);
+        m.push(...tempMissions);
+      }
+    }
+    setMissions(m);
+  }
 
-  // useEffect(() => {
-  //   if (!missions) return;
-  //   async function initApplications() {
-  //     const applicationsPromises = missions.map((mission) => api.get(`/mission/${mission._id}/application`));
-  //     const applications = await Promise.all(applicationsPromises);
-  //     setApplications(
-  //       applications
-  //         .filter((a) => a.ok)
-  //         .map((a) => a.data)
-  //         // Get all application from all missions as a flat array
-  //         .reduce((acc, current) => [...acc, ...current], []),
-  //     );
-  //   }
-  //   initApplications();
-  // }, [missions]);
+  // Get all missions from structure then get all applications int order to display the volontaires' list.
+  useEffect(() => {
+    if (!structureId) return setMissions([]);
+    initMissions(structureId);
+  }, [structureId, user]);
 
-  // useEffect(() => {
-  //   if (!applications) return;
-  //   setStats({
-  //     WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
-  //     WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
-  //     VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
-  //     REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
-  //     CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
-  //     IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
-  //     DONE: applications?.filter((e) => e.status === "DONE").length,
-  //     NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
-  //   });
-  // }, [applications]);
+  useEffect(() => {
+    if (!missions) return;
+    async function initApplications() {
+      const applicationsPromises = missions.map((mission) => api.get(`/mission/${mission._id}/application`));
+      const applications = await Promise.all(applicationsPromises);
+      setApplications(
+        applications
+          .filter((a) => a.ok)
+          .map((a) => a.data)
+          // Get all application from all missions as a flat array
+          .reduce((acc, current) => [...acc, ...current], []),
+      );
+    }
+    initApplications();
+  }, [missions]);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const body = {
-  //       query: { bool: { must: { match_all: {} }, filter: [] } },
-  //       aggs: {
-  //         status: { terms: { field: "status.keyword" } },
-  //       },
-  //       size: 0,
-  //     };
+  useEffect(() => {
+    if (!applications) return;
+    setStats({
+      WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
+      WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
+      VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
+      REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
+      CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
+      IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
+      DONE: applications?.filter((e) => e.status === "DONE").length,
+      NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
+    });
+    setStatsAPI({
+      WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
+      WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
+      VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
+      REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
+      CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
+      IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
+      DONE: applications?.filter((e) => e.status === "DONE").length,
+      NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
+    });
+  }, [applications]);
 
-  //     // if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "youngCohort.keyword": filter.cohort } });
-  //     // if (filter.region?.length) {
-  //     //   const departmentQuery = filter.region?.reduce((previous, current) => previous?.concat(region2department[current]), []);
-  //     //   body.query.bool.filter.push({ terms: { "youngDepartment.keyword": departmentQuery } });
-  //     // }
-  //     // if (filter.department?.length) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": filter.department } });
+  useEffect(() => {
+    if (ESToggle) setStats(statsES);
+    else setStats(statsAPI);
+  }, [ESToggle]);
 
-  //     const { responses } = await api.esQuery("application", body);
-  //     console.log("🚀 ~ file: applications.js ~ line 107 ~ responses", responses);
-  //     if (responses.length) {
-  //       setStats(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-  //     }
-  //   })();
-  // }, []);
+  useEffect(() => {
+    (async () => {
+      const body = {
+        query: { bool: { must: { match_all: {} }, filter: [] } },
+        aggs: {
+          status: { terms: { field: "status.keyword" } },
+        },
+        size: 0,
+      };
+
+      const { responses } = await api.esQuery("application", body);
+      console.log("🚀 ~ file: applications.js ~ line 107 ~ responses", responses);
+      if (responses.length) {
+        setStatsES(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      }
+    })();
+  }, []);
 
   const renderStat = (e) => {
+    if (e === 0) return "-";
     if (e > 0) return e;
-    return "-";
+    return <Loader />;
   };
 
   return (
@@ -117,6 +133,12 @@ export default function Applications() {
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
             Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
+          <div>
+            <label>
+              <input type="checkbox" checked={ESToggle} onChange={handleChange} />
+              ES Search
+            </label>
+          </div>
         </Col>
         {ENABLE_PM && stats?.WAITING_VERIFICATION ? (
           <Col md={6} xl={3}>
@@ -140,7 +162,7 @@ export default function Applications() {
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} style={{ marginBottom: 10 }}>
-                <CardTitle>En attente de validation wesh</CardTitle>
+                <CardTitle>En attente de validation</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{renderStat(stats?.WAITING_VALIDATION)}</CardValue>
                   <CardArrow />
