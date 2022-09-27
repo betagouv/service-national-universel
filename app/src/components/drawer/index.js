@@ -108,17 +108,21 @@ export default function Drawer(props) {
         className={`bg-[#212B44] flex flex-col w-1/6 min-w-[250px] h-screen sticky top-0 bottom-0 left-0 z-[1] overflow-y-auto duration-200 m:opacity-[1] m:visible m:h-screen m:w-screen m:z-[11] m:fixed ${
           open ? "m:translate-x-0" : "m:translate-x-[-105%]"
         }`}>
-        <Header>
-          <Logos>
-            <a href="https://www.snu.gouv.fr/">
-              <img src={require("../../assets/fr.png")} />
+        <div className="p-4 mb-8 l:p-2 bg-[#212B44] border-b border-b-[#2A3655]">
+          <div className=" flex cursor-pointer items-center justify-between">
+            <a href="https://www.snu.gouv.fr/" className="flex items-center">
+              <img src={require("../../assets/logo-snu.png")} className="h-14 mr-4 l:h-10" />
+              <div className=" text-[#D2DAEF] font-medium text-[11px] uppercase">
+                <div>Service</div>
+                <div>National </div>
+                <div>Universel</div>
+              </div>
             </a>
-            <a href="https://www.snu.gouv.fr/">
-              <img src={require("../../assets/logo-snu.png")} />
-            </a>
-            <Close onClick={() => props.onOpen(false)}>&times;</Close>
-          </Logos>
-        </Header>
+            <div className={`hidden text-[32px] text-[#666] px-4 m:block`} onClick={() => props.onOpen(false)}>
+              &times;
+            </div>
+          </div>
+        </div>
         <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
           <div className="icon">
             <svg fill="none" viewBox="0 0 24 24">
