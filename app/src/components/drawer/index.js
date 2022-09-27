@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, Link } from "react-router-dom";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import {
@@ -14,7 +13,6 @@ import {
   permissionPhase3,
   urlWithScheme,
   translate,
-  PHASE_STATUS_COLOR,
   translatePhase1,
   translatePhase2,
 } from "../../utils";
@@ -22,8 +20,8 @@ import { DRAWER_TABS } from "../utils";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
 import plausibleEvent from "../../services/plausible";
-import Home from "../../assets/home.svg";
 import Help from "../../assets/help.svg";
+import SNU from "../../assets/logo-snu.png";
 
 export default function Drawer(props) {
   const [open, setOpen] = useState();
@@ -115,7 +113,7 @@ export default function Drawer(props) {
         <div className="p-4 mb-8 l:p-2 bg-[#212B44] border-b border-b-[#2A3655]">
           <div className=" flex cursor-pointer items-center justify-between">
             <a href="https://www.snu.gouv.fr/" className="flex items-center">
-              <img src={require("../../assets/logo-snu.png")} className="h-14 mr-4 l:h-10" />
+              <img src={SNU} className="h-14 mr-4 l:h-10" />
               <div className=" text-[#D2DAEF] font-medium text-[11px] uppercase">
                 <div>Service</div>
                 <div>National </div>
@@ -130,10 +128,17 @@ export default function Drawer(props) {
         {/* Menu--- */}
         <div className="flex flex-col justify-between h-full">
           <div className="flex flex-col text-[#BCC6DF] text-sm p-2 basis-[50%]">
-            <div exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)} className="flex space-x-4 items-center rounded-md p-2">
-              <img src={Home} className="w-5" />
+            <NavLink
+              exact
+              to="/"
+              onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}
+              className="flex space-x-4 items-center rounded-md p-2 hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] ">
+              {/* <img src={Home} className="w-5" fill="#7A90C3" /> */}
+              <svg className="w-5" viewBox="0 0 24 24" fill="none">
+                <path stroke="#7A90C3" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"></path>
+              </svg>
               <div>Accueil</div>
-            </div>
+            </NavLink>
             {/* A finir / retravailler => Phases 1/2/3 */}
             <div className="list-none">
               <Item
@@ -192,7 +197,7 @@ export default function Drawer(props) {
           <div className="list-none flex flex-col justify-between text-[#BCC6DF] p-4 basis-[50%]">
             <div className="flex flex-col items-center">
               {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
-                <div className="text-sm cursor-pointer hover:text-[#67A4FF] mb-4">
+                <div className="text-sm cursor-pointer hover:text-[#67A4FF] hover:bg-[#344264] w-full p-2 mb-4 rounded-lg flex justify-center">
                   <DeleteAccountButton young={young} />
                 </div>
               ) : null}
@@ -218,7 +223,7 @@ export default function Drawer(props) {
 
               {isDiagorienteReady() && (
                 <NavLink
-                  className="cursor-pointer text-sm  py-3 px-[15px] flex items-center flex-col justify-center text-center text-[#4E6295] hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] border border-[#4E6295] rounded-lg"
+                  className="cursor-pointer text-sm py-2 px-[15px] flex items-center flex-col justify-center text-center text-[#4E6295] hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] border border-[#4E6295] rounded-lg"
                   to="/diagoriente"
                   onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
                   <img src={require("../../assets/logo-diagoriente-white.png")} />
@@ -241,7 +246,11 @@ const DeleteAccountButton = ({ young }) => {
   const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
   const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : inscriptionStatus ? "Abandonner mon inscription" : "Se désister du SNU");
 
-  return <Link to="/desistement">{getLabel()}</Link>;
+  return (
+    <Link className="hover:text-[#67A4FF]" to="/desistement">
+      {getLabel()}
+    </Link>
+  );
 };
 
 const SocialMedia = () => {
@@ -263,7 +272,7 @@ const SocialMedia = () => {
     <div className="flex items-center justify-center space-x-2">
       {medias.map((el, index) => (
         <a key={index} href={urlWithScheme(el.link)} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }} rel="noreferrer">
-          <div className="flex items-center justify-center p-2 rounded-full hover:bg-white">
+          <div className="flex items-center justify-center p-2 rounded-full hover:bg-[#344264]">
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path d={el.svg} fill="#7A90C3"></path>
             </svg>
@@ -308,7 +317,7 @@ const Item = ({ subtitle, to, status, handleClick, disabled, children, open, pha
         to={to}
         onClick={handleClick}
         className={`${
-          disabled ? " cursor-default text-[#526187]" : "hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF]"
+          disabled ? " cursor-default text-[#526187] hover:text-[#526187]" : "hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF]"
         } flex space-x-2 p-2 items-center rounded-md`}>
         <svg fill="none" viewBox="0 0 24 24" className="w-6">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.3" stroke={disabled ? "#526187" : "#7A90C3"} d={icon}></path>
