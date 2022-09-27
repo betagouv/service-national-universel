@@ -18,70 +18,96 @@ export default function Applications() {
   const history = useHistory();
   const structureId = user.structureId;
 
-  async function appendMissions(structure) {
-    const missionsResponse = await api.get(`/structure/${structure}/mission`);
-    if (!missionsResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
-      return history.push("/");
-    }
-    return missionsResponse.data;
-  }
+  // async function appendMissions(structure) {
+  //   const missionsResponse = await api.get(`/structure/${structure}/mission`);
+  //   if (!missionsResponse.ok) {
+  //     toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
+  //     return history.push("/");
+  //   }
+  //   return missionsResponse.data;
+  // }
 
-  async function initMissions(structure) {
-    const m = await appendMissions(structure);
-    if (user.role === ROLES.SUPERVISOR) {
-      const subStructures = await api.get(`/structure/${structure}/children`);
-      if (!subStructures.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
-        return history.push("/");
-      }
-      for (let i = 0; i < subStructures.data.length; i++) {
-        const subStructure = subStructures.data[i];
-        const tempMissions = await appendMissions(subStructure._id);
-        m.push(...tempMissions);
-      }
-    }
-    setMissions(m);
-  }
+  // async function initMissions(structure) {
+  //   const m = await appendMissions(structure);
+  //   if (user.role === ROLES.SUPERVISOR) {
+  //     const subStructures = await api.get(`/structure/${structure}/children`);
+  //     if (!subStructures.ok) {
+  //       toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
+  //       return history.push("/");
+  //     }
+  //     for (let i = 0; i < subStructures.data.length; i++) {
+  //       const subStructure = subStructures.data[i];
+  //       const tempMissions = await appendMissions(subStructure._id);
+  //       m.push(...tempMissions);
+  //     }
+  //   }
+  //   setMissions(m);
+  // }
 
-  // Get all missions from structure then get all applications int order to display the volontaires' list.
-  useEffect(() => {
-    if (!structureId) return setMissions([]);
-    initMissions(structureId);
-  }, [structureId, user]);
-  useEffect(() => {
-    if (!missions) return;
-    async function initApplications() {
-      const applicationsPromises = missions.map((mission) => api.get(`/mission/${mission._id}/application`));
-      const applications = await Promise.all(applicationsPromises);
-      setApplications(
-        applications
-          .filter((a) => a.ok)
-          .map((a) => a.data)
-          // Get all application from all missions as a flat array
-          .reduce((acc, current) => [...acc, ...current], []),
-      );
-    }
-    initApplications();
-  }, [missions]);
-  useEffect(() => {
-    if (!applications) return;
-    setStats({
-      WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
-      WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
-      VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
-      REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
-      CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
-      IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
-      DONE: applications?.filter((e) => e.status === "DONE").length,
-      NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
-    });
-  }, [applications]);
+  // // Get all missions from structure then get all applications int order to display the volontaires' list.
+  // useEffect(() => {
+  //   if (!structureId) return setMissions([]);
+  //   initMissions(structureId);
+  // }, [structureId, user]);
+
+  // useEffect(() => {
+  //   if (!missions) return;
+  //   async function initApplications() {
+  //     const applicationsPromises = missions.map((mission) => api.get(`/mission/${mission._id}/application`));
+  //     const applications = await Promise.all(applicationsPromises);
+  //     setApplications(
+  //       applications
+  //         .filter((a) => a.ok)
+  //         .map((a) => a.data)
+  //         // Get all application from all missions as a flat array
+  //         .reduce((acc, current) => [...acc, ...current], []),
+  //     );
+  //   }
+  //   initApplications();
+  // }, [missions]);
+
+  // useEffect(() => {
+  //   if (!applications) return;
+  //   setStats({
+  //     WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
+  //     WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
+  //     VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
+  //     REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
+  //     CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
+  //     IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
+  //     DONE: applications?.filter((e) => e.status === "DONE").length,
+  //     NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
+  //   });
+  // }, [applications]);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const body = {
+  //       query: { bool: { must: { match_all: {} }, filter: [] } },
+  //       aggs: {
+  //         status: { terms: { field: "status.keyword" } },
+  //       },
+  //       size: 0,
+  //     };
+
+  //     // if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "youngCohort.keyword": filter.cohort } });
+  //     // if (filter.region?.length) {
+  //     //   const departmentQuery = filter.region?.reduce((previous, current) => previous?.concat(region2department[current]), []);
+  //     //   body.query.bool.filter.push({ terms: { "youngDepartment.keyword": departmentQuery } });
+  //     // }
+  //     // if (filter.department?.length) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": filter.department } });
+
+  //     const { responses } = await api.esQuery("application", body);
+  //     console.log("🚀 ~ file: applications.js ~ line 107 ~ responses", responses);
+  //     if (responses.length) {
+  //       setStats(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+  //     }
+  //   })();
+  // }, []);
 
   const renderStat = (e) => {
-    if (e === 0) return "-";
     if (e > 0) return e;
-    return <Loader />;
+    return "-";
   };
 
   return (
@@ -114,7 +140,7 @@ export default function Applications() {
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} style={{ marginBottom: 10 }}>
-                <CardTitle>En attente de validation</CardTitle>
+                <CardTitle>En attente de validation wesh</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{renderStat(stats?.WAITING_VALIDATION)}</CardValue>
                   <CardArrow />
