@@ -197,6 +197,9 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const mission = await MissionObject.findById(value.missionId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const young = await YoungObject.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -225,6 +228,14 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
+    }
+
+    if (application.status !== "VALIDATED" && value.status == "VALIDATED") {
+      const placesTaken = await ApplicationObject.countDocuments({
+        missionId: value.missionId,
+        status: "VALIDATED",
+      });
+      if (placesTaken >= mission.placesTotal) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     application.set(value);

@@ -452,6 +452,8 @@ const translateFieldMission = (f) => {
       return "Nombre total de places ";
     case "placesLeft":
       return "Nombre de places disponibles";
+    case "pendingApplications":
+      return "Nombre de candidatures en attente de traitement";
     case "structureId":
       return "Id de la structure";
     case "structureName":
