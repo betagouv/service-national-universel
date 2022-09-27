@@ -72,9 +72,9 @@ export default function Phase2({ young, onChange }) {
   }, [young, editPreference]);
 
   const onSubmit = async () => {
-    let values = dataPreference;
-    // Object.keys(values).forEach((key) => (values[key] === "" || !values[key]?.length) && delete values[key]);
-    const { ok, data } = await api.put(`/young/${young._id.toString()}/phase2/preference`, values);
+    //loader a utiliser + error a throw
+    setSavePreference(false);
+    const { ok, data } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
     if (!ok) return toastr.error("Oups, une erreur est survenue", translate(data.code));
     toastr.success("Succès", "Vos préférences ont bien été enregistrées");
     await onChange();

@@ -10,7 +10,7 @@ import ModalPreference from "../../components/ModalPreference";
 import RankingPeriod from "../../components/rankingPeriod";
 import Pencil from "../../../../assets/icons/Pencil";
 
-export default function Preferences({ young, data, setData, editPreference, savePreference, setEditPreference, setSavePreference, onSubmit }) {
+export default function Preferences({ young, data, setData, editPreference, savePreference, onSubmit }) {
   const [openProject, setOpenProject] = React.useState(false);
   const [openProjectPrecision, setOpenProjectPrecision] = React.useState(false);
   const [openDesiredLocation, setOpenDesiredLocation] = React.useState(false);
