@@ -10,8 +10,9 @@ const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
 const { ERRORS, getCcOfYoung } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
+const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -236,6 +237,29 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
     await young.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorBody, value: checkedBody } = validatePhase2Preference(req.body);
+    if (errorId || errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungModel.findById(checkedId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    console.log("checkedBody", checkedBody);
+    young.set(checkedBody);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

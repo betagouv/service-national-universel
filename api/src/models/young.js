@@ -1300,7 +1300,7 @@ const Schema = new mongoose.Schema({
   },
   period: {
     type: String,
-    enum: ["DURING_HOLIDAYS", "DURING_SCHOOL"],
+    enum: ["WHENEVER", "DURING_HOLIDAYS", "DURING_SCHOOL"],
     documentation: {
       description: "Période privilégiée pour réaliser des missions",
     },
