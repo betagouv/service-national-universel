@@ -111,6 +111,7 @@ export default function Drawer(props) {
         className={`bg-[#212B44] flex flex-col w-1/6 min-w-[250px] h-screen sticky top-0 bottom-0 left-0 z-[1] overflow-y-auto duration-200 m:opacity-[1] m:visible m:h-screen m:w-screen m:z-[11] m:fixed ${
           open ? "m:translate-x-0" : "m:translate-x-[-105%]"
         }`}>
+        {/* Header--- */}
         <div className="p-4 mb-8 l:p-2 bg-[#212B44] border-b border-b-[#2A3655]">
           <div className=" flex cursor-pointer items-center justify-between">
             <a href="https://www.snu.gouv.fr/" className="flex items-center">
@@ -126,25 +127,25 @@ export default function Drawer(props) {
             </div>
           </div>
         </div>
-        {/* Menu */}
-        <div className="flex flex-col text-[#BCC6DF] text-sm p-2 ">
-          {/* Accueil */}
-          <div exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)} className="flex space-x-4 items-center rounded-md p-2">
-            <img src={Home} className="w-5" />
-            <div>Accueil</div>
-          </div>
-          {/* A finir / retravailler */}
-          <div className="list-none">
-            <Item
-              title="séjour de cohésion"
-              phase="1"
-              subtitle="Phase 1"
-              status={status1}
-              to="/phase1"
-              disabled={getDisabled(DRAWER_TABS.PHASE1)}
-              handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-              open={activeTab === DRAWER_TABS.PHASE1}>
-              {/* <ul className="subNav">
+        {/* Menu--- */}
+        <div className="flex flex-col justify-between h-full">
+          <div className="flex flex-col text-[#BCC6DF] text-sm p-2 basis-[50%]">
+            <div exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)} className="flex space-x-4 items-center rounded-md p-2">
+              <img src={Home} className="w-5" />
+              <div>Accueil</div>
+            </div>
+            {/* A finir / retravailler => Phases 1/2/3 */}
+            <div className="list-none">
+              <Item
+                title="séjour de cohésion"
+                phase="1"
+                subtitle="Phase 1"
+                status={status1}
+                to="/phase1"
+                disabled={getDisabled(DRAWER_TABS.PHASE1)}
+                handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
+                open={activeTab === DRAWER_TABS.PHASE1}>
+                {/* <ul className="subNav">
               {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
                   <DownloadAttestationButton class="subNav-item" young={young} uri="1">
@@ -153,45 +154,50 @@ export default function Drawer(props) {
                 </li>
               ) : null}
             </ul> */}
-            </Item>
-            <Item
-              title="mission d'intérêt général"
-              phase="2"
-              subtitle="Phase 2"
-              status={status2}
-              to="/phase2"
-              disabled={getDisabled(DRAWER_TABS.PHASE2)}
-              handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
-              open={activeTab === DRAWER_TABS.PHASE2}>
-              {/* <SubMenuPhase2 young={young} handleClick={handleClick} /> */}
-            </Item>
-            <Item
-              title="poursuivre mon snu"
-              phase="3"
-              subtitle="Phase 3"
-              status={status3}
-              to="/phase3"
-              disabled={getDisabled(DRAWER_TABS.PHASE3)}
-              handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
-              open={activeTab === DRAWER_TABS.PHASE3}>
-              <SubMenuPhase3 young={young} handleClick={handleClick} />
-            </Item>
+              </Item>
+              <Item
+                title="mission d'intérêt général"
+                phase="2"
+                subtitle="Phase 2"
+                status={status2}
+                to="/phase2"
+                disabled={getDisabled(DRAWER_TABS.PHASE2)}
+                handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
+                open={activeTab === DRAWER_TABS.PHASE2}>
+                {/* <SubMenuPhase2 young={young} handleClick={handleClick} /> */}
+              </Item>
+              <Item
+                title="poursuivre mon snu"
+                phase="3"
+                subtitle="Phase 3"
+                status={status3}
+                to="/phase3"
+                disabled={getDisabled(DRAWER_TABS.PHASE3)}
+                handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
+                open={activeTab === DRAWER_TABS.PHASE3}>
+                <SubMenuPhase3 young={young} handleClick={handleClick} />
+              </Item>
+            </div>
+            <NavLink
+              className="p-2 flex space-x-4 mt-6 cursor-pointer hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] rounded-md items-center"
+              to={`/besoin-d-aide?from=${window.location.pathname}`}
+              onClick={() => {
+                plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
+              }}>
+              <img src={Help} className="w-4" />
+              <div>Besoin d&apos;aide ?</div>
+            </NavLink>
           </div>
-          {/* besoin d'aide */}
-          <NavLink
-            className="p-2 flex space-x-4 mt-12 cursor-pointer hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] rounded-md items-center"
-            to={`/besoin-d-aide?from=${window.location.pathname}`}
-            onClick={() => {
-              plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
-            }}>
-            <img src={Help} className="w-4" />
-            <div>Besoin d&apos;aide ?</div>
-          </NavLink>
-        </div>
 
-        <div className="list-none">
-          <div>
-            {/* <li>
+          <div className="list-none flex flex-col justify-between text-[#BCC6DF] p-4 basis-[50%]">
+            <div className="flex flex-col items-center">
+              {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
+                <div className="text-sm cursor-pointer hover:text-[#67A4FF] mb-4">
+                  <DeleteAccountButton young={young} />
+                </div>
+              ) : null}
+
+              {/* <li>
               <NavLink to="/documents">
                 <div className="icon">
                   <svg fill="none" viewBox="0 0 24 24">
@@ -202,29 +208,27 @@ export default function Drawer(props) {
               </NavLink>
             </li> */}
 
-            {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+              {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
               <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
                 Télécharger mon attestation SNU
               </DownloadAttestationButton>
             </DrawerButton>
             ) : null} */}
-            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
-              <DrawerButton>
-                <DeleteAccountButton young={young} />
-              </DrawerButton>
-            ) : null}
-          </div>
-          <div>
-            {isDiagorienteReady() && (
-              <DiagorienteButton>
-                <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
+
+              {isDiagorienteReady() && (
+                <NavLink
+                  className="cursor-pointer text-sm  py-3 px-[15px] flex items-center flex-col justify-center text-center text-[#4E6295] hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] border border-[#4E6295] rounded-lg"
+                  to="/diagoriente"
+                  onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
                   <img src={require("../../assets/logo-diagoriente-white.png")} />
-                  Outil d&apos;aide à l&apos;orientation
+                  <div className="text-xs">Outil d&apos;aide à l&apos;orientation</div>
                 </NavLink>
-              </DiagorienteButton>
-            )}
-            <SocialMedia />
+              )}
+            </div>
+            <div className="flex justify-end">
+              <SocialMedia />
+            </div>
           </div>
         </div>
       </div>
@@ -256,17 +260,17 @@ const SocialMedia = () => {
     },
   ];
   return (
-    <IconsBar>
+    <div className="flex items-center justify-center space-x-2">
       {medias.map((el, index) => (
         <a key={index} href={urlWithScheme(el.link)} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }} rel="noreferrer">
-          <IconContainer>
+          <div className="flex items-center justify-center p-2 rounded-full hover:bg-white">
             <svg width="24" height="24" viewBox="0 0 24 24">
-              <path d={el.svg}></path>
+              <path d={el.svg} fill="#7A90C3"></path>
             </svg>
-          </IconContainer>
+          </div>
         </a>
       ))}
-    </IconsBar>
+    </div>
   );
 };
 
@@ -325,115 +329,3 @@ const Item = ({ subtitle, to, status, handleClick, disabled, children, open, pha
     </div>
   );
 };
-
-const IconsBar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 1rem 0;
-`;
-
-const IconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: 99999px;
-  cursor: pointer;
-  > svg {
-    fill: white;
-  }
-  :hover {
-    background-color: white;
-    > svg {
-      fill: #362f78;
-    }
-  }
-`;
-
-const MyNav = styled.ul`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
-  margin-top: 25px;
-  padding-top: 1rem;
-  border-top: 1px solid #42389d;
-  li {
-    padding: 2px 20px;
-  }
-  a {
-    font-size: 0.75rem;
-    padding: 12px 15px;
-    border-radius: 6px;
-  }
-`;
-
-const DrawerButton = styled.li`
-  margin-bottom: 0.5rem;
-  padding: 2px 20px;
-  > * {
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: 12px 15px;
-    border-radius: 6px;
-    color: ${({ color }) => (color ? color : "#fff")};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    &.active,
-    :hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
-      border: ${({ color }) => (color ? "" : "none")};
-    }
-    &.disabled {
-      cursor: default;
-    }
-    &.disabled:hover {
-      background-color: transparent;
-      box-shadow: none;
-    }
-    .icon {
-      height: 24px;
-      width: 24px;
-      margin-right: 20px;
-      svg {
-        stroke: #8da2fb;
-      }
-    }
-  }
-`;
-
-const DiagorienteButton = styled.li`
-  margin-bottom: 0.5rem;
-  padding: 2px 20px;
-  > * {
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: 12px 15px;
-    border-radius: 6px;
-    border: solid;
-    border-width: thin;
-    flex-direction: column;
-    color: ${({ color }) => (color ? color : "#fff")};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    &.active,
-    :hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
-    }
-    &.disabled {
-      cursor: default;
-    }
-    &.disabled:hover {
-      background-color: transparent;
-      box-shadow: none;
-    }
-  }
-`;
