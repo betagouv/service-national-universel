@@ -66,6 +66,7 @@ const getReferentManagerPhase2 = async (department) => {
         department,
       }),
     );
+  }
 
   if (!toReferent) {
     toReferent = [];
