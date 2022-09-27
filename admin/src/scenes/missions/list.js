@@ -184,6 +184,7 @@ export default function List() {
               <ModalExport
                 isOpen={isExportOpen}
                 setIsOpen={setIsExportOpen}
+                name="mission"
                 index="mission"
                 transform={transform}
                 exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}

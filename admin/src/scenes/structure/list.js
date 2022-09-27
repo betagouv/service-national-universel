@@ -160,6 +160,7 @@ export default function List() {
                 <ModalExport
                   isOpen={isExportOpen}
                   setIsOpen={setIsExportOpen}
+                  name="structure"
                   index="structure"
                   transform={transform}
                   exportFields={structureExportFields}

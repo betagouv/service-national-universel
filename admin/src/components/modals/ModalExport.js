@@ -6,9 +6,8 @@ import { SelectedFilters, StateProvider } from "@appbaseio/reactivesearch";
 import plausibleEvent from "../../services/pausible";
 import { ModalContainer } from "../../components/modals/Modal";
 import ExportFieldCard from "../ExportFieldCard";
-import { translateIndexes } from "snu-lib";
 
-export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery }) {
+export default function ModalExport({ isOpen, setIsOpen, name, index, transform, exportFields, filters, getExportQuery }) {
   const [selectedFields, setSelectedFields] = useState(exportFields.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
@@ -75,10 +74,10 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
           </button>
           <div className="flex w-full">
             <ExportComponent
-              handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
-              title={`Exporter les ${translateIndexes(index)}`}
+              handleClick={() => plausibleEvent(`${capitalizeFirstLetter(name)}/CTA - Exporter ${name}`)}
+              title={`Exporter les ${name}`}
               defaultQuery={getExportQuery}
-              exportTitle={capitalizeFirstLetter(translateIndexes(index))}
+              exportTitle={capitalizeFirstLetter(name)}
               index={index}
               react={{ and: filters }}
               transform={(data) => transform(data, selectedFields)}

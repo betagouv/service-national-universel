@@ -335,6 +335,14 @@ export default function VolontaireList() {
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
+  function getIndex() {
+    return user.role === ROLES.REFERENT_DEPARTMENT
+      ? "young-having-school-in-department/volontaires"
+      : user.role === ROLES.REFERENT_REGION
+      ? "young-having-school-in-region/volontaires"
+      : "young";
+  }
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Volontaires" }]} />
@@ -354,98 +362,13 @@ export default function VolontaireList() {
                 <ModalExport
                   isOpen={isExportOpen}
                   setIsOpen={setIsExportOpen}
-                  index="young"
+                  name="volontaires"
+                  index={getIndex()}
                   transform={transform}
                   exportFields={youngExportFields}
                   filters={FILTERS}
                   getExportQuery={getExportQuery}
                 />
-
-                {user.role === ROLES.REFERENT_DEPARTMENT && (
-                  <ExportComponent
-                    title="Exporter les volontaires scolarisés dans le département"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Volontaires"
-                    index="young-having-school-in-department/volontaires"
-                    react={{ and: FILTERS }}
-                    transform={async (data) => {
-                      let all = data;
-                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                      if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
-                          query: { bool: { must: { ids: { values: schoolsId } } } },
-                          size: ES_NO_LIMIT,
-                        });
-                        if (responses.length) {
-                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                        }
-                      }
-                      return all.map((data) => {
-                        return {
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Département: data.department,
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                          "Statut général": translate(data.status),
-                          "Statut Phase 1": translate(data.statusPhase1),
-                        };
-                      });
-                    }}
-                  />
-                )}
-                {user.role === ROLES.REFERENT_REGION && (
-                  <ExportComponent
-                    title="Exporter les volontaires scolarisés dans la région"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Volontaires"
-                    index="young-having-school-in-region/volontaires"
-                    react={{ and: FILTERS }}
-                    transform={async (data) => {
-                      let all = data;
-                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                      if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
-                          query: { bool: { must: { ids: { values: schoolsId } } } },
-                          size: ES_NO_LIMIT,
-                        });
-                        if (responses.length) {
-                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                        }
-                      }
-                      return all.map((data) => {
-                        return {
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Département: data.department,
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                          "Statut général": translate(data.status),
-                          "Statut Phase 1": translate(data.statusPhase1),
-                        };
-                      });
-                    }}
-                  />
-                )}
               </div>
             </Header>
             <Filter>
