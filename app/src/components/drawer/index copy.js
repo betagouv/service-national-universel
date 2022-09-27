@@ -103,11 +103,7 @@ export default function Drawer(props) {
 
   return (
     <>
-      <div
-        open={open}
-        className={`bg-[#212B44] flex flex-col w-1/6 min-w-[250px] h-screen sticky top-0 bottom-0 left-0 z-[1] overflow-y-auto duration-200 m:opacity-[1] m:visible m:h-screen m:w-screen m:z-[11] m:fixed ${
-          open ? "m:translate-x-0" : "m:translate-x-[-105%]"
-        }`}>
+      <Sidebar open={open}>
         <Header>
           <Logos>
             <a href="https://www.snu.gouv.fr/">
@@ -217,7 +213,7 @@ export default function Drawer(props) {
             <SocialMedia />
           </div>
         </MyNav>
-      </div>
+      </Sidebar>
     </>
   );
 }
