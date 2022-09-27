@@ -3,7 +3,8 @@ import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactive
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import ExportComponent from "../../components/ExportXlsx";
+import ModalExport from "../../components/modals/ModalExport";
+import { structureExportFields } from "snu-lib/excelExports";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -36,6 +37,7 @@ export default function List() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [infosHover, setInfosHover] = useState(false);
   const [infosClick, setInfosClick] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const toggleInfos = () => {
     setInfosClick(!infosClick);
@@ -62,6 +64,77 @@ export default function List() {
       ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } }, track_total_hits: true }
       : { query: { match_all: {} }, track_total_hits: true };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
+  async function transform(data, values) {
+    let all = data;
+    if (values.includes("team")) {
+      const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];
+      if (structureIds?.length) {
+        const { responses } = await api.esQuery("referent", {
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
+          size: ES_NO_LIMIT,
+        });
+        if (responses.length) {
+          const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
+        }
+      }
+    }
+    return all.map((data) => {
+      if (!data.team) data.team = [];
+      const allFields = {
+        structureInfo: {
+          "Nom de la structure": data.name,
+          "Statut juridique": translate(data.legalStatus),
+          "Type(s) de structure": data.types.toString(),
+          "Sous-type de structure": data.sousTypes,
+          "Présentation de la structure": data.description,
+        },
+        location: {
+          "Adresse de la structure": data.address,
+          "Code postal de la structure": data.zip,
+          "Ville de la structure": data.city,
+          "Département de la structure": data.department,
+          "Région de la structure": data.region,
+        },
+        details: {
+          "Site internet": data.website,
+          Facebook: data.facebook,
+          Twitter: data.twitter,
+          Instagram: data.instagram,
+          "Numéro de SIRET": data.siret,
+        },
+        network: {
+          "Est une tête de réseau": translate(data.isNetwork),
+          "Nom de la tête de réseau": data.networkName,
+        },
+        team: {
+          "Taille d'équipe": data.team?.length,
+          "Membre 1 - Nom": data.team[0]?.lastName,
+          "Membre 1 - Prénom": data.team[0]?.firstName,
+          "Membre 1 - Email": data.team[0]?.email,
+          "Membre 2 - Nom": data.team[1]?.lastName,
+          "Membre 2 - Prénom": data.team[1]?.firstName,
+          "Membre 2 - Email": data.team[1]?.email,
+          "Membre 3 - Nom": data.team[2]?.lastName,
+          "Membre 3 - Prénom": data.team[2]?.firstName,
+          "Membre 3 - Email": data.team[2]?.email,
+        },
+        status: {
+          "Créé lé": formatLongDateFR(data.createdAt),
+          "Mis à jour le": formatLongDateFR(data.updatedAt),
+          "Statut général": translate(data.status),
+        },
+      };
+      let fields = { ID: data._id };
+      for (const element of values) {
+        let key;
+        for (key in allFields[element]) fields[key] = allFields[element][key];
+      }
+      return fields;
+    });
+  }
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Structures" }]} />
@@ -78,65 +151,20 @@ export default function List() {
                     <p>Inviter une nouvelle structure</p>
                   </VioletButton>
                 </Link>
-                <ExportComponent
-                  handleClick={() => plausibleEvent("Structure/CTA - Exporter structure")}
-                  title="Exporter les structures"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Structures"
+
+                <button
+                  className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                  onClick={() => setIsExportOpen(true)}>
+                  Exporter les structures
+                </button>
+                <ModalExport
+                  isOpen={isExportOpen}
+                  setIsOpen={setIsExportOpen}
                   index="structure"
-                  react={{ and: FILTERS }}
-                  transform={async (data) => {
-                    let all = data;
-                    const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];
-                    if (structureIds?.length) {
-                      const { responses } = await api.esQuery("referent", {
-                        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
-                        size: ES_NO_LIMIT,
-                      });
-                      if (responses.length) {
-                        const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                        all = data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
-                      }
-                    }
-                    return all.map((data) => {
-                      return {
-                        _id: data._id,
-                        "Nom de la structure": data.name,
-                        "Numéro de SIRET": data.siret,
-                        Description: data.description,
-                        "Site internet": data.website,
-                        Facebook: data.facebook,
-                        Twitter: data.twitter,
-                        Instagram: data.instagram,
-                        "Statut général": translate(data.status),
-                        "Taille d'équipe": data.team?.length,
-                        "Membre 1 - Prénom": data.team[0]?.firstName,
-                        "Membre 1 - Nom": data.team[0]?.lastName,
-                        "Membre 1 - Email": data.team[0]?.email,
-                        "Membre 2 - Prénom": data.team[1]?.firstName,
-                        "Membre 2 - Nom": data.team[1]?.lastName,
-                        "Membre 2 - Email": data.team[1]?.email,
-                        "Membre 3 - Prénom": data.team[2]?.firstName,
-                        "Membre 3 - Nom": data.team[2]?.lastName,
-                        "Membre 3 - Email": data.team[2]?.email,
-                        "Est une tête de réseau": translate(data.isNetwork),
-                        "Nom de la tête de réseau": data.networkName,
-                        "Statut juridique": translate(data.legalStatus),
-                        "Type d'association": data.associationTypes,
-                        "Type de structure publique": data.structurePubliqueType,
-                        "Type de service de l'état": data.structurePubliqueEtatType,
-                        "Type de structure privée": data.structurePriveeType,
-                        "Adresse de la structure": data.address,
-                        "Code postal de la structure": data.zip,
-                        "Ville de la structure": data.city,
-                        "Département de la structure": data.department,
-                        "Région de la structure": data.region,
-                        "Pays de la structure": data.country,
-                        "Créé lé": formatLongDateFR(data.createdAt),
-                        "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      };
-                    });
-                  }}
+                  transform={transform}
+                  exportFields={structureExportFields}
+                  filters={FILTERS}
+                  getExportQuery={getExportQuery}
                 />
               </div>
             </Header>
