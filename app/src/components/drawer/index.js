@@ -13,14 +13,17 @@ import {
   permissionPhase2,
   permissionPhase3,
   urlWithScheme,
+  translate,
+  PHASE_STATUS_COLOR,
+  translatePhase1,
+  translatePhase2,
 } from "../../utils";
-import Item from "./item";
 import { DRAWER_TABS } from "../utils";
-import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
-import HelpButton from "../buttons/HelpButton";
 import plausibleEvent from "../../services/plausible";
+import Home from "../../assets/home.svg";
+import Help from "../../assets/help.svg";
 
 export default function Drawer(props) {
   const [open, setOpen] = useState();
@@ -123,29 +126,25 @@ export default function Drawer(props) {
             </div>
           </div>
         </div>
-        <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
-          <div className="icon">
-            <svg fill="none" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"></path>
-            </svg>
+        {/* Menu */}
+        <div className="flex flex-col text-[#BCC6DF] text-sm p-2 ">
+          {/* Accueil */}
+          <div exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)} className="flex space-x-4 items-center rounded-md p-2">
+            <img src={Home} className="w-5" />
+            <div>Accueil</div>
           </div>
-          Accueil
-        </HomeLink>
-        <MainNav>
-          <Item
-            title="séjour de cohésion"
-            phase="1"
-            subtitle="Phase 1"
-            status={status1}
-            to="/phase1"
-            disabled={getDisabled(DRAWER_TABS.PHASE1)}
-            handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-            open={activeTab === DRAWER_TABS.PHASE1}>
-            {/* <ul className="subNav">
+          {/* A finir / retravailler */}
+          <div className="list-none">
+            <Item
+              title="séjour de cohésion"
+              phase="1"
+              subtitle="Phase 1"
+              status={status1}
+              to="/phase1"
+              disabled={getDisabled(DRAWER_TABS.PHASE1)}
+              handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
+              open={activeTab === DRAWER_TABS.PHASE1}>
+              {/* <ul className="subNav">
               {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
                   <DownloadAttestationButton class="subNav-item" young={young} uri="1">
@@ -154,55 +153,62 @@ export default function Drawer(props) {
                 </li>
               ) : null}
             </ul> */}
-          </Item>
-          <Item
-            title="mission d'intérêt général"
-            phase="2"
-            subtitle="Phase 2"
-            status={status2}
-            to="/phase2"
-            disabled={getDisabled(DRAWER_TABS.PHASE2)}
-            handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
-            open={activeTab === DRAWER_TABS.PHASE2}>
-            {/* <SubMenuPhase2 young={young} handleClick={handleClick} /> */}
-          </Item>
-          <Item
-            title="poursuivre mon snu"
-            phase="3"
-            subtitle="Phase 3"
-            status={status3}
-            to="/phase3"
-            disabled={getDisabled(DRAWER_TABS.PHASE3)}
-            handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
-            open={activeTab === DRAWER_TABS.PHASE3}>
-            <SubMenuPhase3 young={young} handleClick={handleClick} />
-          </Item>
-        </MainNav>
-        <MyNav>
+            </Item>
+            <Item
+              title="mission d'intérêt général"
+              phase="2"
+              subtitle="Phase 2"
+              status={status2}
+              to="/phase2"
+              disabled={getDisabled(DRAWER_TABS.PHASE2)}
+              handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
+              open={activeTab === DRAWER_TABS.PHASE2}>
+              {/* <SubMenuPhase2 young={young} handleClick={handleClick} /> */}
+            </Item>
+            <Item
+              title="poursuivre mon snu"
+              phase="3"
+              subtitle="Phase 3"
+              status={status3}
+              to="/phase3"
+              disabled={getDisabled(DRAWER_TABS.PHASE3)}
+              handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
+              open={activeTab === DRAWER_TABS.PHASE3}>
+              <SubMenuPhase3 young={young} handleClick={handleClick} />
+            </Item>
+          </div>
+          {/* besoin d'aide */}
+          <NavLink
+            className="p-2 flex space-x-4 mt-12 cursor-pointer hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] rounded-md items-center"
+            to={`/besoin-d-aide?from=${window.location.pathname}`}
+            onClick={() => {
+              plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
+            }}>
+            <img src={Help} className="w-4" />
+            <div>Besoin d&apos;aide ?</div>
+          </NavLink>
+        </div>
+
+        <div className="list-none">
           <div>
             {/* <li>
-          <NavLink to="/documents">
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-              </svg>
-            </div>
-            Mes documents
-          </NavLink>
-        </li> */}
-            <HelpButton
-              to={`/besoin-d-aide?from=${window.location.pathname}`}
-              onClick={() => {
-                plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
-              }}
-            />
+              <NavLink to="/documents">
+                <div className="icon">
+                  <svg fill="none" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                  </svg>
+                </div>
+                Mes documents
+              </NavLink>
+            </li> */}
+
             {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
-            <DrawerButton>
+              <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
                 Télécharger mon attestation SNU
               </DownloadAttestationButton>
             </DrawerButton>
-          ) : null} */}
+            ) : null} */}
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
               <DrawerButton>
                 <DeleteAccountButton young={young} />
@@ -220,7 +226,7 @@ export default function Drawer(props) {
             )}
             <SocialMedia />
           </div>
-        </MyNav>
+        </div>
       </div>
     </>
   );
@@ -264,6 +270,62 @@ const SocialMedia = () => {
   );
 };
 
+// A finir / retravailler
+const Item = ({ subtitle, to, status, handleClick, disabled, children, open, phase }) => {
+  const [icon, setIcon] = useState();
+  const translator = (el) => {
+    if (to === "/phase1") {
+      return translatePhase1(el);
+    } else if (to === "/phase2") {
+      return translatePhase2(el);
+    } else {
+      return translate(el);
+    }
+  };
+
+  useEffect(() => {
+    if (phase === "1")
+      setIcon(
+        "M8.167 3.902v11.131a1.467 1.467 0 0 1-2.848.494L3.53 10.402M14 9.833a2.5 2.5 0 0 0 0-5m-10.47 5.57A3.334 3.334 0 0 1 4.833 4H6.36C9.777 4 12.714 2.972 14 1.5v11.667c-1.286-1.472-4.223-2.5-7.64-2.5H4.833c-.462 0-.902-.095-1.303-.265Z",
+      );
+    if (phase === "2")
+      setIcon(
+        "M3.8335 8.58333V10.6667M3.8335 8.58333V3.58333C3.8335 2.89298 4.39314 2.33333 5.0835 2.33333C5.77385 2.33333 6.3335 2.89298 6.3335 3.58333M3.8335 8.58333C3.8335 7.89298 3.27385 7.33333 2.5835 7.33333C1.89314 7.33333 1.3335 7.89298 1.3335 8.58333V10.25C1.3335 13.7018 4.13172 16.5 7.5835 16.5C11.0353 16.5 13.8335 13.7018 13.8335 10.25V6.08333C13.8335 5.39298 13.2739 4.83333 12.5835 4.83333C11.8931 4.83333 11.3335 5.39298 11.3335 6.08333M6.3335 3.58333V8.16667M6.3335 3.58333V2.75C6.3335 2.05964 6.89314 1.5 7.5835 1.5C8.27385 1.5 8.8335 2.05964 8.8335 2.75V3.58333M8.8335 3.58333V8.16667M8.8335 3.58333C8.8335 2.89298 9.39314 2.33333 10.0835 2.33333C10.7739 2.33333 11.3335 2.89298 11.3335 3.58333V6.08333M11.3335 6.08333V8.16667",
+      );
+    if (phase === "3")
+      setIcon(
+        "M6.50018 9.00018L8.16685 10.6668L11.5002 7.33352M5.52913 2.91439C6.12708 2.86667 6.69473 2.63154 7.15128 2.24247C8.21669 1.33454 9.78368 1.33454 10.8491 2.24247C11.3056 2.63154 11.8733 2.86667 12.4712 2.91439C13.8666 3.02574 14.9746 4.13377 15.086 5.52913C15.1337 6.12708 15.3688 6.69473 15.7579 7.15128C16.6658 8.21669 16.6658 9.78368 15.7579 10.8491C15.3688 11.3056 15.1337 11.8733 15.086 12.4712C14.9746 13.8666 13.8666 14.9746 12.4712 15.086C11.8733 15.1337 11.3056 15.3688 10.8491 15.7579C9.78368 16.6658 8.21669 16.6658 7.15128 15.7579C6.69473 15.3688 6.12708 15.1337 5.52913 15.086C4.13377 14.9746 3.02574 13.8666 2.91439 12.4712C2.86667 11.8733 2.63154 11.3056 2.24247 10.8491C1.33454 9.78368 1.33454 8.21669 2.24247 7.15128C2.63154 6.69473 2.86667 6.12708 2.91439 5.52913C3.02574 4.13377 4.13377 3.02574 5.52913 2.91439Z",
+      );
+  }, [status]);
+
+  return (
+    <div>
+      <NavLink
+        to={to}
+        onClick={handleClick}
+        className={`${
+          disabled ? " cursor-default text-[#526187]" : "hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF]"
+        } flex space-x-2 p-2 items-center rounded-md`}>
+        <svg fill="none" viewBox="0 0 24 24" className="w-6">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.3" stroke={disabled ? "#526187" : "#7A90C3"} d={icon}></path>
+        </svg>
+        <div className="flex space-x-2 items-center">
+          <div>
+            {subtitle} - {subtitle === "Phase 1" ? <span>Séjour</span> : subtitle === "Phase 2" ? <span>MIG</span> : subtitle === "Phase 3" && <span>Engagement</span>}
+          </div>
+          <div
+            className={`${
+              translator(status) !== "Actif" && translator(status) !== "En attente d'affectation" && translator(status) !== "Affectée" && "hidden"
+            } bg-blue-600 rounded-full px-2 py-0.5`}>
+            En cours
+          </div>
+        </div>
+      </NavLink>
+      {open ? children : null}
+    </div>
+  );
+};
+
 const IconsBar = styled.div`
   display: flex;
   align-items: center;
@@ -290,137 +352,6 @@ const IconContainer = styled.div`
   }
 `;
 
-const Sidebar = styled.div`
-  display: flex;
-  flex-direction: column;
-  ::-webkit-scrollbar {
-    display: none;
-  }
-  @media (max-width: 767px) {
-    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
-    opacity: 1;
-    visibility: visible;
-    height: 100vh;
-    width: 100vw;
-    z-index: 11;
-    position: fixed;
-  }
-  background-color: #362f78;
-  width: 15%;
-  position: sticky;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  height: 100vh;
-  min-width: 250px;
-  overflow-y: auto;
-  transition: 0.2s;
-  a {
-    font-size: 13px;
-    color: #f5f5f5;
-    display: flex;
-    align-items: center;
-    font-weight: 700;
-    &.active,
-    :hover {
-      color: #fff;
-      background-color: #5145cd;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    &.disabled {
-      cursor: default;
-    }
-    &.disabled:hover {
-      background-color: transparent;
-      box-shadow: none;
-    }
-    .icon {
-      height: 24px;
-      width: 24px;
-      margin-right: 20px;
-      svg {
-        stroke: #8da2fb;
-      }
-    }
-  }
-`;
-
-const Logos = styled.div`
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  a:hover {
-    background-color: transparent;
-    box-shadow: none;
-  }
-  img {
-    margin: 0 1rem;
-    vertical-align: top;
-    height: 4rem;
-    @media (max-width: 1400px) {
-      height: 2.5rem;
-      .mobileHide {
-        height: 80px;
-      }
-    }
-  }
-`;
-
-const Header = styled.div`
-  padding: 1rem;
-  margin-bottom: 2rem;
-  background-color: #fff;
-  @media (max-width: 1400px) {
-    padding: 0.5rem;
-  }
-`;
-
-const HomeLink = styled(NavLink)`
-  padding-left: 40px;
-  height: 70px;
-`;
-
-const MainNav = styled.ul`
-  .subNav {
-    padding-left: 70px;
-    margin-top: 10px;
-    a,
-    .subNav-item {
-      cursor: pointer;
-      font-weight: 400;
-      padding: 5px 15px;
-      display: inline-block;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      font-size: 13px;
-      color: #fff;
-      align-items: center;
-      &.active,
-      :hover {
-        background-color: #5145cd;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      &.disabled {
-        cursor: default;
-      }
-      &.disabled:hover {
-        background-color: transparent;
-        box-shadow: none;
-      }
-      .icon {
-        height: 24px;
-        width: 24px;
-        margin-right: 20px;
-        svg {
-          stroke: #8da2fb;
-        }
-      }
-    }
-  }
-`;
-
 const MyNav = styled.ul`
   display: flex;
   flex-direction: column;
@@ -436,18 +367,6 @@ const MyNav = styled.ul`
     font-size: 0.75rem;
     padding: 12px 15px;
     border-radius: 6px;
-  }
-`;
-
-const Close = styled.div`
-  font-size: 32px;
-  color: #666;
-  padding: 0 15px 20px;
-  display: none;
-  width: 45px;
-  padding: 0 15px;
-  @media (max-width: 767px) {
-    display: block;
   }
 `;
 
