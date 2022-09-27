@@ -51,29 +51,48 @@ async function updateMission(app, fromUser) {
 }
 
 const getReferentManagerPhase2 = async (department) => {
-  // get the referent_department manager_phase2
   let toReferent = await ReferentObject.find({
     subRole: SUB_ROLES.manager_phase2,
     role: ROLES.REFERENT_DEPARTMENT,
     department,
   });
-  // if not found, get the referent_region manager_phase2
+
   if (!toReferent) {
     toReferent = [];
     toReferent.push(
       await ReferentObject.findOne({
-        subRole: SUB_ROLES.manager_phase2,
-        role: ROLES.REFERENT_REGION,
-        region: department2region[department],
+        subRole: SUB_ROLES.secretariat,
+        role: ROLES.REFERENT_DEPARTMENT,
+        department,
       }),
     );
-  }
-  // if not found, get the manager_department
+
   if (!toReferent) {
     toReferent = [];
     toReferent.push(
       await ReferentObject.findOne({
         subRole: SUB_ROLES.manager_department,
+        role: ROLES.REFERENT_DEPARTMENT,
+        department,
+      }),
+    );
+  }
+
+  if (!toReferent) {
+    toReferent = [];
+    toReferent.push(
+      await ReferentObject.findOne({
+        subRole: SUB_ROLES.assistant_manager_department,
+        role: ROLES.REFERENT_DEPARTMENT,
+        department,
+      }),
+    );
+  }
+
+  if (!toReferent) {
+    toReferent = [];
+    toReferent.push(
+      await ReferentObject.findOne({
         role: ROLES.REFERENT_DEPARTMENT,
         department,
       }),
