@@ -132,8 +132,7 @@ export default function Drawer(props) {
               exact
               to="/"
               onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}
-              className="flex space-x-4 items-center rounded-md p-2 hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] ">
-              {/* <img src={Home} className="w-5" fill="#7A90C3" /> */}
+              className="flex space-x-3 items-center rounded-md p-2 hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] ">
               <svg className="w-5" viewBox="0 0 24 24" fill="none">
                 <path stroke="#7A90C3" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"></path>
               </svg>
