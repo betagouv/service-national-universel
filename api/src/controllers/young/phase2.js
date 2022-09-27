@@ -255,7 +255,6 @@ router.put("/preference", passport.authenticate("referent", { session: false, fa
     if (!canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    console.log("checkedBody", checkedBody);
     young.set(checkedBody);
     await young.save({ fromUser: req.user });
 
