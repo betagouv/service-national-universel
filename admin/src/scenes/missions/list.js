@@ -177,7 +177,7 @@ export default function List() {
                 </Link>
               ) : null}
               <button
-                className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                className="rounded-md py-2 px-4 ml-2 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
                 onClick={() => setIsExportOpen(true)}>
                 Exporter les missions
               </button>
@@ -186,8 +186,7 @@ export default function List() {
                 setIsOpen={setIsExportOpen}
                 index="mission"
                 transform={transform}
-                // exportFields={missionExportFields}
-                exportFields={missionExportFields}
+                exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}
                 filters={FILTERS}
                 getExportQuery={getExportQuery}
               />
