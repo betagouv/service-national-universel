@@ -96,7 +96,7 @@ export default function Applications() {
           <Col md={6} xl={3}>
             <CardContainer>
               <Card borderBottomColor="#888888" style={{ marginBottom: 10, backgroundColor: "#cccccc" }}>
-                <CardTitle>{translate("WAITING_VERIFICATION")}</CardTitle>
+                <CardTitle>En attente de vérification d&apos;éligibilité</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{renderStat(stats?.WAITING_VERIFICATION)}</CardValue>
                   <CardArrow />
@@ -132,7 +132,7 @@ export default function Applications() {
           <Link to={`/volontaire?STATUS=%5B"VALIDATED"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED} style={{ marginBottom: 10 }}>
-                <CardTitle>Validées</CardTitle>
+                <CardTitle>Approuvées</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{renderStat(stats?.VALIDATED)}</CardValue>
                   <CardArrow />
@@ -150,7 +150,7 @@ export default function Applications() {
           <Link to={`/volontaire?STATUS=%5B"REFUSED"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.REFUSED}>
-                <CardTitle>Refusées</CardTitle>
+                <CardTitle>Non retenues</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{renderStat(stats?.REFUSED)}</CardValue>
                   <CardArrow />
@@ -163,7 +163,7 @@ export default function Applications() {
           <Link to={`/volontaire?STATUS=%5B"CANCEL"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.CANCEL}>
-                <CardTitle>Annulés</CardTitle>
+                <CardTitle>Annulées</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{renderStat(stats?.CANCEL)}</CardValue>
                   <CardArrow />

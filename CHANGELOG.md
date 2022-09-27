@@ -1,3 +1,41 @@
+# [1.135.0](https://github.com/betagouv/service-national-universel/compare/v1.134.0...v1.135.0) (2022-09-26)
+
+
+### Bug Fixes
+
+* **api:** allow supervisors to create or edit missions ([#1822](https://github.com/betagouv/service-national-universel/issues/1822)) ([4b0135a](https://github.com/betagouv/service-national-universel/commit/4b0135a108028517f310e3856b26e674a801e834))
+
+
+### Features
+
+* **api, admin:** export modal for missions ([#1818](https://github.com/betagouv/service-national-universel/issues/1818)) ([477fed3](https://github.com/betagouv/service-national-universel/commit/477fed3702d20b37638f24b81277f74860beb6de))
+
+# [1.134.0](https://github.com/betagouv/service-national-universel/compare/v1.133.1...v1.134.0) (2022-09-23)
+
+
+### Bug Fixes
+
+* **admin:** front opti ([#1819](https://github.com/betagouv/service-national-universel/issues/1819)) ([a4cebba](https://github.com/betagouv/service-national-universel/commit/a4cebba24f18bfd911034906d98fa8f0967f636b))
+* **api:** Update profile referent ([0112380](https://github.com/betagouv/service-national-universel/commit/0112380981956174588e1227e63cdfd121a051a2))
+* **redirect:** Tentaive correction alerte sentry ([#1817](https://github.com/betagouv/service-national-universel/issues/1817)) ([1d4e3e8](https://github.com/betagouv/service-national-universel/commit/1d4e3e886d0e9acd9c7956ddac393e384db3bd11))
+
+
+### Features
+
+* **api/cron:** Add template SIB 199 ([#1820](https://github.com/betagouv/service-national-universel/issues/1820)) ([5cd0ade](https://github.com/betagouv/service-national-universel/commit/5cd0ade050d5ba4b3537197563556861fa58a536))
+
+## [1.133.1](https://github.com/betagouv/service-national-universel/compare/v1.133.0...v1.133.1) (2022-09-22)
+
+
+### Bug Fixes
+
+* **api:** cron syncro phase2ApplicationStatus ([#1812](https://github.com/betagouv/service-national-universel/issues/1812)) ([4f0022a](https://github.com/betagouv/service-national-universel/commit/4f0022a1168c45f5f06d4fe6dea3a0e32af88b75))
+* **api:** delete military files in phase2 ([f0d0b0a](https://github.com/betagouv/service-national-universel/commit/f0d0b0a291d20e74c409681b9b79e0f051ac6fd8))
+* **api:** Template 173 cta ([#1815](https://github.com/betagouv/service-national-universel/issues/1815)) ([c440e8a](https://github.com/betagouv/service-national-universel/commit/c440e8a351fb1f405198176792ff0b1ef6f47565))
+* **app:** Alignment ([d75cd6c](https://github.com/betagouv/service-national-universel/commit/d75cd6c5ee2a3b59e9dbf8611a24fe2a43c8efac))
+* **app:** Front corrections validated phase1 screen ([#1814](https://github.com/betagouv/service-national-universel/issues/1814)) ([f6a3955](https://github.com/betagouv/service-national-universel/commit/f6a3955258e39012690d15f4807b9ab8820999a2))
+* translate application status ([31c4fa7](https://github.com/betagouv/service-national-universel/commit/31c4fa7adc270d04a6fabef44b3c4a1a5e12eddc))
+
 # [1.133.0](https://github.com/betagouv/service-national-universel/compare/v1.132.0...v1.133.0) (2022-09-21)
 
 

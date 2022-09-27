@@ -95,6 +95,7 @@ export default function VolontaireList() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const [infosHover, setInfosHover] = useState(false);
   const [infosClick, setInfosClick] = useState(false);
@@ -345,7 +346,20 @@ export default function VolontaireList() {
                 <Title>Volontaires</Title>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
-                <ModalExport title="Exporter les volontaires" transform={transform} exportFields={youngExportFields} filters={FILTERS} getExportQuery={getExportQuery} />
+                <button
+                  className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                  onClick={() => setIsExportOpen(true)}>
+                  Exporter les volontaires
+                </button>
+                <ModalExport
+                  isOpen={isExportOpen}
+                  setIsOpen={setIsExportOpen}
+                  index="young"
+                  transform={transform}
+                  exportFields={youngExportFields}
+                  filters={FILTERS}
+                  getExportQuery={getExportQuery}
+                />
 
                 {user.role === ROLES.REFERENT_DEPARTMENT && (
                   <ExportComponent

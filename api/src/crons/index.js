@@ -7,6 +7,7 @@ const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
 const noticePushMission = require("./noticePushMission");
 //const missionEnd = require("./missionEnd");
+const contratRelance = require("./contratRelance");
 const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
 //const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
@@ -71,7 +72,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     apiEngagement.handler();
   });
 
-  // everyday at 0200
   cron.schedule(everyHours(6), () => {
     jeVeuxAiderDaily.handler();
   });
@@ -81,13 +81,15 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   autoAffectationCohesionCenter.handler();
   // });
 
-  // everyday at 02:00 UTC
+  cron.schedule("0 6 * * *", () => {
+    contratRelance.handler();
+  });
+
   cron.schedule("0 8 * * *", () => {
     missionOutdated.handler();
     missionOutdated.handlerNotice1Week();
   });
 
-  // everyday at 1:00 UTC
   cron.schedule("0 7 * * *", () => {
     applicationOutaded.handler();
     applicationOutaded.handlerNotice1Week();

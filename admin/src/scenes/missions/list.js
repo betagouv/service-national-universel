@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { ReactiveBase, MultiDropdownList, DataSearch, ReactiveComponent } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 
-import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL, supportURL } from "../../config";
 import Panel from "./panel";
@@ -14,7 +13,6 @@ import Loader from "../../components/Loader";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, Help, HelpText, LockIcon } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
 import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
@@ -22,6 +20,8 @@ import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE", "VISIBILITY"];
 import Breadcrumbs from "../../components/Breadcrumbs";
+import { missionExportFields } from "snu-lib";
+import ModalExport from "../../components/modals/ModalExport";
 
 export default function List() {
   const [mission, setMission] = useState(null);
@@ -34,6 +34,7 @@ export default function List() {
   const toggleInfos = () => {
     setInfosClick(!infosClick);
   };
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -62,6 +63,102 @@ export default function List() {
   }, []);
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
+  async function transform(data, selectedFields) {
+    let all = data;
+    if (selectedFields.includes("tutor")) {
+      const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
+      if (tutorIds?.length) {
+        const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
+        if (responses.length) {
+          const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+        }
+      }
+    }
+    if (selectedFields.includes("structureInfo", "structureLocation")) {
+      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
+      const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
+      if (responses?.length) {
+        const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        all = all.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
+      }
+    }
+    return all.map((data) => {
+      if (!data.domains) data.domains = [];
+      if (!data.structure) {
+        data.structure = [];
+        data.structure.types = [];
+      }
+      const allFields = {
+        missionInfo: {
+          "Titre de la mission": data.name,
+          "Date du début": formatDateFRTimezoneUTC(data.startAt),
+          "Date de fin": formatDateFRTimezoneUTC(data.endAt),
+          "Nombre de volontaires recherchés": data.placesTotal,
+          "Places restantes sur la mission": data.placesLeft,
+          "Visibilité de la mission": translateVisibilty(data.visibility),
+          "Source de la mission": data.isJvaMission === "true" ? "JVA" : "SNU",
+        },
+        status: {
+          "Statut de la mission": translate(data.status),
+          "Créée lé": formatLongDateFR(data.createdAt),
+          "Mise à jour le": formatLongDateFR(data.updatedAt),
+        },
+        missionType: {
+          "Domaine principal de la mission": translate(data.mainDomain) || "Non renseigné",
+          "Domaine(s) secondaire(s) de la mission": data.mainDomain ? data.domains.filter((d) => d !== data.mainDomain)?.map(translate) : data.domains?.map(translate),
+          Format: translate(data.format),
+          "Préparation militaire": translate(data.isMilitaryPreparation),
+        },
+        missionDetails: {
+          "Objectifs de la mission": data.description,
+          "Actions concrètes": data.actions,
+          Contraintes: data.contraintes,
+          Durée: data.duration,
+          "Fréquence estimée": data.frequence,
+          "Période de réalisation": data.period?.map(translate)?.join(", "),
+        },
+        tutor: {
+          "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",
+          "Nom du tuteur": data.tutor?.lastName,
+          "Prénom du tuteur": data.tutor?.firstName,
+          "Email du tuteur": data.tutor?.email,
+          "Portable du tuteur": data.tutor?.mobile,
+          "Téléphone du tuteur": data.tutor?.phone,
+        },
+        location: {
+          Adresse: data.address,
+          "Code postal": data.zip,
+          Ville: data.city,
+          Département: data.department,
+          Région: data.region,
+        },
+        structureInfo: {
+          "Id de la structure": data.structureId,
+          "Nom de la structure": data.structure.name,
+          "Statut juridique de la structure": data.structure.legalStatus,
+          "Type(s) de structure": data.structure.types.toString(),
+          "Sous-type de structure": data.structure.sousType,
+          "Présentation de la structure": data.structure.description,
+        },
+        structureLocation: {
+          "Adresse de la structure": data.structure.address,
+          "Code postal de la structure": data.structure.zip,
+          "Ville de la structure": data.structure.city,
+          "Département de la structure": data.structure.department,
+          "Région de la structure": data.structure.region,
+        },
+      };
+
+      let fields = { _id: data._id };
+      for (const element of selectedFields) {
+        let key;
+        for (key in allFields[element]) fields[key] = allFields[element][key];
+      }
+      return fields;
+    });
+  }
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Missions" }]} />
@@ -79,58 +176,19 @@ export default function List() {
                   </VioletButton>
                 </Link>
               ) : null}
-              <ExportComponent
-                handleClick={() => plausibleEvent("Mission/CTA - Exporter missions")}
-                title="Exporter les missions"
-                defaultQuery={getExportQuery}
-                exportTitle="Missions"
+              <button
+                className="rounded-md py-2 px-4 ml-2 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                onClick={() => setIsExportOpen(true)}>
+                Exporter les missions
+              </button>
+              <ModalExport
+                isOpen={isExportOpen}
+                setIsOpen={setIsExportOpen}
                 index="mission"
-                react={{ and: FILTERS }}
-                transform={async (data) => {
-                  let all = data;
-                  const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
-                  if (tutorIds?.length) {
-                    const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
-                    if (responses.length) {
-                      const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      all = data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
-                    }
-                  }
-                  return all.map((data) => {
-                    return {
-                      _id: data._id,
-                      "Titre de la mission": data.name,
-                      Description: data.description,
-                      "Id de la structure": data.structureId,
-                      "Nom de la structure": data.structureName,
-                      "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",
-                      "Nom du tuteur": data.tutor?.lastName,
-                      "Prénom du tuteur": data.tutor?.firstName,
-                      "Email du tuteur": data.tutor?.email,
-                      "Téléphone du tuteur": data.tutor?.mobile || data.tutor?.phone,
-                      "Domaine principal de la mission": translate(data.mainDomain) || "Non renseigné",
-                      "Domaine(s) secondaire(s) de la mission": data.mainDomain ? data.domains.filter((d) => d !== data.mainDomain)?.map(translate) : data.domains?.map(translate),
-                      "Date du début": formatDateFRTimezoneUTC(data.startAt),
-                      "Date de fin": formatDateFRTimezoneUTC(data.endAt),
-                      Format: translate(data.format),
-                      Fréquence: data.frequence,
-                      Période: data.period?.map(translate)?.join(", "),
-                      "Places total": data.placesTotal,
-                      "Places disponibles": data.placesLeft,
-                      "Actions concrètes confiées au(x) volontaire(s)": data.actions,
-                      "Contraintes spécifiques": data.contraintes,
-                      Adresse: data.address,
-                      "Code postal": data.zip,
-                      Ville: data.city,
-                      Département: data.department,
-                      Région: data.region,
-                      "Statut général": translate(data.status),
-                      Motif: data.statusComment,
-                      "Créé lé": formatLongDateFR(data.createdAt),
-                      "Mis à jour le": formatLongDateFR(data.updatedAt),
-                    };
-                  });
-                }}
+                transform={transform}
+                exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}
+                filters={FILTERS}
+                getExportQuery={getExportQuery}
               />
             </Header>
             <Filter>

@@ -63,6 +63,10 @@ export default function App() {
     async function fetchData() {
       try {
         const { ok, user, token } = await api.get("/young/signin_token");
+        if (!ok) {
+          dispatch(setYoung(null));
+          return setLoading(false);
+        }
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
