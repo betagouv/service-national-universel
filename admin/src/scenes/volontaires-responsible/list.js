@@ -17,7 +17,6 @@ import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
 import { translate, translateApplication, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import { ModalContainer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import { Formik, Field } from "formik";
@@ -78,8 +77,6 @@ export default function List() {
   };
 
   if (!missions) return <Loader />;
-  console.log(filterVisible);
-
   const COLUMNS = [
     {
       title: "Identité du volontaire",
@@ -138,8 +135,11 @@ export default function List() {
                 <Title>Volontaires</Title>
               </div>
               {/* Column selection modal */}
-
-              <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
+              <button
+                className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                onClick={() => setColumnModalOpen(true)}>
+                Exporter les volontaires
+              </button>
               <Modal toggle={() => setColumnModalOpen(false)} isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
                 <ModalContainer>
                   <Formik
