@@ -335,6 +335,7 @@ const Item = ({ subtitle, to, status, handleClick, disabled, children, open, pha
           <div>
             {subtitle} - {subtitle === "Phase 1" ? <span>Séjour</span> : subtitle === "Phase 2" ? <span>MIG</span> : subtitle === "Phase 3" && <span>Engagement</span>}
           </div>
+          {/* display status */}
           {translator(status) !== "Actif" && translator(status) !== "En attente d'affectation" && translator(status) !== "Affectée" ? (
             <div className="text-xs italic">{translator(status)}</div>
           ) : (
