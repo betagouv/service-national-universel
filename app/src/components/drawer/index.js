@@ -133,8 +133,13 @@ export default function Drawer(props) {
               to="/"
               onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}
               className="flex space-x-3 items-center rounded-md p-2 hover:text-[#67A4FF] hover:bg-[#344264] focus:bg-[#344264] focus:text-[#67A4FF] ">
-              <svg className="w-5" viewBox="0 0 24 24" fill="none">
-                <path stroke="#7A90C3" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"></path>
+              <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
+                <path
+                  stroke="#7A90C3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.3"
+                  d="M1.5 9l1.667-1.667m0 0L9 1.5l5.833 5.833m-11.666 0v8.334c0 .46.373.833.833.833h2.5m8.333-9.167L16.5 9m-1.667-1.667v8.334c0 .46-.373.833-.833.833h-2.5m-5 0c.46 0 .833-.373.833-.833v-3.334c0-.46.373-.833.834-.833h1.666c.46 0 .834.373.834.833v3.334c0 .46.373.833.833.833m-5 0h5"></path>
               </svg>
               <div>Accueil</div>
             </NavLink>
