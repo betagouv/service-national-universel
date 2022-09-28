@@ -1,3 +1,17 @@
+# [1.137.0](https://github.com/betagouv/service-national-universel/compare/v1.136.0...v1.137.0) (2022-09-28)
+
+
+### Bug Fixes
+
+* **api:** Military Notifications when dossier PM validated ([bb24805](https://github.com/betagouv/service-national-universel/commit/bb24805d76b5477e041d0273b9bb7dfedcaaec2e))
+* **api:** PM notif ([bbccfb1](https://github.com/betagouv/service-national-universel/commit/bbccfb18465fa644913646d0499e9acec1f2e4cd))
+
+
+### Features
+
+* **admin:** Fiche volontaire : phase 2 - MIG préférences de mission ([#1830](https://github.com/betagouv/service-national-universel/issues/1830)) ([b0e63fe](https://github.com/betagouv/service-national-universel/commit/b0e63fe3e48ba8b91148c827ebda10db1a6aa446))
+* **api:** Send email to ref phase 2 priority ([#1832](https://github.com/betagouv/service-national-universel/issues/1832)) ([3c613b6](https://github.com/betagouv/service-national-universel/commit/3c613b648fecc32733f1a78e9dcf756129d59513))
+
 # [1.136.0](https://github.com/betagouv/service-national-universel/compare/v1.135.0...v1.136.0) (2022-09-27)
 
 
