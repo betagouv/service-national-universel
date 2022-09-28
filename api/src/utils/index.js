@@ -326,6 +326,7 @@ async function updateYoungPhase2Hours(young, fromUser) {
   });
   await young.save({ fromUser });
 }
+
 // This function should always be called after updateYoungPhase2Hours.
 // This could be refactored in one function.
 const updateStatusPhase2 = async (young, fromUser) => {
@@ -340,11 +341,14 @@ const updateStatusPhase2 = async (young, fromUser) => {
       a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
   );
 
+  const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+
   young.set({ statusPhase2UpdatedAt: Date.now() });
 
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
     // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
     young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
+    await cancelPendingApplications(pendingApplication, fromUser);
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({
@@ -356,6 +360,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
       "files.militaryPreparationFilesCertificate": [],
       statusMilitaryPreparationFiles: undefined,
     });
+    await cancelPendingApplications(pendingApplication, fromUser);
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
@@ -369,7 +374,6 @@ const updateStatusPhase2 = async (young, fromUser) => {
     // We change young status to IN_PROGRESS if he has an 'active' application.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
   } else {
-    // We change young status to WAITING_LIST if he has no estimated hours of phase 2.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
   }
   await young.save({ fromUser });
@@ -407,6 +411,13 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
 
   await young.save({ fromUser });
 };
+
+async function cancelPendingApplications(pendingApplication, fromUser) {
+  for (const application of pendingApplication) {
+    application.set({ status: APPLICATION_STATUS.CANCEL });
+    await application.save({ fromUser });
+  }
+}
 
 function isYoung(user) {
   return user instanceof YoungModel;
