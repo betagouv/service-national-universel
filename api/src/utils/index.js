@@ -592,7 +592,7 @@ const getReferentManagerPhase2 = async (department) => {
     department,
   });
 
-  if (!toReferent) {
+  if (!toReferent.length) {
     toReferent = await ReferentModel.find({
       subRole: SUB_ROLES.secretariat,
       role: ROLES.REFERENT_DEPARTMENT,
@@ -600,7 +600,7 @@ const getReferentManagerPhase2 = async (department) => {
     });
   }
 
-  if (!toReferent) {
+  if (!toReferent.length) {
     toReferent = await ReferentModel.find({
       subRole: SUB_ROLES.manager_department,
       role: ROLES.REFERENT_DEPARTMENT,
@@ -608,7 +608,7 @@ const getReferentManagerPhase2 = async (department) => {
     });
   }
 
-  if (!toReferent) {
+  if (!toReferent.length) {
     toReferent = await ReferentModel.find({
       subRole: SUB_ROLES.assistant_manager_department,
       role: ROLES.REFERENT_DEPARTMENT,
@@ -616,7 +616,7 @@ const getReferentManagerPhase2 = async (department) => {
     });
   }
 
-  if (!toReferent) {
+  if (!toReferent.length) {
     toReferent = await ReferentModel.find({
       role: ROLES.REFERENT_DEPARTMENT,
       department,
