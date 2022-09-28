@@ -1,106 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { APPLICATION_STATUS_COLORS, ROLES, translate, ENABLE_PM } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer } from "../../../components/dashboard";
-import Loader from "../../../components/Loader";
 
 export default function Applications() {
   const user = useSelector((state) => state.Auth.user);
-  const [missions, setMissions] = useState();
-  const [applications, setApplications] = useState();
   const [stats, setStats] = useState();
-  const [statsAPI, setStatsAPI] = useState();
-  const [statsES, setStatsES] = useState();
-  const history = useHistory();
-  const structureId = user.structureId;
-  const [ESToggle, setESToggle] = useState(false);
-
-  const handleChange = () => {
-    setESToggle(!ESToggle);
-  };
-
-  async function appendMissions(structure) {
-    const missionsResponse = await api.get(`/structure/${structure}/mission`);
-    if (!missionsResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
-      return history.push("/");
-    }
-    return missionsResponse.data;
-  }
-
-  async function initMissions(structure) {
-    const m = await appendMissions(structure);
-    if (user.role === ROLES.SUPERVISOR) {
-      const subStructures = await api.get(`/structure/${structure}/children`);
-      if (!subStructures.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
-        return history.push("/");
-      }
-      for (let i = 0; i < subStructures.data.length; i++) {
-        const subStructure = subStructures.data[i];
-        const tempMissions = await appendMissions(subStructure._id);
-        m.push(...tempMissions);
-      }
-    }
-    setMissions(m);
-  }
-
-  // Get all missions from structure then get all applications int order to display the volontaires' list.
-  useEffect(() => {
-    if (!structureId) return setMissions([]);
-    initMissions(structureId);
-  }, [structureId, user]);
-
-  useEffect(() => {
-    if (!missions) return;
-    async function initApplications() {
-      const applicationsPromises = missions.map((mission) => api.get(`/mission/${mission._id}/application`));
-      const applications = await Promise.all(applicationsPromises);
-      setApplications(
-        applications
-          .filter((a) => a.ok)
-          .map((a) => a.data)
-          // Get all application from all missions as a flat array
-          .reduce((acc, current) => [...acc, ...current], []),
-      );
-    }
-    initApplications();
-  }, [missions]);
-
-  useEffect(() => {
-    if (!applications) return;
-    setStats({
-      WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
-      WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
-      VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
-      REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
-      CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
-      IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
-      DONE: applications?.filter((e) => e.status === "DONE").length,
-      NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
-    });
-    setStatsAPI({
-      WAITING_VALIDATION: applications?.filter((e) => e.status === "WAITING_VALIDATION").length,
-      WAITING_VERIFICATION: applications?.filter((e) => e.status === "WAITING_VERIFICATION").length,
-      VALIDATED: applications?.filter((e) => e.status === "VALIDATED").length,
-      REFUSED: applications?.filter((e) => e.status === "REFUSED").length,
-      CANCEL: applications?.filter((e) => e.status === "CANCEL").length,
-      IN_PROGRESS: applications?.filter((e) => e.status === "IN_PROGRESS").length,
-      DONE: applications?.filter((e) => e.status === "DONE").length,
-      NOT_COMPLETED: applications?.filter((e) => e.status === "NOT_COMPLETED").length,
-    });
-  }, [applications]);
-
-  useEffect(() => {
-    if (ESToggle) setStats(statsES);
-    else setStats(statsAPI);
-  }, [ESToggle]);
 
   useEffect(() => {
     (async () => {
@@ -111,19 +22,15 @@ export default function Applications() {
         },
         size: 0,
       };
-
       const { responses } = await api.esQuery("application", body);
-      console.log("🚀 ~ file: applications.js ~ line 107 ~ responses", responses);
-      if (responses.length) {
-        setStatsES(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      }
+      if (responses.length) setStats(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      else toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(responses.code));
     })();
   }, []);
 
   const renderStat = (e) => {
-    if (e === 0) return "-";
     if (e > 0) return e;
-    return <Loader />;
+    return "-";
   };
 
   return (
@@ -133,12 +40,6 @@ export default function Applications() {
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
             Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
-          <div>
-            <label>
-              <input type="checkbox" checked={ESToggle} onChange={handleChange} />
-              ES Search
-            </label>
-          </div>
         </Col>
         {ENABLE_PM && stats?.WAITING_VERIFICATION ? (
           <Col md={6} xl={3}>
