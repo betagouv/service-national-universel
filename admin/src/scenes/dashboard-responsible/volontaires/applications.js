@@ -24,7 +24,7 @@ export default function Applications() {
       };
       const { responses } = await api.esQuery("application", body);
       if (responses.length) setStats(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      else toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(responses.code));
+      else toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures", translate(responses.code));
     })();
   }, []);
 
@@ -160,7 +160,7 @@ export default function Applications() {
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.NOT_COMPLETED}>
                 <CardTitle>Ayant abandonné leur MIG</CardTitle>
                 <CardValueWrapper>
-                  <CardValue>{renderStat(stats?.NOT_COMPLETED)}</CardValue>
+                  <CardValue>{renderStat(stats?.ABANDON)}</CardValue>
                   <CardArrow />
                 </CardValueWrapper>
               </Card>
