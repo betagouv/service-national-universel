@@ -37,7 +37,7 @@ export default function Phase2({ young, onChange }) {
     domains: [],
     missionFormat: "",
     mobilityTransport: [],
-    period: "",
+    period: [],
     mobilityTransportOther: "",
     mobilityNearHome: "false",
     mobilityNearSchool: "false",
@@ -59,7 +59,7 @@ export default function Phase2({ young, onChange }) {
       domains: young?.domains ? [...young.domains] : [],
       missionFormat: young?.missionFormat || "",
       mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
-      period: young?.period || "",
+      period: young?.period || [],
       mobilityTransportOther: young?.mobilityTransportOther || "",
       mobilityNearHome: young?.mobilityNearHome || "false",
       mobilityNearSchool: young?.mobilityNearSchool || "false",
@@ -80,9 +80,8 @@ export default function Phase2({ young, onChange }) {
     const { ok, data, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
     console.log("code==>", code);
 
-    if (!ok) return toastr.error("Oups, une erreur est survenue", translate(data.code));
+    if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
     toastr.success("Succès", "Vos préférences ont bien été enregistrées");
-    console.log(data.code);
 
     await onChange();
     setEditPreference(false);

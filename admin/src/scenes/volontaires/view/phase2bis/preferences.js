@@ -57,7 +57,7 @@ export default function Preferences({ young, data, setData, editPreference, save
         return null;
     }
   };
-
+  console.log(young);
   return savePreference ? (
     <Loader />
   ) : (
