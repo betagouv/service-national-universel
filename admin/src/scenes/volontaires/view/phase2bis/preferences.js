@@ -9,6 +9,7 @@ import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_P
 import ModalPreference from "../../components/ModalPreference";
 import RankingPeriod from "../../components/rankingPeriod";
 import Pencil from "../../../../assets/icons/Pencil";
+import Loader from "../../../../components/Loader";
 
 export default function Preferences({ young, data, setData, editPreference, savePreference, onSubmit }) {
   const [openProject, setOpenProject] = React.useState(false);
@@ -57,7 +58,9 @@ export default function Preferences({ young, data, setData, editPreference, save
     }
   };
 
-  return (
+  return savePreference ? (
+    <Loader />
+  ) : (
     <div className="flex flex-col mx-5">
       <div className="flex flex-row gap-4 items-center mt-3 w-full">
         {!editPreference ? (

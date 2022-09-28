@@ -26,6 +26,7 @@ export default function Phase2({ young, onChange }) {
   const [blocOpened, setBlocOpened] = useState("missions");
   const [editPreference, setEditPreference] = useState(false);
   const [savePreference, setSavePreference] = useState(false);
+  const [errorMessage, setErrorMessage] = useState({ required: "Ce champs est obligatoire" });
 
   const [dataPreference, setDataPreference] = React.useState({
     professionnalProject: "",
@@ -73,10 +74,16 @@ export default function Phase2({ young, onChange }) {
 
   const onSubmit = async () => {
     //loader a utiliser + error a throw
-    setSavePreference(false);
-    const { ok, data } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
+
+    setSavePreference(true);
+    console.log("dataPreference==>", dataPreference);
+    const { ok, data, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
+    console.log("code==>", code);
+
     if (!ok) return toastr.error("Oups, une erreur est survenue", translate(data.code));
     toastr.success("Succès", "Vos préférences ont bien été enregistrées");
+    console.log(data.code);
+
     await onChange();
     setEditPreference(false);
     setSavePreference(false);
