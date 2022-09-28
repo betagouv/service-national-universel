@@ -196,7 +196,7 @@ export default function Drawer(props) {
           <div className="list-none flex flex-col justify-between text-[#BCC6DF] p-4 basis-[50%]">
             <div className="flex flex-col items-center">
               {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
-                <div className="text-sm cursor-pointer hover:text-[#67A4FF] hover:bg-[#344264] w-full p-2 mb-4 rounded-lg flex justify-center">
+                <div className="text-xs cursor-pointer w-full p-2 mb-4 rounded-lg flex justify-center">
                   <DeleteAccountButton young={young} />
                 </div>
               ) : null}
