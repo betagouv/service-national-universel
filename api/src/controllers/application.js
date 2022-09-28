@@ -20,7 +20,18 @@ const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication, serializeYoung } = require("../utils/serializer");
 const { config } = require("dotenv");
-const { uploadFile, ERRORS, isYoung, isReferent, getCcOfYoung, updateYoungPhase2Hours, updateStatusPhase2, getFile, updateYoungStatusPhase2Contract } = require("../utils");
+const {
+  uploadFile,
+  ERRORS,
+  isYoung,
+  isReferent,
+  getCcOfYoung,
+  updateYoungPhase2Hours,
+  updateStatusPhase2,
+  getFile,
+  updateYoungStatusPhase2Contract,
+  getReferentManagerPhase2,
+} = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
@@ -49,46 +60,6 @@ async function updateMission(app, fromUser) {
     console.error(e);
   }
 }
-
-const getReferentManagerPhase2 = async (department) => {
-  let toReferent = await ReferentObject.find({
-    subRole: SUB_ROLES.manager_phase2,
-    role: ROLES.REFERENT_DEPARTMENT,
-    department,
-  });
-
-  if (!toReferent) {
-    toReferent = await ReferentObject.find({
-      subRole: SUB_ROLES.secretariat,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department,
-    });
-  }
-
-  if (!toReferent) {
-    toReferent = await ReferentObject.find({
-      subRole: SUB_ROLES.manager_department,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department,
-    });
-  }
-
-  if (!toReferent) {
-    toReferent = await ReferentObject.find({
-      subRole: SUB_ROLES.assistant_manager_department,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department,
-    });
-  }
-
-  if (!toReferent) {
-    toReferent = await ReferentObject.find({
-      role: ROLES.REFERENT_DEPARTMENT,
-      department,
-    });
-  }
-  return toReferent;
-};
 
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
