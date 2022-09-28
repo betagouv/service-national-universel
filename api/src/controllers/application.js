@@ -173,7 +173,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const doublon = await ApplicationObject.findOne({ youngId: value.youngId, missionId: value.missionId });
     if (doublon) {
       console.error("Candidature déjà existante trouvée :", doublon);
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
     }
 
     const data = await ApplicationObject.create(value);
@@ -235,7 +235,10 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
         missionId: value.missionId,
         status: "VALIDATED",
       });
-      if (placesTaken >= mission.placesTotal) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (placesTaken >= mission.placesTotal) {
+        capture("No position available");
+        return res.status(409).send({ ok: false, code: ERRORS.NO_POSITION_AVAILABLE });
+      }
     }
 
     application.set(value);
