@@ -20,7 +20,18 @@ const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication, serializeYoung } = require("../utils/serializer");
 const { config } = require("dotenv");
-const { uploadFile, ERRORS, isYoung, isReferent, getCcOfYoung, updateYoungPhase2Hours, updateStatusPhase2, getFile, updateYoungStatusPhase2Contract } = require("../utils");
+const {
+  uploadFile,
+  ERRORS,
+  isYoung,
+  isReferent,
+  getCcOfYoung,
+  updateYoungPhase2Hours,
+  updateStatusPhase2,
+  getFile,
+  updateYoungStatusPhase2Contract,
+  getReferentManagerPhase2,
+} = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
@@ -49,38 +60,6 @@ async function updateMission(app, fromUser) {
     console.error(e);
   }
 }
-
-const getReferentManagerPhase2 = async (department) => {
-  // get the referent_department manager_phase2
-  let toReferent = await ReferentObject.find({
-    subRole: SUB_ROLES.manager_phase2,
-    role: ROLES.REFERENT_DEPARTMENT,
-    department,
-  });
-  // if not found, get the referent_region manager_phase2
-  if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.manager_phase2,
-        role: ROLES.REFERENT_REGION,
-        region: department2region[department],
-      }),
-    );
-  }
-  // if not found, get the manager_department
-  if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.manager_department,
-        role: ROLES.REFERENT_DEPARTMENT,
-        department,
-      }),
-    );
-  }
-  return toReferent;
-};
 
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -440,7 +419,10 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         });
 
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }];
+        emailTo = referentManagerPhase2.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        }));
         params = {
           ...params,
           cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,

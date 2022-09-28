@@ -6,6 +6,7 @@ const ContractModel = require("../models/contract");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 const { sendTemplate } = require("../sendinblue");
+const { getReferentManagerPhase2 } = require("../utils");
 
 const trigger = async () => {
   let countContractNotified = 0;
@@ -16,8 +17,13 @@ const trigger = async () => {
     total++;
     if (diffDays(contract.updatedAt, now) === 1) {
       countContractNotified++;
+      let referentManagerPhase2 = await getReferentManagerPhase2(contract.youngDepartment);
+      let emailTo = referentManagerPhase2.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      }));
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.CONTRACT_DRAFT, {
-        emailTo: [{ name: `${contract?.projectManagerFirstName} ${contract?.projectManagerLastName}`, email: contract?.projectManagerEmail }],
+        emailTo: emailTo,
         params: {
           youngFirstName: contract?.youngFirstName,
           youngLastName: contract?.youngLastName,

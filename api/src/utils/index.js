@@ -28,6 +28,7 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
+const { SUB_ROLES } = require("snu-lib/roles");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -584,6 +585,46 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   }
 }
 
+const getReferentManagerPhase2 = async (department) => {
+  let toReferent = await ReferentModel.find({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department,
+  });
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.secretariat,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.assistant_manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+  return toReferent;
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -682,4 +723,5 @@ module.exports = {
   getCcOfYoung,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
+  getReferentManagerPhase2,
 };
