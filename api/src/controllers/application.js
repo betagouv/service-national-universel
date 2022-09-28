@@ -58,46 +58,34 @@ const getReferentManagerPhase2 = async (department) => {
   });
 
   if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.secretariat,
-        role: ROLES.REFERENT_DEPARTMENT,
-        department,
-      }),
-    );
+    toReferent = await ReferentObject.find({
+      subRole: SUB_ROLES.secretariat,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
   }
 
   if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.manager_department,
-        role: ROLES.REFERENT_DEPARTMENT,
-        department,
-      }),
-    );
+    toReferent = await ReferentObject.find({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
   }
 
   if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.assistant_manager_department,
-        role: ROLES.REFERENT_DEPARTMENT,
-        department,
-      }),
-    );
+    toReferent = await ReferentObject.find({
+      subRole: SUB_ROLES.assistant_manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
   }
 
   if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        role: ROLES.REFERENT_DEPARTMENT,
-        department,
-      }),
-    );
+    toReferent = await ReferentObject.find({
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
   }
   return toReferent;
 };
@@ -454,7 +442,10 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         });
 
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }];
+        emailTo = referentManagerPhase2.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        }));
         params = {
           ...params,
           cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
