@@ -336,18 +336,11 @@ const Item = ({ subtitle, to, status, handleClick, disabled, children, open, pha
             {subtitle} - {subtitle === "Phase 1" ? <span>Séjour</span> : subtitle === "Phase 2" ? <span>MIG</span> : subtitle === "Phase 3" && <span>Engagement</span>}
           </div>
           {/* display status */}
-          {translator(status) !== "Actif" && translator(status) !== "En attente d'affectation" && translator(status) !== "Affectée" ? (
-            <div className="text-xs italic">{translator(status)}</div>
-          ) : (
+          {phase === "2" || (phase === "1" && status !== "DONE" && status !== "EXEMPTED") ? (
             <div className="bg-blue-600 rounded-full px-2 py-0.5">En cours</div>
+          ) : (
+            <div className="text-xs italic">{translator(status)}</div>
           )}
-
-          {/* <div
-            className={`${
-              translator(status) !== "Actif" && translator(status) !== "En attente d'affectation" && translator(status) !== "Affectée" && "hidden"
-            } bg-blue-600 rounded-full px-2 py-0.5`}>
-            En cours
-          </div> */}
         </div>
       </NavLink>
       {open ? children : null}
