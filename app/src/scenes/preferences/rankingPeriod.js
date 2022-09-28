@@ -53,7 +53,7 @@ export default function RankingPeriod({ title, period, handleChange, name, value
   );
 }
 
-Array.prototype.toogleValue = function (i, j) {
+Array.prototype.toggleValue = function (i, j) {
   const temp = this[j];
   this[j] = this[i];
   this[i] = temp;
@@ -64,7 +64,7 @@ const Item = ({ value, values, index, updateList, name }) => {
     const nextIndex = index + delta;
     if (nextIndex >= 0 && nextIndex < values[name].length) {
       const d = values[name];
-      d.toogleValue(nextIndex, index);
+      d.toggleValue(nextIndex, index);
       updateList(d);
     }
   };
