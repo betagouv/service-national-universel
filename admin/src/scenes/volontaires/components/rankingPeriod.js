@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../utils";
+import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../../utils";
 
-export default function RankingPeriod({ title, period, handleChange, name, values }) {
-  const [items, setItems] = useState(values[name]);
+export default function RankingPeriod({ period, handleChange, name, values }) {
+  const [items, setItems] = useState(values[name] ? values[name] : []);
 
   const updateList = (value) => {
-    handleChange({ target: { name, value } });
+    handleChange({ ...values, [name]: value });
     setItems(value);
   };
 
@@ -35,12 +34,11 @@ export default function RankingPeriod({ title, period, handleChange, name, value
   if (!items) return <div />;
 
   return (
-    <Container>
-      <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
+    <div>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="list">
           {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
+            <div className="border-[1px] px-2  rounded-2xl " ref={provided.innerRef} {...provided.droppableProps}>
               {items.map((e, i) => (
                 <Item key={e} index={i} value={e} values={values} updateList={updateList} name={name} />
               ))}
@@ -49,7 +47,7 @@ export default function RankingPeriod({ title, period, handleChange, name, value
           )}
         </Droppable>
       </DragDropContext>
-    </Container>
+    </div>
   );
 }
 
@@ -72,16 +70,20 @@ const Item = ({ value, values, index, updateList, name }) => {
   return (
     <Draggable draggableId={value} index={index}>
       {(provided) => (
-        <ItemContainer ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-          <div style={{ display: "flex", flex: 1 }}>
+        <div
+          className={`flex flex-1 py-2.5 items-center justify-between ${index !== 0 ? "border-t-[1px] border-gray-200" : ""}`}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}>
+          <div className="flex flex-1 items-center">
             <RoundItem value={index + 1} />
-            <Label>{translate(value)}</Label>
+            <div className="my-0 mx-4">{translate(value)}</div>
           </div>
-          <div style={{ display: "flex" }}>
+          <div className="flex">
             <RoundItem plus onClick={() => handleMove(index, -1)} />
             <RoundItem minus onClick={() => handleMove(index, 1)} />
           </div>
-        </ItemContainer>
+        </div>
       )}
     </Draggable>
   );
@@ -93,50 +95,9 @@ const RoundItem = ({ value, plus, minus, onClick }) => {
     if (minus) return "↓";
     return value;
   };
-  return <Badge onClick={onClick}>{getValue()}</Badge>;
+  return (
+    <div className="flex justify-center items-center w-7 h-7 text-[#6b7280] text-sm border-[1px] border-[#d2d6dc] cursor-pointer rounded-full my-0 mx-[0.1rem]" onClick={onClick}>
+      {getValue()}
+    </div>
+  );
 };
-
-const Label = styled.div`
-  margin: 0 1rem;
-`;
-
-const Badge = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  color: #6b7280;
-  font-size: 0.75rem;
-  border-width: 1px;
-  border-color: #d2d6dc;
-  border-style: solid;
-  border-radius: 9999px;
-  cursor: pointer;
-  margin: 0 0.1rem;
-`;
-
-const Container = styled.div`
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  border-width: 1px;
-  border-radius: 0.5rem;
-  border-style: solid;
-  border-color: #d2d6dc;
-  margin: 0 0.25rem 1rem 0.25rem;
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-`;
-
-const ItemContainer = styled.div`
-  border-top-width: 1px;
-  border-top-color: #d2d6dc;
-  border-top-style: solid;
-  width: 100%;
-  flex: 1;
-  padding: 1rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;

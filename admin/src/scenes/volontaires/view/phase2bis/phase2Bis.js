@@ -19,10 +19,68 @@ import Menu from "../../../../assets/icons/Menu";
 import Pencil from "../../../../assets/icons/Pencil";
 import ExportComponent from "../../../../components/ExportXlsx";
 import { apiURL } from "../../../../config";
+import { toastr } from "react-redux-toastr";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   const [blocOpened, setBlocOpened] = useState("missions");
+  const [editPreference, setEditPreference] = useState(false);
+  const [savePreference, setSavePreference] = useState(false);
+
+  const [dataPreference, setDataPreference] = React.useState({
+    professionnalProject: "",
+    professionnalProjectPrecision: "",
+    engaged: "",
+    desiredLocation: "",
+    engagedDescription: "",
+    domains: [],
+    missionFormat: "",
+    mobilityTransport: [],
+    period: "",
+    mobilityTransportOther: "",
+    mobilityNearHome: "false",
+    mobilityNearSchool: "false",
+    mobilityNearRelative: "false",
+    mobilityNearRelativeName: "",
+    mobilityNearRelativeAddress: "",
+    mobilityNearRelativeZip: "",
+    mobilityNearRelativeCity: "",
+    periodRanking: [],
+  });
+
+  React.useEffect(() => {
+    setDataPreference({
+      professionnalProject: young?.professionnalProject || "",
+      professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
+      engaged: young?.engaged || "",
+      desiredLocation: young?.desiredLocation || "",
+      engagedDescription: young?.engagedDescription || "",
+      domains: young?.domains ? [...young.domains] : [],
+      missionFormat: young?.missionFormat || "",
+      mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
+      period: young?.period || "",
+      mobilityTransportOther: young?.mobilityTransportOther || "",
+      mobilityNearHome: young?.mobilityNearHome || "false",
+      mobilityNearSchool: young?.mobilityNearSchool || "false",
+      mobilityNearRelative: young?.mobilityNearRelative || "false",
+      mobilityNearRelativeName: young?.mobilityNearRelativeName || "",
+      mobilityNearRelativeAddress: young?.mobilityNearRelativeAddress || "",
+      mobilityNearRelativeZip: young?.mobilityNearRelativeZip || "",
+      mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
+      periodRanking: young?.periodRanking ? [...young.periodRanking] : [],
+    });
+  }, [young, editPreference]);
+
+  const onSubmit = async () => {
+    //loader a utiliser + error a throw
+    setSavePreference(false);
+    const { ok, data } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
+    if (!ok) return toastr.error("Oups, une erreur est survenue", translate(data.code));
+    toastr.success("Succès", "Vos préférences ont bien été enregistrées");
+    await onChange();
+    setEditPreference(false);
+    setSavePreference(false);
+  };
 
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
@@ -112,9 +170,21 @@ export default function Phase2({ young, onChange }) {
             </div>
 
             {blocOpened === "preferences" ? (
-              <div className="flex items-center gap-2 bg-blue-100 rounded-[28px] px-[9px] py-[7px]  h-[32px]">
-                <Pencil className="h-4 w-4 text-blue-600" />
-                <div className="text-blue-600 text-xs font-medium cursor-pointer">Modifier</div>
+              <div className="flex items-center gap-4">
+                {editPreference ? (
+                  <div className="hover:scale-105 flex items-center gap-2 bg-gray-100 rounded-[28px] px-[9px] py-[7px] h-[32px]" onClick={() => setEditPreference(false)}>
+                    <div className="text-gray-700 text-xs font-medium cursor-pointer">Annuler</div>
+                  </div>
+                ) : null}
+                <div
+                  className="hover:scale-105 flex items-center gap-2 bg-blue-100 rounded-[28px] px-[9px] py-[7px] h-[32px]"
+                  onClick={() => {
+                    if (!editPreference) setEditPreference(true);
+                    else onSubmit();
+                  }}>
+                  <Pencil className="h-4 w-4 text-blue-600" />
+                  <div className="text-blue-600 text-xs font-medium cursor-pointer">{editPreference ? "Enregistrer les changements" : "Modifier"}</div>
+                </div>
               </div>
             ) : null}
 
@@ -173,7 +243,18 @@ export default function Phase2({ young, onChange }) {
             ) : null}
           </div>
           {blocOpened === "missions" && <ApplicationList2 young={young} onChangeApplication={onChange} />}
-          {blocOpened === "preferences" && <Preferences young={young} />}
+          {blocOpened === "preferences" && (
+            <Preferences
+              young={young}
+              data={dataPreference}
+              setData={setDataPreference}
+              editPreference={editPreference}
+              savePreference={savePreference}
+              setEditPreference={setEditPreference}
+              setSavePreference={setSavePreference}
+              onSubmit={onSubmit}
+            />
+          )}
         </Box>
 
         {young.statusPhase2 === "VALIDATED" ? (
