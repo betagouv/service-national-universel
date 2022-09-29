@@ -76,20 +76,17 @@ export default function Phase2({ young, onChange }) {
   const onSubmit = async () => {
     try {
       let error = {};
+      let data = dataPreference;
+
       //Error : professionnalProjet
       if (dataPreference.professionnalProject === "UNIFORM") {
-        if (
-          dataPreference.professionnalProjectPrecision === "" ||
-          dataPreference.professionnalProjectPrecision !== "FIREFIGHTER" ||
-          dataPreference.professionnalProjectPrecision !== "POLICE" ||
-          dataPreference.professionnalProjectPrecision !== "ARMY"
-        ) {
-          console.log("error detected");
+        console.log("dataPreference ==>", dataPreference);
+        if (!["FIREFIGHTER", "POLICE", "ARMY"].includes(dataPreference.professionnalProjectPrecision)) {
           error.errorProject = "Ce champs est obligatoire";
         }
       }
 
-      if (dataPreference.professionnalProject === "OTHER" && !dataPreference.professionnalProjectPrecision) {
+      if (dataPreference.professionnalProject === "OTHER" && dataPreference.professionnalProjectPrecision === "") {
         error.errorProject = "Ce champs est obligatoire";
       }
 
@@ -105,11 +102,11 @@ export default function Phase2({ young, onChange }) {
 
       // Error enum
       if (dataPreference.professionnalProject === "") {
-        setDataPreference(delete dataPreference.professionnalProject);
+        delete data.professionnalProject;
       }
 
       if (dataPreference.period === "") {
-        setDataPreference(delete dataPreference.period);
+        delete data.period;
       }
 
       if (Object.keys(error).length) {
@@ -117,7 +114,7 @@ export default function Phase2({ young, onChange }) {
       } else {
         setErrorMessage({});
         setSavePreference(true);
-        const { ok, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
+        const { ok, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, data);
 
         if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
         toastr.success("Succès", "Vos préférences ont bien été enregistrées");
@@ -129,6 +126,7 @@ export default function Phase2({ young, onChange }) {
       }
     } catch (error) {
       capture(error);
+      setSavePreference(false);
     }
   };
 

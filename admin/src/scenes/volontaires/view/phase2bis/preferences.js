@@ -71,7 +71,7 @@ export default function Preferences({
     <Loader />
   ) : (
     <div className="flex flex-col mx-5">
-      <div className="flex flex-row gap-4 items-end mt-3 w-full">
+      <div className="flex flex-row gap-4 items-start mt-3 w-full">
         {!editPreference ? (
           <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
             <div className="text-xs leading-4 font-normal text-gray-500">Projet professionnel</div>
@@ -113,7 +113,6 @@ export default function Preferences({
           </div>
         )}
         <div className="flex flex-col w-1/2 ">
-          {editPreference && errorMessage.errorProject && <div className="text-red-500 text-xs mb-2">{errorMessage.errorProject}</div>}
           {!editPreference && data?.professionnalProjectPrecision ? (
             <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
               <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
@@ -168,6 +167,7 @@ export default function Preferences({
               </div>
             </div>
           ) : null}
+          {editPreference && errorMessage.errorProject && <div className="text-red-500 text-xs mt-1">{errorMessage.errorProject}</div>}
         </div>
       </div>
       <div className="flex flex-row w-full gap-4 items-center mt-4">
@@ -220,9 +220,8 @@ export default function Preferences({
           )}
         </div>
       </div>
-      <div className="flex flex-row w-full gap-4 items-end mt-4">
+      <div className="flex flex-row w-full gap-4 items-start mt-4">
         <div className="w-1/2">
-          {openDesiredLocation && errorMessage.desiredLocation && <div className="text-red-500 text-xs mb-2">{errorMessage.desiredLocation}</div>}
           {openDesiredLocation || data.desiredLocation ? (
             <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
               <div className="text-xs leading-4 font-normal text-gray-500">Endroit où je souhaite effectuer ma mission</div>
@@ -236,9 +235,9 @@ export default function Preferences({
               />
             </div>
           ) : null}
+          {openDesiredLocation && errorMessage.desiredLocation && <div className="text-red-500 text-xs mt-1">{errorMessage.desiredLocation}</div>}
         </div>
         <div className="w-1/2">
-          {data.engaged === "true" && errorMessage.engaged && <div className="text-red-500 text-xs mb-2">{errorMessage.engaged}</div>}
           {data.engaged === "true" ? (
             <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
               <div className="text-xs leading-4 font-normal text-gray-500">Description de l’activité</div>
@@ -252,6 +251,7 @@ export default function Preferences({
               />
             </div>
           ) : null}
+          {data.engaged === "true" && errorMessage.engaged && <div className="text-red-500 text-xs mt-1">{errorMessage.engaged}</div>}
         </div>
       </div>
       <div className="flex flex-col w-full gap-4 items-center justify-center mt-4 border-t-[1px] border-b-[1px] py-14">
@@ -329,7 +329,13 @@ export default function Preferences({
             );
           })}
         </div>
-        {[PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
+        {!editPreference ? (
+          [PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
+            <div className="flex mt-2 items-center">
+              <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" disabled={true} />
+            </div>
+          ) : null
+        ) : [PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
           <div className="flex mt-2 items-center">
             <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" />
           </div>
