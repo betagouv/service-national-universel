@@ -1,11 +1,11 @@
 import React from "react";
 import { Spinner } from "reactstrap";
 
-export default function LoadingButton({ loading, children, disabled, loadingText, style, ...rest }) {
+export default function LoadingButton({ loading, children, disabled, loadingText, ...rest }) {
   return (
     <button
       disabled={loading || disabled}
-      className={`whitespace-nowrap overflow-hidden text-ellipsis m-0 ${loading || disabled ? "cursor-not-allowed" : "cursor-pointer"} ${style}`}
+      className="text-center text-white font-medium rounded-md p-2 hover:bg-snu-purple-600 hover:drop-shadow w-full bg-snu-purple-300"
       {...rest}>
       {loading && loadingText && (
         <>
