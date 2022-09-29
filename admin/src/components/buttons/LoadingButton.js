@@ -13,7 +13,6 @@ export default function LoadingButton({ loading, children, disabled, loadingText
         justifyContent: "center",
         opacity: loading ? 0.7 : 1,
         cursor: loading || disabled ? "not-allowed" : "pointer",
-        width: "100%",
       }}
       {...rest}>
       {loading && loadingText && (

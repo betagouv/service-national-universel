@@ -70,7 +70,7 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
           ))}
         </div>
         <div className="grid grid-cols-2 gap-4 w-full p-4 drop-shadow-[0_0_10px_rgb(220,220,220)] bg-white">
-          <button className="rounded-md border bg-white hover:drop-shadow" onClick={() => setIsOpen(false)}>
+          <button className="rounded-md border bg-white hover:drop-shadow text-gray-500 font-semibold" onClick={() => setIsOpen(false)}>
             Annuler
           </button>
           <div className="flex w-full">
