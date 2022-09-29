@@ -21,8 +21,8 @@ export default function ExportComponent({
   setIsOpen,
   css = {
     override: true,
-    button: `bg-snu-purple-300 rounded-md p-2 text-white font-medium w-full hover:snu-purple-600`,
-    loadingButton: `bg-snu-purple-300 rounded-md p-2 text-white font-medium w-full hover:snu-purple-600`,
+    button: `bg-brand-purple rounded-md px-4 py-2 text-sm text-white font-semibold w-full hover:brand-darkpurple`,
+    loadingButton: `bg-brand-transpurple rounded-md px-4 py-2 text-sm text-white font-semibold w-full`,
   },
 }) {
   const [exporting, setExporting] = useState(false);
