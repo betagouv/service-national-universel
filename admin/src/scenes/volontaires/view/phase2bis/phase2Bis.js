@@ -12,7 +12,6 @@ import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
 import WrapperPhase2 from "../wrapper";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
-// import Pencil from "../../../../assets/pencil.svg";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import Menu from "../../../../assets/icons/Menu";
@@ -20,13 +19,15 @@ import Pencil from "../../../../assets/icons/Pencil";
 import ExportComponent from "../../../../components/ExportXlsx";
 import { apiURL } from "../../../../config";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../sentry";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   const [blocOpened, setBlocOpened] = useState("missions");
   const [editPreference, setEditPreference] = useState(false);
   const [savePreference, setSavePreference] = useState(false);
-  const [errorMessage, setErrorMessage] = useState({ required: "Ce champs est obligatoire" });
+  const [errorMessage, setErrorMessage] = useState({});
+  const [openDesiredLocation, setOpenDesiredLocation] = React.useState(false);
 
   const [dataPreference, setDataPreference] = React.useState({
     professionnalProject: "",
@@ -51,13 +52,13 @@ export default function Phase2({ young, onChange }) {
 
   React.useEffect(() => {
     setDataPreference({
-      professionnalProject: young?.professionnalProject || "",
+      professionnalProject: young?.professionnalProject || [],
       professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
-      engaged: young?.engaged || "",
+      engaged: young?.engaged || "false",
       desiredLocation: young?.desiredLocation || "",
       engagedDescription: young?.engagedDescription || "",
       domains: young?.domains ? [...young.domains] : [],
-      missionFormat: young?.missionFormat || "",
+      missionFormat: young?.missionFormat || [],
       mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
       period: young?.period || [],
       mobilityTransportOther: young?.mobilityTransportOther || "",
@@ -73,19 +74,53 @@ export default function Phase2({ young, onChange }) {
   }, [young, editPreference]);
 
   const onSubmit = async () => {
-    //loader a utiliser + error a throw
+    try {
+      let error = {};
+      //Error : professionnalProjet
+      if (dataPreference.professionnalProject === "UNIFORM") {
+        if (
+          dataPreference.professionnalProjectPrecision === "" ||
+          dataPreference.professionnalProjectPrecision !== "FIREFIGHTER" ||
+          dataPreference.professionnalProjectPrecision !== "POLICE" ||
+          dataPreference.professionnalProjectPrecision !== "ARMY"
+        ) {
+          console.log("error detected");
+          error.errorProject = "Ce champs est obligatoire";
+        }
+      }
 
-    setSavePreference(true);
-    console.log("dataPreference==>", dataPreference);
-    const { ok, data, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
-    console.log("code==>", code);
+      if (dataPreference.professionnalProject === "OTHER" && !dataPreference.professionnalProjectPrecision) {
+        error.errorProject = "Ce champs est obligatoire";
+      }
 
-    if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
-    toastr.success("Succès", "Vos préférences ont bien été enregistrées");
+      //Error : Desired Location
+      if (openDesiredLocation && !dataPreference.desiredLocation) {
+        error.desiredLocation = "Ce champs est obligatoire";
+      }
 
-    await onChange();
-    setEditPreference(false);
-    setSavePreference(false);
+      //Error : Engaged
+      if (dataPreference.engaged === "true" && !dataPreference.engagedDescription) {
+        error.engaged = "Ce champs est obligatoire";
+      }
+
+      if (Object.keys(error).length) {
+        setErrorMessage(error);
+        console.log(errorMessage);
+      } else {
+        setErrorMessage({});
+        setSavePreference(true);
+        const { ok, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
+
+        if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+        toastr.success("Succès", "Vos préférences ont bien été enregistrées");
+
+        await onChange();
+        setEditPreference(false);
+        setSavePreference(false);
+      }
+    } catch (error) {
+      capture(error);
+    }
   };
 
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
@@ -259,6 +294,10 @@ export default function Phase2({ young, onChange }) {
               setEditPreference={setEditPreference}
               setSavePreference={setSavePreference}
               onSubmit={onSubmit}
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              openDesiredLocation={openDesiredLocation}
+              setOpenDesiredLocation={setOpenDesiredLocation}
             />
           )}
         </Box>

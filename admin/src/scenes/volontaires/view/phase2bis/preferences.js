@@ -11,10 +11,20 @@ import RankingPeriod from "../../components/rankingPeriod";
 import Pencil from "../../../../assets/icons/Pencil";
 import Loader from "../../../../components/Loader";
 
-export default function Preferences({ young, data, setData, editPreference, savePreference, onSubmit }) {
+export default function Preferences({
+  young,
+  data,
+  setData,
+  editPreference,
+  savePreference,
+  onSubmit,
+  errorMessage,
+  setErrorMessage,
+  openDesiredLocation,
+  setOpenDesiredLocation,
+}) {
   const [openProject, setOpenProject] = React.useState(false);
   const [openProjectPrecision, setOpenProjectPrecision] = React.useState(false);
-  const [openDesiredLocation, setOpenDesiredLocation] = React.useState(false);
   const [hasRelativeAddress, setHasRelativeAddress] = React.useState(false);
   const [modal, setModal] = React.useState({});
   const refProject = React.useRef();
@@ -57,12 +67,11 @@ export default function Preferences({ young, data, setData, editPreference, save
         return null;
     }
   };
-  console.log(young);
   return savePreference ? (
     <Loader />
   ) : (
     <div className="flex flex-col mx-5">
-      <div className="flex flex-row gap-4 items-center mt-3 w-full">
+      <div className="flex flex-row gap-4 items-end mt-3 w-full">
         {!editPreference ? (
           <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
             <div className="text-xs leading-4 font-normal text-gray-500">Projet professionnel</div>
@@ -90,6 +99,7 @@ export default function Preferences({ young, data, setData, editPreference, save
                     onClick={() => {
                       setData({ ...data, professionnalProject: option, professionnalProjectPrecision: "" });
                       setOpenProject(false);
+                      setErrorMessage({});
                     }}
                     className={`${option === data?.professionnalProject && "font-bold bg-gray"}`}>
                     <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
@@ -102,59 +112,63 @@ export default function Preferences({ young, data, setData, editPreference, save
             </div>
           </div>
         )}
-        {!editPreference && data?.professionnalProjectPrecision ? (
-          <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
-            <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
-            <div className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent">
-              {t(data.professionnalProjectPrecision) ? t(data.professionnalProjectPrecision) : "Non renseigné"}
-            </div>
-          </div>
-        ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.OTHER ? (
-          <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
-            <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
-            <input
-              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent"
-              type="text"
-              value={data.professionnalProjectPrecision}
-              onChange={(e) => setData({ ...data, professionnalProjectPrecision: e.target.value })}
-            />
-          </div>
-        ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
-          <div className="border-[1px] border-gray-300 w-1/2 rounded-lg px-3 py-2 ">
-            <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
-            <div className="relative" ref={refProjectPrecision}>
-              <button
-                className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
-                onClick={() => setOpenProjectPrecision((e) => !e)}>
-                <div className="flex items-center gap-2">
-                  {data?.professionnalProjectPrecision ? (
-                    <span className="text-sm leading-5 font-normal">{t(data?.professionnalProjectPrecision)}</span>
-                  ) : (
-                    <span className="text-gray-400 text-sm font-normal">Projet professionnel</span>
-                  )}
-                </div>
-                <ChevronDown className="text-gray-400" />
-              </button>
-              {/* display options */}
-              <div className={`${openProjectPrecision ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                {Object.values(PROFESSIONNAL_PROJECT_PRECISION).map((option) => (
-                  <div
-                    key={option}
-                    onClick={() => {
-                      setData({ ...data, professionnalProjectPrecision: option });
-                      setOpenProjectPrecision(false);
-                    }}
-                    className={`${option === data?.professionnalProjectPrecision && "font-bold bg-gray"}`}>
-                    <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                      <div>{t(option)}</div>
-                      {option === data?.professionnalProjectPrecision ? <BsCheck2 /> : null}
-                    </div>
-                  </div>
-                ))}
+        <div className="flex flex-col w-1/2 ">
+          {editPreference && errorMessage.errorProject && <div className="text-red-500 text-xs mb-2">{errorMessage.errorProject}</div>}
+          {!editPreference && data?.professionnalProjectPrecision ? (
+            <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
+              <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
+              <div className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent">
+                {t(data.professionnalProjectPrecision) ? t(data.professionnalProjectPrecision) : "Non renseigné"}
               </div>
             </div>
-          </div>
-        ) : null}
+          ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.OTHER ? (
+            <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
+              <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
+              <input
+                className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent"
+                type="text"
+                value={data.professionnalProjectPrecision}
+                onChange={(e) => setData({ ...data, professionnalProjectPrecision: e.target.value })}
+              />
+            </div>
+          ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
+            <div className="border-[1px] border-gray-300 w-full rounded-lg px-3 py-2 ">
+              <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
+              <div className="relative" ref={refProjectPrecision}>
+                <button
+                  className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
+                  onClick={() => setOpenProjectPrecision((e) => !e)}>
+                  <div className="flex items-center gap-2">
+                    {data?.professionnalProjectPrecision ? (
+                      <span className="text-sm leading-5 font-normal">{t(data?.professionnalProjectPrecision)}</span>
+                    ) : (
+                      <span className="text-gray-400 text-sm font-normal">Projet professionnel</span>
+                    )}
+                  </div>
+                  <ChevronDown className="text-gray-400" />
+                </button>
+                {/* display options */}
+                <div className={`${openProjectPrecision ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                  {Object.values(PROFESSIONNAL_PROJECT_PRECISION).map((option) => (
+                    <div
+                      key={option}
+                      onClick={() => {
+                        setData({ ...data, professionnalProjectPrecision: option });
+                        setOpenProjectPrecision(false);
+                        setErrorMessage({});
+                      }}
+                      className={`${option === data?.professionnalProjectPrecision && "font-bold bg-gray"}`}>
+                      <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                        <div>{t(option)}</div>
+                        {option === data?.professionnalProjectPrecision ? <BsCheck2 /> : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
       <div className="flex flex-row w-full gap-4 items-center mt-4">
         <div className="flex w-1/2 items-center gap-10">
@@ -206,8 +220,9 @@ export default function Preferences({ young, data, setData, editPreference, save
           )}
         </div>
       </div>
-      <div className="flex flex-row w-full gap-4 items-center mt-4">
+      <div className="flex flex-row w-full gap-4 items-end mt-4">
         <div className="w-1/2">
+          {openDesiredLocation && errorMessage.desiredLocation && <div className="text-red-500 text-xs mb-2">{errorMessage.desiredLocation}</div>}
           {openDesiredLocation || data.desiredLocation ? (
             <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
               <div className="text-xs leading-4 font-normal text-gray-500">Endroit où je souhaite effectuer ma mission</div>
@@ -223,6 +238,7 @@ export default function Preferences({ young, data, setData, editPreference, save
           ) : null}
         </div>
         <div className="w-1/2">
+          {data.engaged === "true" && errorMessage.engaged && <div className="text-red-500 text-xs mb-2">{errorMessage.engaged}</div>}
           {data.engaged === "true" ? (
             <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
               <div className="text-xs leading-4 font-normal text-gray-500">Description de l’activité</div>
