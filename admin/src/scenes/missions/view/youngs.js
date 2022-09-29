@@ -61,13 +61,10 @@ export default function Youngs({ mission, applications, updateMission }) {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function transform(data, values) {
-    console.log("🚀 ~ file: youngs.js ~ line 64 ~ transform ~ data", data);
     let all = data;
     const youngIds = [...new Set(data.map((item) => item.youngId))];
-    console.log("🚀 ~ file: youngs.js ~ line 66 ~ transform ~ youngIds", youngIds);
     if (youngIds?.length) {
       const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-      console.log("🚀 ~ file: youngs.js ~ line 68 ~ transform ~ responses", responses);
       if (responses.length) {
         const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
         all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
