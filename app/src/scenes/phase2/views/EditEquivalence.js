@@ -219,7 +219,7 @@ export default function EditEquivalence() {
                   <div
                     key={option}
                     onClick={() => {
-                      setData({ ...data, type: option });
+                      setData({ ...data, type: option, sousType: "" });
                       setOpenType(false);
                     }}
                     className={`${option === data?.type && "font-bold bg-gray"}`}>
