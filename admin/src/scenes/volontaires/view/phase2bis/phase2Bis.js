@@ -38,7 +38,7 @@ export default function Phase2({ young, onChange }) {
     domains: [],
     missionFormat: "",
     mobilityTransport: [],
-    period: [],
+    period: "",
     mobilityTransportOther: "",
     mobilityNearHome: "false",
     mobilityNearSchool: "false",
@@ -52,15 +52,15 @@ export default function Phase2({ young, onChange }) {
 
   React.useEffect(() => {
     setDataPreference({
-      professionnalProject: young?.professionnalProject || [],
+      professionnalProject: young?.professionnalProject || "",
       professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
       engaged: young?.engaged || "false",
       desiredLocation: young?.desiredLocation || "",
       engagedDescription: young?.engagedDescription || "",
       domains: young?.domains ? [...young.domains] : [],
-      missionFormat: young?.missionFormat || [],
+      missionFormat: young?.missionFormat || "",
       mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
-      period: young?.period || [],
+      period: young?.period || "",
       mobilityTransportOther: young?.mobilityTransportOther || "",
       mobilityNearHome: young?.mobilityNearHome || "false",
       mobilityNearSchool: young?.mobilityNearSchool || "false",
@@ -103,9 +103,17 @@ export default function Phase2({ young, onChange }) {
         error.engaged = "Ce champs est obligatoire";
       }
 
+      // Error enum
+      if (dataPreference.professionnalProject === "") {
+        setDataPreference(delete dataPreference.professionnalProject);
+      }
+
+      if (dataPreference.period === "") {
+        setDataPreference(delete dataPreference.period);
+      }
+
       if (Object.keys(error).length) {
         setErrorMessage(error);
-        console.log(errorMessage);
       } else {
         setErrorMessage({});
         setSavePreference(true);
@@ -113,6 +121,7 @@ export default function Phase2({ young, onChange }) {
 
         if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
         toastr.success("Succès", "Vos préférences ont bien été enregistrées");
+        console.log(code);
 
         await onChange();
         setEditPreference(false);
