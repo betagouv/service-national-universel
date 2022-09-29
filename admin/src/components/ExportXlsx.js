@@ -21,7 +21,7 @@ export default function ExportComponent({
   setIsOpen,
   css = {
     override: true,
-    button: `bg-brand-purple rounded-md px-4 py-2 text-sm text-white font-semibold w-full hover:brand-darkpurple`,
+    button: `bg-brand-purple rounded-md px-4 py-2 text-sm text-white font-semibold w-full hover:bg-brand-darkPurple`,
     loadingButton: `bg-brand-transpurple rounded-md px-4 py-2 text-sm text-white font-semibold w-full`,
   },
 }) {
