@@ -293,7 +293,9 @@ export default function Preferences({
             })}
           </div>
         )}
+        {editPreference && errorMessage.domains && <div className="text-red-500 text-xs mt-1">{errorMessage.domains}</div>}
       </div>
+
       <div className="flex flex-col w-full gap-4 items-center justify-center border-b-[1px] py-14">
         <div className="leading-5 font-bold text-sm">Format préféré</div>
         <div className="flex space-x-4 mt-2">
@@ -329,15 +331,9 @@ export default function Preferences({
             );
           })}
         </div>
-        {!editPreference ? (
-          [PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
-            <div className="flex mt-2 items-center">
-              <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" disabled={true} />
-            </div>
-          ) : null
-        ) : [PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
+        {[PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
           <div className="flex mt-2 items-center">
-            <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" />
+            <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" disabled={!editPreference ? true : false} />
           </div>
         ) : null}
       </div>
@@ -377,6 +373,9 @@ export default function Preferences({
             />
           </div>
         ) : null}
+      </div>
+      <div className="flex justify-center">
+        {editPreference && errorMessage.transport && <div className="text-red-500 text-xs w-1/3 flex justify-start mt-1">{errorMessage.transport}</div>}
       </div>
 
       <div className="flex flex-col w-full gap-4 items-center justify-center mt-5 pb-14">
@@ -422,18 +421,21 @@ export default function Preferences({
                 <div className={`text-sm ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}>
                   {data.mobilityNearRelativeCity}{" "}
                   {editPreference ? (
-                    <span className="text-xs cursor-pointer hover:underline" onClick={() => setModal({ isOpen: true })}>
+                    <span className="text-xs cursor-pointer hover:underline hover:text-blue-600 hover:decoration-blue-600" onClick={() => setModal({ isOpen: true })}>
                       (Modifier)
                     </span>
                   ) : null}
                 </div>
               ) : (
                 <div
-                  className={`text-sm ${editPreference ? "cursor-pointer hover:underline" : ""} ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}
+                  className={`text-sm ${editPreference ? "cursor-pointer hover:underline hover:decoration-blue-600 hover:text-blue-600" : ""} ${
+                    data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"
+                  }`}
                   onClick={() => editPreference && setModal({ isOpen: true })}>
                   {editPreference ? "Renseigner une adresse" : "Aucune adresse renseignée"}
                 </div>
               )}
+              {editPreference && errorMessage.mobilityNearRelative && <div className="text-red-500 text-xs flex justify-start mt-1">{errorMessage.mobilityNearRelative}</div>}
             </div>
           </div>
         </div>

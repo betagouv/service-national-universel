@@ -80,7 +80,6 @@ export default function Phase2({ young, onChange }) {
 
       //Error : professionnalProjet
       if (dataPreference.professionnalProject === "UNIFORM") {
-        console.log("dataPreference ==>", dataPreference);
         if (!["FIREFIGHTER", "POLICE", "ARMY"].includes(dataPreference.professionnalProjectPrecision)) {
           error.errorProject = "Ce champs est obligatoire";
         }
@@ -100,8 +99,29 @@ export default function Phase2({ young, onChange }) {
         error.engaged = "Ce champs est obligatoire";
       }
 
-      // Error enum
+      //Error : transport
+      if (dataPreference.mobilityTransport.includes("OTHER") && dataPreference.mobilityTransportOther === "") {
+        error.transport = "Ce champs est obligatoire";
+      }
+
+      //Error : MobilityNearRelative
+      if (
+        dataPreference.mobilityNearRelative &&
+        !dataPreference.mobilityNearRelativeAddress &&
+        !dataPreference.mobilityNearRelativeCity &&
+        !dataPreference.mobilityNearRelativeName &&
+        !dataPreference.mobilityNearRelativeZip
+      ) {
+        error.mobilityNearRelative = "Veuillez renseigner une adresse";
+      }
+
+      //Error
+      if (dataPreference.domains.length !== 3) {
+        error.domains = "Veuillez sélectionner 3 domaines favoris";
+      }
+
       if (dataPreference.professionnalProject === "") {
+        // Error enum
         delete data.professionnalProject;
       }
 

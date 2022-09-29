@@ -97,6 +97,9 @@ export default function ModalPreference({ isOpen, onCancel, setData, data }) {
           </div>
         </div>
         <div className="flex justify-end">
+          <button onClick={onCancel} className={`my-4 px-4 border-[1px] border-gray-300 text-white rounded-lg py-2 bg-blue-600 cursor-pointer`}>
+            Annuler
+          </button>
           <button
             onClick={() => onSubmit()}
             className={`my-4 px-4 border-[1px] border-gray-300 text-white rounded-lg py-2  ${loading ? "bg-blue-300" : "bg-blue-600 cursor-pointer"}`}>
