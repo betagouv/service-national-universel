@@ -25,7 +25,6 @@ import {
 } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
-import ExportComponent from "../../../components/ExportXlsx";
 import { DepartmentFilter } from "../../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -34,11 +33,15 @@ import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWith
 import ModalPJ from "../../volontaires/components/ModalPJ";
 import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
 import { MdOutlineAttachFile } from "react-icons/md";
+import ModalExport from "../../../components/modals/ModalExport";
+import { applicationExportFields } from "snu-lib/excelExports";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
 export default function Youngs({ mission, applications, updateMission }) {
+  const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState();
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
@@ -58,6 +61,118 @@ export default function Youngs({ mission, applications, updateMission }) {
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
+  async function transform(data, values) {
+    let all = data;
+    if (["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].includes(values)) {
+      const youngIds = [...new Set(data.map((item) => item.youngId))];
+      if (youngIds?.length) {
+        const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+        if (responses.length) {
+          const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+        }
+      }
+    }
+    return all.map((data) => {
+      if (!data.young) data.young = {};
+      if (!data.young.domains) data.young.domains = [];
+      if (!data.young.periodRanking) data.young.periodRanking = [];
+      const allFields = {
+        identity: {
+          Cohorte: data.youngCohort,
+          Prénom: data.youngFirstName,
+          Nom: data.youngLastName,
+          Sexe: data.gender,
+          "Date de naissance": formatLongDateUTCWithoutTime(data.youngBirthdateAt),
+        },
+        contact: {
+          Email: data.youngEmail,
+          Téléphone: data.young.phone,
+        },
+        address: {
+          "Issu de QPV": translate(data.young.qpv),
+          "Adresse postale": data.young.address,
+          "Code postal": data.young.zip,
+          Ville: data.young.city,
+          Pays: data.young.country,
+        },
+        location: {
+          Département: data.young.department,
+          Académie: data.young.academy,
+          "Région du volontaire": data.young.region,
+        },
+        application: {
+          "Statut de la candidature": translate(data.status),
+          "Choix - Ordre de la candidature": data.priority,
+          "Candidature créée lé": formatLongDateUTC(data.createdAt),
+          "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
+          "Statut du contrat d'engagement": translate(data.young.statusPhase2Contract),
+          "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
+          "Statut du dossier d'éligibilité PM": translate(data.young.statusMilitaryPreparationFiles),
+        },
+        status: {
+          "Statut général": translate(data.young.status),
+          "Statut phase 2": translate(data.young.statusPhase2),
+          "Statut de la candidature": translate(data.status),
+          // date du dernier statut
+        },
+        // pas pour structures :
+        choices: {
+          "Domaine de MIG 1": data.young.domains[0],
+          "Domaine de MIG 2": data.young.domains[1],
+          "Domaine de MIG 3": data.young.domains[2],
+          "Projet professionnel": translate(data.young.professionnalProject),
+          "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
+          "Période privilégiée pour réaliser des missions": data.period,
+          "Choix 1 période": translate(data.young.periodRanking[0]),
+          "Choix 2 période": translate(data.young.periodRanking[1]),
+          "Choix 3 période": translate(data.young.periodRanking[2]),
+          "Choix 4 période": translate(data.young.periodRanking[3]),
+          "Choix 5 période": translate(data.young.periodRanking[4]),
+          "Mobilité aux alentours de son établissement": translate(data.young.mobilityNearSchool),
+          "Mobilité aux alentours de son domicile": translate(data.young.mobilityNearHome),
+          "Mobilité aux alentours d'un de ses proches": translate(data.young.mobilityNearRelative),
+          "Adresse du proche": data.young.mobilityNearRelativeAddress,
+          "Mode de transport": data.young.mobilityTransport?.map((t) => translate(t)).join(", "),
+          "Format de mission": translate(data.young.missionFormat),
+          "Engagement dans une structure en dehors du SNU": translate(data.young.engaged),
+          "Description engagement ": data.young.youngengagedDescription,
+          "Souhait MIG": data.young.youngdesiredLocation,
+        },
+        representative1: {
+          "Statut représentant légal 1": translate(data.young.parent1Status),
+          "Prénom représentant légal 1": data.young.parent1FirstName,
+          "Nom représentant légal 1": data.young.parent1LastName,
+          "Email représentant légal 1": data.young.parent1Email,
+          "Téléphone représentant légal 1": data.young.parent1Phone,
+          "Adresse représentant légal 1": data.young.parent1Address,
+          "Code postal représentant légal 1": data.young.parent1Zip,
+          "Ville représentant légal 1": data.young.parent1City,
+          "Département représentant légal 1": data.young.parent1Department,
+          "Région représentant légal 1": data.young.parent1Region,
+        },
+        representative2: {
+          "Statut représentant légal 2": translate(data.young.parent2Status),
+          "Prénom représentant légal 2": data.young.parent2FirstName,
+          "Nom représentant légal 2": data.young.parent2LastName,
+          "Email représentant légal 2": data.young.parent2Email,
+          "Téléphone représentant légal 2": data.young.parent2Phone,
+          "Adresse représentant légal 2": data.young.parent2Address,
+          "Code postal représentant légal 2": data.young.parent2Zip,
+          "Ville représentant légal 2": data.young.parent2City,
+          "Département représentant légal 2": data.young.parent2Department,
+          "Région représentant légal 2": data.young.parent2Region,
+        },
+      };
+      let fields = { ID: data._id };
+      for (const element of values) {
+        let key;
+        for (key in allFields[element]) fields[key] = allFields[element][key];
+      }
+      return fields;
+    });
+  }
+
   if (!applications) return <Loader />;
 
   return (
@@ -67,56 +182,19 @@ export default function Youngs({ mission, applications, updateMission }) {
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
-                <ExportComponent
-                  title="Exporter les volontaires"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Volontaires"
+                <button
+                  className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                  onClick={() => setIsExportOpen(true)}>
+                  Exporter les candidatures
+                </button>
+                <ModalExport
+                  isOpen={isExportOpen}
+                  setIsOpen={setIsExportOpen}
                   index="application"
-                  react={{ and: FILTERS }}
-                  transform={async (data) => {
-                    let all = data;
-                    const youngIds = [...new Set(data.map((item) => item.youngId))];
-                    if (youngIds?.length) {
-                      const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-                      if (responses.length) {
-                        const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                        all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-                      }
-                    }
-                    return all.map((data) => {
-                      return {
-                        _id: data._id,
-                        Cohorte: data.youngCohort,
-                        Prénom: data.youngFirstName,
-                        Nom: data.youngLastName,
-                        Email: data.youngEmail,
-                        "Date de naissance": formatLongDateUTCWithoutTime(data.youngBirthdateAt),
-                        Téléphone: data.young.phone,
-                        "Adresse du volontaire": data.young.address,
-                        "Code postal du volontaire": data.young.zip,
-                        "Ville du volontaire": data.young.city,
-                        "Département du volontaire": data.young.department,
-                        "Région du volontaire": data.young.region,
-                        "Mobilité aux alentours de son établissement": translate(data.young.mobilityNearSchool),
-                        "Mobilité aux alentours de son domicile": translate(data.young.mobilityNearHome),
-                        "Mobilité aux alentours d'un de ses proches": translate(data.young.mobilityNearRelative),
-                        "Mode de transport": data.young.mobilityTransport?.map((t) => translate(t)).join(", "),
-                        "Autre mode de transport": data.young.mobilityTransportOther,
-                        "Prénom représentant légal 1": data.young.parent1FirstName,
-                        "Nom représentant légal 1": data.young.parent1LastName,
-                        "Email représentant légal 1": data.young.parent1Email,
-                        "Téléphone représentant légal 1": data.young.parent1Phone,
-                        "Choix - Ordre de la candidature": data.priority,
-                        "Nom de la mission": data.missionName,
-                        "Département de la mission": data.missionDepartment,
-                        "Région de la mission": data.missionRegion,
-                        "Candidature créée lé": formatLongDateUTC(data.createdAt),
-                        "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
-                        "Statut de la candidature": translate(data.status),
-                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
-                      };
-                    });
-                  }}
+                  transform={transform}
+                  exportFields={[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) ? applicationExportFields.filter((e) => e.id !== "choices") : applicationExportFields}
+                  filters={FILTERS}
+                  getExportQuery={getExportQuery}
                 />
               </div>
             </div>

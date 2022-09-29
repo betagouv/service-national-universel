@@ -41,7 +41,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
@@ -331,7 +331,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("structure", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("structure", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeStructures(response) });
     } else {
       const response = await esClient.msearch({ index: "structure", body: withFilterForMSearch(body, filter) });
@@ -435,7 +435,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeApplications(response) });
     } else {
       const response = await esClient.msearch({ index: "application", body: withFilterForMSearch(body, filter) });
