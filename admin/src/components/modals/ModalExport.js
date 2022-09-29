@@ -84,6 +84,11 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
               transform={(data) => transform(data, selectedFields)}
               fieldsToExport={fieldsToExport}
               setIsOpen={setIsOpen}
+              css={{
+                override: true,
+                button: `bg-brand-purple rounded-md px-4 py-2 text-sm text-white font-semibold w-full hover:bg-brand-darkPurple`,
+                loadingButton: `bg-brand-transPurple rounded-md px-4 py-2 text-sm text-white font-semibold w-full`,
+              }}
             />
           </div>
         </div>

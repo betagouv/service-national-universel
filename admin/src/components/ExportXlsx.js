@@ -19,11 +19,7 @@ export default function ExportComponent({
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
   fieldsToExport = "*",
   setIsOpen,
-  css = {
-    override: true,
-    button: `bg-brand-purple rounded-md px-4 py-2 text-sm text-white font-semibold w-full hover:bg-brand-darkPurple`,
-    loadingButton: `bg-brand-transpurple rounded-md px-4 py-2 text-sm text-white font-semibold w-full`,
-  },
+  css = { override: false },
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
