@@ -1,3 +1,15 @@
+# [1.138.0](https://github.com/betagouv/service-national-universel/compare/v1.137.0...v1.138.0) (2022-09-29)
+
+
+### Bug Fixes
+
+* **api:** soft-delete young for ref dep ([#1841](https://github.com/betagouv/service-national-universel/issues/1841)) ([c251cc7](https://github.com/betagouv/service-national-universel/commit/c251cc70c7938a544fcae38a76bb10e2b1ebf7b5))
+
+
+### Features
+
+* **admin:** Export candidatures depuis fiche mission ([#1840](https://github.com/betagouv/service-national-universel/issues/1840)) ([4141bfb](https://github.com/betagouv/service-national-universel/commit/4141bfbdc9b1b309502dd992e9ab3bed1e7249f5))
+
 # [1.137.0](https://github.com/betagouv/service-national-universel/compare/v1.136.0...v1.137.0) (2022-09-28)
 
 
