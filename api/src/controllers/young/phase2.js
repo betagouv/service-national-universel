@@ -10,7 +10,7 @@ const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
 const { ERRORS, getCcOfYoung } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung } = require("snu-lib");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
@@ -18,7 +18,10 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier").required(),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)").required(),
+      sousType: Joi.string()
+        .trim()
+        .valid(...UNSS_TYPE),
       structureName: Joi.string().trim().required(),
       address: Joi.string().trim().required(),
       zip: Joi.string().trim().required(),
@@ -115,7 +118,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       id: Joi.string().required(),
       idEquivalence: Joi.string().required(),
       status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier"),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"),
+      sousType: Joi.string()
+        .trim()
+        .valid(...UNSS_TYPE),
       structureName: Joi.string().trim(),
       address: Joi.string().trim(),
       zip: Joi.string().trim(),
@@ -132,6 +138,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+
+    if (value.type !== "Certification Union Nationale du Sport scolaire (UNSS)") {
+      value.sousType = undefined;
+    }
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 

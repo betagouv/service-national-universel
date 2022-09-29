@@ -85,6 +85,7 @@ export default function CardEquivalence({ equivalence, young }) {
               <div className="grid grid-cols-2 py-2">
                 <div className="flex flex-col gap-y-4 text-sm leading-none font-normal text-gray-400">
                   <span>Type d’engagement :</span>
+                  {equivalence.sousType ? <span>Catégorie :</span> : null}
                   <span>Structure d’accueil :</span>
                   <span>Dates :</span>
                   {equivalence.frequency ? <span>Fréquence :</span> : null}
@@ -94,6 +95,7 @@ export default function CardEquivalence({ equivalence, young }) {
                 </div>
                 <div className="flex flex-col gap-y-4 text-sm leading-none font-medium">
                   <span>{equivalence.type}</span>
+                  {equivalence.sousType ? <span>{equivalence.sousType}</span> : null}
                   <span>{equivalence.structureName}</span>
                   <span>
                     Du {formatDateFR(equivalence.startDate)} au {formatDateFR(equivalence.endDate)}
