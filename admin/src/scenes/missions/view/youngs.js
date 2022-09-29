@@ -39,6 +39,7 @@ import { applicationExportFields } from "snu-lib/excelExports";
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
 export default function Youngs({ mission, applications, updateMission }) {
+  const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState();
   const [isExportOpen, setIsExportOpen] = useState(false);
 
@@ -110,6 +111,7 @@ export default function Youngs({ mission, applications, updateMission }) {
           "Statut de la candidature": translate(data.status),
           // date du dernier statut
         },
+        // pas pour structures :
         choices: {
           "Domaine de MIG 1": data.young.domains[0],
           "Domaine de MIG 2": data.young.domains[1],
@@ -185,7 +187,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                   setIsOpen={setIsExportOpen}
                   index="application"
                   transform={transform}
-                  exportFields={applicationExportFields}
+                  exportFields={[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) ? applicationExportFields.filter((e) => e.id !== "choices") : applicationExportFields}
                   filters={FILTERS}
                   getExportQuery={getExportQuery}
                 />
