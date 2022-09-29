@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, NavLink } from "react-router-dom";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
+import Eye from "../../../../assets/icons/Eye";
 import IconDomain from "../../../../components/IconDomain";
 import Loader from "../../../../components/Loader";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
@@ -125,6 +126,13 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             ) : (
               <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} places disponibles</div>
             )}
+          </div>
+          <div>
+            <NavLink
+              to={`/volontaire/${young._id.toString()}/phase2/application/${hit._id.toString()}`}
+              className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer">
+              <Eye width={16} height={16} />
+            </NavLink>
           </div>
           <div className="flex flex-col basis-[35%] justify-end">
             {/* statut */}
