@@ -30,7 +30,6 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
                   <div className="rounded-xl bg-gray-50 py-3">
                     <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
                     <div className="mt-2 mx-auto text-center text-base text-gray-600">
-                      {console.log("🚀 ~ file: ModalExport.js ~ line 37 ~ ModalExport ~ Object.values(selectedValues", Object.values(selectedValues))}
                       {Object.values(selectedValues)
                         .filter((e) => e.value.length > 0)
                         .map((e) => getSelectedFilterLabel(e.value, translateFilter(e.label)))
