@@ -5,14 +5,20 @@ import { Link, useHistory, NavLink } from "react-router-dom";
 
 import Wrapper from "../wrapper";
 import api from "../../../../services/api";
+import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../utils";
+import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication, copyToClipboard } from "../../../../utils";
 import IconDomain from "../../../../components/IconDomain";
+import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
+import rubberStampValided from "../../../../assets/rubberStampValided.svg";
+import rubberStampNotValided from "../../../../assets/rubberStampNotValided.svg";
+import ReactTooltip from "react-tooltip";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
   const [mission, setMission] = React.useState();
   const [tags, setTags] = React.useState();
+  const [contract, setContract] = React.useState(null);
 
   let { applicationId } = useParams();
   const history = useHistory();
@@ -76,6 +82,20 @@ export default function Phase2Application({ young, onChange }) {
     getMission();
   }, [application]);
 
+  React.useEffect(() => {
+    const getContract = async () => {
+      if (application?.contractId) {
+        const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
+        if (!ok) {
+          capture(code);
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
+        setContract(data);
+      }
+    };
+    getContract();
+  }, [application]);
+
   if (!application || !mission) return "chargement";
 
   return (
@@ -99,8 +119,8 @@ export default function Phase2Application({ young, onChange }) {
           <hr className="my-4" />
           <div className="flex relative w-full rounded-xl px-4 border-[1px] border-white hover:border-gray-200">
             {/* Choix*/}
-            <div className="flex justify-between  ">
-              <Link className="flex basis-[35%] items-center" to={`/mission/${application.missionId}`}>
+            <div className="flex-1 flex justify-between  ">
+              <Link className="flex items-center" to={`/mission/${application.missionId}`}>
                 {/* icon */}
                 <div className="flex items-center mr-4">
                   <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
@@ -131,7 +151,7 @@ export default function Phase2Application({ young, onChange }) {
                 </div>
               </Link>
             </div>
-            <div>
+            <div className="">
               <div className="flex flex-col justify-center items-center p-4 m-0">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
@@ -144,9 +164,110 @@ export default function Phase2Application({ young, onChange }) {
             </div>
           </div>
           <hr className="my-4" />
+          <div className="p-4">
+            <div className="bg-gray-50 rounded-lg  px-10 py-6">
+              <div className="flex justify-between">
+                <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+                <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                  <AiFillClockCircle className="text-sky-500" />
+                  <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
+                </div>
+              </div>
+              <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+              {contract?.invitationSent && (
+                <div className="grid gap-4 grid-cols-4   mt-4">
+                  <StatusContractPeople
+                    value={contract?.projectManagerStatus}
+                    description="Représentant de l’État"
+                    firstName={contract?.projectManagerFirstName}
+                    lastName={contract?.projectManagerLastName}
+                    target="projectManager"
+                    contract={contract}
+                    status={contract?.projectManagerStatus}
+                    token={contract?.projectManagerToken}
+                    validationDate={contract?.projectManagerValidationDate}
+                  />
+                  <StatusContractPeople
+                    value={contract?.structureManagerStatus}
+                    description="Représentant de la structure"
+                    firstName={contract?.structureManagerFirstName}
+                    lastName={contract?.structureManagerLastName}
+                    target="structureManager"
+                    contract={contract}
+                    status={contract?.structureManagerStatus}
+                    token={contract?.structureManagerToken}
+                    validationDate={contract?.structureManagerValidationDate}
+                  />
+                  {contract?.isYoungAdult === "true" ? (
+                    <StatusContractPeople value={contract?.youngContractStatus} description="Volontaire" firstName={contract?.youngFirstName} lastName={contract?.youngLastName} />
+                  ) : (
+                    <>
+                      <StatusContractPeople
+                        value={contract?.parent1Status}
+                        description="Représentant légal 1"
+                        firstName={contract?.parent1FirstName}
+                        lastName={contract?.parent1LastName}
+                        target="parent1"
+                        contract={contract}
+                        status={contract?.parent1Status}
+                        token={contract?.parent1Token}
+                        validationDate={contract?.parent1ValidationDate}
+                      />
+                      {contract?.parent2Email && (
+                        <StatusContractPeople
+                          value={contract?.parent2Status}
+                          description="Représentant légal 2"
+                          firstName={contract?.parent2FirstName}
+                          lastName={contract?.parent2LastName}
+                          target="parent2"
+                          contract={contract}
+                          status={contract?.parent2Status}
+                          token={contract?.parent2Token}
+                          validationDate={contract?.parent2ValidationDate}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        {JSON.stringify(application)}
+        {/* {JSON.stringify(application)} */}
       </Wrapper>
     </div>
   );
 }
+
+const StatusContractPeople = ({ value, description, firstName, lastName, token }) => (
+  <div className="flex flex-col justify-center items-start ">
+    <div className="flex flex-col justify-center items-start " data-tip data-for={`${firstName}${lastName}-validation`}>
+      <div className="mr-2">
+        {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
+      </div>
+      <div>
+        <div className="flex font-semibold space-x-2">
+          <div>{firstName}</div>
+          <div>{lastName?.toUpperCase()}</div>
+        </div>
+        <div className="text-gray-500 text-xs">{description}</div>
+      </div>
+      {value !== "VALIDATED" ? (
+        <ReactTooltip id={`${firstName}${lastName}-validation`} type="light">
+          En attente de signature
+        </ReactTooltip>
+      ) : null}
+    </div>
+    <div className="mt-4">
+      <div
+        className="text-xs text-blue-500 cursor-pointer hover:underline"
+        onClick={() => {
+          copyToClipboard(`${appURL}/validate-contract?token=${token}`);
+          toastr.success("Le lien a été copié dans le presse papier.");
+        }}>
+        Copier le lien de validation
+      </div>
+      {/* <SendContractLink contract={contract} target={target} /> */}
+    </div>
+  </div>
+);

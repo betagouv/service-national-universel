@@ -134,7 +134,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
               <Eye width={16} height={16} />
             </NavLink>
           </div>
-          <div className="flex flex-col basis-[35%] justify-end">
+          <div className="flex basis-[35%] justify-end">
             {/* statut */}
             <div onClick={(e) => e.stopPropagation()}>
               <div>
