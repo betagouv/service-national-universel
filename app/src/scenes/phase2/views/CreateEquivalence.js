@@ -10,18 +10,19 @@ import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
 import validator from "validator";
-import { slugifyFileName } from "../../../utils";
+import { slugifyFileName, UNSS_TYPE } from "../../../utils";
 import plausibleEvent from "../../../services/plausible";
 import { capture } from "../../../sentry";
 
 export default function CreateEquivalence() {
   const young = useSelector((state) => state.Auth.young);
-  const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
+  const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"];
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
   const keyList = ["type", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
   const [data, setData] = useState({});
   const [openType, setOpenType] = useState(false);
+  const [openSousType, setOpenSousType] = React.useState(false);
   const [openDuree, setOpenDuree] = useState(false);
   const [openFrequence, setOpenFrequence] = useState(false);
   const [clickStartDate, setClickStartDate] = useState(false);
@@ -32,7 +33,9 @@ export default function CreateEquivalence() {
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMail, setErrorMail] = useState(false);
+
   const refType = useRef(null);
+  const refSousType = React.useRef(null);
   const refStartDate = useRef(null);
   const refEndDate = useRef(null);
   const refDuree = useRef(null);
@@ -77,6 +80,9 @@ export default function CreateEquivalence() {
       if (refType.current && !refType.current.contains(event.target)) {
         setOpenType(false);
       }
+      if (refSousType.current && !refSousType.current.contains(event.target)) {
+        setOpenSousType(false);
+      }
       if (refDuree.current && !refDuree.current.contains(event.target)) {
         setOpenDuree(false);
       }
@@ -108,6 +114,10 @@ export default function CreateEquivalence() {
         ) {
           error = true;
         }
+      } else if (key === "sousType") {
+        if (data.type === "Certification Union Nationale du Sport scolaire (UNSS)" && (data?.sousType === undefined || data.sousType === "")) {
+          error = true;
+        }
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
       }
@@ -125,6 +135,8 @@ export default function CreateEquivalence() {
 
     try {
       if (!error) {
+        if (data.type !== "Certification Union Nationale du Sport scolaire (UNSS)" && (data?.sousType === "" || data?.sousType)) delete data.sousType;
+
         const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
         if (!ok) {
           toastr.error("Oups, une erreur est survenue");
@@ -188,7 +200,7 @@ export default function CreateEquivalence() {
                     <div
                       key={option}
                       onClick={() => {
-                        setData({ ...data, type: option });
+                        setData({ ...data, type: option, sousType: "" });
                         setOpenType(false);
                       }}
                       className={`${option === data?.type && "font-bold bg-gray"}`}>
@@ -203,6 +215,41 @@ export default function CreateEquivalence() {
             </div>
             {error?.type ? <div className="text-xs leading-4 font-normal text-red-500">{error.type}</div> : null}
           </div>
+          {data?.type === "Certification Union Nationale du Sport scolaire (UNSS)" ? (
+            <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
+              {data?.sousType ? <div className="text-xs leading-4 font-normal text-gray-500">Catégorie</div> : null}
+              <div className="relative" ref={refSousType}>
+                <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenSousType((e) => !e)}>
+                  <div className="flex items-center gap-2">
+                    {data?.sousType ? (
+                      <span className="text-sm leading-5 font-normal">{data?.sousType}</span>
+                    ) : (
+                      <span className="text-gray-400 text-sm leading-5 font-normal">Catégorie</span>
+                    )}
+                  </div>
+                  <ChevronDown className="text-gray-400" />
+                </button>
+                {/* display options */}
+                <div className={`${openSousType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                  {UNSS_TYPE.map((option) => (
+                    <div
+                      key={option}
+                      onClick={() => {
+                        setData({ ...data, sousType: option });
+                        setOpenSousType(false);
+                      }}
+                      className={`${option === data?.sousType && "font-bold bg-gray"}`}>
+                      <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                        <div>{option}</div>
+                        {option === data?.sousType ? <BsCheck2 /> : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {error?.sousType ? <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div> : null}
+            </div>
+          ) : null}
 
           <div className="border-[1px] border-gray-300 w-full px-3 h-14 rounded-lg mt-3  ">
             <div className="flex justify-center h-full  flex-col space-y-1">
