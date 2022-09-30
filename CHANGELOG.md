@@ -1,3 +1,18 @@
+# [1.139.0](https://github.com/betagouv/service-national-universel/compare/v1.138.0...v1.139.0) (2022-09-30)
+
+
+### Bug Fixes
+
+* **admin:** Gestion erreurs preferences missions ([#1839](https://github.com/betagouv/service-national-universel/issues/1839)) ([bac2be5](https://github.com/betagouv/service-national-universel/commit/bac2be50eb1eedeaad1f67722661c237ac959335))
+* **api:** fix pb affichage modal d'export avec recherche textuelle ([#1843](https://github.com/betagouv/service-national-universel/issues/1843)) ([ba307f3](https://github.com/betagouv/service-national-universel/commit/ba307f3dd305b79b447e4fc1ea62b89c71c502f7))
+* **api/admin/app:** MIG - Ajout équivalence MIG ([#1842](https://github.com/betagouv/service-national-universel/issues/1842)) ([464f0e7](https://github.com/betagouv/service-national-universel/commit/464f0e7a25e3c1dfe8085459a2b71c548a47332a))
+
+
+### Features
+
+* **api:** Add model shoolRAMSES ([#1844](https://github.com/betagouv/service-national-universel/issues/1844)) ([218fb17](https://github.com/betagouv/service-national-universel/commit/218fb17b3cc493d7f09c08d723cc4a4c43e2cf68))
+* **api:** Delete pendingCandidature ([#1846](https://github.com/betagouv/service-national-universel/issues/1846)) ([d21912d](https://github.com/betagouv/service-national-universel/commit/d21912d313c58dd977f98a6475713b4a84231a2c))
+
 # [1.138.0](https://github.com/betagouv/service-national-universel/compare/v1.137.0...v1.138.0) (2022-09-29)
 
 
