@@ -63,6 +63,7 @@ export default function Index() {
       <SentryRoute path="/inscription2023/consentement" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
       <SentryRoute path="/inscription2023/document" component={() => <Step step={STEPS.DOCUMENTS} />} />
       <SentryRoute path="/inscription2023/done" component={() => <Step step={STEPS.DONE} />} />
+      {/* Redirect vers home */}
       <SentryRoute path="/inscription2023" component={() => <Step step={STEPS.COORDONNEES} />} />
     </Switch>
   );
