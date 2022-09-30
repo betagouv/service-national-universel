@@ -12,7 +12,6 @@ import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
 import WrapperPhase2 from "../wrapper";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
-// import Pencil from "../../../../assets/pencil.svg";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import Menu from "../../../../assets/icons/Menu";
@@ -20,12 +19,15 @@ import Pencil from "../../../../assets/icons/Pencil";
 import ExportComponent from "../../../../components/ExportXlsx";
 import { apiURL } from "../../../../config";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../sentry";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   const [blocOpened, setBlocOpened] = useState("missions");
   const [editPreference, setEditPreference] = useState(false);
   const [savePreference, setSavePreference] = useState(false);
+  const [errorMessage, setErrorMessage] = useState({});
+  const [openDesiredLocation, setOpenDesiredLocation] = React.useState(false);
 
   const [dataPreference, setDataPreference] = React.useState({
     professionnalProject: "",
@@ -52,7 +54,7 @@ export default function Phase2({ young, onChange }) {
     setDataPreference({
       professionnalProject: young?.professionnalProject || "",
       professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
-      engaged: young?.engaged || "",
+      engaged: young?.engaged || "false",
       desiredLocation: young?.desiredLocation || "",
       engagedDescription: young?.engagedDescription || "",
       domains: young?.domains ? [...young.domains] : [],
@@ -72,14 +74,84 @@ export default function Phase2({ young, onChange }) {
   }, [young, editPreference]);
 
   const onSubmit = async () => {
-    //loader a utiliser + error a throw
-    setSavePreference(false);
-    const { ok, data } = await api.put(`/young/${young._id.toString()}/phase2/preference`, dataPreference);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", translate(data.code));
-    toastr.success("Succès", "Vos préférences ont bien été enregistrées");
-    await onChange();
-    setEditPreference(false);
-    setSavePreference(false);
+    try {
+      let error = {};
+      let data = dataPreference;
+
+      //Error : professionnalProjet
+      if (dataPreference.professionnalProject === "UNIFORM") {
+        if (!["FIREFIGHTER", "POLICE", "ARMY"].includes(dataPreference.professionnalProjectPrecision)) {
+          error.errorProject = "Ce champs est obligatoire";
+        }
+      }
+
+      if (dataPreference.professionnalProject === "OTHER" && dataPreference.professionnalProjectPrecision === "") {
+        error.errorProject = "Ce champs est obligatoire";
+      }
+
+      //Error : Desired Location
+      if (openDesiredLocation && !dataPreference.desiredLocation) {
+        error.desiredLocation = "Ce champs est obligatoire";
+      }
+
+      //Error : Engaged
+      if (dataPreference.engaged === "true" && !dataPreference.engagedDescription) {
+        error.engaged = "Ce champs est obligatoire";
+      }
+
+      //Error : transport
+      if (dataPreference.mobilityTransport.includes("OTHER") && dataPreference.mobilityTransportOther === "") {
+        error.transport = "Ce champs est obligatoire";
+      }
+
+      //Error : MobilityNearRelative
+      if (
+        dataPreference.mobilityNearRelative === "true" &&
+        (!dataPreference?.mobilityNearRelativeAddress ||
+          dataPreference.mobilityNearRelativeAddress === "" ||
+          !dataPreference?.mobilityNearRelativeCity ||
+          dataPreference.mobilityNearRelativeCity === "" ||
+          !dataPreference?.mobilityNearRelativeName ||
+          dataPreference.mobilityNearRelativeName === "" ||
+          !dataPreference?.mobilityNearRelativeZip ||
+          dataPreference.mobilityNearRelativeZip === "")
+      ) {
+        error.mobilityNearRelative = "Veuillez renseigner une adresse";
+      }
+
+      //Error
+      if (dataPreference.domains.length !== 3 && dataPreference.domains.length !== 0) {
+        error.domains = "Veuillez sélectionner 3 domaines favoris";
+      }
+
+      if (dataPreference.professionnalProject === "") {
+        // Error enum
+        delete data.professionnalProject;
+      }
+
+      if (dataPreference.period === "") {
+        delete data.period;
+      }
+
+      if (Object.keys(error).length) {
+        setErrorMessage(error);
+      } else {
+        setErrorMessage({});
+        setSavePreference(true);
+        const { ok, code } = await api.put(`/young/${young._id.toString()}/phase2/preference`, data);
+
+        if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+        toastr.success("Succès", "Vos préférences ont bien été enregistrées");
+        console.log(code);
+
+        await onChange();
+        setEditPreference(false);
+        setSavePreference(false);
+      }
+    } catch (error) {
+      capture(error);
+      setSavePreference(false);
+    }
   };
 
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
@@ -169,7 +241,7 @@ export default function Phase2({ young, onChange }) {
               </div>
             </div>
 
-            {blocOpened === "preferences" ? (
+            {blocOpened === "preferences" && !savePreference ? (
               <div className="flex items-center gap-4">
                 {editPreference ? (
                   <div className="hover:scale-105 flex items-center gap-2 bg-gray-100 rounded-[28px] px-[9px] py-[7px] h-[32px]" onClick={() => setEditPreference(false)}>
@@ -253,6 +325,10 @@ export default function Phase2({ young, onChange }) {
               setEditPreference={setEditPreference}
               setSavePreference={setSavePreference}
               onSubmit={onSubmit}
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              openDesiredLocation={openDesiredLocation}
+              setOpenDesiredLocation={setOpenDesiredLocation}
             />
           )}
         </Box>

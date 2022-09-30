@@ -9,11 +9,22 @@ import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_P
 import ModalPreference from "../../components/ModalPreference";
 import RankingPeriod from "../../components/rankingPeriod";
 import Pencil from "../../../../assets/icons/Pencil";
+import Loader from "../../../../components/Loader";
 
-export default function Preferences({ young, data, setData, editPreference, savePreference, onSubmit }) {
+export default function Preferences({
+  young,
+  data,
+  setData,
+  editPreference,
+  savePreference,
+  onSubmit,
+  errorMessage,
+  setErrorMessage,
+  openDesiredLocation,
+  setOpenDesiredLocation,
+}) {
   const [openProject, setOpenProject] = React.useState(false);
   const [openProjectPrecision, setOpenProjectPrecision] = React.useState(false);
-  const [openDesiredLocation, setOpenDesiredLocation] = React.useState(false);
   const [hasRelativeAddress, setHasRelativeAddress] = React.useState(false);
   const [modal, setModal] = React.useState({});
   const refProject = React.useRef();
@@ -56,10 +67,11 @@ export default function Preferences({ young, data, setData, editPreference, save
         return null;
     }
   };
-
-  return (
+  return savePreference ? (
+    <Loader />
+  ) : (
     <div className="flex flex-col mx-5">
-      <div className="flex flex-row gap-4 items-center mt-3 w-full">
+      <div className="flex flex-row gap-4 items-start mt-3 w-full">
         {!editPreference ? (
           <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
             <div className="text-xs leading-4 font-normal text-gray-500">Projet professionnel</div>
@@ -87,6 +99,7 @@ export default function Preferences({ young, data, setData, editPreference, save
                     onClick={() => {
                       setData({ ...data, professionnalProject: option, professionnalProjectPrecision: "" });
                       setOpenProject(false);
+                      setErrorMessage({});
                     }}
                     className={`${option === data?.professionnalProject && "font-bold bg-gray"}`}>
                     <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
@@ -99,59 +112,63 @@ export default function Preferences({ young, data, setData, editPreference, save
             </div>
           </div>
         )}
-        {!editPreference && data?.professionnalProjectPrecision ? (
-          <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
-            <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
-            <div className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent">
-              {t(data.professionnalProjectPrecision) ? t(data.professionnalProjectPrecision) : "Non renseigné"}
-            </div>
-          </div>
-        ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.OTHER ? (
-          <div className="border-[1px] border-gray-300 w-1/2 px-3 py-2 rounded-lg ">
-            <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
-            <input
-              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent"
-              type="text"
-              value={data.professionnalProjectPrecision}
-              onChange={(e) => setData({ ...data, professionnalProjectPrecision: e.target.value })}
-            />
-          </div>
-        ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
-          <div className="border-[1px] border-gray-300 w-1/2 rounded-lg px-3 py-2 ">
-            <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
-            <div className="relative" ref={refProjectPrecision}>
-              <button
-                className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
-                onClick={() => setOpenProjectPrecision((e) => !e)}>
-                <div className="flex items-center gap-2">
-                  {data?.professionnalProjectPrecision ? (
-                    <span className="text-sm leading-5 font-normal">{t(data?.professionnalProjectPrecision)}</span>
-                  ) : (
-                    <span className="text-gray-400 text-sm font-normal">Projet professionnel</span>
-                  )}
-                </div>
-                <ChevronDown className="text-gray-400" />
-              </button>
-              {/* display options */}
-              <div className={`${openProjectPrecision ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                {Object.values(PROFESSIONNAL_PROJECT_PRECISION).map((option) => (
-                  <div
-                    key={option}
-                    onClick={() => {
-                      setData({ ...data, professionnalProjectPrecision: option });
-                      setOpenProjectPrecision(false);
-                    }}
-                    className={`${option === data?.professionnalProjectPrecision && "font-bold bg-gray"}`}>
-                    <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                      <div>{t(option)}</div>
-                      {option === data?.professionnalProjectPrecision ? <BsCheck2 /> : null}
-                    </div>
-                  </div>
-                ))}
+        <div className="flex flex-col w-1/2 ">
+          {!editPreference && data?.professionnalProjectPrecision ? (
+            <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
+              <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
+              <div className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent">
+                {t(data.professionnalProjectPrecision) ? t(data.professionnalProjectPrecision) : "Non renseigné"}
               </div>
             </div>
-          </div>
-        ) : null}
+          ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.OTHER ? (
+            <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
+              <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
+              <input
+                className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500 disabled:bg-transparent"
+                type="text"
+                value={data.professionnalProjectPrecision}
+                onChange={(e) => setData({ ...data, professionnalProjectPrecision: e.target.value })}
+              />
+            </div>
+          ) : editPreference && data?.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
+            <div className="border-[1px] border-gray-300 w-full rounded-lg px-3 py-2 ">
+              <div className="text-xs leading-4 font-normal text-gray-500">Précisez</div>
+              <div className="relative" ref={refProjectPrecision}>
+                <button
+                  className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
+                  onClick={() => setOpenProjectPrecision((e) => !e)}>
+                  <div className="flex items-center gap-2">
+                    {data?.professionnalProjectPrecision ? (
+                      <span className="text-sm leading-5 font-normal">{t(data?.professionnalProjectPrecision)}</span>
+                    ) : (
+                      <span className="text-gray-400 text-sm font-normal">Projet professionnel</span>
+                    )}
+                  </div>
+                  <ChevronDown className="text-gray-400" />
+                </button>
+                {/* display options */}
+                <div className={`${openProjectPrecision ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                  {Object.values(PROFESSIONNAL_PROJECT_PRECISION).map((option) => (
+                    <div
+                      key={option}
+                      onClick={() => {
+                        setData({ ...data, professionnalProjectPrecision: option });
+                        setOpenProjectPrecision(false);
+                        setErrorMessage({});
+                      }}
+                      className={`${option === data?.professionnalProjectPrecision && "font-bold bg-gray"}`}>
+                      <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                        <div>{t(option)}</div>
+                        {option === data?.professionnalProjectPrecision ? <BsCheck2 /> : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {editPreference && errorMessage.errorProject && <div className="text-red-500 text-xs mt-1">{errorMessage.errorProject}</div>}
+        </div>
       </div>
       <div className="flex flex-row w-full gap-4 items-center mt-4">
         <div className="flex w-1/2 items-center gap-10">
@@ -203,7 +220,7 @@ export default function Preferences({ young, data, setData, editPreference, save
           )}
         </div>
       </div>
-      <div className="flex flex-row w-full gap-4 items-center mt-4">
+      <div className="flex flex-row w-full gap-4 items-start mt-4">
         <div className="w-1/2">
           {openDesiredLocation || data.desiredLocation ? (
             <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg ">
@@ -218,6 +235,7 @@ export default function Preferences({ young, data, setData, editPreference, save
               />
             </div>
           ) : null}
+          {openDesiredLocation && errorMessage.desiredLocation && <div className="text-red-500 text-xs mt-1">{errorMessage.desiredLocation}</div>}
         </div>
         <div className="w-1/2">
           {data.engaged === "true" ? (
@@ -233,6 +251,7 @@ export default function Preferences({ young, data, setData, editPreference, save
               />
             </div>
           ) : null}
+          {data.engaged === "true" && errorMessage.engaged && <div className="text-red-500 text-xs mt-1">{errorMessage.engaged}</div>}
         </div>
       </div>
       <div className="flex flex-col w-full gap-4 items-center justify-center mt-4 border-t-[1px] border-b-[1px] py-14">
@@ -274,7 +293,9 @@ export default function Preferences({ young, data, setData, editPreference, save
             })}
           </div>
         )}
+        {editPreference && errorMessage.domains && <div className="text-red-500 text-xs mt-1">{errorMessage.domains}</div>}
       </div>
+
       <div className="flex flex-col w-full gap-4 items-center justify-center border-b-[1px] py-14">
         <div className="leading-5 font-bold text-sm">Format préféré</div>
         <div className="flex space-x-4 mt-2">
@@ -312,7 +333,7 @@ export default function Preferences({ young, data, setData, editPreference, save
         </div>
         {[PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
           <div className="flex mt-2 items-center">
-            <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" />
+            <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" disabled={!editPreference} />
           </div>
         ) : null}
       </div>
@@ -352,6 +373,9 @@ export default function Preferences({ young, data, setData, editPreference, save
             />
           </div>
         ) : null}
+      </div>
+      <div className="flex justify-center">
+        {editPreference && errorMessage.transport && <div className="text-red-500 text-xs w-1/3 flex justify-start mt-1">{errorMessage.transport}</div>}
       </div>
 
       <div className="flex flex-col w-full gap-4 items-center justify-center mt-5 pb-14">
@@ -397,18 +421,21 @@ export default function Preferences({ young, data, setData, editPreference, save
                 <div className={`text-sm ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}>
                   {data.mobilityNearRelativeCity}{" "}
                   {editPreference ? (
-                    <span className="text-xs cursor-pointer hover:underline" onClick={() => setModal({ isOpen: true })}>
+                    <span className="text-xs cursor-pointer hover:underline hover:text-blue-600 hover:decoration-blue-600" onClick={() => setModal({ isOpen: true })}>
                       (Modifier)
                     </span>
                   ) : null}
                 </div>
               ) : (
                 <div
-                  className={`text-sm ${editPreference ? "cursor-pointer hover:underline" : ""} ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}
+                  className={`text-sm ${editPreference ? "cursor-pointer hover:underline hover:decoration-blue-600 hover:text-blue-600" : ""} ${
+                    data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"
+                  }`}
                   onClick={() => editPreference && setModal({ isOpen: true })}>
                   {editPreference ? "Renseigner une adresse" : "Aucune adresse renseignée"}
                 </div>
               )}
+              {editPreference && errorMessage.mobilityNearRelative && <div className="text-red-500 text-xs flex justify-start mt-1">{errorMessage.mobilityNearRelative}</div>}
             </div>
           </div>
         </div>
@@ -421,7 +448,7 @@ export default function Preferences({ young, data, setData, editPreference, save
           </div>
         </div>
       ) : null}
-      <ModalPreference isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false })} data={data} setData={setData} />
+      <ModalPreference isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false })} data={data} setData={setData} setModal={setModal} />
     </div>
   );
 }

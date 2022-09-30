@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../../utils";
 
-export default function RankingPeriod({ period, handleChange, name, values }) {
+export default function RankingPeriod({ period, handleChange, name, values, disabled }) {
   const [items, setItems] = useState(values[name] ? values[name] : []);
 
   const updateList = (value) => {
@@ -36,11 +36,11 @@ export default function RankingPeriod({ period, handleChange, name, values }) {
   return (
     <div>
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="list">
+        <Droppable droppableId="list" isDropDisabled={disabled}>
           {(provided) => (
             <div className="border-[1px] px-2  rounded-2xl " ref={provided.innerRef} {...provided.droppableProps}>
               {items.map((e, i) => (
-                <Item key={e} index={i} value={e} values={values} updateList={updateList} name={name} />
+                <Item key={e} index={i} value={e} values={values} updateList={updateList} name={name} disabled={disabled} />
               ))}
               {provided.placeholder}
             </div>
@@ -57,7 +57,7 @@ Array.prototype.toggleValue = function (i, j) {
   this[i] = temp;
 };
 
-const Item = ({ value, values, index, updateList, name }) => {
+const Item = ({ value, values, index, updateList, name, disabled }) => {
   const handleMove = (index, delta) => {
     const nextIndex = index + delta;
     if (nextIndex >= 0 && nextIndex < values[name].length) {
@@ -79,10 +79,12 @@ const Item = ({ value, values, index, updateList, name }) => {
             <RoundItem value={index + 1} />
             <div className="my-0 mx-4">{translate(value)}</div>
           </div>
-          <div className="flex">
-            <RoundItem plus onClick={() => handleMove(index, -1)} />
-            <RoundItem minus onClick={() => handleMove(index, 1)} />
-          </div>
+          {!disabled && (
+            <div className="flex">
+              <RoundItem plus onClick={() => handleMove(index, -1)} />
+              <RoundItem minus onClick={() => handleMove(index, 1)} />
+            </div>
+          )}
         </div>
       )}
     </Draggable>
