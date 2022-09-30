@@ -107,10 +107,14 @@ export default function Phase2({ young, onChange }) {
       //Error : MobilityNearRelative
       if (
         dataPreference.mobilityNearRelative === "true" &&
-        !dataPreference.mobilityNearRelativeAddress &&
-        !dataPreference.mobilityNearRelativeCity &&
-        !dataPreference.mobilityNearRelativeName &&
-        !dataPreference.mobilityNearRelativeZip
+        (!dataPreference?.mobilityNearRelativeAddress ||
+          dataPreference.mobilityNearRelativeAddress === "" ||
+          !dataPreference?.mobilityNearRelativeCity ||
+          dataPreference.mobilityNearRelativeCity === "" ||
+          !dataPreference?.mobilityNearRelativeName ||
+          dataPreference.mobilityNearRelativeName === "" ||
+          !dataPreference?.mobilityNearRelativeZip ||
+          dataPreference.mobilityNearRelativeZip === "")
       ) {
         error.mobilityNearRelative = "Veuillez renseigner une adresse";
       }
