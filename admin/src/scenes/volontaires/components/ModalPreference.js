@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Modal } from "reactstrap";
 import validator from "validator";
 import CloseSvg from "../../../assets/Close";
 
-export default function ModalPreference({ isOpen, onCancel, setData, data }) {
+export default function ModalPreference({ isOpen, onCancel, setData, data, setModal }) {
   const [values, setValues] = React.useState({
     mobilityNearRelativeName: "",
     mobilityNearRelativeAddress: "",
@@ -11,6 +11,7 @@ export default function ModalPreference({ isOpen, onCancel, setData, data }) {
     mobilityNearRelativeCity: "",
   });
   const [errors, setErrors] = React.useState({});
+  const ref = useRef();
 
   React.useEffect(() => {
     setValues({
@@ -20,6 +21,18 @@ export default function ModalPreference({ isOpen, onCancel, setData, data }) {
       mobilityNearRelativeCity: data.mobilityNearRelativeCity,
     });
   }, [data]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setModal({ isOpen: false });
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
 
   const onSubmit = async () => {
     let error = {};
@@ -45,7 +58,7 @@ export default function ModalPreference({ isOpen, onCancel, setData, data }) {
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="l">
-      <div className="flex flex-col px-8 py-4">
+      <div className="flex flex-col px-8 py-4" ref={ref}>
         <div className="flex justify-end">
           <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
         </div>

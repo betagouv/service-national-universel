@@ -448,7 +448,7 @@ export default function Preferences({
           </div>
         </div>
       ) : null}
-      <ModalPreference isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false })} data={data} setData={setData} />
+      <ModalPreference isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false })} data={data} setData={setData} setModal={setModal} />
     </div>
   );
 }
