@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import ChevronDown from "../assets/icons/ChevronDown";
+import SpeakerPhone from "../assets/icons/SpeakerPhone";
 
 export default function Select({ options, value, placeholder, Icon = null, alignItems = "left", onChange }) {
   const [open, setOpen] = React.useState(false);
@@ -57,15 +58,20 @@ export default function Select({ options, value, placeholder, Icon = null, align
           className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute ${
             alignItems === "right" ? "right-0" : "left-0"
           } border-3 shadow overflow-hidden z-50`}>
-          <div className="disabled px-3 p-2 text-gray-300">Présence à l&apos;arrivée</div>
+          <div className="disabled p-2 font-medium text-xs text-gray-500 px-3 py-2">Présence à l&apos;arrivée</div>
           {options.map((option, index) => (
             <div
               key={option?.key || index}
               onClick={() => handleChangeValue(option)}
-              className={`${option.value === value && "font-bold bg-gray"} group flex justify-between items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer ${
-                option.disabled && "hidden"
-              }`}>
-              {option.label}
+              className={`${
+                option.value === value && "font-bold bg-gray"
+              } group flex justify-between space-x-8 items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer ${option.disabled && "hidden"}`}>
+              <div className="flex items-center">
+                {" "}
+                <SpeakerPhone className={`text-gray-400 group-hover:scale-105 mr-2 ${option.value === "true" ? "group-hover:text-green-500" : "group-hover:text-red-500"}`} />
+                <div>Marquer {option.label}</div>
+              </div>
+
               {option.value === value ? <BsCheck2 /> : null}
             </div>
           ))}
