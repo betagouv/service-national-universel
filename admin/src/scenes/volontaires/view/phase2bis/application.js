@@ -13,6 +13,8 @@ import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../../../assets/rubberStampNotValided.svg";
 import ReactTooltip from "react-tooltip";
+import Clock from "../../../../assets/Clock.svg";
+import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -102,24 +104,29 @@ export default function Phase2Application({ young, onChange }) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <Wrapper young={young} tab="phase2" onChange={onChange}>
         {/* <Contract young={young} admin={true} /> */}
-        <div className="bg-white w-full h-full rounded-lg">
-          <div className="flex justify-between p-6">
-            <button onClick={history.goBack}>retour</button>
+        <div className="bg-white w-full h-full rounded-lg px-4">
+          <div className="flex justify-between py-6">
+            <button onClick={history.goBack} className="flex items-center space-x-1 bg-gray-100 rounded-full p-[9px]">
+              <LeftArrow stroke={"#374151"} width={15} />
+            </button>
             <div className="flex items-center gap-3 text-2xl font-bold">
-              Espace&nbsp;candidature{" "}
+              <div>Espace&nbsp;candidature </div>
               <div className="flex basis-[44%] items-center justify-end">
-                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-1.5 py-[5px] rounded-sm`}>
                   {translateApplication(application.status)}
                 </div>
               </div>
             </div>
             {/* TODO */}
-            <button onClick={() => {}}>Historique</button>
+            <button className="flex items-center space-x-1 bg-gray-100 rounded py-[7px] pr-[11px] pl-[9px]" onClick={() => {}}>
+              {" "}
+              <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>{" "}
+            </button>
           </div>
           <hr className="my-4" />
-          <div className="flex relative w-full rounded-xl px-4 border-[1px] border-white hover:border-gray-200">
+          <div className="flex relative w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
             {/* Choix*/}
-            <div className="flex-1 flex justify-between  ">
+            <div className="flex-1 flex justify-between basis-[60%] ">
               <Link className="flex items-center" to={`/mission/${application.missionId}`}>
                 {/* icon */}
                 <div className="flex items-center mr-4">
@@ -151,8 +158,8 @@ export default function Phase2Application({ young, onChange }) {
                 </div>
               </Link>
             </div>
-            <div className="">
-              <div className="flex flex-col justify-center items-center p-4 m-0">
+            <div className="border-x border-x-gray-200 basis-[40%]">
+              <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
                 <div className="font-bold text-2xl text-[#242526]">{application.missionDuration || "0"}h</div>
