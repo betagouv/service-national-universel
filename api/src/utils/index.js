@@ -331,7 +331,6 @@ async function updateYoungPhase2Hours(young, fromUser) {
 // This could be refactored in one function.
 const updateStatusPhase2 = async (young, fromUser) => {
   const applications = await ApplicationModel.find({ youngId: young._id });
-  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
   const activeApplication = applications.filter(
     (a) =>
@@ -376,6 +375,10 @@ const updateStatusPhase2 = async (young, fromUser) => {
   } else {
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
   }
+
+  const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+  young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
+
   await young.save({ fromUser });
 };
 
