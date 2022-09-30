@@ -12,6 +12,8 @@ import Account from "./scenes/account";
 import Auth from "./scenes/auth";
 import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
+import Inscription2023 from "./scenes/inscription2023";
+import PreInscription from "./scenes/preinscription";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
@@ -36,7 +38,7 @@ import changeSejour from "./scenes/phase1/changeSejour";
 import Maintenance from "./scenes/maintenance";
 
 import api, { initApi } from "./services/api";
-import { appURL, maintenance } from "./config";
+import { appURL, environment, maintenance } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
@@ -99,6 +101,8 @@ export default function App() {
             <SentryRoute path="/validate-contract/done" component={ContractDone} />
             <SentryRoute path="/validate-contract" component={Contract} />
             <SentryRoute path="/inscription" component={Inscription} />
+            {environment !== "production" ? <SentryRoute path="/inscription2023" component={Inscription2023} /> : null}
+            {environment !== "production" ? <SentryRoute path="/preinscription" component={PreInscription} /> : null}
             <SentryRoute path="/auth" component={Auth} />
             <SentryRoute path="/" component={Espace} />
           </Switch>
