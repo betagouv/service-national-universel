@@ -117,8 +117,6 @@ export default function CreateEquivalence() {
       } else if (key === "sousType") {
         if (data.type === "Certification Union Nationale du Sport scolaire (UNSS)" && (data?.sousType === undefined || data.sousType === "")) {
           error = true;
-        } else {
-          if (data?.sousType === "" || data?.sousType) delete data.sousType;
         }
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
@@ -137,6 +135,8 @@ export default function CreateEquivalence() {
 
     try {
       if (!error) {
+        if (data.type !== "Certification Union Nationale du Sport scolaire (UNSS)" && (data?.sousType === "" || data?.sousType)) delete data.sousType;
+
         const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
         if (!ok) {
           toastr.error("Oups, une erreur est survenue");
