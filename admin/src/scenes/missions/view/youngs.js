@@ -173,6 +173,12 @@ export default function Youngs({ mission, applications, updateMission }) {
     });
   }
 
+  function getExportFields() {
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+      return applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+    } else return applicationExportFields.filter((e) => !["missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+  }
+
   if (!applications) return <Loader />;
 
   return (
@@ -192,7 +198,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                   setIsOpen={setIsExportOpen}
                   index="application"
                   transform={transform}
-                  exportFields={[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) ? applicationExportFields.filter((e) => e.id !== "choices") : applicationExportFields}
+                  exportFields={getExportFields()}
                   filters={FILTERS}
                   getExportQuery={getExportQuery}
                 />
