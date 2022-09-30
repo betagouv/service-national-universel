@@ -106,7 +106,7 @@ export default function Phase2({ young, onChange }) {
 
       //Error : MobilityNearRelative
       if (
-        dataPreference.mobilityNearRelative &&
+        dataPreference.mobilityNearRelative === "true" &&
         !dataPreference.mobilityNearRelativeAddress &&
         !dataPreference.mobilityNearRelativeCity &&
         !dataPreference.mobilityNearRelativeName &&
@@ -116,7 +116,7 @@ export default function Phase2({ young, onChange }) {
       }
 
       //Error
-      if (dataPreference.domains.length !== 3) {
+      if (dataPreference.domains.length !== 3 && dataPreference.domains.length !== 0) {
         error.domains = "Veuillez sélectionner 3 domaines favoris";
       }
 
@@ -237,7 +237,7 @@ export default function Phase2({ young, onChange }) {
               </div>
             </div>
 
-            {blocOpened === "preferences" ? (
+            {blocOpened === "preferences" && !savePreference ? (
               <div className="flex items-center gap-4">
                 {editPreference ? (
                   <div className="hover:scale-105 flex items-center gap-2 bg-gray-100 rounded-[28px] px-[9px] py-[7px] h-[32px]" onClick={() => setEditPreference(false)}>

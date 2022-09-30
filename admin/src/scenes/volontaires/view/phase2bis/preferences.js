@@ -333,7 +333,7 @@ export default function Preferences({
         </div>
         {[PERIOD.DURING_HOLIDAYS, PERIOD.DURING_SCHOOL].includes(data.period) ? (
           <div className="flex mt-2 items-center">
-            <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" disabled={!editPreference ? true : false} />
+            <RankingPeriod handleChange={setData} period={data.period} values={data} name="periodRanking" disabled={!editPreference} />
           </div>
         ) : null}
       </div>
