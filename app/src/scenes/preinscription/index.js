@@ -41,7 +41,6 @@ const Step = ({ step }) => {
 };
 
 export default function Index() {
-  //use context pour transmettre les infos de l'étape précédente
   return (
     <PreInscriptionContextProvider>
       <Switch>
