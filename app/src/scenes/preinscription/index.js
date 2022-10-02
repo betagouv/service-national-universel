@@ -2,6 +2,7 @@ import React from "react";
 import { Switch } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
+import PreInscriptionContextProvider from "../../context/PreInscriptionContextProvider";
 
 import DesktopEligibilite from "./desktop/stepEligibilite";
 import DesktopSejour from "./desktop/stepSejour";
@@ -42,12 +43,14 @@ const Step = ({ step }) => {
 export default function Index() {
   //use context pour transmettre les infos de l'étape précédente
   return (
-    <Switch>
-      <SentryRoute path="/preinscription/eligibilite" component={() => <Step step={STEPS.ELIGIBILITE} />} />
-      <SentryRoute path="/preinscription/sejour" component={() => <Step step={STEPS.SEJOUR} />} />
-      <SentryRoute path="/preinscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
-      <SentryRoute path="/preinscription/done" component={() => <Step step={STEPS.DONE} />} />
-      <SentryRoute path="/preinscription" component={() => <Step step={STEPS.ELIGIBILITE} />} />
-    </Switch>
+    <PreInscriptionContextProvider>
+      <Switch>
+        <SentryRoute path="/preinscription/eligibilite" component={() => <Step step={STEPS.ELIGIBILITE} />} />
+        <SentryRoute path="/preinscription/sejour" component={() => <Step step={STEPS.SEJOUR} />} />
+        <SentryRoute path="/preinscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
+        <SentryRoute path="/preinscription/done" component={() => <Step step={STEPS.DONE} />} />
+        <SentryRoute path="/preinscription" component={() => <Step step={STEPS.ELIGIBILITE} />} />
+      </Switch>
+    </PreInscriptionContextProvider>
   );
 }
