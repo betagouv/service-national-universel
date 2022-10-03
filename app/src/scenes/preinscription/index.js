@@ -15,9 +15,11 @@ import MobileProfil from "./mobile/stepProfil";
 import MobileDone from "./mobile/stepDone";
 
 import Header from "./components/header";
+import Navbar from "./components/navbar";
 
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
+  NONELIGIBLILITE: "NONELIGIBLILITE",
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   DONE: "DONE",
@@ -36,6 +38,7 @@ const Step = ({ step }) => {
   return (
     <div>
       <Header />
+      {step !== STEPS.NONELIGIBILILITE && <Navbar step={step} />}
       {renderStep(step)}
       {/* footer */}
     </div>
