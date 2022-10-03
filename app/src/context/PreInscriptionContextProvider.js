@@ -11,6 +11,8 @@ const PreInscriptionContextProvider = ({ children }) => {
     emailConfirm: "",
     password: "",
     confirmPassword: "",
+    acceptCGU: "false",
+    rulesYoung: "false",
   });
   return <PreInscriptionContext.Provider value={[value, setValue]}>{children}</PreInscriptionContext.Provider>;
 };
