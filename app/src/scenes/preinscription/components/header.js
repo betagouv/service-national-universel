@@ -6,7 +6,7 @@ import useDevice from "../../../hooks/useDevice";
 import Help from "../../../assets/icons/QuestionMarkBlue";
 import File from "../../../assets/file.svg";
 
-const Header = () => {
+const Header = ({ setIsOpen }) => {
   return (
     <div className="flex  px-3  w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] sticky top-0 bg-white">
       <div className="flex justify-between w-full h-full border-b border-b-[#E5E5E5] py-3 md:pr-[120px] md:pl-[108px]">
@@ -22,7 +22,11 @@ const Header = () => {
         </div>
         <div>
           {useDevice() === "mobile" ? (
-            <div className="flex items-start basis-[50%]">
+            <div
+              className="flex items-start basis-[50%]"
+              onClick={() => {
+                setIsOpen(true);
+              }}>
               <Menu />
             </div>
           ) : (

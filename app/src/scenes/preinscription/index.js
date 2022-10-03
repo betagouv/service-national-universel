@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Switch } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
@@ -16,6 +16,7 @@ import MobileDone from "./mobile/stepDone";
 
 import Header from "./components/header";
 import Navbar from "./components/navbar";
+import ModalMenu from "./components/modals/modalMenu";
 
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
@@ -26,6 +27,7 @@ const STEPS = {
 };
 
 const Step = ({ step }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const device = "mobile"; //useDevice();
 
   function renderStep(step) {
@@ -37,7 +39,8 @@ const Step = ({ step }) => {
 
   return (
     <div>
-      <Header />
+      {isOpen && <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />}
+      <Header setIsOpen={setIsOpen} />
       {step !== STEPS.NONELIGIBILILITE && <Navbar step={step} />}
       {renderStep(step)}
       {/* footer */}
