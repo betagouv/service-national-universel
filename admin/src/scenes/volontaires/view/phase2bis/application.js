@@ -245,7 +245,7 @@ export default function Phase2Application({ young, onChange }) {
               )}
             </div>
           </div>
-          <div className="mx-8 mt-8">
+          <div className="mx-8 mt-8 pb-8">
             <div className="flex justify-between">
               <div className="text-lg leading-6 font-semibold">Pièces jointes</div>
               <div className="flex space-x-4 items-center">
