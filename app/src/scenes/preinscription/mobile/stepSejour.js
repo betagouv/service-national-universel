@@ -5,65 +5,82 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { getZoneByDepartment } from "snu-lib/academy";
 
-export default function StepSejour() {
-  const [data, setData] = React.useContext(PreInscriptionContext);
+function getAvailableStays(data) {
+  let cohorts = [];
 
-  function isEligible(data) {
-    if (data) return false;
-  }
+  const zone = getZoneByDepartment(data?.department);
 
-  useEffect(() => {
-    setData({ ...data, department: "Ain" });
-  }, []);
-
-  if (isEligible(data)) return <StayChoice data={data} setData={setData} />;
-  return <NotEligible />;
-}
-
-function StayChoice({ data, setData }) {
-  function getAvailableStays(data) {
-    let cohorts = [];
-
-    const zone = getZoneByDepartment(data?.department);
-
-    switch (zone) {
-      case "A":
+  switch (zone) {
+    case "A":
+      if (data.birthdateAt > new Date("04/22/2005") && data.birthdateAt < new Date("04/09/2008")) {
         cohorts.push({
           cohort: "Avril 2023 - A",
           date: "du 9 au 21 avril",
         });
-        break;
-      case "B":
+      }
+      break;
+    case "B":
+      if (data.birthdateAt > new Date("04/28/2005") && data.birthdateAt < new Date("04/16/2008")) {
         cohorts.push({
           cohort: "Avril 2023 - B",
           date: "du 16 au 28 avril",
         });
-        break;
-      case "C":
-      case "Corse":
+      }
+      break;
+    case "C":
+    case "Corse":
+      if (data.birthdateAt > new Date("02/19/2005") && data.birthdateAt < new Date("03/03/2008")) {
         cohorts.push({
           cohort: "Février 2023 - C",
           date: "du 19 février au 3 mars",
         });
-        break;
-      default:
-        break;
-    }
-
-    cohorts.push(
-      {
-        cohort: "Juin 2023",
-        date: "du 11 au 23 juin",
-      },
-      {
-        cohort: "Juillet 2023",
-        date: "du 1er au 12 juillet",
-      },
-    );
-
-    return cohorts;
+      }
+      break;
+    default:
+      break;
   }
 
+  if (data.birthdateAt > new Date("06/24/2005") && data.birthdateAt < new Date("06/11/2008")) {
+    cohorts.push({
+      cohort: "Juin 2023",
+      date: "du 11 au 23 juin",
+    });
+  }
+
+  if (data.birthdateAt > new Date("07/13/2005") && data.birthdateAt < new Date("07/01/2008")) {
+    cohorts.push({
+      cohort: "Juillet 2023",
+      date: "du 1er au 12 juillet",
+    });
+  }
+
+  return cohorts;
+}
+
+function isEligible(data) {
+  // check grade
+  if (data.schoolRamsese.grade !== "2de") return false;
+  // for each cohesion stay, check both location and dates
+  if (!getAvailableStays(data).length) return false;
+  return true;
+}
+
+export default function StepSejour() {
+  const [data, setData] = React.useContext(PreInscriptionContext);
+
+  useEffect(() => {
+    setData({ ...data, "data.department": "Ain" }); // Pour tester
+  }, []);
+
+  if (isEligible(data)) {
+    setData({ ...data, isEligible: "true" });
+    return <StayChoice data={data} setData={setData} />;
+  } else {
+    setData({ ...data, isEligible: "false" });
+    return <NotEligible />;
+  }
+}
+function StayChoice({ data, setData }) {
   return (
     <div className="bg-white p-4">
       <div className="w-full flex justify-between items-center">
@@ -94,6 +111,21 @@ function NotEligible() {
   return (
     <div className="bg-white p-4">
       <h1 className="text-2xl font-semibold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
+      <div className="font-semibold my-4">Découvrez d’autres formes d’engagement</div>
+      <div className="overflow-x-auto">
+        <div className="flex w-96 gap-4">
+          <div className="w-64 border">
+            <div className="font-semibold m-4">Service civique</div>
+            <div className="m-4">Blabla</div>
+          </div>
+          <div className="w-64 border">
+            <div className="font-semibold m-4">JeVeuxAider.org</div>
+            <div className="m-4">Blabla</div>
+            <div className="text-right">{`->`}</div>
+          </div>
+        </div>
+      </div>
+      <div className="text-blue-600 text-center border my-4 p-2">Voir plus de formes d’engagement</div>
     </div>
   );
 }
