@@ -73,15 +73,15 @@ export default function StepSejour() {
   function StayButton(cohort) {
     return (
       <div
-        key={cohort.cohort}
-        className="border px-3 py-4 my-3 flex justify-between items-center"
+        key={cohort.id}
+        className="border p-4 my-3 flex justify-between items-center"
         onClick={() => {
-          setData({ ...data, cohort: cohort.cohort });
+          setData({ ...data, cohort: cohort.id });
           // history.push("/preinscription/profil");
           console.log(data);
         }}>
         <div>
-          Séjour du <strong>{cohort.date}</strong>
+          Séjour <strong>{cohort.dates}</strong>
         </div>
         <ArrowRightBlueSquare />
       </div>

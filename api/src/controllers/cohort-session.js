@@ -140,16 +140,16 @@ router.post("/eligibility/2023", async (req, res) => {
       case "A":
         if (birthDate > new Date("04/22/2005") && birthDate < new Date("04/09/2008")) {
           cohorts.push({
-            cohort: "Avril 2023 - A",
-            date: "du 9 au 21 avril",
+            id: "Avril 2023 - A",
+            dates: "du 9 au 21 avril",
           });
         }
         break;
       case "B":
         if (birthDate > new Date("04/28/2005") && birthDate < new Date("04/16/2008")) {
           cohorts.push({
-            cohort: "Avril 2023 - B",
-            date: "du 16 au 28 avril",
+            id: "Avril 2023 - B",
+            dates: "du 16 au 28 avril",
           });
         }
         break;
@@ -157,8 +157,8 @@ router.post("/eligibility/2023", async (req, res) => {
       case "Corse":
         if (birthDate > new Date("02/19/2005") && birthDate < new Date("03/03/2008")) {
           cohorts.push({
-            cohort: "Février 2023 - C",
-            date: "du 19 février au 3 mars",
+            id: "Février 2023 - C",
+            dates: "du 19 février au 3 mars",
           });
         }
         break;
@@ -168,15 +168,15 @@ router.post("/eligibility/2023", async (req, res) => {
 
     if (birthDate > new Date("06/24/2005") && birthDate < new Date("06/11/2008")) {
       cohorts.push({
-        cohort: "Juin 2023",
-        date: "du 11 au 23 juin",
+        id: "Juin 2023",
+        dates: "du 11 au 23 juin",
       });
     }
 
     if (birthDate > new Date("07/13/2005") && birthDate < new Date("07/01/2008")) {
       cohorts.push({
-        cohort: "Juillet 2023",
-        date: "du 1er au 12 juillet",
+        id: "Juillet 2023",
+        dates: "du 1er au 12 juillet",
       });
     }
 
