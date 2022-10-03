@@ -8,7 +8,7 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 const { getCohortSessionsAvailability } = require("../utils/cohort");
-const { getDepartmentNumber } = require("snu-lib/region-and-departments");
+const { getDepartmentNumber, getZoneByDepartment } = require("snu-lib/region-and-departments");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
@@ -108,6 +108,79 @@ router.post("/eligibility/2022", async (req, res) => {
     }
 
     return res.send({ ok: true, data: sessions });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/eligibility/2023", async (req, res) => {
+  try {
+    const eligibilityObject = {
+      department: req.body.department,
+      birthDate: req.body.birthDate,
+      schoolLevel: req.body.schoolLevel,
+    };
+    const { error, value } = Joi.object({
+      department: Joi.string().required(),
+      birthDate: Joi.date().required(),
+      schoolLevel: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate(eligibilityObject);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    console.log("🚀 ~ file: cohort-session.js ~ line 133 ~ router.post ~ value", value);
+    const { department, birthDate, schoolLevel } = value;
+
+    if (schoolLevel !== "2de") return res.send({ ok: true, data: [] });
+
+    let cohorts = [];
+    const zone = getZoneByDepartment(department);
+    switch (zone) {
+      case "A":
+        if (birthDate > new Date("04/22/2005") && birthDate < new Date("04/09/2008")) {
+          cohorts.push({
+            cohort: "Avril 2023 - A",
+            date: "du 9 au 21 avril",
+          });
+        }
+        break;
+      case "B":
+        if (birthDate > new Date("04/28/2005") && birthDate < new Date("04/16/2008")) {
+          cohorts.push({
+            cohort: "Avril 2023 - B",
+            date: "du 16 au 28 avril",
+          });
+        }
+        break;
+      case "C":
+      case "Corse":
+        if (birthDate > new Date("02/19/2005") && birthDate < new Date("03/03/2008")) {
+          cohorts.push({
+            cohort: "Février 2023 - C",
+            date: "du 19 février au 3 mars",
+          });
+        }
+        break;
+      default:
+        break;
+    }
+
+    if (birthDate > new Date("06/24/2005") && birthDate < new Date("06/11/2008")) {
+      cohorts.push({
+        cohort: "Juin 2023",
+        date: "du 11 au 23 juin",
+      });
+    }
+
+    if (birthDate > new Date("07/13/2005") && birthDate < new Date("07/01/2008")) {
+      cohorts.push({
+        cohort: "Juillet 2023",
+        date: "du 1er au 12 juillet",
+      });
+    }
+
+    return res.send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
