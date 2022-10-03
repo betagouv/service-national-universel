@@ -228,6 +228,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  inscriptionStep2023: {
+    type: String,
+    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE"],
+    documentation: {
+      description: "Étape du tunnel d'inscription",
+    },
+  },
+
   // keep track of the current inscription step
   inscriptionStep: {
     type: String,
