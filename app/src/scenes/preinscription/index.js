@@ -14,6 +14,8 @@ import MobileSejour from "./mobile/stepSejour";
 import MobileProfil from "./mobile/stepProfil";
 import MobileDone from "./mobile/stepDone";
 
+import Header from "./components/header";
+
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   SEJOUR: "SEJOUR",
@@ -33,7 +35,7 @@ const Step = ({ step }) => {
 
   return (
     <div>
-      {/* header */}
+      <Header />
       {renderStep(step)}
       {/* footer */}
     </div>
