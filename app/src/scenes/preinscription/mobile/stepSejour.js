@@ -59,7 +59,7 @@ function getAvailableStays(data) {
 
 function isEligible(data) {
   // check grade
-  if (data.schoolRamsese.grade !== "2de") return false;
+  if (data.grade !== "2de") return false;
   // for each cohesion stay, check both location and dates
   if (!getAvailableStays(data).length) return false;
   return true;
@@ -69,7 +69,7 @@ export default function StepSejour() {
   const [data, setData] = React.useContext(PreInscriptionContext);
 
   useEffect(() => {
-    setData({ ...data, "data.department": "Ain" }); // Pour tester
+    setData({ ...data, department: "Ain", birthdateAt: new Date("07/14/2006") }); // Pour tester
   }, []);
 
   if (isEligible(data)) {
