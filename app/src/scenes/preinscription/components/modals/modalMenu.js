@@ -23,10 +23,10 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <Login />
             <div> Se connecter</div>
           </Link>
-          <Link className="flex space-x-2 items-center border-b border-b-[#E5E5E5] py-3" to="/les-programmes">
+          <a className="flex space-x-2 items-center border-b border-b-[#E5E5E5] py-3" href="https://www.snu.gouv.fr/" to="/les-programmes">
             <img src={File} />
             <div>Le programme</div>
-          </Link>
+          </a>
           <Link className="flex space-x-2 items-center pt-3" to={`/public-besoin-d-aide?from${pathname}`}>
             <Help />
             <div>Besoin d&apos;aide ?</div>
