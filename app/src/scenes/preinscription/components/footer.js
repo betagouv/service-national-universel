@@ -10,8 +10,12 @@ const Footer = () => {
   return (
     <div
       className={`${
-        useDevice() === "desktop" ? " absolute bottom-0 border-t-[#000091] pt-3 px-3" : !["/preinscription/sejour"].includes(pathname) && "mb-[12vh]"
-      } w-full bg-white border-t border-t-[#E5E5E5] `}>
+        useDevice() === "desktop"
+          ? " absolute bottom-0 border-t-[#000091] pt-3 px-3"
+          : ["/preinscription/done"].includes(pathname)
+          ? "mb-[20vh]"
+          : !["/preinscription/sejour"].includes(pathname) && "mb-[12vh]"
+      } w-full bg-white border-t border-t-[#E5E5E5] pb-3 `}>
       <div className={`${useDevice() === "desktop" ? "flex justify-between w-full px-[108px]" : "px-3"} text-sm text-[#3A3A3A] py-3`}>
         <div className={`${useDevice() === "desktop" && "basis-[50%]"} mb-4 flex`}>
           <img src={LogoFr} className="w-26 h-24" />
