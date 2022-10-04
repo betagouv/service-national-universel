@@ -30,20 +30,6 @@ const Step = ({ step }) => {
   const [isOpen, setIsOpen] = useState(false);
   const device = "mobile"; //useDevice();
 
-  //A terminer
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        // requête
-        // setIsEligible(data.isEligible)
-        //
-      } catch (error) {
-        capture(error);
-      }
-    };
-    getData();
-  }, []);
-
   function renderStep(step) {
     if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
     if (step === STEPS.SEJOUR) return device === "desktop" ? <DesktopSejour /> : <MobileSejour />;
