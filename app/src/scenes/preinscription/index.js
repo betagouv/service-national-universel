@@ -34,7 +34,7 @@ const STEPS = {
 
 const Step = ({ step }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const device = "mobile"; //useDevice();
+  const device = useDevice();
 
   function renderStep(step) {
     if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;

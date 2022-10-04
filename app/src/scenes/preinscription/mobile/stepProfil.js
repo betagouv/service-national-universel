@@ -69,7 +69,7 @@ export default function StepProfil() {
 
   return (
     <>
-      <div className="bg-white p-4">
+      <div className="bg-white px-4 pt-4 pb-12">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-xl text-[#161616]">Créez votre compte</h1>
           <Link to="/public-besoin-d-aide/">
