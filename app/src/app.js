@@ -107,7 +107,7 @@ export default function App() {
             <SentryRoute path="/" component={Espace} />
           </Switch>
         )}
-        <Footer />
+        {!location.pathname.includes("preinscription") && <Footer />}
       </div>
     </Router>
   );
