@@ -159,7 +159,7 @@ export default function StepProfil() {
           </div>
         </div>
       </div>
-      <StickyButton text="Continuer" onClick={() => onSubmit()} />
+      <StickyButton text="Continuer" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription")} />
     </>
   );
 }
