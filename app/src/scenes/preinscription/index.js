@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Switch } from "react-router-dom";
-import { SentryRoute } from "../../sentry";
+import { SentryRoute, capture } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 import PreInscriptionContextProvider from "../../context/PreInscriptionContextProvider";
 
@@ -20,7 +20,6 @@ import ModalMenu from "./components/modals/modalMenu";
 
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
-  NONELIGIBLILITE: "NONELIGIBLILITE",
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   DONE: "DONE",
@@ -28,7 +27,22 @@ const STEPS = {
 
 const Step = ({ step }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEligible, setIsEligible] = useState(true);
   const device = "mobile"; //useDevice();
+
+  //A terminer
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        // requête
+        // setIsEligible(data.isEligible)
+        //
+      } catch (error) {
+        capture(error);
+      }
+    };
+    getData();
+  }, []);
 
   function renderStep(step) {
     if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
@@ -39,9 +53,9 @@ const Step = ({ step }) => {
 
   return (
     <div>
-      {isOpen && <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />}
+      <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
-      {step !== STEPS.NONELIGIBILILITE && <Navbar step={step} />}
+      <Navbar isEligible={isEligible} step={step} />
       {renderStep(step)}
       {/* footer */}
     </div>

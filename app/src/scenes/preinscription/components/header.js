@@ -5,8 +5,10 @@ import Menu from "../../../assets/icons/Burger";
 import useDevice from "../../../hooks/useDevice";
 import Help from "../../../assets/icons/QuestionMarkBlue";
 import File from "../../../assets/file.svg";
+import { Link, useLocation } from "react-router-dom";
 
 const Header = ({ setIsOpen }) => {
+  const { pathname } = useLocation();
   return (
     <div className="flex  px-3  w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] sticky top-0 bg-white">
       <div className="flex justify-between w-full h-full border-b border-b-[#E5E5E5] py-3 md:pr-[120px] md:pl-[108px]">
@@ -31,15 +33,17 @@ const Header = ({ setIsOpen }) => {
             </div>
           ) : (
             <div className="flex text-sm text-[#000091] items-center basis-[50%%]">
-              <div className="flex items-center space-x-1 border-r border-r-gray-300 py-1 pl-1.5 pr-3 cursor-pointer">
+              <div className="flex items-center space-x-1 border-r border-r-gray-300 py-1 pl-1.5 pr-3 cursor-pointer hover:font-bold">
                 <img src={File} alt="" />
                 <div>Programme</div>
               </div>
-              <div className="flex items-center space-x-1 py-1 px-3 cursor-pointer">
+              <Link className="flex items-center space-x-1 py-1 px-3 cursor-pointer hover:font-bold hover:text-[#000091]" to={`/besoin-d-aide?from${window.location.pathname}`}>
                 <Help />
                 <div>Besoin d&apos;aide</div>{" "}
-              </div>
-              <div className="border border-gray-500 py-1 px-1.5 cursor-pointer">Se connecter</div>
+              </Link>
+              <Link className="border border-gray-500 py-1 px-1.5 cursor-pointer hover:text-white hover:bg-[#000091]" to={"/auth"}>
+                Se connecter
+              </Link>
             </div>
           )}
         </div>

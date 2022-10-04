@@ -1,12 +1,14 @@
 import React from "react";
 import useDevice from "../../../hooks/useDevice";
 
-const Navbar = ({ step }) => {
-  return (
+const Navbar = ({ isEligible, step }) => {
+  return isEligible ? (
     <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">
-      <div className={`flex flex-col justify-center ${useDevice() === "desktop" && "w-1/3 mx-auto my-0"}`}>
-        <div className="text-sm">Étape {step === "ELIGIBILITE" ? "1" : step === "SEJOUR" ? "2" : "3"} sur 3</div>
-        <div className="text-lg font-bold mt-2">{step === "ELIGIBILITE" ? "Avant d'aller plus loin" : step === "SEJOUR" ? "Séjour de cohésion" : "Mon compte volontaire SNU"}</div>
+      <div className={`flex flex-col justify-center ${useDevice() === "desktop" && "w-1/2 mx-auto my-0"}`}>
+        <div className="text-sm">Étape {step === "ELIGIBILITE" ? "1" : step === "SEJOUR" ? "2" : step === "PROFIL" && "3"} sur 3</div>
+        <div className="text-lg font-bold mt-2">
+          {step === "ELIGIBILITE" ? "Avant d'aller plus loin" : step === "SEJOUR" ? "Séjour de cohésion" : step === "PROFIL" && "Mon compte volontaire SNU"}
+        </div>
         <div className="flex space-x-2 w-full mt-2">
           <div className="basis-1/3 bg-[#000091] h-2"></div>
           <div className={`basis-1/3  h-2 ${step !== "ELIGIBILITE" ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
@@ -20,7 +22,7 @@ const Navbar = ({ step }) => {
         )}
       </div>
     </div>
-  );
+  ) : null;
 };
 
 export default Navbar;

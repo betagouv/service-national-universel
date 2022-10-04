@@ -3,6 +3,7 @@ import Close from "../../../../assets/CloseBlue.svg";
 import File from "../../../../assets/file.svg";
 import Help from "../../../../assets/icons/QuestionMarkBlue";
 import Login from "../../../../assets/icons/Login";
+import { Link } from "react-router-dom";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
   return (
@@ -17,10 +18,10 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <div>Fermer</div>
             <img src={Close} className="w-3" />
           </div>
-          <div className="flex items-center space-x-2 border-b border-b-[#E5E5E5] py-3">
+          <Link className="flex items-center space-x-2 border-b border-b-[#E5E5E5] py-3" to={"/auth"}>
             <Login />
             <div> Se connecter</div>
-          </div>
+          </Link>
           <div className="flex space-x-2 items-center border-b border-b-[#E5E5E5] py-3">
             <img src={File} />
             <div>Le programme</div>
