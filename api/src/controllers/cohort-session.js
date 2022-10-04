@@ -131,7 +131,7 @@ router.post("/eligibility/2023", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { department, birthDate, schoolLevel } = value;
 
-    if (schoolLevel !== "2de") return res.send({ ok: true, data: [] });
+    if (schoolLevel !== "SECOND") return res.send({ ok: true, data: [] });
 
     let cohorts = [];
     const zone = getZoneByDepartment(department);

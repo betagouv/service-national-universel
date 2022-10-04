@@ -8,18 +8,21 @@ import { toastr } from "react-redux-toastr";
 
 export default function StepSejour() {
   const [isLoading, setLoading] = useState(true);
-  // const [data, setData] = React.useContext(PreInscriptionContext);
-  const [data, setData] = useState({ grade: "2de", department: "Hauts-de-Seine", birthdateAt: new Date("07/14/2006") }); // Pour tester
+  const [data, setData] = React.useContext(PreInscriptionContext);
   const [cohorts, setCohorts] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
     (async () => {
-      const res = await API.post("/cohort-session/eligibility/2023", {
-        department: data.department,
-        birthDate: data.birthdateAt,
-        schoolLevel: data.grade,
-      });
+      const res = await API.post(
+        "/cohort-session/eligibility/2023",
+        // {
+        //   department: data.department,
+        //   birthDate: data.birthDate,
+        //   schoolLevel: data.scolarity,
+        // },
+        { schoolLevel: "SECOND", department: "Hauts-de-Seine", birthDate: new Date("07/14/2006") }, // pour tester
+      );
       if (!res.ok) {
         toastr.error("Impossible de vérifier votre éligibilité");
         history.push("/");
@@ -31,33 +34,7 @@ export default function StepSejour() {
 
   if (isLoading) return <div className="text-center">Vérification de votre éligibilité</div>;
 
-  if (!cohorts.length)
-    return (
-      <div className="bg-white p-4">
-        <h1 className="text-2xl font-semibold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-        <div className="font-semibold my-4">Découvrez d’autres formes d’engagement</div>
-        <div className="overflow-x-auto">
-          <div className="flex w-96 gap-4">
-            <div className="w-64 border">
-              <div className="font-semibold m-4">Service civique</div>
-              <div className="m-4">Blabla</div>
-            </div>
-            <div className="w-64 border">
-              <div className="font-semibold m-4">JeVeuxAider.org</div>
-              <div className="m-4">Blabla</div>
-              <div className="text-right">{`->`}</div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
-          onClick={() => {
-            history.push("https://www.jeveuxaider.gouv.fr/");
-          }}>
-          Voir plus de formes d’engagement
-        </div>
-      </div>
-    );
+  if (!cohorts.length) history.push("noneligible");
 
   return (
     <div className="bg-white p-4">
