@@ -1,5 +1,5 @@
 import React from "react";
-import ArrowRightBlueSquare from "../../../assets/icons/QuestionMarkBlueCircle";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import Input from "../components/input";
 import validator from "validator";
@@ -9,6 +9,7 @@ import { getPasswordErrorMessage } from "../../../utils";
 import CheckBox from "../components/checkbox";
 import { appURL } from "../../../config";
 import StickyButton from "../components/stickyButton";
+import { useHistory, Link } from "react-router-dom";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -16,6 +17,7 @@ export default function StepProfil() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
   const keyList = ["firstName", "lastName", "email", "emailConfirm", "password", "confirmPassword"];
+  const history = useHistory();
 
   const validate = () => {
     let errors = {};
@@ -61,8 +63,7 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
-      //submit
-      console.log("ok");
+      history.push("/preinscription/confirm");
     }
   };
 
@@ -70,8 +71,10 @@ export default function StepProfil() {
     <>
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
-          <h1 className="text-[22px] text-[#161616]">Créez votre compte</h1>
-          <ArrowRightBlueSquare />
+          <h1 className="text-xl text-[#161616]">Créez votre compte</h1>
+          <Link to="/public-besoin-d-aide/">
+            <QuestionMarkBlueCircle />
+          </Link>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col gap-5">
