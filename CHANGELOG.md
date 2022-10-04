@@ -1,3 +1,19 @@
+# [1.140.0](https://github.com/betagouv/service-national-universel/compare/v1.139.0...v1.140.0) (2022-10-03)
+
+
+### Bug Fixes
+
+* **app:** update stickyButton ([c0ec204](https://github.com/betagouv/service-national-universel/commit/c0ec204d435aafbbf5abf9c7f275c5202ce02d06))
+
+
+### Features
+
+* **app:** checkbox component + default value context ([1089e8a](https://github.com/betagouv/service-national-universel/commit/1089e8afdb9beb5c647e95ccb84c5daaa8de4aa5))
+* **app:** help icon for inscription ([ee724e6](https://github.com/betagouv/service-national-universel/commit/ee724e634bc34d078e2210dc7af6dff160937153))
+* **app:** preinscription profile ([3089352](https://github.com/betagouv/service-national-universel/commit/3089352b6dd590ac192d8f11826d36a35b1f521c))
+* **app:** sticky button for mobile ([5044361](https://github.com/betagouv/service-national-universel/commit/5044361b1b41eea94da91df13ef911ad51dbc76e))
+* **app/api:** architecture inscription ([#1847](https://github.com/betagouv/service-national-universel/issues/1847)) ([9efe63f](https://github.com/betagouv/service-national-universel/commit/9efe63fd97001370a374e24b9a660552a8fc73f2))
+
 # [1.139.0](https://github.com/betagouv/service-national-universel/compare/v1.138.0...v1.139.0) (2022-09-30)
 
 

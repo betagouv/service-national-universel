@@ -4,7 +4,16 @@ export const PreInscriptionContext = createContext();
 
 const PreInscriptionContextProvider = ({ children }) => {
   //set default value for uncontrolled input
-  const [value, setValue] = useState({});
+  const [value, setValue] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    emailConfirm: "",
+    password: "",
+    confirmPassword: "",
+    acceptCGU: "false",
+    rulesYoung: "false",
+  });
   return <PreInscriptionContext.Provider value={[value, setValue]}>{children}</PreInscriptionContext.Provider>;
 };
 
