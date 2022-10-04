@@ -11,7 +11,7 @@ const Footer = () => {
     // A tester: Si button sticky mt-[72px] pour mobile
     <div
       className={`${
-        useDevice() === "desktop" ? " absolute bottom-0" : !["/preinscription/sejour"].includes(pathname) && "mb-[72px]"
+        useDevice() === "desktop" ? " absolute bottom-0 border-t-[#000091] pt-3" : !["/preinscription/sejour"].includes(pathname) && "mb-[72px]"
       } w-full bg-white border-t border-t-[#E5E5E5] `}>
       <div className={`${useDevice() === "desktop" ? "flex justify-between w-full px-24" : "px-3"} text-sm text-[#3A3A3A] py-3`}>
         <div className={`${useDevice() === "desktop" && "basis-[50%]"} mb-4 flex`}>
