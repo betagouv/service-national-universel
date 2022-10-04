@@ -1,81 +1,76 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import { getZoneByDepartment } from "snu-lib/academy";
+import API from "../../../../../admin/src/services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function StepSejour() {
-  const [data, setData] = React.useContext(PreInscriptionContext);
-
-  function isEligible(data) {
-    if (data) return false;
-  }
+  const [isLoading, setLoading] = useState(true);
+  // const [data, setData] = React.useContext(PreInscriptionContext);
+  const [data, setData] = useState({ grade: "2de", department: "Hauts-de-Seine", birthdateAt: new Date("07/14/2006") }); // Pour tester
+  const [cohorts, setCohorts] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
-    setData({ ...data, department: "Ain" });
+    (async () => {
+      const res = await API.post("/cohort-session/eligibility/2023", {
+        department: data.department,
+        birthDate: data.birthdateAt,
+        schoolLevel: data.grade,
+      });
+      if (!res.ok) {
+        toastr.error("Impossible de vérifier votre éligibilité");
+        history.push("/");
+      }
+      setCohorts(res.data);
+      setLoading(false);
+    })();
   }, []);
 
-  if (isEligible(data)) return <StayChoice data={data} setData={setData} />;
-  return <NotEligible />;
-}
+  if (isLoading) return <div className="text-center">Vérification de votre éligibilité</div>;
 
-function StayChoice({ data, setData }) {
-  function getAvailableStays(data) {
-    let cohorts = [];
-
-    const zone = getZoneByDepartment(data?.department);
-
-    switch (zone) {
-      case "A":
-        cohorts.push({
-          cohort: "Avril 2023 - A",
-          date: "du 9 au 21 avril",
-        });
-        break;
-      case "B":
-        cohorts.push({
-          cohort: "Avril 2023 - B",
-          date: "du 16 au 28 avril",
-        });
-        break;
-      case "C":
-      case "Corse":
-        cohorts.push({
-          cohort: "Février 2023 - C",
-          date: "du 19 février au 3 mars",
-        });
-        break;
-      default:
-        break;
-    }
-
-    cohorts.push(
-      {
-        cohort: "Juin 2023",
-        date: "du 11 au 23 juin",
-      },
-      {
-        cohort: "Juillet 2023",
-        date: "du 1er au 12 juillet",
-      },
+  if (!cohorts.length)
+    return (
+      <div className="bg-white p-4">
+        <h1 className="text-2xl font-semibold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
+        <div className="font-semibold my-4">Découvrez d’autres formes d’engagement</div>
+        <div className="overflow-x-auto">
+          <div className="flex w-96 gap-4">
+            <div className="w-64 border">
+              <div className="font-semibold m-4">Service civique</div>
+              <div className="m-4">Blabla</div>
+            </div>
+            <div className="w-64 border">
+              <div className="font-semibold m-4">JeVeuxAider.org</div>
+              <div className="m-4">Blabla</div>
+              <div className="text-right">{`->`}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
+          onClick={() => {
+            history.push("https://www.jeveuxaider.gouv.fr/");
+          }}>
+          Voir plus de formes d’engagement
+        </div>
+      </div>
     );
-
-    return cohorts;
-  }
 
   return (
     <div className="bg-white p-4">
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
-        <QuestionMarkBlueCircle />
+        <Link to="/public-besoin-d-aide/">
+          <QuestionMarkBlueCircle />
+        </Link>
       </div>
       <hr className="my-4 h-px bg-gray-200 border-0" />
-
       <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
-
       <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-      <div className="my-4">{getAvailableStays(data).map((e) => StayButton(data, setData, e))}</div>
+      <div className="my-4">{cohorts.map((e) => StayButton(e))}</div>
       <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
       <div className="text-gray-500 text-sm">
         La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
@@ -88,30 +83,21 @@ function StayChoice({ data, setData }) {
       </div>
     </div>
   );
-}
 
-function NotEligible() {
-  return (
-    <div className="bg-white p-4">
-      <h1 className="text-2xl font-semibold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-    </div>
-  );
-}
-
-function StayButton(data, setData, cohort) {
-  return (
-    <div
-      key={cohort.cohort}
-      className="border px-3 py-4 my-3 flex justify-between items-center"
-      onClick={() => {
-        setData({ ...data, cohort: cohort.cohort });
-        // history.push("/preinscription/profil");
-        console.log(data);
-      }}>
-      <div>
-        Séjour du <strong>{cohort.date}</strong>
+  function StayButton(cohort) {
+    return (
+      <div
+        key={cohort.id}
+        className="border p-4 my-3 flex justify-between items-center"
+        onClick={() => {
+          setData({ ...data, cohort: cohort.id });
+          history.push("/preinscription/profil");
+        }}>
+        <div>
+          Séjour <strong>{cohort.dates}</strong>
+        </div>
+        <ArrowRightBlueSquare />
       </div>
-      <ArrowRightBlueSquare />
-    </div>
-  );
+    );
+  }
 }
