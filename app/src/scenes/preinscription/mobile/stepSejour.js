@@ -9,7 +9,7 @@ import { toastr } from "react-redux-toastr";
 export default function StepSejour() {
   const [isLoading, setLoading] = useState(true);
   // const [data, setData] = React.useContext(PreInscriptionContext);
-  const [data, setData] = useState({ grade: "3eme", department: "Hauts-de-Seine", birthdateAt: new Date("07/14/2006") }); // Pour tester
+  const [data, setData] = useState({ grade: "2de", department: "Hauts-de-Seine", birthdateAt: new Date("07/14/2006") }); // Pour tester
   const [cohorts, setCohorts] = useState(false);
   const history = useHistory();
 
