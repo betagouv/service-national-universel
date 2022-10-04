@@ -15,7 +15,6 @@ import MobileProfil from "./mobile/stepProfil";
 import MobileDone from "./mobile/stepDone";
 
 import Header from "./components/header";
-import Footer from "./components/footer";
 
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
@@ -38,7 +37,6 @@ const Step = ({ step }) => {
     <div>
       <Header />
       {renderStep(step)}
-      <Footer />
     </div>
   );
 };
