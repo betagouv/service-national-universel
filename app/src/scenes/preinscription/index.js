@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Switch } from "react-router-dom";
-import { SentryRoute, capture } from "../../sentry";
+import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 import PreInscriptionContextProvider from "../../context/PreInscriptionContextProvider";
 
@@ -41,7 +41,7 @@ const Step = ({ step }) => {
     <div>
       <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
-      <Navbar ineligible={STEPS.INELIGIBLE} step={step} />
+      <Navbar step={step} />
       {renderStep(step)}
       {/* footer */}
     </div>
