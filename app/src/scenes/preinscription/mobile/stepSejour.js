@@ -3,7 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import API from "../../../../../admin/src/services/api";
+import API from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 
 export default function StepSejour() {
@@ -48,16 +48,20 @@ export default function StepSejour() {
       <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
       <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
       <div className="my-4">{cohorts.map((e) => StayButton(e))}</div>
-      <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
-      <div className="text-gray-500 text-sm">
-        La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-        <Link to="" className="underline underline-offset-4">
-          En savoir plus.
-        </Link>
-      </div>
-      <div className="text-blue-600 my-4 underline underline-offset-4">
-        <Link to="">Consulter d’autres dispositifs d’engagement</Link>
-      </div>
+      {cohorts.length < 3 && (
+        <>
+          <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
+          <div className="text-gray-500 text-sm">
+            La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
+            <Link to="" className="underline underline-offset-4">
+              En savoir plus.
+            </Link>
+          </div>
+          <div className="text-blue-600 my-4 underline underline-offset-4">
+            <Link to="">Consulter d’autres dispositifs d’engagement</Link>
+          </div>
+        </>
+      )}
     </div>
   );
 
