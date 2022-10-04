@@ -1,17 +1,16 @@
 import React from "react";
-import LogoFr from "../assets/fr.png";
-import LinkTo from "../assets/icons/LinkTo";
-import useDevice from "../hooks/useDevice";
+import LogoFr from "../../../assets/fr.png";
+import LinkTo from "../../../assets/icons/LinkTo";
+import useDevice from "../../../hooks/useDevice";
 import { useLocation } from "react-router-dom";
-import SNU from "../assets/logo-snu.png";
+import SNU from "../../../assets/logo-snu.png";
 
 const Footer = () => {
   const { pathname } = useLocation();
   return (
-    // A tester: Si button sticky mt-[72px] pour mobile
     <div
       className={`${
-        useDevice() === "desktop" ? " absolute bottom-0 border-t-[#000091] pt-3" : !["/preinscription/sejour"].includes(pathname) && "mb-[72px]"
+        useDevice() === "desktop" ? " absolute bottom-0 border-t-[#000091] pt-3" : !["/preinscription/sejour"].includes(pathname) && "mb-[12vh]"
       } w-full bg-white border-t border-t-[#E5E5E5] `}>
       <div className={`${useDevice() === "desktop" ? "flex justify-between w-full px-24" : "px-3"} text-sm text-[#3A3A3A] py-3`}>
         <div className={`${useDevice() === "desktop" && "basis-[50%]"} mb-4 flex`}>

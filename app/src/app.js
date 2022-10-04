@@ -28,7 +28,6 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Footer2 from "./components/footer2";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
@@ -108,7 +107,7 @@ export default function App() {
             <SentryRoute path="/" component={Espace} />
           </Switch>
         )}
-        {["/preinscription", "/inscription2023"].includes(location.pathname) ? <Footer2 /> : <Footer />}
+        {!location.pathname.includes("preinscription") && <Footer />}
       </div>
     </Router>
   );
