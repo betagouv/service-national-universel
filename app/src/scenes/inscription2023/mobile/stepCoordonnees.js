@@ -11,9 +11,10 @@ const FRANCE = "France";
 
 const defaultState = {
   isFrench: isFrenchOptions[0].value,
-  gender: genderOptions[0].value,
+  birthCountry: FRANCE,
   birthCity: "",
   birthCityZip: "",
+  gender: genderOptions[0].value,
   phone: "",
   isFrenchResident: isFrenchOptions[0].value,
   country: FRANCE,
@@ -34,6 +35,14 @@ const defaultState = {
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
 
+  const setFrench = (isFrench) => {
+    if (isFrenchResident) {
+      setData({ ...data, birthCountry: FRANCE, isFrench });
+    } else {
+      setData({ ...data, birthCountry: "", isFrench });
+    }
+  };
+
   const setFrenchResident = (isFrenchResident) => {
     if (isFrenchResident) {
       setData({ ...data, country: FRANCE, isFrenchResident });
@@ -48,6 +57,7 @@ export default function StepCoordonnees() {
 
   const {
     isFrench,
+    birthCountry,
     birthCityZip,
     birthCity,
     gender,
@@ -73,7 +83,17 @@ export default function StepCoordonnees() {
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Mon profile volontaire</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
-        <RadioButton className="my-4" label="Je suis né(e)..." options={isFrenchOptions} onChange={updateData("isFrench")} value={isFrench} />
+        <RadioButton className="my-4" label="Je suis né(e)..." options={isFrenchOptions} onChange={setFrench} value={isFrench} />
+        {!isFrench && (
+          <Select
+            options={countryOptions}
+            className="my-4"
+            value={birthCountry}
+            label="Pays de naissance"
+            placeholder="Sélectionnez un pays"
+            onChange={updateData("birthCountry")}
+          />
+        )}
         <Input className="my-4" value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} />
         <Input className="my-4" value={birthCity} label="Commune de naissance" onChange={updateData("birthCity")} />
         <RadioButton className="my-4" label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} />
