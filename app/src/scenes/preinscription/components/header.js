@@ -33,11 +33,11 @@ const Header = ({ setIsOpen }) => {
             </div>
           ) : (
             <div className="flex text-sm text-[#000091] items-center basis-[50%%]">
-              <div className="flex items-center space-x-1 border-r border-r-gray-300 py-1 pl-1.5 pr-3 cursor-pointer hover:font-bold">
+              <Link className="flex items-center space-x-1 border-r border-r-gray-300 py-1 pl-1.5 pr-3 cursor-pointer hover:font-bold hover:text-[#000091]" to="/les-programmes">
                 <img src={File} alt="" />
                 <div>Programme</div>
-              </div>
-              <Link className="flex items-center space-x-1 py-1 px-3 cursor-pointer hover:font-bold hover:text-[#000091]" to={`/besoin-d-aide?from${window.location.pathname}`}>
+              </Link>
+              <Link className="flex items-center space-x-1 py-1 px-3 cursor-pointer hover:font-bold hover:text-[#000091]" to={`/public-besoin-d-aide?from${pathname}`}>
                 <Help />
                 <div>Besoin d&apos;aide</div>{" "}
               </Link>

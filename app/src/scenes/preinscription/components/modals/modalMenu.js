@@ -3,9 +3,10 @@ import Close from "../../../../assets/CloseBlue.svg";
 import File from "../../../../assets/file.svg";
 import Help from "../../../../assets/icons/QuestionMarkBlue";
 import Login from "../../../../assets/icons/Login";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
+  const { pathname } = useLocation();
   return (
     isOpen && (
       <div className="w-screen h-screen bg-[#f9f6f2] text-[#000091] text-sm font-medium ">
@@ -26,10 +27,10 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <img src={File} />
             <div>Le programme</div>
           </div>
-          <div className="flex space-x-2 items-center pt-3">
+          <Link className="flex space-x-2 items-center pt-3" to={`/public-besoin-d-aide?from${pathname}`}>
             <Help />
             <div>Besoin d&apos;aide ?</div>
-          </div>
+          </Link>
         </div>
       </div>
     )
