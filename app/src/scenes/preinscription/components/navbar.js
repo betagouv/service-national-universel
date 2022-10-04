@@ -1,8 +1,8 @@
 import React from "react";
 import useDevice from "../../../hooks/useDevice";
 
-const Navbar = ({ isEligible, step }) => {
-  return isEligible ? (
+const Navbar = ({ ineligible, step }) => {
+  return step !== ineligible ? (
     <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">
       <div className={`flex flex-col justify-center ${useDevice() === "desktop" && "w-1/2 mx-auto my-0"}`}>
         <div className="text-sm">Étape {step === "ELIGIBILITE" ? "1" : step === "SEJOUR" ? "2" : step === "PROFIL" && "3"} sur 3</div>

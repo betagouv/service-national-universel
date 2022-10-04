@@ -20,6 +20,7 @@ import ModalMenu from "./components/modals/modalMenu";
 
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
+  INELIGIBLE: "INELIGIBLE",
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   DONE: "DONE",
@@ -27,7 +28,6 @@ const STEPS = {
 
 const Step = ({ step }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isEligible, setIsEligible] = useState(true);
   const device = "mobile"; //useDevice();
 
   //A terminer
@@ -55,7 +55,7 @@ const Step = ({ step }) => {
     <div>
       <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
-      <Navbar isEligible={isEligible} step={step} />
+      <Navbar ineligible={STEPS.INELIGIBLE} step={step} />
       {renderStep(step)}
       {/* footer */}
     </div>
