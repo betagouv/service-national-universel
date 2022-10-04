@@ -129,7 +129,6 @@ router.post("/eligibility/2023", async (req, res) => {
       .unknown()
       .validate(eligibilityObject);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    console.log("🚀 ~ file: cohort-session.js ~ line 133 ~ router.post ~ value", value);
     const { department, birthDate, schoolLevel } = value;
 
     if (schoolLevel !== "2de") return res.send({ ok: true, data: [] });

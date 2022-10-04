@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import API from "../../../../../admin/src/services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function StepSejour() {
   const [isLoading, setLoading] = useState(true);
   // const [data, setData] = React.useContext(PreInscriptionContext);
-  const [data, setData] = useState({ grade: "2de", department: "Hauts-de-Seine", birthdateAt: new Date("07/14/2006") }); // Pour tester
+  const [data, setData] = useState({ grade: "3eme", department: "Hauts-de-Seine", birthdateAt: new Date("07/14/2006") }); // Pour tester
   const [cohorts, setCohorts] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -18,6 +20,10 @@ export default function StepSejour() {
         birthDate: data.birthdateAt,
         schoolLevel: data.grade,
       });
+      if (!res.ok) {
+        toastr.error("Impossible de vérifier votre éligibilité");
+        history.push("/");
+      }
       setCohorts(res.data);
       setLoading(false);
     })();
@@ -43,7 +49,13 @@ export default function StepSejour() {
             </div>
           </div>
         </div>
-        <div className="text-blue-600 text-center border my-4 p-2">Voir plus de formes d’engagement</div>
+        <div
+          className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
+          onClick={() => {
+            history.push("https://www.jeveuxaider.gouv.fr/");
+          }}>
+          Voir plus de formes d’engagement
+        </div>
       </div>
     );
 
@@ -51,7 +63,9 @@ export default function StepSejour() {
     <div className="bg-white p-4">
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
-        <QuestionMarkBlueCircle />
+        <Link to="/public-besoin-d-aide/">
+          <QuestionMarkBlueCircle />
+        </Link>
       </div>
       <hr className="my-4 h-px bg-gray-200 border-0" />
       <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
@@ -77,8 +91,7 @@ export default function StepSejour() {
         className="border p-4 my-3 flex justify-between items-center"
         onClick={() => {
           setData({ ...data, cohort: cohort.id });
-          // history.push("/preinscription/profil");
-          console.log(data);
+          history.push("/preinscription/profil");
         }}>
         <div>
           Séjour <strong>{cohort.dates}</strong>
