@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { setYoung } from "../../../redux/auth/actions";
 import { useHistory, Link } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import api from "../../../services/api";
@@ -11,9 +9,9 @@ import { SENDINBLUE_TEMPLATES } from "../../../utils";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import StickyButton from "../../../components/inscription/stickyButton";
+import { capture } from "../../../sentry";
 
 export default function StepDone() {
-  const dispatch = useDispatch();
   const [error, setError] = useState({});
   const [data] = React.useContext(PreInscriptionContext);
 
@@ -38,12 +36,10 @@ export default function StepDone() {
         schoolRegion: data.school?.region,
         schoolCountry: data.school?.country,
         schoolId: data.school?._id,
+        zip: data.zip,
       });
 
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
-
-      if (token) api.setToken(token);
-      dispatch(setYoung(user));
 
       await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
         cta: `${appURL}/inscription2023`,
@@ -53,10 +49,12 @@ export default function StepDone() {
 
       history.push("/preinscription/done");
     } catch (e) {
-      console.log(e);
       if (e.code === "USER_ALREADY_REGISTERED")
         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
-      else setError({ text: e.code });
+      else {
+        capture(e);
+        setError({ text: e.code });
+      }
     }
   };
 

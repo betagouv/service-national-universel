@@ -6,6 +6,8 @@ import { GrAttachment } from "react-icons/gr";
 import api from "../../../services/api";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
+import { capture } from "../../../sentry";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
@@ -17,6 +19,20 @@ export default function StepDone() {
     dispatch(setYoung(null));
     history.push("/");
   };
+
+  async function handleClick() {
+    try {
+      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
+      if (young) {
+        if (token) api.setToken(token);
+        dispatch(setYoung(young));
+        plausibleEvent("");
+        history.push("/inscription2023");
+      }
+    } catch (e) {
+      capture(e);
+    }
+  }
 
   return (
     <>
@@ -41,7 +57,7 @@ export default function StepDone() {
       </div>
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-col shadow-ninaInverted p-4 bg-white gap-4">
-          <button className="flex items-center justify-center p-2 w-full cursor-pointer bg-[#000091] text-white" onClick={() => history.push("/inscription2023")}>
+          <button className="flex items-center justify-center p-2 w-full cursor-pointer bg-[#000091] text-white" onClick={handleClick}>
             Compléter mon inscription
           </button>
           <button className="flex items-center justify-center p-2 w-full cursor-pointer border-[#000091] border-[1px] text-[#000091]" onClick={() => logout()}>

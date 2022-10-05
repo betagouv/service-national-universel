@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { Link, useHistory } from "react-router-dom";
 import Select from "../../../components/inscription/select";
@@ -7,14 +7,13 @@ import Input from "../../../components/inscription/input";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import DateFilter from "../components/DatePickerList";
 import api from "../../../services/api";
-import { useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
 import StickyButton from "../../../components/inscription/stickyButton";
-import { useRef } from "react";
 import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/inscription/CheckBox";
 import validator from "validator";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -103,6 +102,7 @@ export default function StepEligibilite() {
       toastr.error("Veuillez remplir tous les champs :" + Object.keys(errors)[0] + Object.values(errors)[0]);
       return;
     }
+    plausibleEvent("");
     history.push("/preinscription/sejour");
   };
 

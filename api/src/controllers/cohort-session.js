@@ -124,7 +124,7 @@ router.post("/eligibility/2023", async (req, res) => {
       frenchNationality: req.body.frenchNationality,
     };
     const { error, value } = Joi.object({
-      department: Joi.string().required(),
+      department: Joi.string().allow(null, ""),
       birthDate: Joi.date().required(),
       schoolLevel: Joi.string().allow(null, ""),
       frenchNationality: Joi.string().required(),

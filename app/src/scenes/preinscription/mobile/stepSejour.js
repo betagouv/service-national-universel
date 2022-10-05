@@ -3,19 +3,22 @@ import { Link, useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import API from "../../../services/api";
+import api from "../../../services/api";
+import Error from "../../../components/error";
 import { toastr } from "react-redux-toastr";
+import { getDepartmentByZip } from "snu-lib";
 
 export default function StepSejour() {
   const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState({});
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [cohorts, setCohorts] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
     (async () => {
-      const res = await API.post("/cohort-session/eligibility/2023", {
-        department: data.school.departmentName,
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
         birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
