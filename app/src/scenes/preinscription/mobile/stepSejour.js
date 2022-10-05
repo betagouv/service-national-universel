@@ -15,7 +15,7 @@ export default function StepSejour() {
   useEffect(() => {
     (async () => {
       const res = await API.post("/cohort-session/eligibility/2023", {
-        department: data.department,
+        department: data.school.departmentName,
         birthDate: data.birthDate,
         schoolLevel: data.scolarity,
       });
