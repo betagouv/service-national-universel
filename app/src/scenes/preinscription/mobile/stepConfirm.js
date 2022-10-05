@@ -1,35 +1,77 @@
-import React from "react";
-import EditPen from "../../../assets/icons/EditPen";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
+import { useHistory, Link } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import StickyButton from "../../../components/inscription/stickyButton";
-import { useHistory } from "react-router-dom";
-import API from "../../../services/api";
+import api from "../../../services/api";
 import { appURL } from "../../../config";
-import { translateGrade } from "snu-lib/translation";
-import { formatDateFR } from "snu-lib/date";
+import { translate, translateGrade, formatDateFR } from "snu-lib";
+import plausibleEvent from "../../../services/plausible";
+import { SENDINBLUE_TEMPLATES } from "../../../utils";
+import EditPen from "../../../assets/icons/EditPen";
+import Error from "../../../components/error";
+import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepDone() {
+  const dispatch = useDispatch();
+  const [error, setError] = useState({});
   const [data] = React.useContext(PreInscriptionContext);
+
   const history = useHistory();
 
   const onSubmit = async () => {
-    // create young
-    // await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
-    //   cta: `${appURL}/inscription2023`,
-    // });
-    // plausible
-    history.push("/preinscription/done");
+    try {
+      const { user, token, code, ok } = await api.post("/young/signup2023", {
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        frenchNationality: data.frenchNationality,
+        password: data.password,
+        birthdateAt: data.birthDate,
+        schooled: data.school ? "true" : "false",
+        schoolName: data.school?.fullName,
+        schoolType: data.school?.type,
+        schoolAddress: data.school?.adresse,
+        schoolZip: data.school?.codeCity,
+        schoolCity: data.school?.city,
+        schoolDepartment: data.school?.departmentName,
+        schoolRegion: data.school?.region,
+        schoolCountry: data.school?.country,
+        schoolId: data.school?._id,
+      });
+
+      if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+
+      if (token) api.setToken(token);
+      dispatch(setYoung(user));
+
+      await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
+        cta: `${appURL}/inscription2023`,
+      });
+
+      plausibleEvent("");
+
+      history.push("/preinscription/done");
+    } catch (e) {
+      console.log(e);
+      if (e.code === "USER_ALREADY_REGISTERED")
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
+      else setError({ text: e.code });
+    }
   };
 
   return (
     <>
       <div className="bg-white p-4">
-        <h1 className="text-xl text-[#161616]">Ces informations sont correctes ?</h1>
+        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+        <h1 className="text-xl text-[#161616]">Ces informations sont-elles correctes&nbsp;?</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col gap-4">
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#161616] text-lg">Mes informations personnelles</div>
-            <EditPen />
+            <Link to="profil">
+              <EditPen />
+            </Link>
           </div>
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#666666] text-sm">Prénom :</div>

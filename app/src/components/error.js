@@ -1,5 +1,5 @@
 import React from "react";
-import ErrorIcon from "../../../assets/icons/ErrorIcon";
+import ErrorIcon from "../assets/icons/ErrorIcon";
 import { IoCloseOutline } from "react-icons/io5";
 
 export default function Error({ text, subText, onClose }) {

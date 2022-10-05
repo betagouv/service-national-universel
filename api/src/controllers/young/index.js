@@ -52,6 +52,7 @@ const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = requi
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
+router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));

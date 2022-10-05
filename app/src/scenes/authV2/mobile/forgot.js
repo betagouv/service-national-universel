@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/inscription/input";
 import api from "../../../services/api";
-import Error from "../components/error";
+import Error from "../../../components/error";
 
 export default function Forgot() {
   const [done, setDone] = React.useState(false);
