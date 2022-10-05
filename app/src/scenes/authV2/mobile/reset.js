@@ -85,7 +85,7 @@ export default function Reset() {
         <button
           className={`mt-4 flex items-center justify-center p-2 w-full cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
           onClick={onSubmit}>
-          M&apos;envoyer le lien de réinitialisation
+          Réinitialiser
         </button>
 
         <hr className="text-[#E5E5E5] mt-6" />
