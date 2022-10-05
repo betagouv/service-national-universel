@@ -3,7 +3,7 @@ import { BsCheck2 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function Select({ label, options, value, placeholder = "Sélectionner une option", Icon = null, alignItems = "left", onChange, className }) {
+export default function Select({ label, options, value, placeholder = "Sélectionner une option", Icon = null, alignItems = "left", onChange, error = "" }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -29,7 +29,7 @@ export default function Select({ label, options, value, placeholder = "Sélectio
   };
 
   return (
-    <div className={`${className} text-[#161616]`} style={{ fontFamily: "Marianne" }} ref={ref}>
+    <div className="my-2 text-[#161616]" style={{ fontFamily: "Marianne" }} ref={ref}>
       <label className="my-2">{label}</label>
       <div className="relative">
         {/* select item */}
@@ -68,6 +68,7 @@ export default function Select({ label, options, value, placeholder = "Sélectio
           ))}
         </div>
       </div>
+      <div className="h-4 text-red-500 text-sm">{error}</div>
     </div>
   );
 }
