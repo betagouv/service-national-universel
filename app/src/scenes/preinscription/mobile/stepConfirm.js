@@ -1,16 +1,19 @@
 import React, { useState } from "react";
-import EditPen from "../../../assets/icons/EditPen";
+import { useDispatch } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
+import { useHistory, Link } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import StickyButton from "../../../components/inscription/stickyButton";
-import { useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { appURL } from "../../../config";
 import { translate, translateGrade, formatDateFR } from "snu-lib";
 import plausibleEvent from "../../../services/plausible";
 import { SENDINBLUE_TEMPLATES } from "../../../utils";
+import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
+import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepDone() {
+  const dispatch = useDispatch();
   const [error, setError] = useState({});
   const [data] = React.useContext(PreInscriptionContext);
 
@@ -18,7 +21,6 @@ export default function StepDone() {
 
   const onSubmit = async () => {
     try {
-      // signup
       const { user, token, code, ok } = await api.post("/young/signup2023", {
         email: data.email,
         firstName: data.firstName,
@@ -40,16 +42,13 @@ export default function StepDone() {
 
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
 
-      // signin
-      // if (token) api.setToken(token);
-      // dispatch(setYoung(user));
+      if (token) api.setToken(token);
+      dispatch(setYoung(user));
 
-      // notif
       await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
         cta: `${appURL}/inscription2023`,
       });
 
-      // plausible
       plausibleEvent("");
 
       history.push("/preinscription/done");
@@ -70,7 +69,9 @@ export default function StepDone() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#161616] text-lg">Mes informations personnelles</div>
-            <EditPen />
+            <Link to="profil">
+              <EditPen />
+            </Link>
           </div>
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#666666] text-sm">Prénom :</div>
