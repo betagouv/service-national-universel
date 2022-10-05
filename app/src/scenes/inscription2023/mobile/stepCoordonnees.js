@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import validator from "validator";
 import RadioButton from "../components/RadioButton";
 import Input from "../components/Input";
@@ -6,6 +7,7 @@ import Header from "../components/Header";
 import GhostButton from "../components/GhostButton";
 import Select from "../components/Select";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationShipOptions, frenchNationalityOptions, genderOptions } from "../utils";
+import api from "../../../services/api";
 
 const FRANCE = "France";
 
@@ -35,6 +37,7 @@ const defaultState = {
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
+  const young = useSelector((state) => state.Auth.young);
 
   const {
     frenchNationality,
@@ -106,8 +109,8 @@ export default function StepCoordonnees() {
 
     setErrors(errors);
     if (!Object.keys(errors).length) {
-      //submit
-      console.log("ok");
+      const { ok, code, data: responsData } = await api.put(`/young/inscription2023/coordinates`, data);
+      //@todo display success/error messages
     }
   };
 
