@@ -12,45 +12,7 @@ import Error from "../../../components/error";
 
 export default function StepDone() {
   const [error, setError] = useState({});
-  // const [data] = React.useContext(PreInscriptionContext);
-  const data = {
-    acceptCGU: "true",
-    birthDate: "2007-01-01",
-    cohort: "Avril 2023 - B",
-    confirmPassword: "123!@#qweQWE",
-    email: "bob@bob.com",
-    emailConfirm: "bob@bob.com",
-    firstName: "bob",
-    frenchNationality: "true",
-    lastName: "bob",
-    password: "123!@#qweQWE",
-    rulesYoung: "true",
-    school: {
-      adresse: "3 allée des Collèges",
-      city: "Bourges",
-      codeCity: "18033",
-      codePays: "100",
-      country: "FRANCE",
-      createdAt: "2022-09-30T12:30:29.445Z",
-      data: {
-        ADMINISTRATION: { DATE_MAJ: "2022-06-22", CODE_INSEE_COMMUNE: "18033", CODE_APET: "8531Z", MINISTERES_TUTELLES: Array(1), TYPES_ETABLISSEMENTS: Array(1) },
-        DATE_PRODUCTION: "2022-09-29",
-        IDENTIFICATION: { DATE_MAJ: "2022-06-22", NUMERO_UAI: "0180673J", ETAT: "1", CODE_ACADEMIE: "18", CODE_DEPARTEMENT: "018" },
-        LOCALISATION: { DATE_MAJ: "2022-06-22", CODE_POSTAL: "18028", BOITE_POSTALE: "4029", LOCALITE_ACHEMINEMENT: "BOURGES CEDEX", TELEPHONE: "0248271460" },
-      },
-      department: "018",
-      departmentName: "Cher",
-      fullName: "Collège Jules Verne",
-      postcode: "18028",
-      region: "Centre-Val de Loire",
-      type: "CLG",
-      uai: "0180673J",
-      updatedAt: "2022-09-30T12:30:29.445Z",
-      __v: 0,
-      _id: "6336e165628add2921804288",
-    },
-    scolarity: "SECOND",
-  };
+  const [data] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
 
