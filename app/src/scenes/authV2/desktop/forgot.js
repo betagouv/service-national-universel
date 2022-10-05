@@ -31,7 +31,7 @@ export default function Forgot() {
     }
   };
   return (
-    <div className="bg-[#F9F6F2] h-[80vh] py-8 flex">
+    <div className="bg-[#F9F6F2] py-8 flex">
       <div className="bg-white basis-[50%] mx-auto my-0 px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="text-[#161616] text-[22px] font-bold">Réinitialiser mon mot de passe</div>

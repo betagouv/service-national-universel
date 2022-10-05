@@ -14,9 +14,9 @@ const Footer = () => {
   const noButton = ["/auth"].includes(pathname);
   return (
     <div
-      className={`${
-        desktop ? " border-t-[#000091] border-t pt-3 px-3" : noButton ? "mb-0" : largeButton ? "mb-[20vh]" : smallButton ? "mb-[12vh]" : "mb-0"
-      } w-full bg-white  pb-3 ${mobile && "border-t border-t-[#E5E5E5]"} `}>
+      className={`${desktop || noButton ? "mb-0" : largeButton ? "mb-[20vh]" : smallButton ? "mb-[12vh]" : "mb-0"} ${
+        desktop ? " border-t-[#000091] border-t pt-3 px-3" : mobile && "border-t border-t-[#E5E5E5]"
+      } w-full bg-white  pb-3`}>
       <div className={`${desktop ? "flex justify-between w-full px-[108px]" : "px-3"} text-sm text-[#3A3A3A] py-3`}>
         <div className={`${desktop && "basis-[50%]"} mb-4 flex`}>
           <img src={LogoFr} className="w-26 h-24" />
