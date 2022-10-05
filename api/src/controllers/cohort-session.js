@@ -121,19 +121,21 @@ router.post("/eligibility/2023", async (req, res) => {
       department: req.body.department,
       birthDate: req.body.birthDate,
       schoolLevel: req.body.schoolLevel,
+      frenchNationality: req.body.frenchNationality,
     };
     const { error, value } = Joi.object({
       department: Joi.string().required(),
       birthDate: Joi.date().required(),
       schoolLevel: Joi.string().allow(null, ""),
+      frenchNationality: Joi.string().required(),
     })
       .unknown()
       .validate(eligibilityObject);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { department, birthDate, schoolLevel } = value;
+    const { department, birthDate, schoolLevel, frenchNationality } = value;
 
     // Get available sessions based on department, grade & birthdate
-    if (schoolLevel !== "SECOND") return res.send({ ok: true, data: [] });
+    if (!["NOT_SCOLARISE", "SECOND", "FIRST_CAP"].includes(schoolLevel) || frenchNationality === "false") return res.send({ ok: true, data: [] });
 
     let cohorts = [];
     const zone = getZoneByDepartment(department);

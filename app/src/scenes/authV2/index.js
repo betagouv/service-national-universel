@@ -20,7 +20,6 @@ import HeaderMenu from "../../components/headerMenu";
 import Footer from "../../components/footerV2";
 
 const Render = ({ screen }) => {
-  console.log("here");
   const device = useDevice();
   const [isOpen, setIsOpen] = React.useState(false);
 
