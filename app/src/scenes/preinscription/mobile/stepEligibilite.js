@@ -13,14 +13,19 @@ import { useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
 import StickyButton from "../../../components/inscription/stickyButton";
-import validator from "validator";
+import { useRef } from "react";
+// import validator from "validator";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [search, setSearch] = React.useState();
   const [isSearching, setIsSearching] = React.useState(false);
+  const [showItems, setShowItems] = React.useState(false);
   const [schools, setSchools] = React.useState([]);
   const [error, setError] = React.useState({});
+
+  const inputSearch = useRef(null);
+
   const history = useHistory();
 
   const optionsScolarite = [
@@ -140,10 +145,12 @@ export default function StepEligibilite() {
                 placeholder="Rechercher une ecole.."
                 onChange={(e) => {
                   setSearch(e.target.value);
+                  setShowItems(true);
                 }}
+                ref={inputSearch}
               />
               <div className="relative flex w-full items-center">
-                {schools.length > 0 && (
+                {schools.length > 0 && showItems && (
                   <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
                     {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
                     {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n'y a pas de résultat 👀</span>}
@@ -153,17 +160,27 @@ export default function StepEligibilite() {
                         data={school}
                         onClick={() => {
                           setData({ ...data, school: { ...school } });
+                          setShowItems(false);
+                          setSearch("");
+                          inputSearch.current.value = "";
                         }}
                       />
                     ))}
                   </div>
                 )}
               </div>
-              {/* <div className="flex flex-col flex-start my-4">
-              Niveau de scolarité
-              <Select options={optionsScolarite} value={data.scolarity} placeholder="Sélectionner une option" onChange={(e) => setData({ ...data, scolarity: e })} />
+              <div className="flex flex-col flex-start my-4">
+                Nom de l'établissement
+                <Input disabled value={data?.school?.fullName} />
               </div>
-            <Input disabled /> */}
+              <div className="flex flex-col flex-start my-4">
+                Commune de l'établissement
+                <Input disabled value={data?.school?.city} />
+              </div>
+              <div className="flex flex-col flex-start my-4">
+                Pays de l'établissement
+                <Input disabled value={data?.school?.country} />
+              </div>
             </div>
           ) : (
             <div className="flex justify-between">
