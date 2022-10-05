@@ -10,7 +10,7 @@ import { Link, useLocation } from "react-router-dom";
 const Header = ({ setIsOpen }) => {
   const { pathname } = useLocation();
   return (
-    <div className="flex  px-3  w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] sticky top-0 z-[100] bg-white">
+    <div className="flex  px-3  w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] sticky top-0 z-50 bg-white">
       <div className="flex justify-between w-full h-full border-b border-b-[#E5E5E5] py-3 md:pr-[120px] md:pl-[108px]">
         <div className="flex basis-[50%] space-x-6 items-center">
           <img src={LogoFr} className="w-18 h-16" />
