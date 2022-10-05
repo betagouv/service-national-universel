@@ -3,13 +3,21 @@ import EditPen from "../../../assets/icons/EditPen";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory } from "react-router-dom";
+import API from "../../../services/api";
+import { appURL } from "../../../config";
+import { translateGrade } from "snu-lib/translation";
+import { formatDateFR } from "snu-lib/date";
 
 export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
   const history = useHistory();
 
   const onSubmit = async () => {
-    //create young
+    // create young
+    // await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
+    //   cta: `${appURL}/inscription2023`,
+    // });
+    // plausible
     history.push("/preinscription/done");
   };
 
@@ -37,11 +45,11 @@ export default function StepDone() {
           </div>
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#666666] text-sm">Niveau de scolarité : </div>
-            <div className="text-[#161616] text-base">{data.grade}</div>
+            <div className="text-[#161616] text-base">{translateGrade(data.scolarity)}</div>
           </div>
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#666666] text-sm">Date de naissance : </div>
-            <div className="text-[#161616] text-base">{data.birthdateAt}</div>
+            <div className="text-[#161616] text-base">{formatDateFR(data.birthDate)}</div>
           </div>
         </div>
       </div>
