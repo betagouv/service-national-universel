@@ -12,19 +12,26 @@ import api from "../../../services/api";
 import { useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
+import StickyButton from "../components/stickyButton";
+import validator from "validator";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [search, setSearch] = React.useState();
   const [isSearching, setIsSearching] = React.useState(false);
   const [schools, setSchools] = React.useState([]);
-  const [schoolSelected, setSchoolSelected] = React.useState();
+  const [error, setError] = React.useState({});
   const history = useHistory();
+
   const optionsScolarite = [
-    { value: "NOT_SCOLARISE", label: "Non scolarisé" },
+    { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
+    { value: "FOURTH", label: "4ème" },
     { value: "THIRD", label: "3ème" },
     { value: "SECOND", label: "2nde" },
-    { value: "TERM", label: "1ale" },
+    { value: "FIRST", label: "1ère" },
+    { value: "FIRST_CAP", label: "1ère CAP" },
+    { value: "TERM", label: "Terminale" },
+    { value: "TERM_CAP", label: "Terminale CAP" },
   ];
 
   console.log("🚀 ~ file: stepEligibilite.js ~ line 18 ~ StepEligibilite ~ data", data);
@@ -52,74 +59,129 @@ export default function StepEligibilite() {
     }
   };
 
+  const validate = () => {
+    let errors = {};
+
+    // Nationality
+    if (!data?.frenchNationality) {
+      errors.email = "Vous devez être français";
+    }
+    // Scolarity
+    if (!data?.scolarity) {
+      errors.scolarity = "Choisissez une date de naissance";
+    }
+    // Birthdate
+    // ? Check age ?
+    if (!data?.birthDate) {
+      errors.birthDate = "Vous devez choisir une date de naissance";
+    }
+
+    // School
+    if (!data?.school) {
+      errors.school = "Vous devez choisir votre école. Contactez-nous (support URL) si vous ne la trouvez pas";
+    }
+    return errors;
+  };
+
+  const keyList = ["frenchNationality", "scolarity", "birthDate", "school"];
+
+  const onSubmit = async () => {
+    let errors = {};
+
+    for (const key of keyList) {
+      if (data[key] === undefined || data[key] === "") {
+        errors[key] = "Ce champ est obligatoire";
+      }
+    }
+
+    errors = { ...errors, ...validate() };
+
+    setError(errors);
+    if (!Object.keys(errors).length) {
+      history.push("/preinscription/sejour");
+    }
+  };
+
   return (
-    <div className="bg-white p-4">
-      <div className="w-full flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
-        <QuestionMarkBlueCircle />
-      </div>
-      <hr className="my-4 h-px bg-gray-200 border-0" />
-      <div className="flex items-center my-4">
-        <input
-          type="checkbox"
-          className={`w-4 h-4 cursor-pointer`}
-          checked={data.frenchNationality === "true"}
-          onChange={(e) => setData({ ...data, frenchNationality: e.target.checked ? "true" : "false" })}
-        />
-        <div className="ml-4">Je suis de nationalité française </div>
-      </div>
-      <div className="flex flex-col flex-start my-4">
-        Niveau de scolarité
-        <Select options={optionsScolarite} value={data.scolarity} placeholder="Sélectionner une option" onChange={(e) => setData({ ...data, scolarity: e })} />
-      </div>
-      <div className="flex flex-col flex-start my-4">
-        Date de naissance
-        <DateFilter title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
-      </div>
-      {data.scolarity &&
-        (data.scolarity !== "NOT_SCOLARISE" ? (
-          <div>
+    <>
+      <div className="bg-white p-4">
+        <div className="w-full flex justify-between items-center">
+          <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
+          <QuestionMarkBlueCircle />
+        </div>
+        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <div className="flex flex-col flex-start my-4">
+          <div className="flex items-center my-4">
             <input
-              type="text"
-              placeholder="Rechercher une ecole.."
-              onChange={(e) => {
-                setSearch(e.target.value);
-              }}
+              type="checkbox"
+              className={`w-4 h-4 cursor-pointer`}
+              checked={data.frenchNationality === "true"}
+              onChange={(e) => setData({ ...data, frenchNationality: e.target.checked ? "true" : "false" })}
             />
-            <div className="relative flex w-full items-center">
-              {schools.length > 0 && (
-                <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
-                  {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
-                  {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n'y a pas de résultat 👀</span>}
-                  {schools?.map((school) => (
-                    <SchoolCard
-                      key={school._id}
-                      data={school}
-                      onClick={() => {
-                        setData({ ...data, school: { ...school } });
-                        setSchoolSelected(school);
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* <div className="flex flex-col flex-start my-4">
+            <div className="ml-4">Je suis de nationalité française </div>
+          </div>
+          {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
+        </div>
+        <div className="flex flex-col flex-start my-4">
+          Niveau de scolarité
+          <Select options={optionsScolarite} value={data.scolarity} placeholder="Sélectionner une option" onChange={(e) => setData({ ...data, scolarity: e })} />
+          {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
+        </div>
+        <div className="flex flex-col flex-start my-4">
+          Date de naissance
+          <DateFilter title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+          {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+        </div>
+        {data.scolarity &&
+          (data.scolarity !== "NOT_SCOLARISE" ? (
+            <div>
+              <input
+                type="text"
+                placeholder="Rechercher une ecole.."
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+              />
+              <div className="relative flex w-full items-center">
+                {schools.length > 0 && (
+                  <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
+                    {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
+                    {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n'y a pas de résultat 👀</span>}
+                    {schools?.map((school) => (
+                      <SchoolCard
+                        key={school._id}
+                        data={school}
+                        onClick={() => {
+                          setData({ ...data, school: { ...school } });
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* <div className="flex flex-col flex-start my-4">
               Niveau de scolarité
               <Select options={optionsScolarite} value={data.scolarity} placeholder="Sélectionner une option" onChange={(e) => setData({ ...data, scolarity: e })} />
-            </div>
+              </div>
             <Input disabled /> */}
-          </div>
-        ) : (
-          <div className="flex justify-between">
-            <div className="flex">
-              <div className="font-bold">Je réside</div> en France
             </div>
+          ) : (
+            <div className="flex justify-between">
+              <div className="flex">
+                <div className="font-bold">Je réside</div> en France
+              </div>
 
-            <Toggle onClick={() => setData({ ...data, frenchResidency: !data.frenchResidency })} toggled={data.frenchResidency} />
-          </div>
-        ))}
-    </div>
+              <Toggle onClick={() => setData({ ...data, frenchResidency: !data.frenchResidency })} toggled={data.frenchResidency} />
+              {error.frenchResidency ? <span className="text-red-500 text-sm">{error.frenchResidency}</span> : null}
+
+              {/* <div className="flex flex-col flex-start my-4">
+              Code Postal input a mettre
+            </div> */}
+            </div>
+          ))}
+      </div>
+      <StickyButton text="Continuer" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription")} />
+    </>
   );
 }
 
