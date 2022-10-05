@@ -59,7 +59,7 @@ export default function Signin() {
     else setDisabled(true);
   }, [email, password]);
   return (
-    <div className="bg-[#F9F6F2] h-[80vh] py-8 flex">
+    <div className="bg-[#F9F6F2] py-6 flex">
       <div className="bg-white basis-[50%] mx-auto my-0 px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="text-[#161616] text-[32px] font-bold mb-1">Me connecter</div>
@@ -90,7 +90,7 @@ export default function Signin() {
         </div>
 
         <hr className="text-[#E5E5E5] mt-4" />
-        <div className="text-[#161616] text-[17px] font-bold text-center mt-3 mb-2">Vous n&apos;êtes pas encore inscrit(e) ?</div>
+        <div className="text-[#161616] text-[17px] font-bold text-center mt-4 mb-4">Vous n&apos;êtes pas encore inscrit(e) ?</div>
         <div className="flex justify-center">
           <button className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/preinscription")}>
             Commencer mon inscription
