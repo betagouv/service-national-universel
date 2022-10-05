@@ -94,7 +94,6 @@ class Auth {
       }).validate(req.body);
 
       if (error) {
-        console.log("🚀 ~ file: auth.js ~ line 96 ~ Auth ~ signUp2023 ~ error", error);
         if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
         if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -128,6 +127,7 @@ class Auth {
         firstName,
         lastName,
         password,
+        birthdateAt,
         frenchNationality,
         schooled,
         schoolName,
