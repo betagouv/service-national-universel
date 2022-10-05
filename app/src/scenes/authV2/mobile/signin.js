@@ -8,7 +8,6 @@ import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/inscription/input";
-import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../components/error";
@@ -28,10 +27,14 @@ export default function Signin() {
   const params = queryString.parse(location.search);
   const { redirect, disconnected } = params;
 
-  if (young) return <Redirect to={"/" + (redirect || "")} />;
   if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
+  React.useEffect(() => {
+    if (young) history.push("/" + (redirect || ""));
+  }, [young]);
+
   const onSubmit = async () => {
+    if (loading || disabled) return;
     setLoading(true);
     try {
       const { user: young, token } = await api.post(`/young/signin`, { email, password });
@@ -40,17 +43,15 @@ export default function Signin() {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
       }
-      setLoading(false);
     } catch (e) {
       setPassword("");
-      console.log("e", e);
       setError({ text: "  E-mail et/ou mot de passe incorrect(s)" });
       if (e.code === "TOO_MANY_REQUESTS") {
         let date = formatToActualTime(e?.data?.nextLoginAttemptIn);
         setError({ text: " Vous avez atteint le maximum de tentatives de connexion autorisées.", subText: `Réessayez ${date !== "-" ? `à ${date}.` : "demain."}` });
       }
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   React.useEffect(() => {
@@ -81,13 +82,17 @@ export default function Signin() {
         <div className="pb-4 text-[#000091] text-base font-normal" onClick={() => history.push("/auth/forgot")}>
           Mot de passe perdu ?
         </div>
-        <hr className="text-[#E5E5E5]" />
+        <button
+          className={`flex items-center justify-center p-2 w-full cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+          onClick={onSubmit}>
+          Connexion
+        </button>
+        <hr className="text-[#E5E5E5] mt-5" />
         <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-4">Vous n&apos;êtes pas encore inscrit(e) ?</div>
         <button className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/preinscription")}>
           Commencer mon inscription
         </button>
       </div>
-      <StickyButton onClick={onSubmit} text="Connexion" disabled={disabled || loading} />
     </>
   );
 }
