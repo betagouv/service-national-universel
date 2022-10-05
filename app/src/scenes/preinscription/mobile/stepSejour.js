@@ -18,6 +18,7 @@ export default function StepSejour() {
         department: data.school.departmentName,
         birthDate: data.birthDate,
         schoolLevel: data.scolarity,
+        frenchNationality: data.frenchNationality,
       });
       if (!res.ok) {
         toastr.error("Impossible de vérifier votre éligibilité");
