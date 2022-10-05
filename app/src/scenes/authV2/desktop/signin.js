@@ -1,7 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Redirect, useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
@@ -19,7 +18,6 @@ export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
-  const history = useHistory();
 
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
