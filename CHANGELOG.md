@@ -1,3 +1,31 @@
+# [1.142.0](https://github.com/betagouv/service-national-universel/compare/v1.141.0...v1.142.0) (2022-10-05)
+
+
+### Bug Fixes
+
+* **api:** non scolarisé et 1e CAP eligibles ([c751063](https://github.com/betagouv/service-national-universel/commit/c75106349b96a79637769e2c1cf16490b9ff9193))
+* **app:** Better eligibility ([136e21e](https://github.com/betagouv/service-national-universel/commit/136e21eb005aaf5f6d517e4bf45d5ee363184c48))
+* **app:** Disable previous on eligibilite ([8fde55a](https://github.com/betagouv/service-national-universel/commit/8fde55a55ef021d203cbbb4cabdcf83f237ff024))
+* **app:** eligibilite up ([7057445](https://github.com/betagouv/service-national-universel/commit/705744587d241dcdc9637be363958b1d75c30954))
+* **app:** fix eligibility api call ([30a8862](https://github.com/betagouv/service-national-universel/commit/30a886242ce0757aa6f2701938dd35f2b98cd3c3))
+* **app:** fix footer preinscription ([#1857](https://github.com/betagouv/service-national-universel/issues/1857)) ([8692ceb](https://github.com/betagouv/service-national-universel/commit/8692ceb95e9d736d33a19ed18a96eb0f0e4db57d))
+* **app:** fix modal preinscription and header ([#1858](https://github.com/betagouv/service-national-universel/issues/1858)) ([4a7eb56](https://github.com/betagouv/service-national-universel/commit/4a7eb560242b459417ff2dd184eb05f0212c2632))
+* **app:** header young ([86b3f29](https://github.com/betagouv/service-national-universel/commit/86b3f299e8337173a8d37b4a5cb7773dc4887697))
+* **app:** import error comp ([cec7ed7](https://github.com/betagouv/service-national-universel/commit/cec7ed7ba3ab2d4e62404fd29a76d5083b2f25be))
+* **app:** Update eligibiility ([6c14669](https://github.com/betagouv/service-national-universel/commit/6c14669fd39e6219fb7a5ba0e06910d0e54ff120))
+* **app/api:** ajout verif nationalité ([4a91057](https://github.com/betagouv/service-national-universel/commit/4a91057ed70fc68eabff46c9d899b25dbd553cef))
+
+
+### Features
+
+* **admin:** Open modal address in preference if nearRelative not set ([f7e5daa](https://github.com/betagouv/service-national-universel/commit/f7e5daab490c280d847af38204c9a7c65edecde0))
+* **app:** add signup logic for preinscriptions ([#1859](https://github.com/betagouv/service-national-universel/issues/1859)) ([d97b219](https://github.com/betagouv/service-national-universel/commit/d97b219de135071a665674558caaae920b14ab95))
+* **app:** connect preinscription steps 1 and 2 ([78e25b6](https://github.com/betagouv/service-national-universel/commit/78e25b6876f4ed73386c9ed59c13dee7369848b5))
+* **app:** forgot password ([694d033](https://github.com/betagouv/service-national-universel/commit/694d0337ceb63f0df562a3b52dc4a12b54173a3e))
+* **app:** login page ([6fdd58d](https://github.com/betagouv/service-national-universel/commit/6fdd58db5d6dc9a44927cdabbe697a9f7bc7b767))
+* **app:** new archi auth ([8877690](https://github.com/betagouv/service-national-universel/commit/8877690eb1681c94840bbd936f670b85da22883c))
+* **app:** reset mdp ([6d36f0c](https://github.com/betagouv/service-national-universel/commit/6d36f0c90ca259b858cc5b30fbbbab9f2da94696))
+
 # [1.141.0](https://github.com/betagouv/service-national-universel/compare/v1.140.0...v1.141.0) (2022-10-04)
 
 
