@@ -78,7 +78,7 @@ export default function Signin() {
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
           </div>
         </div>
-        <div className="pb-4 text-[#000091] underline text-base font-normal" onClick={() => history.push("/auth/forgot")}>
+        <div className="pb-4 text-[#000091] underline text-base font-normal cursor-pointer" onClick={() => history.push("/auth/forgot")}>
           Mot de passe perdu ?
         </div>
         <div className="w-full flex justify-end">

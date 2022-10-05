@@ -31,8 +31,8 @@ export default function Forgot() {
     }
   };
   return (
-    <div>
-      <div className="bg-white px-4 pt-4 pb-12">
+    <div className="bg-[#F9F6F2] h-[80vh] py-8 flex">
+      <div className="bg-white basis-[50%] mx-auto my-0 px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="text-[#161616] text-[22px] font-bold">Réinitialiser mon mot de passe</div>
         <div className="flex items-center py-4 gap-4">
@@ -45,11 +45,13 @@ export default function Forgot() {
               <label className="text-[#161616] text-base">E-mail</label>
               <Input value={email} onChange={(e) => setEmail(e)} />
             </div>
-            <button
-              className={`mt-4 flex items-center justify-center p-2 w-full cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-              onClick={onSubmit}>
-              M&apos;envoyer le lien de réinitialisation
-            </button>
+            <div className="flex justify-end">
+              <button
+                className={`mt-4 flex items-center justify-center p-2 cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+                onClick={onSubmit}>
+                M&apos;envoyer le lien de réinitialisation
+              </button>
+            </div>
           </>
         ) : (
           <div className="text-[#161616] text-base ">
@@ -57,11 +59,13 @@ export default function Forgot() {
             réinitialiser votre mot de passe. <br /> <br /> Vous allez le recevoir d’ici quelques minutes, pensez à vérifier vos spams et courriers indésirables.
           </div>
         )}
-        <hr className="text-[#E5E5E5] mt-6" />
-        <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-4">Retourner à la connexion</div>
-        <button className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/auth")}>
-          Se connecter
-        </button>
+        <hr className="text-[#E5E5E5] mt-4" />
+        <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-2">Retourner à la connexion</div>
+        <div className="flex justify-center">
+          <button className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/auth")}>
+            Se connecter
+          </button>
+        </div>
       </div>
     </div>
   );
