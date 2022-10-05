@@ -14,15 +14,11 @@ export default function StepSejour() {
 
   useEffect(() => {
     (async () => {
-      const res = await API.post(
-        "/cohort-session/eligibility/2023",
-        // {
-        //   department: data.department,
-        //   birthDate: data.birthDate,
-        //   schoolLevel: data.scolarity,
-        // },
-        { schoolLevel: "SECOND", department: "Hauts-de-Seine", birthDate: new Date("07/14/2006") }, // pour tester
-      );
+      const res = await API.post("/cohort-session/eligibility/2023", {
+        department: data.school.departmentName,
+        birthDate: data.birthDate,
+        schoolLevel: data.scolarity,
+      });
       if (!res.ok) {
         toastr.error("Impossible de vérifier votre éligibilité");
         history.push("/");

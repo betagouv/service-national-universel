@@ -1,9 +1,9 @@
 import React from "react";
-import LogoFr from "../../../assets/fr.png";
-import LinkTo from "../../../assets/icons/LinkTo";
-import useDevice from "../../../hooks/useDevice";
+import LogoFr from "../assets/fr.png";
+import LinkTo from "../assets/icons/LinkTo";
+import useDevice from "../hooks/useDevice";
 import { useLocation } from "react-router-dom";
-import SNU from "../../../assets/logo-snu.png";
+import SNU from "../assets/logo-snu.png";
 
 const Footer = () => {
   const { pathname } = useLocation();

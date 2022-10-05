@@ -18,10 +18,10 @@ import MobileProfil from "./mobile/stepProfil";
 import MobileConfirm from "./mobile/stepConfirm";
 import MobileDone from "./mobile/stepDone";
 
-import Header from "./components/header";
+import Header from "./../../components/header";
 import Navbar from "./components/navbar";
-import ModalMenu from "./components/modals/modalMenu";
-import Footer from "./components/footer";
+import ModalMenu from "../../components/headerMenu";
+import Footer from "./../../components/footerV2";
 
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",

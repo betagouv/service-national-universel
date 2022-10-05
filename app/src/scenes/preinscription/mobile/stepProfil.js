@@ -1,14 +1,14 @@
 import React from "react";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import Input from "../components/input";
+import Input from "../../../components/inscription/input";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../components/checkbox";
+import CheckBox from "../../../components/inscription/checkbox";
 import { appURL } from "../../../config";
-import StickyButton from "../components/stickyButton";
+import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory, Link } from "react-router-dom";
 
 export default function StepProfil() {

@@ -1,3 +1,18 @@
+# [1.141.0](https://github.com/betagouv/service-national-universel/compare/v1.140.0...v1.141.0) (2022-10-04)
+
+
+### Bug Fixes
+
+* **app:** link program to snu  ([#1854](https://github.com/betagouv/service-national-universel/issues/1854)) ([5ee7963](https://github.com/betagouv/service-national-universel/commit/5ee79634442ee4d535077070a58ca85964c2f326))
+
+
+### Features
+
+* **app:** goBack preinscription ([686a834](https://github.com/betagouv/service-national-universel/commit/686a834504c0634c6706e3c7a235215fd940e83c))
+* **app:** preinscription step confirm / done ([1253a69](https://github.com/betagouv/service-national-universel/commit/1253a69561d9fe88c6e376b32dbf87124ad352a3))
+* **app:** responsive footer preinscription  ([#1853](https://github.com/betagouv/service-national-universel/issues/1853)) ([07c31e8](https://github.com/betagouv/service-national-universel/commit/07c31e87d3252932f9612ac0f82760ea213ee367))
+* **inscription:** Scolarity first shot ([98ff2d6](https://github.com/betagouv/service-national-universel/commit/98ff2d63d1d042a6138eea07c99a4d1f2bb45d5c))
+
 # [1.140.0](https://github.com/betagouv/service-national-universel/compare/v1.139.0...v1.140.0) (2022-10-03)
 
 
