@@ -213,7 +213,7 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <StickyButton text="Continuer" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription")} />
+      <StickyButton text="Continuer" onClick={() => onSubmit()} />
     </>
   );
 }
