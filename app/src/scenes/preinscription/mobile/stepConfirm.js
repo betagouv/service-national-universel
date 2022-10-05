@@ -19,7 +19,7 @@ export default function StepDone() {
 
   const onSubmit = async () => {
     try {
-      const { user, token, code, ok } = await api.post("/young/signup2023", {
+      const { user, code, ok } = await api.post("/young/signup2023", {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -62,11 +62,47 @@ export default function StepDone() {
     <>
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <h1 className="text-xl text-[#161616]">Ces informations sont-elles correctes&nbsp;?</h1>
+        <h1 className="text-xl text-[#161616] font-semibold">Ces informations sont-elles correctes&nbsp;?</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col gap-4">
+          <div className="flex flex-row justify-between items-center my-2">
+            <div className="text-[#161616] text-lg font-semibold">Mon éligibilité</div>
+            <Link to=".">
+              <EditPen />
+            </Link>
+          </div>
           <div className="flex flex-row justify-between items-center">
-            <div className="text-[#161616] text-lg">Mes informations personnelles</div>
+            <div className="text-[#666666] text-sm">Niveau de scolarité : </div>
+            <div className="text-[#161616] text-base">{translateGrade(data.scolarity)}</div>
+          </div>
+          <div className="flex flex-row justify-between items-center">
+            <div className="text-[#666666] text-sm">Date de naissance : </div>
+            <div className="text-[#161616] text-base">{formatDateFR(data.birthDate)}</div>
+          </div>
+          {data.school ? (
+            <>
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-[#666666] text-sm">Pays de l&apos;établissement</div>
+                <div className="text-[#161616] text-base capitalize">{data.school.country.toLowerCase()}</div>
+              </div>
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-[#666666] text-sm">Commune de l&apos;établissement</div>
+                <div className="text-[#161616] text-base">{data.school.city}</div>
+              </div>
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-[#666666] text-sm">Nom de l&apos;établissement</div>
+                <div className="text-[#161616] text-base">{data.school.fullName}</div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-row justify-between items-center">
+              <div className="text-[#666666] text-sm">Code postal</div>
+              <div className="text-[#161616] text-base">{data.zip}</div>
+            </div>
+          )}
+
+          <div className="flex flex-row justify-between items-center my-2">
+            <div className="text-[#161616] text-lg font-semibold">Mes informations personnelles</div>
             <Link to="profil">
               <EditPen />
             </Link>
@@ -82,14 +118,6 @@ export default function StepDone() {
           <div className="flex flex-row justify-between items-center">
             <div className="text-[#666666] text-sm">Email : </div>
             <div className="text-[#161616] text-base">{data.email}</div>
-          </div>
-          <div className="flex flex-row justify-between items-center">
-            <div className="text-[#666666] text-sm">Niveau de scolarité : </div>
-            <div className="text-[#161616] text-base">{translateGrade(data.scolarity)}</div>
-          </div>
-          <div className="flex flex-row justify-between items-center">
-            <div className="text-[#666666] text-sm">Date de naissance : </div>
-            <div className="text-[#161616] text-base">{formatDateFR(data.birthDate)}</div>
           </div>
         </div>
       </div>
