@@ -169,24 +169,33 @@ export default function StepEligibilite() {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col flex-start my-4">
-                Nom de l'établissement
-                <Input disabled value={data?.school?.fullName} />
-              </div>
-              <div className="flex flex-col flex-start my-4">
-                Commune de l'établissement
-                <Input disabled value={data?.school?.city} />
-              </div>
-              <div className="flex flex-col flex-start my-4">
-                Pays de l'établissement
-                <Input disabled value={data?.school?.country} />
-              </div>
+              {data.school ? (
+                <>
+                  <div className="flex flex-col flex-start my-4">
+                    Nom de l'établissement
+                    <Input disabled value={data?.school?.fullName} />
+                  </div>
+                  <div className="flex flex-col flex-start my-4">
+                    Commune de l'établissement
+                    <Input disabled value={data?.school?.city} />
+                  </div>
+                  <div className="flex flex-col flex-start my-4">
+                    Pays de l'établissement
+                    <Input disabled value={data?.school?.country} />
+                  </div>
+                </>
+              ) : null}
             </div>
           ) : (
-            <div className="flex justify-between">
-              <div className="flex">
-                <div className="font-bold">Je réside</div> en France
-              </div>
+            <div className="flex justify-between items-center">
+              <p>
+                <div>
+                  <span className="font-bold">Je réside</span> en France
+                </div>
+                <div className="h-5 flex items-center">
+                  <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
+                </div>
+              </p>
 
               <Toggle onClick={() => setData({ ...data, frenchResidency: !data.frenchResidency })} toggled={data.frenchResidency} />
               {error.frenchResidency ? <span className="text-red-500 text-sm">{error.frenchResidency}</span> : null}
