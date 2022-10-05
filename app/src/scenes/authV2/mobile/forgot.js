@@ -26,7 +26,7 @@ export default function Forgot() {
       setDone(true);
       setError({});
     } catch (e) {
-      setError({ text: "E-mail incorrect" });
+      setError({ text: "Aucun e-mail correspondant" });
       setLoading(false);
     }
   };

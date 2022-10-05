@@ -1,14 +1,13 @@
+import queryString from "query-string";
 import React from "react";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/inscription/input";
 import api from "../../../services/api";
-import Error from "../components/error";
 import { getPasswordErrorMessage, translate } from "../../../utils";
-import queryString from "query-string";
-import { toastr } from "react-redux-toastr";
+import Error from "../components/error";
 
 export default function Reset() {
   const [loading, setLoading] = React.useState(false);
