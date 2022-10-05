@@ -143,6 +143,7 @@ router.post("/eligibility/2023", async (req, res) => {
           cohorts.push({
             id: "Avril 2023 - A",
             dates: "du 9 au 21 avril",
+            buffer: 1.15,
           });
         }
         break;
@@ -151,6 +152,7 @@ router.post("/eligibility/2023", async (req, res) => {
           cohorts.push({
             id: "Avril 2023 - B",
             dates: "du 16 au 28 avril",
+            buffer: 1.15,
           });
         }
         break;
@@ -160,6 +162,7 @@ router.post("/eligibility/2023", async (req, res) => {
           cohorts.push({
             id: "Février 2023 - C",
             dates: "du 19 février au 3 mars",
+            buffer: 1.15,
           });
         }
         break;
@@ -171,6 +174,7 @@ router.post("/eligibility/2023", async (req, res) => {
       cohorts.push({
         id: "Juin 2023",
         dates: "du 11 au 23 juin",
+        buffer: 1.15,
       });
     }
 
@@ -178,6 +182,7 @@ router.post("/eligibility/2023", async (req, res) => {
       cohorts.push({
         id: "Juillet 2023",
         dates: "du 1er au 12 juillet",
+        buffer: 1.15,
       });
     }
 
