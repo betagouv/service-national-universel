@@ -133,7 +133,7 @@ router.post("/eligibility/2023", async (req, res) => {
     const { department, birthDate, schoolLevel } = value;
 
     // Get available sessions based on department, grade & birthdate
-    if (schoolLevel !== "SECOND") return res.send({ ok: true, data: [] });
+    if (!["NOT_SCOLARISE", "SECOND", "FIRST_CAP"].includes(schoolLevel)) return res.send({ ok: true, data: [] });
 
     let cohorts = [];
     const zone = getZoneByDepartment(department);
