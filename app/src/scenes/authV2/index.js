@@ -43,7 +43,7 @@ const Render = ({ screen }) => {
 export default function Index() {
   return (
     <Switch>
-      <SentryRoute path="/auth/signup/invite" component={() => <Render screen="invite" />} />
+      {/* <SentryRoute path="/auth/signup/invite" component={() => <Render screen="invite" />} /> */}
       <SentryRoute path="/auth/reset" component={() => <Render screen="reset" />} />
       <SentryRoute path="/auth/forgot" component={() => <Render screen="forgot" />} />
       <SentryRoute path="/auth/connect" component={Connect} />
