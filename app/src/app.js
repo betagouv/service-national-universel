@@ -26,7 +26,7 @@ import Candidature from "./scenes/candidature";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import Loader from "./components/Loader";
-import Header from "./components/header";
+import Header from "./components/header/index";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
 import MilitaryPreparation from "./scenes/militaryPreparation";
