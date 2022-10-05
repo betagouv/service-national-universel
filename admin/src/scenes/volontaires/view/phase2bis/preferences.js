@@ -413,7 +413,11 @@ export default function Preferences({
               className={`w-4 h-4 ${!editPreference ? "cursor-not-allowed" : "cursor-pointer"}`}
               disabled={!editPreference && data.mobilityNearRelative !== "true"}
               checked={data.mobilityNearRelative === "true"}
-              onChange={(e) => editPreference && setData({ ...data, mobilityNearRelative: e.target.checked ? "true" : "false" })}
+              onChange={(e) => {
+                if (!editPreference) return;
+                setData({ ...data, mobilityNearRelative: e.target.checked ? "true" : "false" });
+                if (e.target.checked && !hasRelativeAddress) setModal({ isOpen: true });
+              }}
             />
             <div className="flex flex-col">
               <div className={`text-sm ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}>Autour de l’adresse d’un proche</div>
