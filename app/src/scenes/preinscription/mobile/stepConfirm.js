@@ -3,10 +3,11 @@ import EditPen from "../../../assets/icons/EditPen";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory } from "react-router-dom";
-import API from "../../../services/api";
+import api from "../../../services/api";
 import { appURL } from "../../../config";
-import { translateGrade } from "snu-lib/translation";
-import { formatDateFR } from "snu-lib/date";
+import { translateGrade, formatDateFR } from "snu-lib";
+import plausibleEvent from "../../../services/plausible";
+import { SENDINBLUE_TEMPLATES } from "../../../utils";
 
 export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
@@ -14,10 +15,53 @@ export default function StepDone() {
 
   const onSubmit = async () => {
     // create young
-    // await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
-    //   cta: `${appURL}/inscription2023`,
-    // });
+    try {
+      const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, rulesYoung, acceptCGU } = values;
+      const route = "/young/signup";
+      const { user, token, code, ok } = await api.post(route, {
+        email,
+        firstName,
+        lastName,
+        password,
+        birthdateAt,
+        birthCountry,
+        birthCity,
+        birthCityZip,
+        frenchNationality,
+        rulesYoung,
+        acceptCGU,
+      });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      if (token) api.setToken(token);
+      dispatch(setYoung(user));
+      await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
+      history.push("/inscription/coordonnees");
+    } catch (e) {
+      console.log(e);
+      if (e.code === "USER_ALREADY_REGISTERED")
+        return toastr.error("Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance).", "", {
+          timeOut: 30000,
+          component: (
+            <p>
+              Si vous ne vous souvenez plus de votre identifiant (email),{" "}
+              <a
+                href={`${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit-1`}
+                target="_blank"
+                style={{ color: "white", textDecoration: "underline" }}
+                rel="noreferrer">
+                cliquez ici.
+              </a>
+            </p>
+          ),
+        });
+    const res = await {};
+    // notif
+    await api.post(`/young/${res.data._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
+      cta: `${appURL}/inscription2023`,
+    });
     // plausible
+    plausibleEvent("");
+
     history.push("/preinscription/done");
   };
 
