@@ -6,7 +6,7 @@ import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../../../components/inscription/checkbox";
+import CheckBox from "../../../components/inscription/CheckBox";
 import { appURL } from "../../../config";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory, Link } from "react-router-dom";

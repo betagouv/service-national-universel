@@ -1,6 +1,6 @@
 import React from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import Select from "../../../components/inscription/select";
 import Toggle from "../../../components/inscription/toggle";
 import Input from "../../../components/inscription/input";
@@ -12,7 +12,9 @@ import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { useRef } from "react";
-// import validator from "validator";
+import IconFrance from "../../../assets/IconFrance";
+import CheckBox from "../../../components/inscription/CheckBox";
+import validator from "validator";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -44,14 +46,14 @@ export default function StepEligibilite() {
   }, [search]);
 
   const getSchools = async () => {
-    if (search.length > 0 && !isSearching) setIsSearching(true);
-    if (!search.length) {
-      setIsSearching(false);
-      setSearch("");
-      setSchools([]);
-      return;
-    }
     try {
+      if (search.length > 0 && !isSearching) setIsSearching(true);
+      if (!search.length) {
+        setIsSearching(false);
+        setSearch("");
+        setSchools([]);
+        return;
+      }
       setIsSearching(true);
       const { ok, data } = await api.post("/es/schoolramses", { query: { q: search } });
       setIsSearching(false);
@@ -62,16 +64,16 @@ export default function StepEligibilite() {
     }
   };
 
-  const validate = () => {
+  const onSubmit = async () => {
     let errors = {};
 
     // Nationality
     if (!data?.frenchNationality) {
-      errors.email = "Vous devez être français";
+      errors.frenchNationality = "Vous devez être français";
     }
     // Scolarity
     if (!data?.scolarity) {
-      errors.scolarity = "Choisissez une date de naissance";
+      errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
     // ? Check age ?
@@ -79,30 +81,29 @@ export default function StepEligibilite() {
       errors.birthDate = "Vous devez choisir une date de naissance";
     }
 
-    // School
-    if (!data?.school) {
-      errors.school = "Vous devez choisir votre école. Contactez-nous (support URL) si vous ne la trouvez pas";
-    }
-    return errors;
-  };
-
-  const keyList = ["frenchNationality", "scolarity", "birthDate", "school"];
-
-  const onSubmit = async () => {
-    let errors = {};
-
-    for (const key of keyList) {
-      if (data[key] === undefined || data[key] === "") {
-        errors[key] = "Ce champ est obligatoire";
+    if (data.scolarity) {
+      if (data.scolarity === "NOT_SCOLARISE") {
+        // Zip du jeune
+        // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
+        if (!(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
+          errors.zip = "Vous devez sélectionner un code postal";
+        }
+      } else {
+        // School
+        if (!data?.school) {
+          errors.school = "Vous devez choisir votre école. Contactez-nous (support URL) si vous ne la trouvez pas";
+        }
       }
     }
 
-    errors = { ...errors, ...validate() };
-
     setError(errors);
-    if (!Object.keys(errors).length) {
-      history.push("/preinscription/sejour");
+
+    // ! Gestion erreur a reprendre
+    if (Object.keys(errors).length) {
+      toastr.error("Veuillez remplir tous les champs :" + Object.keys(errors)[0] + Object.values(errors)[0]);
+      return;
     }
+    history.push("/preinscription/sejour");
   };
 
   return (
@@ -110,18 +111,18 @@ export default function StepEligibilite() {
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
-          <QuestionMarkBlueCircle />
+          <Link to="/public-besoin-d-aide/">
+            <QuestionMarkBlueCircle />
+          </Link>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col flex-start my-4">
-          <div className="flex items-center my-4">
-            <input
-              type="checkbox"
-              className={`w-4 h-4 cursor-pointer`}
-              checked={data.frenchNationality === "true"}
-              onChange={(e) => setData({ ...data, frenchNationality: e.target.checked ? "true" : "false" })}
-            />
-            <div className="ml-4">Je suis de nationalité française </div>
+          <div className="flex items-center">
+            <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+            <div className="flex items-center">
+              <span className="ml-2 mr-2">Je suis de nationalité française</span>
+              <IconFrance />
+            </div>
           </div>
           {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
         </div>
@@ -135,60 +136,12 @@ export default function StepEligibilite() {
           <DateFilter title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
-        {data.scolarity &&
-          (data.scolarity !== "NOT_SCOLARISE" ? (
-            <div>
-              <input
-                type="text"
-                placeholder="Rechercher une ecole.."
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setShowItems(true);
-                }}
-                ref={inputSearch}
-              />
-              <div className="relative flex w-full items-center">
-                {schools.length > 0 && showItems && (
-                  <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
-                    {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
-                    {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n'y a pas de résultat 👀</span>}
-                    {schools?.map((school) => (
-                      <SchoolCard
-                        key={school._id}
-                        data={school}
-                        onClick={() => {
-                          setData({ ...data, school: { ...school } });
-                          setShowItems(false);
-                          setSearch("");
-                          inputSearch.current.value = "";
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-              {data.school ? (
-                <>
-                  <div className="flex flex-col flex-start my-4">
-                    Nom de l'établissement
-                    <Input disabled value={data?.school?.fullName} />
-                  </div>
-                  <div className="flex flex-col flex-start my-4">
-                    Commune de l'établissement
-                    <Input disabled value={data?.school?.city} />
-                  </div>
-                  <div className="flex flex-col flex-start my-4">
-                    Pays de l'établissement
-                    <Input disabled value={data?.school?.country} />
-                  </div>
-                </>
-              ) : null}
-            </div>
-          ) : (
+        {data.scolarity && (
+          <>
             <div className="flex justify-between items-center">
               <p>
                 <div>
-                  <span className="font-bold">Je réside</span> en France
+                  <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
                 </div>
                 <div className="h-5 flex items-center">
                   <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
@@ -197,12 +150,68 @@ export default function StepEligibilite() {
 
               <Toggle onClick={() => setData({ ...data, frenchResidency: !data.frenchResidency })} toggled={data.frenchResidency} />
               {error.frenchResidency ? <span className="text-red-500 text-sm">{error.frenchResidency}</span> : null}
-
-              {/* <div className="flex flex-col flex-start my-4">
-              Code Postal input a mettre
-            </div> */}
             </div>
-          ))}
+
+            {data.scolarity !== "NOT_SCOLARISE" ? (
+              <div>
+                <input
+                  type="text"
+                  placeholder="Rechercher une ecole.."
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setShowItems(true);
+                  }}
+                  ref={inputSearch}
+                />
+                <div className="relative flex w-full items-center">
+                  {schools.length > 0 && showItems && (
+                    <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
+                      {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
+                      {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n'y a pas de résultat 👀</span>}
+                      {schools?.map((school) => (
+                        <SchoolCard
+                          key={school._id}
+                          data={school}
+                          onClick={() => {
+                            setData({ ...data, school: { ...school } });
+                            setShowItems(false);
+                            setSearch("");
+                            inputSearch.current.value = "";
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {data.school ? (
+                  <>
+                    <div className="flex flex-col flex-start my-4">
+                      Nom de l'établissement
+                      <Input disabled value={data?.school?.fullName} />
+                    </div>
+                    <div className="flex flex-col flex-start my-4">
+                      Commune de l'établissement
+                      <Input disabled value={data?.school?.city} />
+                    </div>
+                    <div className="flex flex-col flex-start my-4">
+                      Pays de l'établissement
+                      <Input disabled value={data?.school?.country} />
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex flex-col flex-start my-4">
+                Code Postal
+                <div className="h-5 flex items-center">
+                  <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
+                </div>
+                <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
+                {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
+              </div>
+            )}
+          </>
+        )}
       </div>
       <StickyButton text="Continuer" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription")} />
     </>
@@ -213,18 +222,7 @@ const SchoolCard = ({ _id, data, onClick }) => {
   return (
     <div key={_id} className={`my-1 w-full shrink-0 grow-0 cursor-pointer lg:my-4`} onClick={onClick}>
       <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg`}>
-        <div className="flex flex-grow flex-col">
-          <header className="flex items-center pl-4 pr-8 leading-tight">
-            <span>{data.fullName}</span>
-            <h3 className="my-0 pl-5 text-lg text-black">{data.city}</h3>
-          </header>
-
-          <footer className="mt-2.5 flex flex-col items-start justify-between px-8 leading-none">
-            <p className="flex flex-wrap">
-              {data.departmentName} - {data.region}
-            </p>
-          </footer>
-        </div>
+        <span>{data.fullName}</span>
         <span className="justify-end">{data.adresse}</span>
       </article>
     </div>
