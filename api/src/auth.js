@@ -72,6 +72,89 @@ class Auth {
     }
   }
 
+  async signUp2023(req, res) {
+    try {
+      const { error, value } = Joi.object({
+        email: Joi.string().lowercase().trim().email().required(),
+        firstName: validateFirstName().trim().required(),
+        lastName: Joi.string().uppercase().trim().required(),
+        password: Joi.string().required(),
+        birthdateAt: Joi.date().required(),
+        frenchNationality: Joi.string().trim().required(),
+        schooled: Joi.string().trim().required(),
+        schoolName: Joi.string().trim(),
+        schoolType: Joi.string().trim(),
+        schoolAddress: Joi.string().trim(),
+        schoolZip: Joi.string().trim(),
+        schoolCity: Joi.string().trim(),
+        schoolDepartment: Joi.string().trim(),
+        schoolRegion: Joi.string().trim(),
+        schoolCountry: Joi.string().trim(),
+        schoolId: Joi.string().trim(),
+      }).validate(req.body);
+
+      if (error) {
+        console.log("🚀 ~ file: auth.js ~ line 96 ~ Auth ~ signUp2023 ~ error", error);
+        if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+        if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const {
+        email,
+        firstName,
+        lastName,
+        password,
+        birthdateAt,
+        frenchNationality,
+        schooled,
+        schoolName,
+        schoolType,
+        schoolAddress,
+        schoolZip,
+        schoolCity,
+        schoolDepartment,
+        schoolRegion,
+        schoolCountry,
+        schoolId,
+      } = value;
+      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+
+      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
+      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+      const user = await this.model.create({
+        email,
+        firstName,
+        lastName,
+        password,
+        frenchNationality,
+        schooled,
+        schoolName,
+        schoolType,
+        schoolAddress,
+        schoolZip,
+        schoolCity,
+        schoolDepartment,
+        schoolRegion,
+        schoolCountry,
+        schoolId,
+      });
+      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt", token, cookieOptions());
+
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: serializeYoung(user, user),
+      });
+    } catch (error) {
+      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
   async signin(req, res) {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
