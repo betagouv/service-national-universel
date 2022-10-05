@@ -29,15 +29,26 @@ const defaultState = {
   hostCity: "",
   hostZip: "",
   hostAddress: "",
-  //@todo: change for only one key after data retrieve
-  schoolSituation: youngSchooledSituationOptions[0].value,
-  activeSitutation: youngActiveSituationOptions[0].value,
+  situation: "",
+  isSchooled: true,
 };
 
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
+  const [situationOptions, setSituationOptions] = useState([]);
   const young = useSelector((state) => state.Auth.young);
+
+  useEffect(() => {
+    if (young) {
+      const isSchooled = !(young.grade === "NOT_SCOLARISE");
+      const situationOptions = isSchooled ? youngSchooledSituationOptions : youngActiveSituationOptions;
+      setSituationOptions(situationOptions);
+      setData({ ...data, isSchooled, situation: situationOptions[0].value });
+    }
+  }, [young]);
+
+  console.log({ situationOptions });
 
   const {
     frenchNationality,
@@ -57,8 +68,8 @@ export default function StepCoordonnees() {
     hostAddress,
     hostZip,
     hostRelationShip,
-    schoolSituation,
-    activeSitutation,
+    situation,
+    isSchooled,
   } = data;
 
   const getErrors = () => {
@@ -74,27 +85,12 @@ export default function StepCoordonnees() {
   };
 
   useEffect(() => {
-    console.log("getting errors");
     setErrors(getErrors());
   }, [phone, frenchNationality, birthCityZip]);
 
   const onSubmit = async () => {
     let errors = {};
-    const requiredFields = [
-      "frenchNationality",
-      "birthCountry",
-      "birthCityZip",
-      "birthCity",
-      "gender",
-      "phone",
-      "livesInFrance",
-      "country",
-      "address",
-      "zip",
-      "city",
-      "schoolSituation",
-      "activeSitutation",
-    ];
+    const requiredFields = ["frenchNationality", "birthCountry", "birthCityZip", "birthCity", "gender", "phone", "livesInFrance", "country", "address", "zip", "city", "situation"];
     const requiredFieldsForForeignYoung = ["hostFirstName", "hostLastName", "hostCity", "hostAddress", "hostZip", "hostRelationShip"];
     if (!livesInFrance) {
       requiredFields.push(...requiredFieldsForForeignYoung);
@@ -162,7 +158,7 @@ export default function StepCoordonnees() {
         <Input value={address} label="Adresse de résidence" onChange={updateData("address")} error={errors.address} />
         <Input value={zip} label="Code postal" onChange={updateData("zip")} error={errors.zip} />
         <Input value={city} label="Ville" onChange={updateData("city")} error={errors.city} />
-        {livesInFrance && <GhostButton className="my-3" name="Vérifier mon adresse" onClick={() => {}} />}
+        {livesInFrance && <GhostButton name="Vérifier mon adresse" onClick={() => {}} />}
         {!livesInFrance && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
@@ -193,14 +189,13 @@ export default function StepCoordonnees() {
           </>
         )}
         <Select
-          label="Ma situation scolaire"
-          options={youngSchooledSituationOptions}
-          value={schoolSituation}
-          onChange={updateData("schoolSituation")}
-          error={errors.schoolSituation}
+          label={isSchooled ? "Ma situation scolaire" : "Ma situation"}
+          options={situationOptions}
+          value={situation}
+          onChange={updateData("situation")}
+          error={errors.situation}
         />
-        <Select label="Ma situation" options={youngActiveSituationOptions} value={activeSitutation} onChange={updateData("activeSitutation")} error={errors.activeSitutation} />
-        <GhostButton type="submit" name="Next" onClick={onSubmit} />
+        <GhostButton name="Next" onClick={onSubmit} />
       </div>
     </>
   );
