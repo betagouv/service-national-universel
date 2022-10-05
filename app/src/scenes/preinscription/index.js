@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Switch } from "react-router-dom";
+import { Switch, Redirect } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 import PreInscriptionContextProvider from "../../context/PreInscriptionContextProvider";
@@ -23,6 +23,7 @@ import Navbar from "./components/navbar";
 import ModalMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 
+import { useSelector } from "react-redux";
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   INELIGIBLE: "INELIGIBLE",
@@ -57,6 +58,8 @@ const Step = ({ step }) => {
 };
 
 export default function Index() {
+  const young = useSelector((state) => state.Auth.young);
+  if (young) return <Redirect to="/" />;
   return (
     <PreInscriptionContextProvider>
       <Switch>

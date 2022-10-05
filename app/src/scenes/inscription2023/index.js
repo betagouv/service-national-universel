@@ -49,8 +49,8 @@ const Step = ({ step }) => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
-  //if (!young) return <Redirect to="/preinscription" />;
-
+  if (!young) return <Redirect to="/preinscription" />;
+  console.log(young);
   // if it is a young in a status that is not eligible, they cant access to the inscription
   if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status)) {
     return <Redirect to={{ pathname: "/" }} />;
