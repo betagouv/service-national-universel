@@ -1,7 +1,7 @@
 import React from "react";
 import EditPen from "../../../assets/icons/EditPen";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import StickyButton from "../components/stickyButton";
+import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory } from "react-router-dom";
 
 export default function StepDone() {

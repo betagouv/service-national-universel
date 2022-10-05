@@ -16,7 +16,7 @@ const Navbar = ({ step }) => {
         </div>
         {useDevice() === "desktop" && (
           <div className="flex space-x-1 text-xs mt-2 text-[#666666]">
-            <div className="font-bold">Étape suivante:</div>
+            <div className="font-bold">{["ELIGIBILITE", "SEJOUR"].includes(step) && "Étape suivante:"}</div>
             <div>{step === "ELIGIBILITE" ? "Séjour de cohésion" : step === "SEJOUR" ? "Mon compte volontaire SNU" : null}</div>
           </div>
         )}

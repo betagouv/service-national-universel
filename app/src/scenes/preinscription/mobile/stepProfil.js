@@ -1,14 +1,14 @@
 import React from "react";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import Input from "../components/input";
+import Input from "../../../components/inscription/input";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../components/checkbox";
+import CheckBox from "../../../components/inscription/checkbox";
 import { appURL } from "../../../config";
-import StickyButton from "../components/stickyButton";
+import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory, Link } from "react-router-dom";
 
 export default function StepProfil() {
@@ -69,7 +69,7 @@ export default function StepProfil() {
 
   return (
     <>
-      <div className="bg-white p-4">
+      <div className="bg-white px-4 pt-4 pb-12">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-xl text-[#161616]">Créez votre compte</h1>
           <Link to="/public-besoin-d-aide/">

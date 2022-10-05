@@ -1,10 +1,10 @@
 import React from "react";
-import LogoFr from "../../../assets/fr.png";
-import SNU from "../../../assets/logo-snu.png";
-import Menu from "../../../assets/icons/Burger";
-import useDevice from "../../../hooks/useDevice";
-import Help from "../../../assets/icons/QuestionMarkBlue";
-import File from "../../../assets/file.svg";
+import LogoFr from "../assets/fr.png";
+import SNU from "../assets/logo-snu.png";
+import Menu from "../assets/icons/Burger";
+import useDevice from "../hooks/useDevice";
+import Help from "../assets/icons/QuestionMarkBlue";
+import File from "../assets/file.svg";
 import { Link, useLocation } from "react-router-dom";
 
 const Header = ({ setIsOpen }) => {
@@ -35,7 +35,9 @@ const Header = ({ setIsOpen }) => {
             <div className="flex text-sm text-[#000091] items-center basis-[50%%]">
               <a
                 className="flex items-center space-x-1 border-r border-r-gray-300 py-1 pl-1.5 pr-3 cursor-pointer hover:font-bold hover:text-[#000091]"
-                href="https://www.snu.gouv.fr/">
+                href="https://www.snu.gouv.fr/"
+                target="_blank"
+                rel="noreferrer">
                 <img src={File} alt="" />
                 <div>Programme</div>
               </a>

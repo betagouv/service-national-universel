@@ -1,8 +1,8 @@
 import React from "react";
-import Close from "../../../../assets/CloseBlue.svg";
-import File from "../../../../assets/file.svg";
-import Help from "../../../../assets/icons/QuestionMarkBlue";
-import Login from "../../../../assets/icons/Login";
+import Close from "../assets/CloseBlue.svg";
+import File from "../assets/file.svg";
+import Help from "../assets/icons/QuestionMarkBlue";
+import Login from "../assets/icons/Login";
 import { Link, useLocation } from "react-router-dom";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
@@ -23,7 +23,7 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <Login />
             <div> Se connecter</div>
           </Link>
-          <a className="flex space-x-2 items-center border-b border-b-[#E5E5E5] py-3" href="https://www.snu.gouv.fr/" to="/les-programmes">
+          <a className="flex space-x-2 items-center border-b border-b-[#E5E5E5] py-3" href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
             <img src={File} />
             <div>Le programme</div>
           </a>

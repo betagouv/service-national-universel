@@ -116,6 +116,7 @@ router.post("/eligibility/2022", async (req, res) => {
 
 router.post("/eligibility/2023", async (req, res) => {
   try {
+    // Validation
     const eligibilityObject = {
       department: req.body.department,
       birthDate: req.body.birthDate,
@@ -131,6 +132,7 @@ router.post("/eligibility/2023", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { department, birthDate, schoolLevel } = value;
 
+    // Get available sessions based on department, grade & birthdate
     if (schoolLevel !== "SECOND") return res.send({ ok: true, data: [] });
 
     let cohorts = [];
@@ -141,6 +143,7 @@ router.post("/eligibility/2023", async (req, res) => {
           cohorts.push({
             id: "Avril 2023 - A",
             dates: "du 9 au 21 avril",
+            buffer: 1.15,
           });
         }
         break;
@@ -149,6 +152,7 @@ router.post("/eligibility/2023", async (req, res) => {
           cohorts.push({
             id: "Avril 2023 - B",
             dates: "du 16 au 28 avril",
+            buffer: 1.15,
           });
         }
         break;
@@ -158,6 +162,7 @@ router.post("/eligibility/2023", async (req, res) => {
           cohorts.push({
             id: "Février 2023 - C",
             dates: "du 19 février au 3 mars",
+            buffer: 1.15,
           });
         }
         break;
@@ -169,6 +174,7 @@ router.post("/eligibility/2023", async (req, res) => {
       cohorts.push({
         id: "Juin 2023",
         dates: "du 11 au 23 juin",
+        buffer: 1.15,
       });
     }
 
@@ -176,10 +182,34 @@ router.post("/eligibility/2023", async (req, res) => {
       cohorts.push({
         id: "Juillet 2023",
         dates: "du 1er au 12 juillet",
+        buffer: 1.15,
       });
     }
 
-    return res.send({ ok: true, data: cohorts });
+    // Check inscription goals
+    for (let session of cohorts) {
+      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
+      if (!inscriptionGoal || !inscriptionGoal.max) {
+        session.goalReached = false;
+        continue;
+      }
+
+      const nbYoung = await YoungModel.countDocuments({
+        department: department,
+        cohort: session.id,
+        status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+      });
+      if (nbYoung === 0) {
+        session.goalReached = false;
+        continue;
+      }
+
+      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
+      if (fillingRatio >= 1) session.goalReached = true;
+      else session.goalReached = false;
+    }
+
+    return res.send({ ok: true, data: cohorts.filter((e) => e.goalReached === false) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -10,6 +10,7 @@ import { setYoung } from "./redux/auth/actions";
 
 import Account from "./scenes/account";
 import Auth from "./scenes/auth";
+import AuthV2 from "./scenes/authV2";
 import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Inscription2023 from "./scenes/inscription2023";
@@ -103,11 +104,11 @@ export default function App() {
             <SentryRoute path="/inscription" component={Inscription} />
             {environment !== "production" ? <SentryRoute path="/inscription2023" component={Inscription2023} /> : null}
             {environment !== "production" ? <SentryRoute path="/preinscription" component={PreInscription} /> : null}
-            <SentryRoute path="/auth" component={Auth} />
+            {environment !== "production" ? <SentryRoute path="/auth" component={AuthV2} /> : <SentryRoute path="/auth" component={Auth} />}
             <SentryRoute path="/" component={Espace} />
           </Switch>
         )}
-        {!location.pathname.includes("preinscription") && <Footer />}
+        {environment === "production" ? <Footer /> : ["preinscription", "auth"].findIndex((route) => location.pathname.includes(route)) === -1 ? <Footer /> : null}
       </div>
     </Router>
   );
