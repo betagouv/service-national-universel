@@ -46,7 +46,7 @@ export const hostRelationShipOptions = [
   { label: "Autre", value: "Autre" },
 ];
 
-export const isFrenchOptions = [
+export const frenchNationalityOptions = [
   { value: true, label: "En France" },
   { value: false, label: "À l'étranger" },
 ];

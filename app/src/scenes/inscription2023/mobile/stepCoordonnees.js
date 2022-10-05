@@ -5,18 +5,18 @@ import Input from "../components/Input";
 import Header from "../components/Header";
 import GhostButton from "../components/GhostButton";
 import Select from "../components/Select";
-import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationShipOptions, isFrenchOptions, genderOptions } from "../utils";
+import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationShipOptions, frenchNationalityOptions, genderOptions } from "../utils";
 
 const FRANCE = "France";
 
 const defaultState = {
-  isFrench: isFrenchOptions[0].value,
+  frenchNationality: frenchNationalityOptions[0].value,
   birthCountry: FRANCE,
   birthCity: "",
   birthCityZip: "",
   gender: genderOptions[0].value,
   phone: "",
-  isFrenchResident: isFrenchOptions[0].value,
+  livesInFrance: frenchNationalityOptions[0].value,
   country: FRANCE,
   address: "",
   city: "",
@@ -37,13 +37,13 @@ export default function StepCoordonnees() {
   const [errors, setErrors] = useState({});
 
   const {
-    isFrench,
+    frenchNationality,
     birthCountry,
     birthCityZip,
     birthCity,
     gender,
     phone,
-    isFrenchResident,
+    livesInFrance,
     country,
     address,
     zip,
@@ -63,7 +63,7 @@ export default function StepCoordonnees() {
     if (phone && !validator.isMobilePhone(phone)) {
       errors.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     }
-    if (isFrench && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
+    if (frenchNationality && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = "Le code postal n'est pas valide";
     }
 
@@ -73,18 +73,18 @@ export default function StepCoordonnees() {
   useEffect(() => {
     console.log("getting errors");
     setErrors(getErrors());
-  }, [phone, isFrench, birthCityZip]);
+  }, [phone, frenchNationality, birthCityZip]);
 
   const onSubmit = async () => {
     let errors = {};
     const requiredFields = [
-      "isFrench",
+      "frenchNationality",
       "birthCountry",
       "birthCityZip",
       "birthCity",
       "gender",
       "phone",
-      "isFrenchResident",
+      "livesInFrance",
       "country",
       "address",
       "zip",
@@ -93,7 +93,7 @@ export default function StepCoordonnees() {
       "activeSitutation",
     ];
     const requiredFieldsForForeignYoung = ["hostFirstName", "hostLastName", "hostCity", "hostAddress", "hostZip", "hostRelationShip"];
-    if (!isFrenchResident) {
+    if (!livesInFrance) {
       requiredFields.push(...requiredFieldsForForeignYoung);
     }
     for (const key of requiredFields) {
@@ -111,19 +111,19 @@ export default function StepCoordonnees() {
     }
   };
 
-  const setFrench = (isFrench) => {
-    if (isFrenchResident) {
-      setData({ ...data, birthCountry: FRANCE, isFrench });
+  const setFrenchNationality = (frenchNationality) => {
+    if (frenchNationality) {
+      setData({ ...data, birthCountry: FRANCE, frenchNationality });
     } else {
-      setData({ ...data, birthCountry: "", isFrench });
+      setData({ ...data, birthCountry: "", frenchNationality });
     }
   };
 
-  const setFrenchResident = (isFrenchResident) => {
-    if (isFrenchResident) {
-      setData({ ...data, country: FRANCE, isFrenchResident });
+  const setLivesInFrance = (livesInFrance) => {
+    if (livesInFrance) {
+      setData({ ...data, country: FRANCE, livesInFrance });
     } else {
-      setData({ ...data, country: "", isFrenchResident });
+      setData({ ...data, country: "", livesInFrance });
     }
   };
 
@@ -137,8 +137,8 @@ export default function StepCoordonnees() {
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Mon profile volontaire</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
-        <RadioButton label="Je suis né(e)..." options={isFrenchOptions} onChange={setFrench} value={isFrench} />
-        {!isFrench && (
+        <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
+        {!frenchNationality && (
           <Select
             options={countryOptions}
             value={birthCountry}
@@ -152,15 +152,15 @@ export default function StepCoordonnees() {
         <Input value={birthCity} label="Commune de naissance" onChange={updateData("birthCity")} error={errors.birthCity} />
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} />
         <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} />
-        <RadioButton label="Je réside..." options={isFrenchOptions} onChange={setFrenchResident} value={isFrenchResident} />
-        {!isFrenchResident && (
+        <RadioButton label="Je réside..." options={frenchNationalityOptions} onChange={setLivesInFrance} value={livesInFrance} />
+        {!livesInFrance && (
           <Select options={countryOptions} value={country} label="Pays de résidence" placeholder="Sélectionnez un pays" onChange={updateData("country")} error={errors.country} />
         )}
         <Input value={address} label="Adresse de résidence" onChange={updateData("address")} error={errors.address} />
         <Input value={zip} label="Code postal" onChange={updateData("zip")} error={errors.zip} />
         <Input value={city} label="Ville" onChange={updateData("city")} error={errors.city} />
-        {isFrenchResident && <GhostButton className="my-3" name="Vérifier mon adresse" onClick={() => {}} />}
-        {!isFrenchResident && (
+        {livesInFrance && <GhostButton className="my-3" name="Vérifier mon adresse" onClick={() => {}} />}
+        {!livesInFrance && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
             <div className="flex my-3">
