@@ -1,9 +1,9 @@
 import React from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { useHistory } from "react-router-dom";
-import Select from "../components/select";
-import Toggle from "../components/toggle";
-import Input from "../components/input";
+import Select from "../../../components/inscription/select";
+import Toggle from "../../../components/inscription/toggle";
+import Input from "../../../components/inscription/input";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import DateFilter from "../components/DatePickerList";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
@@ -12,7 +12,7 @@ import api from "../../../services/api";
 import { useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
-import StickyButton from "../components/stickyButton";
+import StickyButton from "../../../components/inscription/stickyButton";
 import validator from "validator";
 
 export default function StepEligibilite() {
