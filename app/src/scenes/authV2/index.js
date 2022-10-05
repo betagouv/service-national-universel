@@ -15,15 +15,40 @@ import Connect from "./connect";
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
-export default function Index() {
+import Header from "../../components/header";
+import HeaderMenu from "../../components/headerMenu";
+import Footer from "../../components/footerV2";
+
+const Render = ({ screen }) => {
+  console.log("here");
   const device = useDevice();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  function renderScreen(screen) {
+    if (screen === "invite") return device === "desktop" ? <DesktopSignupInvite /> : <MobileSignupInvite />;
+    if (screen === "reset") return device === "desktop" ? <DesktopReset /> : <MobileReset />;
+    if (screen === "forgot") return device === "desktop" ? <DesktopForgot /> : <MobileForgot />;
+    if (screen === "auth") return device === "desktop" ? <DesktopSignin /> : <MobileSignin />;
+  }
+
+  return (
+    <div>
+      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+      <Header setIsOpen={setIsOpen} />
+      {renderScreen(screen)}
+      <Footer />
+    </div>
+  );
+};
+
+export default function Index() {
   return (
     <Switch>
-      <SentryRoute path="/auth/signup/invite" component={device === "desktop" ? DesktopSignupInvite : MobileSignupInvite} />
-      <SentryRoute path="/auth/reset" component={device === "desktop" ? DesktopReset : MobileReset} />
-      <SentryRoute path="/auth/forgot" component={device === "desktop" ? DesktopForgot : MobileForgot} />
+      <SentryRoute path="/auth/signup/invite" component={() => <Render screen="invite" />} />
+      <SentryRoute path="/auth/reset" component={() => <Render screen="reset" />} />
+      <SentryRoute path="/auth/forgot" component={() => <Render screen="forgot" />} />
       <SentryRoute path="/auth/connect" component={Connect} />
-      <SentryRoute path="/auth" component={device === "desktop" ? DesktopSignin : MobileSignin} />
+      <SentryRoute path="/auth" component={() => <Render screen="auth" />} />
     </Switch>
   );
 }
