@@ -6,7 +6,7 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
@@ -92,7 +92,7 @@ class Auth {
         schoolCountry: Joi.string().trim(),
         schoolId: Joi.string().trim(),
         zip: Joi.string().trim(),
-        // cohort: Joi.string().trim().required(),
+        cohort: Joi.string().trim().required(),
       }).validate(req.body);
 
       if (error) {
@@ -119,7 +119,7 @@ class Auth {
         schoolCountry,
         schoolId,
         zip,
-        // cohort,
+        cohort,
       } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -145,6 +145,7 @@ class Auth {
         schoolId,
         zip,
         cohort,
+        inscription2023: STEPS2023.COORDONNEES,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());

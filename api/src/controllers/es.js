@@ -11,7 +11,16 @@ const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const SessionPhase1Object = require("../models/sessionPhase1");
-const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
+const {
+  serializeMissions,
+  serializeSchools,
+  serializeRamsesSchools,
+  serializeYoungs,
+  serializeStructures,
+  serializeReferents,
+  serializeApplications,
+  serializeHits,
+} = require("../utils/es-serializer");
 const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
 const Joi = require("joi");
@@ -77,36 +86,14 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
   }
 });
 
-router.post("/schoolramses", async (req, res) => {
+router.post("/schoolramses/_msearch", async (req, res) => {
   try {
     const { body } = req;
-    const query = {
-      query: {
-        bool: {
-          must: [
-            {
-              multi_match: {
-                query: body.query.q || "",
-                fields: ["fullName^10", "city^7", "departmentName^5", "postcode^3", "country^2", "region^2", "adresse^1"],
-                type: "phrase_prefix",
-              },
-            },
-          ],
-        },
-      },
-      size: body.query.limit || 10,
-    };
-
-    const { body: bodyES } = await esClient.search({ index: "schoolramses", body: query });
-
-    const data = bodyES.hits.hits.map((e) => ({ _id: e._id, ...e._source }));
-
-    // ! Add serializer
-
-    return res.status(200).send({ ok: true, data });
+    const response = await esClient.msearch({ index: "schoolramses", body });
+    return res.status(200).send(serializeRamsesSchools(response.body));
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

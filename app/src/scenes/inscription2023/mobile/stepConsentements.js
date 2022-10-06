@@ -1,26 +1,49 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../components/inscription/CheckBox";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import EditPenLight from "../../../assets/icons/EditPenLight";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import Error from "../../../components/error";
+import CheckBox from "../../../components/inscription/CheckBox";
 import StickyButton from "../../../components/inscription/stickyButton";
+import { setYoung } from "../../../redux/auth/actions";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import { translate } from "../../../utils";
 
 export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState({});
+  const dispatch = useDispatch();
   const [data, setData] = React.useState({
-    consentment1: young.consentment === "true",
-    consentment2: young.consentment === "true",
+    consentment1: young?.consentment === "true",
+    consentment2: young?.consentment === "true",
   });
-  console.log(young);
+
   const onSubmit = async () => {
     // TODO
     setLoading(true);
-    history.push("/inscription2023/representants");
+    try {
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/consentement`, data);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
+      history.push("/inscription2023/representants");
+    } catch (e) {
+      capture(e);
+      setError({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+    }
+
     setLoading(false);
   };
 
@@ -39,6 +62,7 @@ export default function StepConsentements() {
           </Link>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
+        {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="flex flex-col gap-4 mt-4 pb-2">
           <div className="text-[#161616] text-base">
             Je,{" "}

@@ -699,6 +699,13 @@ const STEPS = {
   DOCUMENTS: "DOCUMENTS",
   DONE: "DONE",
 };
+const STEPS2023 = {
+  COORDONNEES: "COORDONNEES",
+  CONSENTEMENTS: "CONSENTEMENTS",
+  REPRESENTANTS: "REPRESENTANTS",
+  DOCUMENTS: "DOCUMENTS",
+  DONE: "DONE",
+};
 
 module.exports = {
   timeout,
@@ -730,6 +737,7 @@ module.exports = {
   YOUNG_STATUS,
   YOUNG_SITUATIONS,
   STEPS,
+  STEPS2023,
   inscriptionCheck,
   updateApplication,
   FILE_STATUS_PHASE1,

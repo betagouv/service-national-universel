@@ -1,12 +1,17 @@
 import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { HiOutlineTrash } from "react-icons/hi";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Input from "../components/Input";
+import { translate } from "../../../utils";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
+import Error from "../../../components/error";
 
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
@@ -16,6 +21,8 @@ export default function StepRepresentants() {
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [isParent2Visible, setIsParent2Visible] = React.useState(false);
+  const dispatch = useDispatch();
+
   const [data, setData] = React.useState({
     parent1Status: "",
     parent1FirstName: "",
@@ -55,16 +62,16 @@ export default function StepRepresentants() {
     let errors = {};
     if (data.parent1Phone && !validator.isMobilePhone(data.parent1Phone)) {
       errors.parent1Phone = "Le numéro de téléphone est au mauvais format.";
-    } else errors.parent1Phone = "";
+    } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
-    } else errors.parent1Email = "";
+    } else errors.parent1Email = undefined;
     if (data.parent2Phone && !validator.isMobilePhone(data.parent2Phone)) {
       errors.parent2Phone = "Le numéro de téléphone est au mauvais format.";
-    } else errors.parent2Phone = "";
+    } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
-    } else errors.parent2Email = "";
+    } else errors.parent2Email = undefined;
     return errors;
   };
 
@@ -73,35 +80,58 @@ export default function StepRepresentants() {
   }, [data.parent1Email, data.parent1Phone, data.parent2Email, data.parent2Phone]);
 
   const onSubmit = async () => {
-    // TODO
     setLoading(true);
-    let errors = {};
-    errors = getErrors();
+    let error = {};
+    error = getErrors();
     for (const key of parent1Keys) {
       if (data[key] === undefined || data[key] === "") {
-        errors[key] = "Ce champ est obligatoire";
+        error[key] = "Ce champ est obligatoire";
       }
     }
 
     if (isParent2Visible) {
       for (const key of parent2Keys) {
         if (data[key] === undefined || data[key] === "") {
-          errors[key] = "Ce champ est obligatoire";
+          error[key] = "Ce champ est obligatoire";
         }
       }
     }
-    setErrors(errors);
-
-    if (!Object.keys(errors).length) {
-      if (!isParent2Visible) {
-        delete data.parent2Status;
-        delete data.parent2FirstName;
-        delete data.parent2LastName;
-        delete data.parent2Email;
-        delete data.parent2Phone;
+    for (const key in error) {
+      if (error[key] === undefined) {
+        delete error[key];
       }
-      //@todo save data
-      history.push("/inscription2023/documents");
+    }
+    setErrors(error);
+    if (!Object.keys(error).length) {
+      const value = data;
+      if (!isParent2Visible) {
+        value.parent2 = false;
+        delete value.parent2Status;
+        delete value.parent2FirstName;
+        delete value.parent2LastName;
+        delete value.parent2Email;
+        delete value.parent2Phone;
+      } else {
+        value.parent2 = true;
+      }
+
+      try {
+        value.parent2 = true;
+        const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/next`, value);
+        if (!ok) {
+          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(responseData));
+        history.push("/inscription2023/documents");
+      } catch (e) {
+        capture(e);
+        setErrors({
+          text: `Une erreur s'est produite`,
+          subText: e?.code ? translate(e.code) : "",
+        });
+      }
     }
     setLoading(false);
   };
@@ -117,6 +147,7 @@ export default function StepRepresentants() {
         </div>
         <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
+        {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} />
         {isParent2Visible ? (
           <>
@@ -134,7 +165,7 @@ export default function StepRepresentants() {
           </div>
         )}
       </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={loading} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
     </>
   );
 }
@@ -142,7 +173,7 @@ export default function StepRepresentants() {
 const FormRepresentant = ({ i, data, setData, errors }) => {
   return (
     <div className="flex flex-col my-4">
-      <div className="text-lg  pb-2 ">Représentant légal n°{i} : </div>
+      <div className="pb-2 text-[#161616] font-bold">Représentant légal {i} </div>
       <div className="flex flex-col gap-2">
         <div className="text-[#161616] text-base">Votre lien</div>
         <div className="flex items-center">

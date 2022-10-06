@@ -57,6 +57,7 @@ export default function Forgot() {
           <div className="text-[#161616] text-base ">
             <span className="font-medium"> Un email de réinitialisation de mot de passe a été envoyé à </span> {email} <br /> <br /> Cet email contient un lien permettant de
             réinitialiser votre mot de passe. <br /> <br /> Vous allez le recevoir d’ici quelques minutes, pensez à vérifier vos spams et courriers indésirables.
+            <br /> <br /> Si vous ne recevez aucun email, cela veut dire que vous n&apos;avez pas encore de compte.
           </div>
         )}
         <hr className="text-[#E5E5E5] mt-4" />
