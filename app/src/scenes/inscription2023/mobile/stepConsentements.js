@@ -48,7 +48,7 @@ export default function StepConsentements({ step }) {
     setLoading(false);
   };
   //TO DO
-  const onSave = () => {};
+  // const onSave = () => {};
 
   React.useEffect(() => {
     if (data.consentment1 && data.consentment2) setDisabled(false);
@@ -57,7 +57,7 @@ export default function StepConsentements({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar step={step} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Apporter mon consentement</h1>

@@ -22,7 +22,7 @@ const Navbar = ({ step, onSave }) => {
                 : step === "DOCUMENTS" && "Justifier de mon identité"}
             </div>
           </div>
-          <img src={save} onClick={onSave} className="cursor-pointer" />
+          {onSave && <img src={save} onClick={onSave} className="cursor-pointer" />}
         </div>
 
         <div className="flex space-x-2 w-full mt-2">
