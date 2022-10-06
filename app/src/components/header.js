@@ -5,9 +5,22 @@ import Menu from "../assets/icons/Burger";
 import useDevice from "../hooks/useDevice";
 import Help from "../assets/icons/QuestionMarkBlue";
 import File from "../assets/file.svg";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../redux/auth/actions";
+import api from "../services/api";
 
 const Header = ({ setIsOpen }) => {
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const young = useSelector((state) => state.Auth.young);
+
+  const logout = async () => {
+    await api.post(`/young/logout`);
+    dispatch(setYoung(null));
+    history.push("/");
+  };
+
   const { pathname } = useLocation();
   return (
     <div className="flex  px-3  w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] sticky top-0 z-50 bg-white">
@@ -45,9 +58,18 @@ const Header = ({ setIsOpen }) => {
                 <Help />
                 <div>Besoin d&apos;aide</div>{" "}
               </Link>
-              <Link className="border border-gray-500 py-1 px-1.5 cursor-pointer hover:text-white hover:bg-[#000091]" to={"/auth"}>
-                Se connecter
-              </Link>
+
+              <div
+                className="border border-gray-500 py-1 px-1.5 cursor-pointer hover:text-white hover:bg-[#000091]"
+                onClick={() => {
+                  if (!young) {
+                    history.push("/auth");
+                  } else {
+                    logout();
+                  }
+                }}>
+                {!young ? <div> Se connecter </div> : <div> Se déconnecter </div>}
+              </div>
             </div>
           )}
         </div>
