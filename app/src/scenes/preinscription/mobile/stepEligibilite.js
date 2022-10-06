@@ -14,6 +14,7 @@ import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/inscription/CheckBox";
 import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
+import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -38,6 +39,8 @@ export default function StepEligibilite() {
     { value: "TERM_CAP", label: "Terminale CAP" },
   ];
 
+  console.log("🚀 ~ file: stepEligibilite.js ~ line 18 ~ StepEligibilite ~ data", data);
+
   useEffect(() => {
     if (search) getSchools(search);
   }, [search]);
@@ -52,9 +55,26 @@ export default function StepEligibilite() {
         return;
       }
       setIsSearching(true);
-      const { ok, data } = await api.post("/es/schoolramses", { query: { q: search } });
+      const body = {
+        query: {
+          bool: {
+            must: {
+              match: {
+                "fullName.folded": search,
+              },
+            },
+            filter: [],
+          },
+        },
+        size: 10,
+      };
+      body.query.bool.filter.push({ term: { "country.keyword": "FRANCE" } });
+      const { responses } = await api.esQuery("schoolramses", body);
+      console.log("🚀 ~ file: stepEligibilite.js ~ line 73 ~ getSchools ~ responses", responses);
+      const data = responses[0].hits.hits.map((item) => item._source);
+      console.log("🚀 ~ file: stepEligibilite.js ~ line 75 ~ getSchools ~ data", data);
       setIsSearching(false);
-      if (!ok) return toastr.error("Aucune école trouvée");
+      if (!data.length) return toastr.error("Aucune école trouvée");
       setSchools(data);
     } catch (e) {
       console.log(e.message);
@@ -150,7 +170,9 @@ export default function StepEligibilite() {
               {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
             </div>
 
-            {data.scolarity !== "NOT_SCOLARISE" ? (
+            {data.isAbroad ? (
+              <SchoolOutOfFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+            ) : data.scolarity !== "NOT_SCOLARISE" ? (
               <div>
                 <input
                   type="text"
@@ -184,16 +206,12 @@ export default function StepEligibilite() {
                 {data.school ? (
                   <>
                     <div className="flex flex-col flex-start my-4">
-                      Nom de l&apos;établissement
-                      <Input disabled value={data?.school?.fullName} />
-                    </div>
-                    <div className="flex flex-col flex-start my-4">
                       Commune de l&apos;établissement
                       <Input disabled value={data?.school?.city} />
                     </div>
                     <div className="flex flex-col flex-start my-4">
-                      Pays de l&apos;établissement
-                      <Input disabled value={data?.school?.country} />
+                      Nom de l&apos;établissement
+                      <Input disabled value={data?.school?.fullName} />
                     </div>
                   </>
                 ) : null}
