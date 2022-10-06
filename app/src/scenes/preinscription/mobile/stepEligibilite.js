@@ -38,8 +38,6 @@ export default function StepEligibilite() {
     { value: "TERM_CAP", label: "Terminale CAP" },
   ];
 
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 18 ~ StepEligibilite ~ data", data);
-
   useEffect(() => {
     if (search) getSchools(search);
   }, [search]);

@@ -153,8 +153,9 @@ const Espace = () => {
   }
   const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
 
-  if (!inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
-  if (youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
+  if (environment === "production" && !inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
+  if (environment === "production" && youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
+  if (environment !== "production" && youngInProcessInscription) return <Redirect to="/inscription2023" />;
 
   return (
     <>
