@@ -5,7 +5,6 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import { toastr } from "react-redux-toastr";
 import { getDepartmentByZip } from "snu-lib";
 
 export default function StepSejour() {
@@ -24,7 +23,7 @@ export default function StepSejour() {
         frenchNationality: data.frenchNationality,
       });
       if (!res.ok) {
-        toastr.error("Impossible de vérifier votre éligibilité");
+        setError({ texte: "Impossible de vérifier votre éligibilité" });
         history.push("/");
       }
       setCohorts(res.data);
@@ -38,6 +37,7 @@ export default function StepSejour() {
 
   return (
     <div className="bg-white p-4">
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
         <Link to="/public-besoin-d-aide/">
