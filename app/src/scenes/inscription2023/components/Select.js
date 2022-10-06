@@ -68,7 +68,7 @@ export default function Select({ label, options, value, placeholder = "Sélectio
           ))}
         </div>
       </div>
-      <div className="h-4 text-red-500 text-sm">{error}</div>
+      <div className="h-4 text-[#CE0500] text-sm">{error}</div>
     </div>
   );
 }

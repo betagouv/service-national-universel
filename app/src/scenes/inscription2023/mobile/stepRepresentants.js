@@ -134,7 +134,7 @@ export default function StepRepresentants() {
           </div>
         )}
       </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={loading} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
     </>
   );
 }
