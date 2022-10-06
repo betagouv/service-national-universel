@@ -23,14 +23,18 @@ export default function StepConsentements() {
     consentment1: young?.consentment === "true",
     consentment2: young?.consentment === "true",
   });
-  console.log(young.consentment);
+
   const onSubmit = async () => {
     // TODO
     setLoading(true);
     try {
-      const { ok, code, data: responsData } = await api.put(`/young/inscription2023/consentement/save`, { consentment1: false, consentment2: false });
-      if (!ok) return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-      dispatch(setYoung(responsData));
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/consentement`, data);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);

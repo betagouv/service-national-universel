@@ -6,7 +6,7 @@ const Joi = require("joi");
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
-
+const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023 } = require("../../utils");
 
 router.put("/coordinates", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
@@ -68,7 +68,27 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
 
     const isRequired = type !== "save";
 
-    const { error, value } = Joi.object({}).validate(req.body, { stripUnknown: true });
+    const { error, value } = Joi.object({
+      parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "other"), isRequired),
+      parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
+      parent1LastName: needRequired(Joi.string().trim(), isRequired),
+      parent1Email: needRequired(Joi.string().lowercase().trim().email(), isRequired),
+      parent1Phone: needRequired(Joi.string().trim(), isRequired),
+      parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
+      parent2Status: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2LastName: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: needRequired(Joi.string().uppercase().trim(), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Email: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: needRequired(Joi.string().lowercase().trim().email(), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -76,6 +96,14 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!value.parent2) {
+      value.parent2Status = "";
+      value.parent2FirstName = "";
+      value.parent2LastName = "";
+      value.parent2Email = "";
+      value.parent2Phone = "";
+    }
 
     if (type === "next") value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
 
