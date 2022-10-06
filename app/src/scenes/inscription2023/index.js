@@ -1,7 +1,6 @@
 import React from "react";
 import { Redirect, Switch } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS } from "../../utils";
 import { SentryRoute } from "../../sentry";
 
 import DesktopCoordonnees from "./desktop/stepCoordonnees";

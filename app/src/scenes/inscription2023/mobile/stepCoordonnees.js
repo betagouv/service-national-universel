@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import validator from "validator";
 import RadioButton from "../components/RadioButton";
 import Input from "../components/Input";
-import Header from "../components/Header";
 import GhostButton from "../components/GhostButton";
 import Select from "../components/Select";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationShipOptions, frenchNationalityOptions, genderOptions } from "../utils";
