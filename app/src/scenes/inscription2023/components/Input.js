@@ -11,7 +11,7 @@ export default function Input({ value, placeholder = "", label, onChange, type =
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
       />
-      <div className="h-4 text-red-500 text-sm">{error}</div>
+      <div className="h-4 text-[#CE0500] text-sm">{error}</div>
     </div>
   );
 }

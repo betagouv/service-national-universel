@@ -20,7 +20,7 @@ export default function StepConsentements() {
   const onSubmit = async () => {
     // TODO
     setLoading(true);
-    history.push("/inscription2023/representant");
+    history.push("/inscription2023/representants");
     setLoading(false);
   };
 
