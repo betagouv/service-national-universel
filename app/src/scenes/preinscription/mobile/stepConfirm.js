@@ -37,7 +37,7 @@ export default function StepDone() {
         schoolCountry: data.school?.country,
         schoolId: data.school?._id,
         zip: data.zip,
-        cohort: data.cohort,
+        // cohort: data.cohort,
       });
 
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
