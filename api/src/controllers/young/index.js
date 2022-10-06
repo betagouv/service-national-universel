@@ -1074,5 +1074,6 @@ router.use("/:id/meeting-point", require("./meeting-point"));
 router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/inscription", require("./inscription"));
+router.use("/inscription2023", require("./inscription2023"));
 
 module.exports = router;

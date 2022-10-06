@@ -146,8 +146,8 @@ export default function StepEligibilite() {
                 </div>
               </p>
 
-              <Toggle onClick={() => setData({ ...data, frenchResidency: !data.frenchResidency })} toggled={data.frenchResidency} />
-              {error.frenchResidency ? <span className="text-red-500 text-sm">{error.frenchResidency}</span> : null}
+              <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
+              {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
             </div>
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
@@ -198,7 +198,7 @@ export default function StepEligibilite() {
                   </>
                 ) : null}
               </div>
-            ) : (
+            ) : !data.isAbroad ? (
               <div className="flex flex-col flex-start my-4">
                 Code Postal
                 <div className="h-5 flex items-center">
@@ -207,7 +207,7 @@ export default function StepEligibilite() {
                 <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
                 {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
               </div>
-            )}
+            ) : null}
           </>
         )}
       </div>
