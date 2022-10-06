@@ -20,22 +20,23 @@ export default function StepConsentements() {
   const [error, setError] = React.useState({});
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
-    consentment1: young.consentment === "true",
-    consentment2: young.consentment === "true",
+    consentment1: young?.consentment === "true",
+    consentment2: young?.consentment === "true",
   });
-  console.log(young);
+  console.log(young.consentment);
   const onSubmit = async () => {
     // TODO
     setLoading(true);
     try {
-      const { ok, code, data: responsData } = await api.put(`/young/inscription2023/consentement/next`, data);
-      if (!ok) return setError({ text: `Une erreur s'est produite` });
+      const { ok, code, data: responsData } = await api.put(`/young/inscription2023/consentement/save`, { consentment1: false, consentment2: false });
+      if (!ok) return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       dispatch(setYoung(responsData));
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);
       setError({
         text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
       });
     }
 
