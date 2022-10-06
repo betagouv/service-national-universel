@@ -2,48 +2,43 @@ import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/SearchableSelect";
 
-export default function SchoolOutOfFrance({ onSelectSchool }) {
-  const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState("");
+export default function SchoolInFrance({ onSelectSchool }) {
+  const [cities, setCities] = useState([]);
+  const [city, setCity] = useState("");
   const [schools, setSchools] = useState([]);
   const [school, setSchool] = useState("");
 
   useEffect(() => {
-    async function getCountries() {
+    async function getCities() {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
         size: 0,
         aggs: {
-          countries: { terms: { field: "country.keyword", size: 10000 } },
+          cities: { terms: { field: "city.keyword", size: 10000 } },
         },
       };
       const { responses } = await api.esQuery("schoolramses", body);
-      setCountries(
-        responses[0].aggregations.countries.buckets
-          .filter((e) => e.key !== "FRANCE")
-          .map((e) => e.key)
-          .sort(),
-      );
+      setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
     }
-    getCountries();
+    getCities();
   }, []);
 
   useEffect(() => {
     async function getSchools() {
-      if (!country) return;
+      if (!city) return;
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
       };
-      body.query.bool.filter.push({ term: { "country.keyword": country } });
+      body.query.bool.filter.push({ term: { "city.keyword": city } });
       const { responses } = await api.esQuery("schoolramses", body);
       setSchools(responses[0].hits.hits.map((e) => e._source));
     }
     getSchools();
-  }, [country]);
+  }, [city]);
 
   useEffect(() => {
     if (school) {
-      onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === school));
+      onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === school));
     }
   }, [school]);
 
@@ -51,13 +46,13 @@ export default function SchoolOutOfFrance({ onSelectSchool }) {
     <>
       <div className="form-group">
         <SearchableSelect
-          label="Pays de l'établissement"
-          value={country}
-          options={countries.map((c) => ({ value: c, label: c }))}
+          label="Commune de l'établissement"
+          value={city}
+          options={cities.map((c) => ({ value: c, label: c }))}
           onChange={(value) => {
-            setCountry(value);
+            setCity(value);
           }}
-          placeholder="Sélectionnez un pays"
+          placeholder="Sélectionnez une commune"
         />
       </div>
       <div className="form-group">
@@ -65,7 +60,7 @@ export default function SchoolOutOfFrance({ onSelectSchool }) {
           label="Nom de l'établissement"
           value={school}
           options={schools
-            .map((e) => `${e.fullName} - ${e.city}`)
+            .map((e) => `${e.fullName} - ${e.adresse}`)
             .sort()
             .map((c) => ({ value: c, label: c }))}
           onChange={(value) => {

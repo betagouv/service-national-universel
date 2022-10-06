@@ -15,6 +15,7 @@ import CheckBox from "../../../components/inscription/CheckBox";
 import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
+import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -40,46 +41,6 @@ export default function StepEligibilite() {
   ];
 
   console.log("🚀 ~ file: stepEligibilite.js ~ line 18 ~ StepEligibilite ~ data", data);
-
-  useEffect(() => {
-    if (search) getSchools(search);
-  }, [search]);
-
-  const getSchools = async () => {
-    try {
-      if (search.length > 0 && !isSearching) setIsSearching(true);
-      if (!search.length) {
-        setIsSearching(false);
-        setSearch("");
-        setSchools([]);
-        return;
-      }
-      setIsSearching(true);
-      const body = {
-        query: {
-          bool: {
-            must: {
-              match: {
-                "fullName.folded": search,
-              },
-            },
-            filter: [],
-          },
-        },
-        size: 10,
-      };
-      body.query.bool.filter.push({ term: { "country.keyword": "FRANCE" } });
-      const { responses } = await api.esQuery("schoolramses", body);
-      console.log("🚀 ~ file: stepEligibilite.js ~ line 73 ~ getSchools ~ responses", responses);
-      const data = responses[0].hits.hits.map((item) => item._source);
-      console.log("🚀 ~ file: stepEligibilite.js ~ line 75 ~ getSchools ~ data", data);
-      setIsSearching(false);
-      if (!data.length) return toastr.error("Aucune école trouvée");
-      setSchools(data);
-    } catch (e) {
-      console.log(e.message);
-    }
-  };
 
   const onSubmit = async () => {
     let errors = {};
@@ -173,49 +134,7 @@ export default function StepEligibilite() {
             {data.isAbroad ? (
               <SchoolOutOfFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
             ) : data.scolarity !== "NOT_SCOLARISE" ? (
-              <div>
-                <input
-                  type="text"
-                  placeholder="Rechercher une ecole.."
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setShowItems(true);
-                  }}
-                  ref={inputSearch}
-                />
-                <div className="relative flex w-full items-center">
-                  {schools.length > 0 && showItems && (
-                    <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
-                      {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
-                      {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n&apos;y a pas de résultat 👀</span>}
-                      {schools?.map((school) => (
-                        <SchoolCard
-                          key={school._id}
-                          data={school}
-                          onClick={() => {
-                            setData({ ...data, school: { ...school } });
-                            setShowItems(false);
-                            setSearch("");
-                            inputSearch.current.value = "";
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {data.school ? (
-                  <>
-                    <div className="flex flex-col flex-start my-4">
-                      Commune de l&apos;établissement
-                      <Input disabled value={data?.school?.city} />
-                    </div>
-                    <div className="flex flex-col flex-start my-4">
-                      Nom de l&apos;établissement
-                      <Input disabled value={data?.school?.fullName} />
-                    </div>
-                  </>
-                ) : null}
-              </div>
+              <SchoolInFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
             ) : !data.isAbroad ? (
               <div className="flex flex-col flex-start my-4">
                 Code Postal
