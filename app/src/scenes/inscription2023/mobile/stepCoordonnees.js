@@ -7,6 +7,7 @@ import GhostButton from "../components/GhostButton";
 import Select from "../components/Select";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationShipOptions, frenchNationalityOptions, genderOptions } from "../utils";
 import api from "../../../services/api";
+import VerifyAddress from "../components/VerifyAddress";
 
 const FRANCE = "France";
 
@@ -156,7 +157,22 @@ export default function StepCoordonnees() {
         <Input value={address} label="Adresse de résidence" onChange={updateData("address")} error={errors.address} />
         <Input value={zip} label="Code postal" onChange={updateData("zip")} error={errors.zip} />
         <Input value={city} label="Ville" onChange={updateData("city")} error={errors.city} />
-        {livesInFrance && <GhostButton name="Vérifier mon adresse" onClick={() => {}} />}
+
+        {livesInFrance && (
+          <VerifyAddress
+            address={address}
+            zip={zip}
+            city={city}
+            onSuccess={(values) => {
+              console.log("TODO: success");
+              console.log(values);
+            }}
+            onFail={() => {
+              console.log("TODO: fail");
+            }}
+          />
+        )}
+
         {!livesInFrance && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
