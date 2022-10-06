@@ -76,7 +76,7 @@ const Dashboard = (props) => {
       searchTimeout.current = setTimeout(async () => {
         setIsSearching(true);
         setHideItems(false);
-        const response = await api.get(`/zammood/knowledge-base/search?search=${search}&restriction=${kbRole}`);
+        const response = await api.get(`/zammood/knowledgeBase/search?search=${search}&restriction=${kbRole}`);
         setIsSearching(false);
         if (response.ok) {
           setItems(response.data);

@@ -57,7 +57,7 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
     searchTimeout.current = setTimeout(async () => {
       setIsSearching(true);
       setHideItems(false);
-      const response = await api.get(`/zammood/knowledge-base/search?search=${search}&restriction=young`);
+      const response = await api.get(`/zammood/knowledgeBase/search?search=${search}&restriction=young`);
       setIsSearching(false);
       if (response.ok) {
         setItems(response.data);
