@@ -11,7 +11,8 @@ const Footer = () => {
   const mobile = useDevice() === "mobile";
   const smallButton = !["/preinscription/sejour"].includes(pathname);
   const largeButton = ["/preinscription/done"].includes(pathname);
-  const noButton = ["/auth"].includes(pathname);
+  const noButton = ["auth", "inscription2023"].findIndex((route) => location.pathname.includes(route)) !== -1;
+
   return (
     <div
       className={`${desktop || noButton ? "mb-0" : largeButton ? "mb-[20vh]" : smallButton ? "mb-[12vh]" : "mb-0"} ${
