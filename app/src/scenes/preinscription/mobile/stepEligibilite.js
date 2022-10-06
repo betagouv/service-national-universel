@@ -167,7 +167,7 @@ export default function StepEligibilite() {
                   {schools.length > 0 && showItems && (
                     <div className="absolute top-0 left-0 z-50 max-h-80 w-full overflow-auto  bg-white drop-shadow-lg">
                       {search.length > 0 && isSearching && <Loader size={20} className="my-4" />}
-                      {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n'y a pas de résultat 👀</span>}
+                      {search.length > 0 && !isSearching && !schools.length && <span className="block py-2 px-8 text-sm text-black">Il n&apos;y a pas de résultat 👀</span>}
                       {schools?.map((school) => (
                         <SchoolCard
                           key={school._id}
@@ -186,15 +186,15 @@ export default function StepEligibilite() {
                 {data.school ? (
                   <>
                     <div className="flex flex-col flex-start my-4">
-                      Nom de l'établissement
+                      Nom de l&apos;établissement
                       <Input disabled value={data?.school?.fullName} />
                     </div>
                     <div className="flex flex-col flex-start my-4">
-                      Commune de l'établissement
+                      Commune de l&apos;établissement
                       <Input disabled value={data?.school?.city} />
                     </div>
                     <div className="flex flex-col flex-start my-4">
-                      Pays de l'établissement
+                      Pays de l&apos;établissement
                       <Input disabled value={data?.school?.country} />
                     </div>
                   </>
