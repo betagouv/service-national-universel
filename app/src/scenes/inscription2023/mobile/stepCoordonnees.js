@@ -132,7 +132,6 @@ export default function StepCoordonnees() {
 
   return (
     <>
-      <Header />
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Mon profile volontaire</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
