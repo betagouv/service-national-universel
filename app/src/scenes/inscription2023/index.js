@@ -1,7 +1,6 @@
 import React from "react";
 import { Redirect, Switch } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS } from "../../utils";
 import { SentryRoute } from "../../sentry";
 
 import DesktopCoordonnees from "./desktop/stepCoordonnees";
@@ -18,6 +17,10 @@ import MobileDone from "./mobile/stepDone";
 
 import useDevice from "../../hooks/useDevice";
 
+import Header from "./../../components/header";
+import HeaderMenu from "../../components/headerMenu";
+import Footer from "./../../components/footerV2";
+
 const STEPS = {
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
@@ -27,7 +30,8 @@ const STEPS = {
 };
 
 const Step = ({ step }) => {
-  const device = "mobile"; // useDevice();
+  const device = useDevice();
+  const [isOpen, setIsOpen] = React.useState(false);
 
   function renderStep(step) {
     if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
@@ -40,9 +44,10 @@ const Step = ({ step }) => {
 
   return (
     <div>
-      {/* header */}
+      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+      <Header setIsOpen={setIsOpen} />
       {renderStep(step)}
-      {/* footer */}
+      <Footer />
     </div>
   );
 };
@@ -51,10 +56,6 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return <Redirect to="/preinscription" />;
   console.log(young);
-  // if it is a young in a status that is not eligible, they cant access to the inscription
-  if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status)) {
-    return <Redirect to={{ pathname: "/" }} />;
-  }
 
   return (
     <Switch>
