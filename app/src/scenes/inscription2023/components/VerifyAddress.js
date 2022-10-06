@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Spinner } from "reactstrap";
+import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import GhostButton from "./GhostButton";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail }) {
@@ -24,6 +25,28 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail })
     }
   };
 
+  const formatResult = (suggestion) => {
+    let depart = suggestion.properties.postcode.substr(0, 2);
+    if (["97", "98"].includes(depart)) {
+      depart = suggestion.properties.postcode.substr(0, 3);
+    }
+    if (depart === "20") {
+      depart = suggestion.properties.context.substr(0, 2);
+      if (!["2A", "2B"].includes(depart)) depart = "2B";
+    }
+
+    return {
+      address: suggestion.properties.name,
+      zip: suggestion.properties.postcode,
+      city: suggestion.properties.city,
+      department: departmentLookUp[depart],
+      departmentNumber: depart,
+      location: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] },
+      region: department2region[departmentLookUp[depart]],
+      cityCode: suggestion.properties.citycode,
+    };
+  };
+
   if (suggestion) {
     if (!suggestion.ok) {
       return (
@@ -42,14 +65,14 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail })
           <GhostButton
             onClick={() => {
               setSuggestion(null);
-              onSuccess();
+              onFail();
             }}
             name="Non"
           />
           <GhostButton
             onClick={() => {
+              onSuccess(formatResult(suggestion));
               setSuggestion(null);
-              onFail();
             }}
             name="Oui"
           />

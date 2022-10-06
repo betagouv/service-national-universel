@@ -163,8 +163,9 @@ export default function StepCoordonnees() {
             address={address}
             zip={zip}
             city={city}
-            onSuccess={() => {
+            onSuccess={(values) => {
               console.log("TODO: success");
+              console.log(values);
             }}
             onFail={() => {
               console.log("TODO: fail");
