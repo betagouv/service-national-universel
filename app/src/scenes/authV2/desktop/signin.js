@@ -10,6 +10,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import queryString from "query-string";
+import { useHistory } from "react-router-dom";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -18,6 +19,7 @@ export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
+  const history = useHistory();
 
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
