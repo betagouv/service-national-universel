@@ -19,6 +19,7 @@ import useDevice from "../../hooks/useDevice";
 
 import Header from "./../../components/header";
 import HeaderMenu from "../../components/headerMenu";
+import Help from "./components/Help";
 import Footer from "./../../components/footerV2";
 
 const STEPS = {
@@ -47,6 +48,7 @@ const Step = ({ step }) => {
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(step)}
+      <Help />
       <Footer />
     </div>
   );
