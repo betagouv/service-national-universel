@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
+import { HiSearch, HiX } from "react-icons/hi";
 
 import { HeroContainer } from "../../components/Content";
 import api from "../../services/api";
@@ -34,6 +35,104 @@ const articles = [
     url: `${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`,
   },
 ];
+
+const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
+  const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [items, setItems] = useState([]);
+  const [hideItems, setHideItems] = useState(false);
+
+  const searchTimeout = useRef(null);
+
+  const computeSearch = () => {
+    if (search.length > 0 && !isSearching) setIsSearching(true);
+    if (!search.length) {
+      setIsSearching(false);
+      setSearch("");
+      clearTimeout(searchTimeout.current);
+      setItems([]);
+      return;
+    }
+    clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      setIsSearching(true);
+      setHideItems(false);
+      const response = await api.get(`/zammood/knowledge-base/search?search=${search}&restriction=young`);
+      setIsSearching(false);
+      if (response.ok) {
+        setItems(response.data);
+      }
+    }, 250);
+  };
+
+  useEffect(() => {
+    computeSearch();
+    return () => {
+      clearTimeout(searchTimeout.current);
+      setIsSearching(false);
+    };
+  }, [search]);
+
+  return (
+    <div className="relative flex w-full flex-col items-center">
+      <div className="relative flex w-full items-center">
+        <input
+          className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
+          type="text"
+          placeholder={placeholder}
+          onChange={(e) => setSearch(e.target.value)}
+          value={search}
+        />
+        <span className="material-icons absolute right-2 text-xl text-red-400" onClick={() => setSearch("")}>
+          <HiX />
+        </span>
+        <span className="material-icons absolute left-3 text-xl text-gray-400">
+          <HiSearch />
+        </span>
+      </div>
+      <div className="relative flex w-full items-center">
+        {!hideItems && (search.length > 0 || isSearching || items.length) > 0 && (
+          <div className="absolute top-0 left-0 z-20 max-h-80 w-full overflow-auto bg-white">
+            {search.length > 0 && isSearching && !items.length && <Loader size={20} className="my-4" />}
+            {search.length > 0 && !isSearching && !items.length && <span className="block py-2 px-8 text-sm text-black">{noAnswer}</span>}
+            {items?.map((item) => (
+              <KnowledgeBaseArticleCard
+                key={item._id}
+                _id={item._id}
+                position={item.position}
+                title={item.type === "article" ? item.title : `📂 ${item.title}`}
+                slug={item.slug}
+                path={path}
+                allowedRoles={showAllowedRoles ? item.allowedRoles : []}
+                className="!my-0"
+                contentClassName="!py-2 !shadow-none !rounded-none border-b-2"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className = "" }) => {
+  return (
+    <div key={_id} onClick={() => window.open(`https://support.snu.gouv.fr/${path}/${slug}`, "_blank")}>
+      <a href="#" data-position={position} data-id={_id} className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
+        <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg `}>
+          <div className="flex flex-grow flex-col">
+            <header className="flex items-center justify-between px-8 leading-tight">
+              <h3 className="text-lg text-black">{title}</h3>
+            </header>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" className="mr-6 h-4 w-4 shrink-0 grow-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </article>
+      </a>
+    </div>
+  );
+};
 
 export default function Dashboard(props) {
   const [userTickets, setUserTickets] = useState(null);
@@ -99,35 +198,33 @@ export default function Dashboard(props) {
       </NavLink>
       <Container>
         <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
+        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+          <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" restriction="public" />
+        </div>
+        <h4 className="my-3 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
+        <Articles>
+          {articles?.map((article) => (
+            <div className="block" key={article.url} onClick={() => window.open(article.url)}>
+              <div className="block-title">
+                <p>{article.emoji}</p>
+                <h6>{article.title}</h6>
+              </div>
+              <p>{article.body}</p>
+              <p>
+                <a className="block-link" href={urlWithScheme(article.url)} target="_blank" rel="noreferrer">
+                  Lire la suite
+                </a>
+              </p>
+            </div>
+          ))}
+        </Articles>
+        <hr style={{ margin: "2rem" }} />
+
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
-              <br />
-              N&apos;hésitez pas à consulter notre{" "}
-              <strong>
-                <a className="link" href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
-                  base de connaissance
-                </a>
-              </strong>
-              &nbsp;!
-            </div>
-            <div className="buttons">
-              <LinkButton href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
-                Trouver&nbsp;ma&nbsp;réponse
-              </LinkButton>
-            </div>
-          </div>
-          <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous n&apos;avez pas trouvé de réponse à votre demande ?<br />
-              Contactez notre{" "}
-              <strong>
-                <NavLink className="link" to="/besoin-d-aide/ticket">
-                  service de support
-                </NavLink>
-              </strong>
-              .
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
+              une réponse par mail.
             </div>
             <div className="buttons">
               <InternalLink to={`/besoin-d-aide/ticket?from=${fromPage}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
@@ -135,24 +232,7 @@ export default function Dashboard(props) {
           </div>
         </div>
       </Container>
-      <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
-      <Articles>
-        {articles?.map((article) => (
-          <div className="block" key={article.url} onClick={() => window.open(article.url)}>
-            <div className="block-title">
-              <p>{article.emoji}</p>
-              <h6>{article.title}</h6>
-            </div>
-            <p>{article.body}</p>
-            <p>
-              <a className="block-link" href={urlWithScheme(article.url)} target="_blank" rel="noreferrer">
-                Lire la suite
-              </a>
-            </p>
-          </div>
-        ))}
-      </Articles>
-      <hr style={{ margin: "2rem" }} />
+
       <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
@@ -189,9 +269,12 @@ const Container = styled.div`
   .help-section {
     padding: 0.5rem;
     margin-bottom: 1rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
+    width: 50%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     .buttons {
       margin: 1rem 0;
       flex: 1;
@@ -199,7 +282,7 @@ const Container = styled.div`
   }
   .help-section-block {
     display: grid;
-    grid-template-rows: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
     text-align: center;
   }
   ${
