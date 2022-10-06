@@ -8,6 +8,7 @@ import Select from "../components/Select";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationShipOptions, frenchNationalityOptions, genderOptions } from "../utils";
 import api from "../../../services/api";
 import VerifyAddress from "../components/VerifyAddress";
+import SearchableSelect from "../../../components/SearchableSelect";
 
 const FRANCE = "France";
 
@@ -48,8 +49,6 @@ export default function StepCoordonnees() {
     }
   }, [young]);
 
-  console.log({ situationOptions });
-
   const {
     frenchNationality,
     birthCountry,
@@ -88,6 +87,26 @@ export default function StepCoordonnees() {
     setErrors(getErrors());
   }, [phone, frenchNationality, birthCityZip]);
 
+  const setFrenchNationality = (frenchNationality) => {
+    if (frenchNationality) {
+      setData({ ...data, birthCountry: FRANCE, frenchNationality });
+    } else {
+      setData({ ...data, birthCountry: "", frenchNationality });
+    }
+  };
+
+  const setLivesInFrance = (livesInFrance) => {
+    if (livesInFrance) {
+      setData({ ...data, country: FRANCE, livesInFrance });
+    } else {
+      setData({ ...data, country: "", livesInFrance });
+    }
+  };
+
+  const updateData = (key) => (value) => {
+    setData({ ...data, [key]: value });
+  };
+
   const onSubmit = async () => {
     let errors = {};
     const requiredFields = ["frenchNationality", "birthCountry", "birthCityZip", "birthCity", "gender", "phone", "livesInFrance", "country", "address", "zip", "city", "situation"];
@@ -110,26 +129,6 @@ export default function StepCoordonnees() {
     }
   };
 
-  const setFrenchNationality = (frenchNationality) => {
-    if (frenchNationality) {
-      setData({ ...data, birthCountry: FRANCE, frenchNationality });
-    } else {
-      setData({ ...data, birthCountry: "", frenchNationality });
-    }
-  };
-
-  const setLivesInFrance = (livesInFrance) => {
-    if (livesInFrance) {
-      setData({ ...data, country: FRANCE, livesInFrance });
-    } else {
-      setData({ ...data, country: "", livesInFrance });
-    }
-  };
-
-  const updateData = (key) => (value) => {
-    setData({ ...data, [key]: value });
-  };
-
   return (
     <>
       <div className="bg-white p-4 text-[#161616]">
@@ -137,13 +136,13 @@ export default function StepCoordonnees() {
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
         {!frenchNationality && (
-          <Select
-            options={countryOptions}
-            value={birthCountry}
+          <SearchableSelect
             label="Pays de naissance"
-            placeholder="Sélectionnez un pays"
+            value={birthCountry}
+            options={countryOptions}
             onChange={updateData("birthCountry")}
-            error={errors.birthCity}
+            placeholder="Sélectionnez un pays"
+            error={errors.birthCountry}
           />
         )}
         <Input value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} />
@@ -152,7 +151,14 @@ export default function StepCoordonnees() {
         <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} />
         <RadioButton label="Je réside..." options={frenchNationalityOptions} onChange={setLivesInFrance} value={livesInFrance} />
         {!livesInFrance && (
-          <Select options={countryOptions} value={country} label="Pays de résidence" placeholder="Sélectionnez un pays" onChange={updateData("country")} error={errors.country} />
+          <SearchableSelect
+            label="Pays de résidence"
+            value={country}
+            options={countryOptions}
+            onChange={updateData("country")}
+            placeholder="Sélectionnez un pays"
+            error={errors.country}
+          />
         )}
         <Input value={address} label="Adresse de résidence" onChange={updateData("address")} error={errors.address} />
         <Input value={zip} label="Code postal" onChange={updateData("zip")} error={errors.zip} />
