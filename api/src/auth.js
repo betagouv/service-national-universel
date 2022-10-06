@@ -92,6 +92,7 @@ class Auth {
         schoolCountry: Joi.string().trim(),
         schoolId: Joi.string().trim(),
         zip: Joi.string().trim(),
+        cohort: Joi.string().trim().required(),
       }).validate(req.body);
 
       if (error) {
@@ -118,6 +119,7 @@ class Auth {
         schoolCountry,
         schoolId,
         zip,
+        cohort,
       } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -142,6 +144,7 @@ class Auth {
         schoolCountry,
         schoolId,
         zip,
+        cohort,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
