@@ -102,6 +102,7 @@ export default function App() {
             <SentryRoute path="/validate-contract/done" component={ContractDone} />
             <SentryRoute path="/validate-contract" component={Contract} />
             <SentryRoute path="/inscription" component={Inscription} />
+            {/* @todo: clean this */}
             {environment !== "production" ? <SentryRoute path="/inscription2023" component={Inscription2023} /> : null}
             {environment !== "production" ? <SentryRoute path="/preinscription" component={PreInscription} /> : null}
             {environment !== "production" ? <SentryRoute path="/auth" component={AuthV2} /> : <SentryRoute path="/auth" component={Auth} />}
@@ -153,6 +154,7 @@ const Espace = () => {
   }
   const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
 
+  // @todo: clean this
   if (environment === "production" && !inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
   if (environment === "production" && youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
   if (environment !== "production" && youngInProcessInscription) return <Redirect to="/inscription2023" />;
