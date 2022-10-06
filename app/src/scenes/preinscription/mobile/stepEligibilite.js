@@ -131,10 +131,12 @@ export default function StepEligibilite() {
               {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
             </div>
 
-            {data.isAbroad ? (
-              <SchoolOutOfFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
-            ) : data.scolarity !== "NOT_SCOLARISE" ? (
-              <SchoolInFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+            {data.scolarity !== "NOT_SCOLARISE" ? (
+              data.isAbroad ? (
+                <SchoolOutOfFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+              ) : (
+                <SchoolInFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+              )
             ) : !data.isAbroad ? (
               <div className="flex flex-col flex-start my-4">
                 Code Postal
