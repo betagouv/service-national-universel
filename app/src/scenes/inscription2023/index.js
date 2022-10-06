@@ -20,6 +20,7 @@ import useDevice from "../../hooks/useDevice";
 import Header from "./../../components/header";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
+import Navbar from "./components/Navbar";
 
 const STEPS = {
   COORDONNEES: "COORDONNEES",
@@ -46,6 +47,7 @@ const Step = ({ step }) => {
     <div>
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
+      <Navbar step={step} />
       {renderStep(step)}
       <Footer />
     </div>
