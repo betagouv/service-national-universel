@@ -11,7 +11,16 @@ const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const SessionPhase1Object = require("../models/sessionPhase1");
-const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
+const {
+  serializeMissions,
+  serializeSchools,
+  serializeRamsesSchools,
+  serializeYoungs,
+  serializeStructures,
+  serializeReferents,
+  serializeApplications,
+  serializeHits,
+} = require("../utils/es-serializer");
 const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
 const Joi = require("joi");
@@ -71,6 +80,18 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
     if (isReferent(user) && !canSearchInElasticSearch(user, "school")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const response = await esClient.msearch({ index: "school", body });
     return res.status(200).send(serializeSchools(response.body));
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/schoolramses/_msearch", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { body, user } = req;
+    if (isReferent(user) && !canSearchInElasticSearch(user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const response = await esClient.msearch({ index: "schoolramses", body });
+    return res.status(200).send(serializeRamsesSchools(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
