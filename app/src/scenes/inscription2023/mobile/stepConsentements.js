@@ -11,8 +11,9 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
+import Navbar from "../components/Navbar";
 
-export default function StepConsentements() {
+export default function StepConsentements({ step }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
@@ -20,27 +21,34 @@ export default function StepConsentements() {
   const [error, setError] = React.useState({});
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
-    consentment1: young.consentment === "true",
-    consentment2: young.consentment === "true",
+    consentment1: young?.consentment === "true",
+    consentment2: young?.consentment === "true",
   });
-  console.log(young);
+
   const onSubmit = async () => {
     // TODO
     setLoading(true);
     try {
-      const { ok, code, data: responsData } = await api.put(`/young/inscription2023/consentement/next`, data);
-      if (!ok) return setError({ text: `Une erreur s'est produite` });
-      dispatch(setYoung(responsData));
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/consentement`, data);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);
       setError({
         text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
       });
     }
 
     setLoading(false);
   };
+  //TO DO
+  const onSave = () => {};
 
   React.useEffect(() => {
     if (data.consentment1 && data.consentment2) setDisabled(false);
@@ -49,6 +57,7 @@ export default function StepConsentements() {
 
   return (
     <>
+      <Navbar step={step} onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Apporter mon consentement</h1>

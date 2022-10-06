@@ -2,7 +2,7 @@ import React from "react";
 import useDevice from "../../../hooks/useDevice";
 import save from "../../../assets/save.svg";
 
-const Navbar = ({ step }) => {
+const Navbar = ({ step, onSave }) => {
   const desktop = useDevice() === "desktop";
   return ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS"].includes(step) ? (
     <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">
@@ -22,8 +22,7 @@ const Navbar = ({ step }) => {
                 : step === "DOCUMENTS" && "Justifier de mon identité"}
             </div>
           </div>
-          {/* clic bouton a faire  */}
-          {/* <img src={save} onClick={() => {}} /> */}
+          <img src={save} onClick={onSave} className="cursor-pointer" />
         </div>
 
         <div className="flex space-x-2 w-full mt-2">
