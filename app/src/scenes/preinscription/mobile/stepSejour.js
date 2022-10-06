@@ -16,28 +16,28 @@ export default function StepSejour() {
 
   useEffect(() => {
     (async () => {
-      const res = await api.post("/cohort-session/eligibility/2023", {
-        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-        birthDate: data.birthDate,
-        schoolLevel: data.scolarity,
-        frenchNationality: data.frenchNationality,
-      });
-      if (!res.ok) {
-        setError({ texte: "Impossible de vérifier votre éligibilité" });
-        history.push("/");
+      try {
+        const res = await api.post("/cohort-session/eligibility/2023", {
+          department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+          birthDate: data.birthDate,
+          schoolLevel: data.scolarity,
+          frenchNationality: data.frenchNationality,
+        });
+        setCohorts(res.data);
+      } catch (e) {
+        console.error(e);
+        setError({ text: "Impossible de vérifier votre éligibilité" });
       }
-      setCohorts(res.data);
       setLoading(false);
     })();
   }, []);
 
+  if (Object.keys(error).length > 0) return <Error {...error} onClose={() => history.push("preinscription")} />;
   if (isLoading) return <div className="text-center">Vérification de votre éligibilité</div>;
-
   if (!cohorts.length) history.push("noneligible");
 
   return (
     <div className="bg-white p-4">
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
         <Link to="/public-besoin-d-aide/">
