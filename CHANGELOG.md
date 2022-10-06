@@ -1,3 +1,34 @@
+# [1.143.0](https://github.com/betagouv/service-national-universel/compare/v1.142.0...v1.143.0) (2022-10-06)
+
+
+### Bug Fixes
+
+* **admin:** visu COHORT ([74eb1e5](https://github.com/betagouv/service-national-universel/commit/74eb1e535fb118724f0a55cea2e4e7e194993b19))
+* **api/app:** Eligibility up ([3130cfb](https://github.com/betagouv/service-national-universel/commit/3130cfbdbab71f1d580bc39649557138acf392c4))
+* **app:** apostrophes & mes. d'erreur stepSejour ([e69f87e](https://github.com/betagouv/service-national-universel/commit/e69f87e3db2c3ffeb0677a563c6a78eb7d6a60ca))
+* **app:** Eligibility ([29c69d1](https://github.com/betagouv/service-national-universel/commit/29c69d18cc4a158ec59eec03ea934424546661fa))
+* **app:** fix error message stepSejour ([5e993a8](https://github.com/betagouv/service-national-universel/commit/5e993a86a907d005cfe7ba0d06e840d53ca6a7ef))
+* **app:** new process inscription ([0c094fb](https://github.com/betagouv/service-national-universel/commit/0c094fbd85bdba657923a6e0d834733a306b6f2a))
+* **app:** UPUPUP ([775f1e7](https://github.com/betagouv/service-national-universel/commit/775f1e78f6669ce53feb78e577f7a9b435959a72))
+* up ([803e2a7](https://github.com/betagouv/service-national-universel/commit/803e2a7c8201ea28298928d658795a668e358935))
+* **app:** Up zip code ([fcac22a](https://github.com/betagouv/service-national-universel/commit/fcac22a33992041e22c958b36d382d9fcb947f39))
+* **app/api:** add cohort on signup 2023 ([1dbacef](https://github.com/betagouv/service-national-universel/commit/1dbacef41c2ab1ccc8189266249611ed24ec4ce3))
+
+
+### Features
+
+* **api:** inscription 2023 coordinates ([#1869](https://github.com/betagouv/service-national-universel/issues/1869)) ([1bbb724](https://github.com/betagouv/service-national-universel/commit/1bbb724e6061a185d8b59c8c582382371d1197ce))
+* **app:** add coordinates form for inscription 2023 ([#1852](https://github.com/betagouv/service-national-universel/issues/1852)) ([8791c88](https://github.com/betagouv/service-national-universel/commit/8791c88e4577559307a82c1334b4d9a187790167))
+* **app:** back representant ([1e7ff41](https://github.com/betagouv/service-national-universel/commit/1e7ff4172dca89c89cedff6abc2d5d7a9d3fdcfe))
+* **app:** consentement back ([057ee9c](https://github.com/betagouv/service-national-universel/commit/057ee9c4dc88989f3e74f8c492fed9e603042422))
+* **app:** front consentement ([224fd2d](https://github.com/betagouv/service-national-universel/commit/224fd2d1d2f9d2823b248ab63ae9a38b05c63494))
+* **app:** front representant ([6c1f3ff](https://github.com/betagouv/service-national-universel/commit/6c1f3ff26a7df5b91cb8ff23747d2637f91ccdb1))
+* **app:** header/footer inscription2023 ([a752632](https://github.com/betagouv/service-national-universel/commit/a7526329c4b93c79ac8e2fc6134932c1ab07a4aa))
+* **app:** searchable seleect component ([#1868](https://github.com/betagouv/service-national-universel/issues/1868)) ([977856a](https://github.com/betagouv/service-national-universel/commit/977856a8f8ee7c0e705d1a0c7113e4e49301740c))
+* **app:** searchBar help center ([#1865](https://github.com/betagouv/service-national-universel/issues/1865)) ([c1c6077](https://github.com/betagouv/service-national-universel/commit/c1c607766907e9f65b3656c279bc102e1de429f5))
+* **app,api:** add school out of france component ([#1870](https://github.com/betagouv/service-national-universel/issues/1870)) ([a023448](https://github.com/betagouv/service-national-universel/commit/a0234483c8be78f70cc4365f2fc4fa9588143209))
+* verify address ([#1863](https://github.com/betagouv/service-national-universel/issues/1863)) ([8cd9323](https://github.com/betagouv/service-national-universel/commit/8cd9323029e26eceb6a4a7ec87670fe196c27976))
+
 # [1.142.0](https://github.com/betagouv/service-national-universel/compare/v1.141.0...v1.142.0) (2022-10-05)
 
 
