@@ -7,7 +7,7 @@ import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
 import api from "../../../services/api";
 import { getPasswordErrorMessage, translate } from "../../../utils";
-import Error from "../components/error";
+import Error from "../../../components/error";
 
 export default function Reset() {
   const [loading, setLoading] = React.useState(false);
