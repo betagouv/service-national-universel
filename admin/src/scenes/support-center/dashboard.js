@@ -187,19 +187,21 @@ const Dashboard = (props) => {
     <HeroContainer>
       <Container>
         <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
-        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+        <div className=" mt-3 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
           <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" />
         </div>
-        <h4 className="my-3 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
+        <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
         <ArticlesBlock articles={articles} />
         <hr style={{ margin: "2rem" }} />
+        <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande?</h4>
+
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
               Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
               une réponse par mail.
             </div>
-            <div className="buttons">
+            <div className="buttons mt-4">
               <InternalLink to={`/besoin-d-aide/ticket?from=${from}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
