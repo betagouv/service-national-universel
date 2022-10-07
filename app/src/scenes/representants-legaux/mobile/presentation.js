@@ -1,40 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import queryString from "query-string";
 import Loader from "../../../components/Loader";
-import api from "../../../services/api";
+import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 
-export default function MobileCniInvalide({ step }) {
+export default function Presentation({ step }) {
   const history = useHistory();
-  const params = queryString.parse(location.search);
-  const { token, parent } = params;
-  const [young, setYoung] = useState(null);
-
-  useEffect(() => {
-    async function getYoungFromToken() {
-      const redirectInvalidToken = () => history.push("/representants-legaux/token-invalide");
-      if (!token) redirectInvalidToken();
-      const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parent}`);
-
-      if (!ok) return redirectInvalidToken();
-      setYoung(data);
-    }
-    getYoungFromToken();
-  }, []);
+  const { young, token } = useContext(RepresentantsLegauxContext);
 
   if (!young) return <Loader />;
 
   function onSubmit() {
-    history.push(`/representants-legaux/verification?token=${token}&parent=${parent}`);
+    history.push(`/representants-legaux/verification?token=${token}`);
   }
   return (
     <>
       <Navbar step={step} />
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Déclaration sur l’honneur</h1>
-        <h2>Joao souhaite s’inscrire au SNU !</h2>
-        <div>Nous avons besoin de votre accord pour que Joao vive l’aventure du SNU.</div>
+        <h2>{young.firstName} souhaite s’inscrire au SNU !</h2>
+        <div>Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</div>
         <button className="mt-2 mb-6 max-w-md bg-white w-full py-2 border !border-[#000091] shadow-sm text-[#000091] font-medium">Découvrir le SNU</button>
         <ul>
           <li>Frais de séjour pris en charge par l’État</li>

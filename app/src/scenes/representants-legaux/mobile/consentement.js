@@ -1,39 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import queryString from "query-string";
 import StickyButton from "../../../components/inscription/stickyButton";
 import FranceConnectButton from "../../inscription/components/FranceConnectButton";
 import Navbar from "../components/Navbar";
 import Loader from "../../../components/Loader";
-import api from "../../../services/api";
+import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 
-export default function MobileCniInvalide({ step }) {
+export default function Consentement({ step }) {
   const history = useHistory();
-  const params = queryString.parse(location.search);
-  const { token, parent } = params;
-  const [young, setYoung] = useState(null);
-
-  useEffect(() => {
-    async function getYoungFromToken() {
-      const redirectInvalidToken = () => history.push("/representants-legaux/token-invalide");
-      if (!token) redirectInvalidToken();
-      const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parent}`);
-
-      if (!ok) return redirectInvalidToken();
-      setYoung(data);
-    }
-    getYoungFromToken();
-  }, []);
+  const { young, token } = useContext(RepresentantsLegauxContext);
 
   if (!young) return <Loader />;
 
-  const isParentFromFranceConnect = young[`parent${parent}FromFranceConnect`] === "true";
+  const isParentFromFranceConnect = young[`parent1FromFranceConnect`] === "true";
 
   function getFranceConnectCallback() {
-    return `representants-legaux/france-connect-callback?parent=${parent}&token=${token}`;
+    return `representants-legaux/france-connect-callback?parent=1&token=${token}`;
   }
   function onSubmit() {
-    history.push(`/representants-legaux/done?token=${token}&parent=${parent}`);
+    history.push(`/representants-legaux/done?token=${token}`);
   }
   return (
     <>
@@ -48,7 +33,11 @@ export default function MobileCniInvalide({ step }) {
 
         <div>TODO</div>
       </div>
-      <StickyButton text={"Suivant"} onClick={() => onSubmit()} onClickPrevious={() => history.push(`/representants-legaux/verification?token=${token}&parent=${parent}`)} />
+      <StickyButton
+        text={"Valider mon consentement"}
+        onClick={() => onSubmit()}
+        onClickPrevious={() => history.push(`/representants-legaux/verification?token=${token}&parent=1`)}
+      />
     </>
   );
 }

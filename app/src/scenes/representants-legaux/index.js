@@ -22,6 +22,7 @@ import Header from "./../../components/header";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import FranceConnectCallback from "./components/FranceConnectCallback";
+import RepresentantsLegauxContextProvider from "../../context/RepresentantsLegauxContextProvider";
 
 const STEPS = {
   CNI_INVALIDE: "CNI_INVALIDE",
@@ -58,16 +59,20 @@ const Step = ({ step }) => {
 
 export default function Index() {
   return (
-    <Switch>
-      <SentryRoute path="/representants-legaux/cni-invalide" component={() => <Step step={STEPS.CNI_INVALIDE} />} />
-      <SentryRoute path="/representants-legaux/presentation" component={() => <Step step={STEPS.PRESENTATION} />} />
-      <SentryRoute path="/representants-legaux/verification" component={() => <Step step={STEPS.VERIFICATION} />} />
-      <SentryRoute path="/representants-legaux/consentement" component={() => <Step step={STEPS.CONSENTEMENT} />} />
-      <SentryRoute path="/representants-legaux/done" component={() => <Step step={STEPS.DONE} />} />
-      <SentryRoute path="/representants-legaux/token-invalide" component={() => <Step step={STEPS.TOKEN_INVALIDE} />} />
-      <SentryRoute path="/representants-legaux/france-connect-callback" component={() => <FranceConnectCallback />} />
-      {/* Redirect vers home */}
-      <SentryRoute path="/representants-legaux" component={() => <Step step={STEPS.PRESENTATION} />} />
-    </Switch>
+    <>
+      <Switch>
+        <SentryRoute path="/representants-legaux/token-invalide" component={() => <Step step={STEPS.TOKEN_INVALIDE} />} />
+        <SentryRoute path="/representants-legaux/france-connect-callback" component={() => <FranceConnectCallback />} />
+      </Switch>
+      <RepresentantsLegauxContextProvider>
+        <Switch>
+          <SentryRoute path="/representants-legaux/cni-invalide" component={() => <Step step={STEPS.CNI_INVALIDE} />} />
+          <SentryRoute path="/representants-legaux/presentation" component={() => <Step step={STEPS.PRESENTATION} />} />
+          <SentryRoute path="/representants-legaux/verification" component={() => <Step step={STEPS.VERIFICATION} />} />
+          <SentryRoute path="/representants-legaux/consentement" component={() => <Step step={STEPS.CONSENTEMENT} />} />
+          <SentryRoute path="/representants-legaux/done" component={() => <Step step={STEPS.DONE} />} />
+        </Switch>
+      </RepresentantsLegauxContextProvider>
+    </>
   );
 }

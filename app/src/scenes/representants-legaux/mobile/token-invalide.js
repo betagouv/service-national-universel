@@ -1,7 +1,7 @@
 import React from "react";
 import { environment } from "../../../config";
 
-export default function MobileCniInvalide() {
+export default function TokenInvalide() {
   return (
     <>
       <div className="bg-white p-4 text-[#161616]">
@@ -12,7 +12,7 @@ export default function MobileCniInvalide() {
             <p>Ce message ne s&apos;affiche pas en prod :)</p>
             <p>
               Pensez bien à mettre un token dans le parent1Inscription2023Token d&apos;un young puis appeler l&apos;URL avec le «token» et un numéro de «parent» dedans genre :
-              http://localhost:8081/representants-legaux?token=1234&parent=1
+              http://localhost:8081/representants-legaux/presentation?token=1234&parent=1
             </p>
           </div>
         )}
