@@ -18,7 +18,7 @@ function tokenParentValidMiddleware(req, res, next) {
   const field = req.query.parent === "2" ? "parent2Inscription2023Token" : "parent1Inscription2023Token";
   YoungModel.findOne({ [field]: token })
     .then((young) => {
-      if (!young) return res.status(403).send("Token invalide");
+      if (!young) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       req.young = young;
       next();
     })

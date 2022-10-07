@@ -5,7 +5,7 @@ import api from "../services/api";
 
 export const RepresentantsLegauxContext = createContext();
 
-const RepresentantsLegauxContextProvider = ({ children }) => {
+const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
   const history = useHistory();
   const params = queryString.parse(location.search);
   const { token } = params;
@@ -15,7 +15,7 @@ const RepresentantsLegauxContextProvider = ({ children }) => {
     async function getYoungFromToken() {
       const redirectInvalidToken = () => history.push("/representants-legaux/token-invalide");
       if (!token) redirectInvalidToken();
-      const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parent}`);
+      const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parentId}`);
 
       if (!ok) return redirectInvalidToken();
       setYoung(data);

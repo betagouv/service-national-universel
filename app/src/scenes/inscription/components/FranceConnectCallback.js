@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
 import api from "../../../services/api";
 import { franceConnectUrl } from "../../../config";
 
