@@ -9,6 +9,7 @@ import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOpti
 import api from "../../../services/api";
 import VerifyAddress from "../components/VerifyAddress";
 import SearchableSelect from "../../../components/SearchableSelect";
+import Navbar from "../components/Navbar";
 
 const FRANCE = "France";
 
@@ -34,7 +35,7 @@ const defaultState = {
   isSchooled: true,
 };
 
-export default function StepCoordonnees() {
+export default function StepCoordonnees({ step }) {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
@@ -128,9 +129,12 @@ export default function StepCoordonnees() {
       //@todo display success/error messages
     }
   };
+  //TO DO
+  const onSave = () => {};
 
   return (
     <>
+      <Navbar step={step} onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Mon profile volontaire</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
