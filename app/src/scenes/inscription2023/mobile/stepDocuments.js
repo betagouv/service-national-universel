@@ -113,30 +113,33 @@ export default function StepDocuments() {
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
         {/* Choix de la piece d'identite */}
-        <div className="w-full flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
-          <Link to="/public-besoin-d-aide/">
-            <QuestionMarkBlueCircle />
-          </Link>
-        </div>
-        <div className="text-gray-500 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer.</div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
-        {!IDProof &&
-          IDs.map((id) => (
-            <div className="my-4" key={id.id}>
-              <div
-                className="border p-4 my-3 flex justify-between items-center"
-                onClick={() => {
-                  setIDProof(id);
-                }}>
-                <div>
-                  <div>{id.title}</div>
-                  {id.subtitle && <div className="text-gray-500 text-sm">{id.subtitle}</div>}
-                </div>
-                <ArrowRightBlueSquare />
-              </div>
+        {!IDProof && (
+          <>
+            <div className="w-full flex justify-between items-center">
+              <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
+              <Link to="/public-besoin-d-aide/">
+                <QuestionMarkBlueCircle />
+              </Link>
             </div>
-          ))}
+            <div className="text-gray-500 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer.</div>
+            <hr className="my-4 h-px bg-gray-200 border-0" />
+            {IDs.map((id) => (
+              <div className="my-4" key={id.id}>
+                <div
+                  className="border p-4 my-3 flex justify-between items-center"
+                  onClick={() => {
+                    setIDProof(id);
+                  }}>
+                  <div>
+                    <div>{id.title}</div>
+                    {id.subtitle && <div className="text-gray-500 text-sm">{id.subtitle}</div>}
+                  </div>
+                  <ArrowRightBlueSquare />
+                </div>
+              </div>
+            ))}
+          </>
+        )}
 
         {/* Upload du fichier */}
         {IDProof && (
