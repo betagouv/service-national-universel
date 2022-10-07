@@ -150,7 +150,7 @@ router.post("/eligibility/2023", async (req, res) => {
         break;
       case "B":
       case "Corse":
-        if (birthDate > new Date("04/28/2005") && birthDate < new Date("04/16/2008")) {
+        if (birthDate > new Date("04/29/2005") && birthDate < new Date("04/16/2008")) {
           cohorts.push({
             id: "Avril 2023 - B",
             dates: "du 16 au 28 avril",
@@ -182,7 +182,7 @@ router.post("/eligibility/2023", async (req, res) => {
     if (birthDate > new Date("07/17/2005") && birthDate < new Date("07/05/2008")) {
       cohorts.push({
         id: "Juillet 2023",
-        dates: "du 1er au 12 juillet",
+        dates: "du 5 au 17 juillet",
         buffer: 1.15,
       });
     }
