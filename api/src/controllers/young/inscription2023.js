@@ -119,6 +119,29 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
   }
 });
 
+router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
+    }).validate(req.body, { stripUnknown: true });
+    console.log(error);
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/documents/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: typeError, value: type } = checkParameter(req.params.type);

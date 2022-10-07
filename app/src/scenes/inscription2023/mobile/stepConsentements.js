@@ -11,6 +11,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
+import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 
 export default function StepConsentements({ step }) {
@@ -19,6 +20,7 @@ export default function StepConsentements({ step }) {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
+  const [modal, setModal] = React.useState({ isOpen: false });
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
     consentment1: young?.consentment === "true",
@@ -85,12 +87,13 @@ export default function StepConsentements({ step }) {
             <div className="text-[#3A3A3A] text-sm flex-1">M&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</div>
           </div>
         </div>
-        <div className="flex justify-end items-center gap-2 mt-4 pb-4">
+        <div className="flex justify-end items-center gap-2 mt-4 pb-4" onClick={() => setModal({ isOpen: true })}>
           <EditPenLight />
           <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
+      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>
   );
 }
