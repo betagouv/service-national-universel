@@ -14,7 +14,7 @@ const File = new mongoose.Schema({
   size: Number,
   mimetype: String,
   category: String,
-  expirationDate: String,
+  expirationDate: Date,
 });
 
 const Schema = new mongoose.Schema({
