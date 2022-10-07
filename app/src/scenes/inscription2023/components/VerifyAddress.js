@@ -64,8 +64,8 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail })
         <div className="grid grid-cols-2 gap-4">
           <GhostButton
             onClick={() => {
+              onFail(formatResult(suggestion));
               setSuggestion(null);
-              onFail();
             }}
             name="Non"
           />
