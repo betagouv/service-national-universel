@@ -48,7 +48,7 @@ export default function NonEligible() {
         {/* To do
         Critère déligibilité */}
         <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-        <div className="overflow-x-auto flex space-x-8">
+        <div className="overflow-x-auto flex space-x-6">
           {engagementPrograms.map((program, index) => {
             const [isOpen, setIsOpen] = useState(false);
 
