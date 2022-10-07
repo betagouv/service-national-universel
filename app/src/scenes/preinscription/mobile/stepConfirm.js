@@ -18,33 +18,39 @@ export default function StepDone() {
   const history = useHistory();
 
   const onSubmit = async () => {
+    console.log(data);
+    const values = {
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      frenchNationality: data.frenchNationality,
+      password: data.password,
+      birthdateAt: data.birthDate,
+      schooled: data.school ? "true" : "false",
+      schoolName: data.school?.fullName,
+      schoolType: data.school?.type,
+      schoolAddress: data.school?.adresse,
+      schoolZip: data.school?.codeCity,
+      schoolCity: data.school?.city,
+      schoolDepartment: data.school?.departmentName,
+      schoolRegion: data.school?.region,
+      schoolCountry: data.school?.country,
+      schoolId: data.school?._id,
+      zip: data.zip,
+      cohort: data.cohort,
+    };
+
+    if (values.schooled === "true") values.grade = data.scolarity;
+
     try {
-      const { user, code, ok } = await api.post("/young/signup2023", {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        frenchNationality: data.frenchNationality,
-        password: data.password,
-        birthdateAt: data.birthDate,
-        schooled: data.school ? "true" : "false",
-        schoolName: data.school?.fullName,
-        schoolType: data.school?.type,
-        schoolAddress: data.school?.adresse,
-        schoolZip: data.school?.codeCity,
-        schoolCity: data.school?.city,
-        schoolDepartment: data.school?.departmentName,
-        schoolRegion: data.school?.region,
-        schoolCountry: data.school?.country,
-        schoolId: data.school?._id,
-        zip: data.zip,
-        cohort: data.cohort,
-      });
+      const { user, code, ok } = await api.post("/young/signup2023", values);
 
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
 
-      await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
-        cta: `${appURL}/inscription2023`,
-      });
+      //Tape une 403
+      // await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
+      //   cta: `${appURL}/inscription2023`,
+      // });
 
       plausibleEvent("");
 
@@ -54,7 +60,7 @@ export default function StepDone() {
         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
       else {
         capture(e);
-        setError({ text: e.code });
+        setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
       }
     }
   };

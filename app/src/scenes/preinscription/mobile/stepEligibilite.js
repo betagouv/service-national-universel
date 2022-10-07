@@ -23,16 +23,14 @@ export default function StepEligibilite() {
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
-    { value: "FOURTH", label: "4ème" },
-    { value: "THIRD", label: "3ème" },
-    { value: "SECOND", label: "2nde" },
-    { value: "FIRST", label: "1ère" },
-    { value: "FIRST_CAP", label: "1ère CAP" },
-    { value: "TERM", label: "Terminale" },
-    { value: "TERM_CAP", label: "Terminale CAP" },
+    { value: "4eme", label: "4ème" },
+    { value: "3eme", label: "3ème" },
+    { value: "2nde", label: "2nde" },
+    { value: "1ere", label: "1ère" },
+    { value: "1ere CAP", label: "1ère CAP" },
+    { value: "Terminale", label: "Terminale" },
+    { value: "Terminale CAP", label: "Terminale CAP" },
   ];
-
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 18 ~ StepEligibilite ~ data", data);
 
   const onSubmit = async () => {
     let errors = {};
@@ -55,7 +53,7 @@ export default function StepEligibilite() {
       if (data.scolarity === "NOT_SCOLARISE") {
         // Zip du jeune
         // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
-        if (!(!data?.isAbroad && data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
+        if (!(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
           errors.zip = "Vous devez sélectionner un code postal";
         }
       } else {
@@ -102,7 +100,9 @@ export default function StepEligibilite() {
             label="Niveau de scolarité"
             value={data.scolarity}
             options={optionsScolarite}
-            onChange={(value) => setData({ ...data, scolarity: value })}
+            onChange={(value) => {
+              setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
+            }}
             placeholder="Sélectionnez une option"
           />
           {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
