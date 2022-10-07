@@ -233,8 +233,17 @@ router.post(
           Object.keys(req.files || {}).map((e) => req.files[e]),
           { stripUnknown: true },
         );
-      console.log("files:", files);
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+      const { error: bodyError, value: body } = Joi.object({
+        body: Joi.string(),
+        category: Joi.string(),
+        expirationDate: Joi.date(),
+      }).validate(req.body);
+      if (bodyError) {
+        console.error(bodyError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
 
       // Check permissions
 
@@ -278,6 +287,8 @@ router.post(
           size,
           uploadedAt: Date.now(),
           mimetype,
+          category: body.category,
+          expirationDate: body.expirationDate,
         };
 
         // Upload file using ObjectId as file name
