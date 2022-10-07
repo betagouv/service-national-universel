@@ -89,16 +89,16 @@ export default function StepDone() {
           {data.school ? (
             <>
               <div className="flex flex-row justify-between items-center">
-                <div className="text-[#666666] text-sm">Pays de l&apos;établissement</div>
+                <div className="text-[#666666] text-sm">Pays de l&apos;établissement : </div>
                 <div className="text-[#161616] text-base capitalize">{data.school.country.toLowerCase()}</div>
               </div>
               <div className="flex flex-row justify-between items-center">
-                <div className="text-[#666666] text-sm">Commune de l&apos;établissement</div>
+                <div className="text-[#666666] text-sm">Commune de l&apos;établissement :</div>
                 <div className="text-[#161616] text-base">{data.school.city}</div>
               </div>
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-[#666666] text-sm">Nom de l&apos;établissement</div>
-                <div className="text-[#161616] text-base">{data.school.fullName}</div>
+              <div className="flex flex-col ">
+                <div className="text-[#666666] text-sm">Nom de l&apos;établissement :</div>
+                <div className="text-[#161616] text-base mt-1">{data.school.fullName}</div>
               </div>
             </>
           ) : (
