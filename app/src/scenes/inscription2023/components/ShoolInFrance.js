@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/SearchableSelect";
+import { ES_NO_LIMIT } from "snu-lib";
 
 export default function SchoolInFrance({ school, onSelectSchool }) {
   const [cities, setCities] = useState([]);
@@ -13,7 +14,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
         size: 0,
         aggs: {
-          cities: { terms: { field: "city.keyword", size: 10000 } },
+          cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
         },
       };
       const { responses } = await api.esQuery("schoolramses", body);
@@ -27,6 +28,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
       if (!city) return;
       const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
+        size: ES_NO_LIMIT,
       };
       body.query.bool.filter.push({ term: { "city.keyword": city } });
       const { responses } = await api.esQuery("schoolramses", body);
