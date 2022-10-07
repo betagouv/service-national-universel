@@ -134,11 +134,62 @@ export default function List() {
               <div>
                 <Title>Volontaires</Title>
               </div>
+              <ExportComponent
+                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                defaultQuery={getExportQuery}
+                title="Exporter les volontaires"
+                exportTitle="Volontaires"
+                index="application"
+                react={{ and: FILTERS }}
+                transform={async (data) => {
+                  let all = data;
+                  const youngIds = [...new Set(data.map((item) => item.youngId))];
+                  if (youngIds?.length) {
+                    const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+                    if (responses.length) {
+                      const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                      all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+                    }
+                  }
+                  return all.map((data) => {
+                    return {
+                      _id: data._id,
+                      Cohorte: data.youngCohort,
+                      Prénom: data.youngFirstName,
+                      Nom: data.youngLastName,
+                      "Date de naissance": data.youngBirthdateAt,
+                      Email: data.youngEmail,
+                      Téléphone: data.young.phone,
+                      "Adresse du volontaire": data.young.address,
+                      "Code postal du volontaire": data.young.zip,
+                      "Ville du volontaire": data.young.city,
+                      "Département du volontaire": data.young.department,
+                      "Prénom représentant légal 1": data.young.parent1FirstName,
+                      "Nom représentant légal 1": data.young.parent1LastName,
+                      "Email représentant légal 1": data.young.parent1Email,
+                      "Téléphone représentant légal 1": data.young.parent1Phone,
+                      "Prénom représentant légal 2": data.young.parent2LastName,
+                      "Nom représentant légal 2": data.young.parent2LastName,
+                      "Email représentant légal 2": data.young.parent2Email,
+                      "Téléphone représentant légal 2": data.young.parent2Phone,
+                      "Choix - Ordre de la candidature": data.priority,
+                      "Nom de la mission": data.missionName,
+                      "Département de la mission": data.missionDepartment,
+                      "Région de la mission": data.missionRegion,
+                      "Candidature créée lé": data.createdAt,
+                      "Candidature mise à jour le": data.updatedAt,
+                      "Statut de la candidature": translate(data.status),
+                      Tuteur: data.tutorName,
+                    };
+                  });
+                }}
+              />
               {/* Column selection modal */}
+              {/* Disabled temporarily
               <button
                 className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
                 onClick={() => setColumnModalOpen(true)}>
-                Exporter les volontaires
+                Exporter les volontaires (new)
               </button>
               <Modal toggle={() => setColumnModalOpen(false)} isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
                 <ModalContainer>
@@ -290,7 +341,7 @@ export default function List() {
                     )}
                   </Formik>
                 </ModalContainer>
-              </Modal>
+              </Modal> */}
               {/* End column selection modal */}
             </Header>
             <Filter>
