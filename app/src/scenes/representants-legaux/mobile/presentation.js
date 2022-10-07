@@ -8,7 +8,7 @@ export default function MobileCniInvalide({ step }) {
   const params = queryString.parse(location.search);
   const { token } = params;
   function onSubmit() {
-    history.push("/representants-legaux/verification?token=" + token);
+    history.push(`/representants-legaux/verification?token=${token}&parent=${parent}`);
   }
   return (
     <>

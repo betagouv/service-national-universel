@@ -12,9 +12,10 @@ const { ERRORS } = require("../utils");
 const { validateFirstName, validateString } = require("../utils/validator");
 
 function tokenParentValidMiddleware(req, res, next) {
-  const { error, value: token } = validateString(req.params.token);
+  const { error, value: token } = validateString(req.query.token);
   if (error || !token) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-  const field = req.params.parent === "1" ? "parent1Inscription2023Token" : "parent2Inscription2023Token";
+
+  const field = req.query.parent === "2" ? "parent2Inscription2023Token" : "parent1Inscription2023Token";
   YoungModel.findOne({ [field]: token })
     .then((young) => {
       if (!young) return res.status(403).send("Token invalide");
@@ -23,6 +24,15 @@ function tokenParentValidMiddleware(req, res, next) {
     })
     .catch((e) => res.status(500).send(e));
 }
+
+router.get("/young", tokenParentValidMiddleware, async (req, res) => {
+  try {
+    return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+  } catch (e) {
+    capture(e);
+    return res.status(500).send(e);
+  }
+});
 
 router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, async (req, res) => {
   console.log("coucou");
