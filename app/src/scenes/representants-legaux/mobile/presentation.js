@@ -1,11 +1,14 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import queryString from "query-string";
 
 export default function MobileCniInvalide({ step }) {
   const history = useHistory();
+  const params = queryString.parse(location.search);
+  const { token } = params;
   function onSubmit() {
-    history.push("/representants-legaux/verification");
+    history.push("/representants-legaux/verification?token=" + token);
   }
   return (
     <>

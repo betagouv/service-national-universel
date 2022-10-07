@@ -1,10 +1,14 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import StickyButton from "../../../components/inscription/stickyButton";
+import FranceConnectButton from "../../inscription/components/FranceConnectButton";
 import Navbar from "../components/Navbar";
 
 export default function MobileCniInvalide({ step }) {
   const history = useHistory();
+  function getFranceConnectCallback(idRepresentant) {
+    return `representants-legaux/france-connect-callback?representant=${idRepresentant}`;
+  }
   function onSubmit() {
     history.push("/representants-legaux/done");
   }
@@ -13,6 +17,7 @@ export default function MobileCniInvalide({ step }) {
       <Navbar step={step} />
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Apporter votre consentement</h1>
+        <FranceConnectButton callback={getFranceConnectCallback(1)} />
         <div>TODO</div>
       </div>
       <StickyButton text={"Suivant"} onClick={() => onSubmit()} onClickPrevious={() => history.push("/representants-legaux/verification")} />
