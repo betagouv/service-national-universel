@@ -17,6 +17,11 @@ export default function StepSejour() {
   useEffect(() => {
     (async () => {
       try {
+        if (data.frenchNationality === "false") {
+          setCohorts([]);
+          setLoading(false);
+          return;
+        }
         const res = await api.post("/cohort-session/eligibility/2023", {
           department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
           birthDate: data.birthDate,
@@ -75,7 +80,7 @@ export default function StepSejour() {
           history.push("/preinscription/profil");
         }}>
         <div>
-          Séjour <strong>{cohort.dates}</strong>
+          Séjour <strong>{cohort.dates} 2023</strong>
         </div>
         <ArrowRightBlueSquare />
       </div>

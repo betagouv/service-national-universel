@@ -82,6 +82,8 @@ class Auth {
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
         schooled: Joi.string().trim().required(),
+        grade: Joi.string().trim().valid("4eme", "3eme", "2nde", "1ere", "1ere CAP", "Terminale", "Terminale CAP"),
+
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
@@ -120,6 +122,7 @@ class Auth {
         schoolId,
         zip,
         cohort,
+        grade,
       } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -145,6 +148,7 @@ class Auth {
         schoolId,
         zip,
         cohort,
+        grade,
         inscription2023: STEPS2023.COORDONNEES,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });

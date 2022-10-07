@@ -20,6 +20,7 @@ import useDevice from "../../hooks/useDevice";
 import Header from "./../../components/header";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
+import Navbar from "./components/Navbar";
 
 const STEPS = {
   COORDONNEES: "COORDONNEES",
@@ -34,12 +35,12 @@ const Step = ({ step }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   function renderStep(step) {
-    if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
-    if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants /> : <MobileRepresentants />;
-    if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
-    if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-    if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
-    return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
+    if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees step={step} /> : <MobileCoordonnees step={step} />;
+    if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants step={step} /> : <MobileRepresentants step={step} />;
+    if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements step={step} /> : <MobileConsentements step={step} />;
+    if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments step={step} /> : <MobileDocuments step={step} />;
+    if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone step={step} /> : <MobileDone step={step} />;
+    return device === "desktop" ? <DesktopCoordonnees step={step} /> : <MobileCoordonnees step={step} />;
   }
 
   return (

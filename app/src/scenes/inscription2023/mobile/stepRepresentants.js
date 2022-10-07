@@ -12,8 +12,9 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import Error from "../../../components/error";
+import Navbar from "../components/Navbar";
 
-export default function StepRepresentants() {
+export default function StepRepresentants({ step }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
@@ -136,8 +137,12 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
+  //TO DO
+  const onSave = () => {};
+
   return (
     <>
+      <Navbar step={step} onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Mes représentants légaux</h1>

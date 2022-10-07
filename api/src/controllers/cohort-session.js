@@ -121,21 +121,20 @@ router.post("/eligibility/2023", async (req, res) => {
       department: req.body.department,
       birthDate: req.body.birthDate,
       schoolLevel: req.body.schoolLevel,
-      frenchNationality: req.body.frenchNationality,
     };
     const { error, value } = Joi.object({
       department: Joi.string().allow(null, ""),
       birthDate: Joi.date().required(),
       schoolLevel: Joi.string().allow(null, ""),
-      frenchNationality: Joi.string().required(),
     })
       .unknown()
       .validate(eligibilityObject);
+
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { department, birthDate, schoolLevel, frenchNationality } = value;
+    const { department, birthDate, schoolLevel } = value;
 
     // Get available sessions based on department, grade & birthdate
-    if (!["NOT_SCOLARISE", "SECOND", "FIRST_CAP"].includes(schoolLevel) || frenchNationality === "false") return res.send({ ok: true, data: [] });
+    if (!["NOT_SCOLARISE", "2nde", "1ere CAP"].includes(schoolLevel)) return res.send({ ok: true, data: [] });
 
     let cohorts = [];
     const zone = getZoneByDepartment(department);
@@ -150,6 +149,7 @@ router.post("/eligibility/2023", async (req, res) => {
         }
         break;
       case "B":
+      case "Corse":
         if (birthDate > new Date("04/28/2005") && birthDate < new Date("04/16/2008")) {
           cohorts.push({
             id: "Avril 2023 - B",
@@ -159,7 +159,6 @@ router.post("/eligibility/2023", async (req, res) => {
         }
         break;
       case "C":
-      case "Corse":
         if (birthDate > new Date("02/19/2005") && birthDate < new Date("03/03/2008")) {
           cohorts.push({
             id: "Février 2023 - C",
@@ -199,6 +198,7 @@ router.post("/eligibility/2023", async (req, res) => {
       const nbYoung = await YoungModel.countDocuments({
         department: department,
         cohort: session.id,
+        //TODO enlever le status in progress
         status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
       });
       if (nbYoung === 0) {
