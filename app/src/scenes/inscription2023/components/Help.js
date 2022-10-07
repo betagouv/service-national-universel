@@ -1,6 +1,7 @@
 import React from "react";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import humanCoorperation from "../../../assets/humanCooperation.svg";
+import { appURL } from "../../../config";
 
 const Help = () => {
   return (
@@ -8,7 +9,7 @@ const Help = () => {
       <div className="flex justify-end">
         <img src={humanCoorperation} alt="" />
       </div>
-      <a href={"https://support.snu.gouv.fr/base-de-connaissance/"} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
+      <a href={`${appURL}/base-de-connaissance/`} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
         <img src={arrowRightBlue} className="mb-2" />
         <div className="text-lg mb-2">Besoin d&apos;aide ?</div>
         <div className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</div>
