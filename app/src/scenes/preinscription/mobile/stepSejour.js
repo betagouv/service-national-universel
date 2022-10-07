@@ -75,7 +75,7 @@ export default function StepSejour() {
           history.push("/preinscription/profil");
         }}>
         <div>
-          Séjour <strong>{cohort.dates}</strong>
+          Séjour <strong>{cohort.dates} 2023</strong>
         </div>
         <ArrowRightBlueSquare />
       </div>
