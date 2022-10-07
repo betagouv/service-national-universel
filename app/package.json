@@ -80,6 +80,7 @@
     "react-helmet": "6.1.0",
     "react-icons": "^4.3.1",
     "react-is": "17.0.2",
+    "react-lines-ellipsis": "^0.15.3",
     "react-loading": "2.0.3",
     "react-redux": "7.2.6",
     "react-redux-toastr": "7.6.6",
