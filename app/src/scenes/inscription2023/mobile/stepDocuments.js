@@ -49,7 +49,7 @@ export default function StepDocuments() {
       imgDate: "cniOldDate.png",
     },
     {
-      id: "cniNew",
+      id: "passport",
       title: "Passeport",
       imgFront: "passport.png",
       imgDate: "passportDate.png",
@@ -60,8 +60,8 @@ export default function StepDocuments() {
     setLoading(true);
     try {
       // Check expiration date
-      if (date < START_DATE_SESSION_PHASE1[young.cohort]) {
-        await api.post(`/inscription2023/${young._id}/emailtoparent/${SENDINBLUE_TEMPLATES.young.OUTDATED_ID_PROOF}`, {
+      if (new Date(date) < START_DATE_SESSION_PHASE1[young.cohort]) {
+        await api.post(`/young/inscription2023/${young._id}/emailtoparent/${SENDINBLUE_TEMPLATES.young.OUTDATED_ID_PROOF}`, {
           cta: `${appURL}/`,
         });
       }
@@ -79,7 +79,7 @@ export default function StepDocuments() {
           });
       }
       const path = `/young/${young._id}/documents/cniFiles`;
-      const res = await api.uploadFile(`${path}`, files, IDProof.id, date);
+      const res = await api.uploadFile(`${path}`, files, IDProof.id, new Date(date));
       if (res.code === "FILE_CORRUPTED") {
         setError({
           text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
