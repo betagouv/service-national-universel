@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/SearchableSelect";
 
-export default function SchoolOutOfFrance({ onSelectSchool }) {
+export default function SchoolOutOfFrance({ school, onSelectSchool }) {
   const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState("");
+  const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
-  const [school, setSchool] = useState("");
 
   useEffect(() => {
     async function getCountries() {
@@ -41,12 +40,6 @@ export default function SchoolOutOfFrance({ onSelectSchool }) {
     getSchools();
   }, [country]);
 
-  useEffect(() => {
-    if (school) {
-      onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === school));
-    }
-  }, [school]);
-
   return (
     <>
       <div className="form-group">
@@ -63,13 +56,13 @@ export default function SchoolOutOfFrance({ onSelectSchool }) {
       <div className="form-group">
         <SearchableSelect
           label="Nom de l'établissement"
-          value={school}
+          value={school && `${school.fullName} - ${school.city}`}
           options={schools
             .map((e) => `${e.fullName} - ${e.city}`)
             .sort()
             .map((c) => ({ value: c, label: c }))}
           onChange={(value) => {
-            setSchool(value);
+            onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === value));
           }}
           placeholder="Sélectionnez un établissement"
         />

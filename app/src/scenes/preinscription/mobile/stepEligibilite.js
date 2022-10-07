@@ -1,14 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { Link, useHistory } from "react-router-dom";
-import Select from "../../../components/inscription/select";
 import Toggle from "../../../components/inscription/toggle";
 import Input from "../../../components/inscription/input";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import DateFilter from "../components/DatePickerList";
-import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import Loader from "../../../components/Loader";
 import StickyButton from "../../../components/inscription/stickyButton";
 import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/inscription/CheckBox";
@@ -16,16 +13,11 @@ import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
+import SearchableSelect from "../../../components/SearchableSelect";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
-  const [search, setSearch] = React.useState();
-  const [isSearching, setIsSearching] = React.useState(false);
-  const [showItems, setShowItems] = React.useState(false);
-  const [schools, setSchools] = React.useState([]);
   const [error, setError] = React.useState({});
-
-  const inputSearch = useRef(null);
 
   const history = useHistory();
 
@@ -105,9 +97,14 @@ export default function StepEligibilite() {
           </div>
           {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
         </div>
-        <div className="flex flex-col flex-start my-4">
-          Niveau de scolarité
-          <Select options={optionsScolarite} value={data.scolarity} placeholder="Sélectionner une option" onChange={(e) => setData({ ...data, scolarity: e })} />
+        <div className="form-group">
+          <SearchableSelect
+            label="Niveau de scolarité"
+            value={data.scolarity}
+            options={optionsScolarite}
+            onChange={(value) => setData({ ...data, scolarity: value })}
+            placeholder="Sélectionnez une option"
+          />
           {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
         </div>
         <div className="flex flex-col flex-start my-4">
@@ -133,9 +130,9 @@ export default function StepEligibilite() {
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
-                <SchoolOutOfFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+                <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
               ) : (
-                <SchoolInFrance onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+                <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
               )
             ) : !data.isAbroad ? (
               <div className="flex flex-col flex-start my-4">
