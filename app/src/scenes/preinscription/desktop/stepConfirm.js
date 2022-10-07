@@ -17,7 +17,6 @@ export default function StepDone() {
   useEffect(() => console.log(data), []);
 
   const onSubmit = async () => {
-    console.log(data);
     const values = {
       email: data.email,
       firstName: data.firstName,

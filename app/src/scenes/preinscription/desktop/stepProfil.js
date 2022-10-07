@@ -116,7 +116,6 @@ export default function StepProfil() {
                     <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />
                   )}
                 </div>
-                {error.password ? <span className="text-red-500 text-sm">{error.password}</span> : null}
               </div>
               <div className="flex-1 flex flex-col gap-1">
                 <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>
@@ -137,7 +136,9 @@ export default function StepProfil() {
               </div>
             </div>
             <div className="flex">
-              <p className="text-sm text-[#3A3A3A]">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
+              <p className={`text-sm ${error?.password ? "text-[#CE0500]" : " text-[#3A3A3A]"}`}>
+                Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
+              </p>
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-4">
