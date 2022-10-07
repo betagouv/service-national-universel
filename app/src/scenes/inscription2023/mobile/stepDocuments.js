@@ -60,7 +60,7 @@ export default function StepDocuments() {
     setLoading(true);
     try {
       // Check expiration date
-      if (date > START_DATE_SESSION_PHASE1[young.cohort]) {
+      if (date < START_DATE_SESSION_PHASE1[young.cohort]) {
         await api.post(`/inscription2023/${young._id}/emailtoparent/${SENDINBLUE_TEMPLATES.young.OUTDATED_ID_PROOF}`, {
           cta: `${appURL}/`,
         });
