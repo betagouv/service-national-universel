@@ -86,6 +86,8 @@ export default function TicketCreate(props) {
                 handleChange={handleChange}
                 value={values?.step1?.id}
                 values={values}
+                errors={errors}
+                touched={touched}
               />
               {values.step1?.id === "TECHNICAL" ? (
                 <SelectTag
@@ -96,6 +98,8 @@ export default function TicketCreate(props) {
                   handleChange={handleChange}
                   value={values.step2?.id}
                   values={values}
+                  errors={errors}
+                  touched={touched}
                 />
               ) : null}
               {values.step1?.id === "QUESTION" ? (
@@ -107,6 +111,8 @@ export default function TicketCreate(props) {
                   handleChange={handleChange}
                   value={values.step2?.id}
                   values={values}
+                  errors={errors}
+                  touched={touched}
                 />
               ) : null}
               <Item

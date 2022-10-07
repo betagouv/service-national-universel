@@ -40,7 +40,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
   }
 });
 
-router.get("/knowledgeBase/search", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/knowledgeBase/search", async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

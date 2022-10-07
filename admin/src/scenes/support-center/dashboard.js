@@ -186,9 +186,13 @@ const Dashboard = (props) => {
   return (
     <HeroContainer>
       <Container>
-        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
-        <div className=" mt-3 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+        <h3 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h3>
+        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
           <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" />
+        </div>
+        <div className="w-2/3 m-auto text-center !mt-3" style={{ color: "#6B7280" }}>
+          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
+          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
         </div>
         <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
         <ArticlesBlock articles={articles} />

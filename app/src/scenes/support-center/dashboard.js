@@ -36,7 +36,7 @@ const articles = [
   },
 ];
 
-const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
+const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "Lancez votre recherche par mots clés", className = "" }) => {
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [items, setItems] = useState([]);
@@ -197,9 +197,13 @@ export default function Dashboard(props) {
         Retour à mon espace
       </NavLink>
       <Container>
-        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
-        <div className=" mt-4 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+        <h3 className="text-center text-[32px]">Besoin d&apos;aide&nbsp;?</h3>
+        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
           <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" restriction="public" />
+        </div>
+        <div className="w-2/3 m-auto text-center !mt-3 " style={{ color: "#6B7280" }}>
+          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
+          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
         </div>
         <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
         <Articles>

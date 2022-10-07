@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { HiSearch, HiX } from "react-icons/hi";
+import Loader from "../../components/Loader";
+import api from "../../services/api";
 
 //import { HeroContainer } from "../../components/Content";
 import { colors, urlWithScheme } from "../../utils";
@@ -57,6 +60,104 @@ const articles = [
   },
 ];
 
+const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "Lancez votre recherche par mots clés", className = "" }) => {
+  const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [items, setItems] = useState([]);
+  const [hideItems, setHideItems] = useState(false);
+
+  const searchTimeout = useRef(null);
+
+  const computeSearch = () => {
+    if (search.length > 0 && !isSearching) setIsSearching(true);
+    if (!search.length) {
+      setIsSearching(false);
+      setSearch("");
+      clearTimeout(searchTimeout.current);
+      setItems([]);
+      return;
+    }
+    clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      setIsSearching(true);
+      setHideItems(false);
+      const response = await api.get(`/zammood/knowledgeBase/search?search=${search}&restriction=public`);
+      setIsSearching(false);
+      if (response.ok) {
+        setItems(response.data);
+      }
+    }, 250);
+  };
+
+  useEffect(() => {
+    computeSearch();
+    return () => {
+      clearTimeout(searchTimeout.current);
+      setIsSearching(false);
+    };
+  }, [search]);
+
+  return (
+    <div className="relative flex w-full flex-col items-center">
+      <div className="relative flex w-full items-center">
+        <input
+          className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
+          type="text"
+          placeholder={placeholder}
+          onChange={(e) => setSearch(e.target.value)}
+          value={search}
+        />
+        <span className="material-icons absolute right-2 text-xl text-red-400" onClick={() => setSearch("")}>
+          <HiX />
+        </span>
+        <span className="material-icons absolute left-3 text-xl text-gray-400">
+          <HiSearch />
+        </span>
+      </div>
+      <div className="relative flex w-full items-center">
+        {!hideItems && (search.length > 0 || isSearching || items.length) > 0 && (
+          <div className="absolute top-0 left-0 z-20 max-h-80 w-full overflow-auto bg-white">
+            {search.length > 0 && isSearching && !items.length && <Loader size={20} className="my-4" />}
+            {search.length > 0 && !isSearching && !items.length && <span className="block py-2 px-8 text-sm text-black">{noAnswer}</span>}
+            {items?.map((item) => (
+              <KnowledgeBaseArticleCard
+                key={item._id}
+                _id={item._id}
+                position={item.position}
+                title={item.type === "article" ? item.title : `📂 ${item.title}`}
+                slug={item.slug}
+                path={path}
+                allowedRoles={showAllowedRoles ? item.allowedRoles : []}
+                className="!my-0"
+                contentClassName="!py-2 !shadow-none !rounded-none border-b-2"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className = "" }) => {
+  return (
+    <div key={_id} onClick={() => window.open(`https://support.snu.gouv.fr/${path}/${slug}`, "_blank")}>
+      <a href="#" data-position={position} data-id={_id} className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
+        <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg `}>
+          <div className="flex flex-grow flex-col">
+            <header className="flex items-center justify-between px-8 leading-tight">
+              <h3 className="text-lg text-black">{title}</h3>
+            </header>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" className="mr-6 h-4 w-4 shrink-0 grow-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </article>
+      </a>
+    </div>
+  );
+};
+
 export default function PublicSupportCenter(props) {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState(false);
@@ -69,31 +170,23 @@ export default function PublicSupportCenter(props) {
         {!user && (
           <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>
             Vous avez déjà un compte sur le site du SNU ?{" "}
-            <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href={`${adminURL}/auth/login?redirect=besoin-d-aide`} target="_blank" rel="noopener noreferrer">
+            <a
+              className="link"
+              style={{ color: "#32257F", fontWeight: "bold", fontSize: "16px" }}
+              href={`${adminURL}/auth/login?redirect=besoin-d-aide`}
+              target="_blank"
+              rel="noopener noreferrer">
               Connectez-vous
             </a>
           </p>
         )}
-        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
-        <div className="help-section">
-          <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d&apos;engagement&nbsp;?
-              <br />
-              N&apos;hésitez pas à consulter notre{" "}
-              <strong>
-                <a className="link" href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
-                  base de connaissance
-                </a>
-              </strong>
-              &nbsp;!
-            </div>
-            <div className="buttons">
-              <LinkButton href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
-                Trouver&nbsp;ma&nbsp;réponse
-              </LinkButton>
-            </div>
-          </div>
+        <h3 className="text-center text-[32px] !mt-3">Besoin d&apos;aide&nbsp;?</h3>
+        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+          <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" restriction="public" />
+        </div>
+        <div className="w-2/3 m-auto text-center !mt-3 !text-[16px] " style={{ color: "#6B7280" }}>
+          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
+          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
         </div>
       </Container>
       <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>
