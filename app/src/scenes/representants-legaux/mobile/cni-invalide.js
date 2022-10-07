@@ -7,10 +7,10 @@ import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 
 export default function MobileCniInvalide() {
+  const [check, setCheck] = useState(false);
   const history = useHistory();
   const params = queryString.parse(location.search);
   const { token, parent } = params;
-  const [check, setCheck] = useState(false);
   const [young, setYoung] = useState(null);
 
   useEffect(() => {

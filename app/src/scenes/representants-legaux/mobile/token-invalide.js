@@ -1,12 +1,7 @@
 import React from "react";
 import { environment } from "../../../config";
-import { useHistory } from "react-router-dom";
-import queryString from "query-string";
 
 export default function MobileCniInvalide() {
-  const history = useHistory();
-  const params = queryString.parse(location.search);
-  const { token, parent } = params;
   return (
     <>
       <div className="bg-white p-4 text-[#161616]">
