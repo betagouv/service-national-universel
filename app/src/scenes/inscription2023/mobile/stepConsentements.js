@@ -47,8 +47,6 @@ export default function StepConsentements({ step }) {
 
     setLoading(false);
   };
-  //TO DO
-  // const onSave = () => {};
 
   React.useEffect(() => {
     if (data.consentment1 && data.consentment2) setDisabled(false);
