@@ -117,7 +117,6 @@ export default function StepRepresentants({ step }) {
       }
 
       try {
-        value.parent2 = true;
         const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/next`, value);
         if (!ok) {
           setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
