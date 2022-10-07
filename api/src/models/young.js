@@ -850,6 +850,12 @@ const Schema = new mongoose.Schema({
       description: "Le parent 1 s'est identifié via France Connect",
     },
   },
+  parent1Inscription2023Token: {
+    type: String,
+    documentation: {
+      description: "Token d'inscription 2023 du parent 1",
+    },
+  },
 
   parent2Status: {
     type: String,
@@ -940,6 +946,12 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le parent 2 s'est identifié via France Connect",
+    },
+  },
+  parent2Inscription2023Token: {
+    type: String,
+    documentation: {
+      description: "Token d'inscription 2023 du parent 1",
     },
   },
 
@@ -1585,6 +1597,8 @@ Schema.plugin(
       "invitationExpires",
       "phase3Token",
       "loginAttempts",
+      "parent1Inscription2023Token",
+      "parent2Inscription2023Token",
     ],
   }),
   MODELNAME,
