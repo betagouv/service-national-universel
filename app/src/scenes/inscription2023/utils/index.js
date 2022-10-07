@@ -37,7 +37,7 @@ export const countryOptions = Object.values(countriesList)
   .sort((a, b) => a.localeCompare(b))
   .map((countryName) => ({ value: countryName, label: countryName }));
 
-export const hostRelationShipOptions = [
+export const hostRelationshipOptions = [
   { label: "Parent", value: "Parent" },
   { label: "Frère/Soeur", value: "Frere/Soeur" },
   { label: "Grand-parent", value: "Grand-parent" },
@@ -47,8 +47,8 @@ export const hostRelationShipOptions = [
 ];
 
 export const frenchNationalityOptions = [
-  { value: true, label: "En France" },
-  { value: false, label: "À l'étranger" },
+  { value: "true", label: "En France (Métropolitaine ou Outre-mer)" },
+  { value: "false", label: "À l'étranger" },
 ];
 
 export const genderOptions = [

@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { Spinner } from "reactstrap";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
+import InfoIcon from "../../../components/InfoIcon";
 import GhostButton from "./GhostButton";
 
-export default function VerifyAddress({ address, zip, city, onSuccess, onFail }) {
+export const messageStyles = {
+  info: "info",
+  error: "error",
+};
+export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, message = "", messageStyle = messageStyles.info }) {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
 
@@ -80,18 +85,28 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail })
       </div>
     );
   }
+
   return (
-    <GhostButton
-      name={
-        <div>
-          {loading && <Spinner size="sm" key={"verifaddress"} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
-          Vériﬁer mon adresse
+    <>
+      {message && (
+        <div className={`flex items-center rounded-md p-3 mt-3 text-[${messageStyle === "info" ? "#32257f" : "#CE0500"}]`}>
+          <InfoIcon color={messageStyle === "info" ? "#32257f" : "#CE0500"} />
+          <div className="ml-2">{message}</div>
         </div>
-      }
-      onClick={() => {
-        if (!address || !zip || !city || loading) return;
-        getSuggestions(`${address}, ${city} ${zip}`);
-      }}
-    />
+      )}
+      <GhostButton
+        disabled={disabled}
+        name={
+          <div>
+            {loading && <Spinner size="sm" key={"verifaddress"} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+            Vériﬁer mon adresse
+          </div>
+        }
+        onClick={() => {
+          if (disabled || !address || !zip || !city || loading) return;
+          getSuggestions(`${address}, ${city} ${zip}`);
+        }}
+      />
+    </>
   );
 }

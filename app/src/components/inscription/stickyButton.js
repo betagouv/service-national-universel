@@ -1,7 +1,7 @@
 import React from "react";
 import { FiChevronLeft } from "react-icons/fi";
 
-export default function StickyButton({ text, onClick, onClickPrevious, disabled = false }) {
+export default function StickyButton({ text, onClick, onClickPrevious = undefined, disabled = false }) {
   return (
     <div className="fixed bottom-0 w-full z-50">
       <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
