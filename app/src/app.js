@@ -14,6 +14,7 @@ import AuthV2 from "./scenes/authV2";
 import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Inscription2023 from "./scenes/inscription2023";
+import RepresentantsLegaux from "./scenes/representants-legaux";
 import PreInscription from "./scenes/preinscription";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
@@ -106,6 +107,7 @@ export default function App() {
             {environment !== "production" ? <SentryRoute path="/inscription2023" component={Inscription2023} /> : null}
             {environment !== "production" ? <SentryRoute path="/preinscription" component={PreInscription} /> : null}
             {environment !== "production" ? <SentryRoute path="/auth" component={AuthV2} /> : <SentryRoute path="/auth" component={Auth} />}
+            {environment !== "production" ? <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> : null}
             <SentryRoute path="/" component={Espace} />
           </Switch>
         )}
