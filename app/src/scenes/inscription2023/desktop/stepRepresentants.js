@@ -13,6 +13,7 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import Error from "../../../components/error";
 import Navbar from "../components/Navbar";
+import { toastr } from "react-redux-toastr";
 
 export default function StepRepresentants({ step }) {
   const young = useSelector((state) => state.Auth.young);
@@ -136,8 +137,37 @@ export default function StepRepresentants({ step }) {
     setLoading(false);
   };
 
-  //TO DO
-  const onSave = () => {};
+  const onSave = async () => {
+    setLoading(true);
+    try {
+      const value = data;
+      if (!isParent2Visible) {
+        value.parent2 = false;
+        delete value.parent2Status;
+        delete value.parent2FirstName;
+        delete value.parent2LastName;
+        delete value.parent2Email;
+        delete value.parent2Phone;
+      } else {
+        value.parent2 = true;
+      }
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/save`, value);
+      if (!ok) {
+        setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
+      toastr.success("Vos informations ont bien été enregistrées");
+    } catch (e) {
+      capture(e);
+      setErrors({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+    }
+    setLoading(false);
+  };
 
   return (
     <>
