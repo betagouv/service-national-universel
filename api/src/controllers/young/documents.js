@@ -235,16 +235,6 @@ router.post(
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-      const { error: bodyError, value: body } = Joi.object({
-        body: Joi.string(),
-        category: Joi.string(),
-        expirationDate: Joi.date(),
-      }).validate(req.body, { stripUnknown: true });
-      if (bodyError) {
-        capture(bodyError);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-      }
-
       // Check permissions
 
       const young = await YoungObject.findById(id);
@@ -287,9 +277,22 @@ router.post(
           size,
           uploadedAt: Date.now(),
           mimetype,
-          category: body.category,
-          expirationDate: body.expirationDate,
         };
+
+        if ((key === "cniFiles") & (young.inscriptionStep2023 === "DOCUMENTS")) {
+          const { error, value } = Joi.object({
+            category: Joi.string().required(),
+            expirationDate: Joi.date().required(),
+          }).validate(req.body, { stripUnknown: true });
+          if (error) {
+            capture(error);
+            return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+          }
+          newFile.set({
+            category: value.category,
+            expirationDate: value.expirationDate,
+          });
+        }
 
         // Upload file using ObjectId as file name
 

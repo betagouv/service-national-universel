@@ -7,12 +7,14 @@ import DesktopCoordonnees from "./desktop/stepCoordonnees";
 import DesktopRepresentants from "./desktop/stepRepresentants";
 import DesktopConsentements from "./desktop/stepConsentements";
 import DesktopDocuments from "./desktop/stepDocuments";
+import DesktopUpload from "./desktop/stepUpload";
 import DesktopDone from "./desktop/stepDone";
 
 import MobileCoordonnees from "./mobile/stepCoordonnees";
 import MobileRepresentants from "./mobile/stepRepresentants";
 import MobileConsentements from "./mobile/stepConsentements";
 import MobileDocuments from "./mobile/stepDocuments";
+import MobileUpload from "./mobile/stepUpload";
 import MobileDone from "./mobile/stepDone";
 
 import useDevice from "../../hooks/useDevice";
@@ -28,6 +30,7 @@ const STEPS = {
   CONSENTEMENTS: "CONSENTEMENTS",
   REPRESENTANTS: "REPRESENTANTS",
   DOCUMENTS: "DOCUMENTS",
+  UPLOAD: "UPLOAD",
   DONE: "DONE",
 };
 
@@ -40,6 +43,7 @@ const Step = ({ step }) => {
     if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants step={step} /> : <MobileRepresentants step={step} />;
     if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements step={step} /> : <MobileConsentements step={step} />;
     if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments step={step} /> : <MobileDocuments step={step} />;
+    if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload step={step} /> : <MobileUpload step={step} />;
     if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone step={step} /> : <MobileDone step={step} />;
     return device === "desktop" ? <DesktopCoordonnees step={step} /> : <MobileCoordonnees step={step} />;
   }
@@ -66,6 +70,7 @@ export default function Index() {
       <SentryRoute path="/inscription2023/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
       <SentryRoute path="/inscription2023/consentement" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
       <SentryRoute path="/inscription2023/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
+      <SentryRoute path="/inscription2023/televersement/:id" component={() => <Step step={STEPS.UPLOAD} />} />
       <SentryRoute path="/inscription2023/done" component={() => <Step step={STEPS.DONE} />} />
       {/* Redirect vers home */}
       <SentryRoute path="/inscription2023" component={() => <Step step={STEPS.COORDONNEES} />} />
