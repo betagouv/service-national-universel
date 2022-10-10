@@ -10,6 +10,7 @@ import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate, urlWithScheme } from "../../../utils";
 import ModalButton from "../../../components/buttons/ModalButton";
+import Footer from "../../../components/footer";
 
 export default function Closed({ location }) {
   const [mail, setMail] = useState();
@@ -148,6 +149,7 @@ export default function Closed({ location }) {
           </ModalButton>
         </Container>
       </Wrapper>
+      <Footer />
     </div>
   );
 }

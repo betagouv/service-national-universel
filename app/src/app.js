@@ -152,7 +152,12 @@ const Espace = () => {
 
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
+    // @todo : clean this
+    return environment === "production" ? (
+      <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />
+    ) : (
+      <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/preinscription" }} />
+    );
   }
   const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
 
