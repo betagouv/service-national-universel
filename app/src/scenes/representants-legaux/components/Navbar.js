@@ -15,9 +15,8 @@ const wording = {
 };
 
 const next = {
-  PRESENTATION: "xxxxxxxxxx",
-  VERIFICATION: "yyyyyyyyyy",
-  CONSENTEMENT: "zzzzzzzzzz",
+  PRESENTATION: "Vérification des informations renseignées",
+  VERIFICATION: "Mon consentement",
 };
 
 const Navbar = ({ step, onSave }) => {
@@ -40,7 +39,7 @@ const Navbar = ({ step, onSave }) => {
         </div>
         {desktop && (
           <div className="flex space-x-1 text-xs mt-2 text-[#666666]">
-            <div className="font-bold">{["PRESENTATION", "VERIFICATION", "CONSENTEMENT"].includes(step) && "Étape suivante:"}</div>
+            <div className="font-bold">{["PRESENTATION", "VERIFICATION"].includes(step) && "Étape suivante:"}</div>
             <div>{next[step]}</div>
           </div>
         )}

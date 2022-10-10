@@ -10,7 +10,7 @@ const Footer = () => {
   const desktop = useDevice() === "desktop";
   const mobile = useDevice() === "mobile";
   const smallButton = !["/preinscription/sejour"].includes(pathname);
-  const largeButton = ["/preinscription/done"].includes(pathname);
+  const largeButton = ["/preinscription/done", "/representants-legaux/presentation"].includes(pathname);
   const noButton = ["auth"].findIndex((route) => location.pathname.includes(route)) !== -1;
 
   return (

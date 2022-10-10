@@ -1,4 +1,10 @@
 import React from "react";
-export default function Todo() {
-  return <>todo</>;
+import Navbar from "../components/Navbar";
+export default function Presentation({ step }) {
+  return (
+    <>
+      <Navbar step={step} />
+      todo
+    </>
+  );
 }
