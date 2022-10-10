@@ -95,7 +95,7 @@ export default function Closed({ location }) {
               onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
               title="Le séjour de cohésion"
-              downText="3 sessions possibles en février, juin et juillet 2022"
+              downText="3 sessions possibles en février ou avril (selon votre zone scolaire), juin et juillet 2023"
               to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
             />
             <CardPhase
