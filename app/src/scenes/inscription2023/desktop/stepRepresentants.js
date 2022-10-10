@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import StickyButton from "../../../components/inscription/stickyButton";
 import Input from "../components/Input";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
@@ -206,7 +205,9 @@ export default function StepRepresentants({ step }) {
               onClick={() => history.push("/inscription2023/consentement")}>
               Précédent
             </button>
-            <button className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white`} onClick={onSubmit}>
+            <button
+              className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+              onClick={() => !loading && onSubmit()}>
               Continuer
             </button>
           </div>
