@@ -44,7 +44,7 @@ export default function HeaderComponent({ location }) {
             Se connecter
           </Link>
         )}
-        <Link className="text-gray-400 uppercase cursor-pointer text-xs	md:text-sm hover:text-purple-700" to={{ pathname: "/inscription/profil" }}>
+        <Link className="text-gray-400 uppercase cursor-pointer text-xs	md:text-sm hover:text-purple-700" to={{ pathname: "/preinscription/eligibilite" }}>
           S&apos;inscrire
         </Link>
       </div>
