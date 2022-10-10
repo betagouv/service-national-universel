@@ -6,7 +6,7 @@ import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import validator from "validator";
-import { capture } from "../../../app/src/sentry";
+import { capture } from "../sentry";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
