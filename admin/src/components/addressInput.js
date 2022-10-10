@@ -6,6 +6,7 @@ import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import validator from "validator";
+import { capture } from "../../../app/src/sentry";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
@@ -54,15 +55,19 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
   const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? suggestion.properties.label : "");
 
   const getSuggestions = async (item) => {
-    const text = item;
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
-      mode: "cors",
-      method: "GET",
-    });
-    const res = await response.json();
-    const arr = res.features.filter((e) => e.properties.type !== "municipality");
-    arr.push("noresult");
-    setSuggestions(arr);
+    try {
+      const text = item;
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
+        mode: "cors",
+        method: "GET",
+      });
+      const res = await response.json();
+      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+      arr.push("noresult");
+      setSuggestions(arr);
+    } catch (e) {
+      capture(e);
+    }
   };
 
   // keys is not defined at first load ??
