@@ -24,6 +24,8 @@ import ModalMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 
 import { useSelector } from "react-redux";
+import Home from "./Home";
+
 const STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   INELIGIBLE: "INELIGIBLE",
@@ -69,7 +71,7 @@ export default function Index() {
         <SentryRoute path="/preinscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
         <SentryRoute path="/preinscription/confirm" component={() => <Step step={STEPS.CONFIRM} />} />
         <SentryRoute path="/preinscription/done" component={() => <Step step={STEPS.DONE} />} />
-        <SentryRoute path="/preinscription" component={() => <Step step={STEPS.ELIGIBILITE} />} />
+        <SentryRoute path="/preinscription" component={Home} />
       </Switch>
     </PreInscriptionContextProvider>
   );
