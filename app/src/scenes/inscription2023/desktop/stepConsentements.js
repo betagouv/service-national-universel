@@ -6,7 +6,6 @@ import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/inscription/CheckBox";
-import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -97,7 +96,9 @@ export default function StepConsentements({ step }) {
             <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/inscription2023/coordonnee")}>
               Précédent
             </button>
-            <button className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white`} onClick={onSubmit}>
+            <button
+              className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading || disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+              onClick={() => (!loading || !disabled) && onSubmit()}>
               Continuer
             </button>
           </div>
