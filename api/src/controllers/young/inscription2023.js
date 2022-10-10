@@ -23,21 +23,7 @@ const youngUnemployedSituationOptions = [YOUNG_SITUATIONS.POLE_EMPLOI, YOUNG_SIT
 
 const youngActiveSituationOptions = [...youngEmployedSituationOptions, ...youngUnemployedSituationOptions];
 
-const frenchAddressFields = ["country", "address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
-const foreignAddressFields = [
-  "foreignCountry",
-  "foreignAddress",
-  "foreignCity",
-  "foreignZip",
-  "hostFirstName",
-  "hostLastName",
-  "hostRelationship",
-  "hostCity",
-  "hostZip",
-  "hostAddress",
-  "hostRegion",
-  "hostDepartment",
-];
+const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -81,27 +67,23 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         ),
       }),
       livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      country: Joi.alternatives().conditional("livesInFrance", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      city: Joi.alternatives().conditional("livesInFrance", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      zip: Joi.alternatives().conditional("livesInFrance", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      address: Joi.alternatives().conditional("livesInFrance", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      location: Joi.alternatives().conditional("livesInFrance", {
-        is: "true",
-        then: Joi.object()
-          .keys({
-            lat: needRequired(Joi.number(), isRequired),
-            lon: needRequired(Joi.number(), isRequired),
-          })
-          .default({
-            lat: undefined,
-            lon: undefined,
-          })
-          .allow({}, null),
-        otherwise: Joi.isError(new Error()),
-      }),
-      department: Joi.alternatives().conditional("livesInFrance", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      region: Joi.alternatives().conditional("livesInFrance", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      cityCode: Joi.alternatives().conditional("livesInFrance", { is: "true", then: Joi.string().trim().default("").allow("", null), otherwise: Joi.isError(new Error()) }),
+      country: needRequired(Joi.string().trim(), isRequired),
+      city: needRequired(Joi.string().trim(), isRequired),
+      zip: needRequired(Joi.string().trim(), isRequired),
+      address: needRequired(Joi.string().trim(), isRequired),
+      location: Joi.object()
+        .keys({
+          lat: needRequired(Joi.number(), isRequired),
+          lon: needRequired(Joi.number(), isRequired),
+        })
+        .default({
+          lat: undefined,
+          lon: undefined,
+        })
+        .allow({}, null),
+      department: needRequired(Joi.string().trim(), isRequired),
+      region: needRequired(Joi.string().trim(), isRequired),
+      cityCode: Joi.string().trim().default("").allow("", null),
       foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
       foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
       foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
@@ -117,12 +99,6 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: needRequired(Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      //@todo: add to database hostAddressVerified ?
-      hostCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      hostZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      hostAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      hostRegion: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      hostDepartment: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
     }).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
@@ -136,7 +112,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     young.set({
       ...value,
       employed: youngEmployedSituationOptions.includes(value.situation),
-      ...(value.livesInFrance === "true" ? getObjectWithEmptyData(foreignAddressFields) : getObjectWithEmptyData(frenchAddressFields)),
+      ...(value.livesInFrance === "true" ? getObjectWithEmptyData(foreignAddressFields) : {}),
     });
 
     await young.save({ fromUser: req.user });

@@ -39,39 +39,27 @@ const addressValidationInfo = "Pour valider votre adresse vous devez remplir les
 const addressValidationSuccess = "L'adresse a été vérifiée";
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
-const commonFields = ["frenchNationality", ...birthPlaceFields, "gender", "phone", "situation", "livesInFrance"];
-const commonRequiredFields = ["frenchNationality", ...birthPlaceFields, "gender", "phone", "situation", "livesInFrance"];
-const frenchAddressFields = ["country", "address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
-const foreignAddressFields = [
-  "foreignCountry",
-  "foreignAddress",
-  "foreignCity",
-  "foreignZip",
-  "hostFirstName",
-  "hostLastName",
-  "hostRelationship",
-  "hostCity",
-  "hostZip",
-  "hostAddress",
-  "hostRegion",
-  "hostDepartment",
-  // "hostAddressVerified",
+const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
+const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+
+const commonFields = ["frenchNationality", ...birthPlaceFields, ...addressFields, "gender", "phone", "situation", "livesInFrance"];
+
+const commonRequiredFields = [
+  "frenchNationality",
+  ...birthPlaceFields,
+  "gender",
+  "phone",
+  "situation",
+  "livesInFrance",
+  "address",
+  "zip",
+  "city",
+  "region",
+  "department",
+  "location",
 ];
 
-const requiredFieldsFrench = ["country", "address", "zip", "city", "region", "department", "location"];
-const requiredFieldsForeigner = [
-  "foreignCountry",
-  "foreignAddress",
-  "foreignCity",
-  "hostFirstName",
-  "hostLastName",
-  "hostRelationship",
-  "hostCity",
-  "hostZip",
-  "hostAddress",
-  "hostRegion",
-  "hostDepartment",
-];
+const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 
 //@todo is neccessary
 const defaultState = {
@@ -103,7 +91,6 @@ export default function StepCoordonnees({ step }) {
     phone,
     livesInFrance,
     addressVerified,
-    country,
     address,
     zip,
     city,
@@ -113,11 +100,7 @@ export default function StepCoordonnees({ step }) {
     foreignZip,
     hostFirstName,
     hostLastName,
-    hostCity,
-    hostAddress,
-    hostZip,
     hostRelationship,
-    hostAddressVerified,
     situation,
     schooled,
   } = data;
@@ -126,7 +109,6 @@ export default function StepCoordonnees({ step }) {
   const isFrenchResident = livesInFrance === "true";
 
   const isVerifyAddressDisabled = !address || !city || !zip;
-  const isVerifyHostAddressDisabled = !hostAddress || !hostCity || !hostZip;
 
   useEffect(() => {
     if (young) {
@@ -144,7 +126,6 @@ export default function StepCoordonnees({ step }) {
         gender: young.gender || data.gender,
         phone: young.phone,
         livesInFrance: young.foreignCountry ? "false" : frenchNationalityOptions[0].value,
-        country: young.country || FRANCE,
         address: young.address,
         city: young.city,
         zip: young.zip,
@@ -155,18 +136,13 @@ export default function StepCoordonnees({ step }) {
         hostFirstName: young.hostFirstName || "",
         hostLastName: young.hostLastName || "",
         hostRelationship: young.hostRelationship || "",
-        hostCity: young.hostCity || "",
-        hostZip: young.hostZip || "",
-        hostAddress: young.hostAddress || "",
-        hostRegion: young.hostRegion || "",
-        hostDepartment: young.hostDepartment || "",
       });
     }
   }, [young]);
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, frenchNationality, birthCityZip, zip, hostZip]);
+  }, [phone, frenchNationality, birthCityZip, zip]);
 
   const getErrors = () => {
     let errors = {};
@@ -181,9 +157,6 @@ export default function StepCoordonnees({ step }) {
     if (isFrenchResident && zip && !validator.isPostalCode(zip, "FR")) {
       errors.zip = errorMessages.zip;
     }
-    if (!isFrenchResident && hostZip && !validator.isPostalCode(hostZip, "FR")) {
-      errors.hostZip = errorMessages.zip;
-    }
 
     return errors;
   };
@@ -197,11 +170,7 @@ export default function StepCoordonnees({ step }) {
   };
 
   const setLivesInFrance = (livesInFrance) => {
-    if (livesInFrance === "true") {
-      setData({ ...data, country: FRANCE, livesInFrance });
-    } else {
-      setData({ ...data, country: "", livesInFrance });
-    }
+    setData({ ...data, ...getObjectWithEmptyData(addressFields), ...getObjectWithEmptyData(foreignAddressFields), livesInFrance });
   };
 
   const updateData = (key) => (value) => {
@@ -220,18 +189,13 @@ export default function StepCoordonnees({ step }) {
     const fieldToUpdate = [...commonFields];
     const requiredFields = [...commonRequiredFields];
 
-    if (isFrenchResident) {
-      fieldToUpdate.push(...frenchAddressFields);
-      requiredFields.push(...requiredFieldsFrench);
-      if (addressVerified !== "true") {
-        errors.addressVerified = errorMessages.addressVerified;
-      }
-    } else {
+    if (!isFrenchResident) {
       fieldToUpdate.push(...foreignAddressFields);
       requiredFields.push(...requiredFieldsForeigner);
-      if (hostAddressVerified !== "true") {
-        errors.hostAddressVerified = errorMessages.addressVerified;
-      }
+    }
+
+    if (addressVerified !== "true") {
+      errors.addressVerified = errorMessages.addressVerified;
     }
 
     for (const key of requiredFields) {
@@ -248,6 +212,8 @@ export default function StepCoordonnees({ step }) {
       fieldToUpdate.forEach((field) => {
         updates[field] = data[field];
       });
+
+      updates.country = FRANCE;
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
@@ -270,15 +236,15 @@ export default function StepCoordonnees({ step }) {
     setLoading(true);
 
     const fieldToUpdate = [...commonFields];
-    if (isFrenchResident) {
-      fieldToUpdate.push(...frenchAddressFields);
-    } else {
+    if (!isFrenchResident) {
       fieldToUpdate.push(...foreignAddressFields);
     }
-    const updates = {};
+
     fieldToUpdate.forEach((field) => {
       updates[field] = data[field];
     });
+
+    updates.country = FRANCE;
 
     try {
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/save", updates);
@@ -295,36 +261,21 @@ export default function StepCoordonnees({ step }) {
     }
   };
 
-  const onVerifyAddress =
-    (isPersonalAddress = true, isConfirmed) =>
-    (suggestion) => {
-      if (isPersonalAddress) {
-        setData({
-          ...data,
-          addressVerified: "true",
-          cityCode: suggestion.cityCode,
-          region: suggestion.region,
-          department: suggestion.department,
-          location: suggestion.location,
-          // if the suggestion is not confirmed we keep the address typed by the user
-          address: isConfirmed ? suggestion.address : address,
-          zip: isConfirmed ? suggestion.zip : zip,
-          city: isConfirmed ? suggestion.city : city,
-        });
-        setErrors({ addressVerified: undefined });
-      } else {
-        setData({
-          ...data,
-          hostAddressVerified: "true",
-          hostRegion: suggestion.region,
-          hostDepartment: suggestion.department,
-          hostCity: isConfirmed ? suggestion.city : hostCity,
-          hostZip: isConfirmed ? suggestion.zip : hostZip,
-          hostAddress: isConfirmed ? suggestion.address : hostAddress,
-        });
-        setErrors({ hostAddressVerified: undefined });
-      }
-    };
+  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+    setData({
+      ...data,
+      addressVerified: "true",
+      cityCode: suggestion.cityCode,
+      region: suggestion.region,
+      department: suggestion.department,
+      location: suggestion.location,
+      // if the suggestion is not confirmed we keep the address typed by the user
+      address: isConfirmed ? suggestion.address : address,
+      zip: isConfirmed ? suggestion.zip : zip,
+      city: isConfirmed ? suggestion.city : city,
+    });
+    setErrors({ addressVerified: undefined });
+  };
 
   return (
     <>
@@ -376,18 +327,6 @@ export default function StepCoordonnees({ step }) {
           onChange={updateAddressData(isFrenchResident ? "city" : "foreignCity")}
           error={isFrenchResident ? errors.city : errors.foreignCity}
         />
-        {isFrenchResident && (
-          <VerifyAddress
-            address={address}
-            disabled={isVerifyAddressDisabled}
-            zip={zip}
-            city={city}
-            onSuccess={onVerifyAddress(true, true)}
-            onFail={onVerifyAddress(true)}
-            message={addressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.addressVerified}
-            messageStyle={addressVerified === "true" || isVerifyAddressDisabled ? messageStyles.info : messageStyles.error}
-          />
-        )}
         {!isFrenchResident && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
@@ -411,21 +350,21 @@ export default function StepCoordonnees({ step }) {
               onChange={updateData("hostRelationship")}
               error={errors.hostRelationship}
             />
-            <Input value={hostAddress} label="Son adresse" onChange={updateAddressData("hostAddress", false)} error={errors.hostAddress} />
-            <Input value={hostZip} label="Code postal" onChange={updateAddressData("hostZip", false)} error={errors.hostZip} />
-            <Input value={hostCity} label="Ville" onChange={updateAddressData("hostCity", false)} error={errors.hostCity} />
-            <VerifyAddress
-              address={hostAddress}
-              disabled={isVerifyHostAddressDisabled}
-              zip={hostZip}
-              city={hostCity}
-              onSuccess={onVerifyAddress(false, true)}
-              onFail={onVerifyAddress(false)}
-              message={hostAddressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.hostAddressVerified}
-              messageStyle={hostAddressVerified === "true" || isVerifyHostAddressDisabled ? messageStyles.info : messageStyles.error}
-            />
+            <Input value={address} label="Son adresse" onChange={updateAddressData("address", false)} error={errors.address} />
+            <Input value={zip} label="Code postal" onChange={updateAddressData("zip", false)} error={errors.zip} />
+            <Input value={city} label="Ville" onChange={updateAddressData("city", false)} error={errors.city} />
           </>
         )}
+        <VerifyAddress
+          address={address}
+          disabled={isVerifyAddressDisabled}
+          zip={zip}
+          city={city}
+          onSuccess={onVerifyAddress(true)}
+          onFail={onVerifyAddress()}
+          message={addressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.addressVerified}
+          messageStyle={addressVerified === "true" || isVerifyAddressDisabled ? messageStyles.info : messageStyles.error}
+        />
         <Select
           label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
           options={situationOptions}
