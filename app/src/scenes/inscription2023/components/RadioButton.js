@@ -4,7 +4,7 @@ const RadioButton = ({ options, label, onChange, value: currentValue }) => {
   return (
     <div className="mt-2 mb-6">
       <label className="mb-2">{label}</label>
-      <div className="flex justify-between max-w-md">
+      <div className="flex flex-wrap justify-between max-w-md">
         {options.map(({ label, value }) => (
           <Option key={value} label={label} value={value === currentValue} onChange={() => onChange(value)} />
         ))}

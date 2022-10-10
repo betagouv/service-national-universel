@@ -62,7 +62,7 @@ export default function StepSejour() {
               En savoir plus.
             </Link>
           </div>
-          <div className="text-blue-600 my-4 underline underline-offset-4">
+          <div className="text-[#000091] my-4 underline underline-offset-4">
             <Link to="">Consulter d’autres dispositifs d’engagement</Link>
           </div>
         </>

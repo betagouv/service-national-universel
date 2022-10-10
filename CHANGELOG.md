@@ -1,3 +1,25 @@
+# [1.144.0](https://github.com/betagouv/service-national-universel/compare/v1.143.0...v1.144.0) (2022-10-07)
+
+
+### Bug Fixes
+
+* **admin:** temporarily revert volontaires export modal for responsibles ([#1881](https://github.com/betagouv/service-national-universel/issues/1881)) ([4a80e9a](https://github.com/betagouv/service-national-universel/commit/4a80e9adb7f3b9d8931d40b4fc199dace5a213f8))
+* up ([eafbd63](https://github.com/betagouv/service-national-universel/commit/eafbd636ace11c81abc0c0d1ed85c6b59a777958))
+* **api/app:** session pour Corse ([00d4f20](https://github.com/betagouv/service-national-universel/commit/00d4f20bb6c3fc1a47e081b7596f44de13ab7327))
+* **app:** Better list of schools ([28ca156](https://github.com/betagouv/service-national-universel/commit/28ca1564867c24ac5815b09d75dab593b2921d7e))
+* **app:** eligibilite ([bc8a54f](https://github.com/betagouv/service-national-universel/commit/bc8a54f589e5452cb212aea0d01d3cba6c61a8a1))
+* **app:** Eligibility postalCode ([ddb4631](https://github.com/betagouv/service-national-universel/commit/ddb46312da75b7ad1a9b13d5a6f3510904704aed))
+* **app:** navBar ([d89bfdc](https://github.com/betagouv/service-national-universel/commit/d89bfdc2e7073b49b6ddd5c0ecf6b883add6945f))
+
+
+### Features
+
+* **app:** inscription consentement / représentant desktop ([#1882](https://github.com/betagouv/service-national-universel/issues/1882)) ([5c1524b](https://github.com/betagouv/service-national-universel/commit/5c1524b02e557b9e78ae373ecf1fbdea25b13805))
+* **app:** inscriptions representants legaux ([#1878](https://github.com/betagouv/service-national-universel/issues/1878)) ([87b23bf](https://github.com/betagouv/service-national-universel/commit/87b23bf9bfc58602b2379801cb52b70def816c1d))
+* **app:** modal change sejour ([2fa85be](https://github.com/betagouv/service-national-universel/commit/2fa85be30201a0dcbb268d573323ea46b348a7a3))
+* **app:** Preinscription desktop ([#1879](https://github.com/betagouv/service-national-universel/issues/1879)) ([d0e2b03](https://github.com/betagouv/service-national-universel/commit/d0e2b03b74c4cf499192f7bcb9b4f37f7c8ab07f))
+* **app,admin:** public kb articles ([#1876](https://github.com/betagouv/service-national-universel/issues/1876)) ([5174d32](https://github.com/betagouv/service-national-universel/commit/5174d32b5f74be9863992090865fa895f3eb1061))
+
 # [1.143.0](https://github.com/betagouv/service-national-universel/compare/v1.142.0...v1.143.0) (2022-10-06)
 
 
