@@ -288,10 +288,8 @@ router.post(
             capture(error);
             return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
           }
-          newFile.set({
-            category: value.category,
-            expirationDate: value.expirationDate,
-          });
+          newFile.category = value.category;
+          newFile.expirationDate = value.expirationDate;
         }
 
         // Upload file using ObjectId as file name

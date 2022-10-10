@@ -10,56 +10,54 @@ import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import StickyButton from "../../../components/inscription/stickyButton";
-import BackArrow from "../../../assets/icons/BackArrow";
+// import BackArrow from "../../../assets/icons/BackArrow";
 import Navbar from "../components/Navbar";
 
 export default function StepUpload({ step }) {
-  const { id } = useParams();
+  const { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
-  const [error, setError] = useState({});
-  const [fileError, setFileError] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [IDProof, setIDProof] = useState();
-  const [files, setFiles] = useState();
-  const [date, setDate] = useState();
   const history = useHistory();
   const dispatch = useDispatch();
+  const [error, setError] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [fileError, setFileError] = useState({});
+  const [ID, setID] = useState();
+  const [files, setFiles] = useState();
+  const [date, setDate] = useState();
 
-  async function uploadFiles(files) {
-    for (let index = 0; index < Object.keys(files).length; index++) {
-      let i = Object.keys(files)[index];
-      if (files[i].size > 5000000)
+  async function upload(files) {
+    for (const file of files) {
+      if (file.size > 5000000) {
         return setFileError({
-          text: `Ce fichier ${files[i].name} est trop volumineux.`,
+          text: `Ce fichier ${files.name} est trop volumineux.`,
         });
+      }
     }
-    const path = `/young/${young._id}/documents/cniFiles`;
-    const res = await api.uploadFile(`${path}`, files, IDProof.id, new Date(date));
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID.category, new Date(date));
     if (res.code === "FILE_CORRUPTED") {
       setFileError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
     } else if (!res.ok) {
-      setFileError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
       capture(res.code);
+      setFileError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
     }
   }
 
   async function onSubmit() {
     setLoading(true);
     try {
-      // If ID proof expires before session start, notify the parents.
+      // If ID proof expires before session start, notify parent 1.
       if (new Date(date) < START_DATE_SESSION_PHASE1[young.cohort]) {
         const res = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF}`, {
           cta: `${appURL}/`,
         });
-        if (!res.ok) return setFileError({ text: "Votre pièce d'identité ne sera pas valide au début de votre session. Impossible de pr´venir votre rprésentant légal." });
+        if (!res.ok) return setFileError({ text: "Votre pièce d'identité ne sera pas valide au début de votre session. Impossible de prévenir votre rprésentant légal." });
       }
 
-      await uploadFiles([...files]);
-      if (error.length) return;
+      await upload([...files]);
+      if (error.length) return setLoading(false);
 
-      // Save progress.
       const { ok, code, data: responseData } = await api.put(`/young/inscription2023/documents/next`);
       if (!ok) {
         capture(code);
@@ -80,27 +78,27 @@ export default function StepUpload({ step }) {
   }
 
   useEffect(() => {
-    if (id === "cniNew")
-      setIDProof({
-        id: "cniNew",
-        title: "Carte d'identité",
+    if (category === "cniNew")
+      setID({
+        category: "cniNew",
+        title: "Carte Nationale d'Identité",
         subtitle: "Nouveau format (après août 2021)",
         imgFront: "cniNewFront.png",
         imgBack: "cniNewBack.png",
         imgDate: "cniNewDate.png",
       });
-    if (id === "cniOld")
-      setIDProof({
-        id: "cniOld",
-        title: "Carte d'identité",
+    if (category === "cniOld")
+      setID({
+        category: "cniOld",
+        title: "Carte Nationale d'Identité",
         subtitle: "Ancien format",
         imgFront: "cniOldFront.png",
         imgBack: "cniOldBack.png",
         imgDate: "cniOldDate.png",
       });
-    if (id === "passport") {
-      setIDProof({
-        id: "passport",
+    if (category === "passport") {
+      setID({
+        category: "passport",
         title: "Passeport",
         imgFront: "passport.png",
         imgDate: "passportDate.png",
@@ -108,29 +106,29 @@ export default function StepUpload({ step }) {
     }
   }, []);
 
-  if (!IDProof) return <div>Loading</div>;
+  if (!ID) return <div>Loading</div>;
   return (
     <>
       <Navbar step={step} />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div
+        {/* <div
           className="mt-2 mb-4"
           onClick={() => {
-            setIDProof(null);
+            setID(null);
             setFiles(null);
           }}>
           <BackArrow />
-        </div>
-        <div className="text-2xl font-semibold mt-2 text-gray-800">{IDProof.title}</div>
-        {IDProof.subtitle && <div className="text-xl font-semibold mb-2 text-gray-800">{IDProof.subtitle}</div>}
+        </div> */}
+        <div className="text-2xl font-semibold mt-2 text-gray-800">{ID.title}</div>
+        {ID.subtitle && <div className="text-xl mb-2 text-gray-600">{ID.subtitle}</div>}
         <div className="w-full flex items-center justify-center my-4">
           <div className="w-3/4 flex flex-col gap-4">
-            <img src={require(`../../../assets/IDProof/${IDProof.imgFront}`)} />
-            {IDProof.imgBack && <img src={require(`../../../assets/IDProof/${IDProof.imgBack}`)} />}
+            <img src={require(`../../../assets/IDProof/${ID.imgFront}`)} />
+            {ID.imgBack && <img src={require(`../../../assets/IDProof/${ID.imgBack}`)} />}
           </div>
         </div>
-        <div className="my-2 border-l-4 border-l-blue-600 pl-4">
+        <div className="my-2 border-l-8 border-l-[#6A6AF4] pl-4">
           Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
           document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
         </div>
@@ -151,12 +149,15 @@ export default function StepUpload({ step }) {
         <label htmlFor="file-upload" className="bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600 mt-4">
           Parcourir...
         </label>
-        {files &&
+        {files ? (
           Array.from(files).map((e) => (
             <div className="text-gray-800 text-sm mt-2" key={e.name}>
               {e.name}
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="text-gray-800 text-sm mt-2">Aucun fichier sélectionné.</div>
+        )}
         {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
 
         {/* Date d'expiration */}
@@ -164,10 +165,10 @@ export default function StepUpload({ step }) {
           <>
             <hr className="my-4 h-px bg-gray-200 border-0" />
             <div className="text-2xl font-semibold">Renseignez la date d’expiration</div>
-            <div className="text-gray-500 text-sm">Votre pièce d’identité doit être valide à votre départ en séjour de cohésion.</div>
+            <div className="text-gray-600 text-sm mt-2">Votre pièce d’identité doit être valide à votre départ en séjour de cohésion.</div>
             <div className="w-full flex items-center justify-center my-4">
               <div className="w-3/4 flex flex-col gap-4">
-                <img src={require(`../../../assets/IDProof/${IDProof.imgDate}`)} />
+                <img src={require(`../../../assets/IDProof/${ID.imgDate}`)} />
               </div>
             </div>
             <div className="flex flex-col flex-start my-4">
@@ -176,7 +177,7 @@ export default function StepUpload({ step }) {
           </>
         )}
       </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(files)} disabled={!date || loading} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(files)} disabled={!date || !error || loading} />
     </>
   );
 }

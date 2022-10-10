@@ -10,18 +10,18 @@ export default function StepDocuments({ step }) {
 
   const IDs = [
     {
-      id: "cniNew",
-      title: "Carte d'identité",
+      category: "cniNew",
+      title: "Carte Nationale d'Identité",
       subtitle: "Nouveau format (après août 2021)",
     },
     {
-      id: "cniOld",
-      title: "Carte d'identité",
+      category: "cniOld",
+      title: "Carte Nationale d'Identité",
       subtitle: "Ancien format",
       imgFront: "cniOldFront.png",
     },
     {
-      id: "passport",
+      category: "passport",
       title: "Passeport",
     },
   ];
@@ -38,7 +38,7 @@ export default function StepDocuments({ step }) {
         </div>
         <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((id) => (
-          <Link key={id.id} to={`televersement/${id.id}`}>
+          <Link key={id.category} to={`televersement/${id.category}`}>
             <div className="my-4">
               <div className="border p-4 my-3 flex justify-between items-center">
                 <div>
