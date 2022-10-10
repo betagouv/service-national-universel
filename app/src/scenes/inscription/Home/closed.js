@@ -65,7 +65,7 @@ export default function Closed({ location }) {
                 onClick={() => plausibleEvent("LP - Phase 1")}
                 upText="phase 1"
                 title="Le séjour de cohésion"
-                downText="3 sessions possibles en février, juin et juillet 2022"
+                downText="3 sessions possibles en février ou avril (selon votre zone scolaire), juin et juillet 2023"
                 to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
               />
             </div>
@@ -116,14 +116,14 @@ export default function Closed({ location }) {
           {/* Start Button Desktop View */}
           <div className="z-50  hidden md:block">
             <button disabled className="uppercase p-3 pr-4 mt-[3px] lg:mt-[2rem] text-white bg-[#acaaba] font-medium	text-base	cursor-not-allowed tracking-wider	rounded-full">
-              inscriptions à venir
+              Ouverture des inscriptions le 17/10/2022
             </button>
           </div>
         </div>
         <Container>
           <Text>
-            Envie de vivre le <strong>SNU</strong> ? Pour ne pas rater les prochaines éditions, laissez vos coordonnées pour être recontacté(e) par l’administration lors de
-            l’ouverture des inscriptions.
+            Envie de vivre le <strong>SNU</strong> ? Les inscriptions ouvrent très prochainement et vous pouvez déjà laisser votre adresse mail et votre date de naissance pour être
+            averti(e) dès l’ouverture des inscriptions.
           </Text>
           <input
             type="email"
