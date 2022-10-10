@@ -128,6 +128,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+
     young.set({
       ...value,
       employed: youngEmployedSituationOptions.includes(value.situation),
