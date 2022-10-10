@@ -47,8 +47,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     const { error, value } = Joi.object({
       gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
       frenchNationality: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      birthCountry: needRequired(Joi.string().trim(), isRequired),
       birthCity: needRequired(Joi.string().trim(), isRequired),
-      // @todo zip validation? / zip required
       birthCityZip: Joi.string().trim().allow(null, ""),
       phone: needRequired(Joi.string().trim(), isRequired),
       situation: Joi.alternatives().conditional("schooled", {

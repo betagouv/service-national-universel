@@ -8,12 +8,12 @@ import validator from "validator";
 import RadioButton from "../components/RadioButton";
 import Input from "../components/Input";
 import Select from "../components/Select";
-import Navbar from "../components/Navbar";
 import ErrorMessage from "../components/ErrorMessage";
+import Navbar from "../components/Navbar";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationshipOptions, frenchNationalityOptions, genderOptions } from "../utils";
 
 import api from "../../../services/api";
-import VerifyAddress, { messageStyles } from "../components/VerifyAddress";
+import VerifyAddress from "../components/VerifyAddress";
 import SearchableSelect from "../../../components/SearchableSelect";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
@@ -30,13 +30,10 @@ const getObjectWithEmptyData = (fields) => {
 
 const FRANCE = "France";
 const errorMessages = {
-  addressVerified: "Merci de valider l'adresse",
+  addressVerified: "Merci de vérifier l'adresse",
   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
   zip: "Le code postal n'est pas valide",
 };
-
-const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
-const addressValidationSuccess = "L'adresse a été vérifiée";
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
@@ -61,16 +58,31 @@ const commonRequiredFields = [
 
 const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 
-//@todo is neccessary
 const defaultState = {
+  frenchNationality: "true",
+  birthCountry: FRANCE,
+  birthCityZip: "",
+  birthCity: "",
+  gender: genderOptions[0].value,
+  phone: "",
+  livesInFrance: frenchNationalityOptions[0].value,
+  addressVerified: "false",
+  address: "",
+  zip: "",
+  city: "",
   region: "",
   department: "",
   location: {},
   cityCode: "",
-  addressVerified: "false",
-  hostRegion: "",
-  hostDepartment: "",
-  hostAddressVerified: "false",
+  foreignCountry: "",
+  foreignAddress: "",
+  foreignCity: "",
+  foreignZip: "",
+  hostFirstName: "",
+  hostLastName: "",
+  hostRelationship: "",
+  situation: "",
+  schooled: "",
 };
 
 export default function StepCoordonnees({ step }) {
@@ -117,25 +129,25 @@ export default function StepCoordonnees({ step }) {
 
       setData({
         ...data,
-        schooled: young.schooled,
-        situation: young.situation,
+        schooled: young.schooled || data.schooled,
+        situation: young.situation || data.situation,
         frenchNationality: young.frenchNationality || data.frenchNationality,
         birthCountry: young.birthCountry || data.birthCountry,
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
-        phone: young.phone,
-        livesInFrance: young.foreignCountry ? "false" : frenchNationalityOptions[0].value,
-        address: young.address,
-        city: young.city,
-        zip: young.zip,
-        foreignCountry: young.foreignCountry || "",
-        foreignAddress: young.foreignAddress || "",
-        foreignCity: young.foreignCity || "",
-        foreignZip: young.foreignZip || "",
-        hostFirstName: young.hostFirstName || "",
-        hostLastName: young.hostLastName || "",
-        hostRelationship: young.hostRelationship || "",
+        phone: young.phone || data.phone,
+        livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
+        address: young.address || data.address,
+        city: young.city || data.city,
+        zip: young.zip || data.zip,
+        foreignCountry: young.foreignCountry || data.foreignCountry,
+        foreignAddress: young.foreignAddress || data.foreignAddress,
+        foreignCity: young.foreignCity || data.foreignCity,
+        foreignZip: young.foreignZip || data.foreignZip,
+        hostFirstName: young.hostFirstName || data.hostFirstName,
+        hostLastName: young.hostLastName || data.hostLastName,
+        hostRelationship: young.hostRelationship || data.hostRelationship,
       });
     }
   }, [young]);
@@ -154,7 +166,7 @@ export default function StepCoordonnees({ step }) {
     if (isFrench && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
     }
-    if (isFrenchResident && zip && !validator.isPostalCode(zip, "FR")) {
+    if (zip && !validator.isPostalCode(zip, "FR")) {
       errors.zip = errorMessages.zip;
     }
 
@@ -207,6 +219,7 @@ export default function StepCoordonnees({ step }) {
     errors = { ...errors, ...getErrors() };
 
     setErrors(errors);
+
     if (!Object.keys(errors).length) {
       const updates = {};
       fieldToUpdate.forEach((field) => {
@@ -228,6 +241,8 @@ export default function StepCoordonnees({ step }) {
         capture(e);
         toastr.error("Une erreur s'est produite :", translate(e.code));
       }
+    } else {
+      toastr.error("Merci de corriger les erreurs", "");
     }
     setLoading(false);
   };
@@ -362,9 +377,9 @@ export default function StepCoordonnees({ step }) {
           city={city}
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
-          message={addressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.addressVerified}
-          messageStyle={addressVerified === "true" || isVerifyAddressDisabled ? messageStyles.info : messageStyles.error}
+          isVerified={addressVerified === "true"}
         />
+        <ErrorMessage>{errors.addressVerified}</ErrorMessage>
         <Select
           label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
           options={situationOptions}
