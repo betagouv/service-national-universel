@@ -8,6 +8,7 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
+const { canUpdateYoungStatus } = require("snu-lib");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -128,6 +129,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
 
     young.set({
@@ -146,7 +149,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
 router.put("/consentement", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error } = Joi.object({
+    const { error, value } = Joi.object({
       consentment1: Joi.boolean().required().valid(true),
       consentment2: Joi.boolean().required().valid(true),
     }).validate(req.body, { stripUnknown: true });
@@ -157,6 +160,8 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       consentment: "true",
@@ -206,6 +211,8 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     if (!value.parent2) {
       value.parent2Status = "";
       value.parent2FirstName = "";
@@ -217,6 +224,23 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     if (type === "next") value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
 
     young.set(value);
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/confirm", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({
+      informationAccuracy: "true",
+      inscriptionStep2023: STEPS2023.WAITING_CONSENT,
+    });
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -238,6 +262,8 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
