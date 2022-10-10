@@ -7,10 +7,7 @@ const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
-const { ERRORS, STEPS2023, YOUNG_SITUATIONS, isYoung, isReferent, getCcOfYoung } = require("../../utils");
-const { canSendTemplateToYoung, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { config } = require("dotenv");
-const { sendTemplate } = require("../../sendinblue");
+const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
