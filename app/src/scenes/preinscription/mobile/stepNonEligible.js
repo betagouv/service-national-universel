@@ -63,7 +63,7 @@ export default function NonEligible() {
                       <img src={program.picture} className="object-cover w-full h-full" />
                     </a>
                   </div>
-                  <div className="min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5]">
+                  <div className="min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] h-[250px]">
                     <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
                     <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
                       {" "}
