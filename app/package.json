@@ -66,6 +66,7 @@
     "isomorphic-fetch": "3.0.0",
     "less": "4.1.2",
     "less-loader": "7.3.0",
+    "mime-types": "^2.1.35",
     "password-validator": "5.1.1",
     "path": "0.12.7",
     "postcss": "^8.4.7",

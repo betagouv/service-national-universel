@@ -142,7 +142,7 @@ class api {
     });
   }
 
-  uploadFile(path, arr, category, date) {
+  uploadFile(path, arr, category, expirationDate) {
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -151,7 +151,7 @@ class api {
     }
     formData.append("body", JSON.stringify({ names }));
     if (category) formData.set("category", category);
-    if (date) formData.set("expirationDate", date);
+    if (expirationDate) formData.set("expirationDate", expirationDate);
     for (const e of formData) console.log(e);
     return new Promise(async (resolve, reject) => {
       try {

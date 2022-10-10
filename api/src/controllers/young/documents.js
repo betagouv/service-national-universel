@@ -239,9 +239,9 @@ router.post(
         body: Joi.string(),
         category: Joi.string(),
         expirationDate: Joi.date(),
-      }).validate(req.body);
+      }).validate(req.body, { stripUnknown: true });
       if (bodyError) {
-        console.error(bodyError);
+        capture(bodyError);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import mime from "mime-types";
 import Error from "../../../components/error";
 import api from "../../../services/api";
 import { SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } from "snu-lib";
@@ -12,10 +13,13 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import StickyButton from "../../../components/inscription/stickyButton";
+import BackArrow from "../../../assets/icons/BackArrow";
+import Navbar from "../components/Navbar";
 
-export default function StepDocuments() {
+export default function StepDocuments({ step }) {
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
+  const [fileError, setFileError] = useState({});
   const [loading, setLoading] = useState(false);
   const [IDProof, setIDProof] = useState();
   const [files, setFiles] = useState();
@@ -24,11 +28,37 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
 
   function isFileSupported(fileName) {
-    const allowTypes = ["jpg", "jpeg", "png", "pdf"];
-    const dotted = fileName.split(".");
-    const type = dotted[dotted.length - 1];
+    const allowTypes = ["image/jpeg", "image/png", "application/pdf"];
+    const type = mime.lookup(fileName);
+    console.log("🚀 ~ file: stepDocuments.js ~ line 32 ~ isFileSupported ~ type", type);
     if (!allowTypes.includes(type.toLowerCase())) return false;
     return true;
+  }
+
+  async function uploadFiles(files) {
+    for (let index = 0; index < Object.keys(files).length; index++) {
+      let i = Object.keys(files)[index];
+      if (!isFileSupported(files[i].name))
+        return setFileError({
+          text: `Le type du fichier ${files[i].name} n'est pas supporté.`,
+        });
+      if (files[i].size > 5000000)
+        return setFileError({
+          text: `Ce fichier ${files[i].name} est trop volumineux.`,
+        });
+    }
+    const path = `/young/${young._id}/documents/cniFiles`;
+    const res = await api.uploadFile(`${path}`, files, IDProof.id, new Date(date));
+    if (res.code === "FILE_CORRUPTED") {
+      capture("FILE_CORRUPTED");
+      setFileError({
+        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+      });
+    }
+    if (!res.ok) {
+      setFileError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      capture(res.code);
+    }
   }
 
   const IDs = [
@@ -56,40 +86,24 @@ export default function StepDocuments() {
     },
   ];
 
-  async function onSubmit([...files]) {
+  async function onSubmit() {
     setLoading(true);
     try {
-      // Check expiration date
+      // If ID proof expires before session start, notify the parents.
       if (new Date(date) < START_DATE_SESSION_PHASE1[young.cohort]) {
-        await api.post(`/young/inscription2023/${young._id}/emailtoparent/${SENDINBLUE_TEMPLATES.young.OUTDATED_ID_PROOF}`, {
+        await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF}`, {
           cta: `${appURL}/`,
         });
       }
 
-      // Upload file(s)
-      for (let index = 0; index < Object.keys(files).length; index++) {
-        let i = Object.keys(files)[index];
-        if (!isFileSupported(files[i].name))
-          setError({
-            text: `Le type du fichier ${files[i].name} n'est pas supporté.`,
-          });
-        if (files[i].size > 5000000)
-          return setError({
-            text: `Ce fichier ${files[i].name} est trop volumineux.`,
-          });
-      }
-      const path = `/young/${young._id}/documents/cniFiles`;
-      const res = await api.uploadFile(`${path}`, files, IDProof.id, new Date(date));
-      if (res.code === "FILE_CORRUPTED") {
-        setError({
-          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-        });
-      }
-      if (!res.ok) setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      await uploadFiles([...files]);
+      if (error.length) return;
 
-      // Continue
+      console.log("LEZGOOOO");
+      // Save progress.
       const { ok, code, data: responseData } = await api.put(`/young/inscription2023/documents/next`);
       if (!ok) {
+        capture(code);
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
         setLoading(false);
         return;
@@ -97,6 +111,7 @@ export default function StepDocuments() {
       dispatch(setYoung(responseData));
       history.push("/inscription2023/done");
     } catch (e) {
+      console.log("🚀 ~ file: stepDocuments.js ~ line 113 ~ onSubmit ~ e", e);
       capture(e);
       setError({
         text: `Une erreur s'est produite`,
@@ -109,6 +124,7 @@ export default function StepDocuments() {
 
   return (
     <>
+      <Navbar step={step} />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
@@ -144,6 +160,14 @@ export default function StepDocuments() {
         {/* Upload du fichier */}
         {IDProof && (
           <>
+            <div
+              className="mt-2 mb-4"
+              onClick={() => {
+                setIDProof(null);
+                setFiles(null);
+              }}>
+              <BackArrow />
+            </div>
             <div className="text-2xl font-semibold mt-2 text-gray-800">{IDProof.title}</div>
             {IDProof.subtitle && <div className="text-xl font-semibold mb-2 text-gray-800">{IDProof.subtitle}</div>}
             <div className="w-full flex items-center justify-center my-4">
@@ -164,17 +188,22 @@ export default function StepDocuments() {
               multiple
               id="file-upload"
               name="file-upload"
+              accept=".png, .jpg, .jpeg, .pdf"
               onChange={(e) => {
                 setFiles(e.target.files);
               }}
               className="hidden"
             />
-            <div className="flex mt-4">
-              <label htmlFor="file-upload" className="bg-[#EEEEEE] text-sm p-2 h-10 rounded text-gray-600">
-                Parcourir...
-              </label>
-              {files && <div className="text-gray-500 text-sm p-2 ml-2">{files.item(0).name}</div>}
-            </div>
+            <label htmlFor="file-upload" className="bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600 mt-4">
+              Parcourir...
+            </label>
+            {files &&
+              Array.from(files).map((e) => (
+                <div className="text-gray-800 text-sm mt-2" key={e.name}>
+                  {e.name}
+                </div>
+              ))}
+            {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
           </>
         )}
 
