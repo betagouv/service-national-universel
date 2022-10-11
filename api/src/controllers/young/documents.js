@@ -233,7 +233,6 @@ router.post(
           Object.keys(req.files || {}).map((e) => req.files[e]),
           { stripUnknown: true },
         );
-      console.log("files:", files);
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
       // Check permissions
@@ -279,6 +278,19 @@ router.post(
           uploadedAt: Date.now(),
           mimetype,
         };
+
+        if ((key === "cniFiles") & (young.inscriptionStep2023 === "DOCUMENTS")) {
+          const { error, value } = Joi.object({
+            category: Joi.string().required(),
+            expirationDate: Joi.date().required(),
+          }).validate(req.body, { stripUnknown: true });
+          if (error) {
+            capture(error);
+            return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+          }
+          newFile.category = value.category;
+          newFile.expirationDate = value.expirationDate;
+        }
 
         // Upload file using ObjectId as file name
 

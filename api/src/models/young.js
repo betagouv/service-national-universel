@@ -13,6 +13,8 @@ const File = new mongoose.Schema({
   uploadedAt: Date,
   size: Number,
   mimetype: String,
+  category: String,
+  expirationDate: Date,
 });
 
 const Schema = new mongoose.Schema({

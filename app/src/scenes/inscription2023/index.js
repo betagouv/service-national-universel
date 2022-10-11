@@ -7,6 +7,7 @@ import DesktopConfirm from "./desktop/stepConfirm";
 import DesktopConsentements from "./desktop/stepConsentements";
 import DesktopCoordonnees from "./desktop/stepCoordonnees";
 import DesktopDocuments from "./desktop/stepDocuments";
+import DesktopUpload from "./desktop/stepUpload";
 import DesktopDone from "./desktop/stepDone";
 import DesktopRepresentants from "./desktop/stepRepresentants";
 import DesktopWaitingConsent from "./desktop/StepWaitingConsent";
@@ -15,6 +16,7 @@ import MobileConfirm from "./mobile/stepConfirm";
 import MobileConsentements from "./mobile/stepConsentements";
 import MobileCoordonnees from "./mobile/stepCoordonnees";
 import MobileDocuments from "./mobile/stepDocuments";
+import MobileUpload from "./mobile/stepUpload";
 import MobileDone from "./mobile/stepDone";
 import MobileRepresentants from "./mobile/stepRepresentants";
 import MobileWaitingConsent from "./mobile/StepWaitingConsent";
@@ -31,6 +33,7 @@ const STEPS = {
   CONSENTEMENTS: "CONSENTEMENTS",
   REPRESENTANTS: "REPRESENTANTS",
   DOCUMENTS: "DOCUMENTS",
+  UPLOAD: "UPLOAD",
   CONFIRM: "CONFIRM",
   WAITING_CONSENT: "WAITING_CONSENT",
   DONE: "DONE",
@@ -45,10 +48,10 @@ const Step = ({ step }) => {
     if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants step={step} /> : <MobileRepresentants step={step} />;
     if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements step={step} /> : <MobileConsentements step={step} />;
     if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments step={step} /> : <MobileDocuments step={step} />;
+    if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload step={step} /> : <MobileUpload step={step} />;
     if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
     if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopWaitingConsent /> : <MobileWaitingConsent />;
     if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
-
     return device === "desktop" ? <DesktopCoordonnees step={step} /> : <MobileCoordonnees step={step} />;
   }
 
@@ -74,6 +77,7 @@ export default function Index() {
       <SentryRoute path="/inscription2023/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
       <SentryRoute path="/inscription2023/consentement" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
       <SentryRoute path="/inscription2023/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
+      <SentryRoute path="/inscription2023/televersement/:category" component={() => <Step step={STEPS.UPLOAD} />} />
       <SentryRoute path="/inscription2023/confirm" component={() => <Step step={STEPS.CONFIRM} />} />
       <SentryRoute path="/inscription2023/attente-consentement" component={() => <Step step={STEPS.WAITING_CONSENT} />} />
       <SentryRoute path="/inscription2023/done" component={() => <Step step={STEPS.DONE} />} />

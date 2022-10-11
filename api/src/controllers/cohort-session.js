@@ -179,7 +179,7 @@ router.post("/eligibility/2023", async (req, res) => {
       });
     }
 
-    if (birthDate > new Date("07/17/2005") && birthDate < new Date("07/05/2008")) {
+    if (birthDate > new Date("07/18/2005") && birthDate < new Date("07/05/2008")) {
       cohorts.push({
         id: "Juillet 2023",
         dates: "du 5 au 17 juillet",
