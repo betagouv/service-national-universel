@@ -1,18 +1,17 @@
 import React from "react";
-import { AiOutlinePlus } from "react-icons/ai";
-import { HiOutlineTrash } from "react-icons/hi";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Input from "../components/Input";
-import { translate } from "../../../utils";
+import Error from "../../../components/error";
+import CheckBox from "../../../components/inscription/CheckBox";
+import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { setYoung } from "../../../redux/auth/actions";
-import Error from "../../../components/error";
+import { translate } from "../../../utils";
+import Input from "../components/Input";
 import Navbar from "../components/Navbar";
-import { toastr } from "react-redux-toastr";
 
 export default function StepRepresentants({ step }) {
   const young = useSelector((state) => state.Auth.young);
@@ -21,7 +20,7 @@ export default function StepRepresentants({ step }) {
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName", "parent2Email", "parent2Phone"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(false);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(true);
   const dispatch = useDispatch();
 
   const [data, setData] = React.useState({
@@ -37,10 +36,6 @@ export default function StepRepresentants({ step }) {
     parent2Phone: "",
   });
 
-  const hasParent2Infos = () => {
-    return young?.parent2Status || young?.parent2FirstName || young?.parent2LastName || young?.parent2Email || young?.parent2Phone ? true : false;
-  };
-
   React.useEffect(() => {
     if (young) {
       setData({
@@ -55,7 +50,6 @@ export default function StepRepresentants({ step }) {
         parent2Email: young.parent2Email,
         parent2Phone: young.parent2Phone,
       });
-      setIsParent2Visible(hasParent2Infos());
     }
   }, [young]);
 
@@ -183,21 +177,12 @@ export default function StepRepresentants({ step }) {
           <hr className="my-4 h-px bg-gray-200 border-0" />
           {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
           <FormRepresentant i={1} data={data} setData={setData} errors={errors} />
-          {isParent2Visible ? (
-            <>
-              <hr className="h-px bg-gray-200 border-0" />
-              <FormRepresentant i={2} data={data} setData={setData} errors={errors} />
-              <div className="flex justify-end gap-2 items-center text-[#000091]" onClick={() => setIsParent2Visible(false)}>
-                <HiOutlineTrash />
-                Supprimer le représentant légal
-              </div>
-            </>
-          ) : (
-            <div className="flex justify-end gap-2 items-center text-[#000091]" onClick={() => setIsParent2Visible(true)}>
-              <AiOutlinePlus />
-              Ajouter un(e) représentant(e) légal(e)
-            </div>
-          )}
+          <hr className="my-4 h-px bg-gray-200 border-0" />
+          <div className="flex gap-4 items-center">
+            <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
+            <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
+          </div>
+          {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} /> : null}
           <hr className="my-8 h-px bg-gray-200 border-0" />
           <div className="flex justify-end gap-4">
             <button
