@@ -2,13 +2,16 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
+const crypto = require("crypto");
 
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { sendTemplate } = require("./../../sendinblue");
+const config = require("../../config");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -195,9 +198,14 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2LastName = "";
       value.parent2Email = "";
       value.parent2Phone = "";
+      value.parent2Inscription2023Token = "";
     }
 
-    if (type === "next") value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+    if (type === "next") {
+      value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+      if (value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -213,9 +221,31 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // If ID proof expires before session start, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+
+    if (notifyExpirationDate) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+    });
+
+    if (young.parent2Email) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
     young.set({
       informationAccuracy: "true",
-      inscriptionStep2023: STEPS2023.WAITING_CONSENT,
+      inscriptionStep2023: STEPS2023.DONE,
     });
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -260,6 +290,40 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
 
     if (type === "next") young.set("inscriptionStep2023", STEPS2023.CONFIRM);
     await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/relance", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // If ID proof expires before session start, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+
+    if (notifyExpirationDate) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+    });
+
+    if (young.parent2Email) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);

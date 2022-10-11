@@ -142,7 +142,7 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE", "ABANDONED"],
+    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE", "ABANDONED", "NOT_AUTORISED"],
     documentation: {
       description: "Statut général du volontaire",
     },
@@ -247,7 +247,7 @@ const Schema = new mongoose.Schema({
   inscriptionStep2023: {
     type: String,
     default: "COORDONNEES",
-    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM"],
     documentation: {
       description: "Étape du tunnel d'inscription",
     },

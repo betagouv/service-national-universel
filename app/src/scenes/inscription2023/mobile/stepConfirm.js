@@ -45,7 +45,7 @@ export default function StepConfirm() {
         return;
       }
       dispatch(setYoung(responseData));
-      history.push("/inscription2023/attente-consentement");
+      history.push("/inscription2023/done");
     } catch (e) {
       capture(e);
       setError({
@@ -69,7 +69,7 @@ export default function StepConfirm() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <h1 className="text-lg font-bold mt-2 text-[#161616]">Séjour de cohésion :</h1>
-            <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young.cohort])}</div>
+            <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young?.cohort])}</div>
           </div>
           <EditPen onClick={() => setModal({ isOpen: true })} />
         </div>

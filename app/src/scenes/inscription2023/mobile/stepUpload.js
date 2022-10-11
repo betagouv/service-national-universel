@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory, useParams } from "react-router-dom";
 import Error from "../../../components/error";
-import api from "../../../services/api";
-import { SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } from "snu-lib";
-import { appURL } from "../../../config";
-import { capture } from "../../../sentry";
-import { translate } from "../../../utils";
-import { setYoung } from "../../../redux/auth/actions";
 import StickyButton from "../../../components/inscription/stickyButton";
-import Navbar from "../components/Navbar";
+import { setYoung } from "../../../redux/auth/actions";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
+import Navbar from "../components/Navbar";
 
 export default function StepUpload({ step }) {
   const { category } = useParams();
@@ -46,14 +44,6 @@ export default function StepUpload({ step }) {
   async function onSubmit() {
     setLoading(true);
     try {
-      // If ID proof expires before session start, notify parent 1.
-      if (new Date(date) < START_DATE_SESSION_PHASE1[young.cohort]) {
-        const res = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF}`, {
-          cta: `${appURL}/`,
-        });
-        if (!res.ok) return setFileError({ text: "Votre pièce d'identité ne sera pas valide au début de votre session. Impossible de prévenir votre rprésentant légal." });
-      }
-
       await upload([...files]);
       if (error.length) return setLoading(false);
 
@@ -65,7 +55,7 @@ export default function StepUpload({ step }) {
         return;
       }
       dispatch(setYoung(responseData));
-      history.push("/inscription2023/done");
+      history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
       setError({
