@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
+import Bin from "../../../assets/icons/Bin";
 import Error from "../../../components/error";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
@@ -19,7 +20,8 @@ export default function StepUpload({ step }) {
   const [loading, setLoading] = useState(false);
   const [fileError, setFileError] = useState({});
   const [ID, setID] = useState();
-  const [files, setFiles] = useState();
+  const [filesToUpload, setFilesToUpload] = useState();
+  const [filesUploaded, setFilesUploaded] = useState();
   const [date, setDate] = useState();
 
   async function upload(files) {
@@ -41,13 +43,24 @@ export default function StepUpload({ step }) {
     }
   }
 
+  async function deleteFile(fileId) {
+    try {
+      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
+      if (!res.ok) setError({ text: "Wesh" });
+      setFilesUploaded(res.data);
+    } catch (e) {
+      capture(e);
+      setError({ text: "Impossible de supprimer ce fichier." });
+    }
+  }
+
   async function onSubmit() {
     setLoading(true);
     try {
-      await upload([...files]);
+      await upload([...filesToUpload]);
       if (error.length) return setLoading(false);
 
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/documents/next`);
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
       if (!ok) {
         capture(code);
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -95,20 +108,16 @@ export default function StepUpload({ step }) {
     }
   }, []);
 
+  useEffect(() => {
+    setFilesUploaded(young.files.cniFiles);
+  }, [young]);
+
   if (!ID) return <div>Loading</div>;
   return (
     <>
       <Navbar step={step} />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        {/* <div
-          className="mt-2 mb-4"
-          onClick={() => {
-            setID(null);
-            setFiles(null);
-          }}>
-          <BackArrow />
-        </div> */}
         <div className="text-2xl font-semibold mt-2 text-gray-800">{ID.title}</div>
         {ID.subtitle && <div className="text-xl mb-2 text-gray-600">{ID.subtitle}</div>}
         <div className="w-full flex items-center justify-center my-4">
@@ -131,26 +140,53 @@ export default function StepUpload({ step }) {
           name="file-upload"
           accept=".png, .jpg, .jpeg, .pdf"
           onChange={(e) => {
-            setFiles(e.target.files);
+            setFilesToUpload(e.target.files);
           }}
           className="hidden"
         />
-        <label htmlFor="file-upload" className="bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600 mt-4">
-          Parcourir...
-        </label>
-        {files ? (
-          Array.from(files).map((e) => (
-            <div className="text-gray-800 text-sm mt-2" key={e.name}>
-              {e.name}
-            </div>
-          ))
-        ) : (
-          <div className="text-gray-800 text-sm mt-2">Aucun fichier sélectionné.</div>
-        )}
+        <div className="flex w-full mt-4">
+          <div>
+            <label htmlFor="file-upload" className="bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+              Parcourir...
+            </label>
+          </div>
+          <div className="ml-4">
+            {filesToUpload ? (
+              Array.from(filesToUpload).map((e) => (
+                <p className="text-gray-800 text-sm mt-2" key={e.name}>
+                  {e.name}
+                </p>
+              ))
+            ) : (
+              <div className="text-gray-800 text-sm mt-2">Aucun fichier sélectionné.</div>
+            )}
+          </div>
+        </div>
+        <div className="mt-2">
+          {filesUploaded &&
+            filesUploaded.map((e) => (
+              <div key={e._id} className="flex w-full justify-between">
+                <p className="text-gray-800 text-sm mt-2">{e.name}</p>
+                <div className="text-blue-800 flex mt-2">
+                  <div className="mt-1">
+                    <Bin />
+                  </div>
+                  <p className="text-sm font-medium ml-2" onClick={() => deleteFile(e._id)}>
+                    Supprimer
+                  </p>
+                </div>
+              </div>
+            ))}
+        </div>
         {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
-        {files && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
+        {filesToUpload && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
       </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(files)} disabled={!date || !error || loading} />
+      <StickyButton
+        text="Continuer"
+        onClickPrevious={() => history.push("/inscription2023/documents")}
+        onClick={() => onSubmit(filesToUpload)}
+        disabled={!date || !error || loading}
+      />
     </>
   );
 }
