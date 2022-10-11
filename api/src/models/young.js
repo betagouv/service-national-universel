@@ -1150,6 +1150,13 @@ const Schema = new mongoose.Schema({
   },
 
   // * Consentements
+  parentAllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Les representants autorise le jeune à participer au SNU",
+    },
+  },
   dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
