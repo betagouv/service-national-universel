@@ -154,6 +154,11 @@ class Auth {
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+        params: { firstName: user.firstName, lastName: user.lastName, cta: `${config.APP_URL}/inscription2023` },
+      });
+
       return res.status(200).send({
         ok: true,
         token,
