@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { lazy, useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Error from "../../../components/error";
@@ -8,10 +8,9 @@ import { appURL } from "../../../config";
 import { capture } from "../../../sentry";
 import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
-import DatePickerList from "../../preinscription/components/DatePickerList";
 import StickyButton from "../../../components/inscription/stickyButton";
-// import BackArrow from "../../../assets/icons/BackArrow";
 import Navbar from "../components/Navbar";
+const ExpirationDate = lazy(() => import("../components/ExpirationDate"));
 
 export default function StepUpload({ step }) {
   const { category } = useParams();
@@ -124,8 +123,8 @@ export default function StepUpload({ step }) {
         {ID.subtitle && <div className="text-xl mb-2 text-gray-600">{ID.subtitle}</div>}
         <div className="w-full flex items-center justify-center my-4">
           <div className="w-3/4 flex flex-col gap-4">
-            <img src={require(`../../../assets/IDProof/${ID.imgFront}`)} />
-            {ID.imgBack && <img src={require(`../../../assets/IDProof/${ID.imgBack}`)} />}
+            <img src={require(`../../../assets/IDProof/${ID.imgFront}`)} alt={ID.title} />
+            {ID.imgBack && <img src={require(`../../../assets/IDProof/${ID.imgBack}`)} alt={ID.title} />}
           </div>
         </div>
         <div className="my-2 border-l-8 border-l-[#6A6AF4] pl-4">
@@ -159,23 +158,7 @@ export default function StepUpload({ step }) {
           <div className="text-gray-800 text-sm mt-2">Aucun fichier sélectionné.</div>
         )}
         {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
-
-        {/* Date d'expiration */}
-        {files && (
-          <>
-            <hr className="my-4 h-px bg-gray-200 border-0" />
-            <div className="text-2xl font-semibold">Renseignez la date d’expiration</div>
-            <div className="text-gray-600 text-sm mt-2">Votre pièce d’identité doit être valide à votre départ en séjour de cohésion.</div>
-            <div className="w-full flex items-center justify-center my-4">
-              <div className="w-3/4 flex flex-col gap-4">
-                <img src={require(`../../../assets/IDProof/${ID.imgDate}`)} />
-              </div>
-            </div>
-            <div className="flex flex-col flex-start my-4">
-              <DatePickerList title="" value={date} onChange={(e) => setDate(e.target.value)} />
-            </div>
-          </>
-        )}
+        {files && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
       </div>
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(files)} disabled={!date || !error || loading} />
     </>

@@ -18,7 +18,6 @@ export default function StepDocuments({ step }) {
       category: "cniOld",
       title: "Carte Nationale d'Identité",
       subtitle: "Ancien format",
-      imgFront: "cniOldFront.png",
     },
     {
       category: "passport",
