@@ -1,7 +1,14 @@
 import React from "react";
 import { FiChevronLeft } from "react-icons/fi";
+import useDetectKeyboardOpen from "use-detect-keyboard-open";
 
 export default function StickyButton({ text, onClick, onClickPrevious = undefined, disabled = false }) {
+  const isKeyboardOpen = useDetectKeyboardOpen();
+
+  if (isKeyboardOpen) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 w-full z-50">
       <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
