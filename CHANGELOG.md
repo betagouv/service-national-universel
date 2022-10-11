@@ -1,3 +1,19 @@
+# [1.145.0](https://github.com/betagouv/service-national-universel/compare/v1.144.0...v1.145.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* **app:** notif step confirm -> step done ([6a4da61](https://github.com/betagouv/service-national-universel/commit/6a4da618e95b12c20da2354a3d869d4be5700dca))
+
+
+### Features
+
+* **app:** home preinscription ([1f6d8c0](https://github.com/betagouv/service-national-universel/commit/1f6d8c05e2bdec4fabea1de5816bad5f50f26eb5))
+* **app:** stepNoneligible ([#1885](https://github.com/betagouv/service-national-universel/issues/1885)) ([9e3b01e](https://github.com/betagouv/service-national-universel/commit/9e3b01efba6f171b4cc5d107428fe2c0d3168bd7))
+* **app:** update home page ([d393694](https://github.com/betagouv/service-national-universel/commit/d3936949ac6f5cff909f6c65b0f507c1393d3473))
+* **app/api:** confirm screen inscription + canUpdateYoungStatus on route inscription ([41c43dc](https://github.com/betagouv/service-national-universel/commit/41c43dc8a253b4c3cc4d670057f49b6456ea49b9))
+* **app/api:** inscription 2023 coordinates validation and api call ([#1880](https://github.com/betagouv/service-national-universel/issues/1880)) ([2946ae3](https://github.com/betagouv/service-national-universel/commit/2946ae397db8ede39292a1cafe613f4de09a49f4))
+
 # [1.144.0](https://github.com/betagouv/service-national-universel/compare/v1.143.0...v1.144.0) (2022-10-07)
 
 
