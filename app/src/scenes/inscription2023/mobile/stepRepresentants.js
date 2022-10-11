@@ -13,6 +13,8 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import Error from "../../../components/error";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
 import { toastr } from "react-redux-toastr";
 
 export default function StepRepresentants({ step }) {
@@ -199,6 +201,8 @@ export default function StepRepresentants({ step }) {
           </div>
         )}
       </div>
+      <Help />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
     </>
   );

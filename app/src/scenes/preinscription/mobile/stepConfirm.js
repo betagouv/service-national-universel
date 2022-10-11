@@ -8,6 +8,7 @@ import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { capture } from "../../../sentry";
+import Footer from "../../../components/footerV2";
 
 export default function StepDone() {
   const [error, setError] = useState({});
@@ -119,6 +120,7 @@ export default function StepDone() {
           </div>
         </div>
       </div>
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="M'inscrire au SNU" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/profil")} />
     </>
   );

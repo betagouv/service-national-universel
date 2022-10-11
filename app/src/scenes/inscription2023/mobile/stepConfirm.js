@@ -9,6 +9,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -136,6 +137,7 @@ export default function StepConfirm() {
           ) : null}
         </div>
       </div>
+      <Footer marginBottom={"12vh"} />
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-col shadow-ninaInverted p-4 bg-white gap-1 ">
           <div className="flex flex-row gap-2">
@@ -160,7 +162,7 @@ export default function StepConfirm() {
 }
 
 function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  if (string) return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 const Details = ({ title, value }) => {

@@ -146,15 +146,17 @@ export default function StepConfirm() {
             <hr className="my-5 h-px bg-gray-200 border-0" />
             <div className="flex flex-col items-end w-full">
               <div className="flex justify-end space-x-4">
-                <button className="flex items-center justify-center py-2 px-4 border border-[#000091]" onClick={() => history.push("/inscription2023/documents")}>
+                <div
+                  className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] "
+                  onClick={() => history.push("/inscription2023/documents")}>
                   Précédent
-                </button>
+                </div>
                 <div>
-                  <button
-                    className={`flex items-center justify-center py-2 px-4 cursor-pointer text-base ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+                  <div
+                    className={`flex items-center justify-center py-2 px-4 text-base ${loading ? "bg-[#E5E5E5] text-[#929292]" : "cursor-pointer  bg-[#000091] text-white"}`}
                     onClick={() => !loading && onSubmit()}>
                     Valider mon inscription au SNU
-                  </button>
+                  </div>
                 </div>
               </div>
               <div className="text-[13px]">Je certifie l’exactitude de ces renseignements</div>
