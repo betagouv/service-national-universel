@@ -162,6 +162,8 @@ export default function StepUpload({ step }) {
             )}
           </div>
         </div>
+        {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
+        {filesToUpload && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
         <div className="mt-2">
           {filesUploaded &&
             filesUploaded.map((e) => (
@@ -178,8 +180,6 @@ export default function StepUpload({ step }) {
               </div>
             ))}
         </div>
-        {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
-        {filesToUpload && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
       </div>
       <StickyButton
         text="Continuer"
