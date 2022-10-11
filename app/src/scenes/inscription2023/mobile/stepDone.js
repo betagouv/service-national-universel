@@ -49,7 +49,7 @@ export default function StepWaitingConsent() {
   const young = useSelector((state) => state.Auth.young);
   const [disabled, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
-  const [notAuthorised, setNotAuthorised] = React.useState(true);
+  const [notAuthorised, setNotAuthorised] = React.useState(false);
   const history = useHistory();
 
   React.useEffect(() => {
