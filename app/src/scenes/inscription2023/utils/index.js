@@ -55,3 +55,8 @@ export const genderOptions = [
   { value: "female", label: "Femme" },
   { value: "male", label: "Homme" },
 ];
+
+export const booleanOptions = [
+  { value: "true", label: "Oui" },
+  { value: "false", label: "Non" },
+];

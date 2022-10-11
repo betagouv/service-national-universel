@@ -24,11 +24,12 @@ const youngUnemployedSituationOptions = [YOUNG_SITUATIONS.POLE_EMPLOI, YOUNG_SIT
 const youngActiveSituationOptions = [...youngEmployedSituationOptions, ...youngUnemployedSituationOptions];
 
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const getObjectWithEmptyData = (fields) => {
+const getObjectWithEmptyData = (fields, emptyValue = "") => {
   const object = {};
   fields.forEach((field) => {
-    object[field] = "";
+    object[field] = emptyValue;
   });
   return object;
 };
@@ -99,6 +100,31 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: needRequired(Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
+      handicap: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      ppsBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      paiBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      allergies: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      moreInformation: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      specificAmenagment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      specificAmenagmentType: Joi.alternatives().conditional("specificAmenagment", {
+        is: "true",
+        then: needRequired(Joi.string().trim(), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
     }).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
@@ -113,6 +139,9 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       ...value,
       employed: youngEmployedSituationOptions.includes(value.situation),
       ...(value.livesInFrance === "true" ? getObjectWithEmptyData(foreignAddressFields) : {}),
+      moreInformation: undefined,
+      ...(value.moreInformation === "false" ? getObjectWithEmptyData(moreInformationFields, "false") : {}),
+      ...(value.moreInformation === "false" || value.specificAmenagment === "false" ? { specificAmenagmentType: "" } : {}),
     });
 
     await young.save({ fromUser: req.user });
@@ -230,7 +259,6 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const { error, value } = Joi.object({
       cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
     }).validate(req.body, { stripUnknown: true });
-    console.log(error);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
