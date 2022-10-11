@@ -192,7 +192,7 @@ export default function StepRepresentants({ step }) {
 const FormRepresentant = ({ i, data, setData, errors }) => {
   return (
     <div className="flex flex-col my-4">
-      <div className="pb-2 text-[#161616] font-bold">Représentant légal {i} </div>
+      <div className="pb-2 text-[#161616] font-bold">Représentant(e) légal(e) {i} </div>
       <div className="flex flex-col gap-2">
         <div className="text-[#161616] text-base">Votre lien</div>
         <div className="flex items-center">
@@ -222,7 +222,7 @@ const FormRepresentant = ({ i, data, setData, errors }) => {
             checked={data[`parent${i}Status`] === "representant"}
             onChange={() => setData({ ...data, [`parent${i}Status`]: "representant" })}
           />
-          Représentant(e) légal(e)
+          Autre représentant(e) légal(e)
         </label>
         <div className="text-[#CE0500] text-sm">{errors[`parent${i}Status`]}</div>
       </div>

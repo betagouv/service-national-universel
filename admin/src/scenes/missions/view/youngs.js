@@ -63,7 +63,7 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   async function transform(data, values) {
     let all = data;
-    if (["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].includes(values)) {
+    if (["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
       const youngIds = [...new Set(data.map((item) => item.youngId))];
       if (youngIds?.length) {
         const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
@@ -164,7 +164,7 @@ export default function Youngs({ mission, applications, updateMission }) {
           "Région représentant légal 2": data.young.parent2Region,
         },
       };
-      let fields = { ID: data._id };
+      let fields = { ID: data._id, youngId: data.youngId };
       for (const element of values) {
         let key;
         for (key in allFields[element]) fields[key] = allFields[element][key];

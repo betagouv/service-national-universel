@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import CreatableSelect from "../../../components/CreatableSelect";
 import { ES_NO_LIMIT } from "snu-lib";
+import validator from "validator";
 
-export default function SchoolOutOfFrance({ school, onSelectSchool }) {
+export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify }) {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
+
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     async function getCountries() {
@@ -29,6 +32,21 @@ export default function SchoolOutOfFrance({ school, onSelectSchool }) {
   }, []);
 
   useEffect(() => {
+    if (!countries.length) return;
+
+    let errors = {};
+
+    if (!school?.fullName) {
+      errors.fullName = "Vous devez mettre le nom de l'établissement";
+    }
+    if (!country) {
+      errors.country = "Vous devez mettre le nom du pays";
+    }
+
+    setErrors(errors);
+  }, [toggleVerify]);
+
+  useEffect(() => {
     async function getSchools() {
       if (!country) return;
       const body = {
@@ -44,7 +62,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool }) {
 
   return (
     <>
-      <div className="form-group">
+      <div className="">
         <CreatableSelect
           label="Pays de l'établissement"
           value={country}
@@ -53,23 +71,23 @@ export default function SchoolOutOfFrance({ school, onSelectSchool }) {
             setCountry(value);
           }}
           placeholder="Sélectionnez un pays"
+          error={errors.country}
         />
       </div>
       <div className="form-group">
         <CreatableSelect
           label="Nom de l'établissement"
-          value={school && `${school.fullName} - ${school.city}`}
+          value={school && `${school.fullName}${school.city ? ` - ${school.city}` : ""}`}
           options={schools
             .map((e) => `${e.fullName} - ${e.city}`)
             .sort()
             .map((c) => ({ value: c, label: c }))}
           onChange={(value) => {
-            onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === value));
+            const selectedSchool = schools.find((e) => `${e.fullName} - ${e.city}` === value);
+            onSelectSchool(selectedSchool ?? { fullName: value, country });
           }}
           placeholder="Sélectionnez un établissement"
-          onCreateOption={(value) => {
-            onSelectSchool({ country: country, fullName: value });
-          }}
+          error={errors.fullName}
         />
       </div>
     </>

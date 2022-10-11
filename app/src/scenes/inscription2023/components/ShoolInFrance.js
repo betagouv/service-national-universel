@@ -5,6 +5,9 @@ import CreatableSelect from "../../../components/CreatableSelect";
 import { ES_NO_LIMIT } from "snu-lib";
 import Input from "./Input";
 import VerifyAddress from "./VerifyAddress";
+import GhostButton from "./GhostButton";
+import { FiChevronLeft } from "react-icons/fi";
+import validator from "validator";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
@@ -20,18 +23,15 @@ export const messageStyles = {
   error: "error",
 };
 
-export default function SchoolInFrance({ school, onSelectSchool }) {
+export default function SchoolInFrance({ school, onSelectSchool, toggleVerify }) {
+  console.log("🚀 ~ file: ShoolInFrance.js ~ line 27 ~ SchoolInFrance ~ school", school);
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
   const [manualFilling, setManualFilling] = useState(false);
-  console.log("🚀 ~ file: ShoolInFrance.js ~ line 29 ~ SchoolInFrance ~ manualFilling", manualFilling);
-  const [manualSchool, setManualSchool] = useState({});
+  const [manualSchool, setManualSchool] = useState(school);
   const [errors, setErrors] = useState({});
-
-  console.log("🚀 ~ file: ShoolInFrance.js ~ line 24 ~ SchoolInFrance ~ school", school);
-  console.log("🚀 ~ file: ShoolInFrance.js ~ line 31 ~ SchoolInFrance ~ manualSchool", manualSchool);
 
   const isVerifyAddressDisabled = !manualSchool.fullName || !manualSchool.address || !manualSchool.city || !manualSchool.postCode;
 
@@ -49,6 +49,36 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
     }
     getCities();
   }, []);
+
+  useEffect(() => {
+    if (!cities.length) return;
+
+    let errors = {};
+
+    if (!school?.fullName) {
+      errors.fullName = "Vous devez mettre le nom de l'établissement";
+    }
+    if (!city) {
+      errors.city = "Vous devez mettre le nom de la ville";
+    }
+
+    if (Object.keys(manualSchool).length) {
+      if (!manualSchool?.fullName) {
+        errors.manualFullName = "Vous devez mettre le nom de l'établissement";
+      }
+      if (!manualSchool?.address) {
+        errors.manualAddress = "Vous devez mettre une adresse";
+      }
+      if (!manualSchool?.city) {
+        errors.manualCity = "Vous devez mettre le nom de la ville";
+      }
+      if (!(manualSchool?.postCode && validator.isPostalCode(manualSchool?.postCode, "FR"))) {
+        errors.manualPostCode = "Vous devez sélectionner un code postal";
+      }
+    }
+
+    setErrors(errors);
+  }, [toggleVerify]);
 
   useEffect(() => {
     async function getSchools() {
@@ -89,7 +119,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
         onChange={(value) => {
           setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
         }}
-        error={errors.fullName}
+        error={errors.manualFullName}
       />
       <Input
         value={manualSchool.address}
@@ -97,7 +127,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
         onChange={(value) => {
           setManualSchool({ ...manualSchool, address: value, addressVerified: undefined });
         }}
-        error={errors.address}
+        error={errors.manualAddress}
       />
       <Input
         value={manualSchool.postCode}
@@ -105,7 +135,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
         onChange={(value) => {
           setManualSchool({ ...manualSchool, postCode: value, addressVerified: undefined });
         }}
-        error={errors.postCode}
+        error={errors.manualPostCode}
       />
       <Input
         value={manualSchool.city}
@@ -113,7 +143,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
         onChange={(value) => {
           setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
         }}
-        error={errors.city}
+        error={errors.manualCity}
       />
       <VerifyAddress
         address={manualSchool.address}
@@ -124,6 +154,17 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
         onFail={onVerifyAddress(false)}
         message={manualSchool.addressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.addressVerified}
         messageStyle={manualSchool.addressVerified === "true" || isVerifyAddressDisabled ? messageStyles.info : messageStyles.error}
+      />
+      <GhostButton
+        name={
+          <div className="flex text-center items-center justify-center gap-1">
+            <FiChevronLeft className="text-[#000091] font-bold" />
+            Revenir à la liste des établissements
+          </div>
+        }
+        onClick={() => {
+          setManualFilling(false);
+        }}
       />
     </>
   ) : (
@@ -138,6 +179,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
             setManualSchool({ ...manualSchool, city: value });
           }}
           placeholder="Sélectionnez une commune"
+          error={errors.city}
         />
       </div>
       <div className="form-group">
@@ -156,6 +198,7 @@ export default function SchoolInFrance({ school, onSelectSchool }) {
             setManualSchool({ ...manualSchool, fullName: value });
             setManualFilling(true);
           }}
+          error={errors.fullName}
         />
       </div>
     </>
