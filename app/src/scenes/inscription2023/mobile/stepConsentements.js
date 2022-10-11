@@ -28,7 +28,6 @@ export default function StepConsentements({ step }) {
   });
 
   const onSubmit = async () => {
-    // TODO
     setLoading(true);
     try {
       const { ok, code, data: responseData } = await api.put(`/young/inscription2023/consentement`, data);

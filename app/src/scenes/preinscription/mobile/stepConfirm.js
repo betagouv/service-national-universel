@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { useHistory, Link } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import api from "../../../services/api";
-import { appURL } from "../../../config";
 import { translate, translateGrade, formatDateFR } from "snu-lib";
 import plausibleEvent from "../../../services/plausible";
-import { SENDINBLUE_TEMPLATES } from "../../../utils";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import StickyButton from "../../../components/inscription/stickyButton";
@@ -43,17 +41,10 @@ export default function StepDone() {
     if (values.schooled === "true") values.grade = data.scolarity;
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const { user, code, ok } = await api.post("/young/signup2023", values);
-
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
-
-      //Tape une 403
-      // await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
-      //   cta: `${appURL}/inscription2023`,
-      // });
-
-      plausibleEvent("");
-
+      plausibleEvent("Phase0/CTA preinscription - inscription");
       history.push("/preinscription/done");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")

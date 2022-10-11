@@ -4,11 +4,7 @@ import { department2region, departmentLookUp } from "snu-lib/region-and-departme
 import InfoIcon from "../../../components/InfoIcon";
 import GhostButton from "./GhostButton";
 
-export const messageStyles = {
-  info: "info",
-  error: "error",
-};
-export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, message = "", messageStyle = messageStyles.info }) {
+export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false }) {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
 
@@ -86,14 +82,10 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
     );
   }
 
+  if (isVerified) return <Message>L'adresse a été vérifiée</Message>;
+
   return (
     <>
-      {message && (
-        <div className={`flex items-center rounded-md p-3 mt-3 text-[${messageStyle === "info" ? "#32257f" : "#CE0500"}]`}>
-          <InfoIcon color={messageStyle === "info" ? "#32257f" : "#CE0500"} />
-          <div className="ml-2">{message}</div>
-        </div>
-      )}
       <GhostButton
         disabled={disabled}
         name={
@@ -107,6 +99,14 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
           getSuggestions(`${address}, ${city} ${zip}`);
         }}
       />
+      {(!address || !zip || !city) && <Message>Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.</Message>}
     </>
   );
 }
+
+const Message = ({ children }) => (
+  <div className={`flex items-center rounded-md p-3 text-["#32257f"] bg-[#edecfc]`}>
+    <InfoIcon className="mt-1" color="#32257f" />
+    <div className="ml-2">{children}</div>
+  </div>
+);

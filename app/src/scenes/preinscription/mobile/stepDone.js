@@ -8,6 +8,8 @@ import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
+import { SENDINBLUE_TEMPLATES } from "snu-lib/constants";
+import { appURL } from "../../../config";
 
 export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
@@ -26,7 +28,10 @@ export default function StepDone() {
       if (young) {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
-        plausibleEvent("");
+        plausibleEvent("Phase0/CTA preinscription - demarrer");
+        await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
+          cta: `${appURL}/inscription2023`,
+        });
         history.push("/inscription2023");
       }
     } catch (e) {
