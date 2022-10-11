@@ -8,8 +8,6 @@ import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
-import { SENDINBLUE_TEMPLATES } from "snu-lib/constants";
-import { appURL } from "../../../config";
 
 export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
