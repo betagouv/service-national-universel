@@ -135,12 +135,12 @@ export default function StepEligibilite() {
               data.isAbroad ? (
                 <>
                   {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
-                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} toggleVerify={toggleVerify} />
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               ) : (
                 <>
                   {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
-                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} toggleVerify={toggleVerify} />
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               )
             ) : !data.isAbroad ? (

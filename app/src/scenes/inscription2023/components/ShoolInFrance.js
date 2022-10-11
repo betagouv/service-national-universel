@@ -30,7 +30,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
   const [schools, setSchools] = useState([]);
 
   const [manualFilling, setManualFilling] = useState(false);
-  const [manualSchool, setManualSchool] = useState(school);
+  const [manualSchool, setManualSchool] = useState(school ?? {});
   const [errors, setErrors] = useState({});
 
   const isVerifyAddressDisabled = !manualSchool.fullName || !manualSchool.address || !manualSchool.city || !manualSchool.postCode;
@@ -196,6 +196,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           placeholder="Sélectionnez un établissement"
           onCreateOption={(value) => {
             setManualSchool({ ...manualSchool, fullName: value });
+            onSelectSchool(null);
             setManualFilling(true);
           }}
           error={errors.fullName}
