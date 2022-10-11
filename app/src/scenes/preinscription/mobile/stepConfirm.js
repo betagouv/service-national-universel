@@ -8,6 +8,7 @@ import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { capture } from "../../../sentry";
+import { useEffect } from "react";
 import Footer from "../../../components/footerV2";
 
 export default function StepDone() {
@@ -15,6 +16,16 @@ export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
+
+  useEffect(
+    () =>
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      }),
+    [error],
+  );
 
   const onSubmit = async () => {
     console.log(data);
@@ -66,7 +77,7 @@ export default function StepDone() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-row justify-between items-center my-2">
             <div className="text-[#161616] text-lg font-semibold">Mon éligibilité</div>
-            <Link to=".">
+            <Link to="./eligibilite">
               <EditPen />
             </Link>
           </div>
@@ -80,14 +91,18 @@ export default function StepDone() {
           </div>
           {data.school ? (
             <>
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-[#666666] text-sm">Pays de l&apos;établissement : </div>
-                <div className="text-[#161616] text-base capitalize">{data.school.country.toLowerCase()}</div>
-              </div>
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-[#666666] text-sm">Commune de l&apos;établissement :</div>
-                <div className="text-[#161616] text-base">{data.school.city}</div>
-              </div>
+              {data.school?.country ? (
+                <div className="flex flex-row justify-between items-center">
+                  <div className="text-[#666666] text-sm">Pays de l&apos;établissement : </div>
+                  <div className="text-[#161616] text-base capitalize">{data.school?.country?.toLowerCase()}</div>
+                </div>
+              ) : null}
+              {data.school?.city ? (
+                <div className="flex flex-row justify-between items-center">
+                  <div className="text-[#666666] text-sm">Commune de l&apos;établissement :</div>
+                  <div className="text-[#161616] text-base">{data.school.city}</div>
+                </div>
+              ) : null}
               <div className="flex flex-col ">
                 <div className="text-[#666666] text-sm">Nom de l&apos;établissement :</div>
                 <div className="text-[#161616] text-base mt-1">{data.school.fullName}</div>

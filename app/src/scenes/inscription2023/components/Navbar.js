@@ -7,6 +7,7 @@ const index = {
   CONSENTEMENTS: "2",
   REPRESENTANTS: "3",
   DOCUMENTS: "4",
+  UPLOAD: "4",
 };
 
 const wording = {
@@ -14,6 +15,7 @@ const wording = {
   CONSENTEMENTS: "Consentements",
   REPRESENTANTS: "Mes représentants légaux",
   DOCUMENTS: "Justifier de mon identité",
+  UPLOAD: "Justifier de mon identité",
 };
 
 const next = {
@@ -38,8 +40,8 @@ const Navbar = ({ step, onSave }) => {
         <div className="flex space-x-2 w-full mt-2">
           <div className="basis-1/3 bg-[#000091] h-2"></div>
           <div className={`basis-1/3  h-2 ${step !== "COORDONNEES" ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
-          <div className={`basis-1/3  h-2 ${["REPRESENTANTS", "DOCUMENTS"].includes(step) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
-          <div className={`basis-1/3  h-2 ${step === "DOCUMENTS" ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
+          <div className={`basis-1/3  h-2 ${["REPRESENTANTS", "DOCUMENTS", "UPLOAD"].includes(step) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
+          <div className={`basis-1/3  h-2 ${["DOCUMENTS", "UPLOAD"].includes(step) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
         </div>
         {desktop && (
           <div className="flex space-x-1 text-xs mt-2 text-[#666666]">

@@ -6,6 +6,7 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import { getDepartmentByZip } from "snu-lib";
+import plausibleEvent from "../../../services/plausible";
 import Footer from "../../../components/footerV2";
 
 export default function StepSejour() {
@@ -82,6 +83,7 @@ export default function StepSejour() {
         className="border p-4 my-3 flex justify-between items-center"
         onClick={() => {
           setData({ ...data, cohort: cohort.id });
+          plausibleEvent(cohort.event);
           history.push("/preinscription/profil");
         }}>
         <div>

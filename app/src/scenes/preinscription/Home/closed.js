@@ -117,7 +117,7 @@ export default function Closed({ location }) {
           {/* Start Button Desktop View */}
           <div className="z-50  hidden md:block">
             <button disabled className="uppercase p-3 pr-4 mt-[3px] lg:mt-[2rem] text-white bg-[#acaaba] font-medium	text-base	cursor-not-allowed tracking-wider	rounded-full">
-              Ouverture des inscriptions le 17/10/2022
+              Ouverture des inscriptions le 19/10/2022
             </button>
           </div>
         </div>
