@@ -121,6 +121,8 @@ const defaultState = {
   handicapInSameDepartment: "",
 };
 
+const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07)(?:\\W*\\d){8}$`;
+
 export default function StepCoordonnees({ step }) {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
@@ -218,7 +220,7 @@ export default function StepCoordonnees({ step }) {
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !validator.isMobilePhone(phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (phone && !validator.matches(phone, regexPhoneFrenchCountries)) {
       errors.phone = errorMessages.phone;
     }
 
