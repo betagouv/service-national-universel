@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
-import SearchableSelect from "../../../components/SearchableSelect";
+import CreatableSelect from "../../../components/CreatableSelect";
 import { ES_NO_LIMIT } from "snu-lib";
 
 export default function SchoolOutOfFrance({ school, onSelectSchool }) {
@@ -45,7 +45,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool }) {
   return (
     <>
       <div className="form-group">
-        <SearchableSelect
+        <CreatableSelect
           label="Pays de l'établissement"
           value={country}
           options={countries.map((c) => ({ value: c, label: c }))}
@@ -56,7 +56,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool }) {
         />
       </div>
       <div className="form-group">
-        <SearchableSelect
+        <CreatableSelect
           label="Nom de l'établissement"
           value={school && `${school.fullName} - ${school.city}`}
           options={schools
@@ -67,6 +67,9 @@ export default function SchoolOutOfFrance({ school, onSelectSchool }) {
             onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === value));
           }}
           placeholder="Sélectionnez un établissement"
+          onCreateOption={(value) => {
+            onSelectSchool({ country: country, fullName: value });
+          }}
         />
       </div>
     </>
