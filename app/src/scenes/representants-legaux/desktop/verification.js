@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import { getDepartmentByZip } from "snu-lib/region-and-departments";
 import { translate, translateGrade } from "snu-lib/translation";
-import CheckBox from "../../../components/inscription/checkbox";
+import Check from "../components/Check";
 
 export default function Verification({ step }) {
   const history = useHistory();
@@ -52,15 +52,14 @@ export default function Verification({ step }) {
           {sections}
 
           <div className="flex items-center pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-            <CheckBox className="shrink-0" checked={certified} onChange={(e) => setCertified(e)} />
-            <div className="ml-3 text-[14px] leadind-[19px] text-[#3a3a3a]">
+            <Check checked={certified} onChange={(e) => setCertified(e)}>
               Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
               <a href="#" target="_blank" className="underline">
                 {/* TODO: mettre le lien sur cet article */}
                 cet article
               </a>{" "}
               avant de valider.
-            </div>
+            </Check>
           </div>
           {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
 
