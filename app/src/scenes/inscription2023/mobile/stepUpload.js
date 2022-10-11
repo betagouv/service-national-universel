@@ -1,4 +1,4 @@
-import React, { lazy, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Error from "../../../components/error";
@@ -10,7 +10,7 @@ import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Navbar from "../components/Navbar";
-const ExpirationDate = lazy(() => import("../components/ExpirationDate"));
+import ExpirationDate from "../components/ExpirationDate";
 
 export default function StepUpload({ step }) {
   const { category } = useParams();
