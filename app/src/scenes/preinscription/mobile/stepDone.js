@@ -24,12 +24,11 @@ export default function StepDone() {
 
   async function handleClick() {
     try {
+      plausibleEvent("Phase0/CTA preinscription - demarrer");
       const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
       if (young) {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
-        plausibleEvent("Phase0/CTA preinscription - demarrer");
-        history.push("/inscription2023");
       }
     } catch (e) {
       capture(e);
