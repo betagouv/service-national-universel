@@ -145,6 +145,7 @@ router.post("/eligibility/2023", async (req, res) => {
             id: "Avril 2023 - A",
             dates: "du 9 au 21 avril",
             buffer: 1.15,
+            event: "Phase0/CTA preinscription - sejour avril A",
           });
         }
         break;
@@ -155,6 +156,7 @@ router.post("/eligibility/2023", async (req, res) => {
             id: "Avril 2023 - B",
             dates: "du 16 au 28 avril",
             buffer: 1.15,
+            event: "Phase0/CTA preinscription - sejour avril B",
           });
         }
         break;
@@ -164,6 +166,7 @@ router.post("/eligibility/2023", async (req, res) => {
             id: "Février 2023 - C",
             dates: "du 19 février au 3 mars",
             buffer: 1.15,
+            event: "Phase0/CTA preinscription - sejour fevrier C",
           });
         }
         break;
@@ -176,6 +179,7 @@ router.post("/eligibility/2023", async (req, res) => {
         id: "Juin 2023",
         dates: "du 11 au 23 juin",
         buffer: 1.15,
+        event: "Phase0/CTA preinscription - sejour juin",
       });
     }
 
@@ -184,6 +188,7 @@ router.post("/eligibility/2023", async (req, res) => {
         id: "Juillet 2023",
         dates: "du 5 au 17 juillet",
         buffer: 1.15,
+        event: "Phase0/CTA preinscription - sejour juillet",
       });
     }
 

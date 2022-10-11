@@ -71,7 +71,7 @@ export default function StepEligibilite() {
       toastr.error("Veuillez remplir tous les champs :" + Object.keys(errors)[0] + Object.values(errors)[0]);
       return;
     }
-    plausibleEvent("");
+    plausibleEvent("Phase0/CTA preinscription - eligibilite");
     history.push("/preinscription/sejour");
   };
 
