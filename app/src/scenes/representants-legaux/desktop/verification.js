@@ -5,19 +5,28 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import { computeSejourDate } from "../commons";
+import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import { getDepartmentByZip } from "snu-lib/region-and-departments";
+import { translate, translateGrade } from "snu-lib/translation";
+import CheckBox from "../../../components/inscription/checkbox";
 
 export default function Verification({ step }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
+  const [certified, setCertified] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   if (!young) return <Loader />;
 
   const sections = sectionsData(young).map(Section);
 
   function onNext() {
-    history.push(`/representants-legaux/consentement?token=${token}`);
+    setError(null);
+    if (certified) {
+      history.push(`/representants-legaux/consentement?token=${token}`);
+    } else {
+      setError("Vous devez certifier l'exactitude de ces renseignements avant de pouvoir continuer.");
+    }
   }
   function onPrevious() {
     history.push(`/representants-legaux/presentation?token=${token}`);
@@ -34,6 +43,7 @@ export default function Verification({ step }) {
             <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
             <p>
               <a href="#" className="underline">
+                {/* TODO: mettre le bon lien */}
                 Je vois des informations incorrectes
               </a>
             </p>
@@ -41,7 +51,20 @@ export default function Verification({ step }) {
 
           {sections}
 
-          <div className="flex justify-content-end pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="flex items-center pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+            <CheckBox className="shrink-0" checked={certified} onChange={(e) => setCertified(e)} />
+            <div className="ml-3 text-[14px] leadind-[19px] text-[#3a3a3a]">
+              Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
+              <a href="#" target="_blank" className="underline">
+                {/* TODO: mettre le lien sur cet article */}
+                cet article
+              </a>{" "}
+              avant de valider.
+            </div>
+          </div>
+          {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
+
+          <div className="flex justify-content-end pt-[32px]">
             <button className="flex items-center justify-center px-3 py-2 cursor-pointer border-[1px] border-solid border-[#000091] text-[#000091] mr-2" onClick={onPrevious}>
               Précédent
             </button>
@@ -55,24 +78,24 @@ export default function Verification({ step }) {
   );
 }
 
-function Section(section) {
+function Section(section, idx) {
   if (section.subtitle) {
-    return SectionSubtitle(section);
+    return SectionSubtitle(section, idx);
   }
 
   const fields = section.fields.map(SectionField);
 
   return (
-    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid" key={idx.toString()}>
       <h2 className="mt-0 mb-[19px] font-bold text-[18px] leading-[32px]">{section.title}</h2>
       {fields}
     </div>
   );
 }
 
-function SectionSubtitle(section) {
+function SectionSubtitle(section, idx) {
   return (
-    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid" key={idx.toString()}>
       <h2 className="mt-0 mb-[19px] font-400 text-[18px] leading-[32px]">
         <b>{section.title} : </b> {section.subtitle}
       </h2>
@@ -80,11 +103,22 @@ function SectionSubtitle(section) {
   );
 }
 
-function SectionField(field) {
+function SectionField(field, idx) {
+  let content;
+  if (field.subtitle) {
+    content = <div className="text-[16px] font-400 text-[#666666]">{field.subtitle} :</div>;
+  } else {
+    content = (
+      <>
+        <div className="text-[16px] font-400 text-[#666666]">{field.label} :</div>
+        <div className="text-[16px] font-400 text-[#161616]">{field.value ? field.value : "-"}</div>
+      </>
+    );
+  }
+
   return (
-    <div className="flex justify-content-between items-center mb-[15px]">
-      <div className="text-[16px] font-400 text-[#666666]">{field.label} :</div>
-      <div className="text-[16px] font-400 text-[#161616]">{field.value ? field.value : "-"}</div>
+    <div className={"flex justify-content-between items-center mb-[15px]" + (field.separator ? " border-t-[1px] border-t-[#E5E5E5] border-t-solid m-t-2 pt-2" : "")} key={idx}>
+      {content}
     </div>
   );
 }
@@ -110,17 +144,73 @@ function specialSituations(young) {
   if (young.specificAmenagment === "true") {
     specials.push(young.firstName + " a besoin d'aménagements spécifiques " + (young.specificAmenagmentType ? ": " + young.specificAmenagmentType : ""));
   }
-  if (young.handicap === "true") {
-    specials.push(young.firstName + " a un handicap");
+  if (young.handicapInSameDepartment === "true") {
+    specials.push(young.firstName + " doit être affecté dans son département de résidence");
   }
-  if (young.handicap === "true") {
-    specials.push(young.firstName + " a un handicap");
+  if (young.highSkilledActivity === "true") {
+    specials.push(young.firstName + " a une activité de haut niveau");
+  }
+  if (young.highSkilledActivityInSameDepartment === "true") {
+    specials.push(young.firstName + " doit être affecté dans son département de résidence (activité de haut niveau)");
   }
 
   return specials;
 }
 
 function sectionsData(young) {
+  // --- situation spéciales ?
+  let specialSituation;
+  const specials = specialSituations(young);
+  if (specials.length > 0) {
+    specialSituation = specials.map((s) => (
+      <div className="text-right" key={s}>
+        {s}
+      </div>
+    ));
+  } else {
+    specialSituation = "Non";
+  }
+
+  // --- foreign address
+  let foreignAddress = [];
+  let titleAddress = [];
+  if (young.foreignAddress) {
+    titleAddress.push({ separator: true, subtitle: "Adresse de l'hébergeur" });
+
+    foreignAddress.push(
+      { separator: true, subtitle: "Adresse à l&apos;étranger" },
+      { label: "Adresse", value: young.foreignAddress },
+      { label: "Code postal", value: young.foreignZip },
+      { label: "Ville", value: young.foreignCity },
+      { label: "Pays", value: young.foreignCountry },
+    );
+  }
+
+  // --- situation
+  let situation = [{ separator: true, label: young.schooled === "true" ? "Situation scolaire" : "Situation", value: translate(young.situation) }];
+  if (young.schooled === "true") {
+    situation.push(
+      { label: "Pays de l'établissement", value: young.schoolCountry },
+      { label: "Ville de l'établissement", value: young.schoolCity },
+      { label: "Nom de l'établissement", value: young.schoolName },
+    );
+  }
+  situation.push({ label: "Situation particulière", value: specialSituation });
+
+  // --- parent 2
+  let secondParent = [];
+
+  if (young.parent2Status === "true") {
+    secondParent.push(
+      { separation: true, subtitle: "2ème parent" },
+      { label: "Son lien", value: young.parent2Status },
+      { label: "Son prénom", value: young.parent2FirstName },
+      { label: "Son nom", value: young.parent2LastName },
+      // { label: "Moyen de contact favori", value: "?" },
+      { label: "Son email", value: young.parent2Email },
+      { label: "Son téléphone", value: young.parent2Phone },
+    );
+  }
   return [
     {
       title: "Ses informations personnelles",
@@ -128,13 +218,13 @@ function sectionsData(young) {
         { label: "Prénom", value: young.firstName },
         { label: "Nom", value: young.lastName },
         { label: "Email", value: young.email },
-        { label: "Niveau de scolarité", value: young.grade },
+        { label: "Niveau de scolarité", value: translateGrade(young.grade) },
         { label: "Date de naissance", value: dayjs(young.birthdateAt).locale("fr").format("DD/MM/YYYY") },
       ],
     },
     {
       title: "Séjour de cohésion",
-      subtitle: "du " + computeSejourDate(young.cohort),
+      subtitle: COHESION_STAY_LIMIT_DATE[young.cohort],
     },
     {
       title: "Son profil",
@@ -143,26 +233,25 @@ function sectionsData(young) {
         { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
         { label: "Ville de naissance", value: young.birthCity },
         { label: "Sexe", value: young.gender },
-        { label: "Téléphone", value: young.phone },
+        { label: "Téléphone", value: young.phonwe },
+        ...titleAddress,
         { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
         { label: "Code postal", value: young.zip },
         { label: "Ville", value: young.city },
-        { label: "Sa situation scolaire", value: young.situation },
-        { label: "Pays de l'établissement", value: young.schoolCountry },
-        { label: "Ville de l'établissement", value: young.schoolCity },
-        { label: "Nom de l'établissement", value: young.schoolName },
-        { label: "Situation particulière", value: specialSituations(young) },
+        ...foreignAddress,
+        ...situation,
       ],
     },
     {
-      title: "Ses représentants légaux",
+      title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale&nbsp;:",
       fields: [
-        { label: "Lien", value: young.parent1Status },
-        { label: "Prénom", value: young.parent1FirstName },
-        { label: "Nom", value: young.parent1LastName },
+        { label: "Votre lien", value: young.parent1Status },
+        { label: "Votre prénom", value: young.parent1FirstName },
+        { label: "Votre nom", value: young.parent1LastName },
         // { label: "Moyen de contact favori", value: "?" },
-        { label: "Email", value: young.paren1Email },
-        { label: "Téléphone", value: young.paren1Phone },
+        { label: "Votre email", value: young.paren1Email },
+        { label: "Votre téléphone", value: young.parent1Phone },
+        ...secondParent,
       ],
     },
   ];

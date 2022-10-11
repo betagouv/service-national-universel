@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import LinkTo from "../../../assets/icons/LinkTo";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import CalendarBig from "../../../assets/icons/CalendarBig";
-import { computeSejourDate } from "../commons";
+import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 
 export default function Presentation({ step }) {
   const history = useHistory();
@@ -14,7 +14,7 @@ export default function Presentation({ step }) {
 
   if (!young) return <Loader />;
 
-  const sejourDate = computeSejourDate();
+  const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
 
   function onSubmit() {
     history.push(`/representants-legaux/verification?token=${token}`);
