@@ -18,6 +18,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [error, setError] = React.useState({});
+  const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
 
@@ -59,16 +60,18 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez choisir votre école. Contactez-nous (support URL) si vous ne la trouvez pas";
+          errors.school = "Vous devez choisir votre école";
         }
       }
     }
 
     setError(errors);
+    setToggleVerify(!toggleVerify);
 
     // ! Gestion erreur a reprendre
     if (Object.keys(errors).length) {
-      toastr.error("Veuillez remplir tous les champs :" + Object.keys(errors)[0] + Object.values(errors)[0]);
+      console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
+      toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
       return;
     }
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
@@ -130,9 +133,15 @@ export default function StepEligibilite() {
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
-                <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+                <>
+                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} toggleVerify={toggleVerify} />
+                </>
               ) : (
-                <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+                <>
+                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} toggleVerify={toggleVerify} />
+                </>
               )
             ) : !data.isAbroad ? (
               <div className="flex flex-col flex-start my-4">
@@ -151,14 +160,3 @@ export default function StepEligibilite() {
     </>
   );
 }
-
-const SchoolCard = ({ _id, data, onClick }) => {
-  return (
-    <div key={_id} className={`my-1 w-full shrink-0 grow-0 cursor-pointer lg:my-4`} onClick={onClick}>
-      <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg`}>
-        <span>{data.fullName}</span>
-        <span className="justify-end">{data.adresse}</span>
-      </article>
-    </div>
-  );
-};
