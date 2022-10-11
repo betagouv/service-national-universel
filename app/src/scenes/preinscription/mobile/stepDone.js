@@ -29,9 +29,6 @@ export default function StepDone() {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         plausibleEvent("Phase0/CTA preinscription - demarrer");
-        await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`, {
-          cta: `${appURL}/inscription2023`,
-        });
         history.push("/inscription2023");
       }
     } catch (e) {
