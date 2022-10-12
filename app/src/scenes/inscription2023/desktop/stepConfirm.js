@@ -63,10 +63,8 @@ export default function StepConfirm() {
           <div className="p-4 text-[#161616]">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <div className="flex items-center justify-between">
-              {" "}
-              <h1 className="text-[32px] font-bold mt-2">Vous y êtes presque...</h1>
-              {/* <img src={QuestionMark} alt="" /> */}
-              <QuestionMark />
+              <h1 className="text-[32px] font-bold mt-2 ">Vous y êtes presque...</h1>
+              <QuestionMark className="hover:scale-105 cursor-pointer" />
             </div>
 
             <div className="text-[#666666] text-sm mt-2">
@@ -79,13 +77,13 @@ export default function StepConfirm() {
                 <h1 className="text-lg font-bold mt-2 text-[#161616]">Séjour de cohésion :</h1>
                 <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young.cohort])}</div>
               </div>
-              <EditPen onClick={() => setModal({ isOpen: true })} />
+              <EditPen className="hover:scale-105 cursor-pointer" onClick={() => setModal({ isOpen: true })} />
             </div>
             <hr className="my-4 h-px bg-gray-200 border-0" />
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h1 className="text-lg font-bold mt-2 text-[#161616]">Mon profil</h1>
-                <EditPen onClick={() => history.push("/inscription2023/coordonnee")} />
+                <EditPen className="hover:scale-105 cursor-pointer" onClick={() => history.push("/inscription2023/coordonnee")} />
               </div>
               <Details title="Pays de naissance" value={young.birthCountry} />
               <Details title="Département de naissance" value={young.birthCityZip} />
@@ -125,7 +123,7 @@ export default function StepConfirm() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h1 className="text-lg font-bold mt-2 text-[#161616]">Mes représentants légaux</h1>
-                <EditPen onClick={() => history.push("/inscription2023/representants")} />
+                <EditPen className="hover:scale-105 cursor-pointer" onClick={() => history.push("/inscription2023/representants")} />
               </div>
               <Details title="Votre lien" value={translate(young.parent1Status)} />
               <Details title="Son prénom" value={young.parent1FirstName} />
@@ -147,13 +145,14 @@ export default function StepConfirm() {
             <div className="flex flex-col items-end w-full">
               <div className="flex justify-end space-x-4">
                 <div
-                  className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] "
+                  className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] hover:text-white hover:bg-[#000091] "
                   onClick={() => history.push("/inscription2023/documents")}>
                   Précédent
                 </div>
                 <div>
                   <div
-                    className={`flex items-center justify-center py-2 px-4 text-base ${loading ? "bg-[#E5E5E5] text-[#929292]" : "cursor-pointer  bg-[#000091] text-white"}`}
+                    disabled={loading}
+                    className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
                     onClick={() => !loading && onSubmit()}>
                     Valider mon inscription au SNU
                   </div>
