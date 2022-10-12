@@ -45,6 +45,7 @@ const errorMessages = {
   addressVerified: "Merci de vérifier l'adresse",
   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
   zip: "Le code postal n'est pas valide",
+  hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
@@ -191,9 +192,14 @@ export default function StepCoordonnees() {
         gender: young.gender || data.gender,
         phone: young.phone || data.phone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
+        addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
         city: young.city || data.city,
         zip: young.zip || data.zip,
+        region: young.region || data.region,
+        department: young.department || data.department,
+        location: young.location || data.location,
+        cityCode: young.cityCode || data.cityCode,
         foreignCountry: young.foreignCountry || data.foreignCountry,
         foreignAddress: young.foreignAddress || data.foreignAddress,
         foreignCity: young.foreignCity || data.foreignCity,
@@ -215,7 +221,7 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, frenchNationality, birthCityZip, zip]);
+  }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
   const getErrors = () => {
     let errors = {};
@@ -229,6 +235,10 @@ export default function StepCoordonnees() {
     }
     if (zip && !validator.isPostalCode(zip, "FR")) {
       errors.zip = errorMessages.zip;
+    }
+
+    if (hasSpecialSituation && handicap === "false" && allergies === "false" && ppsBeneficiary === "false" && paiBeneficiary === "false") {
+      errors.hasSpecialSituation = errorMessages.hasSpecialSituation;
     }
 
     return errors;
@@ -267,11 +277,9 @@ export default function StepCoordonnees() {
     }
   };
 
-  const updateAddressData =
-    (key, isPersonalAddress = true) =>
-    (value) => {
-      setData({ ...data, [key]: value, [isPersonalAddress ? "addressVerified" : "hostAddressVerified"]: "false" });
-    };
+  const updateAddressToVerify = (key) => (value) => {
+    setData({ ...data, [key]: value, addressVerified: "false" });
+  };
 
   const onSubmit = async () => {
     setLoading(true);
@@ -419,7 +427,7 @@ export default function StepCoordonnees() {
             label="Pays de résidence"
             value={foreignCountry}
             options={countryOptions}
-            onChange={updateAddressData("foreignCountry")}
+            onChange={updateData("foreignCountry")}
             placeholder="Sélectionnez un pays"
             error={errors.foreignCountry}
           />
@@ -427,19 +435,19 @@ export default function StepCoordonnees() {
         <Input
           value={isFrenchResident ? address : foreignAddress}
           label="Adresse de résidence"
-          onChange={updateAddressData(isFrenchResident ? "address" : "foreignAddress")}
+          onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
           error={isFrenchResident ? errors.address : errors.foreignAddress}
         />
         <Input
           value={isFrenchResident ? zip : foreignZip}
           label="Code postal"
-          onChange={updateAddressData(isFrenchResident ? "zip" : "foreignZip")}
+          onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
           error={isFrenchResident ? errors.zip : errors.foreignZip}
         />
         <Input
           value={isFrenchResident ? city : foreignCity}
           label="Ville"
-          onChange={updateAddressData(isFrenchResident ? "city" : "foreignCity")}
+          onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
           error={isFrenchResident ? errors.city : errors.foreignCity}
         />
         {!isFrenchResident && (
@@ -465,9 +473,9 @@ export default function StepCoordonnees() {
               onChange={updateData("hostRelationship")}
               error={errors.hostRelationship}
             />
-            <Input value={address} label="Son adresse" onChange={updateAddressData("address", false)} error={errors.address} />
-            <Input value={zip} label="Code postal" onChange={updateAddressData("zip", false)} error={errors.zip} />
-            <Input value={city} label="Ville" onChange={updateAddressData("city", false)} error={errors.city} />
+            <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address")} error={errors.address} />
+            <Input value={zip} label="Code postal" onChange={updateAddressToVerify("zip")} error={errors.zip} />
+            <Input value={city} label="Ville" onChange={updateAddressToVerify("city")} error={errors.city} />
           </>
         )}
         <VerifyAddress
@@ -487,13 +495,15 @@ export default function StepCoordonnees() {
           onChange={updateData("situation")}
           error={errors.situation}
         />
-        <div className="flex items-center">
-          <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
-          <div className="mr-3">
+        <div className="flex items-center mb-4">
+          <div>
+            <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
+            <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+          </div>
+          <div className="ml-3">
             <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
           </div>
         </div>
-        <div className="mb-4 text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         {hasSpecialSituation && (
           <>
             <CheckBox
@@ -529,6 +539,7 @@ export default function StepCoordonnees() {
                 setData({ ...data, allergies: value.toString() });
               }}
             />
+            <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
             {moreInformation && (
               <>
                 <hr className="my-4 h-px bg-gray-200 border-0" />
@@ -544,7 +555,7 @@ export default function StepCoordonnees() {
                   <Input
                     value={specificAmenagmentType}
                     label="Quelle est la nature de cet aménagement ?"
-                    onChange={updateAddressData("specificAmenagmentType")}
+                    onChange={updateData("specificAmenagmentType")}
                     error={errors.specificAmenagmentType}
                   />
                 )}

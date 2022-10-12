@@ -7,7 +7,7 @@ const RadioButton = ({ options, label, description = "", onChange, value: curren
       <label className="mb-2">
         {label} <span className="text-[#666666] text-[14px] leading-tight"> {description}</span>
       </label>
-      <div className="flex flex-wrap justify-between max-w-md">
+      <div className="flex flex-wrap max-w-md md:max-w-full">
         {options.map(({ label, value }) => (
           <Option key={value} label={label} value={value === currentValue} onChange={() => onChange(value)} />
         ))}
@@ -19,8 +19,8 @@ const RadioButton = ({ options, label, description = "", onChange, value: curren
 
 const Option = ({ label, value, onChange }) => {
   return (
-    <label className="mb-0">
-      <input className="mr-3 accent-[#000091] border-dashed" type="radio" checked={value} onChange={onChange} />
+    <label className="cursor-pointer mb-0 first-of-type:mr-8 md:first-of-type:mr-0 md:last-of-type:ml-8 md:first-of-type:after:border md:first-of-type:after:border-[#E5E5E5] md:first-of-type:after:ml-8">
+      <input className="cursor-pointer mr-3 accent-[#000091] border-dashed hover:scale-105" type="radio" checked={value} onChange={onChange} />
       {label}
     </label>
   );

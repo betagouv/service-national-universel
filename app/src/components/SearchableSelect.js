@@ -27,6 +27,7 @@ const customStyles = {
       color: "#161616",
       fontWeight: state.isSelected ? 700 : 400,
       backgroundColor: state.isFocused ? "#EEEEEE" : "tranparent",
+      cursor: "pointer",
     };
   },
   control: (provided, state) => {
@@ -46,6 +47,7 @@ const customStyles = {
       background: "#EEEEEE",
       height: 40,
       paddingLeft: 24,
+      cursor: "pointer",
     };
   },
   singleValue: (provided) => {
