@@ -8,7 +8,7 @@ const Footer = ({ marginBottom }) => {
   const mobile = useDevice() === "mobile";
 
   return mobile ? (
-    <div className={`mb-[${marginBottom}] border-t border-t-[#E5E5E5] w-full bg-white  pb-3`}>
+    <div className={`${marginBottom ? `mb-[${marginBottom}]` : ""} border-t border-t-[#E5E5E5] w-full bg-white  pb-3`}>
       <div className="px-3 text-sm text-[#3A3A3A] py-3">
         <div className="mb-4 flex">
           <img src={LogoFr} className="w-26 h-24" />
@@ -63,8 +63,8 @@ const Footer = ({ marginBottom }) => {
             Le Service national universel s’adresse à tous les jeunes de 15 à 17 ans qui souhaitent vivre une belle expérience collective, se rendre utile aux autres, créer des
             liens forts et se découvrir un talent pour l’engagement !
           </div>
-          <div className="items-center space-x-6 flex font-bold">
-            <div className="space-x-6 flex">
+          <div className="items-center flex font-bold flex-wrap">
+            <div className="space-x-6 flex mr-6 mb-2">
               <div className="flex items-center space-x-1  cursor-pointer">
                 <a href="https://www.legifrance.gouv.fr/" className="hover:text-[#3A3A3A]">
                   legifrance.gouv.fr
@@ -78,7 +78,7 @@ const Footer = ({ marginBottom }) => {
                 <LinkTo />
               </div>
             </div>
-            <div className="space-x-6 flex">
+            <div className="space-x-6 flex mb-2">
               <div className="flex items-center space-x-1  cursor-pointer">
                 <a href="https://www.service-public.fr/" className="hover:text-[#3A3A3A]">
                   service-public.fr
