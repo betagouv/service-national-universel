@@ -3,12 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import Bin from "../../../assets/icons/Bin";
 import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
+import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 
 export default function StepUpload() {
@@ -185,6 +187,8 @@ export default function StepUpload() {
             ))}
         </div>
       </div>
+      <Help />
+      <Footer />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );

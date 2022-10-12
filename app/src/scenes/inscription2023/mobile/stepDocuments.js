@@ -5,6 +5,7 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -51,6 +52,7 @@ export default function StepDocuments() {
           </Link>
         ))}
       </div>
+      <Help />
       <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} disabled />
     </>
