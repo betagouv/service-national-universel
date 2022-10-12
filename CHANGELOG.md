@@ -1,3 +1,23 @@
+# [1.147.0](https://github.com/betagouv/service-national-universel/compare/v1.146.0...v1.147.0) (2022-10-12)
+
+
+### Bug Fixes
+
+* **api:** fix signup grade validation ([dd9c025](https://github.com/betagouv/service-national-universel/commit/dd9c02503fb573f04d12aa8192af2c81249edaec))
+* **app:** continue doc ([2e22426](https://github.com/betagouv/service-national-universel/commit/2e22426a81ba160f27e3c9d38a05f9d200b0949e))
+* **app:** extra condition for document pages ([#1900](https://github.com/betagouv/service-national-universel/issues/1900)) ([22fa605](https://github.com/betagouv/service-national-universel/commit/22fa605241264c2e4216675d3fb65ef78ed7523b))
+* **app:** next btn active if file already uploaded ([f0b36f1](https://github.com/betagouv/service-national-universel/commit/f0b36f112d4aa88033aa15135fd70f823262b80f))
+* **app:** Phone validation for all inscription pages ([4361240](https://github.com/betagouv/service-national-universel/commit/43612400ee5cc138de39f88447074ef174e63d83))
+* **app:** Regex mobile ([7fb4333](https://github.com/betagouv/service-national-universel/commit/7fb433319629f3f9c787bf496e631af9b1a882a5))
+
+
+### Features
+
+* **app:** desktop coordinates page ([#1899](https://github.com/betagouv/service-national-universel/issues/1899)) ([fcce6e8](https://github.com/betagouv/service-national-universel/commit/fcce6e8ad79926fdaa846e6de6b8919516cddce4))
+* **app:** step done inscription ([5703b75](https://github.com/betagouv/service-national-universel/commit/5703b751b7c032dcf3dfb8292311ed9701026c8b))
+* **app:** step navigation based on user access ([#1897](https://github.com/betagouv/service-national-universel/issues/1897)) ([80849d5](https://github.com/betagouv/service-national-universel/commit/80849d5f9da9ccb8995ea833c0b9a782f9ab163e))
+* **app:** user feedBack staging ([6a2ad48](https://github.com/betagouv/service-national-universel/commit/6a2ad488ccd4ef41d47d4cee5b29a0f4df47ade5))
+
 # [1.146.0](https://github.com/betagouv/service-national-universel/compare/v1.145.0...v1.146.0) (2022-10-11)
 
 
