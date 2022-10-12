@@ -487,13 +487,15 @@ export default function StepCoordonnees() {
           onChange={updateData("situation")}
           error={errors.situation}
         />
-        <div className="flex items-center">
-          <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
-          <div className="mr-3">
+        <div className="flex items-center mb-4">
+          <div>
+            <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
+            <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+          </div>
+          <div className="ml-3">
             <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
           </div>
         </div>
-        <div className="mb-4 text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         {hasSpecialSituation && (
           <>
             <CheckBox
