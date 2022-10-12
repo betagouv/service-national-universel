@@ -24,8 +24,8 @@ export default function StepSejour() {
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
         <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-        <div className="my-4">{cohorts.map((e) => StayButton(e))}</div>
-        {cohorts.length < 3 && (
+        <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
+        {data.sessions?.length < 3 && (
           <>
             <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
             <div className="text-gray-500 text-sm">
@@ -40,25 +40,6 @@ export default function StepSejour() {
           </>
         )}
       </div>
-      <hr className="my-4 h-px bg-gray-200 border-0" />
-      <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
-      <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-      <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
-      {data.sessions?.length < 3 && (
-        <>
-          <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
-          <div className="text-gray-500 text-sm">
-            La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-            <Link to="" className="underline underline-offset-4">
-              En savoir plus.
-            </Link>
-          </div>
-          <div className="text-[#000091] my-4 underline underline-offset-4">
-            <Link to="">Consulter d’autres dispositifs d’engagement</Link>
-          </div>
-        </>
-      )}
-    </div>
       <Footer marginBottom={"12vh"} />
     </>
   );
