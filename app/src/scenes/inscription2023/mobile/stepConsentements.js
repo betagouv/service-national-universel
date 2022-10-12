@@ -13,6 +13,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
 
 export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
@@ -97,6 +98,7 @@ export default function StepConsentements() {
           <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>

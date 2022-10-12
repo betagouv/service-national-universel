@@ -14,6 +14,7 @@ import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SearchableSelect from "../../../components/SearchableSelect";
+import Footer from "../../../components/footerV2";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -156,6 +157,7 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClick={() => onSubmit()} />
     </>
   );

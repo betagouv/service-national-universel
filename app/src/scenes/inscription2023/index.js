@@ -62,9 +62,9 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
     <div>
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
-      {renderStep(currentStep, device)}
-      <Help />
-      <Footer />
+      {renderStep(step)}
+      {device === "desktop" && <Footer marginBottom={"0px"} />}
+
     </div>
   );
 };

@@ -13,6 +13,8 @@ import api from "../../../services/api";
 import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
 
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
@@ -184,6 +186,8 @@ export default function StepRepresentants() {
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} /> : null}
       </div>
+      <Help />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
     </>
   );
