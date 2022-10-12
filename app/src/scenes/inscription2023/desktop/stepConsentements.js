@@ -105,7 +105,8 @@ export default function StepConsentements({ step }) {
               Précédent
             </button>
             <button
-              className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading || disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+              disabled={disabled || loading}
+              className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
               onClick={() => (!loading || !disabled) && onSubmit()}>
               Continuer
             </button>

@@ -171,7 +171,9 @@ export default function StepProfil() {
                 onClick={() => history.push("/preinscription/eligibilite")}>
                 Retourner au choix de séjour
               </button>
-              <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white" onClick={() => onSubmit()}>
+              <button
+                className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
+                onClick={() => onSubmit()}>
                 Continuer
               </button>
             </div>

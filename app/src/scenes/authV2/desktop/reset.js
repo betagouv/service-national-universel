@@ -82,13 +82,12 @@ export default function Reset() {
           {error.passwordConfirm ? <span className="text-[#CE0500] text-sm">{error.passwordConfirm}</span> : null}
         </div>
         <div className="w-full flex justify-end">
-          <div
-            className={`mt-4 flex items-center justify-center p-2 ${
-              disabled || loading ? "bg-[#E5E5E5] text-[#929292] cursor-default" : "bg-[#000091] text-white hover:text-[#000091] cursor-pointer"
-            }`}
+          <button
+            disabled={disabled || loading}
+            className="flex items-center justify-center px-3 py-2 mt-4 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
             onClick={onSubmit}>
             Réinitialiser
-          </div>
+          </button>
         </div>
 
         <hr className="text-[#E5E5E5] mt-4" />

@@ -146,7 +146,9 @@ export default function StepDone() {
                 onClick={() => history.push("/preinscription/profil")}>
                 Précédent
               </button>
-              <button className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white`} onClick={() => onSubmit()}>
+              <button
+                className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]`}
+                onClick={() => onSubmit()}>
                 M’inscrire au SNU
               </button>
             </div>

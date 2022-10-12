@@ -46,13 +46,12 @@ export default function Forgot() {
               <Input value={email} onChange={(e) => setEmail(e)} />
             </div>
             <div className="flex justify-end">
-              <div
-                className={`mt-4 flex items-center justify-center p-2 ${
-                  disabled || loading ? "bg-[#E5E5E5] text-[#929292] cursor-default" : "cursor-pointer  bg-[#000091] text-white"
-                }`}
+              <button
+                disabled={disabled || loading}
+                className="flex items-center justify-center px-3 py-2 mt-3 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
                 onClick={onSubmit}>
                 M&apos;envoyer le lien de réinitialisation
-              </div>
+              </button>
             </div>
           </>
         ) : (
