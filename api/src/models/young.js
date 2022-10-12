@@ -820,6 +820,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 1",
     },
   },
+  parent1CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la Ville du parent 1",
+    },
+  },
   parent1Department: {
     type: String,
     documentation: {
@@ -854,6 +860,34 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent1DataVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 autorise le jeune à participer au SNU",
+    },
+  },
+  parent1AllowCovidAutotest: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 autorise les autotests Covid",
+    },
+  },
+  parent1AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 donne les droits à l'image de son enfant.",
     },
   },
 

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
@@ -9,28 +9,58 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import { getDepartmentByZip } from "snu-lib/region-and-departments";
 import { translate, translateGrade } from "snu-lib/translation";
 import Check from "../components/Check";
+import { Spinner } from "reactstrap";
+import api from "../../../services/api";
+import { API_VERIFICATION } from "../commons";
 
 export default function Verification({ step }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
   const [certified, setCertified] = React.useState(false);
   const [error, setError] = React.useState(null);
+  const [saving, setSaving] = React.useState(false);
+
+  useEffect(() => {
+    if (young) {
+      setCertified(young.parent1DataVerified);
+    }
+  }, [young]);
 
   if (!young) return <Loader />;
 
   const sections = sectionsData(young).map(Section);
 
-  function onNext() {
+  async function onNext() {
+    setSaving(true);
     setError(null);
     if (certified) {
-      history.push(`/representants-legaux/consentement?token=${token}`);
+      if (await saveParentCertified()) {
+        history.push(`/representants-legaux/consentement?token=${token}`);
+      }
     } else {
       setError("Vous devez certifier l'exactitude de ces renseignements avant de pouvoir continuer.");
     }
+    setSaving(false);
   }
   function onPrevious() {
     history.push(`/representants-legaux/presentation?token=${token}`);
   }
+
+  async function saveParentCertified() {
+    try {
+      const { code, ok } = await api.post(API_VERIFICATION + `?token=${token}`, { verified: true });
+      if (!ok) {
+        setError("Une erreur s'est produite" + (code ? " : " + translate(code) : ""));
+        return false;
+      } else {
+        return true;
+      }
+    } catch (e) {
+      setError("Une erreur s'est produite" + (e.code ? " : " + translate(e.code) : ""));
+      return false;
+    }
+  }
+
   return (
     <>
       <Navbar step={step} />
@@ -68,6 +98,7 @@ export default function Verification({ step }) {
               Précédent
             </button>
             <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white" onClick={onNext}>
+              {saving && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
               Suivant
             </button>
           </div>
