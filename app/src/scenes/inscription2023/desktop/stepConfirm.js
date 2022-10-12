@@ -63,10 +63,8 @@ export default function StepConfirm() {
           <div className="p-4 text-[#161616]">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <div className="flex items-center justify-between">
-              {" "}
-              <h1 className="text-[32px] font-bold mt-2">Vous y êtes presque...</h1>
-              {/* <img src={QuestionMark} alt="" /> */}
-              <QuestionMark />
+              <h1 className="text-[32px] font-bold mt-2 ">Vous y êtes presque...</h1>
+              <QuestionMark className="hover:scale-105 cursor-pointer" />
             </div>
 
             <div className="text-[#666666] text-sm mt-2">
@@ -79,13 +77,13 @@ export default function StepConfirm() {
                 <h1 className="text-lg font-bold mt-2 text-[#161616]">Séjour de cohésion :</h1>
                 <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young.cohort])}</div>
               </div>
-              <EditPen onClick={() => setModal({ isOpen: true })} />
+              <EditPen className="hover:scale-105 cursor-pointer" onClick={() => setModal({ isOpen: true })} />
             </div>
             <hr className="my-4 h-px bg-gray-200 border-0" />
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h1 className="text-lg font-bold mt-2 text-[#161616]">Mon profil</h1>
-                <EditPen onClick={() => history.push("/inscription2023/coordonnee")} />
+                <EditPen className="hover:scale-105 cursor-pointer" onClick={() => history.push("/inscription2023/coordonnee")} />
               </div>
               <Details title="Pays de naissance" value={young.birthCountry} />
               <Details title="Département de naissance" value={young.birthCityZip} />
@@ -125,7 +123,7 @@ export default function StepConfirm() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h1 className="text-lg font-bold mt-2 text-[#161616]">Mes représentants légaux</h1>
-                <EditPen onClick={() => history.push("/inscription2023/representants")} />
+                <EditPen className="hover:scale-105 cursor-pointer" onClick={() => history.push("/inscription2023/representants")} />
               </div>
               <Details title="Votre lien" value={translate(young.parent1Status)} />
               <Details title="Son prénom" value={young.parent1FirstName} />
