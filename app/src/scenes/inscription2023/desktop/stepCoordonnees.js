@@ -29,6 +29,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import Button from "../components/Button";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -43,6 +44,7 @@ const errorMessages = {
   addressVerified: "Merci de vérifier l'adresse",
   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
   zip: "Le code postal n'est pas valide",
+  hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
@@ -189,9 +191,14 @@ export default function StepCoordonnees() {
         gender: young.gender || data.gender,
         phone: young.phone || data.phone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
+        addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
         city: young.city || data.city,
         zip: young.zip || data.zip,
+        region: young.region || data.region,
+        department: young.department || data.department,
+        location: young.location || data.location,
+        cityCode: young.cityCode || data.cityCode,
         foreignCountry: young.foreignCountry || data.foreignCountry,
         foreignAddress: young.foreignAddress || data.foreignAddress,
         foreignCity: young.foreignCity || data.foreignCity,
@@ -213,7 +220,7 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, frenchNationality, birthCityZip, zip]);
+  }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
   const getErrors = () => {
     let errors = {};
@@ -227,6 +234,10 @@ export default function StepCoordonnees() {
     }
     if (zip && !validator.isPostalCode(zip, "FR")) {
       errors.zip = errorMessages.zip;
+    }
+
+    if (hasSpecialSituation && handicap === "false" && allergies === "false" && ppsBeneficiary === "false" && paiBeneficiary === "false") {
+      errors.hasSpecialSituation = errorMessages.hasSpecialSituation;
     }
 
     return errors;
@@ -265,11 +276,9 @@ export default function StepCoordonnees() {
     }
   };
 
-  const updateAddressData =
-    (key, isPersonalAddress = true) =>
-    (value) => {
-      setData({ ...data, [key]: value, [isPersonalAddress ? "addressVerified" : "hostAddressVerified"]: "false" });
-    };
+  const updateAddressToVerify = (key) => (value) => {
+    setData({ ...data, [key]: value, addressVerified: "false" });
+  };
 
   const onSubmit = async () => {
     setLoading(true);
@@ -397,7 +406,7 @@ export default function StepCoordonnees() {
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
           <div className="w-full flex justify-between items-center mt-2">
             <h1 className="text-xl font-bold">Mon profil volontaire</h1>
-            <Link to="/public-besoin-d-aide/">
+            <Link className="hover:scale-105" to="/public-besoin-d-aide/">
               <QuestionMarkBlueCircle />
             </Link>
           </div>
@@ -425,7 +434,7 @@ export default function StepCoordonnees() {
               label="Pays de résidence"
               value={foreignCountry}
               options={countryOptions}
-              onChange={updateAddressData("foreignCountry")}
+              onChange={updateData("foreignCountry")}
               placeholder="Sélectionnez un pays"
               error={errors.foreignCountry}
             />
@@ -433,7 +442,7 @@ export default function StepCoordonnees() {
           <Input
             value={isFrenchResident ? address : foreignAddress}
             label="Adresse de résidence"
-            onChange={updateAddressData(isFrenchResident ? "address" : "foreignAddress")}
+            onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
             error={isFrenchResident ? errors.address : errors.foreignAddress}
           />
           <div className="flex">
@@ -441,14 +450,14 @@ export default function StepCoordonnees() {
               className="flex-1 mr-3"
               value={isFrenchResident ? zip : foreignZip}
               label="Code postal"
-              onChange={updateAddressData(isFrenchResident ? "zip" : "foreignZip")}
+              onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
               error={isFrenchResident ? errors.zip : errors.foreignZip}
             />
             <Input
               className="flex-1 ml-3"
               value={isFrenchResident ? city : foreignCity}
               label="Ville"
-              onChange={updateAddressData(isFrenchResident ? "city" : "foreignCity")}
+              onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
               error={isFrenchResident ? errors.city : errors.foreignCity}
             />
           </div>
@@ -477,10 +486,10 @@ export default function StepCoordonnees() {
                 onChange={updateData("hostRelationship")}
                 error={errors.hostRelationship}
               />
-              <Input value={address} label="Son adresse" onChange={updateAddressData("address", false)} error={errors.address} />
+              <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address", false)} error={errors.address} />
               <div className="flex">
-                <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressData("zip", false)} error={errors.zip} />
-                <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressData("city", false)} error={errors.city} />
+                <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} />
+                <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} />
               </div>
             </>
           )}
@@ -549,6 +558,7 @@ export default function StepCoordonnees() {
                   setData({ ...data, allergies: value.toString() });
                 }}
               />
+              <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
               {moreInformation && (
                 <>
                   <hr className="my-4 h-px bg-gray-200 border-0" />
@@ -564,7 +574,7 @@ export default function StepCoordonnees() {
                     <Input
                       value={specificAmenagmentType}
                       label="Quelle est la nature de cet aménagement ?"
-                      onChange={updateAddressData("specificAmenagmentType")}
+                      onChange={updateData("specificAmenagmentType")}
                       error={errors.specificAmenagmentType}
                     />
                   )}
@@ -588,11 +598,7 @@ export default function StepCoordonnees() {
           )}
           <hr className="my-8 h-px bg-gray-200 border-0" />
           <div className="flex justify-end gap-4">
-            <button
-              className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-              onClick={() => !loading && onSubmit()}>
-              Continuer
-            </button>
+            <Button onClick={() => !loading && onSubmit()} disabled={loading} />
           </div>
         </div>
       </div>

@@ -19,8 +19,8 @@ const RadioButton = ({ options, label, description = "", onChange, value: curren
 
 const Option = ({ label, value, onChange }) => {
   return (
-    <label className="mb-0 first-of-type:mr-8 md:first-of-type:mr-0 md:last-of-type:ml-8 md:first-of-type:after:border md:first-of-type:after:border-[#E5E5E5] md:first-of-type:after:ml-8">
-      <input className="mr-3 accent-[#000091] border-dashed" type="radio" checked={value} onChange={onChange} />
+    <label className="cursor-pointer mb-0 first-of-type:mr-8 md:first-of-type:mr-0 md:last-of-type:ml-8 md:first-of-type:after:border md:first-of-type:after:border-[#E5E5E5] md:first-of-type:after:ml-8">
+      <input className="cursor-pointer mr-3 accent-[#000091] border-dashed hover:scale-105" type="radio" checked={value} onChange={onChange} />
       {label}
     </label>
   );
