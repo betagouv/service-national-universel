@@ -1,3 +1,26 @@
+# [1.146.0](https://github.com/betagouv/service-national-universel/compare/v1.145.0...v1.146.0) (2022-10-11)
+
+
+### Bug Fixes
+
+* **admin:** fix missing data for application export ([734bcfc](https://github.com/betagouv/service-national-universel/commit/734bcfc0eede39937226e980222db6a209a4e823))
+* **api/app:** remove hostAddress fields ([#1892](https://github.com/betagouv/service-national-universel/issues/1892)) ([5eba189](https://github.com/betagouv/service-national-universel/commit/5eba1894b7675bce2b6926064d3bcf02b64876bf))
+* **app:** Empty school ([3083741](https://github.com/betagouv/service-national-universel/commit/308374169bfbe04362b09fde046698c11f34e82b))
+* **app:** Gestion d'erreur ([97e00a3](https://github.com/betagouv/service-national-universel/commit/97e00a337b93aebbc8d950517b9cf2f1d21acc03))
+* **app:** Inscription ([b4e15e7](https://github.com/betagouv/service-national-universel/commit/b4e15e78ff67a6985101ea24bb3e041f2537b149))
+* **app:** legal representant ([714c358](https://github.com/betagouv/service-national-universel/commit/714c3584172cb9ce33d07b6c7b10a326a4b77854))
+* **app:** Preinscription ([e4d0339](https://github.com/betagouv/service-national-universel/commit/e4d0339775223537e7fa36f68c549da59102a2a8))
+* **app:** Retour Bertille ([b5de153](https://github.com/betagouv/service-national-universel/commit/b5de153f6f07cc4f5f72279e22be6e6fe5b97948))
+
+
+### Features
+
+* **api:** update young model ([5f3e78e](https://github.com/betagouv/service-national-universel/commit/5f3e78eaaaf75c0005a54d0ca38ff04a5f3610e9))
+* **api/app:** special situations ([#1896](https://github.com/betagouv/service-national-universel/issues/1896)) ([dcf27ef](https://github.com/betagouv/service-national-universel/commit/dcf27ef9064e13b33f39a302ee9a9144520036fa))
+* **app:** inscription step done + notif + token resp ([7933eef](https://github.com/betagouv/service-national-universel/commit/7933eef7c168422869a0d9c9d8cd2c620b6e71fc))
+* **app:** mini crud cnifiles ([8fc0ad8](https://github.com/betagouv/service-national-universel/commit/8fc0ad85e20a9d498992fdbb52993016e6e608cf))
+* **app:** upload documents step for inscription 2023 ([#1867](https://github.com/betagouv/service-national-universel/issues/1867)) ([f2c0a64](https://github.com/betagouv/service-national-universel/commit/f2c0a64bc5f10129b5f94d12df0b657295b8fbaa))
+
 # [1.145.0](https://github.com/betagouv/service-national-universel/compare/v1.144.0...v1.145.0) (2022-10-10)
 
 
