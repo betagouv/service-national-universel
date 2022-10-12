@@ -13,7 +13,7 @@ import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
 
-export default function StepRepresentants({ step }) {
+export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
@@ -164,7 +164,7 @@ export default function StepRepresentants({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar onSave={onSave} />
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
           <div className="w-full flex justify-between items-center mt-2">

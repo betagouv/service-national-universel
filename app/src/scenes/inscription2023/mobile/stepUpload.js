@@ -11,7 +11,7 @@ import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import Navbar from "../components/Navbar";
 
-export default function StepUpload({ step }) {
+export default function StepUpload() {
   const { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
@@ -119,7 +119,7 @@ export default function StepUpload({ step }) {
   if (!ID) return <div>Loading</div>;
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="text-2xl font-semibold mt-2 text-gray-800">{ID.title}</div>

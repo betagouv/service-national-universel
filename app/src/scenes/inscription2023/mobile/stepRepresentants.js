@@ -14,7 +14,7 @@ import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
 
-export default function StepRepresentants({ step }) {
+export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
@@ -165,7 +165,7 @@ export default function StepRepresentants({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Mes représentants légaux</h1>
