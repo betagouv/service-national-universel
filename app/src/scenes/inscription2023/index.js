@@ -51,10 +51,13 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
 
   if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/inscription2023/${getStepUrl(STEPS.DONE)}`} />;
 
+  const eligibleStepDetails = STEP_LIST.find((element) => element.name === eligibleStep);
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === eligibleStep);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  if (currentStepIndex > eligibleStepIndex) {
+  const updatedEligibleStepIndex = eligibleStepDetails.allowNext ? eligibleStepIndex + 1 : eligibleStepIndex;
+
+  if (currentStepIndex > updatedEligibleStepIndex) {
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
