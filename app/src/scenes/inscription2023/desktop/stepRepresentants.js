@@ -9,11 +9,11 @@ import CheckBox from "../../../components/inscription/CheckBox";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
 
-export default function StepRepresentants({ step }) {
+export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
@@ -55,14 +55,14 @@ export default function StepRepresentants({ step }) {
 
   const getErrors = () => {
     let errors = {};
-    if (data.parent1Phone && !validator.isMobilePhone(data.parent1Phone)) {
-      errors.parent1Phone = "Le numéro de téléphone est au mauvais format.";
+    if (data.parent1Phone && !validator.matches(data.parent2Phone, regexPhoneFrenchCountries)) {
+      errors.parent1Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
-    if (data.parent2Phone && !validator.isMobilePhone(data.parent2Phone)) {
-      errors.parent2Phone = "Le numéro de téléphone est au mauvais format.";
+    if (data.parent2Phone && !validator.matches(data.parent2Phone, regexPhoneFrenchCountries)) {
+      errors.parent2Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
@@ -164,7 +164,7 @@ export default function StepRepresentants({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar onSave={onSave} />
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
           <div className="w-full flex justify-between items-center mt-2">

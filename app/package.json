@@ -94,6 +94,7 @@
     "slugify": "^1.6.5",
     "snu-lib": "file:../lib",
     "styled-components": "5.3.3",
+    "use-detect-keyboard-open": "^0.2.0",
     "validator": "13.7.0"
   },
   "engines": {

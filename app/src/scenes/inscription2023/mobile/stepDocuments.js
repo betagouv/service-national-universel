@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
 
-export default function StepDocuments({ step }) {
+export default function StepDocuments() {
   const history = useHistory();
 
   const IDs = [
@@ -28,7 +28,7 @@ export default function StepDocuments({ step }) {
 
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>

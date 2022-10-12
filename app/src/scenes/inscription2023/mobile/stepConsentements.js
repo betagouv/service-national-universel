@@ -15,7 +15,7 @@ import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 import Footer from "../../../components/footerV2";
 
-export default function StepConsentements({ step }) {
+export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
@@ -57,7 +57,7 @@ export default function StepConsentements({ step }) {
 
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Apporter mon consentement</h1>
