@@ -35,7 +35,7 @@ const Render = ({ screen }) => {
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderScreen(screen)}
-      <Footer />
+      {device === "desktop" && <Footer marginBottom={"0px"} />}
     </div>
   );
 };

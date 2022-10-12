@@ -3,15 +3,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import Bin from "../../../assets/icons/Bin";
 import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
+import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 
-export default function StepUpload({ step }) {
+export default function StepUpload() {
   const { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
@@ -23,6 +25,10 @@ export default function StepUpload({ step }) {
   const [filesToUpload, setFilesToUpload] = useState();
   const [filesUploaded, setFilesUploaded] = useState();
   const [date, setDate] = useState();
+
+  let disabled = false;
+  if (!date || !error || loading) disabled = true;
+  if (filesUploaded?.length) disabled = false;
 
   async function upload(files) {
     for (const file of files) {
@@ -47,7 +53,7 @@ export default function StepUpload({ step }) {
     try {
       const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
       if (!res.ok) setError({ text: "Wesh" });
-      setFilesUploaded(res.data);
+      setFilesUploaded(res.data.filter((e) => e.category === category));
     } catch (e) {
       capture(e);
       setError({ text: "Impossible de supprimer ce fichier." });
@@ -109,13 +115,13 @@ export default function StepUpload({ step }) {
   }, []);
 
   useEffect(() => {
-    setFilesUploaded(young.files.cniFiles);
+    setFilesUploaded(young.files.cniFiles.filter((e) => e.category === category));
   }, [young]);
 
   if (!ID) return <div>Loading</div>;
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="text-2xl font-semibold mt-2 text-gray-800">{ID.title}</div>
@@ -181,12 +187,9 @@ export default function StepUpload({ step }) {
             ))}
         </div>
       </div>
-      <StickyButton
-        text="Continuer"
-        onClickPrevious={() => history.push("/inscription2023/documents")}
-        onClick={() => onSubmit(filesToUpload)}
-        disabled={!date || !error || loading}
-      />
+      <Help />
+      <Footer />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );
 }

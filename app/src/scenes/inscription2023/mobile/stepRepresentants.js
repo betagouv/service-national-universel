@@ -5,16 +5,18 @@ import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
 
-export default function StepRepresentants({ step }) {
+export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
@@ -56,14 +58,14 @@ export default function StepRepresentants({ step }) {
 
   const getErrors = () => {
     let errors = {};
-    if (data.parent1Phone && !validator.isMobilePhone(data.parent1Phone)) {
-      errors.parent1Phone = "Le numéro de téléphone est au mauvais format.";
+    if (data.parent1Phone && !validator.matches(data.parent1Phone, regexPhoneFrenchCountries)) {
+      errors.parent1Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
-    if (data.parent2Phone && !validator.isMobilePhone(data.parent2Phone)) {
-      errors.parent2Phone = "Le numéro de téléphone est au mauvais format.";
+    if (data.parent2Phone && !validator.matches(data.parent2Phone, regexPhoneFrenchCountries)) {
+      errors.parent2Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
@@ -165,7 +167,7 @@ export default function StepRepresentants({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Mes représentants légaux</h1>
@@ -184,6 +186,8 @@ export default function StepRepresentants({ step }) {
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} /> : null}
       </div>
+      <Help />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
     </>
   );

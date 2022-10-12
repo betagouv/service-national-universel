@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
+import Footer from "../../../components/footerV2";
 
 export default function StepDone() {
   const [data] = React.useContext(PreInscriptionContext);
@@ -54,6 +55,7 @@ export default function StepDone() {
           </div>
         </div>
       </div>
+      <Footer marginBottom={"20vh"} />
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-col shadow-ninaInverted p-4 bg-white gap-4">
           <button className="flex items-center justify-center p-2 w-full cursor-pointer bg-[#000091] text-white" onClick={handleClick}>

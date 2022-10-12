@@ -4,8 +4,10 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
+import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
 
-export default function StepDocuments({ step }) {
+export default function StepDocuments() {
   const history = useHistory();
 
   const IDs = [
@@ -27,7 +29,7 @@ export default function StepDocuments({ step }) {
 
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
@@ -50,6 +52,8 @@ export default function StepDocuments({ step }) {
           </Link>
         ))}
       </div>
+      <Help />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} disabled />
     </>
   );

@@ -11,6 +11,7 @@ import Input from "../../../components/inscription/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -95,6 +96,7 @@ export default function Signin() {
           Commencer mon inscription
         </button>
       </div>
+      <Footer />
     </>
   );
 }

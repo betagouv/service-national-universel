@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
@@ -13,6 +13,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
+import { setYoung } from "../../../redux/auth/actions";
 
 const engagementPrograms = [
   {
@@ -49,8 +50,10 @@ export default function StepWaitingConsent() {
   const young = useSelector((state) => state.Auth.young);
   const [disabled, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
   const [notAuthorised, setNotAuthorised] = React.useState(false);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
     if (young?.parentAllowSNU) {
@@ -82,7 +85,12 @@ export default function StepWaitingConsent() {
     }
   };
 
-  const logout = async () => {};
+  const logout = async () => {
+    setLoading(true);
+    await api.post(`/young/logout`);
+    dispatch(setYoung(null));
+    history.push("/");
+  };
 
   return !notAuthorised ? (
     <>
@@ -100,10 +108,7 @@ export default function StepWaitingConsent() {
           </div>
           <div className="text-[#666666] text-sm ">{young?.email}</div>
           <div className="flex justify-between mt-2">
-            <button
-              className={`mt-2 h-10 text-base w-1/2 ${disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-              disabled={disabled}
-              onClick={() => handleClick()}>
+            <button className="mt-2 h-10 text-base w-1/2 disabled:bg-[#E5E5E5] disabled:text-[#929292] bg-[#000091]  text-white " disabled={disabled} onClick={() => handleClick()}>
               Relancer
             </button>
             <img className="translate-y-4" src={Avatar} />
@@ -112,8 +117,11 @@ export default function StepWaitingConsent() {
       </div>
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
-          <button className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => logout()}>
-            Revenir à l’accueil
+          <button
+            className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091] disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
+            disabled={loading}
+            onClick={() => logout()}>
+            Revenir à l&apos;accueil
           </button>
         </div>
       </div>
@@ -167,6 +175,16 @@ export default function StepWaitingConsent() {
               </div>
             );
           })}
+        </div>
+      </div>
+      <div className="fixed bottom-0 w-full z-50">
+        <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
+          <button
+            className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] bg-[#000091] text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
+            disabled={loading}
+            onClick={() => logout()}>
+            Revenir à l&apos;accueil
+          </button>
         </div>
       </div>
     </>
