@@ -27,7 +27,7 @@ import StickyButton from "../../../components/inscription/stickyButton";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "../../../utils";
+import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
 
 const getObjectWithEmptyData = (fields) => {
@@ -120,8 +120,6 @@ const defaultState = {
   reducedMobilityAccess: "",
   handicapInSameDepartment: "",
 };
-
-const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07)(?:\\W*\\d){8}$`;
 
 export default function StepCoordonnees({ step }) {
   const [data, setData] = useState(defaultState);
