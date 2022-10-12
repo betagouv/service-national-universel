@@ -24,6 +24,10 @@ export default function StepUpload({ step }) {
   const [filesUploaded, setFilesUploaded] = useState();
   const [date, setDate] = useState();
 
+  let disabled = false;
+  if (!date || !error || loading) disabled = true;
+  if (filesUploaded?.length) disabled = false;
+
   async function upload(files) {
     for (const file of files) {
       if (file.size > 5000000) {
@@ -47,7 +51,7 @@ export default function StepUpload({ step }) {
     try {
       const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
       if (!res.ok) setError({ text: "Wesh" });
-      setFilesUploaded(res.data);
+      setFilesUploaded(res.data.filter((e) => e.category === category));
     } catch (e) {
       capture(e);
       setError({ text: "Impossible de supprimer ce fichier." });
@@ -109,7 +113,7 @@ export default function StepUpload({ step }) {
   }, []);
 
   useEffect(() => {
-    setFilesUploaded(young.files.cniFiles);
+    setFilesUploaded(young.files.cniFiles.filter((e) => e.category === category));
   }, [young]);
 
   if (!ID) return <div>Loading</div>;
@@ -181,12 +185,7 @@ export default function StepUpload({ step }) {
             ))}
         </div>
       </div>
-      <StickyButton
-        text="Continuer"
-        onClickPrevious={() => history.push("/inscription2023/documents")}
-        onClick={() => onSubmit(filesToUpload)}
-        disabled={!date || !error || loading}
-      />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );
 }
