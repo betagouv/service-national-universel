@@ -46,11 +46,13 @@ export default function Forgot() {
               <Input value={email} onChange={(e) => setEmail(e)} />
             </div>
             <div className="flex justify-end">
-              <button
-                className={`mt-4 flex items-center justify-center p-2 cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+              <div
+                className={`mt-4 flex items-center justify-center p-2 ${
+                  disabled || loading ? "bg-[#E5E5E5] text-[#929292] cursor-default" : "cursor-pointer  bg-[#000091] text-white"
+                }`}
                 onClick={onSubmit}>
                 M&apos;envoyer le lien de réinitialisation
-              </button>
+              </div>
             </div>
           </>
         ) : (
@@ -63,7 +65,9 @@ export default function Forgot() {
         <hr className="text-[#E5E5E5] mt-4" />
         <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-2">Retourner à la connexion</div>
         <div className="flex justify-center">
-          <button className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/auth")}>
+          <button
+            className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+            onClick={() => history.push("/auth")}>
             Se connecter
           </button>
         </div>

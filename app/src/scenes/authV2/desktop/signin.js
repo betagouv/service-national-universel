@@ -82,19 +82,23 @@ export default function Signin() {
           Mot de passe perdu ?
         </div>
         <div className="w-full flex justify-end">
-          <button
-            className={`flex items-center justify-center p-2 cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+          <div
+            className={`flex items-center justify-center p-2 ${
+              disabled || loading ? "bg-[#E5E5E5] text-[#929292] cursor-default" : " cursor-pointer bg-[#000091] text-white hover:text-[#000091]"
+            }`}
             onClick={onSubmit}>
             Connexion
-          </button>
+          </div>
         </div>
 
         <hr className="text-[#E5E5E5] mt-4" />
         <div className="text-[#161616] text-[17px] font-bold text-center mt-4 mb-4">Vous n&apos;êtes pas encore inscrit(e) ?</div>
         <div className="flex justify-center">
-          <button className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/preinscription")}>
+          <div
+            className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+            onClick={() => history.push("/preinscription")}>
             Commencer mon inscription
-          </button>
+          </div>
         </div>
       </div>
     </div>

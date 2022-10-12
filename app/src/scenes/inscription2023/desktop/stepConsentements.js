@@ -93,13 +93,15 @@ export default function StepConsentements({ step }) {
               </div>
             </div>
           </div>
-          <div className="flex justify-end items-center gap-2 mt-4 pb-4" onClick={() => setModal({ isOpen: true })}>
+          <div className="flex justify-end items-center gap-2 mt-4 pb-4 cursor-pointer" onClick={() => setModal({ isOpen: true })}>
             <EditPenLight />
-            <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
+            <div className="text-[#000091] text-sm font-medium ">Je souhaite modifier mes dates de séjour</div>
           </div>
           <hr className="my-8 h-px bg-gray-200 border-0" />
           <div className="flex justify-end gap-4">
-            <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/inscription2023/coordonnee")}>
+            <button
+              className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+              onClick={() => history.push("/inscription2023/coordonnee")}>
               Précédent
             </button>
             <button
