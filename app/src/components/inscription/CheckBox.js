@@ -1,10 +1,11 @@
 import React from "react";
 import Check from "../../assets/icons/Check";
 
-export default function CheckBox({ checked, onChange, label = "", description = "", className = "" }) {
+export default function CheckBox({ checked, onChange, label = "", description = "", className = "", disabled = false }) {
   return (
     <div
       onClick={() => {
+        if (disabled) return;
         if (checked) onChange(false);
         else onChange(true);
       }}

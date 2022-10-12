@@ -244,6 +244,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  reinscriptionStep2023: {
+    type: String,
+    default: "ELIGIBILITE",
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "DOCUMENTS", "DONE", "CONFIRM"],
+    documentation: {
+      description: "Étape du tunnel de réinscription",
+    },
+  },
+
   inscriptionStep2023: {
     type: String,
     default: "COORDONNEES",

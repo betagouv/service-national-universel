@@ -6,7 +6,7 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, STEPS2023REINSCRIPTION } = require("./utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
@@ -149,6 +149,7 @@ class Auth {
         cohort,
         grade,
         inscription2023: STEPS2023.COORDONNEES,
+        reinscription2023: STEPS2023REINSCRIPTION.ELIGIBILITE,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
