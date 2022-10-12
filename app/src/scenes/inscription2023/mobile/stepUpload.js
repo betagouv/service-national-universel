@@ -23,6 +23,7 @@ export default function StepUpload() {
   const [fileError, setFileError] = useState({});
   const [ID, setID] = useState();
   const [filesToUpload, setFilesToUpload] = useState();
+  console.log("🚀 ~ file: stepUpload.js ~ line 26 ~ StepUpload ~ filesToUpload", filesToUpload);
   const [filesUploaded, setFilesUploaded] = useState();
   const [date, setDate] = useState();
 
@@ -63,17 +64,18 @@ export default function StepUpload() {
   async function onSubmit() {
     setLoading(true);
     try {
-      await upload([...filesToUpload]);
-      if (error.length) return setLoading(false);
-
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
-      if (!ok) {
-        capture(code);
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
+      if (filesToUpload !== undefined) {
+        await upload([...filesToUpload]);
+        if (error.length) return setLoading(false);
+        const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+        if (!ok) {
+          capture(code);
+          setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(responseData));
       }
-      dispatch(setYoung(responseData));
       history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
