@@ -13,7 +13,7 @@ export default function CheckBox({ checked, onChange, label = "", description = 
         {checked ? <Check className="text-white" /> : null}
       </div>
       {label && (
-        <label className="ml-2">
+        <label className="pl-2 cursor-pointer">
           {label} <span className="text-[#666666] text-[14px] leading-tight"> {description}</span>
         </label>
       )}
