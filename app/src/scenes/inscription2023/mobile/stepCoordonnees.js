@@ -121,7 +121,7 @@ const defaultState = {
   handicapInSameDepartment: "",
 };
 
-export default function StepCoordonnees({ step }) {
+export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
@@ -392,7 +392,7 @@ export default function StepCoordonnees({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <h1 className="text-[22px] font-bold">Mon profil volontaire</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />

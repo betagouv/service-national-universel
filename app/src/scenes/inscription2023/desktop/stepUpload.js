@@ -1,10 +1,10 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 
-export default function StepUpload({ step }) {
+export default function StepUpload() {
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div>StepUpload</div>
     </>
   );
