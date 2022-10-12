@@ -10,6 +10,8 @@ import Input from "../components/Input";
 import Select from "../components/Select";
 import ErrorMessage from "../components/ErrorMessage";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -565,6 +567,8 @@ export default function StepCoordonnees() {
           </>
         )}
       </div>
+      <Help />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClick={onSubmit} disabled={loading} />
     </>
   );
