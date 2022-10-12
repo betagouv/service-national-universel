@@ -5,7 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -56,7 +56,7 @@ export default function StepRepresentants() {
 
   const getErrors = () => {
     let errors = {};
-    if (data.parent1Phone && !validator.matches(data.parent2Phone, regexPhoneFrenchCountries)) {
+    if (data.parent1Phone && !validator.matches(data.parent1Phone, regexPhoneFrenchCountries)) {
       errors.parent1Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
