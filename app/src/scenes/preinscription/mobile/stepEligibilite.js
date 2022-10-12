@@ -14,11 +14,15 @@ import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SearchableSelect from "../../../components/SearchableSelect";
+import api from "../../../services/api";
+import { getDepartmentByZip } from "snu-lib";
+import { capture } from "../../../sentry";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const history = useHistory();
 
@@ -26,14 +30,18 @@ export default function StepEligibilite() {
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
     { value: "3eme", label: "3ème" },
-    { value: "2nde", label: "2nde" },
-    { value: "1ere", label: "1ère" },
-    { value: "1ere CAP", label: "1ère CAP" },
-    { value: "Terminale", label: "Terminale" },
-    { value: "Terminale CAP", label: "Terminale CAP" },
+    { value: "2ndePro", label: "2nde Pro" },
+    { value: "2ndeGT", label: "2nde GT" },
+    { value: "1erePro", label: "1ère Pro" },
+    { value: "1ereGT", label: "1ère GT" },
+    { value: "TermPro", label: "Terminale Pro" },
+    { value: "TermGT", label: "Terminale GT" },
+    { value: "CAP", label: "CAP" },
+    { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
   const onSubmit = async () => {
+    setLoading(true);
     let errors = {};
 
     // Nationality
@@ -74,7 +82,23 @@ export default function StepEligibilite() {
       toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
       return;
     }
+
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
+    if (data.frenchNationality === "false") return history.push("/preinscription/noneligible");
+    try {
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+        birthDate: new Date(data.birthDate),
+        schoolLevel: data.scolarity,
+        frenchNationality: data.frenchNationality,
+      });
+      setData({ ...data, sessions: res.data });
+      if (res.data.length) return history.push("/preinscription/sejour");
+      return history.push("/preinscription/noneligible");
+    } catch (e) {
+      capture(e);
+      setError({ text: "Impossible de vérifier votre éligibilité" });
+    }
     history.push("/preinscription/sejour");
   };
 
@@ -156,7 +180,7 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <StickyButton text="Continuer" onClick={() => onSubmit()} />
+      <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );
 }

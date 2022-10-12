@@ -133,90 +133,108 @@ router.post("/eligibility/2023", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { department, birthDate, schoolLevel } = value;
 
-    // Get available sessions based on department, grade & birthdate
-    if (!["NOT_SCOLARISE", "2nde", "1ere CAP"].includes(schoolLevel)) return res.send({ ok: true, data: [] });
-
-    let cohorts = [];
-    const zone = getZoneByDepartment(department);
-    switch (zone) {
-      case "A":
-        if (birthDate > new Date("04/22/2005") && birthDate < new Date("04/09/2008")) {
-          cohorts.push({
-            id: "Avril 2023 - A",
-            dates: "du 9 au 21 avril",
-            buffer: 1.15,
-            event: "Phase0/CTA preinscription - sejour avril A",
-          });
-        }
-        break;
-      case "B":
-      case "Corse":
-        if (birthDate > new Date("04/29/2005") && birthDate < new Date("04/16/2008")) {
-          cohorts.push({
-            id: "Avril 2023 - B",
-            dates: "du 16 au 28 avril",
-            buffer: 1.15,
-            event: "Phase0/CTA preinscription - sejour avril B",
-          });
-        }
-        break;
-      case "C":
-        if (birthDate > new Date("02/19/2005") && birthDate < new Date("03/03/2008")) {
-          cohorts.push({
-            id: "Février 2023 - C",
-            dates: "du 19 février au 3 mars",
-            buffer: 1.15,
-            event: "Phase0/CTA preinscription - sejour fevrier C",
-          });
-        }
-        break;
-      default:
-        break;
-    }
-
-    if (birthDate > new Date("06/24/2005") && birthDate < new Date("06/11/2008")) {
-      cohorts.push({
-        id: "Juin 2023",
-        dates: "du 11 au 23 juin",
+    const sessions = [
+      {
+        id: "2023_02_C",
+        name: "Février 2023 - C",
+        dateStart: "19 février",
+        dateEnd: "3 mars",
+        buffer: 1.15,
+        event: "Phase0/CTA preinscription - sejour fevrier C",
+        eligibility: {
+          zones: ["C"],
+          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+          bornAfter: new Date("03/04/2005"),
+          bornBefore: new Date("02/19/2008"),
+        },
+      },
+      {
+        id: "2023_04_A",
+        name: "Avril 2023 - A",
+        dateStart: "9 avril",
+        dateEnd: "21 avril",
+        buffer: 1.15,
+        event: "Phase0/CTA preinscription - sejour avril A",
+        eligibility: {
+          zones: ["A"],
+          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+          bornAfter: new Date("04/22/2005"),
+          bornBefore: new Date("04/09/2008"),
+        },
+      },
+      {
+        id: "2023_04_B",
+        name: "Avril 2023 - B",
+        dateStart: "16 avril",
+        dateEnd: "28 avril",
+        buffer: 1.15,
+        event: "Phase0/CTA preinscription - sejour avril B",
+        eligibility: {
+          zones: ["B", "Corse"],
+          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+          bornAfter: new Date("04/29/2005"),
+          bornBefore: new Date("04/16/2008"),
+        },
+      },
+      {
+        id: "2023_06",
+        name: "Juin 2023",
+        dateStart: "11 juin",
+        dateEnd: "23 juin",
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour juin",
-      });
-    }
-
-    if (birthDate > new Date("07/18/2005") && birthDate < new Date("07/05/2008")) {
-      cohorts.push({
-        id: "Juillet 2023",
-        dates: "du 5 au 17 juillet",
+        eligibility: {
+          zones: ["A", "B", "C", "Corse", "DOM", "Etranger"],
+          schoolLevels: ["NOT_SCOLARISE", "2ndeGT", "Autre"],
+          bornAfter: new Date("06/24/2005"),
+          bornBefore: new Date("06/11/2008"),
+        },
+      },
+      {
+        id: "2023_07",
+        name: "Juillet 2023",
+        dateStart: "5 juillet",
+        dateEnd: "17 juillet",
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour juillet",
-      });
-    }
+        eligibility: {
+          zones: ["A", "B", "C", "Corse", "DOM", "Etranger"],
+          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+          bornAfter: new Date("07/18/2005"),
+          bornBefore: new Date("07/05/2008"),
+        },
+      },
+    ];
+
+    const zone = getZoneByDepartment(department);
+    let sessionsFiltered = sessions.filter(function (session) {
+      if (
+        session.eligibility.zones.includes(zone) &&
+        session.eligibility.schoolLevels.includes(schoolLevel) &&
+        session.eligibility.bornAfter < birthDate &&
+        session.eligibility.bornBefore > birthDate
+      )
+        return true;
+      return false;
+    });
 
     // Check inscription goals
-    for (let session of cohorts) {
-      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
-      if (!inscriptionGoal || !inscriptionGoal.max) {
-        session.goalReached = false;
-        continue;
+    if (sessionsFiltered.length) {
+      for (let session of sessionsFiltered) {
+        const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
+        if (!inscriptionGoal || !inscriptionGoal.max) continue;
+        const nbYoung = await YoungModel.countDocuments({
+          department: department,
+          cohort: session.id,
+          status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+        });
+        if (nbYoung === 0) continue;
+        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
+        if (fillingRatio >= 1) sessionsFiltered = sessionsFiltered.filter((e) => e.id !== session.id);
       }
-
-      const nbYoung = await YoungModel.countDocuments({
-        department: department,
-        cohort: session.id,
-        //TODO enlever le status in progress
-        status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-      });
-      if (nbYoung === 0) {
-        session.goalReached = false;
-        continue;
-      }
-
-      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-      if (fillingRatio >= 1) session.goalReached = true;
-      else session.goalReached = false;
     }
 
-    return res.send({ ok: true, data: cohorts.filter((e) => e.goalReached === false) });
+    return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
