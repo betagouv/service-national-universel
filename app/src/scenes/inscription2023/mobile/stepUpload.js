@@ -190,7 +190,7 @@ export default function StepUpload() {
         </div>
       </div>
       <Help />
-      <Footer />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );
