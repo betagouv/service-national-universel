@@ -65,7 +65,7 @@ export default function Forgot() {
           Se connecter
         </button>
       </div>
-      <Footer marginBottom={"0px"} />
+      <Footer />
     </>
   );
 }

@@ -96,7 +96,7 @@ export default function Signin() {
           Commencer mon inscription
         </button>
       </div>
-      <Footer marginBottom={"0px"} />
+      <Footer />
     </>
   );
 }

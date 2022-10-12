@@ -95,7 +95,7 @@ export default function Reset() {
           Se connecter
         </button>
       </div>
-      <Footer marginBottom={"0px"} />
+      <Footer />
     </>
   );
 }
