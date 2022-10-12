@@ -60,10 +60,14 @@ export default function StepDone() {
           </div>
           <hr className="my-8 h-px bg-gray-200 border-0" />
           <div className="flex justify-end gap-4">
-            <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]" onClick={() => logout()}>
+            <button
+              className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+              onClick={() => logout()}>
               Plus tard
             </button>
-            <button className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white`} onClick={handleClick}>
+            <button
+              className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]`}
+              onClick={handleClick}>
               Continuer
             </button>
           </div>
