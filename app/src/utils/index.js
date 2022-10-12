@@ -115,3 +115,5 @@ export const getDistance = (lat1, lon1, lat2, lon2) => {
     return dist;
   }
 };
+
+export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07)(?:\\W*\\d){8}$`;

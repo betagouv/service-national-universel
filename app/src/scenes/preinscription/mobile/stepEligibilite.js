@@ -17,6 +17,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import api from "../../../services/api";
 import { getDepartmentByZip } from "snu-lib";
 import { capture } from "../../../sentry";
+import Footer from "../../../components/footerV2";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -179,6 +180,7 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );
