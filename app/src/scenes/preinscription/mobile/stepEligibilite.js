@@ -30,18 +30,17 @@ export default function StepEligibilite() {
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
     { value: "3eme", label: "3ème" },
-    { value: "2ndePro", label: "2nde Pro" },
-    { value: "2ndeGT", label: "2nde GT" },
-    { value: "1erePro", label: "1ère Pro" },
-    { value: "1ereGT", label: "1ère GT" },
-    { value: "TermPro", label: "Terminale Pro" },
-    { value: "TermGT", label: "Terminale GT" },
+    { value: "2ndePro", label: "2de professionnelle" },
+    { value: "2ndeGT", label: "2de générale et technologique" },
+    { value: "1erePro", label: "1ère professionnelle" },
+    { value: "1ereGT", label: "1ère générale et technologique" },
+    { value: "TermPro", label: "Terminale professionnelle" },
+    { value: "TermGT", label: "Terminale générale et technologique" },
     { value: "CAP", label: "CAP" },
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
   const onSubmit = async () => {
-    setLoading(true);
     let errors = {};
 
     // Nationality
@@ -83,23 +82,23 @@ export default function StepEligibilite() {
       return;
     }
 
+    setLoading(true);
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
     if (data.frenchNationality === "false") return history.push("/preinscription/noneligible");
-    try {
-      const res = await api.post("/cohort-session/eligibility/2023", {
-        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-        birthDate: new Date(data.birthDate),
-        schoolLevel: data.scolarity,
-        frenchNationality: data.frenchNationality,
-      });
-      setData({ ...data, sessions: res.data });
-      if (res.data.length) return history.push("/preinscription/sejour");
-      return history.push("/preinscription/noneligible");
-    } catch (e) {
-      capture(e);
+    const res = await api.post("/cohort-session/eligibility/2023", {
+      department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+      birthDate: new Date(data.birthDate),
+      schoolLevel: data.scolarity,
+      frenchNationality: data.frenchNationality,
+    });
+    if (!res.ok) {
+      capture(res.code);
       setError({ text: "Impossible de vérifier votre éligibilité" });
+      setLoading(false);
     }
-    history.push("/preinscription/sejour");
+    setData({ ...data, sessions: res.data });
+    if (res.data.length) return history.push("/preinscription/sejour");
+    return history.push("/preinscription/noneligible");
   };
 
   return (

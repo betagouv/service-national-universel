@@ -137,8 +137,8 @@ router.post("/eligibility/2023", async (req, res) => {
       {
         id: "2023_02_C",
         name: "Février 2023 - C",
-        dateStart: "19 février",
-        dateEnd: "3 mars",
+        dateStart: new Date("02/19/2023"),
+        dateEnd: new Date("03/03/2023"),
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour fevrier C",
         eligibility: {
@@ -151,8 +151,8 @@ router.post("/eligibility/2023", async (req, res) => {
       {
         id: "2023_04_A",
         name: "Avril 2023 - A",
-        dateStart: "9 avril",
-        dateEnd: "21 avril",
+        dateStart: new Date("04/09/2023"),
+        dateEnd: new Date("04/21/2023"),
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour avril A",
         eligibility: {
@@ -165,8 +165,8 @@ router.post("/eligibility/2023", async (req, res) => {
       {
         id: "2023_04_B",
         name: "Avril 2023 - B",
-        dateStart: "16 avril",
-        dateEnd: "28 avril",
+        dateStart: new Date("04/16/2023"),
+        dateEnd: new Date("04/28/2023"),
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour avril B",
         eligibility: {
@@ -179,8 +179,8 @@ router.post("/eligibility/2023", async (req, res) => {
       {
         id: "2023_06",
         name: "Juin 2023",
-        dateStart: "11 juin",
-        dateEnd: "23 juin",
+        dateStart: new Date("06/11/2023"),
+        dateEnd: new Date("06/23/2023"),
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour juin",
         eligibility: {
@@ -193,8 +193,8 @@ router.post("/eligibility/2023", async (req, res) => {
       {
         id: "2023_07",
         name: "Juillet 2023",
-        dateStart: "5 juillet",
-        dateEnd: "17 juillet",
+        dateStart: new Date("07/05/2023"),
+        dateEnd: new Date("07/17/2023"),
         buffer: 1.15,
         event: "Phase0/CTA preinscription - sejour juillet",
         eligibility: {
@@ -207,16 +207,13 @@ router.post("/eligibility/2023", async (req, res) => {
     ];
 
     const zone = getZoneByDepartment(department);
-    let sessionsFiltered = sessions.filter(function (session) {
-      if (
+    let sessionsFiltered = sessions.filter(
+      (session) =>
         session.eligibility.zones.includes(zone) &&
         session.eligibility.schoolLevels.includes(schoolLevel) &&
         session.eligibility.bornAfter < birthDate &&
-        session.eligibility.bornBefore > birthDate
-      )
-        return true;
-      return false;
-    });
+        session.eligibility.bornBefore > birthDate,
+    );
 
     // Check inscription goals
     if (sessionsFiltered.length) {

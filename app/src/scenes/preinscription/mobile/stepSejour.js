@@ -4,6 +4,7 @@ import { PreInscriptionContext } from "../../../context/PreInscriptionContextPro
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import plausibleEvent from "../../../services/plausible";
+import { formatStringDate } from "snu-lib";
 
 export default function StepSejour() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -49,7 +50,7 @@ export default function StepSejour() {
           history.push("/preinscription/profil");
         }}>
         <div>
-          Séjour du <strong>{session.dateStart}</strong> au <strong>{session.dateEnd} 2023</strong>
+          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
         </div>
         <ArrowRightBlueSquare />
       </div>
