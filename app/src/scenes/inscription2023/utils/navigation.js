@@ -12,7 +12,7 @@ export const STEP_LIST = [
   { name: STEPS.COORDONNEES, url: "coordonnee" },
   { name: STEPS.CONSENTEMENTS, url: "consentement" },
   { name: STEPS.REPRESENTANTS, url: "representants" },
-  { name: STEPS.DOCUMENTS, url: "documents" },
+  { name: STEPS.DOCUMENTS, url: "documents", allowNext: true },
   { name: STEPS.UPLOAD, url: "televersement" },
   { name: STEPS.CONFIRM, url: "confirm" },
   { name: STEPS.DONE, url: "done" },
