@@ -1337,6 +1337,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac",
     },
   },
+  parentStatementOfHounourInvalidId: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant a fait une déclaration sur l'honneur qu'il allait mettre à jour la CNI du volontaire.",
+    },
+  },
 
   // * JDC
   jdc: {
