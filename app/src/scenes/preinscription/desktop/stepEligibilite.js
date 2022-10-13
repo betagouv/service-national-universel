@@ -115,7 +115,7 @@ export default function StepEligibilite() {
             <div className="flex items-center">
               <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
               <div className="flex items-center">
-                <span className="ml-4">Je suis de nationalité française</span>
+                <span className="ml-4 mr-2">Je suis de nationalité française</span>
                 <IconFrance />
               </div>
             </div>

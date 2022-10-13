@@ -82,7 +82,7 @@ class Auth {
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
         schooled: Joi.string().trim().required(),
-        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2deGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
