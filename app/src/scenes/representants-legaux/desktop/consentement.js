@@ -12,7 +12,6 @@ import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, HEALTH_FORM_URL, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
-import { Spinner } from "reactstrap";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
@@ -476,8 +475,7 @@ export default function Consentement({ step }) {
               <BorderButton className="mr-2" onClick={onPrevious}>
                 Précédent
               </BorderButton>
-              <PlainButton onClick={onSubmit}>
-                {saving && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+              <PlainButton onClick={onSubmit} spinner={saving}>
                 Je valide mon consentement
               </PlainButton>
             </div>

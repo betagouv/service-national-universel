@@ -9,7 +9,6 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import { getDepartmentByZip } from "snu-lib/region-and-departments";
 import { translate, translateGrade } from "snu-lib/translation";
 import Check from "../components/Check";
-import { Spinner } from "reactstrap";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 import { BorderButton, PlainButton } from "../components/Buttons";
@@ -103,8 +102,7 @@ export default function Verification({ step }) {
             <BorderButton className="mr-2" onClick={onPrevious}>
               Précédent
             </BorderButton>
-            <PlainButton onClick={onNext}>
-              {saving && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+            <PlainButton onClick={onNext} spinner={saving}>
               Suivant
             </PlainButton>
           </div>

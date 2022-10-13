@@ -5,6 +5,7 @@ export const ABROAD = "Abroad";
 
 export const API_VERIFICATION = "/representants-legaux/data-verification";
 export const API_CONSENT = "/representants-legaux/consent";
+export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide";
 
 export const ERROR_MESSAGES = {
   firstName: {

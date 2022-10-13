@@ -1,4 +1,5 @@
 import React from "react";
+import { Spinner } from "reactstrap";
 
 export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel }) {
   if (href) {
@@ -23,11 +24,12 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
   }
 }
 
-export function PlainButton({ children, className = "", onClick = () => {} }) {
+export function PlainButton({ children, className = "", onClick = () => {}, spinner = false }) {
   return (
     <button
       className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#000091] text-white border-[transparent] border-[1px] border-solid hover:!text-[#000091] hover:bg-white hover:border-[#000091] ${className}`}
       onClick={onClick}>
+      {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
       {children}
     </button>
   );
