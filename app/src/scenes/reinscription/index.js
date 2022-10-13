@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Redirect, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
 import DesktopConfirm from "./desktop/stepConfirm";
@@ -73,6 +73,7 @@ const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
 
   if (!young) history.push("/");
 

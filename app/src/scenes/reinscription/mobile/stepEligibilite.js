@@ -14,38 +14,71 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import Footer from "../../../components/footerV2";
 import CheckBox from "../../../components/inscription/CheckBox";
 import DateFilter from "../../preinscription/components/DatePickerList";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { capture } from "../../../sentry";
+import { getDepartmentByZip } from "snu-lib";
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
+import { translate } from "../../../utils";
 
 export default function StepEligibilite() {
   // const [data, setData] = React.useContext(PreInscriptionContext);
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
   const [error, setError] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
   const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
   console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
 
   useEffect(() => {
-    setData(young);
+    if (!young) return;
+
+    setData({
+      frenchNationality: young.frenchNationality,
+      birthDate: young.birthdateAt.split("T")[0],
+      // ! Forcer a refaire l'update de la school
+      // ! Mais qd meme gérer le cas des retours en arrière
+      // school: young.schooled
+      //   ? {
+      //       fullName: young.schoolName,
+      //       type: young.schoolType,
+      //       adresse: young.schoolAddress,
+      //       codeCity: young.schoolZip,
+      //       city: young.schoolCity,
+      //       departmentName: young.schoolDepartment,
+      //       region: young.schoolRegion,
+      //       country: young.schoolCountry,
+      //       _id: young.schoolId,
+      //       postCode: young.schoolZip,
+      //     }
+      //   : null,
+      // ! Galère de retraduire la scolarité dans le nouveau format => Mieux de créer nouveau format
+      zip: young.zip,
+    });
   }, [young]);
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
     { value: "3eme", label: "3ème" },
-    { value: "2nde", label: "2nde" },
-    { value: "1ere", label: "1ère" },
-    { value: "1ere CAP", label: "1ère CAP" },
-    { value: "Terminale", label: "Terminale" },
-    { value: "Terminale CAP", label: "Terminale CAP" },
+    { value: "2ndePro", label: "2de professionnelle" },
+    { value: "2ndeGT", label: "2de générale et technologique" },
+    { value: "1erePro", label: "1ère professionnelle" },
+    { value: "1ereGT", label: "1ère générale et technologique" },
+    { value: "TermPro", label: "Terminale professionnelle" },
+    { value: "TermGT", label: "Terminale générale et technologique" },
+    { value: "CAP", label: "CAP" },
+    { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
   const onSubmit = async () => {
     let errors = {};
 
     // Nationality
-    if (!data?.frenchNationality) {
+    if (!young?.frenchNationality) {
       errors.frenchNationality = "Vous devez être français";
     }
     // Scolarity
@@ -82,8 +115,64 @@ export default function StepEligibilite() {
       toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
       return;
     }
-    plausibleEvent("Phase0/CTA preinscription - eligibilite");
-    history.push("/preinscription/sejour");
+
+    setLoading(true);
+    plausibleEvent("Phase1/CTA reinscription - eligibilite");
+    if (data.frenchNationality === "false") return history.push("/reinscription/noneligible");
+
+    const updates = {
+      grade: data.scolarity,
+      schooled: data.school ? "true" : "false",
+      schoolName: data.school?.fullName,
+      schoolType: data.school?.type,
+      schoolAddress: data.school?.adresse,
+      schoolZip: data.school?.codeCity,
+      schoolCity: data.school?.city,
+      schoolDepartment: data.school?.departmentName,
+      schoolRegion: data.school?.region,
+      schoolCountry: data.school?.country,
+      schoolId: data.school?._id,
+      zip: data.zip,
+      // ! isAbroad n'est stocké ni ici ni dans dans stepConfirm
+    };
+
+    try {
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+        birthDate: new Date(data.birthDate),
+        schoolLevel: data.scolarity,
+        frenchNationality: data.frenchNationality,
+      });
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Impossible de vérifier votre éligibilité" });
+        setLoading(false);
+      }
+      // ! FIXME: Rediscuter du cas de non éligibilité (suppression du compte ???)
+      if (!res.data.length) return history.push("/reinscription/noneligible");
+
+      updates.sessions = res.data;
+    } catch (e) {
+      capture(e);
+      toastr.error("Une erreur s'est produite :", translate(e.code));
+    }
+
+    try {
+      // ! FIXME: Store sessions dans jeune. Solution naze mais pas le temps de faire mieux
+      const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      console.log("🚀 ~ file: stepEligibilite.js ~ line 162 ~ onSubmit ~ responseData", responseData);
+      dispatch(setYoung(responseData));
+      console.log("🚀 ~ file: stepEligibilite.js ~ line 168 ~ onSubmit ~ responseData", responseData);
+      history.push("/reinscription/sejour");
+    } catch (e) {
+      capture(e);
+      toastr.error("Une erreur s'est produite :", translate(e.code));
+    }
   };
 
   return (
@@ -120,7 +209,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4">
           Date de naissance
-          <DateFilter title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+          <DateFilter disabled={true} title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (
@@ -165,7 +254,7 @@ export default function StepEligibilite() {
         )}
       </div>
       <Footer marginBottom={"12vh"} />
-      <StickyButton text="Continuer" onClick={() => onSubmit()} />
+      <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );
 }

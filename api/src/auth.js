@@ -82,7 +82,7 @@ class Auth {
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
         schooled: Joi.string().trim().required(),
-        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2deGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
@@ -101,6 +101,8 @@ class Auth {
         if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+
+      // ! FIXME: Foreign school data
 
       const {
         email,

@@ -90,6 +90,12 @@ const Schema = new mongoose.Schema({
       description: "Date de naissance du volontaire",
     },
   },
+  sessions: {
+    type: [mongoose.Schema.Types.Mixed],
+    documentation: {
+      description: "Champ temporaire pour stocker les sessions",
+    },
+  },
   cohort: {
     type: String,
     default: "2022",

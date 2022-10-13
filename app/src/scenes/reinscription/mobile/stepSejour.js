@@ -1,47 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link, useHistory } from "react-router-dom";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import api from "../../../services/api";
-import Error from "../../../components/error";
-import { getDepartmentByZip } from "snu-lib";
 import plausibleEvent from "../../../services/plausible";
+import { formatStringDate } from "snu-lib";
 import Footer from "../../../components/footerV2";
+import { useDispatch, useSelector } from "react-redux";
+import api from "../../../services/api";
+import { capture } from "../../../sentry";
+import { setYoung } from "../../../redux/auth/actions";
+import { toastr } from "react-redux-toastr";
+import { translate } from "../../../utils";
 
 export default function StepSejour() {
-  const [isLoading, setLoading] = useState(true);
-  const [error, setError] = useState({});
-  const [data, setData] = React.useContext(PreInscriptionContext);
-  const [cohorts, setCohorts] = useState(false);
+  const young = useSelector((state) => state.Auth.young);
+  console.log("🚀 ~ file: stepSejour.js ~ line 14 ~ StepSejour ~ young", young);
+  const dispatch = useDispatch();
+
   const history = useHistory();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (data.frenchNationality === "false") {
-          setCohorts([]);
-          setLoading(false);
-          return;
-        }
-        const res = await api.post("/cohort-session/eligibility/2023", {
-          department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-          birthDate: data.birthDate,
-          schoolLevel: data.scolarity,
-          frenchNationality: data.frenchNationality,
-        });
-        setCohorts(res.data);
-      } catch (e) {
-        console.error(e);
-        setError({ text: "Impossible de vérifier votre éligibilité" });
-      }
-      setLoading(false);
-    })();
-  }, []);
-
-  if (Object.keys(error).length > 0) return <Error {...error} onClose={() => history.push("preinscription")} />;
-  if (isLoading) return <div className="text-center">Vérification de votre éligibilité</div>;
-  if (!cohorts.length) history.push("noneligible");
+  if (!young) return;
 
   return (
     <>
@@ -56,8 +34,8 @@ export default function StepSejour() {
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
         <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-        <div className="my-4">{cohorts.map((e) => StayButton(e))}</div>
-        {cohorts.length < 3 && (
+        <div className="my-4">{young.sessions?.map((e) => SessionButton(e))}</div>
+        {young.sessions?.length < 3 && (
           <>
             <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
             <div className="text-gray-500 text-sm">
@@ -76,18 +54,29 @@ export default function StepSejour() {
     </>
   );
 
-  function StayButton(cohort) {
+  function SessionButton(session) {
     return (
       <div
-        key={cohort.id}
+        key={session.id}
         className="border p-4 my-3 flex justify-between items-center"
-        onClick={() => {
-          setData({ ...data, cohort: cohort.id });
-          plausibleEvent(cohort.event);
-          history.push("/preinscription/profil");
+        onClick={async () => {
+          // setData({ ...data, cohort: session.name });
+          // ! Reprendre les call api ici
+          const { ok, data, code } = await api.put("/young/reinscription/changeCohort", {
+            cohortChangeReason: "Réinscription à un nouveau séjour",
+            cohort: session.name,
+          });
+          if (!ok) {
+            capture(code);
+            return toastr.error("Oups, une erreur est survenue", translate(code));
+          }
+          dispatch(setYoung(data));
+
+          plausibleEvent(session.event);
+          history.push("/reinscription/documents");
         }}>
         <div>
-          Séjour <strong>{cohort.dates} 2023</strong>
+          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
         </div>
         <ArrowRightBlueSquare />
       </div>
