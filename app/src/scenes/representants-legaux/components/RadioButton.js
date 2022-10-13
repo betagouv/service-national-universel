@@ -18,7 +18,7 @@ const RadioButton = ({ options, label, onChange, value: currentValue }) => {
 
 const Option = ({ label, value, onChange }) => {
   return (
-    <label className="mb-0">
+    <label className="mb-0 hover:underline cursor-pointer">
       <input className="mr-3 accent-[#000091] border-dashed" type="radio" checked={value} onChange={onChange} />
       {label}
     </label>

@@ -81,20 +81,24 @@ router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, as
 
 router.post("/data-verification", tokenParentValidMiddleware, async (req, res) => {
   // --- validate data
-  if (req.body.verified !== true) {
+  const { error: error_id } = Joi.boolean().valid(true).required().validate(req.body.verified);
+  if (error_id) {
     return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
   }
 
   // --- update young
-  req.young.set({ parent1DataVerified: true });
-  await req.young.save(fromUser(req.young));
+  const young = req.young;
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  young.set({ parent1DataVerified: true });
+  await young.save(fromUser(req.young));
 
   // --- result
   return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
 });
 
 router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
-  const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
+  const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.query.parent, { stripUnknown: true });
   if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   // --- validate data
@@ -103,8 +107,8 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     [`parent${id}LastName`]: Joi.string().uppercase().required(),
     [`parent${id}Email`]: Joi.string().lowercase().required(),
     [`parent${id}Phone`]: Joi.string().required(),
-    [`parent${id}AllowSNU`]: Joi.string().valid("true", "false").required(),
-    [`parent${id}AllowCovidAutotest`]: Joi.string().valid("true", "false").required(),
+    [`parentAllowSNU`]: Joi.string().valid("true", "false").required(),
+    // [`parent${id}AllowCovidAutotest`]: Joi.string().valid("true", "false").required(),
     [`parent${id}AllowImageRights`]: Joi.string().valid("true", "false").required(),
     [`rulesParent${id}`]: Joi.string().valid("true").required(),
 
@@ -124,6 +128,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   const result = consentBodySchema.validate(req.body, { stripUnknown: true });
   const { error, value } = result;
   if (error) {
+    console.log("error: ", error);
     return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
   }
 
@@ -136,8 +141,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
   if (id !== "1" || onlyOneParent) {
     const allowed = id === 1 ? value.parentAllowSNU : young.parentAllowSNU;
-    // TODO: le NOT_AUTHORIZED n'est pas le bon mais je n'ai pas trouvé le bon. A corriger.
-    value.status = allowed ? "WAITING_VALIDATION" : "NOT_AUTHORIZED";
+    value.status = allowed ? "WAITING_VALIDATION" : "NOT_AUTORISED";
     if (!canUpdateYoungStatus({ body: value, current: young })) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }

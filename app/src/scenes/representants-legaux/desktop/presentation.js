@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
@@ -7,10 +7,20 @@ import LinkTo from "../../../assets/icons/LinkTo";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
+import { BorderButton, PlainButton } from "../components/Buttons";
+import { isReturningParent } from "../commons";
 
 export default function Presentation({ step }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
+
+  useEffect(() => {
+    if (young) {
+      if (isReturningParent(young, 1)) {
+        history.push(`/representants-legaux/done?token=${token}&parent=1`);
+      }
+    }
+  }, [young]);
 
   if (!young) return <Loader />;
 
@@ -28,13 +38,9 @@ export default function Presentation({ step }) {
 
           <p className="text-[17px] leading-[28px] text-[#161616] mb-8">Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</p>
 
-          <a
-            href="https://www.snu.gouv.fr/"
-            target="_blank"
-            className="inline-flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]"
-            rel="noreferrer">
+          <BorderButton href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
             Découvrir le SNU <LinkTo className="ml-2" />
-          </a>
+          </BorderButton>
 
           <div className="flex my-8 pb-8  border-b border-[#e5e5e5] border-b-solid">
             <div className="flex-[1_0_0] mr-3 p-7 bg-[#fbfbfb]">
@@ -45,7 +51,7 @@ export default function Presentation({ step }) {
                 </li>
                 <li className="flex items-center mb-4 text-[14px] font-500">
                   <CheckCircleStroke stroke="#D1D5DB" className="mr-2 flex-shrink-0" />
-                  80 000 jeunes se sont déjà engagés
+                  80 000 jeunes déjà engagés
                 </li>
                 <li className="flex items-center mb-4 text-[14px] font-500">
                   <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
@@ -80,9 +86,7 @@ export default function Presentation({ step }) {
 
           <div className="flex justify-content-end">
             <div className="w-[256px]">
-              <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white" onClick={onSubmit}>
-                Continuer vers la vérification
-              </button>
+              <PlainButton onClick={onSubmit}>Continuer vers la vérification</PlainButton>
               <div className="text-center text-[13px] leading-[18px] font-400 mt-1.5">
                 Votre consentement ne sera recueilli qu’à la <b>troisième étape</b> de ce formulaire
               </div>

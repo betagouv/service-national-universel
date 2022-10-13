@@ -11,7 +11,8 @@ import { translate, translateGrade } from "snu-lib/translation";
 import Check from "../components/Check";
 import { Spinner } from "reactstrap";
 import api from "../../../services/api";
-import { API_VERIFICATION } from "../commons";
+import { API_VERIFICATION, isReturningParent } from "../commons";
+import { BorderButton, PlainButton } from "../components/Buttons";
 
 export default function Verification({ step }) {
   const history = useHistory();
@@ -22,6 +23,11 @@ export default function Verification({ step }) {
 
   useEffect(() => {
     if (young) {
+      if (isReturningParent(young, 1)) {
+        history.push(`/representants-legaux/done?token=${token}&parent=1`);
+        return;
+      }
+
       setCertified(young.parent1DataVerified);
     }
   }, [young]);
@@ -94,13 +100,13 @@ export default function Verification({ step }) {
           {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
 
           <div className="flex justify-content-end pt-[32px]">
-            <button className="flex items-center justify-center px-3 py-2 cursor-pointer border-[1px] border-solid border-[#000091] text-[#000091] mr-2" onClick={onPrevious}>
+            <BorderButton className="mr-2" onClick={onPrevious}>
               Précédent
-            </button>
-            <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white" onClick={onNext}>
+            </BorderButton>
+            <PlainButton onClick={onNext}>
               {saving && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
               Suivant
-            </button>
+            </PlainButton>
           </div>
         </div>
       </div>

@@ -10,12 +10,13 @@ import Toggle from "../../../components/inscription/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
-import { FRANCE, ABROAD, HEALTH_FORM_URL, translateError, API_CONSENT } from "../commons";
+import { FRANCE, ABROAD, HEALTH_FORM_URL, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import { Spinner } from "reactstrap";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
+import { BorderButton, PlainButton } from "../components/Buttons";
 
 export default function Consentement({ step }) {
   const history = useHistory();
@@ -48,11 +49,16 @@ export default function Consentement({ step }) {
     allowCovidAutotest: null,
     allowImageRights: null,
   });
-  const [covidAutoTestExplanationShown, setCovidAutoTestExplanationShown] = useState(false);
+  // const [covidAutoTestExplanationShown, setCovidAutoTestExplanationShown] = useState(false);
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
 
   useEffect(() => {
     if (young) {
+      if (isReturningParent(young, 1)) {
+        history.push(`/representants-legaux/done?token=${token}&parent=1`);
+        return;
+      }
+
       let address;
       if (young.parent1OwnAddress) {
         address = {
@@ -81,6 +87,7 @@ export default function Consentement({ step }) {
       }
 
       const confirmAddress = !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true });
+      const internalRules = stringToBoolean(young.rulesParent1);
 
       setData({
         firstName: young.parent1FirstName ? young.parent1FirstName : "",
@@ -89,16 +96,16 @@ export default function Consentement({ step }) {
         phone: young.parent1Phone ? young.parent1Phone : "",
         confirmAddress,
         addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
-        addressVerified: young.parent1AddressVerified,
+        addressVerified: young.addressParent1Verified === "true",
         ...address,
-        allowSNU: young.parentAllowSNU,
-        rightOlder: young.rulesParent1,
-        personalData: young.rulesParent1,
-        healthForm: young.rulesParent1,
-        vaccination: young.rulesParent1,
-        internalRules: young.rulesParent1,
-        allowCovidAutotest: young.autoTestPCR,
-        allowImageRights: young.parent1ImageRights,
+        allowSNU: stringToBoolean(young.parentAllowSNU),
+        rightOlder: internalRules,
+        personalData: internalRules,
+        healthForm: internalRules,
+        vaccination: internalRules,
+        internalRules,
+        allowCovidAutotest: stringToBoolean(young.autoTestPCR),
+        allowImageRights: stringToBoolean(young.parent1AllowImageRights),
       });
     }
   }, [young]);
@@ -140,10 +147,10 @@ export default function Consentement({ step }) {
   };
 
   // --- ui
-  function toggleCovidAutoTestExplanationShown(e) {
-    e.preventDefault();
-    setCovidAutoTestExplanationShown(!covidAutoTestExplanationShown);
-  }
+  // function toggleCovidAutoTestExplanationShown(e) {
+  //   e.preventDefault();
+  //   setCovidAutoTestExplanationShown(!covidAutoTestExplanationShown);
+  // }
 
   function toggleImageRightsExplanationShown(e) {
     e.preventDefault();
@@ -156,15 +163,13 @@ export default function Consentement({ step }) {
 
   // --- submit
   async function onSubmit() {
-    console.log("DATA: ", data);
     setSaving(true);
     setErrors({});
     const errors = validateData();
-    console.log("Validation errors: ", errors);
     if (errors) {
       setErrors(errors);
     } else if (await saveData()) {
-      history.push(`/representants-legaux/done?token=${token}`);
+      history.push(`/representants-legaux/done?token=${token}&parent=1`);
     }
     setSaving(false);
   }
@@ -205,7 +210,6 @@ export default function Consentement({ step }) {
         validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
       }
 
-      console.log("valid address = ", validAddress);
       if (!validAddress) {
         setData({ ...data, confirmAddress: false });
       }
@@ -222,7 +226,7 @@ export default function Consentement({ step }) {
     validate("vaccination", "unchecked", data.vaccination !== true);
     validate("internalRules", "unchecked", data.internalRules !== true);
 
-    validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
+    // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
     validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
 
     if (hasErrors) {
@@ -260,14 +264,14 @@ export default function Consentement({ step }) {
       parent1Email: validator.normalizeEmail(data.email),
       parent1Phone: data.phone.trim(),
       ...address,
-      parent1AllowSNU: data.allowSNU ? "true" : "false",
-      parent1AllowCovidAutotest: data.allowCovidAutotest ? "true" : "false",
+      parentAllowSNU: data.allowSNU ? "true" : "false",
+      // parent1AllowCovidAutotest: data.allowCovidAutotest ? "true" : "false",
       parent1AllowImageRights: data.allowImageRights ? "true" : "false",
       rulesParent1: "true",
     };
 
     try {
-      const { code, ok } = await api.post(API_CONSENT + `?token=${token}`, body);
+      const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=1`, body);
       if (!ok) {
         setErrors({ global: "Une erreur s'est produite" + (code ? " : " + translate(code) : "") });
         return false;
@@ -388,7 +392,7 @@ export default function Consentement({ step }) {
             </div>
           </div>
           <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-            <AuthorizeBlock
+            {/*<AuthorizeBlock
               title="Utilisation d’autotests COVID"
               value={data.allowCovidAutotest}
               onChange={(e) => setData({ ...data, allowCovidAutotest: e })}
@@ -434,13 +438,8 @@ export default function Consentement({ step }) {
                   </a>
                 </>
               )}
-            </AuthorizeBlock>
-            <AuthorizeBlock
-              className="mt-[32px]"
-              title="Droit à l’image"
-              value={data.allowImageRights}
-              onChange={(e) => setData({ ...data, allowImageRights: e })}
-              error={errors.allowImageRights}>
+            </AuthorizeBlock>*/}
+            <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
               <div className="mb-3">
                 Le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes dûment accrédités par les services communication du
                 ministère et/ou des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
@@ -471,14 +470,17 @@ export default function Consentement({ step }) {
             </AuthorizeBlock>
           </div>
 
-          <div className="mt-[32px] flex justify-end pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-            <button className="flex items-center justify-center px-3 py-2 cursor-pointer border-[1px] border-solid border-[#000091] text-[#000091] mr-2" onClick={onPrevious}>
-              Précédent
-            </button>
-            <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white" onClick={onSubmit}>
-              {saving && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
-              Je valide mon consentement
-            </button>
+          <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+            {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
+            <div className="flex justify-end ">
+              <BorderButton className="mr-2" onClick={onPrevious}>
+                Précédent
+              </BorderButton>
+              <PlainButton onClick={onSubmit}>
+                {saving && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+                Je valide mon consentement
+              </PlainButton>
+            </div>
           </div>
         </div>
       </div>
@@ -488,15 +490,19 @@ export default function Consentement({ step }) {
 
 function AuthorizeBlock({ title, value, onChange, children, className, error }) {
   const options = [
-    { value: true, label: "J'autorise" },
-    { value: false, label: "Je n'autorise pas" },
+    { value: "true", label: "J'autorise" },
+    { value: "false", label: "Je n'autorise pas" },
   ];
+
+  function onValueChange(e) {
+    onChange(e === "true");
+  }
 
   return (
     <div className={className}>
-      <RadioButton label={title} options={options} onChange={onChange} value={value} />
+      <RadioButton label={title} options={options} onChange={onValueChange} value={booleanToString(value)} />
       {error && <ErrorMessage className="mb-2">{error}</ErrorMessage>}
-      <div className="">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }

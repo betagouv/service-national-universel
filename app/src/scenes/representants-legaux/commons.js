@@ -78,3 +78,30 @@ export function translateError(path) {
     }
   }
 }
+
+export function stringToBoolean(val, defaultValue = null) {
+  if (val === "true") {
+    return true;
+  } else if (val === "false") {
+    return false;
+  } else {
+    return defaultValue;
+  }
+}
+
+export function booleanToString(val, defaultValue = null) {
+  if (val === true) {
+    return "true";
+  } else if (val === false) {
+    return "false";
+  } else {
+    return defaultValue;
+  }
+}
+
+export function isReturningParent(young, parentId) {
+  return (
+    (parentId === 1 && (young.parentAllowSNU === "true" || young.parentAllowSNU === "false")) ||
+    (parentId === 2 && (young.parent2ImageRights === "true" || young.parent2ImageRights === "false"))
+  );
+}
