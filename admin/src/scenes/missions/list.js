@@ -64,6 +64,8 @@ export default function List() {
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   async function transform(data, selectedFields) {
+    console.log("🚀 ~ file: list.js ~ line 67 ~ transform ~ data", data);
+    console.log("🚀 ~ file: list.js ~ line 67 ~ transform ~ selectedFields", selectedFields);
     let all = data;
     if (selectedFields.includes("tutor")) {
       const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
@@ -75,8 +77,9 @@ export default function List() {
         }
       }
     }
-    if (selectedFields.includes("structureInfo", "structureLocation")) {
+    if (["structureInfo", "structureLocation"].some((e) => selectedFields.includes(e))) {
       const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
+      console.log("🚀 ~ file: list.js ~ line 80 ~ transform ~ structureIds", structureIds);
       const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
       if (responses?.length) {
         const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
