@@ -4,6 +4,7 @@ import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
+import plausibleEvent from "../../../services/plausible";
 
 export default function MobileCniInvalide() {
   const [check, setCheck] = useState(false);
@@ -38,6 +39,7 @@ export default function MobileCniInvalide() {
       <StickyButton
         text="Valider ma déclaration"
         onClick={() => {
+          plausibleEvent("Phase0/CTA representant legal - ID perimee");
           history.push(`/representants-legaux/presentation?token=${token}`);
         }}
       />

@@ -13,6 +13,7 @@ import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
 import Help from "../components/Help";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
@@ -119,6 +120,7 @@ export default function StepRepresentants() {
           return;
         }
         dispatch(setYoung(responseData));
+        plausibleEvent("Phase0/CTA inscription - representants legaux");
         history.push("/inscription2023/documents");
       } catch (e) {
         capture(e);

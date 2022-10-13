@@ -135,7 +135,7 @@ export default function StepDone() {
           </div>
         </div>
       </div>
-      <Footer marginBottom="88px" />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="M'inscrire au SNU" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/profil")} />
     </>
   );

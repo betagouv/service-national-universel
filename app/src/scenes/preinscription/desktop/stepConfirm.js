@@ -62,7 +62,7 @@ export default function StepDone() {
       //   cta: `${appURL}/inscription2023`,
       // });
 
-      plausibleEvent("");
+      plausibleEvent("Phase0/CTA preinscription - inscription");
 
       history.push("/preinscription/done");
     } catch (e) {

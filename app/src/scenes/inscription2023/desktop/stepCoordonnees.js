@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import validator from "validator";
 
@@ -9,7 +9,6 @@ import RadioButton from "../components/RadioButton";
 import Input from "../components/Input";
 import Select from "../components/Select";
 import ErrorMessage from "../components/ErrorMessage";
-import Navbar from "../components/Navbar";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -28,9 +27,8 @@ import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Button from "../components/Button";
 import DesktopPageContainer from "../components/DesktopPageContainer";
+import plausibleEvent from "../../../services/plausible";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -333,6 +331,7 @@ export default function StepCoordonnees() {
           return;
         }
         dispatch(setYoung(responseData));
+        plausibleEvent("Phase0/CTA inscription - profil");
         history.push("/inscription2023/consentement");
       } catch (e) {
         capture(e);

@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import DesktopPageContainer from "../components/DesktopPageContainer";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -71,6 +72,7 @@ export default function StepUpload() {
         return;
       }
       dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - CI desktop");
       history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
