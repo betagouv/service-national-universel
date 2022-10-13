@@ -24,7 +24,6 @@ import useDevice from "../../hooks/useDevice";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
-import Help from "./components/Help";
 import { getStepFromUrlParam, STEPS, STEP_LIST } from "./utils/navigation";
 
 const getStepUrl = (name) => {
