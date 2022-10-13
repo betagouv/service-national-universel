@@ -41,7 +41,7 @@ import {
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";

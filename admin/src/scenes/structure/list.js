@@ -14,7 +14,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import { HiAdjustments } from "react-icons/hi";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import UnlockedSvg from "../../assets/lock-open.svg";

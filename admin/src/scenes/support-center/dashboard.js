@@ -14,7 +14,7 @@ import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles } from "./articles";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 
 const Dashboard = (props) => {
   const [userTickets, setUserTickets] = useState(null);

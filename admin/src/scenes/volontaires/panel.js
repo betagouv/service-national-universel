@@ -24,7 +24,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { ImQuotesLeft } from "react-icons/im";
 

@@ -8,7 +8,7 @@ import api from "../../services/api";
 //import { HeroContainer } from "../../components/Content";
 import { colors, urlWithScheme } from "../../utils";
 import { adminURL, supportURL } from "../../config";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 
 const articles = [
   {
