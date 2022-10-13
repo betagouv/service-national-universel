@@ -34,7 +34,7 @@ export default function StepUpload() {
         });
       }
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID.category, new Date(date));
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, new Date(date));
     if (res.code === "FILE_CORRUPTED") {
       setFileError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
@@ -62,16 +62,15 @@ export default function StepUpload() {
       if (filesToUpload !== undefined) {
         await upload([...filesToUpload]);
         if (error.length) return setLoading(false);
-
-        const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
-        if (!ok) {
-          capture(code);
-          setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-          setLoading(false);
-          return;
-        }
-        dispatch(setYoung(responseData));
       }
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+      if (!ok) {
+        capture(code);
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
       history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
