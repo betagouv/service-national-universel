@@ -2,13 +2,16 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
+const crypto = require("crypto");
 
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { sendTemplate } = require("./../../sendinblue");
+const config = require("../../config");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -24,11 +27,12 @@ const youngUnemployedSituationOptions = [YOUNG_SITUATIONS.POLE_EMPLOI, YOUNG_SIT
 const youngActiveSituationOptions = [...youngEmployedSituationOptions, ...youngUnemployedSituationOptions];
 
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const getObjectWithEmptyData = (fields) => {
+const getObjectWithEmptyData = (fields, emptyValue = "") => {
   const object = {};
   fields.forEach((field) => {
-    object[field] = "";
+    object[field] = emptyValue;
   });
   return object;
 };
@@ -67,6 +71,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         ),
       }),
       livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       country: needRequired(Joi.string().trim(), isRequired),
       city: needRequired(Joi.string().trim(), isRequired),
       zip: needRequired(Joi.string().trim(), isRequired),
@@ -99,6 +104,31 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: needRequired(Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
+      handicap: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      ppsBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      paiBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      allergies: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      moreInformation: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      specificAmenagment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      specificAmenagmentType: Joi.alternatives().conditional("specificAmenagment", {
+        is: "true",
+        then: needRequired(Joi.string().trim(), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
     }).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
@@ -113,6 +143,9 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       ...value,
       employed: youngEmployedSituationOptions.includes(value.situation),
       ...(value.livesInFrance === "true" ? getObjectWithEmptyData(foreignAddressFields) : {}),
+      moreInformation: undefined,
+      ...(value.moreInformation === "false" ? getObjectWithEmptyData(moreInformationFields, "false") : {}),
+      ...(value.moreInformation === "false" || value.specificAmenagment === "false" ? { specificAmenagmentType: "" } : {}),
     });
 
     await young.save({ fromUser: req.user });
@@ -195,9 +228,14 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2LastName = "";
       value.parent2Email = "";
       value.parent2Phone = "";
+      value.parent2Inscription2023Token = "";
     }
 
-    if (type === "next") value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+    if (type === "next") {
+      value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+      if (value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -213,9 +251,31 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // If ID proof expires before session start, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+
+    if (notifyExpirationDate) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+    });
+
+    if (young.parent2Email) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
     young.set({
       informationAccuracy: "true",
-      inscriptionStep2023: STEPS2023.WAITING_CONSENT,
+      inscriptionStep2023: STEPS2023.DONE,
     });
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -230,7 +290,6 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const { error, value } = Joi.object({
       cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
     }).validate(req.body, { stripUnknown: true });
-    console.log(error);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -243,6 +302,57 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
 
     young.set(value);
     await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/documents/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: typeError, value: type } = checkParameter(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (type === "next") young.set("inscriptionStep2023", STEPS2023.CONFIRM);
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/relance", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // If ID proof expires before session start, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+
+    if (notifyExpirationDate) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+    });
+
+    if (young.parent2Email) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      });
+    }
+
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);

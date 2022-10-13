@@ -11,6 +11,7 @@ import Input from "../../../components/inscription/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -89,10 +90,13 @@ export default function Signin() {
         </button>
         <hr className="text-[#E5E5E5] mt-5" />
         <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-4">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-        <button className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/preinscription")}>
+        <button
+          className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091]"
+          onClick={() => history.push("/preinscription/eligibilite")}>
           Commencer mon inscription
         </button>
       </div>
+      <Footer />
     </>
   );
 }

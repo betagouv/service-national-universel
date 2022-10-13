@@ -13,8 +13,9 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
 
-export default function StepConsentements({ step }) {
+export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
@@ -56,7 +57,7 @@ export default function StepConsentements({ step }) {
 
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Apporter mon consentement</h1>
@@ -78,12 +79,18 @@ export default function StepConsentements({ step }) {
             <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
             <div className="text-[#3A3A3A] text-sm flex-1">
               Suis volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-              <strong>{COHESION_STAY_LIMIT_DATE[young.cohort]}</strong> puis la réalisation d’une mission d’intérêt général.
+              <strong>{COHESION_STAY_LIMIT_DATE[young.cohort]}</strong> et la réalisation d’une mission d’intérêt général.
             </div>
           </div>
           <div className="flex items-center gap-4">
             <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
-            <div className="text-[#3A3A3A] text-sm flex-1">M&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</div>
+            <div className="text-[#3A3A3A] text-sm flex-1">
+              M&apos;engage à respecter le{" "}
+              <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view" target="_blank" rel="noreferrer">
+                règlement intérieur
+              </a>{" "}
+              du SNU, en vue de ma participation au séjour de cohésion.
+            </div>
           </div>
         </div>
         <div className="flex justify-end items-center gap-2 mt-4 pb-4" onClick={() => setModal({ isOpen: true })}>
@@ -91,6 +98,7 @@ export default function StepConsentements({ step }) {
           <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>

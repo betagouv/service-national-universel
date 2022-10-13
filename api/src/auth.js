@@ -82,8 +82,7 @@ class Auth {
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
         schooled: Joi.string().trim().required(),
-        grade: Joi.string().trim().valid("4eme", "3eme", "2nde", "1ere", "1ere CAP", "Terminale", "Terminale CAP"),
-
+        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2deGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
@@ -153,6 +152,11 @@ class Auth {
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+        params: { firstName: user.firstName, lastName: user.lastName, cta: `${config.APP_URL}/inscription2023` },
+      });
 
       return res.status(200).send({
         ok: true,

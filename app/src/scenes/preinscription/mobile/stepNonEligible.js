@@ -6,6 +6,7 @@ import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-ge
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
+import Footer from "../../../components/footerV2";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -94,6 +95,7 @@ export default function NonEligible() {
       Voir plus de formes d’engagement
     </div> */}
       </div>
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />
     </>
   );

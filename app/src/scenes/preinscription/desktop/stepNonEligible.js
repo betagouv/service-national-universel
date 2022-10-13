@@ -95,7 +95,9 @@ export default function NonEligible() {
       Voir plus de formes d’engagement
     </div> */}
           <div className="w-full border-t border-t-[#E5E5E5] mt-5 flex justify-end">
-            <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white mt-4" onClick={onClickButton}>
+            <button
+              className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091] mt-4"
+              onClick={onClickButton}>
               Revenir à l&apos;accueil
             </button>
           </div>

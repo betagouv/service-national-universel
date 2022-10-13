@@ -36,6 +36,19 @@
       // Send the pageview event to Plausible
       plausible("pageview", { u: redactedUrl });
     </script>
+    <script>
+      var url = window.location.href;
+      if (url.search("app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io") !== -1) {
+        window.Userback = window.Userback || {};
+        Userback.access_token = "37908|74324|NbXYWe7QybkcLVTY0BdbmN81n";
+        (function (d) {
+          var s = d.createElement("script");
+          s.async = true;
+          s.src = "https://static.userback.io/widget/v1.js";
+          (d.head || d.body).appendChild(s);
+        })(document);
+      }
+    </script>
     <!--
   Start of global snippet: Please do not remove
   Place this snippet between the head and /head tags on every page of your site.

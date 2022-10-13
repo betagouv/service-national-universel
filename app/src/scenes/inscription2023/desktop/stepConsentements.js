@@ -13,7 +13,7 @@ import { translate } from "../../../utils";
 import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 
-export default function StepConsentements({ step }) {
+export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
@@ -56,7 +56,7 @@ export default function StepConsentements({ step }) {
 
   return (
     <>
-      <Navbar step={step} />
+      <Navbar />
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
           <div className="w-full flex justify-between items-center mt-2">
@@ -79,25 +79,34 @@ export default function StepConsentements({ step }) {
               <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
               <div className="text-[#3A3A3A] text-sm flex-1">
                 Suis volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-                <strong>{COHESION_STAY_LIMIT_DATE[young.cohort]}</strong> puis la réalisation d’une mission d’intérêt général.
+                <strong>{COHESION_STAY_LIMIT_DATE[young.cohort]}</strong> et la réalisation d’une mission d’intérêt général.
               </div>
             </div>
             <div className="flex items-center gap-4">
               <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
-              <div className="text-[#3A3A3A] text-sm flex-1">M&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</div>
+              <div className="text-[#3A3A3A] text-sm flex-1">
+                M&apos;engage à respecter le{" "}
+                <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view" target="_blank" rel="noreferrer">
+                  règlement intérieur
+                </a>{" "}
+                du SNU, en vue de ma participation au séjour de cohésion.
+              </div>
             </div>
           </div>
-          <div className="flex justify-end items-center gap-2 mt-4 pb-4" onClick={() => setModal({ isOpen: true })}>
+          <div className="flex justify-end items-center gap-2 mt-4 pb-4 cursor-pointer" onClick={() => setModal({ isOpen: true })}>
             <EditPenLight />
-            <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
+            <div className="text-[#000091] text-sm font-medium ">Je souhaite modifier mes dates de séjour</div>
           </div>
           <hr className="my-8 h-px bg-gray-200 border-0" />
           <div className="flex justify-end gap-4">
-            <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/inscription2023/coordonnee")}>
+            <button
+              className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+              onClick={() => history.push("/inscription2023/coordonnee")}>
               Précédent
             </button>
             <button
-              className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading || disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+              disabled={disabled || loading}
+              className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
               onClick={() => (!loading || !disabled) && onSubmit()}>
               Continuer
             </button>

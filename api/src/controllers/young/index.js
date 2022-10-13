@@ -665,7 +665,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     const { id, template, message, prevStatus, missionName, structureName, cta, type_document, object, link } = value;
 
     // The template must exist.
-    if (!Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
+    if (!Object.values(SENDINBLUE_TEMPLATES.young).includes(template) && !Object.values(SENDINBLUE_TEMPLATES.parent).includes(template)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
@@ -696,12 +696,21 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     if (buttonCta === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION)
       buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+dossier+attente+correction&utm_source=notifauto&utm_medium=mail+169+corriger`;
 
-    let cc = getCcOfYoung({ template, young });
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document, object, link },
-      cc,
-    });
+    if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document, object, link },
+        cc,
+      });
+    }
+
+    if (Object.values(SENDINBLUE_TEMPLATES.parent).includes(template)) {
+      await sendTemplate(template, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: { youngFirstName: young.firstName, youngLastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document, object, link },
+      });
+    }
 
     return res.status(200).send({ ok: true });
   } catch (error) {

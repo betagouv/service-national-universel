@@ -16,6 +16,16 @@ export default function StepDone() {
 
   useEffect(() => console.log(data), []);
 
+  useEffect(
+    () =>
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      }),
+    [error],
+  );
+
   const onSubmit = async () => {
     const values = {
       email: data.email,
@@ -73,7 +83,7 @@ export default function StepDone() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-between items-center my-2">
               <div className="text-[#161616] text-lg font-semibold">Mon éligibilité</div>
-              <Link to=".">
+              <Link to="./eligibilite">
                 <EditPen />
               </Link>
             </div>
@@ -87,14 +97,18 @@ export default function StepDone() {
             </div>
             {data.school ? (
               <>
-                <div className="flex flex-row justify-between items-center">
-                  <div className="text-[#666666] text-sm">Pays de l&apos;établissement</div>
-                  <div className="text-[#161616] text-base capitalize">{data.school.country.toLowerCase()}</div>
-                </div>
-                <div className="flex flex-row justify-between items-center">
-                  <div className="text-[#666666] text-sm">Commune de l&apos;établissement</div>
-                  <div className="text-[#161616] text-base">{data.school.city}</div>
-                </div>
+                {data.school?.country ? (
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="text-[#666666] text-sm">Pays de l&apos;établissement</div>
+                    <div className="text-[#161616] text-base capitalize">{data.school?.country?.toLowerCase()}</div>
+                  </div>
+                ) : null}
+                {data.school?.city ? (
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="text-[#666666] text-sm">Commune de l&apos;établissement</div>
+                    <div className="text-[#161616] text-base">{data.school.city}</div>
+                  </div>
+                ) : null}
                 <div className="flex flex-row justify-between items-center">
                   <div className="text-[#666666] text-sm">Nom de l&apos;établissement</div>
                   <div className="text-[#161616] text-base">{data.school.fullName}</div>
@@ -127,10 +141,14 @@ export default function StepDone() {
             </div>
             <hr className="my-8 h-px bg-gray-200 border-0" />
             <div className="flex justify-end gap-4">
-              <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/preinscription/profil")}>
+              <button
+                className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+                onClick={() => history.push("/preinscription/profil")}>
                 Précédent
               </button>
-              <button className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white`} onClick={() => onSubmit()}>
+              <button
+                className={`flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]`}
+                onClick={() => onSubmit()}>
                 M’inscrire au SNU
               </button>
             </div>

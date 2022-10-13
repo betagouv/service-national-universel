@@ -14,10 +14,16 @@ import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SearchableSelect from "../../../components/SearchableSelect";
+import api from "../../../services/api";
+import { getDepartmentByZip } from "snu-lib";
+import { capture } from "../../../sentry";
+import Footer from "../../../components/footerV2";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [error, setError] = React.useState({});
+  const [toggleVerify, setToggleVerify] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const history = useHistory();
 
@@ -25,11 +31,14 @@ export default function StepEligibilite() {
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
     { value: "3eme", label: "3ème" },
-    { value: "2nde", label: "2nde" },
-    { value: "1ere", label: "1ère" },
-    { value: "1ere CAP", label: "1ère CAP" },
-    { value: "Terminale", label: "Terminale" },
-    { value: "Terminale CAP", label: "Terminale CAP" },
+    { value: "2ndePro", label: "2de professionnelle" },
+    { value: "2ndeGT", label: "2de générale et technologique" },
+    { value: "1erePro", label: "1ère professionnelle" },
+    { value: "1ereGT", label: "1ère générale et technologique" },
+    { value: "TermPro", label: "Terminale professionnelle" },
+    { value: "TermGT", label: "Terminale générale et technologique" },
+    { value: "CAP", label: "CAP" },
+    { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
   const onSubmit = async () => {
@@ -53,26 +62,44 @@ export default function StepEligibilite() {
       if (data.scolarity === "NOT_SCOLARISE") {
         // Zip du jeune
         // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
-        if (!(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
+        if (!data?.isAbroad && !(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
           errors.zip = "Vous devez sélectionner un code postal";
         }
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez choisir votre école. Contactez-nous (support URL) si vous ne la trouvez pas";
+          errors.school = "Vous devez choisir votre école";
         }
       }
     }
 
     setError(errors);
+    setToggleVerify(!toggleVerify);
 
     // ! Gestion erreur a reprendre
     if (Object.keys(errors).length) {
-      toastr.error("Veuillez remplir tous les champs :" + Object.keys(errors)[0] + Object.values(errors)[0]);
+      console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
+      toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
       return;
     }
-    plausibleEvent("");
-    history.push("/preinscription/sejour");
+
+    setLoading(true);
+    plausibleEvent("Phase0/CTA preinscription - eligibilite");
+    if (data.frenchNationality === "false") return history.push("/preinscription/noneligible");
+    const res = await api.post("/cohort-session/eligibility/2023", {
+      department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+      birthDate: new Date(data.birthDate),
+      schoolLevel: data.scolarity,
+      frenchNationality: data.frenchNationality,
+    });
+    if (!res.ok) {
+      capture(res.code);
+      setError({ text: "Impossible de vérifier votre éligibilité" });
+      setLoading(false);
+    }
+    setData({ ...data, sessions: res.data });
+    if (res.data.length) return history.push("/preinscription/sejour");
+    return history.push("/preinscription/noneligible");
   };
 
   return (
@@ -130,9 +157,15 @@ export default function StepEligibilite() {
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
-                <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+                <>
+                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                </>
               ) : (
-                <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: { ...school } })} />
+                <>
+                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                </>
               )
             ) : !data.isAbroad ? (
               <div className="flex flex-col flex-start my-4">
@@ -147,18 +180,8 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <StickyButton text="Continuer" onClick={() => onSubmit()} />
+      <Footer marginBottom={"12vh"} />
+      <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );
 }
-
-const SchoolCard = ({ _id, data, onClick }) => {
-  return (
-    <div key={_id} className={`my-1 w-full shrink-0 grow-0 cursor-pointer lg:my-4`} onClick={onClick}>
-      <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg`}>
-        <span>{data.fullName}</span>
-        <span className="justify-end">{data.adresse}</span>
-      </article>
-    </div>
-  );
-};

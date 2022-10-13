@@ -4,7 +4,7 @@ import { department2region, departmentLookUp } from "snu-lib/region-and-departme
 import InfoIcon from "../../../components/InfoIcon";
 import GhostButton from "./GhostButton";
 
-export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false }) {
+export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
 
@@ -58,7 +58,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
       );
     }
     return (
-      <div>
+      <div className="w-full">
         <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
         <p>{suggestion.properties.name}</p>
         <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
@@ -86,26 +86,29 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
 
   return (
     <>
-      <GhostButton
-        disabled={disabled}
-        name={
-          <div>
-            {loading && <Spinner size="sm" key={"verifaddress"} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
-            Vériﬁer mon adresse
-          </div>
-        }
-        onClick={() => {
-          if (disabled || !address || !zip || !city || loading) return;
-          getSuggestions(`${address}, ${city} ${zip}`);
-        }}
-      />
-      {(!address || !zip || !city) && <Message>Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postal et ville.</Message>}
+      <div className={buttonContainerClassName}>
+        <GhostButton
+          className={buttonClassName}
+          disabled={disabled}
+          name={
+            <div>
+              {loading && <Spinner size="sm" key={"verifaddress"} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+              Vériﬁer mon adresse
+            </div>
+          }
+          onClick={() => {
+            if (disabled || !address || !zip || !city || loading) return;
+            getSuggestions(`${address}, ${city} ${zip}`);
+          }}
+        />
+      </div>
+      {(!address || !zip || !city) && <Message>Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.</Message>}
     </>
   );
 }
 
-const Message = ({ children }) => (
-  <div className={`flex items-center rounded-md p-3 text-["#32257f"] bg-[#edecfc]`}>
+const Message = ({ children, className = "" }) => (
+  <div className={`flex items-center rounded-md p-3 text-["#32257f"] bg-[#edecfc] ${className}`}>
     <InfoIcon className="mt-1" color="#32257f" />
     <div className="ml-2">{children}</div>
   </div>

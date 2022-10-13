@@ -166,10 +166,14 @@ export default function StepProfil() {
               {error.rulesYoung ? <span className="text-red-500 text-sm">{error.rulesYoung}</span> : null}
             </div>
             <div className="flex justify-end gap-4">
-              <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/preinscription")}>
+              <button
+                className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+                onClick={() => history.push("/preinscription/eligibilite")}>
                 Retourner au choix de séjour
               </button>
-              <button className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white" onClick={() => onSubmit()}>
+              <button
+                className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
+                onClick={() => onSubmit()}>
                 Continuer
               </button>
             </div>

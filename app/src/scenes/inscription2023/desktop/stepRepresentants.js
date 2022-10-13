@@ -1,27 +1,27 @@
 import React from "react";
-import { AiOutlinePlus } from "react-icons/ai";
-import { HiOutlineTrash } from "react-icons/hi";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Input from "../components/Input";
-import { translate } from "../../../utils";
+import Error from "../../../components/error";
+import CheckBox from "../../../components/inscription/checkbox";
+import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { setYoung } from "../../../redux/auth/actions";
-import Error from "../../../components/error";
+import { translate, regexPhoneFrenchCountries } from "../../../utils";
+import Input from "../components/Input";
 import Navbar from "../components/Navbar";
-import { toastr } from "react-redux-toastr";
+import Help from "../components/Help";
 
-export default function StepRepresentants({ step }) {
+export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName", "parent2Email", "parent2Phone"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(false);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(true);
   const dispatch = useDispatch();
 
   const [data, setData] = React.useState({
@@ -37,10 +37,6 @@ export default function StepRepresentants({ step }) {
     parent2Phone: "",
   });
 
-  const hasParent2Infos = () => {
-    return young?.parent2Status || young?.parent2FirstName || young?.parent2LastName || young?.parent2Email || young?.parent2Phone ? true : false;
-  };
-
   React.useEffect(() => {
     if (young) {
       setData({
@@ -55,20 +51,19 @@ export default function StepRepresentants({ step }) {
         parent2Email: young.parent2Email,
         parent2Phone: young.parent2Phone,
       });
-      setIsParent2Visible(hasParent2Infos());
     }
   }, [young]);
 
   const getErrors = () => {
     let errors = {};
-    if (data.parent1Phone && !validator.isMobilePhone(data.parent1Phone)) {
-      errors.parent1Phone = "Le numéro de téléphone est au mauvais format.";
+    if (data.parent1Phone && !validator.matches(data.parent1Phone, regexPhoneFrenchCountries)) {
+      errors.parent1Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
-    if (data.parent2Phone && !validator.isMobilePhone(data.parent2Phone)) {
-      errors.parent2Phone = "Le numéro de téléphone est au mauvais format.";
+    if (data.parent2Phone && !validator.matches(data.parent2Phone, regexPhoneFrenchCountries)) {
+      errors.parent2Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
@@ -170,46 +165,42 @@ export default function StepRepresentants({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
-          <div className="w-full flex justify-between items-center mt-2">
-            <h1 className="text-xl font-bold">Mes représentants légaux</h1>
-            <Link to="/public-besoin-d-aide/">
-              <QuestionMarkBlueCircle />
-            </Link>
-          </div>
-          <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
-          <hr className="my-4 h-px bg-gray-200 border-0" />
-          {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
-          <FormRepresentant i={1} data={data} setData={setData} errors={errors} />
-          {isParent2Visible ? (
-            <>
-              <hr className="h-px bg-gray-200 border-0" />
-              <FormRepresentant i={2} data={data} setData={setData} errors={errors} />
-              <div className="flex justify-end gap-2 items-center text-[#000091]" onClick={() => setIsParent2Visible(false)}>
-                <HiOutlineTrash />
-                Supprimer le représentant légal
-              </div>
-            </>
-          ) : (
-            <div className="flex justify-end gap-2 items-center text-[#000091]" onClick={() => setIsParent2Visible(true)}>
-              <AiOutlinePlus />
-              Ajouter un(e) représentant(e) légal(e)
+      <Navbar onSave={onSave} />
+      <div className="bg-[#f9f6f2] flex justify-center flex-col py-10">
+        <div className="basis-[70%] mx-auto my-0">
+          <div className="bg-white   px-[102px] py-[60px]">
+            <div className="w-full flex justify-between items-center mt-2">
+              <h1 className="text-xl font-bold">Mes représentants légaux</h1>
+              <Link to="/public-besoin-d-aide/">
+                <QuestionMarkBlueCircle />
+              </Link>
             </div>
-          )}
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="flex justify-end gap-4">
-            <button
-              className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091]"
-              onClick={() => history.push("/inscription2023/consentement")}>
-              Précédent
-            </button>
-            <button
-              className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-              onClick={() => !loading && onSubmit()}>
-              Continuer
-            </button>
+            <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
+            <hr className="my-4 h-px bg-gray-200 border-0" />
+            {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
+            <FormRepresentant i={1} data={data} setData={setData} errors={errors} />
+            <hr className="my-4 h-px bg-gray-200 border-0" />
+            <div className="flex gap-4 items-center">
+              <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
+              <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
+            </div>
+            {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} /> : null}
+            <hr className="my-8 h-px bg-gray-200 border-0" />
+            <div className="flex justify-end gap-4">
+              <button
+                className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] "
+                onClick={() => history.push("/inscription2023/consentement")}>
+                Précédent
+              </button>
+              <button
+                className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+                onClick={() => !loading && onSubmit()}>
+                Continuer
+              </button>
+            </div>
+          </div>
+          <div className="flex w-full mt-4">
+            <Help />
           </div>
         </div>
       </div>

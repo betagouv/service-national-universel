@@ -10,14 +10,26 @@ import Input from "../components/Input";
 import Select from "../components/Select";
 import ErrorMessage from "../components/ErrorMessage";
 import Navbar from "../components/Navbar";
-import { youngSchooledSituationOptions, youngActiveSituationOptions, countryOptions, hostRelationshipOptions, frenchNationalityOptions, genderOptions } from "../utils";
+import Footer from "../../../components/footerV2";
+import Help from "../components/Help";
+import {
+  youngSchooledSituationOptions,
+  youngActiveSituationOptions,
+  countryOptions,
+  hostRelationshipOptions,
+  frenchNationalityOptions,
+  genderOptions,
+  booleanOptions,
+} from "../utils";
 
 import api from "../../../services/api";
 import VerifyAddress from "../components/VerifyAddress";
 import SearchableSelect from "../../../components/SearchableSelect";
 import StickyButton from "../../../components/inscription/stickyButton";
+import Toggle from "../../../components/inscription/toggle";
+import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "../../../utils";
+import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
 
 const getObjectWithEmptyData = (fields) => {
@@ -33,13 +45,27 @@ const errorMessages = {
   addressVerified: "Merci de vérifier l'adresse",
   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
   zip: "Le code postal n'est pas valide",
+  hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = ["frenchNationality", ...birthPlaceFields, ...addressFields, "gender", "phone", "situation", "livesInFrance"];
+const commonFields = [
+  "frenchNationality",
+  ...birthPlaceFields,
+  ...addressFields,
+  "gender",
+  "phone",
+  "situation",
+  "livesInFrance",
+  "handicap",
+  "allergies",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+];
 
 const commonRequiredFields = [
   "frenchNationality",
@@ -54,9 +80,14 @@ const commonRequiredFields = [
   "region",
   "department",
   "location",
+  "handicap",
+  "allergies",
+  "ppsBeneficiary",
+  "paiBeneficiary",
 ];
 
 const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+const requiredMoreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
 const defaultState = {
   frenchNationality: "true",
@@ -83,9 +114,17 @@ const defaultState = {
   hostRelationship: "",
   situation: "",
   schooled: "",
+  handicap: "false",
+  allergies: "false",
+  ppsBeneficiary: "false",
+  paiBeneficiary: "false",
+  specificAmenagment: "",
+  specificAmenagmentType: "",
+  reducedMobilityAccess: "",
+  handicapInSameDepartment: "",
 };
 
-export default function StepCoordonnees({ step }) {
+export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
@@ -93,6 +132,8 @@ export default function StepCoordonnees({ step }) {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
   const {
     frenchNationality,
@@ -115,17 +156,30 @@ export default function StepCoordonnees({ step }) {
     hostRelationship,
     situation,
     schooled,
+    handicap,
+    allergies,
+    ppsBeneficiary,
+    paiBeneficiary,
+    specificAmenagment,
+    specificAmenagmentType,
+    reducedMobilityAccess,
+    handicapInSameDepartment,
   } = data;
 
   const isFrench = frenchNationality === "true";
   const isFrenchResident = livesInFrance === "true";
 
   const isVerifyAddressDisabled = !address || !city || !zip;
+  const moreInformation = handicap === "true" || ppsBeneficiary === "true" || paiBeneficiary === "true";
 
   useEffect(() => {
     if (young) {
       const situationOptions = young.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions;
       setSituationOptions(situationOptions);
+
+      if (young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true") {
+        setSpecialSituation(true);
+      }
 
       setData({
         ...data,
@@ -138,9 +192,14 @@ export default function StepCoordonnees({ step }) {
         gender: young.gender || data.gender,
         phone: young.phone || data.phone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
+        addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
         city: young.city || data.city,
         zip: young.zip || data.zip,
+        region: young.region || data.region,
+        department: young.department || data.department,
+        location: young.location || data.location,
+        cityCode: young.cityCode || data.cityCode,
         foreignCountry: young.foreignCountry || data.foreignCountry,
         foreignAddress: young.foreignAddress || data.foreignAddress,
         foreignCity: young.foreignCity || data.foreignCity,
@@ -148,18 +207,26 @@ export default function StepCoordonnees({ step }) {
         hostFirstName: young.hostFirstName || data.hostFirstName,
         hostLastName: young.hostLastName || data.hostLastName,
         hostRelationship: young.hostRelationship || data.hostRelationship,
+        handicap: young.handicap || data.handicap,
+        allergies: young.allergies || data.allergies,
+        ppsBeneficiary: young.ppsBeneficiary || data.ppsBeneficiary,
+        paiBeneficiary: young.paiBeneficiary || data.paiBeneficiary,
+        specificAmenagment: young.specificAmenagment || data.specificAmenagment,
+        specificAmenagmentType: young.specificAmenagmentType || data.specificAmenagmentType,
+        reducedMobilityAccess: young.reducedMobilityAccess || data.reducedMobilityAccess,
+        handicapInSameDepartment: young.handicapInSameDepartment || data.handicapInSameDepartment,
       });
     }
   }, [young]);
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, frenchNationality, birthCityZip, zip]);
+  }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !validator.isMobilePhone(phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (phone && !validator.matches(phone, regexPhoneFrenchCountries)) {
       errors.phone = errorMessages.phone;
     }
 
@@ -168,6 +235,10 @@ export default function StepCoordonnees({ step }) {
     }
     if (zip && !validator.isPostalCode(zip, "FR")) {
       errors.zip = errorMessages.zip;
+    }
+
+    if (hasSpecialSituation && handicap === "false" && allergies === "false" && ppsBeneficiary === "false" && paiBeneficiary === "false") {
+      errors.hasSpecialSituation = errorMessages.hasSpecialSituation;
     }
 
     return errors;
@@ -189,11 +260,26 @@ export default function StepCoordonnees({ step }) {
     setData({ ...data, [key]: value });
   };
 
-  const updateAddressData =
-    (key, isPersonalAddress = true) =>
-    (value) => {
-      setData({ ...data, [key]: value, [isPersonalAddress ? "addressVerified" : "hostAddressVerified"]: "false" });
-    };
+  const updateSpecialSituation = (value) => {
+    setSpecialSituation(value);
+    if (!value) {
+      setData({
+        ...data,
+        handicap: "false",
+        allergies: "false",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        specificAmenagment: "",
+        specificAmenagmentType: "",
+        reducedMobilityAccess: "",
+        handicapInSameDepartment: "",
+      });
+    }
+  };
+
+  const updateAddressToVerify = (key) => (value) => {
+    setData({ ...data, [key]: value, addressVerified: "false" });
+  };
 
   const onSubmit = async () => {
     setLoading(true);
@@ -208,6 +294,16 @@ export default function StepCoordonnees({ step }) {
 
     if (addressVerified !== "true") {
       errors.addressVerified = errorMessages.addressVerified;
+    }
+
+    if (moreInformation) {
+      fieldToUpdate.push(...moreInformationFields);
+      requiredFields.push(...requiredMoreInformationFields);
+    }
+
+    if (specificAmenagment === "true") {
+      fieldToUpdate.push("specificAmenagmentType");
+      requiredFields.push("specificAmenagmentType");
     }
 
     for (const key of requiredFields) {
@@ -227,6 +323,7 @@ export default function StepCoordonnees({ step }) {
       });
 
       updates.country = FRANCE;
+      updates.moreInformation = moreInformation.toString();
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
@@ -255,11 +352,22 @@ export default function StepCoordonnees({ step }) {
       fieldToUpdate.push(...foreignAddressFields);
     }
 
+    if (moreInformation) {
+      fieldToUpdate.push(...moreInformationFields);
+    }
+
+    if (moreInformation && specificAmenagment === "true") {
+      fieldToUpdate.push("specificAmenagmentType");
+    }
+
+    const updates = {};
+
     fieldToUpdate.forEach((field) => {
       updates[field] = data[field];
     });
 
     updates.country = FRANCE;
+    updates.moreInformation = moreInformation.toString();
 
     try {
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/save", updates);
@@ -294,9 +402,9 @@ export default function StepCoordonnees({ step }) {
 
   return (
     <>
-      <Navbar step={step} onSave={onSave} />
+      <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
-        <h1 className="text-[22px] font-bold">Mon profile volontaire</h1>
+        <h1 className="text-[22px] font-bold">Mon profil volontaire</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
         {!isFrench && (
@@ -319,7 +427,7 @@ export default function StepCoordonnees({ step }) {
             label="Pays de résidence"
             value={foreignCountry}
             options={countryOptions}
-            onChange={updateAddressData("foreignCountry")}
+            onChange={updateData("foreignCountry")}
             placeholder="Sélectionnez un pays"
             error={errors.foreignCountry}
           />
@@ -327,19 +435,19 @@ export default function StepCoordonnees({ step }) {
         <Input
           value={isFrenchResident ? address : foreignAddress}
           label="Adresse de résidence"
-          onChange={updateAddressData(isFrenchResident ? "address" : "foreignAddress")}
+          onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
           error={isFrenchResident ? errors.address : errors.foreignAddress}
         />
         <Input
           value={isFrenchResident ? zip : foreignZip}
           label="Code postal"
-          onChange={updateAddressData(isFrenchResident ? "zip" : "foreignZip")}
+          onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
           error={isFrenchResident ? errors.zip : errors.foreignZip}
         />
         <Input
           value={isFrenchResident ? city : foreignCity}
           label="Ville"
-          onChange={updateAddressData(isFrenchResident ? "city" : "foreignCity")}
+          onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
           error={isFrenchResident ? errors.city : errors.foreignCity}
         />
         {!isFrenchResident && (
@@ -365,9 +473,9 @@ export default function StepCoordonnees({ step }) {
               onChange={updateData("hostRelationship")}
               error={errors.hostRelationship}
             />
-            <Input value={address} label="Son adresse" onChange={updateAddressData("address", false)} error={errors.address} />
-            <Input value={zip} label="Code postal" onChange={updateAddressData("zip", false)} error={errors.zip} />
-            <Input value={city} label="Ville" onChange={updateAddressData("city", false)} error={errors.city} />
+            <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address")} error={errors.address} />
+            <Input value={zip} label="Code postal" onChange={updateAddressToVerify("zip")} error={errors.zip} />
+            <Input value={city} label="Ville" onChange={updateAddressToVerify("city")} error={errors.city} />
           </>
         )}
         <VerifyAddress
@@ -387,7 +495,91 @@ export default function StepCoordonnees({ step }) {
           onChange={updateData("situation")}
           error={errors.situation}
         />
+        <div className="flex items-center mb-4">
+          <div>
+            <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
+            <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+          </div>
+          <div className="ml-3">
+            <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
+          </div>
+        </div>
+        {hasSpecialSituation && (
+          <>
+            <CheckBox
+              className="mb-4"
+              label="Je suis en situation de handicap"
+              checked={handicap === "true"}
+              onChange={(value) => {
+                setData({ ...data, handicap: value.toString() });
+              }}
+            />
+            <CheckBox
+              className="mb-4"
+              label="Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)"
+              checked={ppsBeneficiary === "true"}
+              onChange={(value) => {
+                setData({ ...data, ppsBeneficiary: value.toString() });
+              }}
+            />
+            <CheckBox
+              className="mb-4"
+              label="Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)"
+              checked={paiBeneficiary === "true"}
+              onChange={(value) => {
+                setData({ ...data, paiBeneficiary: value.toString() });
+              }}
+            />
+            <CheckBox
+              className="mb-4"
+              label="J’ai des allergies ou intolérances alimentaires."
+              description="(nécessitant la mise en place de mesures adaptées)"
+              checked={allergies === "true"}
+              onChange={(value) => {
+                setData({ ...data, allergies: value.toString() });
+              }}
+            />
+            <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
+            {moreInformation && (
+              <>
+                <hr className="my-4 h-px bg-gray-200 border-0" />
+                <RadioButton
+                  label="Avez-vous besoin d’aménagements spécifiques ?"
+                  description="(accompagnant professionnel, participation de jour, activités adaptées... )"
+                  options={booleanOptions}
+                  onChange={updateData("specificAmenagment")}
+                  value={specificAmenagment}
+                  error={errors.specificAmenagment}
+                />
+                {specificAmenagment === "true" && (
+                  <Input
+                    value={specificAmenagmentType}
+                    label="Quelle est la nature de cet aménagement ?"
+                    onChange={updateData("specificAmenagmentType")}
+                    error={errors.specificAmenagmentType}
+                  />
+                )}
+                <RadioButton
+                  label="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
+                  options={booleanOptions}
+                  onChange={updateData("reducedMobilityAccess")}
+                  value={reducedMobilityAccess}
+                  error={errors.reducedMobilityAccess}
+                />
+                <RadioButton
+                  label="Avez-vous besoin d’être affecté(e) dans un centre de votre département de résidence ?"
+                  options={booleanOptions}
+                  onChange={updateData("handicapInSameDepartment")}
+                  value={handicapInSameDepartment}
+                  error={errors.handicapInSameDepartment}
+                />
+              </>
+            )}
+          </>
+        )}
       </div>
+      <Help />
+      <Footer marginBottom={"12vh"} />
       <StickyButton text="Continuer" onClick={onSubmit} disabled={loading} />
     </>
   );

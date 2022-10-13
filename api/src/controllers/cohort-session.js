@@ -2,13 +2,12 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-
 const { capture } = require("../sentry");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 const { getCohortSessionsAvailability } = require("../utils/cohort");
-const { getDepartmentNumber, getZoneByDepartment } = require("snu-lib/region-and-departments");
+const { getDepartmentNumber, getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
@@ -133,85 +132,32 @@ router.post("/eligibility/2023", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { department, birthDate, schoolLevel } = value;
 
-    // Get available sessions based on department, grade & birthdate
-    if (!["NOT_SCOLARISE", "2nde", "1ere CAP"].includes(schoolLevel)) return res.send({ ok: true, data: [] });
-
-    let cohorts = [];
     const zone = getZoneByDepartment(department);
-    switch (zone) {
-      case "A":
-        if (birthDate > new Date("04/22/2005") && birthDate < new Date("04/09/2008")) {
-          cohorts.push({
-            id: "Avril 2023 - A",
-            dates: "du 9 au 21 avril",
-            buffer: 1.15,
-          });
-        }
-        break;
-      case "B":
-      case "Corse":
-        if (birthDate > new Date("04/29/2005") && birthDate < new Date("04/16/2008")) {
-          cohorts.push({
-            id: "Avril 2023 - B",
-            dates: "du 16 au 28 avril",
-            buffer: 1.15,
-          });
-        }
-        break;
-      case "C":
-        if (birthDate > new Date("02/19/2005") && birthDate < new Date("03/03/2008")) {
-          cohorts.push({
-            id: "Février 2023 - C",
-            dates: "du 19 février au 3 mars",
-            buffer: 1.15,
-          });
-        }
-        break;
-      default:
-        break;
-    }
-
-    if (birthDate > new Date("06/24/2005") && birthDate < new Date("06/11/2008")) {
-      cohorts.push({
-        id: "Juin 2023",
-        dates: "du 11 au 23 juin",
-        buffer: 1.15,
-      });
-    }
-
-    if (birthDate > new Date("07/17/2005") && birthDate < new Date("07/05/2008")) {
-      cohorts.push({
-        id: "Juillet 2023",
-        dates: "du 5 au 17 juillet",
-        buffer: 1.15,
-      });
-    }
+    let sessionsFiltered = sessions2023.filter(
+      (session) =>
+        session.eligibility.zones.includes(zone) &&
+        session.eligibility.schoolLevels.includes(schoolLevel) &&
+        session.eligibility.bornAfter < birthDate &&
+        session.eligibility.bornBefore > birthDate,
+    );
 
     // Check inscription goals
-    for (let session of cohorts) {
-      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
-      if (!inscriptionGoal || !inscriptionGoal.max) {
-        session.goalReached = false;
-        continue;
+    if (sessionsFiltered.length) {
+      for (let session of sessionsFiltered) {
+        const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
+        if (!inscriptionGoal || !inscriptionGoal.max) continue;
+        const nbYoung = await YoungModel.countDocuments({
+          department: department,
+          cohort: session.id,
+          status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+        });
+        if (nbYoung === 0) continue;
+        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
+        if (fillingRatio >= 1) sessionsFiltered = sessionsFiltered.filter((e) => e.id !== session.id);
       }
-
-      const nbYoung = await YoungModel.countDocuments({
-        department: department,
-        cohort: session.id,
-        //TODO enlever le status in progress
-        status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-      });
-      if (nbYoung === 0) {
-        session.goalReached = false;
-        continue;
-      }
-
-      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-      if (fillingRatio >= 1) session.goalReached = true;
-      else session.goalReached = false;
     }
 
-    return res.send({ ok: true, data: cohorts.filter((e) => e.goalReached === false) });
+    return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

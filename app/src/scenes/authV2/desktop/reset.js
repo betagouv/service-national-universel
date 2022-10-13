@@ -83,7 +83,8 @@ export default function Reset() {
         </div>
         <div className="w-full flex justify-end">
           <button
-            className={`mt-4 flex items-center justify-center p-2 cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+            disabled={disabled || loading}
+            className="flex items-center justify-center px-3 py-2 mt-4 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
             onClick={onSubmit}>
             Réinitialiser
           </button>
@@ -92,7 +93,9 @@ export default function Reset() {
         <hr className="text-[#E5E5E5] mt-4" />
         <div className="text-[#161616] text-[17px] font-bold text-center mt-4 mb-4">Retourner à la connexion</div>
         <div className="flex justify-center">
-          <button className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091]" onClick={() => history.push("/auth")}>
+          <button
+            className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+            onClick={() => history.push("/auth")}>
             Se connecter
           </button>
         </div>
