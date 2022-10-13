@@ -40,7 +40,7 @@ export default function StepSejour() {
           </>
         )}
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer />
     </>
   );
 

@@ -14,6 +14,7 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
+import Footer from "../../../components/footerV2";
 
 const engagementPrograms = [
   {
@@ -104,9 +105,9 @@ export default function StepWaitingConsent() {
         <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] p-4 gap-1">
           <div className="text-[#161616] text-base font-bold">En attente du consentement de :</div>
           <div className="text-[#3A3A3A] text-base ">
-            {young?.firstName} {young.lastName}
+            {young?.parent1FirstName} {young.parent1LastName}
           </div>
-          <div className="text-[#666666] text-sm ">{young?.email}</div>
+          <div className="text-[#666666] text-sm ">{young?.parent1Email}</div>
           <div className="flex justify-between mt-2">
             <button className="mt-2 h-10 text-base w-1/2 disabled:bg-[#E5E5E5] disabled:text-[#929292] bg-[#000091]  text-white " disabled={disabled} onClick={() => handleClick()}>
               Relancer
@@ -125,6 +126,7 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
+      <Footer marginBottom="mb-[88px]" />
     </>
   ) : (
     <>
@@ -187,6 +189,7 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
+      <Footer marginBottom="mb-[88px]" />
     </>
   );
 }

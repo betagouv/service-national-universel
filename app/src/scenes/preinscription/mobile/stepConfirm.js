@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import { useHistory, Link } from "react-router-dom";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import api from "../../../services/api";
-import { translate, translateGrade, formatDateFR } from "snu-lib";
-import plausibleEvent from "../../../services/plausible";
+import React, { useEffect, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import { formatDateFR, translate, translateGrade } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
-import StickyButton from "../../../components/inscription/stickyButton";
-import { capture } from "../../../sentry";
-import { useEffect } from "react";
 import Footer from "../../../components/footerV2";
+import StickyButton from "../../../components/inscription/stickyButton";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepDone() {
   const [error, setError] = useState({});
@@ -48,6 +47,7 @@ export default function StepDone() {
       schoolId: data.school?._id,
       zip: data.zip,
       cohort: data.cohort,
+      grade: data.scolarity,
     };
 
     if (values.schooled === "true") values.grade = data.scolarity;
@@ -135,7 +135,7 @@ export default function StepDone() {
           </div>
         </div>
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="88px" />
       <StickyButton text="M'inscrire au SNU" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/profil")} />
     </>
   );

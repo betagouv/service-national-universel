@@ -12,7 +12,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 import Badge from "../../components/Badge";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function InscriptionPanel({ onChange, value }) {

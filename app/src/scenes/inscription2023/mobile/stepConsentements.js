@@ -98,7 +98,7 @@ export default function StepConsentements() {
           <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>

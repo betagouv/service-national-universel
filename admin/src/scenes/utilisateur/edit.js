@@ -21,7 +21,7 @@ import HistoricComponent from "../../components/views/Historic";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser as ReduxSetUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import {
   canDeleteReferent,
   canUpdateReferent,

@@ -3,7 +3,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import { getSelectedFilterLabel, translateFilter, capitalizeFirstLetter } from "../../utils";
 import { Modal } from "reactstrap";
 import { SelectedFilters, StateProvider } from "@appbaseio/reactivesearch";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import { ModalContainer } from "../../components/modals/Modal";
 import ExportFieldCard from "../ExportFieldCard";
 import { translateIndexes } from "snu-lib";
