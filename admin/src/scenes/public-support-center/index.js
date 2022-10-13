@@ -8,6 +8,7 @@ import api from "../../services/api";
 //import { HeroContainer } from "../../components/Content";
 import { colors, urlWithScheme } from "../../utils";
 import { adminURL, supportURL } from "../../config";
+import plausibleEvent from "../../services/pausible";
 
 const articles = [
   {
@@ -104,6 +105,7 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
           className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
           type="text"
           placeholder={placeholder}
+          onClick={() => plausibleEvent("Besoin d'aide - Barre de recherche")}
           onChange={(e) => setSearch(e.target.value)}
           value={search}
         />
@@ -141,8 +143,14 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
 
 const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className = "" }) => {
   return (
-    <div key={_id} onClick={() => window.open(`https://support.snu.gouv.fr/${path}/${slug}`, "_blank")}>
-      <a href="#" data-position={position} data-id={_id} className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
+    <div key={_id}>
+      <a
+        href={`https://support.snu.gouv.fr/${path}/${slug}`}
+        target="_blank"
+        rel="noreferrer"
+        data-position={position}
+        data-id={_id}
+        className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
         <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg `}>
           <div className="flex flex-grow flex-col">
             <header className="flex items-center justify-between px-8 leading-tight">
@@ -216,7 +224,13 @@ export default function PublicSupportCenter(props) {
               une réponse par mail.
             </div>
             <div className="zammad-container">
-              <LinkButton onClick={() => setOpen(true)}>Contacter quelqu&apos;un</LinkButton>
+              <LinkButton
+                onClick={() => {
+                  plausibleEvent("Besoin d'aide - Contacter quelqu'un");
+                  setOpen(true);
+                }}>
+                Contacter quelqu&apos;un
+              </LinkButton>
             </div>
           </div>
         </div>
