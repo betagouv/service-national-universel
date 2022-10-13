@@ -1337,7 +1337,7 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac",
     },
   },
-  parentStatementOfHounourInvalidId: {
+  parentStatementOfHonorInvalidId: {
     type: String,
     enum: ["true", "false"],
     documentation: {

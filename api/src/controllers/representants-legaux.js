@@ -213,7 +213,7 @@ router.post("/cni-invalide", tokenParentValidMiddleware, async (req, res) => {
   const young = req.young;
   if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  young.set({ parentStatementOfHounourInvalidId: "true" });
+  young.set({ parentStatementOfHonorInvalidId: "true" });
   await young.save(fromUser(req.young));
 
   // --- result
