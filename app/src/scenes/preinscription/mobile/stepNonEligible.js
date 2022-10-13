@@ -95,7 +95,7 @@ export default function NonEligible() {
       Voir plus de formes d’engagement
     </div> */}
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />
     </>
   );

@@ -14,6 +14,7 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
+import Footer from "../../../components/footerV2";
 
 const engagementPrograms = [
   {
@@ -51,7 +52,7 @@ export default function StepWaitingConsent() {
   const [disabled, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
-  const [notAuthorised, setNotAuthorised] = React.useState(false);
+  const [notAuthorised, setNotAuthorised] = React.useState(true);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -125,6 +126,7 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
+      <Footer marginBottom="mb-[88px]" />
     </>
   ) : (
     <>
@@ -187,6 +189,7 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
+      <Footer marginBottom="mb-[88px]" />
     </>
   );
 }

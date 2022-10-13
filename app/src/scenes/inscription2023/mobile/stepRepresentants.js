@@ -187,7 +187,7 @@ export default function StepRepresentants() {
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} /> : null}
       </div>
       <Help />
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
     </>
   );

@@ -579,7 +579,7 @@ export default function StepCoordonnees() {
         )}
       </div>
       <Help />
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClick={onSubmit} disabled={loading} />
     </>
   );
