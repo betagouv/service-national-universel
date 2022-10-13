@@ -64,7 +64,7 @@ export default function StepUpload() {
       await upload([...filesToUpload]);
       if (error.length) return setLoading(false);
 
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+      const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
       if (!ok) {
         capture(code);
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -72,7 +72,7 @@ export default function StepUpload() {
         return;
       }
       dispatch(setYoung(responseData));
-      history.push("/inscription2023/confirm");
+      history.push("/reinscription/confirm");
     } catch (e) {
       capture(e);
       setError({
@@ -185,7 +185,7 @@ export default function StepUpload() {
             ))}
         </div>
       </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );
 }

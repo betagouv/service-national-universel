@@ -7,6 +7,7 @@ import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.j
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
+import Navbar from "../components/Navbar";
 
 export default function NonEligible() {
   const history = useHistory();

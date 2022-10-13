@@ -11,6 +11,7 @@ import { capture } from "../../../sentry";
 import { setYoung } from "../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
+import Navbar from "../components/Navbar";
 
 export default function StepSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -23,7 +24,7 @@ export default function StepSejour() {
 
   return (
     <>
-      {" "}
+      <Navbar />{" "}
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>

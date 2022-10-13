@@ -52,7 +52,7 @@ export default function StepDocuments() {
         ))}
       </div>
       <Footer marginBottom={"12vh"} />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} disabled />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/confirm")} disabled />
     </>
   );
 }

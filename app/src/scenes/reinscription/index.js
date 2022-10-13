@@ -39,6 +39,7 @@ function renderStep(step, device) {
 }
 
 const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
+  console.log("🚀 ~ file: index.js ~ line 42 ~ Step ~ eligibleStep", eligibleStep);
   const device = useDevice();
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();

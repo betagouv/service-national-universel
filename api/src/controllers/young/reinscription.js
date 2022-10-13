@@ -225,22 +225,19 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
   }
 });
 
-// router.put("/documents/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-//   try {
-//     const { error: typeError, value: type } = checkParameter(req.params.type);
-//     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.put("/documents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-//     const young = await YoungObject.findById(req.user._id);
-//     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-//     if (type === "next") young.set("inscriptionStep2023", STEPS2023.CONFIRM);
-//     await young.save({ fromUser: req.user });
-//     return res.status(200).send({ ok: true, data: serializeYoung(young) });
-//   } catch (error) {
-//     capture(error);
-//     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-//   }
-// });
+    young.set("reinscriptionStep2023", STEPS2023REINSCRIPTION.CONFIRM);
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 // router.put("/relance", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
 //   try {
