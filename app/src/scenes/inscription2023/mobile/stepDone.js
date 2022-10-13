@@ -52,7 +52,7 @@ export default function StepWaitingConsent() {
   const [disabled, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
-  const [notAuthorised, setNotAuthorised] = React.useState(true);
+  const [notAuthorised, setNotAuthorised] = React.useState(false);
   const history = useHistory();
   const dispatch = useDispatch();
 
