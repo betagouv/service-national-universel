@@ -109,7 +109,6 @@ export default function ModalSejour({ isOpen, onCancel }) {
         onClick={() => {
           plausibleEvent(session.event);
           onSubmit(session.name);
-          history.push("/preinscription/profil");
         }}>
         <div>
           Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023

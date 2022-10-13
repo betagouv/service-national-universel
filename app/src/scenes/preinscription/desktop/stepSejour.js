@@ -47,7 +47,7 @@ export default function StepSejour() {
         key={session.id}
         className="border p-4 my-3 flex justify-between items-center hover:cursor-pointer"
         onClick={() => {
-          setData({ ...data, cohort: session.id });
+          setData({ ...data, cohort: session.name });
           plausibleEvent(session.event);
           history.push("/preinscription/profil");
         }}>
