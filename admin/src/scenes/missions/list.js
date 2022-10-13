@@ -64,8 +64,6 @@ export default function List() {
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   async function transform(data, selectedFields) {
-    console.log("🚀 ~ file: list.js ~ line 67 ~ transform ~ data", data);
-    console.log("🚀 ~ file: list.js ~ line 67 ~ transform ~ selectedFields", selectedFields);
     let all = data;
     if (selectedFields.includes("tutor")) {
       const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
