@@ -122,7 +122,7 @@ export default function StepEligibilite() {
           </div>
           {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
         </div>
-        <div className="form-group">
+        <div className="form-group my-2">
           <SearchableSelect
             label="Niveau de scolarité"
             value={data.scolarity}

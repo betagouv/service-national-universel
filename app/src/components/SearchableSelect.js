@@ -3,7 +3,7 @@ import Select from "react-select";
 
 const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "" }) => {
   return (
-    <div className="my-2 text-[#161616]" style={{ fontFamily: "Marianne" }}>
+    <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
       <label className="my-2">{label}</label>
       <Select
         styles={customStyles}
