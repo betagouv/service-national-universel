@@ -36,7 +36,7 @@ function tokenParentValidMiddleware(req, res, next) {
 }
 
 function fromUser(young, parent = 1) {
-  return { fromUser: { ...young, firstName: young.parent1FirstName + " " + young.parent1LastName + "(Parent" + parent + ")" } };
+  return { fromUser: { ...young, firstName: young.parent1FirstName, lastName : young.parent1LastName + "(Parent" + parent + ")" } };
 }
 
 router.get("/young", tokenParentValidMiddleware, async (req, res) => {
