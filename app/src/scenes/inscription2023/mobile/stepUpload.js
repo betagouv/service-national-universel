@@ -21,9 +21,7 @@ export default function StepUpload() {
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const [fileError, setFileError] = useState({});
-  const [ID, setID] = useState();
   const [filesToUpload, setFilesToUpload] = useState();
-  console.log("🚀 ~ file: stepUpload.js ~ line 26 ~ StepUpload ~ filesToUpload", filesToUpload);
   const [filesUploaded, setFilesUploaded] = useState();
   const [date, setDate] = useState();
 
@@ -33,11 +31,10 @@ export default function StepUpload() {
 
   async function upload(files) {
     for (const file of files) {
-      if (file.size > 5000000) {
+      if (file.size > 5000000)
         return setFileError({
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
-      }
     }
     const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID.category, new Date(date));
     if (res.code === "FILE_CORRUPTED") {
@@ -87,51 +84,46 @@ export default function StepUpload() {
     setLoading(false);
   }
 
-  useEffect(() => {
-    if (category === "cniNew")
-      setID({
-        category: "cniNew",
-        title: "Carte Nationale d'Identité",
-        subtitle: "Nouveau format (après août 2021)",
-        imgFront: "cniNewFront.png",
-        imgBack: "cniNewBack.png",
-        imgDate: "cniNewDate.png",
-      });
-    if (category === "cniOld")
-      setID({
-        category: "cniOld",
-        title: "Carte Nationale d'Identité",
-        subtitle: "Ancien format",
-        imgFront: "cniOldFront.png",
-        imgBack: "cniOldBack.png",
-        imgDate: "cniOldDate.png",
-      });
-    if (category === "passport") {
-      setID({
-        category: "passport",
-        title: "Passeport",
-        imgFront: "passport.png",
-        imgDate: "passportDate.png",
-      });
-    }
-  }, []);
+  const ID = {
+    cniNew: {
+      category: "cniNew",
+      title: "Carte Nationale d'Identité",
+      subtitle: "Nouveau format (après août 2021)",
+      imgFront: "cniNewFront.png",
+      imgBack: "cniNewBack.png",
+      imgDate: "cniNewDate.png",
+    },
+    cniOld: {
+      category: "cniOld",
+      title: "Carte Nationale d'Identité",
+      subtitle: "Ancien format",
+      imgFront: "cniOldFront.png",
+      imgBack: "cniOldBack.png",
+      imgDate: "cniOldDate.png",
+    },
+    passport: {
+      category: "passport",
+      title: "Passeport",
+      imgFront: "passport.png",
+      imgDate: "passportDate.png",
+    },
+  };
 
   useEffect(() => {
     setFilesUploaded(young.files.cniFiles.filter((e) => e.category === category));
   }, [young]);
 
-  if (!ID) return <div>Loading</div>;
   return (
     <>
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-2xl font-semibold mt-2 text-gray-800">{ID.title}</div>
-        {ID.subtitle && <div className="text-xl mb-2 text-gray-600">{ID.subtitle}</div>}
+        <div className="text-2xl font-semibold mt-2 text-gray-800">{ID[category].title}</div>
+        {ID[category].subtitle && <div className="text-xl mb-2 text-gray-600">{ID[category].subtitle}</div>}
         <div className="w-full flex items-center justify-center my-4">
           <div className="w-3/4 flex flex-col gap-4">
-            <img src={require(`../../../assets/IDProof/${ID.imgFront}`)} alt={ID.title} />
-            {ID.imgBack && <img src={require(`../../../assets/IDProof/${ID.imgBack}`)} alt={ID.title} />}
+            <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+            {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
           </div>
         </div>
         <div className="my-2 border-l-8 border-l-[#6A6AF4] pl-4">
@@ -171,10 +163,11 @@ export default function StepUpload() {
           </div>
         </div>
         {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
-        {filesToUpload && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
-        <div className="mt-2">
-          {filesUploaded &&
-            filesUploaded.map((e) => (
+        {filesToUpload && <ExpirationDate ID={ID[category]} date={date} setDate={setDate} />}
+        {filesUploaded && (
+          <>
+            <hr className="my-4 h-px bg-gray-200 border-0" />
+            {filesUploaded.map((e) => (
               <div key={e._id} className="flex w-full justify-between">
                 <p className="text-gray-800 text-sm mt-2">{e.name}</p>
                 <div className="text-blue-800 flex mt-2">
@@ -187,7 +180,8 @@ export default function StepUpload() {
                 </div>
               </div>
             ))}
-        </div>
+          </>
+        )}
       </div>
       <Help />
       <Footer marginBottom={"12vh"} />
