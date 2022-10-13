@@ -17,7 +17,7 @@ import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
 
-export default function Consentement({ step }) {
+export default function Consentement({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
   const [errors, setErrors] = useState({});
@@ -53,23 +53,22 @@ export default function Consentement({ step }) {
 
   useEffect(() => {
     if (young) {
-      if (isReturningParent(young, 1)) {
-        history.push(`/representants-legaux/done?token=${token}&parent=1`);
-        return;
+      if (isReturningParent(young, parentId)) {
+        return done();
       }
 
       let address;
-      if (young.parent1OwnAddress) {
+      if (young[`parent${parentId}OwnAddress`]) {
         address = {
-          address: young.parent1Address ? young.parent1Address : "",
-          addressComplement: young.parent1ComplementAddress ? young.parent1ComplementAddress : "",
-          zip: young.parent1Zip ? young.parent1Zip : "",
-          city: young.parent1City ? young.parent1City : "",
-          country: young.parent1Country ? young.parent1Country : "",
-          cityCode: young.parent1CityCode ? young.parent1CityCode : "",
-          department: young.parent1Department ? young.parent1Department : null,
-          region: young.parent1Region ? young.parent1Region : null,
-          location: young.parent1Location ? young.parent1Location : null,
+          address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
+          addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
+          zip: young[`parent${parentId}Zip`] ? young[`parent${parentId}Zip`] : "",
+          city: young[`parent${parentId}City`] ? young[`parent${parentId}City`] : "",
+          country: young[`parent${parentId}Country`] ? young[`parent${parentId}Country`] : "",
+          cityCode: young[`parent${parentId}CityCode`] ? young[`parent${parentId}CityCode`] : "",
+          department: young[`parent${parentId}Department`] ? young[`parent${parentId}Department`] : null,
+          region: young[`parent${parentId}Region`] ? young[`parent${parentId}Region`] : null,
+          location: young[`parent${parentId}Location`] ? young[`parent${parentId}Location`] : null,
         };
       } else {
         address = {
@@ -86,13 +85,14 @@ export default function Consentement({ step }) {
       }
 
       const confirmAddress = !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true });
-      const internalRules = stringToBoolean(young.rulesParent1);
+
+      const internalRules = stringToBoolean(young[`rulesParent${parentId}`]);
 
       setData({
-        firstName: young.parent1FirstName ? young.parent1FirstName : "",
-        lastName: young.parent1LastName ? young.parent1LastName : "",
-        email: young.parent1Email ? young.parent1Email : "",
-        phone: young.parent1Phone ? young.parent1Phone : "",
+        firstName: young[`parent${parentId}FirstName`] ? young[`parent${parentId}FirstName`] : "",
+        lastName: young[`parent${parentId}LastName`] ? young[`parent${parentId}LastName`] : "",
+        email: young[`parent${parentId}Email`] ? young[`parent${parentId}Email`] : "",
+        phone: young[`parent${parentId}Phone`] ? young[`parent${parentId}Phone`] : "",
         confirmAddress,
         addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
         addressVerified: young.addressParent1Verified === "true",
@@ -103,8 +103,8 @@ export default function Consentement({ step }) {
         healthForm: internalRules,
         vaccination: internalRules,
         internalRules,
-        allowCovidAutotest: stringToBoolean(young.autoTestPCR),
-        allowImageRights: stringToBoolean(young.parent1AllowImageRights),
+        // allowCovidAutotest: stringToBoolean(young[`parent${parentId}AllowCovidAutotest`]),
+        allowImageRights: stringToBoolean(young[`parent${parentId}AllowImageRights`]),
       });
     }
   }, [young]);
@@ -117,8 +117,8 @@ export default function Consentement({ step }) {
   const sessionDate = COHESION_STAY_LIMIT_DATE[young.cohort];
 
   // --- France Connect
-  const isParentFromFranceConnect = young.parent1FromFranceConnect === "true";
-  const franceConnectCallbackUrl = "representants-legaux/france-connect-callback?parent=1&token=" + token;
+  const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
+  const franceConnectCallbackUrl = "representants-legaux/france-connect-callback?parent=" + parentId + "&token=" + token;
 
   // --- address
   const formattedAddress =
@@ -168,7 +168,7 @@ export default function Consentement({ step }) {
     if (errors) {
       setErrors(errors);
     } else if (await saveData()) {
-      history.push(`/representants-legaux/done?token=${token}&parent=1`);
+      done();
     }
     setSaving(false);
   }
@@ -215,18 +215,22 @@ export default function Consentement({ step }) {
     }
 
     // --- accept
-    validate("allowSNU", "not_choosen", data.allowSNU !== false && data.allowSNU !== true);
+    if (parentId === 1) {
+      validate("allowSNU", "not_choosen", data.allowSNU !== false && data.allowSNU !== true);
 
-    if (data.allowSNU) {
-      validate("rightOlder", "unchecked", data.rightOlder !== true);
-      validate("personalData", "unchecked", data.personalData !== true);
-      if (youngAge < 15) {
-        validate("healthForm", "unchecked", data.healthForm !== true);
+      if (data.allowSNU) {
+        validate("rightOlder", "unchecked", data.rightOlder !== true);
+        validate("personalData", "unchecked", data.personalData !== true);
+        if (youngAge < 15) {
+          validate("healthForm", "unchecked", data.healthForm !== true);
+        }
+        validate("vaccination", "unchecked", data.vaccination !== true);
+        validate("internalRules", "unchecked", data.internalRules !== true);
+
+        // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
+        validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
       }
-      validate("vaccination", "unchecked", data.vaccination !== true);
-      validate("internalRules", "unchecked", data.internalRules !== true);
-
-      // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
+    } else {
       validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
     }
 
@@ -242,38 +246,43 @@ export default function Consentement({ step }) {
     let address;
     if (ownAddress) {
       address = {
-        parent1OwnAddress: "true",
-        parent1Address: data.address.trim(),
-        parent1ComplementAddress: data.addressComplement.trim(),
-        parent1Zip: data.zip.trim(),
-        parent1City: data.city.trim(),
-        parent1Country: data.country.trim(),
-        addressParent1Verified: data.addressVerified ? "true" : "false",
-        parent1CityCode: data.cityCode.trim(),
-        parent1Region: data.region.trim(),
-        parent1Department: data.department.trim(),
-        parent1Location: data.location,
+        [`parent${parentId}OwnAddress`]: "true",
+        [`parent${parentId}Address`]: data.address.trim(),
+        [`parent${parentId}ComplementAddress`]: data.addressComplement.trim(),
+        [`parent${parentId}Zip`]: data.zip.trim(),
+        [`parent${parentId}City`]: data.city.trim(),
+        [`parent${parentId}Country`]: data.country.trim(),
+        [`addressParent${parentId}Verified`]: data.addressVerified ? "true" : "false",
+        [`parent${parentId}CityCode`]: data.cityCode.trim(),
+        [`parent${parentId}Region`]: data.region.trim(),
+        [`parent${parentId}Department`]: data.department.trim(),
+        [`parent${parentId}Location`]: data.location,
       };
     } else {
-      address = { parent1OwnAddress: "false" };
+      address = { [`parent${parentId}OwnAddress`]: "false" };
     }
 
-    const body = {
-      parent1FirstName: data.firstName.trim(),
-      parent1LastName: data.lastName.trim(),
-      parent1Email: validator.normalizeEmail(data.email),
-      parent1Phone: data.phone.trim(),
+    let body = {
+      [`parent${parentId}FirstName`]: data.firstName.trim(),
+      [`parent${parentId}LastName`]: data.lastName.trim(),
+      [`parent${parentId}Email`]: validator.normalizeEmail(data.email),
+      [`parent${parentId}Phone`]: data.phone.trim(),
       ...address,
-      parentAllowSNU: data.allowSNU ? "true" : "false",
     };
-    if (data.allowSNU) {
-      // body.parent1AllowCovidAutotest = data.allowCovidAutotest ? "true" : "false";
-      body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
-      body.rulesParent1 = "true";
+
+    if (parentId === 1) {
+      body.parentAllowSNU = data.allowSNU ? "true" : "false";
+      if (data.allowSNU) {
+        // body.parent1AllowCovidAutotest = data.allowCovidAutotest ? "true" : "false";
+        body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
+        body.rulesParent1 = "true";
+      }
+    } else {
+      body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
     }
 
     try {
-      const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=1`, body);
+      const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
         setErrors({ global: "Une erreur s'est produite" + (code ? " : " + translate(code) : "") });
         return false;
@@ -286,9 +295,17 @@ export default function Consentement({ step }) {
     }
   }
 
+  function done() {
+    if (parentId === 1) {
+      history.push(`/representants-legaux/done?token=${token}`);
+    } else {
+      history.push(`/representants-legaux/done-parent2?token=${token}`);
+    }
+  }
+
   return (
     <>
-      <Navbar step={step} />
+      {parentId === 1 && <Navbar step={step} />}
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
           <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Apporter votre consentement</h1>
@@ -362,41 +379,43 @@ export default function Consentement({ step }) {
             )}
           </div>
 
-          <div className="py-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-            <AuthorizeBlock title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
-              <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-              réalisation d&apos;une mission d&apos;intérêt général.
-            </AuthorizeBlock>
+          {parentId === 1 && (
+            <div className="py-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+              <AuthorizeBlock title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
+                <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
+                réalisation d&apos;une mission d&apos;intérêt général.
+              </AuthorizeBlock>
 
-            {data.allowSNU && (
-              <div className="pt-[32px]">
-                <div>
-                  Je, <b>{data.firstName + " " + data.lastName}</b>
-                  <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
-                    Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
-                  </Check>
-                  <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                    J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                  </Check>
-                  {youngAge < 15 && (
-                    <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                      cohésion. (<a href={HEALTH_FORM_URL}>Télécharger la fiche sanitaire ici</a>)
+              {data.allowSNU && (
+                <div className="pt-[32px]">
+                  <div>
+                    Je, <b>{data.firstName + " " + data.lastName}</b>
+                    <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
+                      Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
                     </Check>
-                  )}
-                  <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
-                    M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et
-                    pour les volontaires résidents de Guyane, la fièvre jaune.
-                  </Check>
-                  <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
-                    Reconnais avoir pris connaissance du <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view?usp=sharing">Règlement Intérieur du SNU</a>
-                    .
-                  </Check>
+                    <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
+                      J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
+                    </Check>
+                    {youngAge < 15 && (
+                      <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
+                        M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
+                        cohésion. (<a href={HEALTH_FORM_URL}>Télécharger la fiche sanitaire ici</a>)
+                      </Check>
+                    )}
+                    <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
+                      M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP),
+                      et pour les volontaires résidents de Guyane, la fièvre jaune.
+                    </Check>
+                    <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
+                      Reconnais avoir pris connaissance du
+                      <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view?usp=sharing">Règlement Intérieur du SNU</a>.
+                    </Check>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          {data.allowSNU && (
+              )}
+            </div>
+          )}
+          {(data.allowSNU || parentId === 2) && (
             <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
               {/*<AuthorizeBlock
                 title="Utilisation d’autotests COVID"
@@ -480,9 +499,11 @@ export default function Consentement({ step }) {
           <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
             {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
             <div className="flex justify-end ">
-              <BorderButton className="mr-2" onClick={onPrevious}>
-                Précédent
-              </BorderButton>
+              {parentId === 1 && (
+                <BorderButton className="mr-2" onClick={onPrevious}>
+                  Précédent
+                </BorderButton>
+              )}
               <PlainButton onClick={onSubmit} spinner={saving}>
                 Je valide mon consentement
               </PlainButton>

@@ -100,37 +100,16 @@ router.post("/data-verification", tokenParentValidMiddleware, async (req, res) =
 });
 
 router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
-  const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.query.parent, { stripUnknown: true });
+  const { error: error_id, value: idstr } = Joi.string().valid("1", "2").required().validate(req.query.parent, { stripUnknown: true });
   if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  const id = parseInt(idstr);
 
   // --- validate data
-  const consentBodySchema = Joi.object().keys({
+  const commonSchema = {
     [`parent${id}FirstName`]: validateFirstName().trim().required(),
     [`parent${id}LastName`]: Joi.string().uppercase().required(),
     [`parent${id}Email`]: Joi.string().lowercase().required(),
     [`parent${id}Phone`]: Joi.string().required(),
-    ["parentAllowSNU"]: Joi.string().valid("true", "false").required(),
-
-    // --- Demande de retirer l'autorisation de tests PCR pouyr l'instant. On laisse le code au cas où la demande s'inverserait :)
-    // [`parent${id}AllowCovidAutotest`]: Joi.string()
-    //   .valid("true", "false")
-    //   .when("parentAllowSNU", {
-    //     is: Joi.equal("true"),
-    //     then: Joi.required(),
-    //   }),
-    [`parent${id}AllowImageRights`]: Joi.string()
-      .valid("true", "false")
-      .when("parentAllowSNU", {
-        is: Joi.equal("true"),
-        then: Joi.required(),
-      }),
-    [`rulesParent${id}`]: Joi.string()
-      .valid("true")
-      .when("parentAllowSNU", {
-        is: Joi.equal("true"),
-        then: Joi.required(),
-      }),
-
     [`parent${id}OwnAddress`]: Joi.string().valid("true", "false").required(),
     [`parent${id}Address`]: Joi.string().allow(""),
     [`parent${id}ComplementAddress`]: Joi.string().allow(""),
@@ -142,7 +121,40 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     [`parent${id}Department`]: Joi.string().allow(""),
     [`parent${id}Location`]: Joi.any(),
     [`addressParent${id}Verified`]: Joi.string().valid("true", "false"),
-  });
+  };
+
+  let consentBodySchema;
+  if (id === 1) {
+    consentBodySchema = Joi.object().keys({
+      ...commonSchema,
+      ["parentAllowSNU"]: Joi.string().valid("true", "false").required(),
+
+      // --- Demande de retirer l'autorisation de tests PCR pouyr l'instant. On laisse le code au cas où la demande s'inverserait :)
+      // parent1AllowCovidAutotest: Joi.string()
+      //   .valid("true", "false")
+      //   .when("parentAllowSNU", {
+      //     is: Joi.equal("true"),
+      //     then: Joi.required(),
+      //   }),
+      parent1AllowImageRights: Joi.string()
+        .valid("true", "false")
+        .when("parentAllowSNU", {
+          is: Joi.equal("true"),
+          then: Joi.required(),
+        }),
+      rulesParent1: Joi.string()
+        .valid("true")
+        .when("parentAllowSNU", {
+          is: Joi.equal("true"),
+          then: Joi.required(),
+        }),
+    });
+  } else {
+    consentBodySchema = Joi.object().keys({
+      ...commonSchema,
+      parent2AllowImageRights: Joi.string().valid("true", "false").required(),
+    });
+  }
 
   const result = consentBodySchema.validate(req.body, { stripUnknown: true });
   const { error, value } = result;
@@ -177,7 +189,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
 
   // --- update young
   young.set(value);
-  await young.save(fromUser(young));
+  await young.save(fromUser(young, id));
 
   // --- envoie de mail
   if (statusChanged) {

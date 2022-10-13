@@ -954,6 +954,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 2",
     },
   },
+  parent2CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la ville du parent 2",
+    },
+  },
   parent2Department: {
     type: String,
     documentation: {
@@ -988,6 +994,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent2AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 2 donne les droits à l'image de son enfant.",
     },
   },
 
