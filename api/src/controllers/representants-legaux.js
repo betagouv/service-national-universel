@@ -36,7 +36,7 @@ function tokenParentValidMiddleware(req, res, next) {
 }
 
 function fromUser(young, parent = 1) {
-  return { fromUser: { ...young, firstName: young.parent1FirstName, lastName : young.parent1LastName + "(Parent" + parent + ")" } };
+  return { fromUser: { ...young, firstName: young.parent1FirstName, lastName: young.parent1LastName + "(Parent" + parent + ")" } };
 }
 
 router.get("/young", tokenParentValidMiddleware, async (req, res) => {
@@ -94,7 +94,8 @@ router.post("/data-verification", tokenParentValidMiddleware, async (req, res) =
 });
 
 router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
-  const id = req.query === "2" ? "2" : "1";
+  const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
+  if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   // --- validate data
   const consentBodySchema = Joi.object({
@@ -121,7 +122,6 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   });
 
   const result = consentBodySchema.validate(req.body, { stripUnknown: true });
-  console.log("JOI RSULT = ", result);
   const { error, value } = result;
   if (error) {
     return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -133,14 +133,9 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   }
 
-  let allowed;
-  if (id !== "1" || young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0) {
-    if (id === "1") {
-      allowed = value.parent1AllowSNU === "true";
-    } else {
-      allowed = value.parent1AllowSNU === "true" && value.parent2AllowSNU === "true";
-    }
-
+  const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
+  if (id !== "1" || onlyOneParent) {
+    const allowed = id === 1 ? value.parentAllowSNU : young.parentAllowSNU;
     // TODO: le NOT_AUTHORIZED n'est pas le bon mais je n'ai pas trouvé le bon. A corriger.
     value.status = allowed ? "WAITING_VALIDATION" : "NOT_AUTHORIZED";
     if (!canUpdateYoungStatus({ body: value, current: young })) {

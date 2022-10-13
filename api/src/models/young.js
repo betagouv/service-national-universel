@@ -871,13 +871,6 @@ const Schema = new mongoose.Schema({
       description: "Le parent 1 a certifié l'exactitude des renseignements",
     },
   },
-  parent1AllowSNU: {
-    type: String,
-    enum: ["true", "false"],
-    documentation: {
-      description: "Le parent 1 autorise le jeune à participer au SNU",
-    },
-  },
   parent1AllowCovidAutotest: {
     type: String,
     enum: ["true", "false"],
