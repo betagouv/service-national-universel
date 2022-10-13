@@ -8,6 +8,7 @@ import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import Help from "../components/Help";
@@ -73,6 +74,7 @@ export default function StepUpload() {
         return;
       }
       dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - CI mobile");
       history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);

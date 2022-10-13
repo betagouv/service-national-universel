@@ -14,6 +14,7 @@ import { translate } from "../../../utils";
 import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 import Footer from "../../../components/footerV2";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
@@ -38,6 +39,7 @@ export default function StepConsentements() {
         return;
       }
       dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - consentement");
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);

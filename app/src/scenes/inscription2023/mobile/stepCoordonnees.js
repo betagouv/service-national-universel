@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import plausibleEvent from "../../../services/plausible";
 
 import validator from "validator";
 
@@ -333,6 +334,7 @@ export default function StepCoordonnees() {
           return;
         }
         dispatch(setYoung(responseData));
+        plausibleEvent("Phase0/CTA inscription - profil");
         history.push("/inscription2023/consentement");
       } catch (e) {
         capture(e);
