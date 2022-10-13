@@ -30,7 +30,7 @@ const Navbar = ({ onSave }) => {
   const desktop = useDevice() === "desktop";
 
   const { step } = useParams();
-  const currentStep = getStepFromUrlParam(step);
+  const currentStep = getStepFromUrlParam(step, true);
 
   return (
     <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">

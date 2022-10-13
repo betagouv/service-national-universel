@@ -46,7 +46,13 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
-  let currentStep = getStepFromUrlParam(step);
+  const requestedStep = getStepFromUrlParam(step);
+
+  if (!requestedStep && eligibleStep) {
+    return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep)}`} />;
+  }
+
+  const currentStep = requestedStep || STEP_LIST[0].name;
 
   if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/inscription2023/${getStepUrl(STEPS.DONE)}`} />;
 
