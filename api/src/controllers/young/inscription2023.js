@@ -257,19 +257,31 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     if (notifyExpirationDate) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
       });
     }
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
     });
 
     if (young.parent2Email) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
         emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent2Inscription2023Token}&parent=2`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
       });
     }
 

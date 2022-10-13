@@ -4,13 +4,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { Modal } from "reactstrap";
-import { getDepartmentByZip } from "snu-lib";
+import { formatStringDate, getDepartmentByZip } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 
 export default function ModalSejour({ isOpen, onCancel }) {
@@ -78,7 +79,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
               <>
                 <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
                 <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-                <div className="my-4">{cohorts.map((e) => StayButton(e))}</div>
+                <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
               </>
             ) : (
               <div className="text-gray-500 text-sm my-2">Aucun séjour de cohésion n’est disponible pour le moment.</div>
@@ -100,16 +101,18 @@ export default function ModalSejour({ isOpen, onCancel }) {
     </Modal>
   );
 
-  function StayButton(cohort) {
+  function SessionButton(session) {
     return (
       <div
-        key={cohort.id}
+        key={session.id}
         className="border p-4 my-3 flex justify-between items-center"
         onClick={() => {
-          onSubmit(cohort.id);
+          plausibleEvent(session.event);
+          onSubmit(session.name);
+          history.push("/preinscription/profil");
         }}>
         <div>
-          Séjour <strong>{cohort.dates}</strong>
+          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
         </div>
         <ArrowRightBlueSquare />
       </div>
