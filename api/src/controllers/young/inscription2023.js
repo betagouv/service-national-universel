@@ -192,13 +192,17 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     const isRequired = type !== "save";
 
     const { error, value } = Joi.object({
-      parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "other"), isRequired),
+      parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
       parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
       parent1Email: needRequired(Joi.string().lowercase().trim().email(), isRequired),
       parent1Phone: needRequired(Joi.string().trim(), isRequired),
       parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
-      parent2Status: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2Status: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
       parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
       parent2LastName: Joi.alternatives().conditional("parent2", {
         is: true,
@@ -212,7 +216,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       }),
       parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
     }).validate(req.body, { stripUnknown: true });
-
+    console.log(error);
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
