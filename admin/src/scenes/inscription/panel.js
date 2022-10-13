@@ -119,7 +119,7 @@ export default function InscriptionPanel({ onChange, value }) {
         {(young?.files.cniFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
-            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e}`)}
+            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e._id}`)}
             title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
           />
         ))}
