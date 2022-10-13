@@ -104,15 +104,32 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   // --- validate data
-  const consentBodySchema = Joi.object({
+  const consentBodySchema = Joi.object().keys({
     [`parent${id}FirstName`]: validateFirstName().trim().required(),
     [`parent${id}LastName`]: Joi.string().uppercase().required(),
     [`parent${id}Email`]: Joi.string().lowercase().required(),
     [`parent${id}Phone`]: Joi.string().required(),
-    [`parentAllowSNU`]: Joi.string().valid("true", "false").required(),
-    // [`parent${id}AllowCovidAutotest`]: Joi.string().valid("true", "false").required(),
-    [`parent${id}AllowImageRights`]: Joi.string().valid("true", "false").required(),
-    [`rulesParent${id}`]: Joi.string().valid("true").required(),
+    ["parentAllowSNU"]: Joi.string().valid("true", "false").required(),
+
+    // --- Demande de retirer l'autorisation de tests PCR pouyr l'instant. On laisse le code au cas où la demande s'inverserait :)
+    // [`parent${id}AllowCovidAutotest`]: Joi.string()
+    //   .valid("true", "false")
+    //   .when("parentAllowSNU", {
+    //     is: Joi.equal("true"),
+    //     then: Joi.required(),
+    //   }),
+    [`parent${id}AllowImageRights`]: Joi.string()
+      .valid("true", "false")
+      .when("parentAllowSNU", {
+        is: Joi.equal("true"),
+        then: Joi.required(),
+      }),
+    [`rulesParent${id}`]: Joi.string()
+      .valid("true")
+      .when("parentAllowSNU", {
+        is: Joi.equal("true"),
+        then: Joi.required(),
+      }),
 
     [`parent${id}OwnAddress`]: Joi.string().valid("true", "false").required(),
     [`parent${id}Address`]: Joi.string().allow(""),
@@ -140,15 +157,22 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   }
 
-  let sendEmail = false;
+  // --- fin du consentement ?
+  let statusChanged = false;
   const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
-  if (id !== "1" || onlyOneParent) {
-    const allowed = id === 1 ? value.parentAllowSNU : young.parentAllowSNU;
-    value.status = allowed ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+  if (id === 1 && onlyOneParent) {
+    // on prend en compte la valeur envoyée dans cette requête.
+    value.status = value.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+    statusChanged = true;
+  } else if (id === 2) {
+    // on prend en compte la valeur déjà enregistrée par le premier représentant.
+    value.status = young.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+    statusChanged = true;
+  }
+  if (statusChanged) {
     if (!canUpdateYoungStatus({ body: value, current: young })) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    sendEmail = true;
   }
 
   // --- update young
@@ -156,8 +180,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   await young.save(fromUser(young));
 
   // --- envoie de mail
-  console.log("send Email: ", sendEmail, young.parentAllowSNU, value);
-  if (sendEmail) {
+  if (statusChanged) {
     try {
       const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
       if (young.parentAllowSNU === "true") {

@@ -234,10 +234,10 @@ function sectionsData(young) {
   // --- parent 2
   let secondParent = [];
 
-  if (young.parent2Status === "true") {
+  if (young.parent2Status !== null && young.parent2Status !== undefined && young.parent2Status.trim().length > 0) {
     secondParent.push(
-      { separation: true, subtitle: "2ème parent" },
-      { label: "Son lien", value: young.parent2Status },
+      { separator: true, subtitle: "2ème parent" },
+      { label: "Son lien", value: translate(young.parent2Status) },
       { label: "Son prénom", value: young.parent2FirstName },
       { label: "Son nom", value: young.parent2LastName },
       // { label: "Moyen de contact favori", value: "?" },
@@ -266,8 +266,8 @@ function sectionsData(young) {
         { label: "Pays de naissance", value: young.birthCountry },
         { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
         { label: "Ville de naissance", value: young.birthCity },
-        { label: "Sexe", value: young.gender },
-        { label: "Téléphone", value: young.phonwe },
+        { label: "Sexe", value: translate(young.gender) },
+        { label: "Téléphone", value: young.phone },
         ...titleAddress,
         { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
         { label: "Code postal", value: young.zip },
@@ -277,13 +277,13 @@ function sectionsData(young) {
       ],
     },
     {
-      title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale&nbsp;:",
+      title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale\u00A0:",
       fields: [
-        { label: "Votre lien", value: young.parent1Status },
+        { label: "Votre lien", value: translate(young.parent1Status) },
         { label: "Votre prénom", value: young.parent1FirstName },
         { label: "Votre nom", value: young.parent1LastName },
         // { label: "Moyen de contact favori", value: "?" },
-        { label: "Votre email", value: young.paren1Email },
+        { label: "Votre email", value: young.parent1Email },
         { label: "Votre téléphone", value: young.parent1Phone },
         ...secondParent,
       ],

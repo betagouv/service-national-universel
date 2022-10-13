@@ -217,16 +217,18 @@ export default function Consentement({ step }) {
     // --- accept
     validate("allowSNU", "not_choosen", data.allowSNU !== false && data.allowSNU !== true);
 
-    validate("rightOlder", "unchecked", data.rightOlder !== true);
-    validate("personalData", "unchecked", data.personalData !== true);
-    if (youngAge < 15) {
-      validate("healthForm", "unchecked", data.healthForm !== true);
-    }
-    validate("vaccination", "unchecked", data.vaccination !== true);
-    validate("internalRules", "unchecked", data.internalRules !== true);
+    if (data.allowSNU) {
+      validate("rightOlder", "unchecked", data.rightOlder !== true);
+      validate("personalData", "unchecked", data.personalData !== true);
+      if (youngAge < 15) {
+        validate("healthForm", "unchecked", data.healthForm !== true);
+      }
+      validate("vaccination", "unchecked", data.vaccination !== true);
+      validate("internalRules", "unchecked", data.internalRules !== true);
 
-    // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
-    validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
+      // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
+      validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
+    }
 
     if (hasErrors) {
       return errors;
@@ -236,8 +238,7 @@ export default function Consentement({ step }) {
   }
 
   async function saveData() {
-    const ownAddress =
-      data.address.trim() !== young.address || data.addressComplement !== young.addressComplement.trim() || data.zip.trim() !== young.zip || data.city !== young.city;
+    const ownAddress = data.address.trim() !== young.address || data.zip.trim() !== young.zip || data.city !== young.city;
     let address;
     if (ownAddress) {
       address = {
@@ -264,10 +265,12 @@ export default function Consentement({ step }) {
       parent1Phone: data.phone.trim(),
       ...address,
       parentAllowSNU: data.allowSNU ? "true" : "false",
-      // parent1AllowCovidAutotest: data.allowCovidAutotest ? "true" : "false",
-      parent1AllowImageRights: data.allowImageRights ? "true" : "false",
-      rulesParent1: "true",
     };
+    if (data.allowSNU) {
+      // body.parent1AllowCovidAutotest = data.allowCovidAutotest ? "true" : "false";
+      body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
+      body.rulesParent1 = "true";
+    }
 
     try {
       const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=1`, body);
@@ -365,109 +368,114 @@ export default function Consentement({ step }) {
               réalisation d&apos;une mission d&apos;intérêt général.
             </AuthorizeBlock>
 
-            <div className="pt-[32px]">
-              <div>
-                Je, <b>{data.firstName + " " + data.lastName}</b>
-                <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
-                  Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
-                </Check>
-                <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                  J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                </Check>
-                {youngAge < 15 && (
-                  <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                    M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                    cohésion. (<a href={HEALTH_FORM_URL}>Télécharger la fiche sanitaire ici</a>)
+            {data.allowSNU && (
+              <div className="pt-[32px]">
+                <div>
+                  Je, <b>{data.firstName + " " + data.lastName}</b>
+                  <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
+                    Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
                   </Check>
-                )}
-                <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
-                  M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et
-                  pour les volontaires résidents de Guyane, la fièvre jaune.
-                </Check>
-                <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
-                  Reconnais avoir pris connaissance du <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view?usp=sharing">Règlement Intérieur du SNU</a>.
-                </Check>
+                  <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
+                    J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
+                  </Check>
+                  {youngAge < 15 && (
+                    <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
+                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
+                      cohésion. (<a href={HEALTH_FORM_URL}>Télécharger la fiche sanitaire ici</a>)
+                    </Check>
+                  )}
+                  <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
+                    M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et
+                    pour les volontaires résidents de Guyane, la fièvre jaune.
+                  </Check>
+                  <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
+                    Reconnais avoir pris connaissance du <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view?usp=sharing">Règlement Intérieur du SNU</a>
+                    .
+                  </Check>
+                </div>
               </div>
+            )}
+          </div>
+          {data.allowSNU && (
+            <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+              {/*<AuthorizeBlock
+                title="Utilisation d’autotests COVID"
+                value={data.allowCovidAutotest}
+                onChange={(e) => setData({ ...data, allowCovidAutotest: e })}
+                error={errors.allowCovidAutotest}>
+                <div className="mb-3">
+                  La réalisation d’autotests antigéniques sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de résultat positif, la
+                  communication communication communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées par
+                  ce dernier.{" "}
+                  {!covidAutoTestExplanationShown && (
+                    <a className="underline whitespace-nowrap" href="#" onClick={toggleCovidAutoTestExplanationShown}>
+                      Lire plus
+                    </a>
+                  )}
+                </div>
+                {covidAutoTestExplanationShown && (
+                  <>
+                    <div className="mb-3">
+                      Vous avez souhaité que votre enfant participe au séjour de cohésion du SNU. L’épidémie actuelle de COVID-19 nécessite de prendre des mesures de prévention et de
+                      santé publique pour :
+                      <ul className="list-disc ml-4">
+                        <li>Garantir la sécurité de tous, volontaires et cadres</li>
+                        <li>Permettre à chacun de participer à la totalité du séjour et éviter un éventuel retour à domicile ou un isolement en cas de contamination.</li>
+                      </ul>
+                    </div>
+                    <div className="mb-3">
+                      En complément du test PCR, antigénique ou autotest recommandé avant le départ en séjour, des autotests antigéniques sur prélèvement nasal pourront être réalisés
+                      durant le séjour en présence de signes évocateurs de la covid-19, de cas confirmés ou de cas contacts.
+                    </div>
+                    <h3>Protocole sanitaire de l’année 2022-2023</h3>
+                    <div className="mb-3">
+                      Durant le séjour de cohésion, des séances permettant la réalisation d’autotests pourraient être organisées en cas de nécessité, sous l’encadrement d’un
+                      infirmier ou d’un cadre formé à la réalisation du prélèvement. Ces tests permettant de vivre en collectivité dans des conditions de sécurité sont fortement
+                      recommandés mais non obligatoires. S’ils sont pratiqués, seuls seront concernés les volontaires ayant remis lors de leur inscription le consentement écrit
+                      représentant légal.
+                    </div>
+                    <div className="mb-3">
+                      Votre consentement est également requis pour que les résultats des autotests puissent être transmis au chef de centre et aux personnes habilitées par ce
+                      dernier, au directeur académique des services de l’éducation et à l’ARS en cas de résultat positif. Le consentement à la réalisation des autotests et à la
+                      transmission des données est recueilli par le biais du formulaire que vous trouverez ci-joint et qui est à téléverser depuis le compte volontaire.
+                    </div>
+                    <a className="underline" href="#" onClick={toggleCovidAutoTestExplanationShown}>
+                      Lire moins
+                    </a>
+                  </>
+                )}
+              </AuthorizeBlock>*/}
+              <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
+                <div className="mb-3">
+                  Le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes dûment accrédités par les services communication du
+                  ministère et/ou des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
+                  séparément, sur leurs publications respectives.{" "}
+                  {!imageRightsExplanationShown && (
+                    <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
+                      Lire plus
+                    </a>
+                  )}
+                </div>
+                {imageRightsExplanationShown && (
+                  <>
+                    <div className="mb-3">
+                      Cette autorisation est valable pour une utilisation : d’une durée de 5 ans à compter de la signature de la présente ; sur tous les supports d’information et
+                      de communication imprimés ou numériques à but non lucratif ; édités par les services de l’État ainsi que sur tous réseaux de communication, y compris
+                      télévisuels ou Internet ; de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle. Conformément
+                      aux dispositions légales en vigueur relatives au droit à l’image, le MENJS s’engage à ce que la publication et la diffusion de l’image ainsi que des
+                      commentaires l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des
+                      données (RGPD), entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la
+                      personne mineure et a le droit de demander à tout moment le retrait de celles-ci*.
+                    </div>
+                    <div className="mb-3">La présente autorisation est consentie à titre gratuit.</div>
+                    <a className="underline" href="#" onClick={toggleImageRightsExplanationShown}>
+                      Lire moins
+                    </a>
+                  </>
+                )}
+              </AuthorizeBlock>
             </div>
-          </div>
-          <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-            {/*<AuthorizeBlock
-              title="Utilisation d’autotests COVID"
-              value={data.allowCovidAutotest}
-              onChange={(e) => setData({ ...data, allowCovidAutotest: e })}
-              error={errors.allowCovidAutotest}>
-              <div className="mb-3">
-                La réalisation d’autotests antigéniques sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de résultat positif, la
-                communication communication communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées par
-                ce dernier.{" "}
-                {!covidAutoTestExplanationShown && (
-                  <a className="underline whitespace-nowrap" href="#" onClick={toggleCovidAutoTestExplanationShown}>
-                    Lire plus
-                  </a>
-                )}
-              </div>
-              {covidAutoTestExplanationShown && (
-                <>
-                  <div className="mb-3">
-                    Vous avez souhaité que votre enfant participe au séjour de cohésion du SNU. L’épidémie actuelle de COVID-19 nécessite de prendre des mesures de prévention et de
-                    santé publique pour :
-                    <ul className="list-disc ml-4">
-                      <li>Garantir la sécurité de tous, volontaires et cadres</li>
-                      <li>Permettre à chacun de participer à la totalité du séjour et éviter un éventuel retour à domicile ou un isolement en cas de contamination.</li>
-                    </ul>
-                  </div>
-                  <div className="mb-3">
-                    En complément du test PCR, antigénique ou autotest recommandé avant le départ en séjour, des autotests antigéniques sur prélèvement nasal pourront être réalisés
-                    durant le séjour en présence de signes évocateurs de la covid-19, de cas confirmés ou de cas contacts.
-                  </div>
-                  <h3>Protocole sanitaire de l’année 2022-2023</h3>
-                  <div className="mb-3">
-                    Durant le séjour de cohésion, des séances permettant la réalisation d’autotests pourraient être organisées en cas de nécessité, sous l’encadrement d’un
-                    infirmier ou d’un cadre formé à la réalisation du prélèvement. Ces tests permettant de vivre en collectivité dans des conditions de sécurité sont fortement
-                    recommandés mais non obligatoires. S’ils sont pratiqués, seuls seront concernés les volontaires ayant remis lors de leur inscription le consentement écrit
-                    représentant légal.
-                  </div>
-                  <div className="mb-3">
-                    Votre consentement est également requis pour que les résultats des autotests puissent être transmis au chef de centre et aux personnes habilitées par ce
-                    dernier, au directeur académique des services de l’éducation et à l’ARS en cas de résultat positif. Le consentement à la réalisation des autotests et à la
-                    transmission des données est recueilli par le biais du formulaire que vous trouverez ci-joint et qui est à téléverser depuis le compte volontaire.
-                  </div>
-                  <a className="underline" href="#" onClick={toggleCovidAutoTestExplanationShown}>
-                    Lire moins
-                  </a>
-                </>
-              )}
-            </AuthorizeBlock>*/}
-            <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
-              <div className="mb-3">
-                Le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes dûment accrédités par les services communication du
-                ministère et/ou des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
-                séparément, sur leurs publications respectives.{" "}
-                {!imageRightsExplanationShown && (
-                  <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
-                    Lire plus
-                  </a>
-                )}
-              </div>
-              {imageRightsExplanationShown && (
-                <>
-                  <div className="mb-3">
-                    Cette autorisation est valable pour une utilisation : d’une durée de 5 ans à compter de la signature de la présente ; sur tous les supports d’information et de
-                    communication imprimés ou numériques à but non lucratif ; édités par les services de l’État ainsi que sur tous réseaux de communication, y compris télévisuels
-                    ou Internet ; de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle. Conformément aux
-                    dispositions légales en vigueur relatives au droit à l’image, le MENJS s’engage à ce que la publication et la diffusion de l’image ainsi que des commentaires
-                    l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des données (RGPD),
-                    entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la personne mineure et
-                    a le droit de demander à tout moment le retrait de celles-ci*.
-                  </div>
-                  <div className="mb-3">La présente autorisation est consentie à titre gratuit.</div>
-                  <a className="underline" href="#" onClick={toggleImageRightsExplanationShown}>
-                    Lire moins
-                  </a>
-                </>
-              )}
-            </AuthorizeBlock>
-          </div>
+          )}
 
           <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
             {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
