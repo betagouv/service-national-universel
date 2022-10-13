@@ -13,13 +13,15 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungModel = require("../models/young");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
+const { sendTemplate } = require("../sendinblue");
+const { APP_URL } = require("../config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
@@ -138,6 +140,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   }
 
+  let sendEmail = false;
   const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
   if (id !== "1" || onlyOneParent) {
     const allowed = id === 1 ? value.parentAllowSNU : young.parentAllowSNU;
@@ -145,11 +148,32 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     if (!canUpdateYoungStatus({ body: value, current: young })) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    sendEmail = true;
   }
 
   // --- update young
   young.set(value);
   await young.save(fromUser(young));
+
+  // --- envoie de mail
+  console.log("send Email: ", sendEmail, young.parentAllowSNU, value);
+  if (sendEmail) {
+    try {
+      const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+      if (young.parentAllowSNU === "true") {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
+          emailTo,
+          params: {
+            cta: `${APP_URL}/`,
+          },
+        });
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_DID_NOT_CONSENT, { emailTo });
+      }
+    } catch (e) {
+      capture(e);
+    }
+  }
 
   // --- result
   return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
