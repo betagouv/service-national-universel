@@ -11,7 +11,7 @@ import Center from "./centers";
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 
 export default function Dashboard() {
   const history = useHistory();

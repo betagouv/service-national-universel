@@ -10,7 +10,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function UserPanel({ onChange, value }) {
