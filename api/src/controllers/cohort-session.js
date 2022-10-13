@@ -144,11 +144,11 @@ router.post("/eligibility/2023", async (req, res) => {
     // Check inscription goals
     if (sessionsFiltered.length) {
       for (let session of sessionsFiltered) {
-        const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
+        const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.name });
         if (!inscriptionGoal || !inscriptionGoal.max) continue;
         const nbYoung = await YoungModel.countDocuments({
           department: department,
-          cohort: session.id,
+          cohort: session.name,
           status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
         });
         if (nbYoung === 0) continue;
