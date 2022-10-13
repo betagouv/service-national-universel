@@ -2,13 +2,12 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-
 const { capture } = require("../sentry");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 const { getCohortSessionsAvailability } = require("../utils/cohort");
-const { getDepartmentNumber, getZoneByDepartment } = require("snu-lib/region-and-departments");
+const { getDepartmentNumber, getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
@@ -133,81 +132,81 @@ router.post("/eligibility/2023", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { department, birthDate, schoolLevel } = value;
 
-    const sessions = [
-      {
-        id: "2023_02_C",
-        name: "Février 2023 - C",
-        dateStart: new Date("02/19/2023"),
-        dateEnd: new Date("03/03/2023"),
-        buffer: 1.15,
-        event: "Phase0/CTA preinscription - sejour fevrier C",
-        eligibility: {
-          zones: ["C"],
-          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
-          bornAfter: new Date("03/04/2005"),
-          bornBefore: new Date("02/19/2008"),
-        },
-      },
-      {
-        id: "2023_04_A",
-        name: "Avril 2023 - A",
-        dateStart: new Date("04/09/2023"),
-        dateEnd: new Date("04/21/2023"),
-        buffer: 1.15,
-        event: "Phase0/CTA preinscription - sejour avril A",
-        eligibility: {
-          zones: ["A"],
-          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
-          bornAfter: new Date("04/22/2005"),
-          bornBefore: new Date("04/09/2008"),
-        },
-      },
-      {
-        id: "2023_04_B",
-        name: "Avril 2023 - B",
-        dateStart: new Date("04/16/2023"),
-        dateEnd: new Date("04/28/2023"),
-        buffer: 1.15,
-        event: "Phase0/CTA preinscription - sejour avril B",
-        eligibility: {
-          zones: ["B", "Corse"],
-          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
-          bornAfter: new Date("04/29/2005"),
-          bornBefore: new Date("04/16/2008"),
-        },
-      },
-      {
-        id: "2023_06",
-        name: "Juin 2023",
-        dateStart: new Date("06/11/2023"),
-        dateEnd: new Date("06/23/2023"),
-        buffer: 1.15,
-        event: "Phase0/CTA preinscription - sejour juin",
-        eligibility: {
-          zones: ["A", "B", "C", "Corse", "DOM", "Etranger"],
-          schoolLevels: ["NOT_SCOLARISE", "2ndeGT", "Autre"],
-          bornAfter: new Date("06/24/2005"),
-          bornBefore: new Date("06/11/2008"),
-        },
-      },
-      {
-        id: "2023_07",
-        name: "Juillet 2023",
-        dateStart: new Date("07/05/2023"),
-        dateEnd: new Date("07/17/2023"),
-        buffer: 1.15,
-        event: "Phase0/CTA preinscription - sejour juillet",
-        eligibility: {
-          zones: ["A", "B", "C", "Corse", "DOM", "Etranger"],
-          schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
-          bornAfter: new Date("07/18/2005"),
-          bornBefore: new Date("07/05/2008"),
-        },
-      },
-    ];
+    // const sessions = [
+    //   {
+    //     id: "2023_02_C",
+    //     name: "Février 2023 - C",
+    //     dateStart: new Date("02/19/2023"),
+    //     dateEnd: new Date("03/03/2023"),
+    //     buffer: 1.15,
+    //     event: "Phase0/CTA preinscription - sejour fevrier C",
+    //     eligibility: {
+    //       zones: ["C"],
+    //       schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+    //       bornAfter: new Date("03/04/2005"),
+    //       bornBefore: new Date("02/19/2008"),
+    //     },
+    //   },
+    //   {
+    //     id: "2023_04_A",
+    //     name: "Avril 2023 - A",
+    //     dateStart: new Date("04/09/2023"),
+    //     dateEnd: new Date("04/21/2023"),
+    //     buffer: 1.15,
+    //     event: "Phase0/CTA preinscription - sejour avril A",
+    //     eligibility: {
+    //       zones: ["A"],
+    //       schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+    //       bornAfter: new Date("04/22/2005"),
+    //       bornBefore: new Date("04/09/2008"),
+    //     },
+    //   },
+    //   {
+    //     id: "2023_04_B",
+    //     name: "Avril 2023 - B",
+    //     dateStart: new Date("04/16/2023"),
+    //     dateEnd: new Date("04/28/2023"),
+    //     buffer: 1.15,
+    //     event: "Phase0/CTA preinscription - sejour avril B",
+    //     eligibility: {
+    //       zones: ["B", "Corse"],
+    //       schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+    //       bornAfter: new Date("04/29/2005"),
+    //       bornBefore: new Date("04/16/2008"),
+    //     },
+    //   },
+    //   {
+    //     id: "2023_06",
+    //     name: "Juin 2023",
+    //     dateStart: new Date("06/11/2023"),
+    //     dateEnd: new Date("06/23/2023"),
+    //     buffer: 1.15,
+    //     event: "Phase0/CTA preinscription - sejour juin",
+    //     eligibility: {
+    //       zones: ["A", "B", "C", "Corse", "DOM", "Etranger"],
+    //       schoolLevels: ["NOT_SCOLARISE", "2ndeGT", "Autre"],
+    //       bornAfter: new Date("06/24/2005"),
+    //       bornBefore: new Date("06/11/2008"),
+    //     },
+    //   },
+    //   {
+    //     id: "2023_07",
+    //     name: "Juillet 2023",
+    //     dateStart: new Date("07/05/2023"),
+    //     dateEnd: new Date("07/17/2023"),
+    //     buffer: 1.15,
+    //     event: "Phase0/CTA preinscription - sejour juillet",
+    //     eligibility: {
+    //       zones: ["A", "B", "C", "Corse", "DOM", "Etranger"],
+    //       schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+    //       bornAfter: new Date("07/18/2005"),
+    //       bornBefore: new Date("07/05/2008"),
+    //     },
+    //   },
+    // ];
 
     const zone = getZoneByDepartment(department);
-    let sessionsFiltered = sessions.filter(
+    let sessionsFiltered = sessions2023.filter(
       (session) =>
         session.eligibility.zones.includes(zone) &&
         session.eligibility.schoolLevels.includes(schoolLevel) &&
