@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useHistory } from "react-router-dom";
 import { formatStringDate } from "snu-lib";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import plausibleEvent from "../../../services/plausible";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 
@@ -47,6 +48,7 @@ export default function StepSejour() {
         className="border p-4 my-3 flex justify-between items-center hover:cursor-pointer"
         onClick={() => {
           setData({ ...data, cohort: session.id });
+          plausibleEvent(session.event);
           history.push("/preinscription/profil");
         }}>
         <div>
