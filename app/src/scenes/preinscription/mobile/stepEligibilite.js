@@ -8,7 +8,7 @@ import DateFilter from "../components/DatePickerList";
 import { toastr } from "react-redux-toastr";
 import StickyButton from "../../../components/inscription/stickyButton";
 import IconFrance from "../../../assets/IconFrance";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
