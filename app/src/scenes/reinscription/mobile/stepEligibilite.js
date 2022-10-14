@@ -21,6 +21,7 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
+import { STEP_LIST } from "../utils/navigation";
 
 export default function StepEligibilite() {
   // const [data, setData] = React.useContext(PreInscriptionContext);
@@ -40,23 +41,22 @@ export default function StepEligibilite() {
     setData({
       frenchNationality: young.frenchNationality,
       birthDate: young.birthdateAt.split("T")[0],
-      // ! Forcer a refaire l'update de la school
-      // ! Mais qd meme gérer le cas des retours en arrière
-      // school: young.schooled
-      //   ? {
-      //       fullName: young.schoolName,
-      //       type: young.schoolType,
-      //       adresse: young.schoolAddress,
-      //       codeCity: young.schoolZip,
-      //       city: young.schoolCity,
-      //       departmentName: young.schoolDepartment,
-      //       region: young.schoolRegion,
-      //       country: young.schoolCountry,
-      //       _id: young.schoolId,
-      //       postCode: young.schoolZip,
-      //     }
-      //   : null,
-      // ! Galère de retraduire la scolarité dans le nouveau format => Mieux de créer nouveau format
+      school:
+        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
+          ? {
+              fullName: young.schoolName,
+              type: young.schoolType,
+              adresse: young.schoolAddress,
+              codeCity: young.schoolZip,
+              city: young.schoolCity,
+              departmentName: young.schoolDepartment,
+              region: young.schoolRegion,
+              country: young.schoolCountry,
+              _id: young.schoolId,
+              postCode: young.schoolZip,
+            }
+          : null,
+      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE ? young.grade : null,
       zip: young.zip,
     });
   }, [young]);
