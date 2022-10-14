@@ -16,6 +16,7 @@ import Toggle from "../../../components/inscription/toggle";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import Input from "../../../components/inscription/input";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -95,8 +96,11 @@ export default function StepEligibilite() {
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
-    setData({ ...data, sessions: res.data });
-    if (res.data.length) return history.push("/preinscription/sejour");
+    if (res.data.length) {
+      setData({ ...data, sessions: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
+      return history.push("/preinscription/sejour");
+    }
+    setData({ ...data, step: PREINSCRIPTION_STEPS.INELIGIBLE });
     return history.push("/preinscription/noneligible");
   };
 

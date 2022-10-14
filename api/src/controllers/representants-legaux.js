@@ -172,14 +172,28 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   // --- fin du consentement ?
   let statusChanged = false;
   const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
-  if (id === 1 && onlyOneParent) {
+  if (onlyOneParent) {
     // on prend en compte la valeur envoyée dans cette requête.
-    value.status = value.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+    value.status = value.parentAllowSNU === "true" ? "WAITING_VALIDATION" : "NOT_AUTORISED";
     statusChanged = true;
-  } else if (id === 2) {
-    // on prend en compte la valeur déjà enregistrée par le premier représentant.
-    value.status = young.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
-    statusChanged = true;
+  } else {
+    if (id === 1) {
+      if (young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") {
+        // les 2 ont répondus.
+        // on prend en compte la valeur envoyée dans cette requête.
+        value.status = value.parentAllowSNU === "true" ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+        statusChanged = true;
+      }
+      // sinon, on attend le parent 2 pour changer le statut.
+    } else {
+      if (young.parentAllowSNU === "true" || young.parentAllowSNU === "false") {
+        // le parent 1 a bien déjà répondu
+        // on prend en compte la valeur déjà enregistrée par le premier représentant.
+        value.status = young.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+        statusChanged = true;
+      }
+      // sinon, on attend le parent 1 pour changer le statut.
+    }
   }
   if (statusChanged) {
     if (!canUpdateYoungStatus({ body: value, current: young })) {

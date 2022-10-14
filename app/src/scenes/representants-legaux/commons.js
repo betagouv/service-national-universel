@@ -12,8 +12,6 @@ export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide"
 // --- Docs on CDN
 export const CDN_BASE_URL =
   environment === "production" ? "https://cellar-c2.services.clever-cloud.com/snu-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/snu-bucket-staging";
-export const HEALTH_FORM_URL = CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf";
-export const INTERNAL_RULES_URL = CDN_BASE_URL + "/snu-reglement-interieur-2022-2023.pdf";
 
 // --- errors
 export const ERROR_MESSAGES = {

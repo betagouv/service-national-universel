@@ -6,14 +6,34 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import plausibleEvent from "../../../services/plausible";
 import { formatStringDate } from "snu-lib";
 import Footer from "../../../components/footerV2";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
-export default function StepSejour() {
+function SessionButton(session) {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const history = useHistory();
+  return (
+    <div
+      key={session.id}
+      className="border p-4 my-3 flex justify-between items-center"
+      onClick={() => {
+        setData({ ...data, cohort: session.name });
+        plausibleEvent(session.event);
+        setData({ ...data, step: PREINSCRIPTION_STEPS.PROFIL });
+        history.push("/preinscription/profil");
+      }}>
+      <div>
+        Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
+      </div>
+      <ArrowRightBlueSquare />
+    </div>
+  );
+}
+
+export default function StepSejour() {
+  const [data] = React.useContext(PreInscriptionContext);
 
   return (
     <>
-      {" "}
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
@@ -43,22 +63,4 @@ export default function StepSejour() {
       <Footer />
     </>
   );
-
-  function SessionButton(session) {
-    return (
-      <div
-        key={session.id}
-        className="border p-4 my-3 flex justify-between items-center"
-        onClick={() => {
-          setData({ ...data, cohort: session.name });
-          plausibleEvent(session.event);
-          history.push("/preinscription/profil");
-        }}>
-        <div>
-          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
-        </div>
-        <ArrowRightBlueSquare />
-      </div>
-    );
-  }
 }
