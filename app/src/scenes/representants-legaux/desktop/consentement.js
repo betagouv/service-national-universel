@@ -53,8 +53,6 @@ export default function Consentement({ step, parentId }) {
 
   useEffect(() => {
     if (young) {
-      console.log("parentId: ", parentId);
-      console.log("young: ", young);
       if (isReturningParent(young, parentId)) {
         return done();
       }
