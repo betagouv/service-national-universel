@@ -63,7 +63,7 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
   }
 
   return (
-    <div>
+    <div className="md:flex md:flex-col md:h-screen md:justify-between">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(currentStep, device)}

@@ -52,7 +52,7 @@ const Step = ({ step }) => {
   }
 
   return (
-    <div>
+    <div className="md:flex md:flex-col md:h-screen md:justify-between">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(step)}

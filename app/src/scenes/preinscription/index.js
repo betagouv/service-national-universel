@@ -54,7 +54,7 @@ const Step = () => {
   }
 
   return (
-    <div>
+    <div className="md:flex md:flex-col md:h-screen md:justify-between">
       <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       <Navbar />
