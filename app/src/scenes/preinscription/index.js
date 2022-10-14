@@ -49,8 +49,6 @@ const Step = () => {
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  console.log({ currentStep, eligibleStep: data.step, eligibleStepIndex, currentStepIndex });
-
   if (currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
