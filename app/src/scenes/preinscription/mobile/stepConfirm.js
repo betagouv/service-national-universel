@@ -9,10 +9,11 @@ import { PreInscriptionContext } from "../../../context/PreInscriptionContextPro
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepDone() {
   const [error, setError] = useState({});
-  const [data, _, removeData] = React.useContext(PreInscriptionContext);
+  const [data, setData, removePersistedData] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
 
@@ -56,7 +57,8 @@ export default function StepDone() {
       const { user, code, ok } = await api.post("/young/signup2023", values);
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       plausibleEvent("Phase0/CTA preinscription - inscription");
-      removeData();
+      setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
+      removePersistedData();
       history.push("/preinscription/done");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
