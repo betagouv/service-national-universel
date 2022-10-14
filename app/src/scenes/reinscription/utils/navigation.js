@@ -4,7 +4,6 @@ export const STEPS = {
   SEJOUR: "SEJOUR",
   DOCUMENTS: "DOCUMENTS",
   UPLOAD: "UPLOAD",
-  CONFIRM: "CONFIRM",
   DONE: "DONE",
 };
 
@@ -14,7 +13,6 @@ export const STEP_LIST = [
   { name: STEPS.SEJOUR, url: "sejour" },
   { name: STEPS.DOCUMENTS, url: "documents", allowNext: true },
   { name: STEPS.UPLOAD, url: "televersement" },
-  { name: STEPS.CONFIRM, url: "confirm" },
   { name: STEPS.DONE, url: "done" },
 ];
 

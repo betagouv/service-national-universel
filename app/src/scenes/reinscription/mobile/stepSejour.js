@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -12,15 +12,46 @@ import { setYoung } from "../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
+import { getDepartmentByZip } from "snu-lib/region-and-departments";
 
 export default function StepSejour() {
   const young = useSelector((state) => state.Auth.young);
-  console.log("🚀 ~ file: stepSejour.js ~ line 14 ~ StepSejour ~ young", young);
   const dispatch = useDispatch();
+  const [sessions, setSessions] = React.useState([]);
 
   const history = useHistory();
 
   if (!young) return;
+
+  useEffect(() => {
+    const checkEligibilite = async (young) => {
+      try {
+        const res = await api.post("/cohort-session/eligibility/2023", {
+          department: young.schoolDepartment || getDepartmentByZip(young.zip) || null,
+          birthDate: new Date(young.birthdateAt),
+          schoolLevel: young.grade,
+          frenchNationality: young.frenchNationality,
+        });
+        if (!res.ok) {
+          capture(res.code);
+        }
+
+        if (!res.data.length) {
+          const res = await api.put("/young/reinscription/noneligible");
+          if (!res.ok) {
+            capture(res.code);
+          }
+          return history.push("/reinscription/noneligible");
+        }
+
+        setSessions(res.data);
+      } catch (e) {
+        capture(e);
+        toastr.error("Une erreur s'est produite :", translate(e.code));
+      }
+    };
+    checkEligibilite(young);
+  }, [young]);
 
   return (
     <>
@@ -35,8 +66,8 @@ export default function StepSejour() {
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
         <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-        <div className="my-4">{young.sessions?.map((e) => SessionButton(e))}</div>
-        {young.sessions?.length < 3 && (
+        <div className="my-4">{sessions?.map((e) => SessionButton(e))}</div>
+        {sessions?.length < 3 && (
           <>
             <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
             <div className="text-gray-500 text-sm">
@@ -61,8 +92,6 @@ export default function StepSejour() {
         key={session.id}
         className="border p-4 my-3 flex justify-between items-center"
         onClick={async () => {
-          // setData({ ...data, cohort: session.name });
-          // ! Reprendre les call api ici
           const { ok, data, code } = await api.put("/young/reinscription/changeCohort", {
             cohortChangeReason: "Réinscription à un nouveau séjour",
             cohort: session.name,

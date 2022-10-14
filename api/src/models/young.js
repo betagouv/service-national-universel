@@ -90,12 +90,6 @@ const Schema = new mongoose.Schema({
       description: "Date de naissance du volontaire",
     },
   },
-  sessions: {
-    type: [mongoose.Schema.Types.Mixed],
-    documentation: {
-      description: "Champ temporaire pour stocker les sessions",
-    },
-  },
   cohort: {
     type: String,
     default: "2022",
@@ -253,7 +247,7 @@ const Schema = new mongoose.Schema({
   reinscriptionStep2023: {
     type: String,
     default: "ELIGIBILITE",
-    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "DOCUMENTS", "DONE", "CONFIRM"],
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "DOCUMENTS", "DONE"],
     documentation: {
       description: "Étape du tunnel de réinscription",
     },

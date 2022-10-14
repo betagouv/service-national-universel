@@ -20,6 +20,7 @@ import { getDepartmentByZip } from "snu-lib";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
+import Navbar from "../components/Navbar";
 
 export default function StepEligibilite() {
   // const [data, setData] = React.useContext(PreInscriptionContext);
@@ -133,7 +134,7 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
       zip: data.zip,
-      // ! isAbroad n'est stocké ni ici ni dans dans stepConfirm
+      // ! FIXME : isAbroad n'est stocké ni ici ni dans dans stepConfirm
     };
 
     try {
@@ -148,8 +149,16 @@ export default function StepEligibilite() {
         setError({ text: "Impossible de vérifier votre éligibilité" });
         setLoading(false);
       }
-      // ! FIXME: Rediscuter du cas de non éligibilité (suppression du compte ???)
-      if (!res.data.length) return history.push("/reinscription/noneligible");
+
+      if (!res.data.length) {
+        const res = await api.put("/young/reinscription/noneligible");
+        if (!res.ok) {
+          capture(res.code);
+          setError({ text: "Pb avec votre non eligibilite" });
+          setLoading(false);
+        }
+        return history.push("/reinscription/noneligible");
+      }
 
       updates.sessions = res.data;
     } catch (e) {
@@ -158,17 +167,14 @@ export default function StepEligibilite() {
     }
 
     try {
-      // ! FIXME: Store sessions dans jeune. Solution naze mais pas le temps de faire mieux
       const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
       if (!ok) {
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
         setLoading(false);
         return;
       }
-      console.log("🚀 ~ file: stepEligibilite.js ~ line 162 ~ onSubmit ~ responseData", responseData);
       dispatch(setYoung(responseData));
-      console.log("🚀 ~ file: stepEligibilite.js ~ line 168 ~ onSubmit ~ responseData", responseData);
-      history.push("/reinscription/sejour");
+      return history.push("/reinscription/sejour");
     } catch (e) {
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
@@ -177,6 +183,7 @@ export default function StepEligibilite() {
 
   return (
     <>
+      <Navbar />
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
