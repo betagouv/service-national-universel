@@ -12,6 +12,7 @@ import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory, Link } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import Footer from "../../../components/footerV2";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -65,6 +66,7 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
+      setData({ ...data, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
     }

@@ -7,14 +7,13 @@ import plausibleEvent from "../../../services/plausible";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { capture } from "../../../sentry";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepDone() {
   const [error, setError] = useState({});
-  const [data] = React.useContext(PreInscriptionContext);
+  const [data, setData, removePersistedData] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
-
-  useEffect(() => console.log(data), []);
 
   useEffect(
     () =>
@@ -63,7 +62,8 @@ export default function StepDone() {
       // });
 
       plausibleEvent("Phase0/CTA preinscription - inscription");
-
+      setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
+      removePersistedData();
       history.push("/preinscription/done");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
