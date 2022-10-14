@@ -16,7 +16,6 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "../utilisateur/composants/ModalUniqueResponsable";
-import styled from "styled-components";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
