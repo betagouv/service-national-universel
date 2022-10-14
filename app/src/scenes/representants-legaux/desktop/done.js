@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 
-export default function Done() {
+export default function Done({ parentId }) {
   const { young } = useContext(RepresentantsLegauxContext);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
