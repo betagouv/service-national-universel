@@ -103,6 +103,6 @@ export function booleanToString(val, defaultValue = null) {
 export function isReturningParent(young, parentId) {
   return (
     (parentId === 1 && (young.parentAllowSNU === "true" || young.parentAllowSNU === "false")) ||
-    (parentId === 2 && (young.parent2ImageRights === "true" || young.parent2ImageRights === "false"))
+    (parentId === 2 && (young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false"))
   );
 }
