@@ -3,6 +3,8 @@ import API from "../../../services/api";
 
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
+import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 
@@ -10,6 +12,7 @@ const EngagementsProgramMobile = () => {
   const [program, setProgram] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     const getProgram = async () => {
@@ -19,6 +22,8 @@ const EngagementsProgramMobile = () => {
         setIsLoading(false);
       } catch (error) {
         capture(error);
+        toastr.error("Oups, une erreur est survenue");
+        history.push("/preinscription/noneligible");
       }
     };
     getProgram();

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../../../services/api";
 import { capture } from "../../../sentry";
 import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import Loader from "../../../components/Loader";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
@@ -21,6 +22,8 @@ const EngagementsProgramMobile = () => {
         setIsLoading(false);
       } catch (error) {
         capture(error);
+        toastr.error("Oups, une erreur est survenue");
+        history.push("/preinscription/noneligible");
       }
     };
     getProgram();
