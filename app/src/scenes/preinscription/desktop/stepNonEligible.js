@@ -89,7 +89,7 @@ export default function NonEligible() {
           </div>
           <div className="flex justify-center my-8">
             <div
-              className="text-[#000091] text-center border-2 border-[#000091] w-[50%]  p-2 cursor-pointer"
+              className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%]  p-2 cursor-pointer"
               onClick={() => {
                 history.push("/public-engagements");
               }}>

@@ -88,7 +88,7 @@ export default function NonEligible() {
           })}
         </div>
         <div
-          className="text-[#000091] text-center border-2 border-[#000091] my-4 p-2"
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
           onClick={() => {
             history.push("/public-engagements");
           }}>
