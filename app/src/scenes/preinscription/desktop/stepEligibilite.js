@@ -16,6 +16,7 @@ import Toggle from "../../../components/inscription/toggle";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import Input from "../../../components/inscription/input";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -99,10 +100,10 @@ export default function StepEligibilite() {
       setLoading(false);
     }
     if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg });
+      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    setData({ ...data, sessions: res.data });
+    setData({ ...data, sessions: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
     return history.push("/preinscription/sejour");
   };
 

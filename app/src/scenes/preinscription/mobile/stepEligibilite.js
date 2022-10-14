@@ -18,6 +18,7 @@ import api from "../../../services/api";
 import { getDepartmentByZip } from "snu-lib";
 import { capture } from "../../../sentry";
 import Footer from "../../../components/footerV2";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -95,17 +96,16 @@ export default function StepEligibilite() {
       schoolLevel: data.scolarity,
       frenchNationality: data.frenchNationality,
     });
-    console.log("🚀 ~ file: stepEligibilite.js ~ line 95 ~ onSubmit ~ res", res);
     if (!res.ok) {
       capture(res.code);
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
     if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg });
+      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    setData({ ...data, sessions: res.data });
+    setData({ ...data, sessions: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
     return history.push("/preinscription/sejour");
   };
 

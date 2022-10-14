@@ -2,7 +2,7 @@ import React from "react";
 import useDevice from "../../../hooks/useDevice";
 import save from "../../../assets/save.svg";
 import { useParams } from "react-router-dom";
-import { getStepFromUrlParam } from "../utils/navigation";
+import { getStepFromUrlParam, INSCRIPTION_STEPS_LIST } from "../../../utils/navigation";
 
 const index = {
   COORDONNEES: "1",
@@ -30,7 +30,7 @@ const Navbar = ({ onSave }) => {
   const desktop = useDevice() === "desktop";
 
   const { step } = useParams();
-  const currentStep = getStepFromUrlParam(step, true);
+  const currentStep = getStepFromUrlParam(step, INSCRIPTION_STEPS_LIST, true);
 
   return (
     <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">

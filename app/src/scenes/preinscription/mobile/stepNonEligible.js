@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
@@ -12,6 +12,7 @@ import Footer from "../../../components/footerV2";
 export default function NonEligible() {
   const [data] = React.useContext(PreInscriptionContext);
   const history = useHistory();
+  const [_, __, removePersistedData] = useContext(PreInscriptionContext);
 
   const engagementPrograms = [
     {
@@ -44,6 +45,7 @@ export default function NonEligible() {
     },
   ];
   const onClickButton = () => {
+    removePersistedData(true);
     history.push("/");
   };
 
@@ -88,13 +90,13 @@ export default function NonEligible() {
             );
           })}
         </div>
-        {/* <div
-      className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
-      onClick={() => {
-        history.push("https://www.jeveuxaider.gouv.fr/");
-      }}>
-      Voir plus de formes d’engagement
-    </div> */}
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
+        </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />

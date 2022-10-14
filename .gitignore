@@ -13,3 +13,5 @@ api/coverage
 .cache_ggshield
 Zammadwebhook.json
 requestZammad.json
+
+.idea

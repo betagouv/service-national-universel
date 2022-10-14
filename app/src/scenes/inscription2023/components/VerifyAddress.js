@@ -82,7 +82,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
     );
   }
 
-  if (isVerified) return <Message>L'adresse a été vérifiée</Message>;
+  if (isVerified) return <Message>L&apos;adresse a été vérifiée</Message>;
 
   return (
     <>
