@@ -10,13 +10,14 @@ import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
 
 export default function StepDone() {
-  const [data] = React.useContext(PreInscriptionContext);
+  const [data, _, removePersistedData] = React.useContext(PreInscriptionContext);
   const history = useHistory();
   const dispatch = useDispatch();
 
   const logout = async () => {
     await api.post(`/young/logout`);
     dispatch(setYoung(null));
+    removePersistedData(true);
     history.push("/");
   };
 
@@ -27,6 +28,7 @@ export default function StepDone() {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         plausibleEvent("Phase0/CTA preinscription - demarrer");
+        removePersistedData(true);
         history.push("/inscription2023");
       }
     } catch (e) {
