@@ -225,7 +225,7 @@ export default function Profil() {
         </div>
       </div>
       {/* {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && ( */}
-      <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
+      <DeleteBtn onClick={onClickDelete}>Supprimer mon compte</DeleteBtn>
       {/* )} */}
 
       <ModalConfirm
@@ -256,7 +256,6 @@ export default function Profil() {
         onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
       />
       <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
-      <div className="flex-1">Supprimer mon compte</div>
     </div>
   );
 }
