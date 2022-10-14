@@ -16,6 +16,7 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "../utilisateur/composants/ModalUniqueResponsable";
+import { capture } from "../../sentry";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
@@ -54,7 +55,7 @@ export default function Profil() {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {
-      console.log(e);
+      capture(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
