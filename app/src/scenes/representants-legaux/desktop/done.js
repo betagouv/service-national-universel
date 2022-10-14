@@ -9,12 +9,28 @@ export default function Done({ parentId }) {
 
   useEffect(() => {
     if (young) {
-      if (young.parentAllowSNU === "true") {
-        setTitle("Merci, nous avons bien enregistré votre consentement.");
-        setText("Le dossier de votre enfant a bien été enregsitré, celui-ci sera étudié ultérieurement.");
+      if (parentId === 1) {
+        if (young.parentAllowSNU === "true") {
+          setTitle("Merci, nous avons bien enregistré votre consentement.");
+          setText("Le dossier de votre enfant a bien été enregsitré, celui-ci sera étudié ultérieurement.");
+        } else {
+          setTitle("Merci, nous avons bien enregistré votre refus.");
+          setText("L'inscription de votre enfant a bien été refusée.");
+        }
       } else {
-        setTitle("Merci, nous avons bien enregistré votre refus.");
-        setText("L'inscription de votre enfant a bien été refusée.");
+        if (young.parent2AllowImageRights === "true") {
+          setTitle("Merci, nous avons bien enregistré votre consentement.");
+          setText(
+            "En parallèle nous avons envoyé une demande de consentements au représentant légal 1 déclaré sur le dossier du volontaire. " +
+              "Pour en savoir plus, rapprochez vous du volontaire.",
+          );
+        } else {
+          setTitle("Merci, nous avons bien enregistré votre refus de consentement pour le droit à l'image.");
+          setText(
+            "En parallèle nous avons envoyé une demande de consentements au représentant légal 1 déclaré sur le dossier du volontaire. " +
+              "Pour en savoir plus, rapprochez vous du volontaire.",
+          );
+        }
       }
     }
   }, [young]);
