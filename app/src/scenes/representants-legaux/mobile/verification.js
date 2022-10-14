@@ -110,10 +110,13 @@ function Section(section, idx) {
   const fields = section.fields.map(SectionField);
 
   return (
-    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid" key={idx.toString()}>
-      <h2 className="mt-0 mb-[19px] font-bold text-[18px] leading-[32px]">{section.title}</h2>
-      {fields}
-    </div>
+    <>
+      <hr className="mt-8" />
+      <div className="pt-[32px]" key={idx.toString()}>
+        <h2 className="mt-0 mb-[19px] font-semibold text-[18px] leading-[32px]">{section.title}</h2>
+        {fields}
+      </div>
+    </>
   );
 }
 
@@ -133,10 +136,10 @@ function SectionField(field, idx) {
     content = <div className="text-[16px] font-400 text-[#666666]">{field.subtitle}&nbsp;:</div>;
   } else {
     content = (
-      <>
+      <div className="flex w-full justify-between">
         <p className="text-[16px] font-400 text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="text-[16px] font-400 text-[#161616]">{field.value ? field.value : "-"}</p>
-      </>
+        <p className="text-[16px] font-400 text-[#161616] text-right">{field.value ? field.value : "-"}</p>
+      </div>
     );
   }
 
