@@ -1,3 +1,23 @@
+# [1.149.0](https://github.com/betagouv/service-national-universel/compare/v1.148.0...v1.149.0) (2022-10-14)
+
+
+### Bug Fixes
+
+* **app:** step done desktop ([552d548](https://github.com/betagouv/service-national-universel/commit/552d548c2470321c7d301eaba9ef66edf53b7b3e))
+* **app:** two-line fields alignment ([24eeb98](https://github.com/betagouv/service-national-universel/commit/24eeb984be6d5eef56f0236b2b44585dd144c29f))
+
+
+### Features
+
+* **admin:** Referent self delete ([#1918](https://github.com/betagouv/service-national-universel/issues/1918)) ([8728be6](https://github.com/betagouv/service-national-universel/commit/8728be627d23e081dd3664ef18cafacb807202f8))
+* **api/app:** give motive for non eligibility ([#1912](https://github.com/betagouv/service-national-universel/issues/1912)) ([a6eb5ff](https://github.com/betagouv/service-national-universel/commit/a6eb5ff50e37124a2f1a9171d28a72fc5635ab89))
+* **app:** cni invalide mobile ([324abf0](https://github.com/betagouv/service-national-universel/commit/324abf038c9f09a3e68cbccb4d0338c2f77c4d19))
+* **app:** mobile consentement ([573a771](https://github.com/betagouv/service-national-universel/commit/573a771e5ce86056aa720d85b9cafe1b958ad0be))
+* **app:** mobile rp verification + translate new status ([9481c62](https://github.com/betagouv/service-national-universel/commit/9481c62bb1f4ee4b6630c79a556abab187dcf477))
+* **app:** persist data and control navigation for preinscription ([#1913](https://github.com/betagouv/service-national-universel/issues/1913)) ([c1ca4fb](https://github.com/betagouv/service-national-universel/commit/c1ca4fbc9f7ed2089b732b7d4ccc291f37fbad6a))
+* **app:** rp done mobile ([9e40981](https://github.com/betagouv/service-national-universel/commit/9e40981d9356ff034f2572255dcf4343f9ab2673))
+* **app:** verification version mobile ([162294c](https://github.com/betagouv/service-national-universel/commit/162294c3669f126c5502347a189310c02ef6f4d2))
+
 # [1.148.0](https://github.com/betagouv/service-national-universel/compare/v1.147.0...v1.148.0) (2022-10-13)
 
 
