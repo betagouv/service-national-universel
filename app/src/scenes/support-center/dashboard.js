@@ -14,6 +14,7 @@ import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { supportURL } from "../../config";
+import plausibleEvent from "../../services/plausible";
 
 const articles = [
   {
@@ -80,6 +81,7 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
           className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
           type="text"
           placeholder={placeholder}
+          onClick={() => plausibleEvent("Besoin d'aide - Barre de recherche")}
           onChange={(e) => setSearch(e.target.value)}
           value={search}
         />
@@ -117,8 +119,14 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
 
 const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className = "" }) => {
   return (
-    <div key={_id} onClick={() => window.open(`https://support.snu.gouv.fr/${path}/${slug}`, "_blank")}>
-      <a href="#" data-position={position} data-id={_id} className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
+    <div key={_id}>
+      <a
+        href={`https://support.snu.gouv.fr/${path}/${slug}`}
+        target="_blank"
+        rel="noreferrer"
+        data-position={position}
+        data-id={_id}
+        className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
         <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg `}>
           <div className="flex flex-grow flex-col">
             <header className="flex items-center justify-between px-8 leading-tight">
@@ -232,7 +240,9 @@ export default function Dashboard(props) {
               une réponse par mail.
             </div>
             <div className="buttons mt-4">
-              <InternalLink to={`/besoin-d-aide/ticket?from=${fromPage}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
+              <InternalLink onClick={() => plausibleEvent("Besoin d'aide - Contacter quelqu'un")} to={`/besoin-d-aide/ticket?from=${fromPage}`}>
+                Contacter&nbsp;quelqu&apos;un
+              </InternalLink>
             </div>
           </div>
         </div>

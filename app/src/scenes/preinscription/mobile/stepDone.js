@@ -55,7 +55,7 @@ export default function StepDone() {
           </div>
         </div>
       </div>
-      <Footer marginBottom={"20vh"} />
+      <Footer marginBottom="mb-[146px]" />
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-col shadow-ninaInverted p-4 bg-white gap-4">
           <button className="flex items-center justify-center p-2 w-full cursor-pointer bg-[#000091] text-white" onClick={handleClick}>

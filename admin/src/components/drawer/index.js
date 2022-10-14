@@ -8,7 +8,7 @@ import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import { environment } from "../../config";
 
 const DrawerTab = ({ title, to, onClick, beta, exact }) => {

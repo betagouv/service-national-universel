@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import validator from "validator";
 
@@ -9,7 +9,6 @@ import RadioButton from "../components/RadioButton";
 import Input from "../components/Input";
 import Select from "../components/Select";
 import ErrorMessage from "../components/ErrorMessage";
-import Navbar from "../components/Navbar";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -28,8 +27,8 @@ import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Button from "../components/Button";
+import DesktopPageContainer from "../components/DesktopPageContainer";
+import plausibleEvent from "../../../services/plausible";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -332,6 +331,7 @@ export default function StepCoordonnees() {
           return;
         }
         dispatch(setYoung(responseData));
+        plausibleEvent("Phase0/CTA inscription - profil");
         history.push("/inscription2023/consentement");
       } catch (e) {
         capture(e);
@@ -398,210 +398,193 @@ export default function StepCoordonnees() {
     });
     setErrors({ addressVerified: undefined });
   };
-
   return (
-    <>
-      <Navbar onSave={onSave} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10 text-[#161616]">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
-          <div className="w-full flex justify-between items-center mt-2">
-            <h1 className="text-xl font-bold">Mon profil volontaire</h1>
-            <Link className="hover:scale-105" to="/public-besoin-d-aide/">
-              <QuestionMarkBlueCircle />
-            </Link>
+    <DesktopPageContainer title="Mon profil volontaire" onSave={onSave} onSubmit={onSubmit} disabled={loading}>
+      <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
+      {!isFrench && (
+        <SearchableSelect
+          label="Pays de naissance"
+          value={birthCountry}
+          options={countryOptions}
+          onChange={updateData("birthCountry")}
+          placeholder="Sélectionnez un pays"
+          error={errors.birthCountry}
+        />
+      )}
+      <div className="flex">
+        <Input className="flex-1 mr-3" value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} />
+        <Input className="flex-1 ml-3" value={birthCity} label="Commune de naissance" onChange={updateData("birthCity")} error={errors.birthCity} />
+      </div>
+      <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} />
+      <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} />
+      <RadioButton label="Je réside..." options={frenchNationalityOptions} onChange={setLivesInFrance} value={livesInFrance} />
+      {!isFrenchResident && (
+        <SearchableSelect
+          label="Pays de résidence"
+          value={foreignCountry}
+          options={countryOptions}
+          onChange={updateData("foreignCountry")}
+          placeholder="Sélectionnez un pays"
+          error={errors.foreignCountry}
+        />
+      )}
+      <Input
+        value={isFrenchResident ? address : foreignAddress}
+        label="Adresse de résidence"
+        onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
+        error={isFrenchResident ? errors.address : errors.foreignAddress}
+      />
+      <div className="flex">
+        <Input
+          className="flex-1 mr-3"
+          value={isFrenchResident ? zip : foreignZip}
+          label="Code postal"
+          onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
+          error={isFrenchResident ? errors.zip : errors.foreignZip}
+        />
+        <Input
+          className="flex-1 ml-3"
+          value={isFrenchResident ? city : foreignCity}
+          label="Ville"
+          onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
+          error={isFrenchResident ? errors.city : errors.foreignCity}
+        />
+      </div>
+      {!isFrenchResident && (
+        <>
+          <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
+          <div className="flex my-3">
+            <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
+              <img src={require("../../../assets/infoSquared.svg")} height={20} width={20} />
+            </div>
+            <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
+              Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
+            </div>
           </div>
-          <hr className="my-4 h-px bg-gray-200 border-0" />
-          <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
-          {!isFrench && (
-            <SearchableSelect
-              label="Pays de naissance"
-              value={birthCountry}
-              options={countryOptions}
-              onChange={updateData("birthCountry")}
-              placeholder="Sélectionnez un pays"
-              error={errors.birthCountry}
-            />
-          )}
+          <p className="text-[14px] text-[#666666] leading-tight text-justify">
+            À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+          </p>
           <div className="flex">
-            <Input className="flex-1 mr-3" value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} />
-            <Input className="flex-1 ml-3" value={birthCity} label="Commune de naissance" onChange={updateData("birthCity")} error={errors.birthCity} />
-          </div>
-          <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} />
-          <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} />
-          <RadioButton label="Je réside..." options={frenchNationalityOptions} onChange={setLivesInFrance} value={livesInFrance} />
-          {!isFrenchResident && (
-            <SearchableSelect
-              label="Pays de résidence"
-              value={foreignCountry}
-              options={countryOptions}
-              onChange={updateData("foreignCountry")}
-              placeholder="Sélectionnez un pays"
-              error={errors.foreignCountry}
-            />
-          )}
-          <Input
-            value={isFrenchResident ? address : foreignAddress}
-            label="Adresse de résidence"
-            onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
-            error={isFrenchResident ? errors.address : errors.foreignAddress}
-          />
-          <div className="flex">
-            <Input
-              className="flex-1 mr-3"
-              value={isFrenchResident ? zip : foreignZip}
-              label="Code postal"
-              onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
-              error={isFrenchResident ? errors.zip : errors.foreignZip}
-            />
-            <Input
-              className="flex-1 ml-3"
-              value={isFrenchResident ? city : foreignCity}
-              label="Ville"
-              onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
-              error={isFrenchResident ? errors.city : errors.foreignCity}
-            />
-          </div>
-          {!isFrenchResident && (
-            <>
-              <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
-              <div className="flex my-3">
-                <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
-                  <img src={require("../../../assets/infoSquared.svg")} height={20} width={20} />
-                </div>
-                <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
-                  Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
-                </div>
-              </div>
-              <p className="text-[14px] text-[#666666] leading-tight text-justify">
-                À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
-              </p>
-              <div className="flex">
-                <Input className="flex-1 mr-3" value={hostFirstName} label="Prénom de l’hébergeur" onChange={updateData("hostFirstName")} error={errors.hostFirstName} />
-                <Input className="flex-1 ml-3" value={hostLastName} label="Nom de l’hébergeur" onChange={updateData("hostLastName")} error={errors.hostLastName} />
-              </div>
-              <Select
-                options={hostRelationshipOptions}
-                value={hostRelationship}
-                label="Précisez votre lien avec l’hébergeur"
-                onChange={updateData("hostRelationship")}
-                error={errors.hostRelationship}
-              />
-              <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address", false)} error={errors.address} />
-              <div className="flex">
-                <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} />
-                <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} />
-              </div>
-            </>
-          )}
-          <VerifyAddress
-            buttonContainerClassName="flex justify-end"
-            buttonClassName="w-[200px]"
-            address={address}
-            disabled={isVerifyAddressDisabled}
-            zip={zip}
-            city={city}
-            onSuccess={onVerifyAddress(true)}
-            onFail={onVerifyAddress()}
-            isVerified={addressVerified === "true"}
-          />
-          <div className="flex justify-end">
-            <ErrorMessage>{errors.addressVerified}</ErrorMessage>
+            <Input className="flex-1 mr-3" value={hostFirstName} label="Prénom de l’hébergeur" onChange={updateData("hostFirstName")} error={errors.hostFirstName} />
+            <Input className="flex-1 ml-3" value={hostLastName} label="Nom de l’hébergeur" onChange={updateData("hostLastName")} error={errors.hostLastName} />
           </div>
           <Select
-            label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
-            options={situationOptions}
-            value={situation}
-            onChange={updateData("situation")}
-            error={errors.situation}
+            options={hostRelationshipOptions}
+            value={hostRelationship}
+            label="Précisez votre lien avec l’hébergeur"
+            onChange={updateData("hostRelationship")}
+            error={errors.hostRelationship}
           />
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
-              <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
-            </div>
-            <div className="ml-3">
-              <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
-            </div>
+          <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address", false)} error={errors.address} />
+          <div className="flex">
+            <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} />
+            <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} />
           </div>
-          {hasSpecialSituation && (
-            <>
-              <CheckBox
-                className="mb-4"
-                label="Je suis en situation de handicap"
-                checked={handicap === "true"}
-                onChange={(value) => {
-                  setData({ ...data, handicap: value.toString() });
-                }}
-              />
-              <CheckBox
-                className="mb-4"
-                label="Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)"
-                checked={ppsBeneficiary === "true"}
-                onChange={(value) => {
-                  setData({ ...data, ppsBeneficiary: value.toString() });
-                }}
-              />
-              <CheckBox
-                className="mb-4"
-                label="Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)"
-                checked={paiBeneficiary === "true"}
-                onChange={(value) => {
-                  setData({ ...data, paiBeneficiary: value.toString() });
-                }}
-              />
-              <CheckBox
-                className="mb-4"
-                label="J’ai des allergies ou intolérances alimentaires."
-                description="(nécessitant la mise en place de mesures adaptées)"
-                checked={allergies === "true"}
-                onChange={(value) => {
-                  setData({ ...data, allergies: value.toString() });
-                }}
-              />
-              <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
-              {moreInformation && (
-                <>
-                  <hr className="my-4 h-px bg-gray-200 border-0" />
-                  <RadioButton
-                    label="Avez-vous besoin d’aménagements spécifiques ?"
-                    description="(accompagnant professionnel, participation de jour, activités adaptées... )"
-                    options={booleanOptions}
-                    onChange={updateData("specificAmenagment")}
-                    value={specificAmenagment}
-                    error={errors.specificAmenagment}
-                  />
-                  {specificAmenagment === "true" && (
-                    <Input
-                      value={specificAmenagmentType}
-                      label="Quelle est la nature de cet aménagement ?"
-                      onChange={updateData("specificAmenagmentType")}
-                      error={errors.specificAmenagmentType}
-                    />
-                  )}
-                  <RadioButton
-                    label="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
-                    options={booleanOptions}
-                    onChange={updateData("reducedMobilityAccess")}
-                    value={reducedMobilityAccess}
-                    error={errors.reducedMobilityAccess}
-                  />
-                  <RadioButton
-                    label="Avez-vous besoin d’être affecté(e) dans un centre de votre département de résidence ?"
-                    options={booleanOptions}
-                    onChange={updateData("handicapInSameDepartment")}
-                    value={handicapInSameDepartment}
-                    error={errors.handicapInSameDepartment}
-                  />
-                </>
-              )}
-            </>
-          )}
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="flex justify-end gap-4">
-            <Button onClick={() => !loading && onSubmit()} disabled={loading} />
-          </div>
+        </>
+      )}
+      <VerifyAddress
+        buttonContainerClassName="flex justify-end"
+        buttonClassName="w-[200px]"
+        address={address}
+        disabled={isVerifyAddressDisabled}
+        zip={zip}
+        city={city}
+        onSuccess={onVerifyAddress(true)}
+        onFail={onVerifyAddress()}
+        isVerified={addressVerified === "true"}
+      />
+      <div className="flex justify-end">
+        <ErrorMessage>{errors.addressVerified}</ErrorMessage>
+      </div>
+      <Select
+        label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
+        options={situationOptions}
+        value={situation}
+        onChange={updateData("situation")}
+        error={errors.situation}
+      />
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
+          <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+        </div>
+        <div className="ml-3">
+          <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
         </div>
       </div>
-    </>
+      {hasSpecialSituation && (
+        <>
+          <CheckBox
+            className="mb-4"
+            label="Je suis en situation de handicap"
+            checked={handicap === "true"}
+            onChange={(value) => {
+              setData({ ...data, handicap: value.toString() });
+            }}
+          />
+          <CheckBox
+            className="mb-4"
+            label="Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)"
+            checked={ppsBeneficiary === "true"}
+            onChange={(value) => {
+              setData({ ...data, ppsBeneficiary: value.toString() });
+            }}
+          />
+          <CheckBox
+            className="mb-4"
+            label="Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)"
+            checked={paiBeneficiary === "true"}
+            onChange={(value) => {
+              setData({ ...data, paiBeneficiary: value.toString() });
+            }}
+          />
+          <CheckBox
+            className="mb-4"
+            label="J’ai des allergies ou intolérances alimentaires."
+            description="(nécessitant la mise en place de mesures adaptées)"
+            checked={allergies === "true"}
+            onChange={(value) => {
+              setData({ ...data, allergies: value.toString() });
+            }}
+          />
+          <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
+          {moreInformation && (
+            <>
+              <hr className="my-4 h-px bg-gray-200 border-0" />
+              <RadioButton
+                label="Avez-vous besoin d’aménagements spécifiques ?"
+                description="(accompagnant professionnel, participation de jour, activités adaptées... )"
+                options={booleanOptions}
+                onChange={updateData("specificAmenagment")}
+                value={specificAmenagment}
+                error={errors.specificAmenagment}
+              />
+              {specificAmenagment === "true" && (
+                <Input
+                  value={specificAmenagmentType}
+                  label="Quelle est la nature de cet aménagement ?"
+                  onChange={updateData("specificAmenagmentType")}
+                  error={errors.specificAmenagmentType}
+                />
+              )}
+              <RadioButton
+                label="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
+                options={booleanOptions}
+                onChange={updateData("reducedMobilityAccess")}
+                value={reducedMobilityAccess}
+                error={errors.reducedMobilityAccess}
+              />
+              <RadioButton
+                label="Avez-vous besoin d’être affecté(e) dans un centre de votre département de résidence ?"
+                options={booleanOptions}
+                onChange={updateData("handicapInSameDepartment")}
+                value={handicapInSameDepartment}
+                error={errors.handicapInSameDepartment}
+              />
+            </>
+          )}
+        </>
+      )}
+    </DesktopPageContainer>
   );
 }

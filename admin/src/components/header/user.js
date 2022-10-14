@@ -6,7 +6,7 @@ import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import { ROLES } from "../../utils";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
 
 import Avatar from "../Avatar";

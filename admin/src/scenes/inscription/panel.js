@@ -12,7 +12,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 import Badge from "../../components/Badge";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function InscriptionPanel({ onChange, value }) {
@@ -119,7 +119,7 @@ export default function InscriptionPanel({ onChange, value }) {
         {(young?.files.cniFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
-            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e}`)}
+            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e._id}`)}
             title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
           />
         ))}

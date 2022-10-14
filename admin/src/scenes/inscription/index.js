@@ -34,7 +34,7 @@ import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";

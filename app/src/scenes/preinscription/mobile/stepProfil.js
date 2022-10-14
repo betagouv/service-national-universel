@@ -6,7 +6,7 @@ import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import { appURL } from "../../../config";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { useHistory, Link } from "react-router-dom";
@@ -162,7 +162,7 @@ export default function StepProfil() {
           </div>
         </div>
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/eligibilite")} />
     </>
   );

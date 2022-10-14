@@ -192,13 +192,17 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     const isRequired = type !== "save";
 
     const { error, value } = Joi.object({
-      parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "other"), isRequired),
+      parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
       parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
       parent1Email: needRequired(Joi.string().lowercase().trim().email(), isRequired),
       parent1Phone: needRequired(Joi.string().trim(), isRequired),
       parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
-      parent2Status: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2Status: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
       parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
       parent2LastName: Joi.alternatives().conditional("parent2", {
         is: true,
@@ -212,7 +216,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       }),
       parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
     }).validate(req.body, { stripUnknown: true });
-
+    console.log(error);
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
@@ -257,19 +261,31 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     if (notifyExpirationDate) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
       });
     }
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
     });
 
     if (young.parent2Email) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
         emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
       });
     }
 
@@ -337,19 +353,31 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     if (notifyExpirationDate) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
       });
     }
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-      params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
     });
 
     if (young.parent2Email) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
         emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: { cta: `${config.APP_URL}/`, youngFirstName: young.firstName, youngName: young.lastName },
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
       });
     }
 

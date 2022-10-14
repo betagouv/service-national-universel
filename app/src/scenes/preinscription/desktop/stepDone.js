@@ -26,7 +26,7 @@ export default function StepDone() {
       if (young) {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
-        plausibleEvent("");
+        plausibleEvent("Phase0/CTA preinscription - demarrer");
         history.push("/inscription2023");
       }
     } catch (e) {

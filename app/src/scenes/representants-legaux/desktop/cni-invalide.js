@@ -1,4 +1,76 @@
-import React from "react";
-export default function Todo() {
-  return <>todo</>;
+import React, { useContext, useState } from "react";
+import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
+import Check from "../components/Check";
+import { COHESION_STAY_START, translate } from "snu-lib";
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
+import Loader from "../../../components/Loader";
+import { PlainButton } from "../components/Buttons";
+import api from "../../../services/api";
+import { API_DECLARATION_CNI_INVALIDE } from "../commons";
+import { useHistory } from "react-router-dom";
+
+export default function CniInvalide() {
+  const history = useHistory();
+  const { young, token } = useContext(RepresentantsLegauxContext);
+  const [validated, setValidated] = useState(false);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  if (!young) return <Loader />;
+
+  const youngFullname = young.firstName + " " + young.lastName;
+  const parentFullname = young.parent1FirstName + " " + young.parent1LastName;
+  const dateSejour = COHESION_STAY_START[young.cohort] ? dayjs(COHESION_STAY_START[young.cohort]).locale("fr").format("D MMMM YYYY") : young.cohort;
+
+  async function onSubmit() {
+    setSaving(true);
+    setError(null);
+
+    if (validated) {
+      try {
+        const { code, ok } = await api.post(API_DECLARATION_CNI_INVALIDE + `?token=${token}`, { validated: true });
+        if (!ok) {
+          setError("Une erreur s'est produite" + (code ? " : " + translate(code) : ""));
+          return false;
+        } else {
+          history.push(`/representants-legaux/presentation?token=${token}&parent=1`);
+        }
+      } catch (e) {
+        console.log(e);
+        setError("Une erreur s'est produite" + (e.code ? " : " + translate(e.code) : ""));
+      }
+    } else {
+      setError("Vous devez cocher la case pour valider votre déclaration.");
+    }
+
+    setSaving(false);
+  }
+
+  return (
+    <div className="bg-[#f9f6f2] flex justify-center py-10">
+      <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616] relative">
+        <h2 className="font-bold text-[#161616] text-[24px] leading-[32px] pb-[32px] border-b-solid border-b-[1px] border-b-[#E5E5E5] m-[0] mb-[32px]">
+          Déclaration sur l’honneur
+        </h2>
+        <p>
+          Malheureusement, la pièce d’identité de {youngFullname} périme d’ici son départ en séjour de cohésion prévu le {dateSejour}.
+        </p>
+        <Check checked={validated} onChange={(e) => setValidated(e)} className="mt-[32px]" error={error}>
+          <p>
+            Je, soussigné(e), <b>{parentFullname}</b>,
+          </p>
+          <p className="mt-2">
+            Suis informé(e) que la participation au séjour de cohésion nécessite que mon enfant soit en possession d’une pièce d’identité valide et qu’à défaut, je dois sans retard
+            engager les démarches de renouvellement de cette pièce d’identité.
+          </p>
+        </Check>
+        <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid flex justify-end">
+          <PlainButton onClick={onSubmit} spinner={saving}>
+            Valider ma déclaration
+          </PlainButton>
+        </div>
+      </div>
+    </div>
+  );
 }

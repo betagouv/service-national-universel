@@ -5,10 +5,11 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
@@ -37,6 +38,7 @@ export default function StepConsentements() {
         return;
       }
       dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - consentement");
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);

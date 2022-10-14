@@ -6,9 +6,10 @@ import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import { appURL } from "../../../config";
 import { useHistory, Link } from "react-router-dom";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -62,6 +63,7 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
+      plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
     }
   };

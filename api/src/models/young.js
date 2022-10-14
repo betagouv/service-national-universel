@@ -831,6 +831,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 1",
     },
   },
+  parent1CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la Ville du parent 1",
+    },
+  },
   parent1Department: {
     type: String,
     documentation: {
@@ -865,6 +871,34 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent1DataVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AddressVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AllowCovidAutotest: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 autorise les autotests Covid",
+    },
+  },
+  parent1AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 donne les droits à l'image de son enfant.",
     },
   },
 
@@ -929,6 +963,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 2",
     },
   },
+  parent2CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la ville du parent 2",
+    },
+  },
   parent2Department: {
     type: String,
     documentation: {
@@ -963,6 +1003,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent2AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 2 donne les droits à l'image de son enfant.",
     },
   },
 
@@ -1310,6 +1357,13 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac",
+    },
+  },
+  parentStatementOfHonorInvalidId: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant a fait une déclaration sur l'honneur qu'il allait mettre à jour la CNI du volontaire.",
     },
   },
 

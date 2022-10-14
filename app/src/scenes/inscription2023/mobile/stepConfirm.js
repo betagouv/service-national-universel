@@ -10,6 +10,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -46,6 +47,7 @@ export default function StepConfirm() {
         return;
       }
       dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - valider inscription");
       history.push("/inscription2023/done");
     } catch (e) {
       capture(e);
@@ -137,7 +139,7 @@ export default function StepConfirm() {
           ) : null}
         </div>
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-col shadow-ninaInverted p-4 bg-white gap-1 ">
           <div className="flex flex-row gap-2">

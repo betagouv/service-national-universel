@@ -5,7 +5,7 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -14,6 +14,7 @@ import { translate } from "../../../utils";
 import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 import Footer from "../../../components/footerV2";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
@@ -38,6 +39,7 @@ export default function StepConsentements() {
         return;
       }
       dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - consentement");
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);
@@ -98,7 +100,7 @@ export default function StepConsentements() {
           <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>

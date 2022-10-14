@@ -1,15 +1,27 @@
+/**
+ * /reprensentants-legaux
+ *
+ * ROUTES
+ *   GET   /young
+ *   PUT   /representant-fromFranceConnect/:id
+ *   POST  /data-verification
+ *   POST  /consent
+ */
+
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungModel = require("../models/young");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
+const { sendTemplate } = require("../sendinblue");
+const { APP_URL } = require("../config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
@@ -25,6 +37,10 @@ function tokenParentValidMiddleware(req, res, next) {
     .catch((e) => res.status(500).send(e));
 }
 
+function fromUser(young, parent = 1) {
+  return { fromUser: { ...young, firstName: young.parent1FirstName, lastName: young.parent1LastName + "(Parent" + parent + ")" } };
+}
+
 router.get("/young", tokenParentValidMiddleware, async (req, res) => {
   try {
     return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
@@ -35,7 +51,6 @@ router.get("/young", tokenParentValidMiddleware, async (req, res) => {
 });
 
 router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, async (req, res) => {
-  console.log("coucou");
   try {
     const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -64,6 +79,157 @@ router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, as
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
+});
+
+router.post("/data-verification", tokenParentValidMiddleware, async (req, res) => {
+  // --- validate data
+  const { error: error_id } = Joi.boolean().valid(true).required().validate(req.body.verified);
+  if (error_id) {
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+  }
+
+  // --- update young
+  const young = req.young;
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  young.set({ parent1DataVerified: "true" });
+  await young.save(fromUser(req.young));
+
+  // --- result
+  return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+});
+
+router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
+  const { error: error_id, value: idstr } = Joi.string().valid("1", "2").required().validate(req.query.parent, { stripUnknown: true });
+  if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  const id = parseInt(idstr);
+
+  // --- validate data
+  const commonSchema = {
+    [`parent${id}FirstName`]: validateFirstName().trim().required(),
+    [`parent${id}LastName`]: Joi.string().uppercase().required(),
+    [`parent${id}Email`]: Joi.string().lowercase().required(),
+    [`parent${id}Phone`]: Joi.string().required(),
+    [`parent${id}OwnAddress`]: Joi.string().valid("true", "false").required(),
+    [`parent${id}Address`]: Joi.string().allow(""),
+    [`parent${id}ComplementAddress`]: Joi.string().allow(""),
+    [`parent${id}Zip`]: Joi.string().allow(""),
+    [`parent${id}City`]: Joi.string().allow(""),
+    [`parent${id}Country`]: Joi.string().allow(""),
+    [`parent${id}CityCode`]: Joi.string().allow(""),
+    [`parent${id}Region`]: Joi.string().allow(""),
+    [`parent${id}Department`]: Joi.string().allow(""),
+    [`parent${id}Location`]: Joi.any(),
+    [`addressParent${id}Verified`]: Joi.string().valid("true", "false"),
+  };
+
+  let consentBodySchema;
+  if (id === 1) {
+    consentBodySchema = Joi.object().keys({
+      ...commonSchema,
+      ["parentAllowSNU"]: Joi.string().valid("true", "false").required(),
+
+      // --- Demande de retirer l'autorisation de tests PCR pouyr l'instant. On laisse le code au cas où la demande s'inverserait :)
+      // parent1AllowCovidAutotest: Joi.string()
+      //   .valid("true", "false")
+      //   .when("parentAllowSNU", {
+      //     is: Joi.equal("true"),
+      //     then: Joi.required(),
+      //   }),
+      parent1AllowImageRights: Joi.string()
+        .valid("true", "false")
+        .when("parentAllowSNU", {
+          is: Joi.equal("true"),
+          then: Joi.required(),
+        }),
+      rulesParent1: Joi.string()
+        .valid("true")
+        .when("parentAllowSNU", {
+          is: Joi.equal("true"),
+          then: Joi.required(),
+        }),
+    });
+  } else {
+    consentBodySchema = Joi.object().keys({
+      ...commonSchema,
+      parent2AllowImageRights: Joi.string().valid("true", "false").required(),
+    });
+  }
+
+  const result = consentBodySchema.validate(req.body, { stripUnknown: true });
+  const { error, value } = result;
+  if (error) {
+    console.log("error: ", error);
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+  }
+
+  // --- check rights
+  const young = req.young;
+  if (!young) {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  }
+
+  // --- fin du consentement ?
+  let statusChanged = false;
+  const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
+  if (id === 1 && onlyOneParent) {
+    // on prend en compte la valeur envoyée dans cette requête.
+    value.status = value.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+    statusChanged = true;
+  } else if (id === 2) {
+    // on prend en compte la valeur déjà enregistrée par le premier représentant.
+    value.status = young.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+    statusChanged = true;
+  }
+  if (statusChanged) {
+    if (!canUpdateYoungStatus({ body: value, current: young })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+  }
+
+  // --- update young
+  young.set(value);
+  await young.save(fromUser(young, id));
+
+  // --- envoie de mail
+  if (statusChanged) {
+    try {
+      const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+      if (young.parentAllowSNU === "true") {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
+          emailTo,
+          params: {
+            cta: `${APP_URL}/`,
+          },
+        });
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_DID_NOT_CONSENT, { emailTo });
+      }
+    } catch (e) {
+      capture(e);
+    }
+  }
+
+  // --- result
+  return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+});
+
+router.post("/cni-invalide", tokenParentValidMiddleware, async (req, res) => {
+  // --- validate data
+  const { error: error_id } = Joi.boolean().valid(true).required().validate(req.body.validated);
+  if (error_id) {
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+  }
+
+  // --- update young
+  const young = req.young;
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  young.set({ parentStatementOfHonorInvalidId: "true" });
+  await young.save(fromUser(req.young));
+
+  // --- result
+  return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
 });
 
 module.exports = router;
