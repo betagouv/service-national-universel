@@ -400,7 +400,7 @@ export default function Consentement({ step, parentId }) {
                       <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                         M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
                         cohésion (
-                        <a href={HEALTH_FORM_URL} target="blank">
+                        <a href={HEALTH_FORM_URL} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                           Télécharger la fiche sanitaire ici
                         </a>
                         ).
@@ -411,8 +411,8 @@ export default function Consentement({ step, parentId }) {
                       et pour les volontaires résidents de Guyane, la fièvre jaune.
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
-                      Reconnais avoir pris connaissance du
-                      <a href={INTERNAL_RULES_URL} target="blank">
+                      Reconnais avoir pris connaissance du{" "}
+                      <a href={INTERNAL_RULES_URL} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du SNU
                       </a>
                       .
