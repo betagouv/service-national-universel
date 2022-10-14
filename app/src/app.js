@@ -115,7 +115,7 @@ export default function App() {
         )}
         {environment === "production" ? (
           <Footer />
-        ) : ["preinscription", "auth", "inscription2023", "public-engagements"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
+        ) : ["preinscription", "auth", "inscription2023", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
           <Footer />
         ) : null}
       </div>

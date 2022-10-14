@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
@@ -7,9 +7,11 @@ import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.j
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 
 export default function NonEligible() {
   const history = useHistory();
+  const [_, __, removePersistedData] = useContext(PreInscriptionContext);
 
   const engagementPrograms = [
     {
@@ -42,6 +44,7 @@ export default function NonEligible() {
     },
   ];
   const onClickButton = () => {
+    removePersistedData(true);
     history.push("/");
   };
 

@@ -1,48 +1,75 @@
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
-import CheckBox from "../../../components/inscription/checkbox";
+import { COHESION_STAY_START, translate } from "snu-lib";
+import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
-import plausibleEvent from "../../../services/plausible";
+import api from "../../../services/api";
+import { API_DECLARATION_CNI_INVALIDE } from "../commons";
+import Check from "../components/Check";
 
-export default function MobileCniInvalide() {
-  const [check, setCheck] = useState(false);
+export default function CniInvalide() {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
+  const [validated, setValidated] = useState(false);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   if (!young) return <Loader />;
+
+  const youngFullname = young.firstName + " " + young.lastName;
+  const parentFullname = young.parent1FirstName + " " + young.parent1LastName;
+  const dateSejour = COHESION_STAY_START[young.cohort] ? dayjs(COHESION_STAY_START[young.cohort]).locale("fr").format("D MMMM YYYY") : young.cohort;
+
+  async function onSubmit() {
+    setSaving(true);
+    setError(null);
+
+    if (validated) {
+      try {
+        const { code, ok } = await api.post(API_DECLARATION_CNI_INVALIDE + `?token=${token}`, { validated: true });
+        if (!ok) {
+          setError("Une erreur s'est produite" + (code ? " : " + translate(code) : ""));
+          return false;
+        } else {
+          history.push(`/representants-legaux/presentation?token=${token}&parent=1`);
+        }
+      } catch (e) {
+        console.log(e);
+        setError("Une erreur s'est produite" + (e.code ? " : " + translate(e.code) : ""));
+      }
+    } else {
+      setError("Vous devez cocher la case pour valider votre déclaration.");
+    }
+
+    setSaving(false);
+  }
 
   return (
     <>
       <div className="bg-white p-4 text-[#161616]">
-        <h1 className="text-[22px] font-bold">Déclaration sur l’honneur</h1>
-        <p>
-          Malheureusement, la pièce d’identité de {young.firstName} {young.lastName} périme d’ici son départ en séjour de cohésion prévu le 13 février 2022.
-        </p>
-        <div className="flex flex-col gap-4 mt-4 pb-2">
-          <div className="text-[#161616] text-base">
-            Je,{" "}
-            <strong>
-              {young.parent1FirstName || "xxxxxxx"} {young.parent1LastName || "xxxxxxx"}
-            </strong>
-            ,
+        <div className="flex flex-col gap-4">
+          <h1 className="text-[22px] font-bold">Déclaration sur l’honneur</h1>
+          <div className="text-[#161616] mt-2">
+            Malheureusement, la pièce d’identité de <strong>{youngFullname}</strong> périme d’ici son départ en séjour de cohésion prévu le{" "}
+            <strong className="whitespace-nowrap">{dateSejour}</strong>.
           </div>
-          <div className="flex items-center gap-4">
-            <CheckBox checked={check} onChange={(e) => setCheck(e)} />
-            <div className="text-[#3A3A3A] text-sm flex-1">
-              Certifie sur l&apos;honneur avoir initié des démarches de renouvellement de la pièce d&apos;identité de {young.firstName} {young.lastName}.
+          <Check checked={validated} onChange={(e) => setValidated(e)} className="mt-[32px]" error={error}>
+            <div className="text-[#161616] text-base">
+              Je, soussigné(e), <b>{parentFullname}</b>,
             </div>
-          </div>
+            <div className="mt-2 text-sm text-[#3A3A3A]">
+              Suis informé(e) que la participation au séjour de cohésion nécessite que mon enfant soit en possession d’une pièce d’identité valide et qu’à défaut, je dois sans
+              retard engager les démarches de renouvellement de cette pièce d’identité.
+            </div>
+          </Check>
         </div>
       </div>
-      <StickyButton
-        text="Valider ma déclaration"
-        onClick={() => {
-          plausibleEvent("Phase0/CTA representant legal - ID perimee");
-          history.push(`/representants-legaux/presentation?token=${token}`);
-        }}
-      />
+      <Footer marginBottom="mb-[88px]" />
+      <StickyButton onClick={onSubmit} disabled={saving} text="Valider ma déclaration" />
     </>
   );
 }

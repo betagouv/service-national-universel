@@ -406,7 +406,7 @@ export default function StepCoordonnees() {
     <>
       <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
-        <h1 className="text-[22px] font-bold">Mon profil volontaire</h1>
+        <h1 className="text-[22px] font-bold">Déclaration sur l’honneur</h1>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
         {!isFrench && (
