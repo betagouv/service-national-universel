@@ -10,7 +10,7 @@ import { capture } from "../../../sentry";
 
 export default function StepDone() {
   const [error, setError] = useState({});
-  const [data] = React.useContext(PreInscriptionContext);
+  const [data, _, removeData] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
 
@@ -63,7 +63,7 @@ export default function StepDone() {
       // });
 
       plausibleEvent("Phase0/CTA preinscription - inscription");
-
+      removeData();
       history.push("/preinscription/done");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")

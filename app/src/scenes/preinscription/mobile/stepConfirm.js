@@ -12,7 +12,7 @@ import plausibleEvent from "../../../services/plausible";
 
 export default function StepDone() {
   const [error, setError] = useState({});
-  const [data] = React.useContext(PreInscriptionContext);
+  const [data, _, removeData] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
 
@@ -27,7 +27,6 @@ export default function StepDone() {
   );
 
   const onSubmit = async () => {
-    console.log(data);
     const values = {
       email: data.email,
       firstName: data.firstName,
@@ -57,6 +56,7 @@ export default function StepDone() {
       const { user, code, ok } = await api.post("/young/signup2023", values);
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       plausibleEvent("Phase0/CTA preinscription - inscription");
+      removeData();
       history.push("/preinscription/done");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")

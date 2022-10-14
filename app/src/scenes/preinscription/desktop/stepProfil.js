@@ -110,7 +110,7 @@ export default function StepProfil() {
                     className="w-full bg-inherit"
                     type={showPassword ? "text" : "password"}
                     value={data.password}
-                    onChange={(e) => setData({ ...data, password: e.target.value })}
+                    onChange={(e) => setData({ ...data, password: e.target.value }, false)}
                   />
                   {showPassword ? (
                     <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} />
@@ -126,7 +126,7 @@ export default function StepProfil() {
                     className="w-full bg-inherit"
                     type={showConfirmPassword ? "text" : "password"}
                     value={data.confirmPassword}
-                    onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
+                    onChange={(e) => setData({ ...data, confirmPassword: e.target.value }, false)}
                   />
                   {showConfirmPassword ? (
                     <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
@@ -144,7 +144,7 @@ export default function StepProfil() {
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-4">
-                <CheckBox checked={data?.acceptCGU === "true"} onChange={(e) => setData({ ...data, acceptCGU: e ? "true" : "false" })} />
+                <CheckBox checked={data?.acceptCGU === "true"} onChange={(e) => setData({ ...data, acceptCGU: e ? "true" : "false" }, false)} />
                 <span className="text-sm text-[#3A3A3A]  flex-1 inline leading-5">
                   J&apos;ai lu et j&apos;accepte les{" "}
                   <a className="underline " href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
@@ -157,7 +157,7 @@ export default function StepProfil() {
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-4">
-                <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" })} />
+                <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" }, false)} />
                 <span className="text-sm text-[#3A3A3A] flex-1 inline leading-5">
                   J&apos;ai pris connaissance des{" "}
                   <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank" rel="noreferrer">
