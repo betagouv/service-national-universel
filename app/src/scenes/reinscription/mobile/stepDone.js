@@ -23,7 +23,7 @@ export default function StepWaitingConsent() {
           Bonne nouvelle, <strong> votre inscription a déjà été validée.</strong>
         </p>
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom={"88px"} />
       <StickyButton text="Revenir à mon compte volontaire" onClick={() => history.push("/phase1")} />
     </>
   );

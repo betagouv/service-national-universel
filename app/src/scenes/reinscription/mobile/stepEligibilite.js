@@ -260,7 +260,7 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom={"88px"} />
       <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );

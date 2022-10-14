@@ -51,7 +51,7 @@ export default function StepDocuments() {
           </Link>
         ))}
       </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom={"88px"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/confirm")} disabled />
     </>
   );
