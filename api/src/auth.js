@@ -102,8 +102,6 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      // ! FIXME: Foreign school data
-
       const {
         email,
         firstName,
@@ -151,7 +149,6 @@ class Auth {
         cohort,
         grade,
         inscription2023: STEPS2023.COORDONNEES,
-        reinscription2023: STEPS2023REINSCRIPTION.ELIGIBILITE,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
