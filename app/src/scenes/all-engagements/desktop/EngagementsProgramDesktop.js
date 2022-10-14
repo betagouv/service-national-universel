@@ -67,6 +67,14 @@ const EngagementsProgramMobile = () => {
               );
             })}
           </div>
+          <hr className="my-5 h-px bg-gray-200 border-0" />
+          <div className="flex justify-end space-x-4">
+            <button
+              className="flex items-center justify-center py-2 px-4 hover:!text-[#000091] border-[1px] hover:border-[#000091] hover:bg-white cursor-pointer bg-[#000091] text-white"
+              onClick={() => history.push("/")}>
+              Revenir à l&apos;accueil
+            </button>
+          </div>
         </div>
       </div>
     </>
