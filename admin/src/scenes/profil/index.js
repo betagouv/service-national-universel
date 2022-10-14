@@ -224,10 +224,9 @@ export default function Profil() {
           </Formik>
         </div>
       </div>
-      {/* {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && ( */}
-      <DeleteBtn onClick={onClickDelete}>Supprimer mon compte</DeleteBtn>
-      {/* )} */}
-
+      <div className="w-64 bg-[#bd2130] text-white text-center font-semibold rounded px-4 py-2 mt-2 hover:cursor-pointer hover:bg-[#dc3545]" onClick={onClickDelete}>
+        Supprimer mon compte
+      </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -238,7 +237,6 @@ export default function Profil() {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-
       <ModalChangeTutor
         isOpen={modalTutor?.isOpen}
         title={modalTutor?.title}
@@ -259,20 +257,6 @@ export default function Profil() {
     </div>
   );
 }
-
-const DeleteBtn = styled.button`
-  background-color: #bd2130;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    background: #dc3545;
-  }
-`;
 
 const Select = ({ title, name, values, onChange, disabled, options, className }) => {
   return (
