@@ -134,7 +134,6 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
       zip: data.zip,
-      // ! FIXME : isAbroad n'est stocké ni ici ni dans dans stepConfirm
     };
 
     try {
@@ -195,8 +194,9 @@ export default function StepEligibilite() {
         <div className="flex flex-col flex-start my-4">
           <div className="flex items-center">
             <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-            <div className="flex items-center">
-              <span className="ml-2 mr-2">Je suis de nationalité française</span>
+            <div className="flex items-center backdrop-opacity-100">
+              <span className="ml-2 mr-2 text-[#929292]">Je suis de nationalité française</span>
+              {/* // ! J'arrive pas a griser le drapeau */}
               <IconFrance />
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function StepEligibilite() {
           />
           {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
         </div>
-        <div className="flex flex-col flex-start my-4">
+        <div className="flex flex-col flex-start my-4 text-[#929292]">
           Date de naissance
           <DateFilter disabled={true} title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
