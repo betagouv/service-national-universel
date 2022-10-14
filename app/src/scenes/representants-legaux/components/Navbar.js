@@ -15,9 +15,9 @@ const wording = {
 };
 
 const next = {
-  PRESENTATION: "xxxxxxxxxx",
-  VERIFICATION: "yyyyyyyyyy",
-  CONSENTEMENT: "zzzzzzzzzz",
+  PRESENTATION: "Vérification des informations renseignées",
+  VERIFICATION: "Mon consentement",
+  CONSENTEMENT: null,
 };
 
 const Navbar = ({ step, onSave }) => {
@@ -30,7 +30,7 @@ const Navbar = ({ step, onSave }) => {
             <div className="text-sm">Étape {index[step]} sur 3</div>
             <div className="text-lg font-bold mt-2">{wording[step]}</div>
           </div>
-          {onSave && <img src={save} onClick={onSave} className="cursor-pointer" />}
+          {onSave && <img src={save} onClick={onSave} className="cursor-pointer" alt="save" />}
         </div>
 
         <div className="flex space-x-2 w-full mt-2">
@@ -40,7 +40,7 @@ const Navbar = ({ step, onSave }) => {
         </div>
         {desktop && (
           <div className="flex space-x-1 text-xs mt-2 text-[#666666]">
-            <div className="font-bold">{["PRESENTATION", "VERIFICATION", "CONSENTEMENT"].includes(step) && "Étape suivante:"}</div>
+            <div className="font-bold">{["PRESENTATION", "VERIFICATION"].includes(step) && "Étape suivante:"}</div>
             <div>{next[step]}</div>
           </div>
         )}

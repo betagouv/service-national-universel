@@ -14,6 +14,7 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
+import Footer from "../../../components/footerV2";
 
 const engagementPrograms = [
   {
@@ -52,6 +53,8 @@ export default function StepWaitingConsent() {
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [notAuthorised, setNotAuthorised] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState({});
+
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -104,9 +107,9 @@ export default function StepWaitingConsent() {
         <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] p-4 gap-1">
           <div className="text-[#161616] text-base font-bold">En attente du consentement de :</div>
           <div className="text-[#3A3A3A] text-base ">
-            {young?.firstName} {young.lastName}
+            {young?.parent1FirstName} {young.parent1LastName}
           </div>
-          <div className="text-[#666666] text-sm ">{young?.email}</div>
+          <div className="text-[#666666] text-sm ">{young?.parent1Email}</div>
           <div className="flex justify-between mt-2">
             <button className="mt-2 h-10 text-base w-1/2 disabled:bg-[#E5E5E5] disabled:text-[#929292] bg-[#000091]  text-white " disabled={disabled} onClick={() => handleClick()}>
               Relancer
@@ -125,6 +128,7 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
+      <Footer marginBottom="mb-[88px]" />
     </>
   ) : (
     <>
@@ -143,8 +147,6 @@ export default function StepWaitingConsent() {
         <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
         <div className="overflow-x-auto flex space-x-6">
           {engagementPrograms.map((program, index) => {
-            const [isOpen, setIsOpen] = React.useState(false);
-
             return (
               <div key={index} className="flex w-96">
                 <div className="w-64 h-min-[700px] ">
@@ -153,9 +155,9 @@ export default function StepWaitingConsent() {
                       <img src={program.picture} className="object-cover w-full h-full" />
                     </a>
                   </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
+                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[index] && "h-[250px]"}`}>
                     <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen[index] && "h-[70px] text-ellipsis overflow-hidden"}`}>
                       {" "}
                       <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
                         {program.description}
@@ -164,10 +166,9 @@ export default function StepWaitingConsent() {
                     <div
                       className="text-[13px] flex justify-between pr-2"
                       onClick={() => {
-                        setIsOpen(!isOpen);
+                        setIsOpen({ ...isOpen, [index]: !isOpen[index] });
                       }}>
-                      {" "}
-                      <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
+                      <div>{isOpen[index] ? "Lire moins" : "Lire plus"}</div>
                       <img src={arrowRightBlue} className="w-3" />
                     </div>
                   </div>
@@ -187,6 +188,7 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
+      <Footer marginBottom="mb-[88px]" />
     </>
   );
 }

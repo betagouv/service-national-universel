@@ -46,11 +46,13 @@ export default function StepDone() {
       schoolId: data.school?._id,
       zip: data.zip,
       cohort: data.cohort,
+      grade: data.scolarity,
     };
 
     if (values.schooled === "true") values.grade = data.scolarity;
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const { user, code, ok } = await api.post("/young/signup2023", values);
 
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
@@ -60,7 +62,7 @@ export default function StepDone() {
       //   cta: `${appURL}/inscription2023`,
       // });
 
-      plausibleEvent("");
+      plausibleEvent("Phase0/CTA preinscription - inscription");
 
       history.push("/preinscription/done");
     } catch (e) {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";

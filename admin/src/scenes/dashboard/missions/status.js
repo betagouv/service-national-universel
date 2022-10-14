@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSubtitle } from "../../../components/dashboard";
 import { translate, MISSION_STATUS, MISSION_STATUS_COLORS } from "../../../utils";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { apiURL } from "../../../config";
 import ExportComponent from "../../../components/ExportXlsx";

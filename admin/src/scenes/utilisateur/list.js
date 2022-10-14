@@ -20,7 +20,7 @@ import Badge from "../../components/Badge";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";

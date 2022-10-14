@@ -7,7 +7,7 @@ import SNU from "../assets/logo-snu.png";
 const Footer = ({ marginBottom }) => {
   const mobile = useDevice() === "mobile";
   return mobile ? (
-    <div className={`${marginBottom ? `mb-[${marginBottom}]` : ""} border-t border-t-[#E5E5E5] w-full bg-white  pb-3`}>
+    <div className={`${marginBottom ? marginBottom : ""} border-t border-t-[#E5E5E5] w-full bg-white  pb-3`}>
       <div className="px-3 text-sm text-[#3A3A3A] py-3">
         <div className="mb-4 flex">
           <img src={LogoFr} className="w-26 h-24" />
@@ -51,7 +51,7 @@ const Footer = ({ marginBottom }) => {
       </div>
     </div>
   ) : (
-    <div className={`mb-[${marginBottom}] border-t-[#000091] border-t pt-3 px-3 w-full bg-white  pb-3`}>
+    <div className={`${marginBottom ? marginBottom : ""} border-t-[#000091] border-t pt-3 px-3 w-full bg-white  pb-3`}>
       <div className="flex justify-between w-full px-[108px] text-sm text-[#3A3A3A] py-3">
         <div className="basis-[50%] mb-4 flex">
           <img src={LogoFr} className="w-26 h-24" />

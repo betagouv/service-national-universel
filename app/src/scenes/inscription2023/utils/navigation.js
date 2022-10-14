@@ -18,6 +18,7 @@ export const STEP_LIST = [
   { name: STEPS.DONE, url: "done" },
 ];
 
-export const getStepFromUrlParam = (param) => {
-  return STEP_LIST.find(({ url }) => url === param)?.name || STEPS.COORDONNEES;
+export const getStepFromUrlParam = (param, withDefault) => {
+  const step = STEP_LIST.find(({ url }) => url === param)?.name;
+  return withDefault ? step || STEP_LIST[0].name : step;
 };

@@ -54,7 +54,7 @@ const Step = ({ step }) => {
       <Header setIsOpen={setIsOpen} />
       <Navbar step={step} />
       {renderStep(step)}
-      {device === "desktop" && <Footer marginBottom={"0px"} />}
+      {device === "desktop" && <Footer />}
     </div>
   );
 };

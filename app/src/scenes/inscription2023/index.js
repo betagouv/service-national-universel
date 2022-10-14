@@ -24,7 +24,6 @@ import useDevice from "../../hooks/useDevice";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
-import Help from "./components/Help";
 import { getStepFromUrlParam, STEPS, STEP_LIST } from "./utils/navigation";
 
 const getStepUrl = (name) => {
@@ -47,7 +46,13 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
-  let currentStep = getStepFromUrlParam(step);
+  const requestedStep = getStepFromUrlParam(step);
+
+  if (!requestedStep && eligibleStep) {
+    return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep)}`} />;
+  }
+
+  const currentStep = requestedStep || STEP_LIST[0].name;
 
   if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/inscription2023/${getStepUrl(STEPS.DONE)}`} />;
 

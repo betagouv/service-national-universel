@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import api from "../../../services/api";
 
-export default function FranceConnectButton({ callback, beforeRedirect }) {
+export default function FranceConnectButton({ callback, beforeRedirect, className }) {
   const [hover, setHover] = useState(false);
   const [redirection, setRedirection] = useState(null);
 
@@ -18,7 +18,7 @@ export default function FranceConnectButton({ callback, beforeRedirect }) {
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem", flexWrap: "wrap" }} className={className}>
       <div style={{ cursor: "pointer", marginBottom: "8px" }} onClick={redirectToFranceConnect} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         {hover ? <ImageHovered /> : <Image />}
       </div>
