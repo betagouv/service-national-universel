@@ -3,10 +3,6 @@ import { useSelector } from "react-redux";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
-import DesktopDocuments from "./desktop/stepDocuments";
-import DesktopDone from "./desktop/stepDone";
-import DesktopUpload from "./desktop/stepUpload";
-
 import MobileEligibilite from "./mobile/stepEligibilite";
 import MobileNonEligible from "./mobile/stepNonEligible";
 import MobileSejour from "./mobile/stepSejour";
@@ -29,9 +25,9 @@ function renderStep(step, device) {
   if (step === STEPS.ELIGIBILITE) return device === "desktop" ? null : <MobileEligibilite />;
   if (step === STEPS.NONELIGIBLE) return device === "desktop" ? null : <MobileNonEligible />;
   if (step === STEPS.SEJOUR) return device === "desktop" ? null : <MobileSejour />;
-  if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-  if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
-  if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
+  if (step === STEPS.DOCUMENTS) return device === "desktop" ? null : <MobileDocuments />;
+  if (step === STEPS.UPLOAD) return device === "desktop" ? null : <MobileUpload />;
+  if (step === STEPS.DONE) return device === "desktop" ? null : <MobileDone />;
   return device === "desktop" ? null : <MobileEligibilite />;
 }
 
