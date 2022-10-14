@@ -86,7 +86,10 @@ export default function StepEligibilite() {
 
     setLoading(true);
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
-    if (data.frenchNationality === "false") return history.push("/preinscription/noneligible");
+    if (data.frenchNationality === "false") {
+      setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
+      return history.push("/preinscription/noneligible");
+    }
     const res = await api.post("/cohort-session/eligibility/2023", {
       department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
       birthDate: new Date(data.birthDate),
@@ -98,14 +101,12 @@ export default function StepEligibilite() {
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
-
-    if (res.data.length) {
-      setData({ ...data, session: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
-      return history.push("/preinscription/sejour");
+    if (res.data.msg) {
+      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/preinscription/noneligible");
     }
-
-    setData({ ...data, step: PREINSCRIPTION_STEPS.INELIGIBLE });
-    return history.push("/preinscription/noneligible");
+    setData({ ...data, sessions: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
+    return history.push("/preinscription/sejour");
   };
 
   return (
