@@ -177,6 +177,13 @@ export default function StepWaitingConsent() {
             );
           })}
         </div>
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
+        </div>
       </div>
       <div className="fixed bottom-0 w-full z-50">
         <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">

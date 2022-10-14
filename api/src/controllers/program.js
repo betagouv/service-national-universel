@@ -77,8 +77,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
 
 router.get("/public/engagements", async (req, res) => {
   try {
-    let data = [];
-    data = await ProgramObject.find({ visibility: "NATIONAL" });
+    const data = await ProgramObject.find({ visibility: "NATIONAL" });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

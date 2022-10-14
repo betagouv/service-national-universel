@@ -17,13 +17,18 @@ const EngagementsProgramMobile = () => {
   useEffect(() => {
     const getProgram = async () => {
       try {
-        const response = await API.get("/program/public/engagements");
-        setProgram(response.data);
+        const { ok, data } = await API.get("/program/public/engagements");
+        if (!ok) {
+          toastr.error("Oups, une erreur est survenue");
+          history.push("/");
+          return;
+        }
+        setProgram(data);
         setIsLoading(false);
       } catch (error) {
         capture(error);
         toastr.error("Oups, une erreur est survenue");
-        history.push("/preinscription/noneligible");
+        history.push("/");
       }
     };
     getProgram();
