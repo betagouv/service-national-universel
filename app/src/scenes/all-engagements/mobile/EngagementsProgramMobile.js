@@ -7,6 +7,7 @@ import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
+import Footer from "../../../components/footerV2";
 
 const EngagementsProgramMobile = () => {
   const [program, setProgram] = useState();
@@ -69,6 +70,7 @@ const EngagementsProgramMobile = () => {
           );
         })}
       </div>
+      <Footer marginBottom="mb-[88px]" />
       <StickyButton
         text="Revenir à l'accueil"
         onClick={() => {
