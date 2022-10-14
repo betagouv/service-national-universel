@@ -56,7 +56,7 @@ const Step = ({ step }) => {
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(step)}
-      <Footer />
+      {device === "desktop" ? <Footer /> : null}
     </div>
   );
 };
