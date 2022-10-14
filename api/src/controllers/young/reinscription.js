@@ -11,14 +11,6 @@ const { canUpdateYoungStatus } = require("snu-lib");
 
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 
-const getObjectWithEmptyData = (fields, emptyValue = "") => {
-  const object = {};
-  fields.forEach((field) => {
-    object[field] = emptyValue;
-  });
-  return object;
-};
-
 router.put("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
@@ -46,11 +38,20 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.SEJOUR;
-
     young.set({
       ...value,
-      ...(value.livesInFrance === "true" ? getObjectWithEmptyData(foreignAddressFields) : {}),
+      ...(value.livesInFrance === "true"
+        ? {
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
+        : {}),
+      reinscriptionStep2023: STEPS2023REINSCRIPTION.SEJOUR,
     });
 
     await young.save({ fromUser: req.user });
