@@ -6,7 +6,6 @@ import SNU from "../assets/logo-snu.png";
 
 const Footer = ({ marginBottom }) => {
   const mobile = useDevice() === "mobile";
-
   return mobile ? (
     <div className={`${marginBottom ? marginBottom : ""} border-t border-t-[#E5E5E5] w-full bg-white  pb-3 `}>
       <div className="px-3 text-sm text-[#3A3A3A] py-3">
