@@ -13,7 +13,7 @@ const Index = () => {
     <>
       <Header />
       <div>{mobile ? <MobileView /> : <DesktopView />} </div>
-      <Footer marginBottom={"12vh"} />
+      <Footer marginBottom={"mb-[88px]"} />
     </>
   );
 };
