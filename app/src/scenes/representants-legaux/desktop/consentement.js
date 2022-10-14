@@ -10,7 +10,7 @@ import Toggle from "../../../components/inscription/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
-import { FRANCE, ABROAD, HEALTH_FORM_URL, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent } from "../commons";
+import { FRANCE, ABROAD, HEALTH_FORM_URL, INTERNAL_RULES_URL, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
@@ -399,7 +399,11 @@ export default function Consentement({ step, parentId }) {
                     {youngAge < 15 && (
                       <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                         M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                        cohésion. (<a href={HEALTH_FORM_URL}>Télécharger la fiche sanitaire ici</a>)
+                        cohésion (
+                        <a href={HEALTH_FORM_URL} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                          Télécharger la fiche sanitaire ici
+                        </a>
+                        ).
                       </Check>
                     )}
                     <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
@@ -407,8 +411,11 @@ export default function Consentement({ step, parentId }) {
                       et pour les volontaires résidents de Guyane, la fièvre jaune.
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
-                      Reconnais avoir pris connaissance du
-                      <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view?usp=sharing">Règlement Intérieur du SNU</a>.
+                      Reconnais avoir pris connaissance du{" "}
+                      <a href={INTERNAL_RULES_URL} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                        Règlement Intérieur du SNU
+                      </a>
+                      .
                     </Check>
                   </div>
                 </div>

@@ -1,12 +1,21 @@
-export const HEALTH_FORM_URL = "https://docs.google.com/document/d/1sRAdenWmJtmKj4I1ZS_FRwSZgAxglg1T/edit?usp=sharing&ouid=110263322243720918742&rtpof=true&sd=true";
+import { environment } from "../../config";
 
+// --- constants
 export const FRANCE = "France";
 export const ABROAD = "Abroad";
 
+// --- API
 export const API_VERIFICATION = "/representants-legaux/data-verification";
 export const API_CONSENT = "/representants-legaux/consent";
 export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide";
 
+// --- Docs on CDN
+export const CDN_BASE_URL =
+  environment === "production" ? "https://cellar-c2.services.clever-cloud.com/snu-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/snu-bucket-staging";
+export const HEALTH_FORM_URL = CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf";
+export const INTERNAL_RULES_URL = CDN_BASE_URL + "/snu-reglement-interieur-2022-2023.pdf";
+
+// --- errors
 export const ERROR_MESSAGES = {
   firstName: {
     empty: "Votre prénom ne peut être vide",
@@ -80,6 +89,7 @@ export function translateError(path) {
   }
 }
 
+// --- Helpers
 export function stringToBoolean(val, defaultValue = null) {
   if (val === "true") {
     return true;
