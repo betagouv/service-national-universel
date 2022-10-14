@@ -90,13 +90,13 @@ export default function NonEligible() {
             );
           })}
         </div>
-        {/* <div
-      className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
-      onClick={() => {
-        history.push("https://www.jeveuxaider.gouv.fr/");
-      }}>
-      Voir plus de formes d’engagement
-    </div> */}
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
+        </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />

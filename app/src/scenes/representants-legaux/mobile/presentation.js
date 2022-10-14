@@ -1,16 +1,15 @@
 import React, { useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
-import Loader from "../../../components/Loader";
-import Navbar from "../components/Navbar";
-import LinkTo from "../../../assets/icons/LinkTo";
-import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
-import CalendarBig from "../../../assets/icons/CalendarBig";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
-import { BorderButton, PlainButton } from "../components/Buttons";
-import { isReturningParent } from "../commons";
-import StickyButton from "../../../components/inscription/stickyButton";
+import CalendarBig from "../../../assets/icons/CalendarBig";
+import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
+import LinkTo from "../../../assets/icons/LinkTo";
 import Footer from "../../../components/footerV2";
+import Loader from "../../../components/Loader";
+import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
+import { isReturningParent } from "../commons";
+import { BorderButton } from "../components/Buttons";
+import Navbar from "../components/Navbar";
 
 export default function Presentation({ step }) {
   const history = useHistory();
