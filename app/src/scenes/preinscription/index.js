@@ -1,28 +1,28 @@
-import React, { useState, useContext } from "react";
-import { Switch, Redirect, useParams } from "react-router-dom";
-import { SentryRoute } from "../../sentry";
-import useDevice from "../../hooks/useDevice";
+import React, { useContext, useState } from "react";
+import { Redirect, Switch, useParams } from "react-router-dom";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
+import useDevice from "../../hooks/useDevice";
+import { SentryRoute } from "../../sentry";
 
-import DesktopEligibilite from "./desktop/stepEligibilite";
-import DesktopNonEligible from "./desktop/stepNonEligible";
-import DesktopSejour from "./desktop/stepSejour";
-import DesktopProfil from "./desktop/stepProfil";
 import DesktopConfirm from "./desktop/stepConfirm";
 import DesktopDone from "./desktop/stepDone";
+import DesktopEligibilite from "./desktop/stepEligibilite";
+import DesktopNonEligible from "./desktop/stepNonEligible";
+import DesktopProfil from "./desktop/stepProfil";
+import DesktopSejour from "./desktop/stepSejour";
 
-import MobileEligibilite from "./mobile/stepEligibilite";
-import MobileNonEligible from "./mobile/stepNonEligible";
-import MobileSejour from "./mobile/stepSejour";
-import MobileProfil from "./mobile/stepProfil";
 import MobileConfirm from "./mobile/stepConfirm";
 import MobileDone from "./mobile/stepDone";
+import MobileEligibilite from "./mobile/stepEligibilite";
+import MobileNonEligible from "./mobile/stepNonEligible";
+import MobileProfil from "./mobile/stepProfil";
+import MobileSejour from "./mobile/stepSejour";
 
+import ModalMenu from "../../components/headerMenu";
+import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
+import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import Navbar from "./components/navbar";
-import ModalMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
-import { getStepFromUrlParam, getStepUrl, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 
 import { useSelector } from "react-redux";
 import Home from "./Home";
