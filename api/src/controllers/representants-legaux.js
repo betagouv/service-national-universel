@@ -92,7 +92,7 @@ router.post("/data-verification", tokenParentValidMiddleware, async (req, res) =
   const young = req.young;
   if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  young.set({ parent1DataVerified: true });
+  young.set({ parent1DataVerified: "true" });
   await young.save(fromUser(req.young));
 
   // --- result
@@ -197,6 +197,24 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       capture(e);
     }
   }
+
+  // --- result
+  return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+});
+
+router.post("/cni-invalide", tokenParentValidMiddleware, async (req, res) => {
+  // --- validate data
+  const { error: error_id } = Joi.boolean().valid(true).required().validate(req.body.validated);
+  if (error_id) {
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+  }
+
+  // --- update young
+  const young = req.young;
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  young.set({ parentStatementOfHonorInvalidId: "true" });
+  await young.save(fromUser(req.young));
 
   // --- result
   return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
