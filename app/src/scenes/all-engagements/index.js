@@ -1,7 +1,5 @@
 import React from "react";
 import useDevice from "../../hooks/useDevice";
-// import { Switch } from "react-router-dom";
-// import { SentryRoute } from "../../sentry";
 
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
