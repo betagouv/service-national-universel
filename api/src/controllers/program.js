@@ -75,6 +75,18 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
+router.get("/public/engagements", async (req, res) => {
+  try {
+    console.log("req==>", req);
+    let data = [];
+    data = await ProgramObject.find({ visibility: "NATIONAL" });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
