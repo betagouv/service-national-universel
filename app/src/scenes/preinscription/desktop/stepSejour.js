@@ -1,10 +1,11 @@
 import React from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { formatStringDate } from "snu-lib";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import plausibleEvent from "../../../services/plausible";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import { supportURL } from "../../../config";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 function SessionButton(session) {
@@ -35,9 +36,9 @@ export default function StepSejour() {
       <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-8 h-px bg-gray-200 border-0" />
         <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
@@ -48,12 +49,14 @@ export default function StepSejour() {
             <div className="font-semibold py-2 mt-5">Pourquoi je ne vois pas tous les séjours ?</div>
             <div className="text-gray-500 text-sm w-2/3">
               La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-              <Link to="" className="underline underline-offset-4">
+              <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
                 En savoir plus.
-              </Link>
+              </a>
             </div>
             <div className="text-[#000091] my-4 underline underline-offset-4">
-              <Link to="">Consulter d’autres dispositifs d’engagement</Link>
+              <a href={`${supportURL}/base-de-connaissance/les-autres-formes-d-engagement`} target="_blank" rel="noreferrer">
+                Consulter d’autres dispositifs d’engagement
+              </a>
             </div>
           </>
         )}

@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useHistory } from "react-router-dom";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DesktopPageContainer from "../components/DesktopPageContainer";
+import { supportURL } from "../../../config";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -27,7 +28,8 @@ export default function StepDocuments() {
     <DesktopPageContainer
       title="Ma pièce d’identité"
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
-      onClickPrevious={() => history.push("/inscription2023/representants")}>
+      onClickPrevious={() => history.push("/inscription2023/representants")}
+      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {IDs.map((id) => (
         <Link key={id.category} to={`televersement/${id.category}`}>
           <div className="my-4">

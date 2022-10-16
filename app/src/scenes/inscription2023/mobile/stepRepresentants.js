@@ -1,21 +1,22 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
 import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
+import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate, regexPhoneFrenchCountries } from "../../../utils";
+import plausibleEvent from "../../../services/plausible";
+import { regexPhoneFrenchCountries, translate } from "../../../utils";
+import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
-import Footer from "../../../components/footerV2";
-import Help from "../components/Help";
-import plausibleEvent from "../../../services/plausible";
 
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
@@ -173,9 +174,9 @@ export default function StepRepresentants() {
       <div className="bg-white p-4 text-[#161616]">
         <div className="w-full flex justify-between items-center mt-2">
           <h1 className="text-xl font-bold">Mes représentants légaux</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
         <hr className="my-4 h-px bg-gray-200 border-0" />

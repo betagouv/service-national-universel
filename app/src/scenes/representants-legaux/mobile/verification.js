@@ -11,6 +11,8 @@ import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import Check from "../components/Check";
 import StickyButton from "../../../components/inscription/stickyButton";
+import { supportURL } from "../../../config";
+import Footer from "../../../components/footerV2";
 
 export default function Verification({ step }) {
   const history = useHistory();
@@ -76,8 +78,7 @@ export default function Verification({ step }) {
           <p>Veuillez vérifier la validité de ces informations.</p>
           <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
           <p>
-            <a href="#" className="underline">
-              {/* TODO: mettre le bon lien */}
+            <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="underline hover:underline">
               Je vois des informations incorrectes
             </a>
           </p>
@@ -88,15 +89,15 @@ export default function Verification({ step }) {
         <div className="flex items-center pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
           <Check checked={certified} onChange={(e) => setCertified(e)}>
             Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
-            <a href="#" target="_blank" className="underline">
-              {/* TODO: mettre le lien sur cet article */}
+            <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="underline hover:underline">
               cet article
             </a>{" "}
             avant de valider.
           </Check>
         </div>
-        {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
+        {error && <div className="text-[#CE0500] text-[14px] leading-[19px] my-2 ml-[40px]">{error}</div>}
       </div>
+      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text={"Suivant"} onClick={() => onNext()} onClickPrevious={onPrevious} disabled={saving} />
     </>
   );

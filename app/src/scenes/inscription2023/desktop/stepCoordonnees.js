@@ -29,6 +29,7 @@ import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
+import { supportURL } from "../../../config";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -399,7 +400,12 @@ export default function StepCoordonnees() {
     setErrors({ addressVerified: undefined });
   };
   return (
-    <DesktopPageContainer title="Mon profil volontaire" onSave={onSave} onSubmit={onSubmit} disabled={loading}>
+    <DesktopPageContainer
+      title="Mon profil volontaire"
+      onSave={onSave}
+      onSubmit={onSubmit}
+      disabled={loading}
+      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
       <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
       {!isFrench && (
         <SearchableSelect

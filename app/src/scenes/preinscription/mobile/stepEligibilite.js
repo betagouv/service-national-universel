@@ -1,24 +1,24 @@
 import React from "react";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import { Link, useHistory } from "react-router-dom";
-import Toggle from "../../../components/inscription/toggle";
-import Input from "../../../components/inscription/input";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import DateFilter from "../components/DatePickerList";
 import { toastr } from "react-redux-toastr";
-import StickyButton from "../../../components/inscription/stickyButton";
-import IconFrance from "../../../assets/IconFrance";
-import CheckBox from "../../../components/inscription/checkbox";
-import validator from "validator";
-import plausibleEvent from "../../../services/plausible";
-import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
-import SearchableSelect from "../../../components/SearchableSelect";
-import api from "../../../services/api";
+import { useHistory } from "react-router-dom";
 import { getDepartmentByZip } from "snu-lib";
-import { capture } from "../../../sentry";
+import validator from "validator";
+import IconFrance from "../../../assets/IconFrance";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Footer from "../../../components/footerV2";
+import CheckBox from "../../../components/inscription/checkbox";
+import Input from "../../../components/inscription/input";
+import StickyButton from "../../../components/inscription/stickyButton";
+import Toggle from "../../../components/inscription/toggle";
+import SearchableSelect from "../../../components/SearchableSelect";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
+import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
+import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
+import DateFilter from "../components/DatePickerList";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -114,9 +114,9 @@ export default function StepEligibilite() {
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col flex-start my-4">
