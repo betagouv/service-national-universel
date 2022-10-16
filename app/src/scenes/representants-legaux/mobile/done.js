@@ -13,7 +13,7 @@ export default function Done({ parentId }) {
       if (parentId === 1) {
         if (young.parentAllowSNU === "true") {
           setTitle("Merci, nous avons bien enregistré votre consentement.");
-          setText("Le dossier de votre enfant a bien été enregsitré, celui-ci sera étudié ultérieurement.");
+          setText("Le dossier de votre enfant a bien été enregistré, celui-ci sera étudié ultérieurement.");
         } else {
           setTitle("Merci, nous avons bien enregistré votre refus.");
           setText("L'inscription de votre enfant a bien été refusée.");
