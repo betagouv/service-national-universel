@@ -80,6 +80,7 @@ router.put("/noneligible", passport.authenticate("young", { session: false, fail
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
+      originalCohort: Joi.string().trim().valid("Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir").required(),
       cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
       cohortChangeReason: Joi.string().trim().required(),
     }).validate(req.body, { stripUnknown: true });
