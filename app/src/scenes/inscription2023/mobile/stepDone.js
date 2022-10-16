@@ -60,7 +60,7 @@ export default function StepWaitingConsent() {
 
   React.useEffect(() => {
     if (young?.parentAllowSNU) {
-      if (young?.parentAllowSNU === "true") {
+      if (young?.parentAllowSNU === "true" && young?.status !== "IN_PROGRESS") {
         history.push("/");
       } else if (young?.parentAllowSNU === "false") {
         setNotAuthorised(true);
