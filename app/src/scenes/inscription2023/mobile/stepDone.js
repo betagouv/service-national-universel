@@ -53,12 +53,14 @@ export default function StepWaitingConsent() {
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [notAuthorised, setNotAuthorised] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState({});
+
   const history = useHistory();
   const dispatch = useDispatch();
 
   React.useEffect(() => {
     if (young?.parentAllowSNU) {
-      if (young?.parentAllowSNU === "true") {
+      if (young?.parentAllowSNU === "true" && young?.status !== "IN_PROGRESS") {
         history.push("/");
       } else if (young?.parentAllowSNU === "false") {
         setNotAuthorised(true);
@@ -145,8 +147,6 @@ export default function StepWaitingConsent() {
         <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
         <div className="overflow-x-auto flex space-x-6">
           {engagementPrograms.map((program, index) => {
-            const [isOpen, setIsOpen] = React.useState(false);
-
             return (
               <div key={index} className="flex w-96">
                 <div className="w-64 h-min-[700px] ">
@@ -155,9 +155,9 @@ export default function StepWaitingConsent() {
                       <img src={program.picture} className="object-cover w-full h-full" />
                     </a>
                   </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
+                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[index] && "h-[250px]"}`}>
                     <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen[index] && "h-[70px] text-ellipsis overflow-hidden"}`}>
                       {" "}
                       <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
                         {program.description}
@@ -166,10 +166,9 @@ export default function StepWaitingConsent() {
                     <div
                       className="text-[13px] flex justify-between pr-2"
                       onClick={() => {
-                        setIsOpen(!isOpen);
+                        setIsOpen({ ...isOpen, [index]: !isOpen[index] });
                       }}>
-                      {" "}
-                      <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
+                      <div>{isOpen[index] ? "Lire moins" : "Lire plus"}</div>
                       <img src={arrowRightBlue} className="w-3" />
                     </div>
                   </div>
@@ -177,6 +176,13 @@ export default function StepWaitingConsent() {
               </div>
             );
           })}
+        </div>
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
         </div>
       </div>
       <div className="fixed bottom-0 w-full z-50">

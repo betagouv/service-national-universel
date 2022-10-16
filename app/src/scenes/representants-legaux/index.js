@@ -7,14 +7,12 @@ import useDevice from "../../hooks/useDevice";
 import DesktopPresentation from "./desktop/presentation";
 import DesktopVerification from "./desktop/verification";
 import DesktopConsentement from "./desktop/consentement";
-import DesktopConsentementParent2 from "./desktop/consentement-parent2";
 import DesktopCniInvalide from "./desktop/cni-invalide";
 import DesktopDone from "./desktop/done";
 import DesktopTokenInvalide from "./desktop/token-invalide";
 
 import MobileDone from "./mobile/done";
 import MobileConsentement from "./mobile/consentement";
-import MobileConsentementParent2 from "./mobile/consentement-parent2";
 import MobilePresentation from "./mobile/presentation";
 import MobileVerification from "./mobile/verification";
 import MobileCniInvalide from "./mobile/cni-invalide";
@@ -33,6 +31,7 @@ const STEPS = {
   CONSENTEMENT: "CONSENTEMENT",
   CONSENTEMENT_PARENT2: "CONSENTEMENT_PARENT2",
   DONE: "DONE",
+  DONE_PARENT2: "DONE_PARENT2",
   TOKEN_INVALIDE: "TOKEN_INVALIDE",
 };
 
@@ -44,19 +43,20 @@ const Step = ({ step }) => {
     if (step === STEPS.CNI_INVALIDE) return device === "desktop" ? <DesktopCniInvalide step={step} /> : <MobileCniInvalide step={step} />;
     if (step === STEPS.PRESENTATION) return device === "desktop" ? <DesktopPresentation step={step} /> : <MobilePresentation step={step} />;
     if (step === STEPS.VERIFICATION) return device === "desktop" ? <DesktopVerification step={step} /> : <MobileVerification step={step} />;
-    if (step === STEPS.CONSENTEMENT) return device === "desktop" ? <DesktopConsentement step={step} /> : <MobileConsentement step={step} />;
-    if (step === STEPS.CONSENTEMENT_PARENT2) return device === "desktop" ? <DesktopConsentementParent2 step={step} /> : <MobileConsentementParent2 step={step} />;
+    if (step === STEPS.CONSENTEMENT) return device === "desktop" ? <DesktopConsentement step={step} parentId={1} /> : <MobileConsentement step={step} parentId={1} />;
+    if (step === STEPS.CONSENTEMENT_PARENT2) return device === "desktop" ? <DesktopConsentement step={step} parentId={2} /> : <MobileConsentement step={step} parentId={2} />;
     if (step === STEPS.TOKEN_INVALIDE) return device === "desktop" ? <DesktopTokenInvalide step={step} /> : <MobileTokenInvalide step={step} />;
-    if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone step={step} /> : <MobileDone step={step} />;
+    if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone step={step} parentId={1} /> : <MobileDone step={step} parentId={1} />;
+    if (step === STEPS.DONE_PARENT2) return device === "desktop" ? <DesktopDone step={step} parentId={2} /> : <MobileDone step={step} parentId={2} />;
     return device === "desktop" ? <DesktopPresentation step={step} /> : <MobilePresentation step={step} />;
   }
 
   return (
-    <div>
+    <div className="flex flex-col h-screen justify-between md:bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(step)}
-      <Footer />
+      {device === "desktop" ? <Footer /> : null}
     </div>
   );
 };
@@ -90,11 +90,14 @@ export default function Index() {
         />
 
         <SentryRoute
-          path="/representants-legaux/consentement-parent2"
+          path={["/representants-legaux/consentement-parent2", "/representants-legaux/done-parent2"]}
           component={() => (
-            <RepresentantsLegauxContextProvider parentId="2">
-              <Step step={STEPS.CONSENTEMENT_PARENT2} />
-            </RepresentantsLegauxContextProvider>
+            <Switch>
+              <RepresentantsLegauxContextProvider parentId="2">
+                <SentryRoute path="/representants-legaux/consentement-parent2" component={() => <Step step={STEPS.CONSENTEMENT_PARENT2} />} />
+                <SentryRoute path="/representants-legaux/done-parent2" component={() => <Step step={STEPS.DONE_PARENT2} />} />
+              </RepresentantsLegauxContextProvider>
+            </Switch>
           )}
         />
       </Switch>

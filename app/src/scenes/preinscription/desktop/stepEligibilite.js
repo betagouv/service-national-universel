@@ -1,21 +1,22 @@
 import React from "react";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import plausibleEvent from "../../../services/plausible";
-import { capture } from "../../../sentry";
+import { useHistory } from "react-router-dom";
 import { getDepartmentByZip } from "snu-lib";
-import api from "../../../services/api";
 import validator from "validator";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../components/inscription/CheckBox";
 import IconFrance from "../../../assets/IconFrance";
-import SearchableSelect from "../../../components/SearchableSelect";
-import DatePickerList from "../components/DatePickerList";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import CheckBox from "../../../components/inscription/checkbox";
+import Input from "../../../components/inscription/input";
 import Toggle from "../../../components/inscription/toggle";
+import SearchableSelect from "../../../components/SearchableSelect";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import Input from "../../../components/inscription/input";
+import DatePickerList from "../components/DatePickerList";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -83,7 +84,10 @@ export default function StepEligibilite() {
 
     setLoading(true);
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
-    if (data.frenchNationality === "false") return history.push("/preinscription/noneligible");
+    if (data.frenchNationality === "false") {
+      setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
+      return history.push("/preinscription/noneligible");
+    }
     const res = await api.post("/cohort-session/eligibility/2023", {
       department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
       birthDate: new Date(data.birthDate),
@@ -95,9 +99,12 @@ export default function StepEligibilite() {
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
-    setData({ ...data, sessions: res.data });
-    if (res.data.length) return history.push("/preinscription/sejour");
-    return history.push("/preinscription/noneligible");
+    if (res.data.msg) {
+      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/preinscription/noneligible");
+    }
+    setData({ ...data, sessions: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
+    return history.push("/preinscription/sejour");
   };
 
   return (
@@ -105,9 +112,9 @@ export default function StepEligibilite() {
       <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-8 h-px bg-gray-200 border-0" />
         <div className="flex flex-col gap-5">

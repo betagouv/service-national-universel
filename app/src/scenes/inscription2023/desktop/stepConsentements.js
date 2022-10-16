@@ -1,11 +1,12 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
+import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -63,9 +64,9 @@ export default function StepConsentements() {
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
           <div className="w-full flex justify-between items-center mt-2">
             <h1 className="text-xl font-bold">Apporter mon consentement</h1>
-            <Link to="/public-besoin-d-aide/">
+            <a href={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`} target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
-            </Link>
+            </a>
           </div>
           <hr className="my-8 h-px bg-gray-200 border-0" />
           {error?.text && <Error {...error} onClose={() => setError({})} />}
@@ -88,7 +89,11 @@ export default function StepConsentements() {
               <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
               <div className="text-[#3A3A3A] text-sm flex-1">
                 M&apos;engage à respecter le{" "}
-                <a href="https://drive.google.com/file/d/17T9zkm7gm5hdsazM5YkkOYwkNe1xvpdc/view" target="_blank" rel="noreferrer">
+                <a
+                  href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_2022_2023.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:underline">
                   règlement intérieur
                 </a>{" "}
                 du SNU, en vue de ma participation au séjour de cohésion.

@@ -11,13 +11,14 @@ import plausibleEvent from "../../../services/plausible";
 import Footer from "../../../components/footerV2";
 
 export default function StepDone() {
-  const [data] = React.useContext(PreInscriptionContext);
+  const [data, _, removePersistedData] = React.useContext(PreInscriptionContext);
   const history = useHistory();
   const dispatch = useDispatch();
 
   const logout = async () => {
     await api.post(`/young/logout`);
     dispatch(setYoung(null));
+    removePersistedData(true);
     history.push("/");
   };
 
@@ -28,6 +29,7 @@ export default function StepDone() {
       if (young) {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
+        removePersistedData(true);
       }
     } catch (e) {
       capture(e);

@@ -1,5 +1,5 @@
 import { Field, Formik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -12,6 +12,11 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate } from "../../utils";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import ModalUniqueResponsable from "../utilisateur/composants/ModalUniqueResponsable";
+import { capture } from "../../sentry";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
@@ -19,6 +24,10 @@ export default function Profil() {
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const getSubRole = (role) => {
     let subRole = [];
@@ -26,6 +35,50 @@ export default function Profil() {
     if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     if (role === ROLES.VISITOR) subRole = VISITOR_SUBROLES;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  };
+
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(),
+      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${user.firstName} ${user.lastName} ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${user._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(user);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      return onReferentDeleted();
+    } catch (e) {
+      capture(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+    }
+  };
+
+  const onDeleteTutorLinked = (target) => {
+    setModalTutor({
+      isOpen: true,
+      value: target,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
+  const onUniqueResponsible = (target) => {
+    setModalUniqueResponsable({
+      isOpen: true,
+      responsable: target,
+    });
+  };
+
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
   };
 
   if (user === undefined) return <Loader />;
@@ -171,6 +224,36 @@ export default function Profil() {
           </Formik>
         </div>
       </div>
+      <div className="w-64 bg-[#bd2130] text-white text-center font-semibold rounded px-4 py-2 mt-2 hover:cursor-pointer hover:bg-[#dc3545]" onClick={onClickDelete}>
+        Supprimer mon compte
+      </div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalChangeTutor
+        isOpen={modalTutor?.isOpen}
+        title={modalTutor?.title}
+        message={modalTutor?.message}
+        tutor={modalTutor?.value}
+        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalTutor?.onConfirm();
+          setModalTutor({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalUniqueResponsable
+        isOpen={modalUniqueResponsable?.isOpen}
+        responsable={modalUniqueResponsable?.responsable}
+        onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
+      />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
     </div>
   );
 }

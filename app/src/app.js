@@ -16,6 +16,7 @@ import Inscription from "./scenes/inscription";
 import Inscription2023 from "./scenes/inscription2023";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import PreInscription from "./scenes/preinscription";
+import AllEngagements from "./scenes/all-engagements/index";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
@@ -108,12 +109,13 @@ export default function App() {
             {environment !== "production" ? <SentryRoute path="/preinscription" component={PreInscription} /> : null}
             {environment !== "production" ? <SentryRoute path="/auth" component={AuthV2} /> : <SentryRoute path="/auth" component={Auth} />}
             {environment !== "production" ? <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> : null}
+            {environment !== "production" ? <SentryRoute path="/public-engagements" component={AllEngagements} /> : null}
             <SentryRoute path="/" component={Espace} />
           </Switch>
         )}
         {environment === "production" ? (
           <Footer />
-        ) : ["preinscription", "auth", "inscription2023"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
+        ) : ["preinscription", "auth", "inscription2023", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
           <Footer />
         ) : null}
       </div>
@@ -159,7 +161,7 @@ const Espace = () => {
       <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/preinscription" }} />
     );
   }
-  const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
+  const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.NOT_AUTORISED].includes(young.status);
 
   // @todo: clean this
   if (environment === "production" && !inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;

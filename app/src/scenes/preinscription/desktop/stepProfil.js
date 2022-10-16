@@ -1,15 +1,16 @@
 import React from "react";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import Input from "../../../components/inscription/input";
+import { useHistory } from "react-router-dom";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
-import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../../../components/inscription/CheckBox";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import CheckBox from "../../../components/inscription/checkbox";
+import Input from "../../../components/inscription/input";
 import { appURL } from "../../../config";
-import { useHistory, Link } from "react-router-dom";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
+import { getPasswordErrorMessage } from "../../../utils";
+import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -63,6 +64,7 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
+      setData({ ...data, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
     }
@@ -74,9 +76,9 @@ export default function StepProfil() {
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
           <div className="w-full flex justify-between items-center">
             <h1 className="text-xl text-[#161616]">Créez votre compte</h1>
-            <Link to="/public-besoin-d-aide/">
+            <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
-            </Link>
+            </a>
           </div>
           <hr className="my-8 h-px bg-gray-200 border-0" />
           <div className="flex flex-col gap-5">

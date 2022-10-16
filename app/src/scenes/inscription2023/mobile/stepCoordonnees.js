@@ -32,6 +32,8 @@ import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import { supportURL } from "../../../config";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -406,7 +408,12 @@ export default function StepCoordonnees() {
     <>
       <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
-        <h1 className="text-[22px] font-bold">Mon profil volontaire</h1>
+        <div className="w-full flex justify-between items-center mt-2">
+          <h1 className="text-xl font-bold">Déclaration sur l’honneur</h1>
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`} target="_blank" rel="noreferrer">
+            <QuestionMarkBlueCircle />
+          </a>
+        </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
         {!isFrench && (

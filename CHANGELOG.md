@@ -1,3 +1,48 @@
+# [1.149.0](https://github.com/betagouv/service-national-universel/compare/v1.148.0...v1.149.0) (2022-10-14)
+
+
+### Bug Fixes
+
+* **app:** step done desktop ([552d548](https://github.com/betagouv/service-national-universel/commit/552d548c2470321c7d301eaba9ef66edf53b7b3e))
+* **app:** two-line fields alignment ([24eeb98](https://github.com/betagouv/service-national-universel/commit/24eeb984be6d5eef56f0236b2b44585dd144c29f))
+
+
+### Features
+
+* **admin:** Referent self delete ([#1918](https://github.com/betagouv/service-national-universel/issues/1918)) ([8728be6](https://github.com/betagouv/service-national-universel/commit/8728be627d23e081dd3664ef18cafacb807202f8))
+* **api/app:** give motive for non eligibility ([#1912](https://github.com/betagouv/service-national-universel/issues/1912)) ([a6eb5ff](https://github.com/betagouv/service-national-universel/commit/a6eb5ff50e37124a2f1a9171d28a72fc5635ab89))
+* **app:** cni invalide mobile ([324abf0](https://github.com/betagouv/service-national-universel/commit/324abf038c9f09a3e68cbccb4d0338c2f77c4d19))
+* **app:** mobile consentement ([573a771](https://github.com/betagouv/service-national-universel/commit/573a771e5ce86056aa720d85b9cafe1b958ad0be))
+* **app:** mobile rp verification + translate new status ([9481c62](https://github.com/betagouv/service-national-universel/commit/9481c62bb1f4ee4b6630c79a556abab187dcf477))
+* **app:** persist data and control navigation for preinscription ([#1913](https://github.com/betagouv/service-national-universel/issues/1913)) ([c1ca4fb](https://github.com/betagouv/service-national-universel/commit/c1ca4fbc9f7ed2089b732b7d4ccc291f37fbad6a))
+* **app:** rp done mobile ([9e40981](https://github.com/betagouv/service-national-universel/commit/9e40981d9356ff034f2572255dcf4343f9ab2673))
+* **app:** verification version mobile ([162294c](https://github.com/betagouv/service-national-universel/commit/162294c3669f126c5502347a189310c02ef6f4d2))
+
+# [1.148.0](https://github.com/betagouv/service-national-universel/compare/v1.147.0...v1.148.0) (2022-10-13)
+
+
+### Bug Fixes
+
+* **admin:** correct file url in inscription panel ([18385ef](https://github.com/betagouv/service-national-universel/commit/18385efe6485c2b340eb56405cd502777abc65ba))
+* **admin:** structure & tutor data for mission export ([#1909](https://github.com/betagouv/service-national-universel/issues/1909)) ([0d51a80](https://github.com/betagouv/service-national-universel/commit/0d51a80f7af403cc3375e69d1081c03f9a5cd37b))
+* **api:** eligibility not scolarise ([8a3b43e](https://github.com/betagouv/service-national-universel/commit/8a3b43e80efe2f3cd3dc08e9f7ad5adcfc51b90c))
+* **api/lib:** sessions dates 7 inscription goals ([98d33a5](https://github.com/betagouv/service-national-universel/commit/98d33a507e384e57ddf285740885c2cc25ab1be7))
+* **app:**  modal change sejour ([#1907](https://github.com/betagouv/service-national-universel/issues/1907)) ([84b1c10](https://github.com/betagouv/service-national-universel/commit/84b1c10e70ceaa9bdd31e500cd1aa39cfedf0b27))
+* **app:** add condition for continue button in step upload ([160f8dc](https://github.com/betagouv/service-national-universel/commit/160f8dc91174f195e1934c6ea0c1f92fb71655f0))
+* **app:** contact repr step done mobile ([6361851](https://github.com/betagouv/service-national-universel/commit/6361851eca4d4de9ac40ce32840adc73b8fa6217))
+* **app:** representant legal ([73736f1](https://github.com/betagouv/service-national-universel/commit/73736f1f1b346eeb538271a13751ffa3f02ac667))
+* **app:** step upload ([69bd260](https://github.com/betagouv/service-national-universel/commit/69bd260f31eb68e44e9b7792b773ddc996c9ce69))
+
+
+### Features
+
+* **admin:** open inscription goal for new cohort ([3828f2e](https://github.com/betagouv/service-national-universel/commit/3828f2ef3c5b6b4cf3143e277ae69b5e5cecaef1))
+* **app:** Ajout de l'envoi d'un mail lors de la mise en liste d'attente ([e19dfc9](https://github.com/betagouv/service-national-universel/commit/e19dfc965cae23fc2606ee7574492ccaa833944c))
+* **app:** document desktop pages ([#1904](https://github.com/betagouv/service-national-universel/issues/1904)) ([a997d6a](https://github.com/betagouv/service-national-universel/commit/a997d6aa9472b0c633a48a7976f46b5a9af70d59))
+* **app:** redirect to current step during inscription ([#1908](https://github.com/betagouv/service-national-universel/issues/1908)) ([74250cc](https://github.com/betagouv/service-national-universel/commit/74250cc0bfd25da81796f2d4f93de42d1f77ed4a))
+* **app:** step eligibility desktop ([b0336e7](https://github.com/betagouv/service-national-universel/commit/b0336e76f9fdd970974b24ee52096cfef4243124))
+* **app,admin:** track help center actions ([#1906](https://github.com/betagouv/service-national-universel/issues/1906)) ([92f075e](https://github.com/betagouv/service-national-universel/commit/92f075e594242948bfe1c852b894fd261bb8cd7a))
+
 # [1.147.0](https://github.com/betagouv/service-national-universel/compare/v1.146.0...v1.147.0) (2022-10-12)
 
 
