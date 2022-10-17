@@ -32,11 +32,11 @@ export default () => {
           <Withdrawn />
         </>
       );
-    if (young.status === YOUNG_STATUS.WAITING_LIST)
+    if (young.status === YOUNG_STATUS.WAITING_LIST && [("2019", "2020", "2021")].includes(young.cohort))
       return (
         <>
           {young.cohort === "2021" ? <Banner /> : null}
-          {environment !== "production" ? <WaitingReinscription /> : <WaitingList />}
+          <WaitingList />
         </>
       );
     if (young.status === YOUNG_STATUS.REFUSED)
