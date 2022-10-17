@@ -8,7 +8,7 @@ export default function ExpirationDate({ ID, date, setDate }) {
       <div className="text-2xl font-semibold">Renseignez la date d’expiration</div>
       <div className="text-gray-600 text-sm mt-2">Votre pièce d’identité doit être valide à votre départ en séjour de cohésion.</div>
       <div className="w-full flex items-center justify-center my-4">
-        <div className="w-3/4 flex flex-col gap-4">
+        <div className="w-1/2 flex flex-col gap-4">
           <img src={require(`../../../assets/IDProof/${ID.imgDate}`)} alt={ID.title} />
         </div>
       </div>

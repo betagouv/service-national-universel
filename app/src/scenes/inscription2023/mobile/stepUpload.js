@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
+import { useHistory, useParams } from "react-router-dom";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
+import { supportURL } from "../../../config";
+
 import ExpirationDate from "../components/ExpirationDate";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import { supportURL } from "../../../config";
+import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
+import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -129,7 +130,7 @@ export default function StepUpload() {
             )}
           </div>
         </div>
-        {files && <ExpirationDate ID={ID[category]} date={date} setDate={setDate} />}
+        {files.length > 0 && <ExpirationDate ID={ID[category]} date={date} setDate={setDate} />}
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />

@@ -1,11 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
-import DesktopPageContainer from "../components/DesktopPageContainer";
 import { supportURL } from "../../../config";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import { translate } from "snu-lib";
+
+import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
+import Bin from "../../../assets/icons/Bin";
+import DesktopPageContainer from "../components/DesktopPageContainer";
+import Error from "../../../components/error";
 
 export default function StepDocuments() {
   const history = useHistory();
+  const dispatch = useDispatch();
+  const young = useSelector((state) => state.Auth.young);
+  const [error, setError] = useState({});
+  const [files, setFiles] = useState(young?.files.cniFiles);
+
+  async function deleteFile(fileId) {
+    try {
+      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
+      if (!res.ok) setError({ text: "Impossible de supprimer ce document" });
+      setFiles(res.data);
+    } catch (e) {
+      capture(e);
+      setError({ text: "Impossible de supprimer ce fichier." });
+    }
+  }
+
+  async function onSubmit() {
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    if (!ok) {
+      capture(code);
+      setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      return;
+    }
+    dispatch(setYoung(responseData));
+    history.push("/inscription2023/confirm");
+  }
 
   const IDs = [
     {
@@ -29,7 +63,9 @@ export default function StepDocuments() {
       title="Ma pièce d’identité"
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
       onClickPrevious={() => history.push("/inscription2023/representants")}
+      onClick={onSubmit}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {IDs.map((id) => (
         <Link key={id.category} to={`televersement/${id.category}`}>
           <div className="my-4">
@@ -43,6 +79,31 @@ export default function StepDocuments() {
           </div>
         </Link>
       ))}
+      <div className="mt-2">
+        {files?.length > 0 && (
+          <>
+            <h2 className="text-base text-gray-800 font-semibold my-2">Documents en ligne&nbsp;:</h2>
+            <div className="space-y-2">
+              {files.map((e) => (
+                <div key={e._id} className="flex w-full justify-between">
+                  <div className="w-2/3">
+                    <p className="text-gray-800 text-sm truncate">{e.name}</p>
+                    <p className="text-gray-600 text-xs truncate">{translate(e.category)}</p>
+                  </div>
+                  <div className="text-blue-800 flex">
+                    <div className="mt-1 mr-1">
+                      <Bin />
+                    </div>
+                    <p className="text-sm font-medium" onClick={() => deleteFile(e._id)}>
+                      Supprimer
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </DesktopPageContainer>
   );
 }

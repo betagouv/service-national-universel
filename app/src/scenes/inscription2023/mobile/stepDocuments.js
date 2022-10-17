@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "snu-lib";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -17,8 +18,9 @@ import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepDocuments() {
   const history = useHistory();
+  const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [files, setFiles] = useState(young.files.cniFiles);
+  const [files, setFiles] = useState(young?.files.cniFiles);
   const [error, setError] = useState({});
 
   const IDs = [
@@ -47,6 +49,17 @@ export default function StepDocuments() {
       capture(e);
       setError({ text: "Impossible de supprimer ce fichier." });
     }
+  }
+
+  async function onSubmit() {
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    if (!ok) {
+      capture(code);
+      setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      return;
+    }
+    dispatch(setYoung(responseData));
+    history.push("/inscription2023/confirm");
   }
 
   return (
@@ -100,7 +113,7 @@ export default function StepDocuments() {
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} disabled={files.length === 0} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={files.length === 0} />
     </>
   );
 }
