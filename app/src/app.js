@@ -167,8 +167,7 @@ const Espace = () => {
   const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.NOT_AUTORISED].includes(young.status);
 
   const forceRedirectInscription =
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 === "WAITING_CONSENT");
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) || (young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
 
   // @todo: clean this
   if (environment === "production" && !inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
