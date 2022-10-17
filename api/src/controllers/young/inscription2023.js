@@ -12,6 +12,7 @@ const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
 const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
+const { getQPV, getDensity } = require("../../geo");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -147,6 +148,20 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       ...(value.moreInformation === "false" ? getObjectWithEmptyData(moreInformationFields, "false") : {}),
       ...(value.moreInformation === "false" || value.specificAmenagment === "false" ? { specificAmenagmentType: "" } : {}),
     });
+
+    // Check quartier prioritaires.
+    if (value.zip && value.city && value.address) {
+      const qpv = await getQPV(value.zip, value.city, value.address);
+      if (qpv === true) young.set({ qpv: "true" });
+      else if (qpv === false) young.set({ qpv: "false" });
+      else young.set({ qpv: "" });
+    }
+
+    // Check zone rurale.
+    if (value.cityCode) {
+      const populationDensity = await getDensity(value.cityCode);
+      young.set({ populationDensity });
+    }
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
