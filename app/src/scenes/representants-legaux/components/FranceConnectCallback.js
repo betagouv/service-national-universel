@@ -20,7 +20,7 @@ export default function FranceConnectCallback() {
       const params = new URLSearchParams({
         id_token_hint: tokenId,
         state: Math.round(Math.random() * 1000000),
-        post_logout_redirect_uri: `${window.location.origin}/representants-legaux/${parent === "1" ? "consentement" : "consentement-parent2"}?parent=${id}&token=${token}`,
+        post_logout_redirect_uri: `${window.location.origin}/representants-legaux/${id === "1" ? "consentement" : "consentement-parent2"}?parent=${id}&token=${token}`,
       }).toString();
       window.location.href = `${franceConnectUrl}/logout?${params.toString()}`;
     }
