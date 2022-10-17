@@ -27,8 +27,14 @@ const LOCAL_STORAGE_KEY = "preinscription";
 
 const getDefaultState = () => {
   const persistedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-  return persistedState ? JSON.parse(persistedState) : defaultState;
-};
+  if (persistedState) {
+    let parsedStateObject = JSON.parse(persistedState);
+    if (parsedStateObject.birthDate) {
+      parsedStateObject.birthDate = new Date(parsedStateObject.birthDate);
+    }
+    return parsedStateObject;
+  }
+  return defaultState;
 
 const PreInscriptionContextProvider = ({ children }) => {
   const [value, setValue] = useState(getDefaultState());
