@@ -14,6 +14,7 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
+import EditPen from "../../../assets/icons/EditPen";
 
 const engagementPrograms = [
   {
@@ -124,7 +125,11 @@ export default function StepWaitingConsent() {
                 </button>
               </div>
             </div>
-            <hr className="my-5 h-px bg-gray-200 border-0" />
+            <div className="flex items-center justify-end text-[#000091] text-base mt-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
+              <EditPen />
+              Modifier mes informations
+            </div>
+            <hr className="my-4 h-px bg-gray-200 border-0" />
             <div className="flex flex-col items-end w-full">
               <div className="flex justify-end space-x-4">
                 <button

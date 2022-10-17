@@ -707,6 +707,14 @@ const STEPS2023 = {
   CONFIRM: "CONFIRM",
   DONE: "DONE",
 };
+const STEPS2023REINSCRIPTION = {
+  ELIGIBILITE: "ELIGIBILITE",
+  NONELIGIBLE: "NONELIGIBLE",
+  SEJOUR: "SEJOUR",
+  DOCUMENTS: "DOCUMENTS",
+  CONFIRM: "CONFIRM",
+  DONE: "DONE",
+};
 
 module.exports = {
   timeout,
@@ -739,6 +747,7 @@ module.exports = {
   YOUNG_SITUATIONS,
   STEPS,
   STEPS2023,
+  STEPS2023REINSCRIPTION,
   inscriptionCheck,
   updateApplication,
   FILE_STATUS_PHASE1,

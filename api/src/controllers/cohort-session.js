@@ -149,6 +149,7 @@ router.post("/eligibility/2023", async (req, res) => {
         session.eligibility.bornAfter < birthDate &&
         session.eligibility.bornBefore > birthDate,
     );
+    if (sessionsFiltered.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
 
     // Check inscription goals
     if (sessionsFiltered.length) {
