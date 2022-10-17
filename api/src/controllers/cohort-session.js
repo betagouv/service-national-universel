@@ -115,7 +115,6 @@ router.post("/eligibility/2022", async (req, res) => {
 
 router.post("/eligibility/2023", async (req, res) => {
   try {
-    // Validation
     const eligibilityObject = {
       department: req.body.department,
       birthDate: req.body.birthDate,
@@ -128,11 +127,21 @@ router.post("/eligibility/2023", async (req, res) => {
     })
       .unknown()
       .validate(eligibilityObject);
-
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { department, birthDate, schoolLevel } = value;
 
+    const { department, birthDate, schoolLevel } = value;
     const zone = getZoneByDepartment(department);
+
+    if (
+      birthDate >= sessions2023[4].eligibility.bornBefore ||
+      (zone === "C" && birthDate <= sessions2023[0].eligibility.bornAfter) ||
+      (zone === "A" && birthDate <= sessions2023[1].eligibility.bornAfter) ||
+      (["B", "Corse"].includes(zone) && birthDate <= sessions2023[2].eligibility.bornAfter) ||
+      (zone === "Etranger" && ["NOT_SCOLARISE", "2ndeGT", "Autre"].includes(schoolLevel) && birthDate <= sessions2023[3].eligibility.bornAfter) ||
+      (zone === "Etranger" && !["NOT_SCOLARISE", "2ndeGT", "Autre"].includes(schoolLevel) && birthDate <= sessions2023[4].eligibility.bornAfter)
+    )
+      return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
+
     let sessionsFiltered = sessions2023.filter(
       (session) =>
         session.eligibility.zones.includes(zone) &&
@@ -156,6 +165,8 @@ router.post("/eligibility/2023", async (req, res) => {
         if (fillingRatio >= 1) sessionsFiltered = sessionsFiltered.filter((e) => e.id !== session.id);
       }
     }
+    if (sessionsFiltered.length === 0)
+      return res.send({ ok: true, data: { msg: "Il n'y a malheuseusement plus de places disponibles pour les volontaires de votre département." } });
 
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {

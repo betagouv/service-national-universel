@@ -60,7 +60,7 @@ export default function StepWaitingConsent() {
 
   React.useEffect(() => {
     if (young?.parentAllowSNU) {
-      if (young?.parentAllowSNU === "true") {
+      if (young?.parentAllowSNU === "true" && young?.status !== "IN_PROGRESS") {
         history.push("/");
       } else if (young?.parentAllowSNU === "false") {
         setNotAuthorised(true);
@@ -176,6 +176,13 @@ export default function StepWaitingConsent() {
               </div>
             );
           })}
+        </div>
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
         </div>
       </div>
       <div className="fixed bottom-0 w-full z-50">

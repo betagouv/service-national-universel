@@ -54,7 +54,7 @@ const Step = () => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col h-screen justify-between md:bg-[#f9f6f2] bg-white">
       <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       <Navbar />

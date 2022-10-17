@@ -1,17 +1,17 @@
 import React from "react";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import Input from "../../../components/inscription/input";
+import { useHistory } from "react-router-dom";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
-import { getPasswordErrorMessage } from "../../../utils";
-import CheckBox from "../../../components/inscription/checkbox";
-import { appURL } from "../../../config";
-import StickyButton from "../../../components/inscription/stickyButton";
-import { useHistory, Link } from "react-router-dom";
-import plausibleEvent from "../../../services/plausible";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Footer from "../../../components/footerV2";
+import CheckBox from "../../../components/inscription/checkbox";
+import Input from "../../../components/inscription/input";
+import StickyButton from "../../../components/inscription/stickyButton";
+import { appURL } from "../../../config";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import plausibleEvent from "../../../services/plausible";
+import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepProfil() {
@@ -77,9 +77,9 @@ export default function StepProfil() {
       <div className="bg-white px-4 pt-4 pb-12">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-xl text-[#161616]">Créez votre compte</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col gap-5">
@@ -118,7 +118,9 @@ export default function StepProfil() {
                 <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />
               )}
             </div>
-            {error.password ? <span className="text-red-500 text-sm">{error.password}</span> : null}
+            <p className={`text-sm ${error?.password ? "text-[#CE0500]" : " text-[#3A3A3A]"}`}>
+              Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
+            </p>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>

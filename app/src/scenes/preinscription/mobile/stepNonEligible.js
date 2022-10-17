@@ -1,16 +1,17 @@
 import React, { useState, useContext } from "react";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
-import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
+import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 
 export default function NonEligible() {
   const history = useHistory();
+  // eslint-disable-next-line no-unused-vars
   const [_, __, removePersistedData] = useContext(PreInscriptionContext);
 
   const engagementPrograms = [
@@ -25,7 +26,7 @@ export default function NonEligible() {
       title: "JeVeuxAider.gouv.fr par la Réserve Civique",
       description:
         "Un dispositif d’engagement civique accessible à tous, auprès d’organisations publiques ou associatives, dans dix domaines d’action : santé, éducation, protection de l’environnement, culture, sport, protection ... la liste complète est disponible ici.)",
-      picture: jeVauxAider,
+      picture: jeVeuxAider,
       link: "https://www.jeveuxaider.gouv.fr/",
     },
     {
@@ -52,8 +53,7 @@ export default function NonEligible() {
     <>
       <div className="bg-white p-4">
         <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-        {/* To do
-        Critère déligibilité */}
+        {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
         <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
         <div className="overflow-x-auto flex space-x-6">
           {engagementPrograms.map((program, index) => {
@@ -90,13 +90,13 @@ export default function NonEligible() {
             );
           })}
         </div>
-        {/* <div
-      className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
-      onClick={() => {
-        history.push("https://www.jeveuxaider.gouv.fr/");
-      }}>
-      Voir plus de formes d’engagement
-    </div> */}
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
+        </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />

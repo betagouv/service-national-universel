@@ -4,10 +4,19 @@ import Navbar from "../components/Navbar";
 
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Button from "../components/Button";
-import { Link } from "react-router-dom";
 import Help from "./Help";
+import { appURL } from "../../../config";
 
-export default function DesktopPageContainer({ title, subTitle = "", children, onSave, onSubmit, onClickPrevious, disabled }) {
+export default function DesktopPageContainer({
+  title,
+  subTitle = "",
+  children,
+  onSave,
+  onSubmit,
+  onClickPrevious,
+  disabled,
+  questionMarckLink = `${appURL}public-besoin-d-aide/`,
+}) {
   return (
     <>
       <Navbar onSave={onSave} />
@@ -16,9 +25,9 @@ export default function DesktopPageContainer({ title, subTitle = "", children, o
           <div className="bg-white my-0 px-[102px] py-[60px]">
             <div className="w-full flex justify-between items-center mt-2">
               <h1 className="text-xl font-bold">{title}</h1>
-              <Link className="hover:scale-105" to="/public-besoin-d-aide/">
+              <a className="hover:scale-105" href={questionMarckLink} target="_blank" rel="noreferrer">
                 <QuestionMarkBlueCircle />
-              </Link>
+              </a>
             </div>
             {subTitle && <div className="text-gray-800 mt-2 text-sm">{subTitle}</div>}
             <hr className="my-4 h-px bg-gray-200 border-0" />
