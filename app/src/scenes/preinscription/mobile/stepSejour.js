@@ -17,9 +17,8 @@ function SessionButton(session) {
       key={session.id}
       className="border p-4 my-3 flex justify-between items-center"
       onClick={() => {
-        setData({ ...data, cohort: session.name });
+        setData({ ...data, cohort: session.name, step: PREINSCRIPTION_STEPS.PROFIL });
         plausibleEvent(session.event);
-        setData({ ...data, step: PREINSCRIPTION_STEPS.PROFIL });
         history.push("/preinscription/profil");
       }}>
       <div>
