@@ -92,7 +92,7 @@ export default function StepEligibilite() {
     }
     const res = await api.post("/cohort-session/eligibility/2023", {
       department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-      birthDate: new Date(data.birthDate),
+      birthDate: data.birthDate,
       schoolLevel: data.scolarity,
       frenchNationality: data.frenchNationality,
     });
@@ -143,7 +143,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4">
           Date de naissance
-          <DateFilter title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+          <DateFilter value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (
