@@ -12,6 +12,7 @@ const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
 const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
+const { getQPV, getDensity } = require("../../geo");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -148,6 +149,20 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       ...(value.moreInformation === "false" || value.specificAmenagment === "false" ? { specificAmenagmentType: "" } : {}),
     });
 
+    // Check quartier prioritaires.
+    if (value.zip && value.city && value.address) {
+      const qpv = await getQPV(value.zip, value.city, value.address);
+      if (qpv === true) young.set({ qpv: "true" });
+      else if (qpv === false) young.set({ qpv: "false" });
+      else young.set({ qpv: "" });
+    }
+
+    // Check zone rurale.
+    if (value.cityCode) {
+      const populationDensity = await getDensity(value.cityCode);
+      young.set({ populationDensity });
+    }
+
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -278,17 +293,6 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
       },
     });
 
-    if (young.parent2Email) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
     young.set({
       informationAccuracy: "true",
       inscriptionStep2023: STEPS2023.DONE,
@@ -367,17 +371,6 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
           cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
-    if (young.parent2Email) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },

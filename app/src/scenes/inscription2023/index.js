@@ -50,8 +50,6 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
 
   const currentStep = requestedStep || STEP_LIST[0].name;
 
-  if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/inscription2023/${getStepUrl(STEPS.DONE, STEP_LIST)}`} />;
-
   const eligibleStepDetails = STEP_LIST.find((element) => element.name === eligibleStep);
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === eligibleStep);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);

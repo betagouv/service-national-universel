@@ -20,6 +20,7 @@ import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
 import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
+import plausibleEvent from "../../../services/plausible";
 
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
@@ -300,6 +301,7 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
+    plausibleEvent("Phase0/CTA representant legal - Consentement valide");
     if (parentId === 1) {
       history.push(`/representants-legaux/done?token=${token}`);
     } else {
