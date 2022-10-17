@@ -9,7 +9,7 @@ const Navbar = () => {
   const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST);
 
   return ["ELIGIBILITE", "SEJOUR", "PROFIL"].includes(currentStep) ? (
-    <div className="bg-[#f9f6f2] pb-3 md:pb-0 pt-3 md:pt-8 text-[#161616] w-full">
+    <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">
       <div className={`flex flex-col justify-center ${useDevice() === "desktop" && "w-1/2 mx-auto my-0"}`}>
         <div className="text-sm">Étape {currentStep === "ELIGIBILITE" ? "1" : currentStep === "SEJOUR" ? "2" : currentStep === "PROFIL" && "3"} sur 3</div>
         <div className="text-lg font-bold mt-2">
