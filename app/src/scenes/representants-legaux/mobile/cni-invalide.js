@@ -10,6 +10,7 @@ import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegaux
 import api from "../../../services/api";
 import { API_DECLARATION_CNI_INVALIDE } from "../commons";
 import Check from "../components/Check";
+import plausibleEvent from "../../../services/plausible";
 
 export default function CniInvalide() {
   const history = useHistory();
@@ -35,6 +36,7 @@ export default function CniInvalide() {
           setError("Une erreur s'est produite" + (code ? " : " + translate(code) : ""));
           return false;
         } else {
+          plausibleEvent("Phase0/CTA representant legal - ID perimee");
           history.push(`/representants-legaux/presentation?token=${token}&parent=1`);
         }
       } catch (e) {
