@@ -143,15 +143,10 @@ export default function StepEligibilite() {
             </div>
             <label className="flex flex-col flex-start text-base w-1/2 mt-2">
               Date de naissance
-              <DatePickerList title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
             </label>
           </div>
-          <label className="flex flex-col flex-start text-base">
-            Date de naissance
-            <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-            {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
-          </label>
           {data.scolarity && (
             <>
               <div className="flex justify-between items-center">
