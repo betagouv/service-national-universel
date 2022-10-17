@@ -11,6 +11,9 @@ import WaitingList from "./waitingList";
 import Validated from "./validated";
 import Banner from "./components/banner";
 import HomePhase2 from "./HomePhase2";
+import { environment } from "../../config";
+import WaitingPhase1Reinscription from "./WaitingPhase1Reinscription";
+import WaitingPhase1 from "./WaitingPhase1";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -30,20 +33,21 @@ export default () => {
           <Withdrawn />
         </>
       );
-    if (young.status === YOUNG_STATUS.WAITING_LIST)
-      return (
-        <>
-          {young.cohort === "2021" ? <Banner /> : null}
-          <WaitingList />
-        </>
-      );
-    if (young.status === YOUNG_STATUS.REFUSED)
-      return (
-        <>
-          {young.cohort === "2021" ? <Banner /> : null}
-          <Refused />
-        </>
-      );
+    // if (young.status === YOUNG_STATUS.WAITING_LIST)
+    //   return (
+    //     <>
+    //       {young.cohort === "2021" ? <Banner /> : null}
+    //       {environment !== "production" ? <WaitingPhase1Reinscription /> : <WaitingList />}
+    //     </>
+    //   );
+    // if (young.status === YOUNG_STATUS.REFUSED)
+    //   return (
+    //     <>
+    //       {young.cohort === "2021" ? <Banner /> : null}
+    //       <Refused />
+    //     </>
+    //   );
+    if (environment !== "production") return <WaitingPhase1 />;
     if (["2022", "à venir"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
