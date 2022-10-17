@@ -14,8 +14,6 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 
-// ! Pas a jour avec le up de Nico. Je savais pas qu'il y avait une gestion cohorte ici aussi
-
 export default function ModalSejour({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = React.useState(false);
@@ -31,6 +29,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
         });
+        if (res.data.msg) return setError({ text: res.data.msg });
         setCohorts(res.data);
       } catch (e) {
         capture(e);

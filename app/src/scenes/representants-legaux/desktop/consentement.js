@@ -16,6 +16,7 @@ import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
+import plausibleEvent from "../../../services/plausible";
 
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
@@ -296,6 +297,7 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
+    plausibleEvent("Phase0/CTA representant legal - Consentement valide");
     if (parentId === 1) {
       history.push(`/representants-legaux/done?token=${token}`);
     } else {
