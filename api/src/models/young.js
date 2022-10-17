@@ -92,7 +92,6 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    default: "2022",
     enum: [
       "Juillet 2023",
       "Juin 2023",
