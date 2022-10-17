@@ -1,14 +1,35 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { HeroContainer, Hero, Content, Alert, WhiteButton } from "../../components/Content";
-import { YOUNG_STATUS, inscriptionModificationOpenForYoungs, translate } from "../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 import styled from "styled-components";
+import { Alert, Content, Hero, HeroContainer, WhiteButton } from "../../components/Content";
+import { setYoung } from "../../redux/auth/actions";
+import { capture } from "../../sentry";
+import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
+import { inscriptionModificationOpenForYoungs, translate, YOUNG_STATUS } from "../../utils";
 
 export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
+  const history = useHistory();
+  const dispatch = useDispatch();
+
+  const goToInscription = async () => {
+    try {
+      const { ok, code, data } = await API.put(`/young/inscription2023/goToInscriptionAgain`);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue :", translate(code));
+        return;
+      }
+      dispatch(setYoung(data));
+      history.push("/inscription2023/profil");
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    }
+  };
 
   return (
     <HeroContainer>
@@ -40,9 +61,9 @@ export default function WaitingValidation() {
           {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(young.cohort) ? (
             <>
               <p>Vous pouvez consulter les informations renseignées dans votre dossier jusqu&apos;à validation de votre inscription.</p>
-              <Link to="/inscription/coordonnees">
+              <div onClick={goToInscription}>
                 <WhiteButton>Revenir à mon dossier d&apos;inscription</WhiteButton>
-              </Link>
+              </div>
             </>
           ) : null}
           <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "2rem" }}>

@@ -15,6 +15,7 @@ import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import EditPen from "../../../assets/icons/EditPen";
+import ConsentDone from "../../../assets/icons/ConsentDone";
 
 const engagementPrograms = [
   {
@@ -58,12 +59,8 @@ export default function StepWaitingConsent() {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    if (young?.parentAllowSNU) {
-      if (young?.parentAllowSNU === "true" && young?.status !== "IN_PROGRESS") {
-        history.push("/");
-      } else if (young?.parentAllowSNU === "false") {
-        setNotAuthorised(true);
-      }
+    if (young?.parentAllowSNU === "false") {
+      setNotAuthorised(true);
     }
   }, [young]);
 
@@ -87,6 +84,27 @@ export default function StepWaitingConsent() {
     }
   };
 
+  const handleDone = async () => {
+    setDisabled(true);
+    try {
+      const { ok, code, data } = await api.put(`/young/inscription2023/done`);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setDisabled(false);
+        return;
+      }
+      dispatch(setYoung(data));
+      //history.push("/");
+    } catch (e) {
+      capture(e);
+      setError({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+      setDisabled(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     await api.post(`/young/logout`);
@@ -96,53 +114,82 @@ export default function StepWaitingConsent() {
 
   return !notAuthorised ? (
     <>
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
-          <div className="bg-white p-4 text-[#161616]">
-            {error?.text && <Error {...error} onClose={() => setError({})} />}
-            <h1 className="text-[32px] font-bold mt-2">Bravo, vous avez terminé votre inscription.</h1>
-            <div className="text-[#666666] text-sm mt-4">
-              Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
-            </div>
-
-            <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] py-[32px] px-[48px] gap-1">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <div className="text-[#161616] text-lg font-bold">En attente du consentement de :</div>
-                  <div className="text-[#3A3A3A] text-lg ">
-                    {young?.parent1FirstName} {young.parent1LastName}
-                  </div>
-                  <div className="text-[#666666] text-[15px] ">{young?.parent1Email}</div>
-                </div>
-                <img className="w-[80px] h-[80px]" src={Avatar} />
-              </div>
-              <div className="flex justify-between mt-2">
-                <button
-                  className="mt-2 h-10 text-base px-8 border-[1px] hover:border-[#000091] hover:!text-[#000091] hover:bg-white bg-[#000091] text-white disabled:border-[#E5E5E5] disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
-                  disabled={disabled}
-                  onClick={() => handleClick()}>
-                  Relancer
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center justify-end text-[#000091] text-base mt-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
-              <EditPen />
-              Modifier mes informations
-            </div>
+      {young?.parentAllowSNU === "true" ? (
+        <div className="bg-[#f9f6f2] flex justify-center py-10">
+          <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616] relative">
+            <h2 className="font-bold text-[#161616] text-[32px] leading-[40px] pb-[32px] border-b-solid border-b-[1px] border-b-[#E5E5E5] m-[0] mb-[32px]">
+              Bravo, nous allons étudier votre dossier !
+            </h2>
+            <p>
+              Bonne nouvelle, votre représentant légal a <strong>donné son consentement</strong> à votre participation au SNU.{" "}
+            </p>
+            <p className="mt-[1em]">Vous pouvez désormais accéder à votre compte volontaire.</p>
             <hr className="my-4 h-px bg-gray-200 border-0" />
-            <div className="flex flex-col items-end w-full">
+            <div className="flex flex-col items-end w-full mt-4">
               <div className="flex justify-end space-x-4">
                 <button
-                  className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] cursor-pointer hover:bg-[#000091] hover:text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
-                  disabled={loading}
-                  onClick={() => logout()}>
-                  Revenir à l&apos;accueil
+                  className="flex items-center justify-center py-2 px-4 hover:!text-[#000091] border-[1px] hover:border-[#000091] hover:bg-white cursor-pointer bg-[#000091] text-white disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-[#E5E5E5]"
+                  onClick={() => handleDone()}
+                  disabled={disabled}>
+                  Accéder à mon compte volontaire
                 </button>
+              </div>
+            </div>
+
+            <div className="absolute top-[30px] right-[30px]">
+              <ConsentDone />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-[#f9f6f2] flex justify-center py-10">
+          <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
+            <div className="bg-white p-4 text-[#161616]">
+              {error?.text && <Error {...error} onClose={() => setError({})} />}
+              <h1 className="text-[32px] font-bold mt-2">Bravo, vous avez terminé votre inscription.</h1>
+              <div className="text-[#666666] text-sm mt-4">
+                Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
+              </div>
+
+              <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] py-[32px] px-[48px] gap-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <div className="text-[#161616] text-lg font-bold">En attente du consentement de :</div>
+                    <div className="text-[#3A3A3A] text-lg ">
+                      {young?.parent1FirstName} {young.parent1LastName}
+                    </div>
+                    <div className="text-[#666666] text-[15px] ">{young?.parent1Email}</div>
+                  </div>
+                  <img className="w-[80px] h-[80px]" src={Avatar} />
+                </div>
+                <div className="flex justify-between mt-2">
+                  <button
+                    className="mt-2 h-10 text-base px-8 border-[1px] hover:border-[#000091] hover:!text-[#000091] hover:bg-white bg-[#000091] text-white disabled:border-[#E5E5E5] disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
+                    disabled={disabled}
+                    onClick={() => handleClick()}>
+                    Relancer
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center justify-end text-[#000091] text-base mt-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
+                <EditPen />
+                Modifier mes informations
+              </div>
+              <hr className="my-4 h-px bg-gray-200 border-0" />
+              <div className="flex flex-col items-end w-full">
+                <div className="flex justify-end space-x-4">
+                  <button
+                    className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] cursor-pointer hover:bg-[#000091] hover:text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
+                    disabled={loading}
+                    onClick={() => logout()}>
+                    Revenir à l&apos;accueil
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   ) : (
     <>

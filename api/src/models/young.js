@@ -255,7 +255,7 @@ const Schema = new mongoose.Schema({
   inscriptionStep2023: {
     type: String,
     default: "COORDONNEES",
-    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM"],
+    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
     documentation: {
       description: "Étape du tunnel d'inscription",
     },

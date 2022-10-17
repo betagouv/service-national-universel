@@ -5,6 +5,7 @@ export const INSCRIPTION_STEPS = {
   DOCUMENTS: "DOCUMENTS",
   UPLOAD: "UPLOAD",
   CONFIRM: "CONFIRM",
+  WAITING_CONSENT: "WAITING_CONSENT",
   DONE: "DONE",
 };
 
@@ -24,6 +25,7 @@ export const INSCRIPTION_STEPS_LIST = [
   { name: INSCRIPTION_STEPS.DOCUMENTS, url: "documents", allowNext: true },
   { name: INSCRIPTION_STEPS.UPLOAD, url: "televersement" },
   { name: INSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+  { name: INSCRIPTION_STEPS.WAITING_CONSENT, url: "done" },
   { name: INSCRIPTION_STEPS.DONE, url: "done" },
 ];
 
