@@ -293,17 +293,6 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
       },
     });
 
-    if (young.parent2Email) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
     young.set({
       informationAccuracy: "true",
       inscriptionStep2023: STEPS2023.DONE,
@@ -382,17 +371,6 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
           cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
-    if (young.parent2Email) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
