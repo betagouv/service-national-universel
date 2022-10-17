@@ -13,7 +13,7 @@ export default function ExpirationDate({ ID, date, setDate }) {
         </div>
       </div>
       <div className="flex flex-col flex-start my-4">
-        <DatePickerList title="" value={date} onChange={(e) => setDate(e.target.value)} />
+        <DatePickerList value={date} onChange={(date) => setDate(date)} />
       </div>
     </>
   );
