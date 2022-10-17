@@ -35,6 +35,7 @@ const getDefaultState = () => {
     return parsedStateObject;
   }
   return defaultState;
+};
 
 const PreInscriptionContextProvider = ({ children }) => {
   const [value, setValue] = useState(getDefaultState());
