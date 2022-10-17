@@ -4,7 +4,6 @@ import DatePickerList from "../../preinscription/components/DatePickerList";
 export default function ExpirationDate({ ID, date, setDate }) {
   return (
     <>
-      <hr className="my-4 h-px bg-gray-200 border-0" />
       <div className="text-2xl font-semibold">Renseignez la date d’expiration</div>
       <div className="text-gray-600 text-sm mt-2">Votre pièce d’identité doit être valide à votre départ en séjour de cohésion.</div>
       <div className="w-full flex items-center justify-center my-4">
