@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors, department2region } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
@@ -10,6 +10,7 @@ import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/plausible";
 import { environment } from "../../config";
+import ModalInfo from "../modals/ModalInfo";
 
 const DrawerTab = ({ title, to, onClick, beta, exact }) => {
   if (environment === "production" && beta) return null;
@@ -19,6 +20,18 @@ const DrawerTab = ({ title, to, onClick, beta, exact }) => {
         {title}
         {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
       </NavLink>
+    </div>
+  );
+};
+
+const DrawerTabWithoutLink = ({ title, onClick, beta }) => {
+  if (environment === "production" && beta) return null;
+  return (
+    <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block cursor-pointer">
+      <div className="block py-3 pl-3 text-base hover:!text-white">
+        {title}
+        {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
+      </div>
     </div>
   );
 };
@@ -168,7 +181,22 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
   );
 }
 
-function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
+function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
+  // blocage de l'accès inscription pour les référents avec un message.
+  // Pour supprimer ce blocage, supprimer tout ce code et remettre tout simplement la ligne :
+  // <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+  const [info, setInfo] = useState({
+    isOpen: false,
+    title: "Instruction fermée",
+    message: "L'instruction des dossiers sera ouverte à partir de début novembre, merci de votre patience.",
+  });
+
+  function blockInscription(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setInfo({ ...info, isOpen: true });
+  }
+
   return (
     <>
       <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
@@ -176,7 +204,7 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      <DrawerTabWithoutLink to="/inscription" title="Inscriptions" onClick={blockInscription} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
@@ -204,6 +232,7 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
       </DrawerConnectToZammood>
 
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
+      <ModalInfo isOpen={info.isOpen} title={info.title} message={info.message} onClose={() => setInfo({ ...info, isOpen: false })} />
     </>
   );
 }
@@ -263,7 +292,7 @@ const Drawer = (props) => {
       else if (user.role === ROLES.REFERENT_REGION) query = { region: user.region, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
       const getTickets = async (query) => {
-        const { ok, data } = await api.post(`/zammood/tickets`, query);
+        const { data } = await api.post(`/zammood/tickets`, query);
         props.dispatchTickets(data);
       };
       if (query) getTickets(query);
