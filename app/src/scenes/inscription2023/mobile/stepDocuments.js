@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,23 +19,17 @@ export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [filesUploaded, setFilesUploaded] = useState();
-  console.log("🚀 ~ file: stepDocuments.js ~ line 23 ~ StepDocuments ~ filesUploaded", filesUploaded);
+  const [filesUploaded, setFilesUploaded] = useState(young?.files.cniFiles);
   const [error, setError] = useState({});
 
-  useEffect(() => {
-    setFilesUploaded(young.files.cniFiles);
-  }, [young]);
-
   async function deleteFile(fileId) {
-    try {
-      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
-      if (!res.ok) setError({ text: "Wesh" });
-      setFilesUploaded(res.data);
-    } catch (e) {
-      capture(e);
-      setError({ text: "Impossible de supprimer ce fichier." });
+    const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
+    if (!res.ok) {
+      setError({ text: "Impossible de supprimer ce fichier" });
+      capture(res.code);
+      return;
     }
+    setFilesUploaded(res.data);
   }
 
   const IDs = [
