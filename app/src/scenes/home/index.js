@@ -33,21 +33,31 @@ export default () => {
           <Withdrawn />
         </>
       );
-    // if (young.status === YOUNG_STATUS.WAITING_LIST)
-    //   return (
-    //     <>
-    //       {young.cohort === "2021" ? <Banner /> : null}
-    //       {environment !== "production" ? <WaitingPhase1Reinscription /> : <WaitingList />}
-    //     </>
-    //   );
-    // if (young.status === YOUNG_STATUS.REFUSED)
-    //   return (
-    //     <>
-    //       {young.cohort === "2021" ? <Banner /> : null}
-    //       <Refused />
-    //     </>
-    //   );
-    if (environment !== "production") return <WaitingPhase1 />;
+    if (young.status === YOUNG_STATUS.WAITING_LIST)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          {environment !== "production" ? <WaitingPhase1Reinscription /> : <WaitingList />}
+        </>
+      );
+    if (young.status === YOUNG_STATUS.REFUSED)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          <Refused />
+        </>
+      );
+    if (environment !== "production" && [("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023")].includes(young.cohort)) return <WaitingPhase1 />;
+    if (
+      environment !== "production" &&
+      young.status === YOUNG_STATUS.VALIDATED &&
+      [("2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir")].includes(young.cohort) &&
+      ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(
+        young.statusPhase1,
+      )
+    ) {
+      return <WaitingPhase1Reinscription />;
+    }
     if (["2022", "à venir"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
