@@ -24,7 +24,7 @@ const Header = ({ setIsOpen }) => {
   const { pathname } = useLocation();
   return (
     <div className="flex px-3 w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:shadow-none sticky top-0 z-50 bg-white">
-      <div className="flex justify-between w-full h-full py-3 md:pr-[120px] md:pl-[108px]">
+      <div className="flex justify-between w-full h-full py-3 md:pr-[120px] md:pl-[108px] items-center">
         <div className="flex basis-[50%] space-x-6 items-center">
           <img src={LogoFr} className="w-18 h-16" />
           <img src={SNU} className="w-14" />
