@@ -216,7 +216,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4 text-[#929292]">
           Date de naissance
-          <DateFilter disabled={true} title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+          <DateFilter disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (
