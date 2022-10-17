@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 
-export default function WaitingPhase1Reinscription() {
+export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 

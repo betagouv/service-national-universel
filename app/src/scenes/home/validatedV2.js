@@ -6,7 +6,7 @@ import PrepareSejour from "../../assets/icons/PrepareSejour";
 
 import plausibleEvent from "../../services/plausible";
 
-export default function WaitingPhase1() {
+export default function ValidatedV2() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 

@@ -8,12 +8,11 @@ import Refused from "./refused";
 import Default from "./default";
 import Withdrawn from "./withdrawn";
 import WaitingList from "./waitingList";
-import Validated from "./validated";
+import ValidatedV2 from "./validatedV2";
 import Banner from "./components/banner";
 import HomePhase2 from "./HomePhase2";
 import { environment } from "../../config";
-import WaitingPhase1Reinscription from "./WaitingPhase1Reinscription";
-import WaitingPhase1 from "./WaitingPhase1";
+import WaitingReinscription from "./WaitingReinscription";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -37,7 +36,7 @@ export default () => {
       return (
         <>
           {young.cohort === "2021" ? <Banner /> : null}
-          {environment !== "production" ? <WaitingPhase1Reinscription /> : <WaitingList />}
+          {environment !== "production" ? <WaitingReinscription /> : <WaitingList />}
         </>
       );
     if (young.status === YOUNG_STATUS.REFUSED)
@@ -47,22 +46,19 @@ export default () => {
           <Refused />
         </>
       );
-    if (environment !== "production" && [("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023")].includes(young.cohort)) return <WaitingPhase1 />;
     if (
       environment !== "production" &&
       young.status === YOUNG_STATUS.VALIDATED &&
       [("2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir")].includes(young.cohort) &&
-      ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(
-        young.statusPhase1,
-      )
+      (young.cohort === "à venir" || young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.NOT_DONE && !young.cohesionStayPresence && !young.departInform))
     ) {
-      return <WaitingPhase1Reinscription />;
+      return <WaitingReinscription />;
     }
-    if (["2022", "à venir"].includes(young.cohort)) {
+    if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-      if (young.status === YOUNG_STATUS.VALIDATED) return <Validated />;
+      if (young.status === YOUNG_STATUS.VALIDATED) return <ValidatedV2 />;
     }
     if (
       young.status === YOUNG_STATUS.VALIDATED &&
