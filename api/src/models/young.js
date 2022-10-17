@@ -92,7 +92,6 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    default: "2022",
     enum: [
       "Juillet 2023",
       "Juin 2023",
@@ -241,6 +240,15 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Message écrit lors de l'abandon du SNU.",
+    },
+  },
+
+  reinscriptionStep2023: {
+    type: String,
+    default: "ELIGIBILITE",
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "DOCUMENTS", "DONE"],
+    documentation: {
+      description: "Étape du tunnel de réinscription",
     },
   },
 

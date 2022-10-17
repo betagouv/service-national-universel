@@ -15,6 +15,7 @@ import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import Footer from "../../../components/footerV2";
+import EditPen from "../../../assets/icons/EditPen";
 
 const engagementPrograms = [
   {
@@ -60,7 +61,7 @@ export default function StepWaitingConsent() {
 
   React.useEffect(() => {
     if (young?.parentAllowSNU) {
-      if (young?.parentAllowSNU === "true") {
+      if (young?.parentAllowSNU === "true" && young?.status !== "IN_PROGRESS") {
         history.push("/");
       } else if (young?.parentAllowSNU === "false") {
         setNotAuthorised(true);
@@ -116,6 +117,10 @@ export default function StepWaitingConsent() {
             </button>
             <img className="translate-y-4" src={Avatar} />
           </div>
+        </div>
+        <div className="flex items-center justify-end text-[#000091] text-base my-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
+          <EditPen />
+          Modifier mes informations
         </div>
       </div>
       <div className="fixed bottom-0 w-full z-50">
@@ -176,6 +181,13 @@ export default function StepWaitingConsent() {
               </div>
             );
           })}
+        </div>
+        <div
+          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          onClick={() => {
+            history.push("/public-engagements");
+          }}>
+          Voir plus de formes d’engagement
         </div>
       </div>
       <div className="fixed bottom-0 w-full z-50">

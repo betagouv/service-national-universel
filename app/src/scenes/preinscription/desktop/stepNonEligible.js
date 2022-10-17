@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
-import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
+import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
+import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 
 export default function NonEligible() {
   const history = useHistory();
+  // eslint-disable-next-line no-unused-vars
+  const [_, __, removePersistedData] = useContext(PreInscriptionContext);
 
   const engagementPrograms = [
     {
@@ -21,7 +24,7 @@ export default function NonEligible() {
       title: "JeVeuxAider.gouv.fr par la Réserve Civique",
       description:
         "Un dispositif d’engagement civique accessible à tous, auprès d’organisations publiques ou associatives, dans dix domaines d’action : santé, éducation, protection de l’environnement, culture, sport, protection ... la liste complète est disponible ici.)",
-      picture: jeVauxAider,
+      picture: jeVeuxAider,
       link: "https://www.jeveuxaider.gouv.fr/",
     },
     {
@@ -40,6 +43,7 @@ export default function NonEligible() {
     },
   ];
   const onClickButton = () => {
+    removePersistedData(true);
     history.push("/");
   };
 
@@ -48,9 +52,7 @@ export default function NonEligible() {
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[60%] mx-auto my-0 px-[102px] py-[60px]">
           <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-          {/* To do
-        Critère déligibilité */}
-          {/* <div>Pour participer au SNU, vous devez être XXX</div> */}
+          {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
           <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
           <div className="overflow-x-auto flex flex-wrap justify-between">
             {engagementPrograms.map((program, index) => {
@@ -87,14 +89,17 @@ export default function NonEligible() {
               );
             })}
           </div>
-          {/* <div
-      className="text-blue-600 text-center border-2 border-blue-600 my-4 p-2"
-      onClick={() => {
-        history.push("https://www.jeveuxaider.gouv.fr/");
-      }}>
-      Voir plus de formes d’engagement
-    </div> */}
-          <div className="w-full border-t border-t-[#E5E5E5] mt-5 flex justify-end">
+          <div className="flex justify-center my-8">
+            <div
+              className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%]  p-2 cursor-pointer"
+              onClick={() => {
+                history.push("/public-engagements");
+              }}>
+              Voir plus de formes d’engagement
+            </div>
+          </div>
+
+          <div className="w-full border-t border-t-[#E5E5E5] flex justify-end">
             <button
               className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091] mt-4"
               onClick={onClickButton}>

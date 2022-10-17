@@ -13,6 +13,8 @@ import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import { supportURL } from "../../../config";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -120,7 +122,12 @@ export default function StepUpload() {
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-2xl font-semibold mt-2 text-gray-800">{ID[category].title}</div>
+        <div className="w-full flex justify-between items-center mt-2">
+          <div className="text-2xl font-semibold text-gray-800 flex-1">{ID[category].title}</div>
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
+            <QuestionMarkBlueCircle />
+          </a>
+        </div>
         {ID[category].subtitle && <div className="text-xl mb-2 text-gray-600">{ID[category].subtitle}</div>}
         <div className="w-full flex items-center justify-center my-4">
           <div className="w-3/4 flex flex-col gap-4">

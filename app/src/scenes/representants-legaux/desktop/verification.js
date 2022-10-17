@@ -12,6 +12,7 @@ import Check from "../components/Check";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 import { BorderButton, PlainButton } from "../components/Buttons";
+import { supportURL } from "../../../config";
 
 export default function Verification({ step }) {
   const history = useHistory();
@@ -77,8 +78,7 @@ export default function Verification({ step }) {
             <p>Veuillez vérifier la validité de ces informations.</p>
             <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
             <p>
-              <a href="#" className="underline">
-                {/* TODO: mettre le bon lien */}
+              <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="underline hover:underline">
                 Je vois des informations incorrectes
               </a>
             </p>
@@ -89,8 +89,7 @@ export default function Verification({ step }) {
           <div className="flex items-center pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
             <Check checked={certified} onChange={(e) => setCertified(e)}>
               Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
-              <a href="#" target="_blank" className="underline">
-                {/* TODO: mettre le lien sur cet article */}
+              <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="underline hover:underline">
                 cet article
               </a>{" "}
               avant de valider.
@@ -160,51 +159,39 @@ function SectionField(field, idx) {
 function specialSituations(young) {
   let specials = [];
 
-  if (young.allergies === "true") {
-    specials.push(young.firstName + " a des allergies");
-  }
   if (young.handicap === "true") {
-    specials.push(young.firstName + " a un handicap");
+    specials.push({ label: "En situation de handicap", value: "Oui" });
+  }
+
+  if (young.allergies === "true") {
+    specials.push({ label: "A des allergies", value: "Oui" });
   }
   if (young.reducedMobilityAccess === "true") {
-    specials.push(young.firstName + " a besoin d’un aménagement pour mobilité réduite");
+    specials.push({ label: "A besoin d’un aménagement pour mobilité réduite", value: "Oui" });
   }
   if (young.ppsBeneficiary === "true") {
-    specials.push(young.firstName + " bénéficie d'un PPS (projet personnalisé de scolarisation");
+    specials.push({ label: "Bénéficie d'un PPS (projet personnalisé de scolarisation", value: "Oui" });
   }
   if (young.paiBeneficiary === "true") {
-    specials.push(young.firstName + " bénéficie d'un PAI (projet d'accueil individualisé");
+    specials.push({ label: "Bénéficie d'un PAI (projet d'accueil individualisé", value: "Oui" });
   }
   if (young.specificAmenagment === "true") {
-    specials.push(young.firstName + " a besoin d'aménagements spécifiques " + (young.specificAmenagmentType ? ": " + young.specificAmenagmentType : ""));
+    specials.push({ label: "A besoin d'aménagements spécifiques", value: young.specificAmenagmentType ? ": " + young.specificAmenagmentType : "Oui" });
   }
   if (young.handicapInSameDepartment === "true") {
-    specials.push(young.firstName + " doit être affecté dans son département de résidence");
+    specials.push({ label: "Doit être affecté dans son département de résidence", value: "Oui" });
   }
   if (young.highSkilledActivity === "true") {
-    specials.push(young.firstName + " a une activité de haut niveau");
+    specials.push({ label: "A une activité de haut niveau", value: "Oui" });
   }
   if (young.highSkilledActivityInSameDepartment === "true") {
-    specials.push(young.firstName + " doit être affecté dans son département de résidence (activité de haut niveau)");
+    specials.push({ label: "Doit être affecté dans son département de résidence (activité de haut niveau)", value: "Oui" });
   }
 
   return specials;
 }
 
 function sectionsData(young) {
-  // --- situation spéciales ?
-  let specialSituation;
-  const specials = specialSituations(young);
-  if (specials.length > 0) {
-    specialSituation = specials.map((s) => (
-      <div className="text-right" key={s}>
-        {s}
-      </div>
-    ));
-  } else {
-    specialSituation = "Non";
-  }
-
   // --- foreign address
   let foreignAddress = [];
   let titleAddress = [];
@@ -229,7 +216,13 @@ function sectionsData(young) {
       { label: "Nom de l'établissement", value: young.schoolName },
     );
   }
-  situation.push({ label: "Situation particulière", value: specialSituation });
+  // --- situations particulières
+  const specials = specialSituations(young);
+  if (specials.length > 0) {
+    situation = [...situation, { separator: true, subtitle: "Situation particulière" }, ...specials];
+  } else {
+    situation.push({ label: "Situation particulière", value: "Non" });
+  }
 
   // --- parent 2
   let secondParent = [];

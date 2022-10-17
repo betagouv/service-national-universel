@@ -52,11 +52,11 @@ const Step = ({ step }) => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col h-screen justify-between md:bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(step)}
-      <Footer />
+      {device === "desktop" ? <Footer /> : null}
     </div>
   );
 };

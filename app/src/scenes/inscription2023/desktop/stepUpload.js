@@ -10,6 +10,7 @@ import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
+import { supportURL } from "../../../config";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -119,7 +120,8 @@ export default function StepUpload() {
       subTitle={ID[category].subTitle}
       onClickPrevious={() => history.push("/inscription2023/documents")}
       onSubmit={() => onSubmit(filesToUpload)}
-      disabled={disabled}>
+      disabled={disabled}
+      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="w-full flex my-4">

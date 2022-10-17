@@ -10,12 +10,13 @@ import Toggle from "../../../components/inscription/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
-import { FRANCE, ABROAD, HEALTH_FORM_URL, INTERNAL_RULES_URL, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent } from "../commons";
+import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
+import plausibleEvent from "../../../services/plausible";
 
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
@@ -296,6 +297,7 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
+    plausibleEvent("Phase0/CTA representant legal - Consentement valide");
     if (parentId === 1) {
       history.push(`/representants-legaux/done?token=${token}`);
     } else {
@@ -400,7 +402,7 @@ export default function Consentement({ step, parentId }) {
                       <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                         M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
                         cohésion (
-                        <a href={HEALTH_FORM_URL} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                        <a href={CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                           Télécharger la fiche sanitaire ici
                         </a>
                         ).
@@ -412,7 +414,7 @@ export default function Consentement({ step, parentId }) {
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={INTERNAL_RULES_URL} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du SNU
                       </a>
                       .

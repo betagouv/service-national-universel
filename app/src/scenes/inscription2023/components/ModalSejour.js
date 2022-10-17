@@ -2,12 +2,12 @@ import React from "react";
 import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
 import { Modal } from "reactstrap";
 import { formatStringDate, getDepartmentByZip } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";
+import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -29,6 +29,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
         });
+        if (res.data.msg) return setError({ text: res.data.msg });
         setCohorts(res.data);
       } catch (e) {
         capture(e);
@@ -89,9 +90,9 @@ export default function ModalSejour({ isOpen, onCancel }) {
                 <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
                 <div className="text-gray-500 text-sm">
                   La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-                  <Link to="" className="underline underline-offset-4">
+                  <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline hover:underline">
                     En savoir plus.
-                  </Link>
+                  </a>
                 </div>
               </>
             )}

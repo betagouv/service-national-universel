@@ -23,8 +23,8 @@ const Header = ({ setIsOpen }) => {
 
   const { pathname } = useLocation();
   return (
-    <div className="flex  px-3  w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] sticky top-0 z-50 bg-white">
-      <div className="flex justify-between w-full h-full border-b border-b-[#E5E5E5] py-3 md:pr-[120px] md:pl-[108px]">
+    <div className="flex px-3 w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:shadow-none sticky top-0 z-50 bg-white">
+      <div className="flex justify-between w-full h-full py-3 md:pr-[120px] md:pl-[108px] items-center">
         <div className="flex basis-[50%] space-x-6 items-center">
           <img src={LogoFr} className="w-18 h-16" />
           <img src={SNU} className="w-14" />
@@ -35,7 +35,7 @@ const Header = ({ setIsOpen }) => {
             </div>
           )}
         </div>
-        <div>
+        <div className="flex h-full items-center">
           {useDevice() === "mobile" ? (
             <div
               className="flex items-start basis-[50%]"
@@ -45,9 +45,9 @@ const Header = ({ setIsOpen }) => {
               <Menu />
             </div>
           ) : (
-            <div className="flex text-sm text-[#000091] items-center basis-[50%%]">
+            <div className="flex text-sm text-[#000091] basis-[50%%]">
               <a
-                className="flex items-center space-x-1 border-r border-r-gray-300 py-1 pl-1.5 pr-3 cursor-pointer hover:font-bold hover:text-[#000091]"
+                className="flex items-center space-x-1 border-r border-r-gray-300 pr-3 cursor-pointer hover:font-bold hover:text-[#000091]"
                 href="https://www.snu.gouv.fr/"
                 target="_blank"
                 rel="noreferrer">

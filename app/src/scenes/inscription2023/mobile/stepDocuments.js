@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
 import Help from "../components/Help";
+import { supportURL } from "../../../config";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -33,9 +34,9 @@ export default function StepDocuments() {
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((id) => (

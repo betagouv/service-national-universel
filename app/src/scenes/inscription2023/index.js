@@ -24,11 +24,7 @@ import useDevice from "../../hooks/useDevice";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
-import { getStepFromUrlParam, STEPS, STEP_LIST } from "./utils/navigation";
-
-const getStepUrl = (name) => {
-  return STEP_LIST.find((step) => step.name === name)?.url;
-};
+import { getStepFromUrlParam, getStepUrl, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
@@ -46,15 +42,13 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
-  const requestedStep = getStepFromUrlParam(step);
+  const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
   if (!requestedStep && eligibleStep) {
-    return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep)}`} />;
+    return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
   }
 
   const currentStep = requestedStep || STEP_LIST[0].name;
-
-  if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/inscription2023/${getStepUrl(STEPS.DONE)}`} />;
 
   const eligibleStepDetails = STEP_LIST.find((element) => element.name === eligibleStep);
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === eligibleStep);
@@ -67,7 +61,7 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col h-screen justify-between md:bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(currentStep, device)}

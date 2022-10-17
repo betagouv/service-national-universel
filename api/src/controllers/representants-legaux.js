@@ -22,6 +22,7 @@ const { ERRORS } = require("../utils");
 const { validateFirstName, validateString } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
+const config = require("../config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
@@ -170,20 +171,34 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   }
 
   // --- fin du consentement ?
+  let shouldSendToParent2 = false;
   let statusChanged = false;
-  const onlyOneParent = young.parent2Status === undefined || young.parent2Status === null || young.parent2Status.trim().length === 0;
-  if (id === 1 && onlyOneParent) {
-    // on prend en compte la valeur envoyée dans cette requête.
-    value.status = value.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
-    statusChanged = true;
-  } else if (id === 2) {
-    // on prend en compte la valeur déjà enregistrée par le premier représentant.
-    value.status = young.parentAllowSNU ? "WAITING_VALIDATION" : "NOT_AUTORISED";
-    statusChanged = true;
+  if (id === 1) {
+    if (young.parentAllowSNU !== value.parentAllowSNU) {
+      value.status = value.parentAllowSNU === "true" ? "WAITING_VALIDATION" : "NOT_AUTORISED";
+
+      if (!canUpdateYoungStatus({ body: value, current: young })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      statusChanged = true;
+
+      if (value.parentAllowSNU === "true" && value.parent1AllowImageRights === "true") {
+        shouldSendToParent2 = true;
+      }
+    }
   }
-  if (statusChanged) {
-    if (!canUpdateYoungStatus({ body: value, current: young })) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+  if (shouldSendToParent2) {
+    const onlyOneParent = young.parent2Email === undefined || young.parent2Email === null || young.parent2Email.trim().length === 0;
+    if (!onlyOneParent) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
     }
   }
 
