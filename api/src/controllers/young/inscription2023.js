@@ -340,8 +340,6 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
-    const needParent2Relance =
-      young.parentAllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2Email && !["true", "false"].includes(young.parent2AllowImageRights);
 
     if (notifyExpirationDate && needCniRelance) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
@@ -358,17 +356,6 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
           cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
-    if (needParent2Relance) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
