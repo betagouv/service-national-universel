@@ -15,6 +15,7 @@ import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Inscription2023 from "./scenes/inscription2023";
 import RepresentantsLegaux from "./scenes/representants-legaux";
+import ReInscription from "./scenes/reinscription";
 import PreInscription from "./scenes/preinscription";
 import AllEngagements from "./scenes/all-engagements/index";
 import Phase1 from "./scenes/phase1";
@@ -106,6 +107,7 @@ export default function App() {
             <SentryRoute path="/inscription" component={Inscription} />
             {/* @todo: clean this */}
             {environment !== "production" ? <SentryRoute path="/inscription2023" component={Inscription2023} /> : null}
+            {environment !== "production" ? <SentryRoute path="/reinscription" component={ReInscription} /> : null}
             {environment !== "production" ? <SentryRoute path="/preinscription" component={PreInscription} /> : null}
             {environment !== "production" ? <SentryRoute path="/auth" component={AuthV2} /> : <SentryRoute path="/auth" component={Auth} />}
             {environment !== "production" ? <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> : null}
@@ -115,7 +117,7 @@ export default function App() {
         )}
         {environment === "production" ? (
           <Footer />
-        ) : ["preinscription", "auth", "inscription2023", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
+        ) : ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
           <Footer />
         ) : null}
       </div>
