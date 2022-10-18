@@ -32,7 +32,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
 
     const { error, value } = Joi.object({
       schooled: Joi.string().trim().required(),
-      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"),
       schoolName: Joi.string().trim(),
       schoolType: Joi.string().trim(),
       schoolAddress: Joi.string().trim(),
@@ -46,6 +46,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
+      console.log("🚀 ~ file: reinscription.js ~ line 49 ~ router.put ~ error", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
