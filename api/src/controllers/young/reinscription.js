@@ -7,7 +7,7 @@ const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023REINSCRIPTION } = require("../../utils");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, YOUNG_STATUS } = require("snu-lib");
 
 router.put("/goToReinscription", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
