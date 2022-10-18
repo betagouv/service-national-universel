@@ -128,7 +128,6 @@ export default function App() {
 
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
-
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const young = useSelector((state) => state.Auth.young);
