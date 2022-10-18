@@ -13,8 +13,7 @@ const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
 
   useEffect(() => {
     async function getYoungFromToken() {
-      // const redirectInvalidToken = () => history.push("/representants-legaux/token-invalide");
-      const redirectInvalidToken = () => history.push("/");
+      const redirectInvalidToken = () => history.push("/representants-legaux/token-invalide");
       if (!token) redirectInvalidToken();
       const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parentId}`);
 
