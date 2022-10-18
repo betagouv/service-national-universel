@@ -24,7 +24,7 @@ export default function WaitingReinscription() {
   const onClickEligibilte = async () => {
     try {
       setLoading(true);
-      const { ok, code } = await API.get("/young/reinscription/goToReinscription");
+      const { ok, code } = await API.put("/young/reinscription/goToReinscription");
       if (!ok) throw new Error(translate(code));
 
       plausibleEvent("Phase0/CTA reinscription - home page");
