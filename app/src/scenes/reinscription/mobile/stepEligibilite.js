@@ -21,10 +21,9 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
-import { STEP_LIST } from "../utils/navigation";
+import { STEPS } from "../utils/navigation";
 
 export default function StepEligibilite() {
-  // const [data, setData] = React.useContext(PreInscriptionContext);
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -33,16 +32,15 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
 
   useEffect(() => {
     if (!young) return;
 
     setData({
       frenchNationality: young.frenchNationality,
-      birthDate: young.birthdateAt.split("T")[0],
+      birthDate: new Date(young.birthdateAt),
       school:
-        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
+        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE && young.schooled
           ? {
               fullName: young.schoolName,
               type: young.schoolType,
@@ -56,7 +54,7 @@ export default function StepEligibilite() {
               postCode: young.schoolZip,
             }
           : null,
-      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE ? young.grade : null,
+      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE ? young.grade : null,
       zip: young.zip,
     });
   }, [young]);
@@ -102,7 +100,7 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez choisir votre école";
+          errors.school = "Vous devez renseigner votre établissement scolaire";
         }
       }
     }
@@ -134,12 +132,13 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
       zip: data.zip,
+      birthDate: data.birthDate,
     };
 
     try {
       const res = await api.post("/cohort-session/eligibility/2023", {
         department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-        birthDate: new Date(data.birthDate),
+        birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });

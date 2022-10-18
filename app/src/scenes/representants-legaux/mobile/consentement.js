@@ -400,7 +400,7 @@ export default function Consentement({ step, parentId }) {
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                       M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
                       cohésion (
-                      <a href={CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Télécharger la fiche sanitaire ici
                       </a>
                       ).
@@ -411,7 +411,7 @@ export default function Consentement({ step, parentId }) {
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du SNU
                       </a>
                       .
@@ -472,9 +472,9 @@ export default function Consentement({ step, parentId }) {
               </AuthorizeBlock>*/}
               <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
                 <div className="mb-3">
-                  Le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes dûment accrédités par les services communication du
-                  ministère et/ou des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
-                  séparément, sur leurs publications respectives.{" "}
+                  Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
+                  des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
+                  leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
                     <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus

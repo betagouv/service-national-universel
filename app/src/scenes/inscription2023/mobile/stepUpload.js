@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import Bin from "../../../assets/icons/Bin";
-import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
+import { useHistory, useParams } from "react-router-dom";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import ExpirationDate from "../components/ExpirationDate";
+import { supportURL } from "../../../config";
+import { formatDateFR, sessions2023 } from "snu-lib";
+
+import DatePickerList from "../../preinscription/components/DatePickerList";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import { supportURL } from "../../../config";
+import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
+import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -22,70 +23,33 @@ export default function StepUpload() {
   const history = useHistory();
   const dispatch = useDispatch();
   const [error, setError] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [fileError, setFileError] = useState({});
-  const [filesToUpload, setFilesToUpload] = useState();
-  const [filesUploaded, setFilesUploaded] = useState();
+  const [files, setFiles] = useState();
   const [date, setDate] = useState();
 
-  let disabled = false;
-  if (!date || !error || loading) disabled = true;
-  if (filesUploaded?.length) disabled = false;
-
-  async function upload(files) {
+  async function onSubmit() {
     for (const file of files) {
       if (file.size > 5000000)
-        return setFileError({
+        return setError({
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, date);
-    if (res.code === "FILE_CORRUPTED") {
-      setFileError({
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, date);
+    if (res.code === "FILE_CORRUPTED")
+      return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
-    } else if (!res.ok) {
+    if (!res.ok) {
       capture(res.code);
-      setFileError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
     }
-  }
-
-  async function deleteFile(fileId) {
-    try {
-      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
-      if (!res.ok) setError({ text: "Wesh" });
-      setFilesUploaded(res.data.filter((e) => e.category === category));
-    } catch (e) {
-      capture(e);
-      setError({ text: "Impossible de supprimer ce fichier." });
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    if (!ok) {
+      capture(code);
+      return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
     }
-  }
-
-  async function onSubmit() {
-    setLoading(true);
-    try {
-      if (filesToUpload !== undefined) {
-        await upload([...filesToUpload]);
-        if (error.length) return setLoading(false);
-      }
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
-      if (!ok) {
-        capture(code);
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
-      dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - CI mobile");
-      history.push("/inscription2023/confirm");
-    } catch (e) {
-      capture(e);
-      setError({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
-    }
-    setLoading(false);
+    dispatch(setYoung(responseData));
+    plausibleEvent("Phase0/CTA inscription - CI mobile");
+    history.push("/inscription2023/confirm");
   }
 
   const ID = {
@@ -112,10 +76,6 @@ export default function StepUpload() {
       imgDate: "passportDate.png",
     },
   };
-
-  useEffect(() => {
-    setFilesUploaded(young.files.cniFiles.filter((e) => e.category === category));
-  }, [young]);
 
   return (
     <>
@@ -149,7 +109,7 @@ export default function StepUpload() {
           name="file-upload"
           accept=".png, .jpg, .jpeg, .pdf"
           onChange={(e) => {
-            setFilesToUpload(e.target.files);
+            setFiles(e.target.files);
           }}
           className="hidden"
         />
@@ -160,8 +120,8 @@ export default function StepUpload() {
             </label>
           </div>
           <div className="ml-4">
-            {filesToUpload ? (
-              Array.from(filesToUpload).map((e) => (
+            {files ? (
+              Array.from(files).map((e) => (
                 <p className="text-gray-800 text-sm mt-2" key={e.name}>
                   {e.name}
                 </p>
@@ -171,30 +131,24 @@ export default function StepUpload() {
             )}
           </div>
         </div>
-        {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
-        {filesToUpload && <ExpirationDate ID={ID[category]} date={date} setDate={setDate} />}
-        {filesUploaded && (
+        {files?.length > 0 && (
           <>
-            <hr className="my-4 h-px bg-gray-200 border-0" />
-            {filesUploaded.map((e) => (
-              <div key={e._id} className="flex w-full justify-between">
-                <p className="text-gray-800 text-sm mt-2">{e.name}</p>
-                <div className="text-blue-800 flex mt-2">
-                  <div className="mt-1">
-                    <Bin />
-                  </div>
-                  <p className="text-sm font-medium ml-2" onClick={() => deleteFile(e._id)}>
-                    Supprimer
-                  </p>
-                </div>
-              </div>
-            ))}
+            <hr className="my-8 h-px bg-gray-200 border-0" />
+            <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+            <div className="text-gray-600 leading-loose my-2">
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+              ).
+            </div>
+            <div className="w-3/4 mx-auto">
+              <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+            </div>
+            <DatePickerList value={date} onChange={(date) => setDate(date)} />
           </>
         )}
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={onSubmit} disabled={!date} />
     </>
   );
 }

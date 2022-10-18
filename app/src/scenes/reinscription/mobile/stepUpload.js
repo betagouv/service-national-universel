@@ -10,6 +10,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -36,7 +37,7 @@ export default function StepUpload() {
         });
       }
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID.category, new Date(date));
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID.category, date);
     if (res.code === "FILE_CORRUPTED") {
       setFileError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
@@ -185,6 +186,7 @@ export default function StepUpload() {
             ))}
         </div>
       </div>
+      <Footer marginBottom={"88px"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );

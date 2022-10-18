@@ -126,6 +126,7 @@ class Auth {
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
+      console.log("count = ", countDocuments, typeof countDocuments, countDocuments > 0);
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       const user = await this.model.create({
@@ -148,7 +149,7 @@ class Auth {
         zip,
         cohort,
         grade,
-        inscription2023: STEPS2023.COORDONNEES,
+        inscriptionStep2023: STEPS2023.COORDONNEES,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
@@ -164,6 +165,7 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
+      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
