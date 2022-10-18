@@ -28,7 +28,7 @@ export default function StepSejour() {
       try {
         const res = await api.post("/cohort-session/eligibility/2023", {
           department: young.schoolDepartment || getDepartmentByZip(young.zip) || null,
-          birthDate: new Date(young.birthdateAt),
+          birthDate: new Date(young.birthDateAt),
           schoolLevel: young.grade,
           frenchNationality: young.frenchNationality,
         });
@@ -87,8 +87,6 @@ export default function StepSejour() {
   );
 
   function SessionButton(session) {
-    const young = useSelector((state) => state.Auth.young);
-
     return (
       <div
         key={session.id}
@@ -97,7 +95,7 @@ export default function StepSejour() {
           const { ok, data, code } = await api.put("/young/reinscription/changeCohort", {
             cohortChangeReason: "Réinscription à un nouveau séjour",
             cohort: session.name,
-            originCohort: young.cohort,
+            originalCohort: young.cohort,
           });
           if (!ok) {
             capture(code);

@@ -27,20 +27,21 @@ export default function StepEligibilite() {
   // const [data, setData] = React.useContext(PreInscriptionContext);
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
+  console.log("🚀 ~ file: stepEligibilite.js ~ line 30 ~ StepEligibilite ~ young", young);
   const dispatch = useDispatch();
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
+  // console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
 
   useEffect(() => {
     if (!young) return;
 
     setData({
       frenchNationality: young.frenchNationality,
-      birthDate: young.birthdateAt.split("T")[0],
+      birthDate: new Date(young.birthDateAt),
       school:
         young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
           ? {
@@ -134,12 +135,15 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
       zip: data.zip,
+      birthDate: data.birthDate,
     };
 
     try {
+      console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data.birthDate);
+
       const res = await api.post("/cohort-session/eligibility/2023", {
         department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-        birthDate: new Date(data.birthDate),
+        birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
