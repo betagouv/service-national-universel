@@ -60,11 +60,11 @@ export default function YoungHeader({ young, tab, onChange }) {
       <div className="ml-[30px]">
         <div className="">
           <Field name="status" label="Inscription" value={translate(young.status)} />
-          <div className="flex">
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+          <div className="flex items-center mt-[16px]">
+            <a className="mr-[4px]" href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
             </a>
-            <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+            <PanelActionButton className="ml-[4px]" onClick={onClickDelete} icon="bin" title="Supprimer" />
           </div>
         </div>
       </div>
