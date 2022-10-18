@@ -37,7 +37,7 @@ export default function CniInvalide() {
           return false;
         } else {
           plausibleEvent("Phase0/CTA representant legal - ID perimee");
-          history.push(`/representants-legaux/presentation?token=${token}&parent=1`);
+          history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
         }
       } catch (e) {
         console.log(e);
