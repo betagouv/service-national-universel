@@ -21,10 +21,9 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
-import { STEP_LIST } from "../utils/navigation";
+import { STEPS } from "../utils/navigation";
 
 export default function StepEligibilite() {
-  // const [data, setData] = React.useContext(PreInscriptionContext);
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -33,7 +32,6 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
 
   useEffect(() => {
     if (!young) return;
@@ -42,7 +40,7 @@ export default function StepEligibilite() {
       frenchNationality: young.frenchNationality,
       birthDate: new Date(young.birthdateAt),
       school:
-        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
+        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE && young.schooled
           ? {
               fullName: young.schoolName,
               type: young.schoolType,
@@ -56,7 +54,7 @@ export default function StepEligibilite() {
               postCode: young.schoolZip,
             }
           : null,
-      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE ? young.grade : null,
+      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE ? young.grade : null,
       zip: young.zip,
     });
   }, [young]);
