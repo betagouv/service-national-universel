@@ -1,27 +1,27 @@
 import React, { useState } from "react";
 import Title from "../../../components/views/Title";
-import {canViewEmailHistory, YOUNG_STATUS} from "../../../utils";
+import { canViewEmailHistory } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "./Tab";
-import {Col, Row} from "reactstrap";
-import SelectStatus from "../../../components/selectStatus";
-import {appURL} from "../../../config";
+import { appURL } from "../../../config";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import {Link} from "react-router-dom";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import Pencil from "../../../assets/icons/Pencil";
 import History from "../../../assets/icons/History";
+import Field from "./Field";
+import { translate } from "snu-lib";
 
 export default function YoungHeader({ young, tab, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const [notesCount, setNotesCount] = useState(0);
 
   function onClickDelete() {
-
+    console.log("delete...");
   }
+
   return (
     <div className="px-[30px] pt-[15px] flex items-end border-b-[#E5E7EB] border-b-[1px]">
       <div className="grow">
@@ -59,7 +59,13 @@ export default function YoungHeader({ young, tab, onChange }) {
       </div>
       <div className="ml-[30px]">
         <div className="">
-
+          <Field name="status" label="Inscription" value={translate(young.status)} />
+          <div className="flex">
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            </a>
+            <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+          </div>
         </div>
       </div>
       {/*<Row style={{ minWidth: "30%" }}>
@@ -85,5 +91,5 @@ export default function YoungHeader({ young, tab, onChange }) {
         </Col>
       </Row>*/}
     </div>
-  )
+  );
 }
