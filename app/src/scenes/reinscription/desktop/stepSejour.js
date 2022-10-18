@@ -4,14 +4,12 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import plausibleEvent from "../../../services/plausible";
 import { formatStringDate } from "snu-lib";
-import Footer from "../../../components/footerV2";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";
 import { setYoung } from "../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
-import Navbar from "../components/Navbar";
 import { getDepartmentByZip } from "snu-lib/region-and-departments";
 import { supportURL } from "../../../config";
 
