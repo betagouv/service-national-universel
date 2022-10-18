@@ -101,7 +101,7 @@ export default function StepDocuments() {
                     <div className="mt-1 mr-1">
                       <Bin />
                     </div>
-                    <p className="text-sm font-medium" onClick={() => deleteFile(e._id)}>
+                    <p className="text-sm font-medium cursor-pointer" onClick={() => deleteFile(e._id)}>
                       Supprimer
                     </p>
                   </div>
