@@ -10,6 +10,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import ExpirationDate from "../components/ExpirationDate";
 import Navbar from "../components/Navbar";
+import Footer from "../../../components/footerV2";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -185,6 +186,7 @@ export default function StepUpload() {
             ))}
         </div>
       </div>
+      <Footer marginBottom={"88px"} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
     </>
   );
