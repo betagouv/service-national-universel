@@ -221,10 +221,10 @@ export default function Consentement({ step, parentId }) {
 
       if (data.allowSNU) {
         validate("rightOlder", "unchecked", data.rightOlder !== true);
-        validate("personalData", "unchecked", data.personalData !== true);
         if (youngAge < 15) {
-          validate("healthForm", "unchecked", data.healthForm !== true);
+          validate("personalData", "unchecked", data.personalData !== true);
         }
+        validate("healthForm", "unchecked", data.healthForm !== true);
         validate("vaccination", "unchecked", data.vaccination !== true);
         validate("internalRules", "unchecked", data.internalRules !== true);
 
@@ -395,19 +395,19 @@ export default function Consentement({ step, parentId }) {
                     <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
                       Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
                     </Check>
-                    <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                      J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                    </Check>
                     {youngAge < 15 && (
-                      <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                        M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                        cohésion (
-                        <a href={CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
-                          Télécharger la fiche sanitaire ici
-                        </a>
-                        ).
+                      <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
+                        J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
                       </Check>
                     )}
+                    <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
+                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
+                      cohésion (
+                      <a href={CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                        Télécharger la fiche sanitaire ici
+                      </a>
+                      ).
+                    </Check>
                     <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
                       M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP),
                       et pour les volontaires résidents de Guyane, la fièvre jaune.
