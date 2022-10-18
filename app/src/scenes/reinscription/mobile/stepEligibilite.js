@@ -100,7 +100,7 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez choisir votre école";
+          errors.school = "Vous devez renseigner votre établissement scolaire";
         }
       }
     }
