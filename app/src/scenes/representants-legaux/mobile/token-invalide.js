@@ -1,22 +1,17 @@
 import React from "react";
-import { environment } from "../../../config";
+import logo from "../../../assets/logo-snu.png";
 
 export default function TokenInvalide() {
   return (
-    <>
-      <div className="bg-white p-4 text-[#161616]">
-        <h1 className="text-[22px] font-bold">Jeton de validation invalide</h1>
-        <p>Le jeton de validation est invalide. Veuillez vérifier que vous avez bien copié le lien complet du mail</p>
-        {environment !== "production" && (
-          <div className="grid gap-4 bg-amber-200 border-amber-500 p-6 my-4">
-            <p>Ce message ne s&apos;affiche pas en prod :)</p>
-            <p>
-              Pensez bien à mettre un token dans le parent1Inscription2023Token d&apos;un young puis appeler l&apos;URL avec le «token» et un numéro de «parent» dedans genre :
-              http://localhost:8081/representants-legaux/presentation?token=1234&parent=1
-            </p>
-          </div>
-        )}
+    <div className="flex flex-col h-100 items-center justify-center m-6">
+      <img src={logo} alt="logo" className="w-56 pb-8" />
+      <div className="text-3xl text-center pb-4">Vous n&apos;avez pas les droits d&apos;accès à cette page !</div>
+      <div className="text-center text-lg mt-4 text-gray-500">
+        Besoin d&apos;aide&nbsp;?{" "}
+        <a rel="noreferrer" href="/public-besoin-d-aide" target="_blank" className="hover:underline scale-105 cursor-pointer">
+          Cliquez ici
+        </a>
       </div>
-    </>
+    </div>
   );
 }
