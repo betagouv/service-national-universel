@@ -41,7 +41,7 @@ export default function StepDocuments() {
     history.push("/inscription2023/confirm");
   }
 
-  const documents = [
+  const docs = [
     {
       category: "cniNew",
       title: "Carte Nationale d'Identité",
@@ -67,7 +67,7 @@ export default function StepDocuments() {
       disabled={!files.length}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      {documents.map((doc) => (
+      {docs.map((doc) => (
         <div key={doc.category} className="my-4 hover:bg-gray-50 cursor-pointer" onClick={() => history.push(`televersement/${doc.category}`)}>
           <div className="border p-4 my-3 flex justify-between items-center">
             <div>

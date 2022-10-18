@@ -338,7 +338,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (type === "next") young.set("inscriptionStep2023", STEPS2023.CONFIRM);
+    if (type === "next") {
+      if (young.files.cniFiles.length > 0) {
+        young.set("inscriptionStep2023", STEPS2023.CONFIRM);
+      } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

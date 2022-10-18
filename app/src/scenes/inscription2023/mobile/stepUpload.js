@@ -33,7 +33,7 @@ export default function StepUpload() {
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, date);
     if (res.code === "FILE_CORRUPTED")
       return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
@@ -131,22 +131,18 @@ export default function StepUpload() {
             )}
           </div>
         </div>
-        {files.length > 0 && (
+        {files?.length > 0 && (
           <>
             <hr className="my-8 h-px bg-gray-200 border-0" />
-            <div className="w-full flex">
-              <div className="w-1/2">
-                <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-                <div className="text-gray-600 leading-loose mt-2 mb-8">
-                  Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
-                  ).
-                </div>
-                <DatePickerList value={date} onChange={(data) => setDate({ ...data, date })} />
-              </div>
-              <div className="w-1/2">
-                <img className="h-64 mx-auto" src={require(`../../../assets/IDProof/${ID.imgDate}`)} alt={ID.title} />
-              </div>
+            <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+            <div className="text-gray-600 leading-loose my-2">
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+              ).
             </div>
+            <div className="w-3/4 mx-auto">
+              <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+            </div>
+            <DatePickerList value={date} onChange={(date) => setDate(date)} />
           </>
         )}
       </div>
