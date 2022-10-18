@@ -346,6 +346,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  inscriptionDoneDate: {
+    type: Date,
+    documentation: {
+      description: "Date de validation de l'inscription par le jeune",
+    },
+  },
+
   // keep track of the current cohesion inscription step for 2020 users
   cohesion2020Step: {
     type: String,

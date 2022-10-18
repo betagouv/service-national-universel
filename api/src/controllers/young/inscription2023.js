@@ -270,7 +270,9 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (young.status === "IN_PROGRESS") {
+    const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
+
+    if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
       // If ID proof expires before session start, notify parent 1.
       const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
 
@@ -293,11 +295,10 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
           youngName: young.lastName,
         },
       });
+      value.inscriptionDoneDate = new Date();
     }
-    young.set({
-      informationAccuracy: "true",
-      inscriptionStep2023: STEPS2023.WAITING_CONSENT,
-    });
+
+    young.set(value);
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -381,6 +382,9 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
         },
       });
     }
+
+    young.set({ inscriptionDoneDate: new Date() });
+    await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
