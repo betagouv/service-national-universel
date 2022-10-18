@@ -17,6 +17,83 @@ const File = new mongoose.Schema({
   expirationDate: Date,
 });
 
+const CorrectionRequest = new mongoose.Schema({
+  moderatorId: {
+    type: mongoose.ObjectId,
+    required: true,
+    documentation: {
+      description: "Identifiant du demandeur",
+    },
+  },
+  cohort: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Cohorte du jeune au moment de la dernière action sur cette demande de correction",
+    },
+  },
+  field: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Champs concerné pour la demande de correction. (une seule demande par champs",
+    },
+  },
+  reason: {
+    type: String,
+    documentation: {
+      description: "Motif de la demande de correction",
+    },
+  },
+  message: {
+    type: String,
+    documentation: {
+      description: "Message complétementaire pour la demande de correction",
+    },
+  },
+  status: {
+    type: String,
+    required: true,
+    default: "PENDING",
+    enum: ["PENDING" | "SENT" | "REMINDED" | "CORRECTED" | "CANCELED"],
+    documentation: {
+      description: "Etat de la demande de correction",
+    },
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    documentation: {
+      description: "Date de création de la demande de correction",
+    },
+  },
+
+  sentAt: {
+    type: Date,
+    documentation: {
+      description: "Date de premier envoi de la demande de correction",
+    },
+  },
+  remindedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de la dernière relance envoyée au jeune",
+    },
+  },
+  correctedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de correction du jeune",
+    },
+  },
+  canceledAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'annulation de la demande",
+    },
+  },
+});
+
 const Schema = new mongoose.Schema({
   sqlId: {
     type: String,
@@ -1566,6 +1643,15 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Statut de la dernière demande d'équivalence phase 2",
+    },
+  },
+
+  // --- demandes de corrections : phase 0
+  correctionRequests: {
+    type: [CorrectionRequest],
+    default: undefined,
+    documentation: {
+      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
     },
   },
 

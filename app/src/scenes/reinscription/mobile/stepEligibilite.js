@@ -40,7 +40,7 @@ export default function StepEligibilite() {
 
     setData({
       frenchNationality: young.frenchNationality,
-      birthDate: new Date(young.birthDateAt),
+      birthDate: new Date(young.birthdateAt),
       school:
         young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
           ? {
