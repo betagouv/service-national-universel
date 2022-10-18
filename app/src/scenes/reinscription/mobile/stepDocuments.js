@@ -1,13 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
+import api from "../../../services/api";
+import { capture } from "../../../sentry";
+import { translate } from "snu-lib";
+import { supportURL } from "../../../config";
+
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
+import Error from "../../../components/error";
+import Bin from "../../../assets/icons/Bin";
+import Help from "../../inscription2023/components/Help";
 
 export default function StepDocuments() {
   const history = useHistory();
+  const dispatch = useDispatch();
+  const young = useSelector((state) => state.Auth.young);
+  const [files, setFiles] = useState(young?.files.cniFiles);
+  const [error, setError] = useState({});
 
   const IDs = [
     {
@@ -26,15 +40,38 @@ export default function StepDocuments() {
     },
   ];
 
+  async function deleteFile(fileId) {
+    try {
+      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
+      if (!res.ok) setError({ text: "Wesh" });
+      setFiles(res.data);
+    } catch (e) {
+      capture(e);
+      setError({ text: "Impossible de supprimer ce fichier." });
+    }
+  }
+
+  async function onSubmit() {
+    const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
+    if (!ok) {
+      capture(code);
+      setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      return;
+    }
+    dispatch(setYoung(responseData));
+    history.push("/reinscription/done");
+  }
+
   return (
     <>
       <Navbar />
       <div className="bg-white p-4">
+        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((id) => (
@@ -50,9 +87,33 @@ export default function StepDocuments() {
             </div>
           </Link>
         ))}
+        {files?.length > 0 && (
+          <>
+            <h2 className="text-base text-gray-800 font-semibold my-2">Documents en ligne&nbsp;:</h2>
+            <div className="space-y-2">
+              {files.map((e) => (
+                <div key={e._id} className="flex w-full justify-between">
+                  <div className="w-2/3">
+                    <p className="text-gray-800 text-sm truncate">{e.name}</p>
+                    <p className="text-gray-600 text-xs truncate">{translate(e.category)}</p>
+                  </div>
+                  <div className="text-blue-800 flex">
+                    <div className="mt-1 mr-1">
+                      <Bin />
+                    </div>
+                    <p className="text-sm font-medium" onClick={() => deleteFile(e._id)}>
+                      Supprimer
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
+      <Help />
       <Footer marginBottom={"88px"} />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/confirm")} disabled />
+      <StickyButton text="Continuer" onSubmit={onSubmit} onClickPrevious={() => history.push("/reinscription/sejour")} disabled={!files} />
     </>
   );
 }

@@ -9,7 +9,7 @@ import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023 } from "snu-lib";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
-import DesktopPageContainer from "../components/DesktopPageContainer";
+import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 
@@ -38,13 +38,13 @@ export default function StepUpload() {
       capture(res.code);
       return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
     }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
     if (!ok) {
       capture(code);
       return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
     }
     dispatch(setYoung(responseData));
-    plausibleEvent("Phase0/CTA inscription - CI mobile");
+    plausibleEvent("Phase0/CTA reinscription - CI mobile");
     history.push("/inscription2023/confirm");
   }
 
@@ -77,7 +77,7 @@ export default function StepUpload() {
     <DesktopPageContainer
       title={ID[category].title}
       subTitle={ID[category].subTitle}
-      onClickPrevious={() => history.push("/inscription2023/documents")}
+      onClickPrevious={() => history.push("/reinscription/documents")}
       onSubmit={onSubmit}
       disabled={!date}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>

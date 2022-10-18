@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import Bin from "../../../assets/icons/Bin";
-import Error from "../../../components/error";
-import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
+import { useHistory, useParams } from "react-router-dom";
+import { supportURL } from "../../../config";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
+import { formatDateFR, sessions2023 } from "snu-lib";
 import { translate } from "../../../utils";
-import ExpirationDate from "../components/ExpirationDate";
+
+import DatePickerList from "../../preinscription/components/DatePickerList";
+import Error from "../../../components/error";
+import Footer from "../../../components/footerV2";
+import Help from "../../inscription2023/components/Help";
 import Navbar from "../components/Navbar";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -17,117 +23,76 @@ export default function StepUpload() {
   const history = useHistory();
   const dispatch = useDispatch();
   const [error, setError] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [fileError, setFileError] = useState({});
-  const [ID, setID] = useState();
-  const [filesToUpload, setFilesToUpload] = useState();
-  const [filesUploaded, setFilesUploaded] = useState();
+  const [files, setFiles] = useState();
   const [date, setDate] = useState();
 
-  let disabled = false;
-  if (!date || !error || loading) disabled = true;
-  if (filesUploaded?.length) disabled = false;
-
-  async function upload(files) {
+  async function onSubmit() {
     for (const file of files) {
-      if (file.size > 5000000) {
-        return setFileError({
+      if (file.size > 5000000)
+        return setError({
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
-      }
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID.category, date);
-    if (res.code === "FILE_CORRUPTED") {
-      setFileError({
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, date);
+    if (res.code === "FILE_CORRUPTED")
+      return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
-    } else if (!res.ok) {
+    if (!res.ok) {
       capture(res.code);
-      setFileError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
     }
+    const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
+    if (!ok) {
+      capture(code);
+      return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+    }
+    dispatch(setYoung(responseData));
+    plausibleEvent("Phase0/CTA reinscription - CI mobile");
+    history.push("/reinscription/done");
   }
 
-  async function deleteFile(fileId) {
-    try {
-      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
-      if (!res.ok) setError({ text: "Wesh" });
-      setFilesUploaded(res.data.filter((e) => e.category === category));
-    } catch (e) {
-      capture(e);
-      setError({ text: "Impossible de supprimer ce fichier." });
-    }
-  }
+  const ID = {
+    cniNew: {
+      category: "cniNew",
+      title: "Carte Nationale d'Identité",
+      subtitle: "Nouveau format (après août 2021)",
+      imgFront: "cniNewFront.png",
+      imgBack: "cniNewBack.png",
+      imgDate: "cniNewDate.png",
+    },
+    cniOld: {
+      category: "cniOld",
+      title: "Carte Nationale d'Identité",
+      subtitle: "Ancien format",
+      imgFront: "cniOldFront.png",
+      imgBack: "cniOldBack.png",
+      imgDate: "cniOldDate.png",
+    },
+    passport: {
+      category: "passport",
+      title: "Passeport",
+      imgFront: "passport.png",
+      imgDate: "passportDate.png",
+    },
+  };
 
-  async function onSubmit() {
-    setLoading(true);
-    try {
-      await upload([...filesToUpload]);
-      if (error.length) return setLoading(false);
-
-      const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
-      if (!ok) {
-        capture(code);
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
-      dispatch(setYoung(responseData));
-      history.push("/reinscription/confirm");
-    } catch (e) {
-      capture(e);
-      setError({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    if (category === "cniNew")
-      setID({
-        category: "cniNew",
-        title: "Carte Nationale d'Identité",
-        subtitle: "Nouveau format (après août 2021)",
-        imgFront: "cniNewFront.png",
-        imgBack: "cniNewBack.png",
-        imgDate: "cniNewDate.png",
-      });
-    if (category === "cniOld")
-      setID({
-        category: "cniOld",
-        title: "Carte Nationale d'Identité",
-        subtitle: "Ancien format",
-        imgFront: "cniOldFront.png",
-        imgBack: "cniOldBack.png",
-        imgDate: "cniOldDate.png",
-      });
-    if (category === "passport") {
-      setID({
-        category: "passport",
-        title: "Passeport",
-        imgFront: "passport.png",
-        imgDate: "passportDate.png",
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    setFilesUploaded(young.files.cniFiles.filter((e) => e.category === category));
-  }, [young]);
-
-  if (!ID) return <div>Loading</div>;
   return (
     <>
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-2xl font-semibold mt-2 text-gray-800">{ID.title}</div>
-        {ID.subtitle && <div className="text-xl mb-2 text-gray-600">{ID.subtitle}</div>}
+        <div className="w-full flex justify-between items-center mt-2">
+          <div className="text-2xl font-semibold text-gray-800 flex-1">{ID[category].title}</div>
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
+            <QuestionMarkBlueCircle />
+          </a>
+        </div>
+        {ID[category].subtitle && <div className="text-xl mb-2 text-gray-600">{ID[category].subtitle}</div>}
         <div className="w-full flex items-center justify-center my-4">
           <div className="w-3/4 flex flex-col gap-4">
-            <img src={require(`../../../assets/IDProof/${ID.imgFront}`)} alt={ID.title} />
-            {ID.imgBack && <img src={require(`../../../assets/IDProof/${ID.imgBack}`)} alt={ID.title} />}
+            <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+            {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
           </div>
         </div>
         <div className="my-2 border-l-8 border-l-[#6A6AF4] pl-4">
@@ -144,7 +109,7 @@ export default function StepUpload() {
           name="file-upload"
           accept=".png, .jpg, .jpeg, .pdf"
           onChange={(e) => {
-            setFilesToUpload(e.target.files);
+            setFiles(e.target.files);
           }}
           className="hidden"
         />
@@ -155,8 +120,8 @@ export default function StepUpload() {
             </label>
           </div>
           <div className="ml-4">
-            {filesToUpload ? (
-              Array.from(filesToUpload).map((e) => (
+            {files ? (
+              Array.from(files).map((e) => (
                 <p className="text-gray-800 text-sm mt-2" key={e.name}>
                   {e.name}
                 </p>
@@ -166,26 +131,24 @@ export default function StepUpload() {
             )}
           </div>
         </div>
-        {Object.keys(fileError).length > 0 && <Error {...fileError} onClose={() => setError({})} />}
-        {filesToUpload && <ExpirationDate ID={ID} date={date} setDate={setDate} />}
-        <div className="mt-2">
-          {filesUploaded &&
-            filesUploaded.map((e) => (
-              <div key={e._id} className="flex w-full justify-between">
-                <p className="text-gray-800 text-sm mt-2">{e.name}</p>
-                <div className="text-blue-800 flex mt-2">
-                  <div className="mt-1">
-                    <Bin />
-                  </div>
-                  <p className="text-sm font-medium ml-2" onClick={() => deleteFile(e._id)}>
-                    Supprimer
-                  </p>
-                </div>
-              </div>
-            ))}
-        </div>
+        {files?.length > 0 && (
+          <>
+            <hr className="my-8 h-px bg-gray-200 border-0" />
+            <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+            <div className="text-gray-600 leading-loose my-2">
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+              ).
+            </div>
+            <div className="w-3/4 mx-auto">
+              <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+            </div>
+            <DatePickerList value={date} onChange={(date) => setDate(date)} />
+          </>
+        )}
       </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={() => onSubmit(filesToUpload)} disabled={disabled} />
+      <Help />
+      <Footer marginBottom="mb-[88px]" />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={onSubmit} disabled={!date} />
     </>
   );
 }

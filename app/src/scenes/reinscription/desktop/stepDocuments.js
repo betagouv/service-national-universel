@@ -9,7 +9,7 @@ import { translate } from "snu-lib";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Bin from "../../../assets/icons/Bin";
-import DesktopPageContainer from "../components/DesktopPageContainer";
+import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 
 export default function StepDocuments() {
@@ -31,14 +31,14 @@ export default function StepDocuments() {
   }
 
   async function onSubmit() {
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       return;
     }
     dispatch(setYoung(responseData));
-    history.push("/inscription2023/confirm");
+    history.push("/reinscription/done");
   }
 
   const docs = [
@@ -62,7 +62,7 @@ export default function StepDocuments() {
     <DesktopPageContainer
       title="Ma pièce d’identité"
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
-      onClickPrevious={() => history.push("/inscription2023/representants")}
+      onClickPrevious={() => history.push("/reinscription/representants")}
       onSubmit={onSubmit}
       disabled={!files.length}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
