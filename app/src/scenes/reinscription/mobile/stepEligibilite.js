@@ -12,7 +12,7 @@ import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SearchableSelect from "../../../components/SearchableSelect";
 import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/CheckBox";
+import CheckBox from "../../../components/inscription/checkbox";
 import DateFilter from "../../preinscription/components/DatePickerList";
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../sentry";
