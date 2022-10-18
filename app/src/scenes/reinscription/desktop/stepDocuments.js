@@ -93,7 +93,7 @@ export default function StepDocuments() {
                     <div className="mt-1 mr-1">
                       <Bin />
                     </div>
-                    <p className="text-sm font-medium">Supprimer</p>
+                    <p className="text-sm font-medium cursor-pointer">Supprimer</p>
                   </div>
                 </div>
               ))}
