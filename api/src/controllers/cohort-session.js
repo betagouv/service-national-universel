@@ -127,8 +127,10 @@ router.post("/eligibility/2023", async (req, res) => {
     })
       .unknown()
       .validate(eligibilityObject);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { department, birthDate, schoolLevel } = value;
     const zone = getZoneByDepartment(department);
 

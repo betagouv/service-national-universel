@@ -40,7 +40,7 @@ export default function StepEligibilite() {
 
     setData({
       frenchNationality: young.frenchNationality,
-      birthDate: young.birthdateAt.split("T")[0],
+      birthDate: new Date(young.birthDateAt),
       school:
         young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
           ? {
@@ -134,12 +134,13 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
       zip: data.zip,
+      birthDate: data.birthDate,
     };
 
     try {
       const res = await api.post("/cohort-session/eligibility/2023", {
         department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-        birthDate: new Date(data.birthDate),
+        birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
