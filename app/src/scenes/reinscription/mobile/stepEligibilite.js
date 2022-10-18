@@ -27,14 +27,13 @@ export default function StepEligibilite() {
   // const [data, setData] = React.useContext(PreInscriptionContext);
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 30 ~ StepEligibilite ~ young", young);
   const dispatch = useDispatch();
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
-  // console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
+  console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
 
   useEffect(() => {
     if (!young) return;
@@ -139,8 +138,6 @@ export default function StepEligibilite() {
     };
 
     try {
-      console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data.birthDate);
-
       const res = await api.post("/cohort-session/eligibility/2023", {
         department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
         birthDate: data.birthDate,
