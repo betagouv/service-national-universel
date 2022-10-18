@@ -1,16 +1,19 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { getDepartmentByZip } from "snu-lib";
+import { capture } from "../../../sentry";
+import { apiURL } from "../../../config";
+import { useSelector } from "react-redux";
 
 export default function NonEligible() {
+  const young = useSelector((state) => state.Auth.young);
+  const [msg, setMsg] = useState("");
   const history = useHistory();
-  // eslint-disable-next-line no-unused-vars
-  const [_, __, removePersistedData] = useContext(PreInscriptionContext);
 
   const engagementPrograms = [
     {
@@ -43,16 +46,33 @@ export default function NonEligible() {
     },
   ];
   const onClickButton = () => {
-    removePersistedData(true);
     history.push("/");
   };
 
+  const getMessageNonEligible = async (young) => {
+    const res = await apiURL.post("/cohort-session/eligibility/2023", {
+      department: young.school?.departmentName || getDepartmentByZip(young.zip) || null,
+      birthDate: young.birthDate,
+      schoolLevel: young.scolarity,
+      frenchNationality: young.frenchNationality,
+    });
+    if (!res.ok) {
+      capture(res.code);
+    }
+    setMsg(res.data.msg);
+  };
+
+  useEffect(() => {
+    if (!young) return null;
+
+    getMessageNonEligible(young);
+  }, [young]);
   return (
     <>
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[60%] mx-auto my-0 px-[102px] py-[60px]">
           <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-          {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
+          {msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{msg}</div>}
           <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
           <div className="overflow-x-auto flex flex-wrap justify-between">
             {engagementPrograms.map((program, index) => {
