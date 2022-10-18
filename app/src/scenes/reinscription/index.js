@@ -10,6 +10,13 @@ import MobileDocuments from "./mobile/stepDocuments";
 import MobileDone from "./mobile/stepDone";
 import MobileUpload from "./mobile/stepUpload";
 
+import DesktopEligibilite from "./desktop/stepEligibilite";
+import DesktopNonEligible from "./desktop/stepNonEligible";
+import DesktopSejour from "./desktop/stepSejour";
+import DesktopDocuments from "./desktop/stepDocuments";
+import DesktopDone from "./desktop/stepDone";
+import DesktopUpload from "./desktop/stepUpload";
+
 import useDevice from "../../hooks/useDevice";
 
 import HeaderMenu from "../../components/headerMenu";
@@ -22,13 +29,13 @@ const getStepUrl = (name) => {
 };
 
 function renderStep(step, device) {
-  if (step === STEPS.ELIGIBILITE) return device === "desktop" ? null : <MobileEligibilite />;
-  if (step === STEPS.NONELIGIBLE) return device === "desktop" ? null : <MobileNonEligible />;
-  if (step === STEPS.SEJOUR) return device === "desktop" ? null : <MobileSejour />;
-  if (step === STEPS.DOCUMENTS) return device === "desktop" ? null : <MobileDocuments />;
-  if (step === STEPS.UPLOAD) return device === "desktop" ? null : <MobileUpload />;
-  if (step === STEPS.DONE) return device === "desktop" ? null : <MobileDone />;
-  return device === "desktop" ? null : <MobileEligibilite />;
+  if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
+  if (step === STEPS.NONELIGIBLE) return device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />;
+  if (step === STEPS.SEJOUR) return device === "desktop" ? <DesktopSejour /> : <MobileSejour />;
+  if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
+  if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
+  if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
+  return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
 }
 
 const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
