@@ -17,5 +17,5 @@ export const STEP_LIST = [
 ];
 
 export const getStepFromUrlParam = (param) => {
-  return STEP_LIST.find(({ url }) => url === param)?.name || STEPS.ELIGIBILITE;
+  return STEP_LIST.find(({ url }) => url === param)?.name;
 };

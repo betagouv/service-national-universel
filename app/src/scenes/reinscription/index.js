@@ -32,16 +32,12 @@ function renderStep(step, device) {
 }
 
 const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
-  console.log("🚀 ~ file: index.js ~ line 42 ~ Step ~ eligibleStep", eligibleStep);
   const device = useDevice();
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
+  if (!eligibleStep) return <Redirect to={`/home`} />;
   let currentStep = getStepFromUrlParam(step);
-  console.log("🚀 ~ file: index.js ~ line 47 ~ Step ~ currentStep", currentStep);
-
-  if (!eligibleStep) eligibleStep = getStepFromUrlParam(step);
-  console.log("🚀 ~ file: index.js ~ line 50 ~ Step ~ eligibleStep", eligibleStep);
 
   if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/reinscription/${getStepUrl(STEPS.DONE)}`} />;
 
