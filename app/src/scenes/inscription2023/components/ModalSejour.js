@@ -26,7 +26,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
       try {
         const res = await api.post("/cohort-session/eligibility/2023", {
           department: young?.schoolDepartment || getDepartmentByZip(young?.zip) || null,
-          birthDate: young.birthdateAt,
+          birthDate: young.birthDateAt,
           schoolLevel: young.grade,
         });
         if (res.data.msg) return setError({ text: res.data.msg });

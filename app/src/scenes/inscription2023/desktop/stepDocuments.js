@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
@@ -41,7 +41,7 @@ export default function StepDocuments() {
     history.push("/inscription2023/confirm");
   }
 
-  const IDs = [
+  const documents = [
     {
       category: "cniNew",
       title: "Carte Nationale d'Identité",
@@ -63,40 +63,37 @@ export default function StepDocuments() {
       title="Ma pièce d’identité"
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
       onClickPrevious={() => history.push("/inscription2023/representants")}
-      onClick={onSubmit}
+      onSubmit={onSubmit}
+      disabled={!files.length}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      {IDs.map((id) => (
-        <Link key={id.category} to={`televersement/${id.category}`}>
-          <div className="my-4">
-            <div className="border p-4 my-3 flex justify-between items-center">
-              <div>
-                <div>{id.title}</div>
-                {id.subtitle && <div className="text-gray-500 text-sm">{id.subtitle}</div>}
-              </div>
-              <ArrowRightBlueSquare />
+      {documents.map((doc) => (
+        <div key={doc.category} className="my-4 hover:bg-gray-50 cursor-pointer" onClick={() => history.push(`televersement/${doc.category}`)}>
+          <div className="border p-4 my-3 flex justify-between items-center">
+            <div>
+              <div>{doc.title}</div>
+              {doc.subtitle && <div className="text-gray-500 text-sm">{doc.subtitle}</div>}
             </div>
+            <ArrowRightBlueSquare />
           </div>
-        </Link>
+        </div>
       ))}
       <div className="mt-2">
         {files?.length > 0 && (
           <>
-            <h2 className="text-base text-gray-800 font-semibold my-2">Documents en ligne&nbsp;:</h2>
-            <div className="space-y-2">
+            <h2 className="text-base text-gray-800 font-semibold my-3">Mes documents en ligne&nbsp;:</h2>
+            <div className="space-y-3">
               {files.map((e) => (
-                <div key={e._id} className="flex w-full justify-between">
+                <div key={e._id} className="flex w-1/2 justify-between">
                   <div className="w-2/3">
                     <p className="text-gray-800 text-sm truncate">{e.name}</p>
-                    <p className="text-gray-600 text-xs truncate">{translate(e.category)}</p>
+                    <p className="text-gray-500 text-xs truncate">{translate(e.category)}</p>
                   </div>
-                  <div className="text-blue-800 flex">
+                  <div className="flex text-blue-800 hover:text-blue-500 cursor-pointer" onClick={() => deleteFile(e._id)}>
                     <div className="mt-1 mr-1">
                       <Bin />
                     </div>
-                    <p className="text-sm font-medium" onClick={() => deleteFile(e._id)}>
-                      Supprimer
-                    </p>
+                    <p className="text-sm font-medium">Supprimer</p>
                   </div>
                 </div>
               ))}

@@ -35,7 +35,7 @@ export default function StepUpload() {
       });
     if (!res.ok) {
       capture(res.code);
-      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
     }
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
     if (!ok) {
@@ -80,52 +80,55 @@ export default function StepUpload() {
       onSubmit={onSubmit}
       disabled={!date}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
-      <div className="bg-white p-4">
-        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="w-full flex mb-4">
-          <div className="flex align-center items-center">
-            <img className={`${ID[category].imgBack ? "w-1/4" : "w-1/2"} px-4`} src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-            {ID[category].imgBack && <img className="w-1/4 px-4" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
-          </div>
-        </div>
-        <div className="my-2 border-l-8 border-l-[#6A6AF4] pl-4">
-          Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
-          document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
-        </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
-        <div>Ajouter un fichier</div>
-        <div className="text-gray-500 text-sm mt-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Plusieurs fichiers possibles.</div>
-        <input
-          type="file"
-          multiple
-          id="file-upload"
-          name="file-upload"
-          accept=".png, .jpg, .jpeg, .pdf"
-          onChange={(e) => {
-            setFiles(e.target.files);
-          }}
-          className="hidden"
-        />
-        <div className="flex w-full mt-4">
-          <div>
-            <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
-              Parcourir...
-            </label>
-          </div>
-          <div className="ml-4">
-            {files ? (
-              Array.from(files).map((e) => (
-                <p className="text-gray-800 text-sm mt-2" key={e.name}>
-                  {e.name}
-                </p>
-              ))
-            ) : (
-              <div className="text-gray-800 text-sm mt-2">Aucun fichier sélectionné.</div>
-            )}
-          </div>
-        </div>
-        {files.length > 0 && <ExpirationDate ID={ID[category]} date={date} setDate={setDate} />}
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+      <div className="w-full my-16 flex justify-around">
+        <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+        {ID[category].imgBack && <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
       </div>
+      <div className="border-l-8 border-l-[#6A6AF4] pl-8 leading-loose">
+        Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
+        document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
+      </div>
+      <hr className="my-8 h-px bg-gray-200 border-0" />
+      <div>Ajouter un fichier</div>
+      <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Plusieurs fichiers possibles.</div>
+      <input
+        type="file"
+        multiple
+        id="file-upload"
+        name="file-upload"
+        accept=".png, .jpg, .jpeg, .pdf"
+        onChange={(e) => {
+          setFiles(e.target.files);
+        }}
+        className="hidden"
+      />
+      <div className="flex w-full my-4">
+        <div>
+          <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+            Parcourir...
+          </label>
+        </div>
+        <div className="ml-4 mt-2">
+          {files.length ? (
+            Array.from(files).map((e) => (
+              <p className="text-gray-800 text-sm" key={e.name}>
+                {e.name}
+              </p>
+            ))
+          ) : (
+            <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
+          )}
+        </div>
+      </div>
+      <div className="text-gray-800 text-sm my-4">
+        Vous avez besoin d’aide pour téléverser les documents ?{" "}
+        <a href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/" className="underline">
+          Cliquez ici
+        </a>
+        .
+      </div>
+      {files.length > 0 && <ExpirationDate ID={ID[category]} date={date} setDate={setDate} young={young} />}
     </DesktopPageContainer>
   );
 }
