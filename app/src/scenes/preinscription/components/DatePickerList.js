@@ -1,15 +1,22 @@
 import React from "react";
+import DatePicker, { registerLocale } from "react-datepicker";
+import fr from "date-fns/locale/fr";
+import "react-datepicker/dist/react-datepicker.css";
+import { FiCalendar } from "react-icons/fi";
+registerLocale("fr", fr);
 
 export default function DatePickerList({ value, onChange, disabled = false }) {
   return (
-    <div className="flex flex-wrap bg-white rounded-[0.4rem] box-border shadow-sm">
-      <div className="flex py-[10px] px-[20px] w-full">
-        {disabled ? (
-          <input min={value} max={value} className="cursor-pointer text-[14px] w-full bg-inherit" type="date" value={value} onChange={onChange}></input>
-        ) : (
-          <input className="cursor-pointer text-[14px] w-full bg-inherit" type="date" value={value} onChange={onChange}></input>
-        )}
-      </div>
+    <div className="flex justify-between items-center gap-3 w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px] mt-2">
+      <DatePicker
+        locale="fr"
+        selected={value}
+        onChange={onChange}
+        placeholderText={"jj/mm/aaaa"}
+        disabled={disabled}
+        className="bg-[#EEEEEE] w-full"
+        dateFormat="dd/MM/yyyy"></DatePicker>
+      <FiCalendar />
     </div>
   );
 }

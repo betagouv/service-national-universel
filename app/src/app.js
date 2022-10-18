@@ -117,7 +117,8 @@ export default function App() {
         )}
         {environment === "production" ? (
           <Footer />
-        ) : ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) === -1 ? (
+        ) : ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) ===
+          -1 ? (
           <Footer />
         ) : null}
       </div>
@@ -163,12 +164,15 @@ const Espace = () => {
       <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/preinscription" }} />
     );
   }
-  const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.NOT_AUTORISED].includes(young.status);
+  const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.NOT_AUTORISED].includes(young.status);
+
+  const forceRedirectInscription =
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) || (young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
 
   // @todo: clean this
   if (environment === "production" && !inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
   if (environment === "production" && youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
-  if (environment !== "production" && youngInProcessInscription) return <Redirect to="/inscription2023" />;
+  if (environment !== "production" && forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
     <>

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import api from "../../../services/api";
-import CreatableSelect from "../../../components/CreatableSelect";
 import { ES_NO_LIMIT } from "snu-lib";
-import validator from "validator";
+import CreatableSelect from "../../../components/CreatableSelect";
+import api from "../../../services/api";
 
 export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify }) {
   const [countries, setCountries] = useState([]);

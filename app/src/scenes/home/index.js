@@ -8,9 +8,11 @@ import Refused from "./refused";
 import Default from "./default";
 import Withdrawn from "./withdrawn";
 import WaitingList from "./waitingList";
-import Validated from "./validated";
+import ValidatedV2 from "./validatedV2";
 import Banner from "./components/banner";
 import HomePhase2 from "./HomePhase2";
+import { environment } from "../../config";
+import WaitingReinscription from "./WaitingReinscription";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -30,7 +32,10 @@ export default () => {
           <Withdrawn />
         </>
       );
-    if (young.status === YOUNG_STATUS.WAITING_LIST)
+    if (
+      (young.status === YOUNG_STATUS.WAITING_LIST && environment !== "production" && [("2019", "2020", "2021")].includes(young.cohort)) ||
+      (young.status === YOUNG_STATUS.WAITING_LIST && environment === "production")
+    )
       return (
         <>
           {young.cohort === "2021" ? <Banner /> : null}
@@ -44,11 +49,19 @@ export default () => {
           <Refused />
         </>
       );
-    if (["2022", "à venir"].includes(young.cohort)) {
+    if (
+      environment !== "production" &&
+      [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST].includes(young.status) &&
+      ["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort) &&
+      (young.cohort === "à venir" || young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.NOT_DONE && !young.cohesionStayPresence && !young.departInform))
+    ) {
+      return <WaitingReinscription />;
+    }
+    if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-      if (young.status === YOUNG_STATUS.VALIDATED) return <Validated />;
+      if (young.status === YOUNG_STATUS.VALIDATED) return <ValidatedV2 />;
     }
     if (
       young.status === YOUNG_STATUS.VALIDATED &&

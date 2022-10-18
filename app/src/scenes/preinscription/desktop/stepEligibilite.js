@@ -90,7 +90,7 @@ export default function StepEligibilite() {
     }
     const res = await api.post("/cohort-session/eligibility/2023", {
       department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-      birthDate: new Date(data.birthDate),
+      birthDate: data.birthDate,
       schoolLevel: data.scolarity,
       frenchNationality: data.frenchNationality,
     });
@@ -128,23 +128,25 @@ export default function StepEligibilite() {
             </div>
             {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
           </div>
-          <div className="flex flex-col">
-            <SearchableSelect
-              label="Niveau de scolarité"
-              value={data.scolarity}
-              options={optionsScolarite}
-              onChange={(value) => {
-                setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
-              }}
-              placeholder="Sélectionnez une option"
-            />
-            {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
+          <div className="flex w-full space-x-4">
+            <div className="flex flex-col w-1/2">
+              <SearchableSelect
+                label="Niveau de scolarité"
+                value={data.scolarity}
+                options={optionsScolarite}
+                onChange={(value) => {
+                  setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
+                }}
+                placeholder="Sélectionnez une option"
+              />
+              {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
+            </div>
+            <label className="flex flex-col flex-start text-base w-1/2 mt-2">
+              Date de naissance
+              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+            </label>
           </div>
-          <label className="flex flex-col flex-start text-base">
-            Date de naissance
-            <DatePickerList title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
-            {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
-          </label>
           {data.scolarity && (
             <>
               <div className="flex justify-between items-center">
