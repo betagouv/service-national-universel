@@ -7,12 +7,14 @@ import Tab from "./Tab";
 import { appURL } from "../../../config";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { useSelector } from "react-redux";
 import Pencil from "../../../assets/icons/Pencil";
 import History from "../../../assets/icons/History";
 import Field from "./Field";
 import { translate } from "snu-lib";
+import { Button } from "./Buttons";
+import Bin from "../../../assets/Bin";
+import TakePlace from "../../../assets/icons/TakePlace";
 
 export default function YoungHeader({ young, tab, onChange }) {
   const user = useSelector((state) => state.Auth.user);
@@ -60,11 +62,17 @@ export default function YoungHeader({ young, tab, onChange }) {
       <div className="ml-[30px]">
         <div className="">
           <Field name="status" label="Inscription" value={translate(young.status)} />
-          <div className="flex items-center mt-[16px]">
-            <a className="mr-[4px]" href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-            </a>
-            <PanelActionButton className="ml-[4px]" onClick={onClickDelete} icon="bin" title="Supprimer" />
+          <div className="flex items-center justify-between my-[15px]">
+            <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+              Supprimer
+            </Button>
+            <Button
+              className="ml-[8px]"
+              icon={<TakePlace className="text-[#6B7280]" />}
+              href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
+              onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+              Prendre sa place
+            </Button>
           </div>
         </div>
       </div>
