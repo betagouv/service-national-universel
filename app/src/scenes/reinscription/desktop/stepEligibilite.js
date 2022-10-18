@@ -16,6 +16,8 @@ import { capture } from "../../../sentry";
 import { getDepartmentByZip } from "snu-lib";
 import api from "../../../services/api";
 import DatePickerList from "../../preinscription/components/DatePickerList";
+import { setYoung } from "../../../redux/auth/actions";
+import { translate } from "../../../utils";
 
 import { STEPS } from "../utils/navigation";
 
@@ -113,27 +115,65 @@ export default function StepEligibilite() {
 
     setLoading(true);
     plausibleEvent("Phase1/CTA reinscription - eligibilite");
-    if (data.frenchNationality === "false") {
-      setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
-      return history.push("/preinscription/noneligible");
-    }
-    const res = await api.post("/cohort-session/eligibility/2023", {
-      department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+
+    const updates = {
+      grade: data.scolarity,
+      schooled: data.school ? "true" : "false",
+      schoolName: data.school?.fullName,
+      schoolType: data.school?.type,
+      schoolAddress: data.school?.adresse,
+      schoolZip: data.school?.codeCity,
+      schoolCity: data.school?.city,
+      schoolDepartment: data.school?.departmentName,
+      schoolRegion: data.school?.region,
+      schoolCountry: data.school?.country,
+      schoolId: data.school?._id,
+      zip: data.zip,
       birthDate: data.birthDate,
-      schoolLevel: data.scolarity,
-      frenchNationality: data.frenchNationality,
-    });
-    if (!res.ok) {
-      capture(res.code);
-      setError({ text: "Impossible de vérifier votre éligibilité" });
-      setLoading(false);
+    };
+
+    try {
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+        birthDate: data.birthDate,
+        schoolLevel: data.scolarity,
+        frenchNationality: data.frenchNationality,
+      });
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Impossible de vérifier votre éligibilité" });
+        setLoading(false);
+      }
+
+      if (res.data.msg) {
+        const res = await api.put("/young/reinscription/noneligible");
+        if (!res.ok) {
+          capture(res.code);
+          setError({ text: "Pb avec votre non eligibilite" });
+          setLoading(false);
+        }
+        return history.push("/reinscription/noneligible");
+      }
+
+      updates.sessions = res.data;
+    } catch (e) {
+      capture(e);
+      toastr.error("Une erreur s'est produite :", translate(e.code));
     }
-    if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
+
+    try {
+      const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
+      return history.push("/reinscription/sejour");
+    } catch (e) {
+      capture(e);
+      toastr.error("Une erreur s'est produite :", translate(e.code));
     }
-    setData({ ...data, sessions: res.data, step: PREINSCRIPTION_STEPS.SEJOUR });
-    return history.push("/preinscription/sejour");
   };
 
   return (

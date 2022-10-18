@@ -117,7 +117,6 @@ export default function StepEligibilite() {
 
     setLoading(true);
     plausibleEvent("Phase1/CTA reinscription - eligibilite");
-    if (data.frenchNationality === "false") return history.push("/reinscription/noneligible");
 
     const updates = {
       grade: data.scolarity,
@@ -148,7 +147,7 @@ export default function StepEligibilite() {
         setLoading(false);
       }
 
-      if (!res.data.length) {
+      if (res.data.msg) {
         const res = await api.put("/young/reinscription/noneligible");
         if (!res.ok) {
           capture(res.code);
