@@ -148,7 +148,7 @@ class Auth {
         zip,
         cohort,
         grade,
-        inscription2023: STEPS2023.COORDONNEES,
+        inscriptionStep2023: STEPS2023.COORDONNEES,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());

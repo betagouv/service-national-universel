@@ -42,7 +42,7 @@ export default function StepDone() {
         <h1 className="text-xl text-[#161616]">Bienvenue {data.firstName} ! Vous avez complété votre pré-inscription.</h1>
 
         <div className="mt-4 text-[#3A3A3A] text-sm">
-          Vous pouvez dès à présent <strong>compléter</strong> votre inscription ou <strong>reprendre à tout moment</strong> depuis le mail envoyé à {data.email}, ou depuis
+          Vous pouvez dès à présent <strong>compléter</strong> votre inscription ou <strong>la reprendre à tout moment</strong> depuis le mail envoyé à {data.email}, ou depuis
           &quot;Se connecter&quot;
         </div>
         <div className="mt-4 border-x-[1px] border-t-[1px] border-b-4 border-b-[#000091] px-3 pt-2 pb-7">

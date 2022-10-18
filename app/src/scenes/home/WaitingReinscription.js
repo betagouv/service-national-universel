@@ -28,7 +28,7 @@ export default function WaitingReinscription() {
       if (!ok) throw new Error(translate(code));
 
       plausibleEvent("Phase0/CTA reinscription - home page");
-      return history.push("/reinscription");
+      return history.push("/reinscription/eligibilite");
     } catch (e) {
       setLoading(false);
       capture(e);

@@ -506,7 +506,10 @@ export default function StepCoordonnees() {
         />
         <div className="flex items-center mb-4">
           <div>
-            <h2 className="mt-0 text-[16px] font-bold">Souhaitez-vous nous faire part d’une situation particulière ?</h2>
+            <h2 className="mt-0 text-[16px] font-bold">
+              Souhaitez-vous nous faire part d’une situation particulière ?
+              <span className="text-[14px] ">(allergie, situation de handicap, besoin d'un aménagement spécifique, ...)</span>
+            </h2>
             <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
           </div>
           <div className="ml-3">
