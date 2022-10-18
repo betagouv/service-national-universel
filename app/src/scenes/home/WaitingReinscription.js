@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
+import { capture } from "../../sentry";
+import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
+import { translate } from "../../utils";
 
 export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
+
+  const [loading, setLoading] = useState(false);
 
   let textPrecision;
   if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour en 2022.";
@@ -14,6 +20,21 @@ export default function WaitingReinscription() {
   else if (young.status === YOUNG_STATUS.NOT_DONE && !young.cohesionStayPresence && !young.departInform)
     textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
   else return;
+
+  const onClickEligibilte = async () => {
+    try {
+      setLoading(true);
+      const { ok, code } = await API.get("/young/reinscription/goToReinscription");
+      if (!ok) throw new Error(translate(code));
+
+      plausibleEvent("Phase0/CTA reinscription - home page");
+      return history.push("/reinscription");
+    } catch (e) {
+      setLoading(false);
+      capture(e);
+      toastr.error("Une erreur s'est produite :", translate(e.code));
+    }
+  };
 
   return (
     <>
@@ -29,10 +50,8 @@ export default function WaitingReinscription() {
               <div className="flex flex-col items-stretch w-fit">
                 <button
                   className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-                  onClick={() => {
-                    plausibleEvent("Phase1/CTA reinscription - home page");
-                    history.push("/reinscription");
-                  }}>
+                  disabled={loading}
+                  onClick={onClickEligibilte}>
                   Vérifier mon éligibilité
                 </button>
               </div>
@@ -52,10 +71,8 @@ export default function WaitingReinscription() {
             <div className="left-7 font-bold text-gray-800 mt-4">Vérifiez dès maintenant votre éligibilité</div>
             <button
               className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-3 text-white hover:!text-blue-600 text-sm leading-5 transition ease-in-out duration-150"
-              onClick={() => {
-                plausibleEvent("Phase1/CTA reinscription - home page");
-                history.push("/reinscription");
-              }}>
+              disabled={loading}
+              onClick={onClickEligibilte}>
               Vérifier mon éligibilité
             </button>
           </div>
