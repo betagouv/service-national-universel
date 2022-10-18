@@ -138,10 +138,11 @@ export default function StepUpload() {
               <div className="text-gray-600 leading-loose mt-2 mb-8">
                 Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}).
               </div>
+              <p className="text-gray-800">Date d&apos;expiration</p>
               <DatePickerList value={date} onChange={(date) => setDate(date)} />
             </div>
             <div className="w-1/2">
-              <img className="h-64 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+              <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
             </div>
           </div>
         </>
