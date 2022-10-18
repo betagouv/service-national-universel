@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { capture } from "../../sentry";
 import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
@@ -10,14 +10,15 @@ import { translate } from "../../utils";
 
 export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
+  console.log("🚀 ~ file: WaitingReinscription.js ~ line 13 ~ WaitingReinscription ~ young", young);
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
 
   let textPrecision;
   if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour en 2022.";
-  else if (young.cohorte === "à venir") textPrecision = "Vous êtes inscrit sur un séjour “à venir”.";
-  else if (young.status === YOUNG_STATUS.NOT_DONE && !young.cohesionStayPresence && !young.departInform)
+  else if (young.cohort === "à venir") textPrecision = "Vous êtes inscrit sur un séjour “à venir”.";
+  else if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !young.cohesionStayPresence && !young.departInform)
     textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
   else return;
 
