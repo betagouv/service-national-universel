@@ -13,7 +13,7 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SearchableSelect from "../../../components/SearchableSelect";
 import Footer from "../../../components/footerV2";
 import CheckBox from "../../../components/inscription/checkbox";
-import DateFilter from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../preinscription/components/DatePickerList";
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../sentry";
 import { getDepartmentByZip } from "snu-lib";
@@ -77,7 +77,7 @@ export default function StepEligibilite() {
     let errors = {};
 
     // Nationality
-    if (!young?.frenchNationality) {
+    if (!data?.frenchNationality) {
       errors.frenchNationality = "Vous devez être français";
     }
     // Scolarity
@@ -185,9 +185,9 @@ export default function StepEligibilite() {
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col flex-start my-4">
@@ -215,7 +215,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4 text-[#929292]">
           Date de naissance
-          <DateFilter disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+          <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (

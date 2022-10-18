@@ -1,30 +1,59 @@
-import React from "react";
-import { toastr } from "react-redux-toastr";
+import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { getDepartmentByZip } from "snu-lib";
-import validator from "validator";
-import IconFrance from "../../../assets/IconFrance";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../components/inscription/checkbox";
-import Input from "../../../components/inscription/input";
 import Toggle from "../../../components/inscription/toggle";
-import SearchableSelect from "../../../components/SearchableSelect";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
+import Input from "../../../components/inscription/input";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import { toastr } from "react-redux-toastr";
+import IconFrance from "../../../assets/IconFrance";
+import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
-import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../components/DatePickerList";
+import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
+import SearchableSelect from "../../../components/SearchableSelect";
+import CheckBox from "../../../components/inscription/checkbox";
+import { useDispatch, useSelector } from "react-redux";
+import { capture } from "../../../sentry";
+import { getDepartmentByZip } from "snu-lib";
+import api from "../../../services/api";
+import DatePickerList from "../../preinscription/components/DatePickerList";
+
+import { STEPS } from "../utils/navigation";
 
 export default function StepEligibilite() {
-  const [data, setData] = React.useContext(PreInscriptionContext);
+  const [data, setData] = React.useState({});
+  const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
   const [error, setError] = React.useState({});
-  const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
+
+  useEffect(() => {
+    if (!young) return;
+
+    setData({
+      frenchNationality: young.frenchNationality,
+      birthDate: new Date(young.birthdateAt),
+      school:
+        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE && young.schooled
+          ? {
+              fullName: young.schoolName,
+              type: young.schoolType,
+              adresse: young.schoolAddress,
+              codeCity: young.schoolZip,
+              city: young.schoolCity,
+              departmentName: young.schoolDepartment,
+              region: young.schoolRegion,
+              country: young.schoolCountry,
+              _id: young.schoolId,
+              postCode: young.schoolZip,
+            }
+          : null,
+      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE ? young.grade : null,
+      zip: young.zip,
+    });
+  }, [young]);
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
@@ -83,7 +112,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase0/CTA preinscription - eligibilite");
+    plausibleEvent("Phase1/CTA reinscription - eligibilite");
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
       return history.push("/preinscription/noneligible");
@@ -120,7 +149,7 @@ export default function StepEligibilite() {
         <div className="flex flex-col gap-5">
           <div className="flex flex-col flex-start">
             <div className="flex items-center">
-              <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+              <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
               <div className="flex items-center">
                 <span className="ml-4 mr-2">Je suis de nationalité française</span>
                 <IconFrance />
@@ -143,7 +172,7 @@ export default function StepEligibilite() {
             </div>
             <label className="flex flex-col flex-start text-base w-1/2 mt-2">
               Date de naissance
-              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
             </label>
           </div>
