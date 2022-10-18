@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Check from "../components/Check";
 import { COHESION_STAY_START, translate } from "snu-lib";
@@ -17,6 +17,14 @@ export default function CniInvalide() {
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (young) {
+      if (young.parentStatementOfHonorInvalidId === "true" || young.parentStatementOfHonorInvalidId === "false") {
+        history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
+      }
+    }
+  }, [young]);
 
   if (!young) return <Loader />;
 
