@@ -28,7 +28,7 @@ export default function StepSejour() {
       try {
         const res = await api.post("/cohort-session/eligibility/2023", {
           department: young.schoolDepartment || getDepartmentByZip(young.zip) || null,
-          birthDate: new Date(young.birthDateAt),
+          birthDate: new Date(young.birthdateAt),
           schoolLevel: young.grade,
           frenchNationality: young.frenchNationality,
         });
