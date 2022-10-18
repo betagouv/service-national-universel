@@ -15,7 +15,9 @@ export default function DatePickerList({ value, onChange, disabled = false }) {
         placeholderText={"jj/mm/aaaa"}
         disabled={disabled}
         className="bg-[#EEEEEE] w-full"
-        dateFormat="dd/MM/yyyy"></DatePicker>
+        dateFormat="dd/MM/yyyy"
+        maxDate={new Date("01/01/2030")}
+      />
       <FiCalendar />
     </div>
   );
