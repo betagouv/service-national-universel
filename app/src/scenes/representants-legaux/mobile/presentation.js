@@ -45,7 +45,7 @@ export default function Presentation({ step }) {
             <ul>
               <li className="flex items-center mb-4 text-sm font-medium">
                 <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
-                Frais de séjour pris en charge par l’État
+                Dispositif financé par l&apos;Etat
               </li>
               <li className="flex items-center mb-4 text-sm font-medium">
                 <CheckCircleStroke stroke="#D1D5DB" className="mr-2 flex-shrink-0" />
@@ -53,15 +53,15 @@ export default function Presentation({ step }) {
               </li>
               <li className="flex items-center mb-4 text-sm font-medium">
                 <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
-                Pour mettre son énergie et ses valeurs au service d’une société solidaire
+                Renforcement de la cohésion nationale en développant une culture de l&apos;engagement
               </li>
               <li className="flex items-center mb-4 text-sm font-medium">
                 <CheckCircleStroke stroke="#D1D5DB" className="mr-2 flex-shrink-0" />
-                Réalisation d’une mission d’intérêt général (phase 2)
+                Mixité sociale et territoriale
               </li>
               <li className="flex items-center text-[14px] font-medium">
                 <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
-                Possibilité de poursuivre son engagement en phase 3
+                Accompagnement à l&apos;insertion sociale et professionnelle
               </li>
             </ul>
           </div>
