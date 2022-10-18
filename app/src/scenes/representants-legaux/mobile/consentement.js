@@ -472,9 +472,9 @@ export default function Consentement({ step, parentId }) {
               </AuthorizeBlock>*/}
               <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
                 <div className="mb-3">
-                  Le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes dûment accrédités par les services communication du
-                  ministère et/ou des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
-                  séparément, sur leurs publications respectives.{" "}
+                  Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
+                  des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
+                  leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
                     <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus
