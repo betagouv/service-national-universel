@@ -323,7 +323,7 @@ export default function Consentement({ step, parentId }) {
           <div>
             {isParentFromFranceConnect ? (
               <div className="w-[400px] text-[14px] leading-[20px] text-[#666666] mx-auto mb-[32px]">
-                Les information en provenance de FranceConnect du représentant légal n°1 ont bien été enregistrées.
+                Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
               </div>
             ) : (
               <FranceConnectButton callback={franceConnectCallbackUrl} className="flex-column" />
