@@ -156,7 +156,11 @@ class Auth {
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
-        params: { firstName: user.firstName, lastName: user.lastName, cta: `${config.APP_URL}/inscription2023` },
+        params: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+        },
       });
 
       return res.status(200).send({

@@ -273,14 +273,14 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
 
     if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
-      // If ID proof expires before session start, notify parent 1.
-      const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+      // If no ID proof has a valid date, notify parent 1.
+      const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
 
       if (notifyExpirationDate) {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
           emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
           params: {
-            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
             youngFirstName: young.firstName,
             youngName: young.lastName,
           },
@@ -290,7 +290,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -357,8 +357,8 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // If ID proof expires before session start, notify parent 1.
-    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+    // If no ID proof has a valid date, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
 
@@ -366,7 +366,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -376,7 +376,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
