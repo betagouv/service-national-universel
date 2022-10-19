@@ -11,7 +11,7 @@ export default function Index() {
 
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
+    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/preinscription" }} />;
   }
 
   return (
