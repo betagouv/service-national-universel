@@ -11,6 +11,7 @@ const app = express();
 app.use(helmet());
 app.use(helmet.hsts({ maxAge: 5184000 }));
 
+// @todo: can it be removed?
 const origin = ["http://localhost:8085"];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json({ limit: "50mb" }));
