@@ -1,11 +1,11 @@
-require("dotenv").config({ path: "../../.env-prod" });
+require("../mongo");
 
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
 const mongoose = require("mongoose");
 const { isInRuralArea, getAge } = require("snu-lib");
 
-require("../mongo");
+const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
 const { ANALYTICS_API_URL } = require("../config.js");
 const { getDateString, getMinusDate } = require("./utils");
@@ -68,7 +68,7 @@ async function process(patch, count, total) {
       }
     }
   } catch (e) {
-    console.log("CATCH", e);
+    console.log(`Couldn't create patch for patch id : ${patch._id}`, e);
   }
 }
 
@@ -110,7 +110,7 @@ async function createLog(patch, actualYoung, event, value) {
     .then((response) => response.json())
     .catch((error) => console.log("error fetch struture :", error));
 
-  console.log("log's auto-generated ID:", response.data.id);
+  // console.log("log's auto-generated ID:", response.data.id);
 }
 
 const rebuildYoung = (youngInfos) => {
@@ -140,16 +140,13 @@ async function findAll(Model, where, cb) {
         await cb(doc._doc, count, total);
         //}
       } catch (e) {
-        console.log("e", e);
+        throw e;
+        // console.log("e", e);
       }
     });
 }
 
-//@todo user handler and add cron
-// exports.handler = async () => {
-// };
-
-(async () => {
+exports.handler = async () => {
   try {
     const todayDateString = getDateString(new Date());
     const yesterdayDateString = getDateString(getMinusDate(1));
@@ -160,6 +157,6 @@ async function findAll(Model, where, cb) {
 
     process.exit(0);
   } catch (e) {
-    console.log("CATCH", e);
+    capture("Error during creation of young patch logs", JSON.stringify(e));
   }
-})();
+};
