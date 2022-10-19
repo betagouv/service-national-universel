@@ -4,7 +4,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { HiAdjustments } from "react-icons/hi";
@@ -64,6 +64,7 @@ const FILTERS = [
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -75,7 +76,7 @@ export default function Inscription() {
     setInfosClick(!infosClick);
   };
 
-  if (user.role !== ROLES.ADMIN) return history.push("/");
+  if (user.role !== ROLES.ADMIN) history.push("/");
 
   return (
     <div>
