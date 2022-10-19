@@ -9,6 +9,7 @@ let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
 let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
 let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
 const API_PDF_ENDPOINT = process.env.API_PDF_ENDPOINT || "http://localhost:8087/render";
+const ANALYTICS_API_URL = process.env.ANALYTICS_API_URL || "http://localhost:8085";
 
 let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
 let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
@@ -81,6 +82,7 @@ module.exports = {
   JVA_TOKEN,
   JVA_API_KEY,
   API_PDF_ENDPOINT,
+  ANALYTICS_API_URL,
 };
 
 function getEnvironment() {
