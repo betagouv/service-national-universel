@@ -75,6 +75,8 @@ export default function Inscription() {
     setInfosClick(!infosClick);
   };
 
+  if (user.role !== ROLES.ADMIN) return history.push("/");
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
