@@ -18,14 +18,13 @@ import MobileNonEligible from "./mobile/stepNonEligible";
 import MobileProfil from "./mobile/stepProfil";
 import MobileSejour from "./mobile/stepSejour";
 
+import { useSelector } from "react-redux";
+import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import ModalMenu from "../../components/headerMenu";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import Navbar from "./components/navbar";
-
-import { useSelector } from "react-redux";
-import Home from "./Home";
 
 function renderStep(step, device) {
   if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
@@ -42,7 +41,7 @@ const Step = () => {
   const device = useDevice();
   const { step } = useParams();
 
-  const currentStep = getStepFromUrlParam(step, STEP_LIST);
+  const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
 
   if (!currentStep) return <Redirect to="/preinscription" />;
 
@@ -51,6 +50,10 @@ const Step = () => {
 
   if (currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
+  }
+
+  if (!inscriptionCreationOpenForYoungs()) {
+    return <Redirect to="/" />;
   }
 
   return (
@@ -73,7 +76,7 @@ export default function Index() {
     <PreInscriptionContextProvider>
       <Switch>
         <SentryRoute path="/preinscription/:step" component={Step} />;
-        <SentryRoute path="/preinscription" component={Home} />
+        <SentryRoute path="/preinscription" component={Step} />;
       </Switch>
     </PreInscriptionContextProvider>
   );
