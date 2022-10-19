@@ -189,6 +189,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
 
     young.set({
       acceptCGU: "true",
+      consentment: "true",
       inscriptionStep2023: STEPS2023.REPRESENTANTS,
     });
     await young.save({ fromUser: req.user });
