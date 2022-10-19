@@ -6,14 +6,14 @@ const LogYoungModel = require("../models/log_youngs");
 const LogStructureModel = require("../models/log_structures");
 const LogMissionModel = require("../models/log_missions");
 const LogApplicationModel = require("../models/log_applications");
+const auth = require("../auth");
 
 router.get("/", async (req, res) => {
   const logs = await LogModel.findAll();
   return res.status(200).send({ ok: false, data: logs });
 });
 
-//Rajouter authentification
-router.post("/young", async (req, res) => {
+router.post("/young", auth, async (req, res) => {
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -45,8 +45,7 @@ router.post("/young", async (req, res) => {
   return res.status(200).send({ ok: true, data: log });
 });
 
-//Rajouter authentification
-router.post("/structure", async (req, res) => {
+router.post("/structure", auth, async (req, res) => {
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -77,8 +76,7 @@ router.post("/structure", async (req, res) => {
   return res.status(200).send({ ok: true, data: log });
 });
 
-//Rajouter authentification
-router.post("/mission", async (req, res) => {
+router.post("/mission", auth, async (req, res) => {
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -111,8 +109,7 @@ router.post("/mission", async (req, res) => {
   return res.status(200).send({ ok: true, data: log });
 });
 
-//Rajouter authentification
-router.post("/application", async (req, res) => {
+router.post("/application", auth, async (req, res) => {
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),

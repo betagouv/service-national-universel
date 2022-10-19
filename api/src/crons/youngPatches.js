@@ -7,7 +7,7 @@ const { isInRuralArea, getAge } = require("snu-lib");
 
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
-const { ANALYTICS_API_URL } = require("../config.js");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../config.js");
 const { getDateString, getMinusDate } = require("./utils");
 
 async function process(patch, count, total) {
@@ -79,13 +79,14 @@ async function createLog(patch, actualYoung, event, value) {
 
   const age = getAge(young?.birthdateAt || actualYoung?.birthdateAt);
 
-  const response = await fetch(`${ANALYTICS_API_URL}/log/young`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/young`, {
     method: "POST",
     redirect: "follow",
     headers: {
       Accept: "application/json, text/plain, */*",
       "User-Agent": "*",
       "Content-Type": "application/json",
+      "x-api-key": API_ANALYTICS_API_KEY,
     },
     body: JSON.stringify({
       evenement_nom: event,
