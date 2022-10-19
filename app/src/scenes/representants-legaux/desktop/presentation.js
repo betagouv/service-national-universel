@@ -37,7 +37,7 @@ export default function Presentation({ step, parentId }) {
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
           <h1 className="text-[31px] font-bold leading-40 text-[#21213F] mb-2">
-            {parentId === 2 ? <>{young.firstName} s&apos;est inscrit au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
+            {parentId === 2 ? <>{young.firstName} s&apos;est inscrit(e) au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
           </h1>
           <p className="text-[17px] leading-[28px] text-[#161616] mb-8">
             {parentId === 2 ? (

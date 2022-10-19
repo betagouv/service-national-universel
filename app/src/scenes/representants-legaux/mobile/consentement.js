@@ -160,7 +160,8 @@ export default function Consentement({ step, parentId }) {
   }
 
   function onPrevious() {
-    history.push(`/representants-legaux/verification?token=${token}`);
+    const route = parentId === 2 ? "verification-parent2" : "verification";
+    history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
   // --- submit
@@ -309,7 +310,7 @@ export default function Consentement({ step, parentId }) {
 
   return (
     <>
-      {parentId === 1 && <Navbar step={step} />}
+      <Navbar step={step} />
       <div className="bg-white px-3 py-4 text-[#161616]">
         <div className="flex flex-col">
           <h1 className="text-[22px]  font-bold text-[#21213F] mb-1">Apporter votre consentement</h1>
@@ -505,7 +506,7 @@ export default function Consentement({ step, parentId }) {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton onClickPrevious={parentId === 1 && onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
+      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
     </>
   );
 }
