@@ -17,6 +17,8 @@ const OBJ = db.define(
     user_departement: DataTypes.TEXT,
     user_region: DataTypes.TEXT,
     user_cohorte: DataTypes.TEXT,
+    user_rural: DataTypes.TEXT,
+    user_age: DataTypes.INTEGER,
     date: DataTypes.DATE,
     raw_data: DataTypes.JSONB,
   },

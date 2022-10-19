@@ -28,6 +28,8 @@ router.post("/young", async (req, res) => {
     user_departement: Joi.string().allow(null, ""),
     user_region: Joi.string().allow(null, ""),
     user_cohorte: Joi.string().allow(null, ""),
+    user_rural: Joi.string().valid("true", "false").allow(null),
+    user_age: Joi.number(),
     date: Joi.string(),
     raw_data: Joi.object(),
   }).validate(req.body);
@@ -38,7 +40,6 @@ router.post("/young", async (req, res) => {
   }
 
   value.date = new Date(value.date);
-
   const log = await LogYoungModel.create(value);
   console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
