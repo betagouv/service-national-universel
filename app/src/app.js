@@ -152,8 +152,8 @@ const Espace = () => {
 
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    // @todo : clean this
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+    if (redirect === "inscription") return <Redirect to="/preinscription" />;
+    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
 
   const forceRedirectInscription =
