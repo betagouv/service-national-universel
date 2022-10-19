@@ -32,7 +32,7 @@ export default function StepWaitingConsent() {
           </div>
         </div>
       </div>
-      <StickyButton text="Revenir à mon compte volontaire" onClick={() => history.push("/phase1")} />
+      <StickyButton text="Revenir à mon compte volontaire" onClick={() => history.push("/")} />
     </>
   );
 }
