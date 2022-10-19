@@ -188,7 +188,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
-      consentment: "true",
+      acceptCGU: "true",
       inscriptionStep2023: STEPS2023.REPRESENTANTS,
     });
     await young.save({ fromUser: req.user });
