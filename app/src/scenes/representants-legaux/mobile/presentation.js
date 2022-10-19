@@ -38,7 +38,7 @@ export default function Presentation({ step, parentId }) {
       <div className="bg-white p-4 text-[#161616]">
         <div className="flex flex-col gap-4">
           <h1 className="text-[22px] font-bold">
-            {parentId === 2 ? <>{young.firstName} s&apos;est inscrit au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
+            {parentId === 2 ? <>{young.firstName} s&apos;est inscrit(e) au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
           </h1>
           <p className="text-sm text-[#161616] mb-8">
             {parentId === 2 ? (
