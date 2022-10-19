@@ -112,10 +112,7 @@ export default function App() {
             <SentryRoute path="/" component={Espace} />
           </Switch>
         )}
-        {["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements"].findIndex((route) => location.pathname.includes(route)) ===
-        -1 ? (
-          <Footer />
-        ) : null}
+        <Footer />
       </div>
     </Router>
   );
