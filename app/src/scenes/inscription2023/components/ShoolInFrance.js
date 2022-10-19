@@ -63,7 +63,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       errors.city = "Vous devez renseigner le nom de la ville";
     }
 
-    if (Object.keys(manualSchool).length) {
+    if (manualFilling && Object.keys(manualSchool).length) {
       if (!manualSchool?.fullName) {
         errors.manualFullName = "Vous devez renseigner le nom de l'établissement";
       }
