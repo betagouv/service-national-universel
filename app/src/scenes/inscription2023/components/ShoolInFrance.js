@@ -30,7 +30,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
-  const [manualFilling, setManualFilling] = useState(false);
+  const [manualFilling, setManualFilling] = useState(school?.addressVerified);
   const [manualSchool, setManualSchool] = useState(school ?? {});
   const [errors, setErrors] = useState({});
 
@@ -99,7 +99,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
   }, [city]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setManualSchool({
+    const newSchool = {
       ...manualSchool,
       addressVerified: "true",
       cityCode: suggestion.cityCode,
@@ -110,9 +110,10 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       address: isConfirmed ? suggestion.address : manualSchool.address,
       postCode: isConfirmed ? suggestion.zip : manualSchool.postCode,
       city: isConfirmed ? suggestion.city : manualSchool.city,
-    });
+    };
+    setManualSchool(newSchool);
     setErrors({ addressVerified: undefined });
-    onSelectSchool(manualSchool);
+    onSelectSchool(newSchool);
   };
 
   return manualFilling ? (
@@ -188,7 +189,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           options={cities.map((c) => ({ value: c, label: c }))}
           onChange={(value) => {
             setCity(value);
-            setManualSchool({ ...manualSchool, city: value });
+            setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
+            onSelectSchool(null);
           }}
           placeholder="Sélectionnez une commune"
           error={errors.city}
@@ -207,7 +209,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           }}
           placeholder="Sélectionnez un établissement"
           onCreateOption={(value) => {
-            setManualSchool({ ...manualSchool, fullName: value });
+            setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
             onSelectSchool(null);
             setManualFilling(true);
           }}
