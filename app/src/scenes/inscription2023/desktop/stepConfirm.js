@@ -10,6 +10,7 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import QuestionMark from "../../../assets/icons/QuestionMarkBlueCircle";
 import plausibleEvent from "../../../services/plausible";
+import { supportURL } from "../../../config";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -66,7 +67,9 @@ export default function StepConfirm() {
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <div className="flex items-center justify-between">
               <h1 className="text-[32px] font-bold mt-2 ">Vous y êtes presque...</h1>
-              <QuestionMark className="hover:scale-105 cursor-pointer" />
+              <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer">
+                <QuestionMark className="hover:scale-105 cursor-pointer" />
+              </a>
             </div>
 
             <div className="text-[#666666] text-sm mt-2">
