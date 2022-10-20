@@ -41,7 +41,7 @@ export default function StepDone() {
       schoolAddress: data.school?.address || data.school?.adresse,
       schoolZip: data.school?.postCode || data.school?.postcode,
       schoolCity: data.school?.city,
-      schoolDepartment: data.school?.department || data.school?.departmentName,
+      schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,

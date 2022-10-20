@@ -106,7 +106,7 @@ export default function StepEligibilite() {
       setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    const sessionsFiltered = res.data.filter((e) => e.goalReached === true);
+    const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
     if (sessionsFiltered.length === 0) {
       setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");

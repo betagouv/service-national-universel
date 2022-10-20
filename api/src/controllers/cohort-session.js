@@ -133,9 +133,7 @@ router.post("/eligibility/2023", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { department, birthDate, schoolLevel, frenchNationality } = value;
-
-    if (!frenchNationality) return res.send({ ok: true, data: { msg: "Pour participer au SNU, vous devez être de nationalité française." } });
+    const { department, birthDate, schoolLevel } = value;
 
     const zone = getZoneByDepartment(department);
 
@@ -160,7 +158,7 @@ router.post("/eligibility/2023", async (req, res) => {
 
     // Check inscription goals
     for (let session of sessionsFiltered) {
-      session.set({ goalReached: false });
+      session.goalReached = false;
       const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.name });
       if (!inscriptionGoal || !inscriptionGoal.max) continue;
       const nbYoung = await YoungModel.countDocuments({
@@ -170,7 +168,7 @@ router.post("/eligibility/2023", async (req, res) => {
       });
       if (nbYoung === 0) continue;
       const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-      if (fillingRatio >= 1) session.set({ goalReached: true });
+      if (fillingRatio >= 1) session.goalReached = true;
     }
 
     return res.send({ ok: true, data: sessionsFiltered });
