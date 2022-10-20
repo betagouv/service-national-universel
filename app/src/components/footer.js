@@ -29,8 +29,6 @@ export default function Footer() {
     } else setShowOldFooter(false);
   }, [location]);
 
-  console.log("running footer", showOldFooter);
-
   return showOldFooter ? (
     <FooterContainer>
       <Container>
