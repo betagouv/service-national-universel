@@ -25,7 +25,6 @@ export const messageStyles = {
 };
 
 export default function SchoolInFrance({ school, onSelectSchool, toggleVerify }) {
-  console.log("🚀 ~ file: ShoolInFrance.js ~ line 27 ~ SchoolInFrance ~ school", school);
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
@@ -93,7 +92,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       };
       body.query.bool.filter.push({ term: { "city.keyword": city } });
       const { responses } = await api.esQuery("schoolramses", body);
-      setSchools(responses[0].hits.hits.map((e) => e._source));
+      setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
     }
     getSchools();
   }, [city]);
@@ -110,6 +109,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       address: isConfirmed ? suggestion.address : manualSchool.address,
       postCode: isConfirmed ? suggestion.zip : manualSchool.postCode,
       city: isConfirmed ? suggestion.city : manualSchool.city,
+      id: suggestion.id,
     };
     setManualSchool(newSchool);
     setErrors({ addressVerified: undefined });

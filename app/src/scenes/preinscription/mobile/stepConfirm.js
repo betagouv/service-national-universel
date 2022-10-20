@@ -44,7 +44,7 @@ export default function StepDone() {
       schoolDepartment: data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
-      schoolId: data.school?._id,
+      schoolId: data.school?.id,
       zip: data.zip,
       cohort: data.cohort,
       grade: data.scolarity,
