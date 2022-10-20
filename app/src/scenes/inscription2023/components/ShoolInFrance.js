@@ -109,7 +109,6 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       address: isConfirmed ? suggestion.address : manualSchool.address,
       postCode: isConfirmed ? suggestion.zip : manualSchool.postCode,
       city: isConfirmed ? suggestion.city : manualSchool.city,
-      id: suggestion.id,
     };
     setManualSchool(newSchool);
     setErrors({ addressVerified: undefined });
