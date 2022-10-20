@@ -159,22 +159,19 @@ router.post("/eligibility/2023", async (req, res) => {
     if (sessionsFiltered.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
 
     // Check inscription goals
-    if (sessionsFiltered.length) {
-      for (let session of sessionsFiltered) {
-        const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.name });
-        if (!inscriptionGoal || !inscriptionGoal.max) continue;
-        const nbYoung = await YoungModel.countDocuments({
-          department: department,
-          cohort: session.name,
-          status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-        });
-        if (nbYoung === 0) continue;
-        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-        if (fillingRatio >= 1) sessionsFiltered = sessionsFiltered.filter((e) => e.id !== session.id);
-      }
+    for (let session of sessionsFiltered) {
+      session.set({ goalReached: false });
+      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.name });
+      if (!inscriptionGoal || !inscriptionGoal.max) continue;
+      const nbYoung = await YoungModel.countDocuments({
+        department: department,
+        cohort: session.name,
+        status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+      });
+      if (nbYoung === 0) continue;
+      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
+      if (fillingRatio >= 1) session.set({ goalReached: true });
     }
-    if (sessionsFiltered.length === 0)
-      return res.send({ ok: true, data: { msg: "Il n'y a malheuseusement plus de places disponibles pour les volontaires de votre département." } });
 
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {

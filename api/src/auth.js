@@ -7,9 +7,12 @@ const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { getDepartmentByZip, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
+const InscriptionGoalModel = require("./models/inscriptionGoal");
+const YoungModel = require("./models/young");
+
 class Auth {
   constructor(model) {
     this.model = model;
@@ -128,6 +131,21 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
       console.log("count = ", countDocuments, typeof countDocuments, countDocuments > 0);
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+      // Check inscription goals
+      const dep = schoolDepartment || getDepartmentByZip(zip);
+      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: dep, cohort: cohort.name });
+      if (inscriptionGoal && inscriptionGoal.max) {
+        const nbYoung = await YoungModel.countDocuments({
+          department: dep,
+          cohort: cohort.name,
+          status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+        });
+        if (nbYoung > 0) {
+          const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * cohort.buffer);
+          if (fillingRatio >= 1) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
 
       const user = await this.model.create({
         email,
