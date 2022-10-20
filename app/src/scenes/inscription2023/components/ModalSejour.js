@@ -110,7 +110,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
     return (
       <div
         key={session.id}
-        className="border p-4 my-3 flex justify-between items-center"
+        className="border p-4 my-3 flex justify-between items-center hover:bg-gray-50 cursor-pointer"
         onClick={() => {
           plausibleEvent(session.event);
           onSubmit(session.name);
