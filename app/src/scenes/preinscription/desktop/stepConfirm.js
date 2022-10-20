@@ -36,7 +36,7 @@ export default function StepDone() {
       schooled: data.school ? "true" : "false",
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,
-      schoolAddress: data.school?.adress || data.school?.adresse,
+      schoolAddress: data.school?.address || data.school?.adresse,
       schoolZip: data.school?.postCode || data.school?.postcode,
       schoolCity: data.school?.city,
       schoolDepartment: data.school?.department || data.school?.departmentName,
