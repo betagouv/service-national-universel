@@ -127,7 +127,7 @@ export default function StepEligibilite() {
       schoolAddress: data.school?.adresse,
       schoolZip: data.school?.codeCity,
       schoolCity: data.school?.city,
-      schoolDepartment: data.school?.departmentName,
+      schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
