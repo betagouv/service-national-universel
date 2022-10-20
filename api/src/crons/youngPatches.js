@@ -10,6 +10,44 @@ const YoungModel = require("../models/young");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../config.js");
 const { getDateString, getMinusDate } = require("./utils");
 
+let token;
+
+class HTTPResponseError extends Error {
+  constructor(response, ...args) {
+    super(`HTTP Error Response: ${response.status} ${response.statusText}`, ...args);
+    this.response = response;
+  }
+}
+
+const checkResponseStatus = (response) => {
+  if (response.ok) {
+    // response.status >= 200 && response.status < 300
+    return response;
+  } else {
+    throw new HTTPResponseError(response);
+  }
+};
+
+async function getAccessToken() {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/auth/token`, {
+    method: "GET",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-api-key": API_ANALYTICS_API_KEY,
+    },
+  });
+
+  const data = await response.json();
+  if (data.ok == true && data.token) {
+    token = data.token;
+  } else {
+    throw new Error("Couldn't retrieve auth token");
+  }
+}
+
 async function process(patch, count, total) {
   try {
     if (count % 100 === 0) console.log(count, "/", total);
@@ -68,7 +106,7 @@ async function process(patch, count, total) {
       }
     }
   } catch (e) {
-    console.log(`Couldn't create patch for patch id : ${patch._id}`, e);
+    capture(`Couldn't create patch for patch id : ${patch._id}`, JSON.stringify(e));
   }
 }
 
@@ -86,7 +124,7 @@ async function createLog(patch, actualYoung, event, value) {
       Accept: "application/json, text/plain, */*",
       "User-Agent": "*",
       "Content-Type": "application/json",
-      "x-api-key": API_ANALYTICS_API_KEY,
+      "x-access-token": token,
     },
     body: JSON.stringify({
       evenement_nom: event,
@@ -107,11 +145,10 @@ async function createLog(patch, actualYoung, event, value) {
       date: patch.date,
       raw_data: young,
     }),
-  })
-    .then((response) => response.json())
-    .catch((error) => console.log("error fetch struture :", error));
+  });
 
-  // console.log("log's auto-generated ID:", response.data.id);
+  const successResponse = checkResponseStatus(response);
+  return await successResponse.json();
 }
 
 const rebuildYoung = (youngInfos) => {
@@ -134,29 +171,23 @@ async function findAll(Model, where, cb) {
     .cursor()
     .addCursorFlag("noCursorTimeout", true)
     .eachAsync(async (doc) => {
-      try {
-        count++;
-        //if (doc._doc._id.toString() === "625a947f8aa1df07eaaeb159") process = true;
-        //) {
-        await cb(doc._doc, count, total);
-        //}
-      } catch (e) {
-        throw e;
-        // console.log("e", e);
-      }
+      count++;
+      //if (doc._doc._id.toString() === "625a947f8aa1df07eaaeb159") process = true;
+      //) {
+      await cb(doc._doc, count, total);
     });
 }
 
 exports.handler = async () => {
   try {
+    await getAccessToken();
+
     const todayDateString = getDateString(new Date());
     const yesterdayDateString = getDateString(getMinusDate(1));
 
     const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
 
     await findAll(young_patches, { date: { $gte: new Date(yesterdayDateString), $lt: new Date(todayDateString) } }, process);
-
-    process.exit(0);
   } catch (e) {
     capture("Error during creation of young patch logs", JSON.stringify(e));
   }

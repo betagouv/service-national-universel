@@ -19,6 +19,7 @@ app.use(bodyParser.text({ type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/log", require("./controllers/log"));
+app.use("/auth", require("./controllers/auth"));
 
 app.get("/", async (req, res) => {
   res.status(200).send("OK");

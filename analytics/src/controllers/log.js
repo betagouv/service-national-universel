@@ -6,7 +6,7 @@ const LogYoungModel = require("../models/log_youngs");
 const LogStructureModel = require("../models/log_structures");
 const LogMissionModel = require("../models/log_missions");
 const LogApplicationModel = require("../models/log_applications");
-const auth = require("../auth");
+const auth = require("../middleware/auth");
 
 router.get("/", async (req, res) => {
   const logs = await LogModel.findAll();
@@ -41,7 +41,6 @@ router.post("/young", auth, async (req, res) => {
 
   value.date = new Date(value.date);
   const log = await LogYoungModel.create(value);
-  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
