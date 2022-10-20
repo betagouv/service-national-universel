@@ -21,7 +21,7 @@ export default function Index() {
     setFilter((f) => ({ ...f, ...n }));
   }
 
-  const cohortList = ["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"];
+  const cohortList = ["2022", "Février 2022", "Juin 2022", "Juillet 2022"];
 
   useEffect(() => {
     if (state !== undefined && state?.params) {
