@@ -122,10 +122,10 @@ export default function StepEligibilite() {
       schooled: data.school ? "true" : "false",
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,
-      schoolAddress: data.school?.adresse,
-      schoolZip: data.school?.codeCity,
+      schoolAddress: data.school?.address || data.school?.adresse,
+      schoolZip: data.school?.postCode || data.school?.postcode,
       schoolCity: data.school?.city,
-      schoolDepartment: data.school?.departmentName,
+      schoolDepartment: data.school?.department || data.school?.departmentName,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
@@ -135,7 +135,7 @@ export default function StepEligibilite() {
 
     try {
       const res = await api.post("/cohort-session/eligibility/2023", {
-        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+        department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
         birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,

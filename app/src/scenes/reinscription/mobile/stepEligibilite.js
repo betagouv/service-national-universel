@@ -137,7 +137,7 @@ export default function StepEligibilite() {
 
     try {
       const res = await api.post("/cohort-session/eligibility/2023", {
-        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+        department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
         birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
