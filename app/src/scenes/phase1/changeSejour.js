@@ -22,6 +22,7 @@ export default function changeSejour() {
   const [modalConfirmControlOk, setmodalConfirmControlOk] = useState(false);
   const [modalConfirmGoalReached, setmodalConfirmGoalReached] = useState(false);
   const [sejours, setSejours] = useState(null);
+  const [sejourGoal, setSejourGoal] = useState(null);
   const [isEligible, setIsElegible] = useState(false);
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,18 +45,18 @@ export default function changeSejour() {
           schoolLevel: young.grade,
           department: young.department,
         });
-        const isArray = Array.isArray(data);
-        if (isArray) {
-          const sejourGoal = data.map((e) => {
-            return { sejour: e.name, goal: e.goalReached };
-          });
-          const sejour = sejourGoal.map((e) => e.sejour);
-          setSejours(sejour);
-          setIsElegible(true);
-        } else {
-          setIsElegible(false);
-          setSejours([]);
-        }
+        const sejourGoal = data.map((e) => {
+          // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
+          //var date = new Date();
+          //console.log(date.toISOString());
+          //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer
+          return { sejour: e.id, goal: e.goalReached };
+        });
+        const sejour = sejourGoal.map((e) => e.sejour);
+
+        setSejours(sejour);
+        setIsElegible(!!data);
+        setSejourGoal(sejourGoal);
       } catch (e) {
         capture(e);
         toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -66,7 +67,13 @@ export default function changeSejour() {
 
   const onConfirmer = () => {
     if (newSejour && motif) {
-      setmodalConfirmControlOk(true);
+      let isGoalTrue = sejourGoal.find((obj) => obj.goal === true && obj.sejour === newSejour);
+      //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
+      if (isGoalTrue === undefined) {
+        setmodalConfirmControlOk(true);
+      } else {
+        setmodalConfirmGoalReached(true);
+      }
     } else {
       toastr.info("Veuillez renseigner tous les champs");
     }
