@@ -30,7 +30,11 @@ export default function ModalSejour({ isOpen, onCancel }) {
           schoolLevel: young.grade,
         });
         if (res.data.msg) return setError({ text: res.data.msg });
-        setCohorts(res.data);
+        const sessionsFiltered = res.data.filter((e) => e.goalReached === true);
+        if (sessionsFiltered.length === 0) {
+          setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
+        }
+        setCohorts(sessionsFiltered);
       } catch (e) {
         capture(e);
         setCohorts([]);
