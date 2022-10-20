@@ -7,8 +7,8 @@ import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.j
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import { getDepartmentByZip } from "snu-lib";
 import { capture } from "../../../sentry";
-import { apiURL } from "../../../config";
 import { useSelector } from "react-redux";
+import API from "../../../services/api";
 
 export default function NonEligible() {
   const young = useSelector((state) => state.Auth.young);
@@ -50,10 +50,10 @@ export default function NonEligible() {
   };
 
   const getMessageNonEligible = async (young) => {
-    const res = await apiURL.post("/cohort-session/eligibility/2023", {
+    const res = await API.post("/cohort-session/eligibility/2023", {
       department: young.school?.departmentName || getDepartmentByZip(young.zip) || null,
-      birthDate: young.birthDate,
-      schoolLevel: young.scolarity,
+      birthDate: young.birthdateAt,
+      schoolLevel: young.grade,
       frenchNationality: young.frenchNationality,
     });
     if (!res.ok) {

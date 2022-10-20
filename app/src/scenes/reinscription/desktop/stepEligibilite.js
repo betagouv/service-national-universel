@@ -192,7 +192,7 @@ export default function StepEligibilite() {
             <div className="flex items-center">
               <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
               <div className="flex items-center">
-                <span className="ml-4 mr-2">Je suis de nationalité française</span>
+                <span className="ml-4 mr-2 text-[#929292]">Je suis de nationalité française</span>
                 <IconFrance />
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
             </div>
-            <label className="flex flex-col flex-start text-base w-1/2 mt-2">
+            <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
               Date de naissance
               <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
