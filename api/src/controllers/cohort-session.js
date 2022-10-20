@@ -119,11 +119,13 @@ router.post("/eligibility/2023", async (req, res) => {
       department: req.body.department,
       birthDate: req.body.birthDate,
       schoolLevel: req.body.schoolLevel,
+      frenchNationality: req.body.frenchNationality,
     };
     const { error, value } = Joi.object({
       department: Joi.string().allow(null, ""),
       birthDate: Joi.date().required(),
       schoolLevel: Joi.string().allow(null, ""),
+      frenchNationality: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate(eligibilityObject);
@@ -131,7 +133,10 @@ router.post("/eligibility/2023", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { department, birthDate, schoolLevel } = value;
+    const { department, birthDate, schoolLevel, frenchNationality } = value;
+
+    if (!frenchNationality) return res.send({ ok: true, data: { msg: "Pour participer au SNU, vous devez être de nationalité française." } });
+
     const zone = getZoneByDepartment(department);
 
     if (

@@ -13,19 +13,12 @@ import ErrorMessage from "./ErrorMessage";
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
 
-// const errorMessages = {
-//   addressVerified: "Merci de valider l'adresse",
-//   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
-//   zip: "Le code postal n'est pas valide",
-// };
-
 export const messageStyles = {
   info: "info",
   error: "error",
 };
 
 export default function SchoolInFrance({ school, onSelectSchool, toggleVerify }) {
-  console.log("🚀 ~ file: ShoolInFrance.js ~ line 27 ~ SchoolInFrance ~ school", school);
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
