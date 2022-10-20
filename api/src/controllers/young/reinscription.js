@@ -82,6 +82,7 @@ router.put("/noneligible", passport.authenticate("young", { session: false, fail
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.reinscriptionStep2023 = STEPS2023REINSCRIPTION.NONELIGIBLE;
+    young.status = YOUNG_STATUS.NOT_ELIGIBLE;
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
