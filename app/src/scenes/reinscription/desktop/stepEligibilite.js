@@ -98,7 +98,8 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez renseigner votre établissement scolaire";
+          // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
+          errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
       }
     }
@@ -235,12 +236,10 @@ export default function StepEligibilite() {
               {data.scolarity !== "NOT_SCOLARISE" ? (
                 data.isAbroad ? (
                   <>
-                    {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                     <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                   </>
                 ) : (
                   <>
-                    {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                     <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                   </>
                 )
