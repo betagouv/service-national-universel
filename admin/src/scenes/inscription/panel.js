@@ -175,7 +175,7 @@ export default function InscriptionPanel({ onChange, value }) {
         <Details title="Classe" value={t(value.grade)} />
         <Details title="Type" value={value.schoolType} />
         <Details title="Nom" value={value.schoolName} />
-        <Details title="Adresse" value={value.schoolAdress} />
+        <Details title="Adresse" value={value.schoolAddress} />
         <Details title="Ville" value={value.schoolCity && value.schoolZip && `${value.schoolCity} (${value.schoolZip})`} />
         <Details title="Dép" value={value.schoolDepartment} />
         <Details title="Région" value={value.schoolRegion} />

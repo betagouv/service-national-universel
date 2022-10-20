@@ -184,7 +184,7 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Région" value={young.schoolRegion} />
           <Details title="Dép" value={young.schoolDepartment} />
           <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-          <Details title="Adresse" value={young.schoolAdress} />
+          <Details title="Adresse" value={young.schoolAddress} />
         </Info>
 
         {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (

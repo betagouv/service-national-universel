@@ -86,7 +86,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       };
       body.query.bool.filter.push({ term: { "city.keyword": city } });
       const { responses } = await api.esQuery("schoolramses", body);
-      setSchools(responses[0].hits.hits.map((e) => e._source));
+      setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
     }
     getSchools();
   }, [city]);
