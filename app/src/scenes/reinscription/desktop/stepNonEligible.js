@@ -51,7 +51,7 @@ export default function NonEligible() {
 
   const getMessageNonEligible = async (young) => {
     const res = await API.post("/cohort-session/eligibility/2023", {
-      department: young.school?.departmentName || getDepartmentByZip(young.zip) || null,
+      department: young.school?.departmentName || young.school?.department || getDepartmentByZip(young.zip) || null,
       birthDate: young.birthdateAt,
       schoolLevel: young.grade,
       frenchNationality: young.frenchNationality,
