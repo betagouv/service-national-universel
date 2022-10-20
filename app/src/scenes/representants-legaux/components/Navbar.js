@@ -6,18 +6,27 @@ const index = {
   PRESENTATION: "1",
   VERIFICATION: "2",
   CONSENTEMENT: "3",
+  PRESENTATION_PARENT2: "1",
+  VERIFICATION_PARENT2: "2",
+  CONSENTEMENT_PARENT2: "3",
 };
 
 const wording = {
   PRESENTATION: "Présentation",
   VERIFICATION: "Vérification des informations renseignées",
   CONSENTEMENT: "Mon consentement",
+  PRESENTATION_PARENT2: "Présentation",
+  VERIFICATION_PARENT2: "Vérification des informations renseignées",
+  CONSENTEMENT_PARENT2: "Mon consentement",
 };
 
 const next = {
   PRESENTATION: "Vérification des informations renseignées",
   VERIFICATION: "Mon consentement",
   CONSENTEMENT: null,
+  PRESENTATION_PARENT2: "Vérification des informations renseignées",
+  VERIFICATION_PARENT2: "Mon consentement",
+  CONSENTEMENT_PARENT2: null,
 };
 
 const Navbar = ({ step, onSave }) => {
@@ -35,12 +44,12 @@ const Navbar = ({ step, onSave }) => {
 
         <div className="flex space-x-2 w-full mt-2">
           <div className="basis-1/3 bg-[#000091] h-2"></div>
-          <div className={`basis-1/3  h-2 ${step !== "PRESENTATION" ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
-          <div className={`basis-1/3  h-2 ${["CONSENTEMENT", "DOCUMENTS"].includes(step) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
+          <div className={`basis-1/3  h-2 ${step !== "PRESENTATION" && step !== "PRESENTATION_PARENT2" ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
+          <div className={`basis-1/3  h-2 ${["CONSENTEMENT", "CONSENTEMENT_PARENT2", "DOCUMENTS"].includes(step) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
         </div>
         {desktop && (
           <div className="flex space-x-1 text-xs mt-2 text-[#666666]">
-            <div className="font-bold">{["PRESENTATION", "VERIFICATION"].includes(step) && "Étape suivante:"}</div>
+            <div className="font-bold">{["PRESENTATION", "PRESENTATION_PARENT2", "VERIFICATION", "VERIFICATION_PARENT2"].includes(step) && "Étape suivante:"}</div>
             <div>{next[step]}</div>
           </div>
         )}

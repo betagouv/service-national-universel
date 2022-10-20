@@ -20,17 +20,9 @@ export default function Done({ parentId }) {
         }
       } else {
         if (young.parent2AllowImageRights === "true") {
-          setTitle("Merci, nous avons bien enregistré votre consentement.");
-          setText(
-            "En parallèle nous avons envoyé une demande de consentements au représentant légal 1 déclaré sur le dossier du volontaire. " +
-              "Pour en savoir plus, rapprochez vous du volontaire.",
-          );
+          setTitle("Merci, nous avons bien enregistré votre accord de droit à l'image.");
         } else {
-          setTitle("Merci, nous avons bien enregistré votre refus de consentement pour le droit à l'image.");
-          setText(
-            "En parallèle nous avons envoyé une demande de consentements au représentant légal 1 déclaré sur le dossier du volontaire. " +
-              "Pour en savoir plus, rapprochez vous du volontaire.",
-          );
+          setTitle("Merci, nous avons bien enregistré votre refus du droit à l'image.");
         }
       }
     }

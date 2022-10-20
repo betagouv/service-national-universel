@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 export default function Footer() {
   const young = useSelector((state) => state.Auth.young);
   const [from, setFrom] = useState();
+  const [showOldFooter, setShowOldFooter] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -18,7 +19,19 @@ export default function Footer() {
     }
   }, [history]);
 
-  return (
+  useEffect(() => {
+    if (
+      ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements", "inscription"].findIndex((route) =>
+        location.pathname.includes(route),
+      ) === -1
+    ) {
+      setShowOldFooter(true);
+    } else setShowOldFooter(false);
+  }, [location]);
+
+  console.log("running footer", showOldFooter);
+
+  return showOldFooter ? (
     <FooterContainer>
       <Container>
         <ul>
@@ -86,7 +99,7 @@ export default function Footer() {
         </ul>
       </Container>
     </FooterContainer>
-  );
+  ) : null;
 }
 
 const FooterContainer = styled.footer`

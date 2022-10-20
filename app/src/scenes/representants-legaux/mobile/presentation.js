@@ -11,14 +11,15 @@ import { isReturningParent } from "../commons";
 import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 
-export default function Presentation({ step }) {
+export default function Presentation({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
 
   useEffect(() => {
     if (young) {
-      if (isReturningParent(young, 1)) {
-        history.push(`/representants-legaux/done?token=${token}&parent=1`);
+      if (isReturningParent(young, parentId)) {
+        const route = parentId === 2 ? "done-parent2" : "done";
+        history.push(`/representants-legaux/${route}?token=${token}`);
       }
     }
   }, [young]);
@@ -28,15 +29,24 @@ export default function Presentation({ step }) {
   const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
 
   function onSubmit() {
-    history.push(`/representants-legaux/verification?token=${token}`);
+    const route = parentId === 2 ? "verification-parent2" : "verification";
+    history.push(`/representants-legaux/${route}?token=${token}`);
   }
   return (
     <>
       <Navbar step={step} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="flex flex-col gap-4">
-          <h1 className="text-[22px] font-bold">{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</h1>
-          <p className="text-sm text-[#161616] mb-8">Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</p>
+          <h1 className="text-[22px] font-bold">
+            {parentId === 2 ? <>{young.firstName} s&apos;est inscrit(e) au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
+          </h1>
+          <p className="text-sm text-[#161616] mb-8">
+            {parentId === 2 ? (
+              <>Nous avons besoin de votre consentement au droit à l’image.</>
+            ) : (
+              <>Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</>
+            )}
+          </p>
           <BorderButton href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
             Découvrir le SNU <LinkTo className="ml-2" />
           </BorderButton>

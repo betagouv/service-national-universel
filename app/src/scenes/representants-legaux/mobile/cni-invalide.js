@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_START, translate } from "snu-lib";
 import Footer from "../../../components/footerV2";
@@ -18,6 +18,14 @@ export default function CniInvalide() {
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (young) {
+      if (young.parentStatementOfHonorInvalidId === "true" || young.parentStatementOfHonorInvalidId === "false") {
+        history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
+      }
+    }
+  }, [young]);
 
   if (!young) return <Loader />;
 
@@ -37,7 +45,7 @@ export default function CniInvalide() {
           return false;
         } else {
           plausibleEvent("Phase0/CTA representant legal - ID perimee");
-          history.push(`/representants-legaux/presentation?token=${token}&parent=1`);
+          history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
         }
       } catch (e) {
         console.log(e);

@@ -16,6 +16,7 @@ import Help from "../../inscription2023/components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import StickyButton from "../../../components/inscription/stickyButton";
+import Footer from "../../../components/footerV2";
 
 export default function StepUpload() {
   const { category } = useParams();

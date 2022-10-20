@@ -160,7 +160,8 @@ export default function Consentement({ step, parentId }) {
   }
 
   function onPrevious() {
-    history.push(`/representants-legaux/verification?token=${token}`);
+    const route = parentId === 2 ? "verification-parent2" : "verification";
+    history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
   // --- submit
@@ -309,7 +310,7 @@ export default function Consentement({ step, parentId }) {
 
   return (
     <>
-      {parentId === 1 && <Navbar step={step} />}
+      <Navbar step={step} />
       <div className="bg-white px-3 py-4 text-[#161616]">
         <div className="flex flex-col">
           <h1 className="text-[22px]  font-bold text-[#21213F] mb-1">Apporter votre consentement</h1>
@@ -323,7 +324,7 @@ export default function Consentement({ step, parentId }) {
           <div>
             {isParentFromFranceConnect ? (
               <div className="w-[400px] text-[14px] leading-[20px] text-[#666666] mx-auto mb-[32px]">
-                Les information en provenance de FranceConnect du représentant légal n°1 ont bien été enregistrées.
+                Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
               </div>
             ) : (
               <FranceConnectButton callback={franceConnectCallbackUrl} className="flex-column" />
@@ -400,7 +401,7 @@ export default function Consentement({ step, parentId }) {
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                       M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
                       cohésion (
-                      <a href={CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Télécharger la fiche sanitaire ici
                       </a>
                       ).
@@ -505,7 +506,7 @@ export default function Consentement({ step, parentId }) {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton onClickPrevious={parentId === 1 && onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
+      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
     </>
   );
 }
