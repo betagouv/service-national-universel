@@ -45,7 +45,6 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
       location: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] },
       region: department2region[departmentLookUp[depart]],
       cityCode: suggestion.properties.citycode,
-      id: suggestion.properties.id,
     };
   };
 
