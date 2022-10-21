@@ -8,6 +8,7 @@ import { NavLink, useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
+import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
@@ -17,6 +18,7 @@ import QuestionBubble from "../../../assets/icons/QuestionBubble";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 
 export default function TicketCreate(props) {
+  const { files, addFiles, deleteFile, error } = useFileUpload();
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
@@ -58,6 +60,12 @@ export default function TicketCreate(props) {
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
+              let attachments;
+              if (files.length > 0) {
+                const filesResponse = await api.uploadFile("/zammood/upload", files);
+                if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
+                attachments = filesResponse.data;
+              }
               const { message, step1, step2 } = values;
               const title = `${step1?.label} - ${step2?.label}`;
               const response = await api.post("/zammood/ticket", {
@@ -66,6 +74,7 @@ export default function TicketCreate(props) {
                 fromPage,
                 subjectStep1: step1?.id,
                 subjectStep2: step2?.id,
+                attachments,
               });
               if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               toastr.success("Demande envoyée");
@@ -126,6 +135,7 @@ export default function TicketCreate(props) {
                 touched={touched}
                 rows="5"
               />
+              <FileUpload className="px-[15px]" files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
               <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
                 Envoyer
               </ContinueButton>

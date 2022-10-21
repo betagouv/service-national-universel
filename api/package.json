@@ -62,6 +62,7 @@
     "sanitize-html": "^2.7.0",
     "slugify": "^1.6.2",
     "snu-lib": "file:../lib",
+    "uuid": "^9.0.0",
     "validator": "^13.5.2"
   },
   "devDependencies": {
