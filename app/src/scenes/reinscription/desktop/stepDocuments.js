@@ -11,6 +11,7 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Bin from "../../../assets/icons/Bin";
 import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -37,7 +38,9 @@ export default function StepDocuments() {
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       return;
     }
+    console.log("🚀 ~ file: stepDocuments.js ~ line 36 ~ onSubmit ~ data", responseData);
     dispatch(setYoung(responseData));
+    plausibleEvent("Phase0/CTA reinscription - CI mobile");
     history.push("/reinscription/done");
   }
 
@@ -62,7 +65,7 @@ export default function StepDocuments() {
     <DesktopPageContainer
       title="Ma pièce d’identité"
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
-      onClickPrevious={() => history.push("/reinscription/representants")}
+      onClickPrevious={() => history.push("/reinscription/consentement")}
       onSubmit={onSubmit}
       disabled={!files.length}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>

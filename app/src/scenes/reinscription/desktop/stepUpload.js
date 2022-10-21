@@ -45,7 +45,7 @@ export default function StepUpload() {
     }
     dispatch(setYoung(responseData));
     plausibleEvent("Phase0/CTA reinscription - CI mobile");
-    history.push("/inscription2023/confirm");
+    history.push("/reinscription/done");
   }
 
   const ID = {
