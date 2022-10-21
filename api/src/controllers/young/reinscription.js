@@ -4,10 +4,12 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungObject = require("../../models/young");
+const config = require("../../config");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023REINSCRIPTION } = require("../../utils");
-const { canUpdateYoungStatus, YOUNG_STATUS } = require("snu-lib");
+const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { sendTemplate } = require("../../sendinblue");
 
 router.put("/goToReinscription", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -116,6 +118,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
       cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
       cohortChangeReason: Joi.string().trim().required(),
     }).validate(req.body, { stripUnknown: true });
+    console.log("🚀 ~ file: reinscription.js ~ line 119 ~ router.put ~ error", error);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -137,13 +140,71 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
   }
 });
 
+router.put("/consentement", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      consentment1: Joi.boolean().required().valid(true),
+      consentment2: Joi.boolean().required().valid(true),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set({
+      acceptCGU: "true",
+      consentment: "true",
+      reinscriptionStep2023: STEPS2023REINSCRIPTION.DOCUMENTS,
+    });
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/documents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set("reinscriptionStep2023", STEPS2023REINSCRIPTION.DONE);
-    young.set("status", YOUNG_STATUS.VALIDATED);
+    const value = { informationAccuracy: "true", reinscriptionStep2023: STEPS2023REINSCRIPTION.WAITING_CONSENT };
+
+    // if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
+    // If no ID proof has a valid date, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
+
+    if (notifyExpirationDate) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+    value.inscriptionDoneDate = new Date();
+    // }
+
+    value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.WAITING_CONSENT;
+
+    young.set(value);
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

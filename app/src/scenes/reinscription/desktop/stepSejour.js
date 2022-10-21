@@ -100,7 +100,7 @@ export default function StepSejour() {
           dispatch(setYoung(data));
 
           plausibleEvent(session.event);
-          history.push("/reinscription/documents");
+          history.push("/reinscription/consentement");
         }}>
         <div>
           Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
