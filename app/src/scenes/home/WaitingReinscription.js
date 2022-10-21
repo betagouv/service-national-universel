@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { setYoung } from "../../redux/auth/actions";
 import { capture } from "../../sentry";
 import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
@@ -12,6 +13,7 @@ export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   console.log("🚀 ~ file: WaitingReinscription.js ~ line 13 ~ WaitingReinscription ~ young", young);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
 
@@ -25,8 +27,9 @@ export default function WaitingReinscription() {
   const onClickEligibilte = async () => {
     try {
       setLoading(true);
-      const { ok, code } = await API.put("/young/reinscription/goToReinscription");
+      const { ok, code, data: responseData } = await API.put("/young/reinscription/goToReinscription");
       if (!ok) throw new Error(translate(code));
+      dispatch(setYoung(responseData));
 
       plausibleEvent("Phase0/CTA reinscription - home page");
       return history.push("/reinscription/eligibilite");

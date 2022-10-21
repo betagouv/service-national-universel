@@ -45,6 +45,7 @@ export default function changeSejour() {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
           department: young.department,
+          frenchNationality: young.frenchNationality,
         });
         console.log("🚀 ~ file: changeSejour.js ~ line 48 ~ getInfo ~ data", data);
         const sejourGoal = data.map((e) => {

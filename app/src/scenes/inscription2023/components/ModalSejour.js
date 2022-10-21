@@ -28,6 +28,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
           department: young?.schoolDepartment || getDepartmentByZip(young?.zip) || null,
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
+          frenchNationality: young.frenchNationality,
         });
         if (res.data.msg) return setError({ text: res.data.msg });
         const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
