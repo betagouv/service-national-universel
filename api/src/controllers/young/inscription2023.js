@@ -327,7 +327,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     // Check inscription goals
     const dep = young.schoolDepartment || getDepartmentByZip(young.zip);
     const cohort = sessions2023.filter((e) => e.name === young.cohort)[0];
-    if (isGoalReached(dep, cohort.name)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set(value);
     await young.save({ fromUser: req.user });

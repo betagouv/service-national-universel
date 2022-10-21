@@ -158,9 +158,10 @@ router.post("/eligibility/2023", async (req, res) => {
 
     // Check inscription goals
     for (let session of sessionsFiltered) {
-      if (isGoalReached(department, session.name)) session.goalReached = true;
+      if (isGoalReached(department, session.name) === true) session.goalReached = true;
       else session.goalReached = false;
     }
+    console.log(sessionsFiltered);
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
     capture(error);

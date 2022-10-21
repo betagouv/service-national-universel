@@ -6,10 +6,11 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isGoalReached } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
 const { getDepartmentByZip, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
+const { isGoalReached } = require("./utils/cohort");
 
 class Auth {
   constructor(model) {
@@ -131,7 +132,7 @@ class Auth {
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       const dep = schoolDepartment || getDepartmentByZip(zip);
-      if (isGoalReached(dep, cohort.name)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
       const user = await this.model.create({
         email,
