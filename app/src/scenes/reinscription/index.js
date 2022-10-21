@@ -50,6 +50,7 @@ const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
 
   if (!eligibleStep) return <Redirect to={`/home`} />;
   let currentStep = getStepFromUrlParam(step);
+  if (!currentStep) return <Redirect to={`/reinscription/${getStepUrl(eligibleStep)}`} />;
 
   const eligibleStepDetails = STEP_LIST.find((element) => element.name === eligibleStep);
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === eligibleStep);
@@ -75,8 +76,10 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
-  if (!young) history.push("/");
+  if (!young) {
+    history.push("/");
+    return null;
+  }
 
-  console.log("🚀 ~ file: index.js ~ line 80 ~ Index ~ young", young);
   return <SentryRoute path="/reinscription/:step?/:category?" component={() => <Step young={young} />} />;
 }

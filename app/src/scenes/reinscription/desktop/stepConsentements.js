@@ -107,7 +107,7 @@ export default function StepConsentements() {
           <div className="flex justify-end gap-4">
             <button
               className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
-              onClick={() => history.push("/reinscription/sejour")}>
+              onClick={() => history.push("/reinscription/eligibilite")}>
               Précédent
             </button>
             <button

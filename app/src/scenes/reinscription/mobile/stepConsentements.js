@@ -106,7 +106,7 @@ export default function StepConsentements() {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/sejour")} onClick={onSubmit} disabled={disabled || loading} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={onSubmit} disabled={disabled || loading} />
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>
   );
