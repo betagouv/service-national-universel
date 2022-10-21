@@ -67,6 +67,7 @@ export default function StepDocuments() {
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
       onClickPrevious={() => history.push("/reinscription/consentement")}
       onSubmit={onSubmit}
+      childrenContinueButton={"Me réinscrire au SNU"}
       disabled={!files.length}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}

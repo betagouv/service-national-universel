@@ -148,7 +148,7 @@ export default function StepUpload() {
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={onSubmit} disabled={!date} />
+      <StickyButton text="Me réinscrire au SNU" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={onSubmit} disabled={!date} />
     </>
   );
 }
