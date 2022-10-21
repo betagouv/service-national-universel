@@ -83,6 +83,27 @@ export default function StepWaitingConsent() {
     }
   };
 
+  const handleDone = async () => {
+    setDisabled(true);
+    try {
+      const { ok, code, data } = await api.put(`/young/reinscription/done`);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setDisabled(false);
+        return;
+      }
+      dispatch(setYoung(data));
+      history.push("/home");
+    } catch (e) {
+      capture(e);
+      setError({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+      setDisabled(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     await api.post(`/young/logout`);
@@ -108,7 +129,7 @@ export default function StepWaitingConsent() {
           <div className="flex justify-end space-x-4">
             <button
               className="flex items-center justify-center py-2 px-4 hover:!text-[#000091] border-[1px] hover:border-[#000091] hover:bg-white cursor-pointer bg-[#000091] text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
-              onClick={() => history.push("/home")}>
+              onClick={handleDone}>
               Revenir à mon compte volontaire
             </button>
           </div>

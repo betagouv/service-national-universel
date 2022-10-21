@@ -18,6 +18,7 @@ router.put("/goToReinscription", passport.authenticate("young", { session: false
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set({ reinscriptionStep2023: STEPS2023REINSCRIPTION.ELIGIBILITE });
+    young.set({ status: YOUNG_STATUS.REINSCRIPTION });
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -49,7 +50,6 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
-      console.log("🚀 ~ file: reinscription.js ~ line 49 ~ router.put ~ error", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
@@ -119,7 +119,6 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
       cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
       cohortChangeReason: Joi.string().trim().required(),
     }).validate(req.body, { stripUnknown: true });
-    console.log("🚀 ~ file: reinscription.js ~ line 119 ~ router.put ~ error", error);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -210,6 +209,21 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
 
     young.set(value);
     await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/done", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ reinscriptionStep2023: STEPS2023REINSCRIPTION.DONE });
+    await young.save({ fromUser: req.user });
+
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);

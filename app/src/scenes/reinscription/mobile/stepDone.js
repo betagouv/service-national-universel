@@ -89,13 +89,14 @@ export default function StepWaitingConsent() {
   const handleDone = async () => {
     setDisabled(true);
     try {
-      const { ok, code, data } = await api.put(`/young/inscription2023/done`);
+      const { ok, code, data } = await api.put(`/young/reinscription/done`);
       if (!ok) {
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
         setDisabled(false);
         return;
       }
       dispatch(setYoung(data));
+      history.push("/home");
     } catch (e) {
       capture(e);
       setError({
@@ -130,7 +131,7 @@ export default function StepWaitingConsent() {
             </p>
           </div>
           <Footer marginBottom={"88px"} />
-          <StickyButton text="Revenir à mon compte volontaire" onClick={() => history.push("/phase1")} />
+          <StickyButton text="Revenir à mon compte volontaire" onClick={handleDone} />
         </>
       ) : (
         <>
