@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
-const { getCohortSessionsAvailability } = require("../utils/cohort");
+const { getCohortSessionsAvailability, isGoalReached } = require("../utils/cohort");
 const { getDepartmentNumber, getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
@@ -158,19 +158,9 @@ router.post("/eligibility/2023", async (req, res) => {
 
     // Check inscription goals
     for (let session of sessionsFiltered) {
-      session.goalReached = false;
-      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.name });
-      if (!inscriptionGoal || !inscriptionGoal.max) continue;
-      const nbYoung = await YoungModel.countDocuments({
-        department: department,
-        cohort: session.name,
-        status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-      });
-      if (nbYoung === 0) continue;
-      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-      if (fillingRatio >= 1) session.goalReached = true;
+      if (isGoalReached(department, session.name)) session.goalReached = true;
+      else session.goalReached = false;
     }
-
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
     capture(error);
