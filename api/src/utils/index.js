@@ -23,6 +23,10 @@ const {
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
+  CELLAR_ENDPOINT_SUPPORT,
+  CELLAR_KEYID_SUPPORT,
+  CELLAR_KEYSECRET_SUPPORT,
+  PUBLIC_BUCKET_NAME_SUPPORT,
 } = require("../config");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
 
@@ -46,11 +50,26 @@ function getReq(url, cb) {
   return http.get(url, cb);
 }
 
-function uploadFile(path, file) {
+const SUPPORT_BUCKET_CONFIG = {
+  bucket: PUBLIC_BUCKET_NAME_SUPPORT,
+  endpoint: CELLAR_ENDPOINT_SUPPORT,
+  accessKeyId: CELLAR_KEYID_SUPPORT,
+  secretAccessKey: CELLAR_KEYSECRET_SUPPORT,
+};
+
+const DEFAULT_BUCKET_CONFIG = {
+  bucket: BUCKET_NAME,
+  endpoint: CELLAR_ENDPOINT,
+  accessKeyId: CELLAR_KEYID,
+  secretAccessKey: CELLAR_KEYSECRET,
+};
+
+function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: bucket,
       Key: path,
       Body: file.data,
       ContentEncoding: file.encoding,
@@ -771,4 +790,5 @@ module.exports = {
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
   getReferentManagerPhase2,
+  SUPPORT_BUCKET_CONFIG,
 };
