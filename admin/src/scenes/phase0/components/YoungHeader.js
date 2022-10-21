@@ -56,7 +56,7 @@ export default function YoungHeader({ young, tab, onChange }) {
             {young.firstName} {young.lastName}
           </div>
           <Badge color="#66A7F4" backgroundColor="#F9FCFF" text={young.cohort} />
-          <EditCohortButton cohort={young.cohort} />
+          <EditCohortButton young={young} onChange={onChange} />
           {young.originalCohort && (
             <Badge color="#9A9A9A" backgroundColor="#F6F6F6" text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />
           )}
@@ -98,28 +98,6 @@ export default function YoungHeader({ young, tab, onChange }) {
           </div>
         </div>
       </div>
-      {/*<Row style={{ minWidth: "30%" }}>
-        <Col md={12}>
-          <Row>
-            <Col md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <SelectStatus hit={young} options={[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN]} />
-            </Col>
-          </Row>
-          {young.status !== YOUNG_STATUS.DELETED ? (
-            <>
-              <Row style={{ marginTop: "0.5rem" }}>
-                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-                </a>
-                <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-                  <PanelActionButton icon="pencil" title="Modifier" />
-                </Link>
-                <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
-              </Row>
-            </>
-          ) : null}
-        </Col>
-      </Row>*/}
       <ModalConfirm
         isOpen={confirmModal?.isOpen}
         title={confirmModal?.title}
@@ -134,18 +112,127 @@ export default function YoungHeader({ young, tab, onChange }) {
   );
 }
 
-function EditCohortButton({ cohort }) {
+function EditCohortButton({ young, onChange }) {
+  const user = useSelector((state) => state.Auth.user);
+  const options = ["à venir"];
+  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+  const [newCohort, setNewCohort] = useState(young.cohort);
+  const [changeCohortModal, setChangeCohortModal] = useState(false);
+
+  function onSelect(value) {
+    setNewCohort(value);
+    setChangeCohortModal(true);
+  }
+
+  return (
+    <UncontrolledDropdown setActiveFromChild>
+      <DropdownToggle tag="button" disabled={disabled}>
+        <div className="flex items-center justify-center p-[9px] rounded-[4px] cursor-pointer border-[1px] border-[transparent] hover:border-[#E5E7EB] mr-[15px]">
+          <Pencil stroke="#66A7F4" className="w-[11px] h-[11px]" />
+        </div>
+      </DropdownToggle>
+      <DropdownMenu>
+        {options
+          .filter((e) => e !== young.cohort)
+          .map((status) => {
+            return (
+              <DropdownItem key={status} className="dropdown-item" onClick={() => onSelect(status)}>
+                Cohorte {status}
+              </DropdownItem>
+            );
+          })}
+      </DropdownMenu>
+      <ChangeCohortModal isOpen={changeCohortModal} young={young} cohort={newCohort} close={() => setChangeCohortModal(false)} />
+    </UncontrolledDropdown>
+  );
+}
+
+function ChangeCohortModal({ isOpen, young, cohort, close }) {
+  const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState(false);
+  const [newCohort, setNewCohort] = useState(cohort);
+  const [motif, setMotif] = useState("");
+
+  const motifs = [
+    "Non disponibilité pour motif familial ou personnel",
+    "Non disponibilité pour motif scolaire ou professionnel",
+    "L’affectation ne convient pas",
+    "Impossibilité de se rendre au point de rassemblement",
+    "Autre",
+  ];
+
+  return (
+    <ModalConfirm
+      size="lg"
+      isOpen={isOpen}
+      title="Changement de cohorte"
+      message={
+        <>
+          Vous êtes sur le point de changer la cohorte de {young.firstName} {young.lastName}. <br />
+        </>
+      }
+      onCancel={close}
+      onConfirm={() => {
+        close();
+        setModalConfirmWithMessage(true);
+      }}
+      disableConfirm={!motif}
+      showHeaderIcon={true}
+      showHeaderText={false}>
+      <>
+        <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "left", minWidth: "75%" }}>
+          <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
+
+          <div className="text-[#9a9a9a] bg-[#ffffff] w-[375px]">
+            <UncontrolledDropdown setActiveFromChild>
+              <DropdownToggle tag="button">
+                {motif || <p></p>}
+                <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
+              </DropdownToggle>
+              <DropdownMenu>
+                {motifs
+                  .filter((e) => e !== motif)
+                  .map((status) => {
+                    return (
+                      <DropdownItem key={status} className="dropdown-item" onClick={() => setMotif(status)}>
+                        {status}
+                      </DropdownItem>
+                    );
+                  })}
+              </DropdownMenu>
+            </UncontrolledDropdown>
+          </div>
+          <p style={{ margin: 0 }}>Choix de la nouvelle cohorte :</p>
+          <CohortDropDown cohort={newCohort} onClick={(value) => setNewCohort(value)} width="375px" />
+        </div>
+        <p style={{ margin: 0, marginTop: "16px" }}>
+          Veuillez vous assurer de son éligibilité , pour en savoir plus consulter{" "}
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href=" https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1"
+            style={{ color: "#5145cc" }}>
+            l’article de la base de connaissance
+          </a>
+        </p>
+      </>
+    </ModalConfirm>
+  );
+}
+
+function CohortDropDown({ originalCohort, cohort, onClick, width }) {
   const user = useSelector((state) => state.Auth.user);
   const options = ["à venir"];
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   return (
-    <>
+    <div className={`text-[#0C7CFF] bg-[#F9FCFF] -w[${width}]`}>
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button" disabled={disabled}>
-          <div className="flex items-center justify-center p-[9px] rounded-[4px] cursor-pointer border-[1px] border-[transparent] hover:border-[#E5E7EB] mr-[15px]">
-            <Pencil stroke="#66A7F4" className="w-[11px] h-[11px]" />
+          <div className="flex items-center gap-1">
+            {originalCohort ? <IconChangementCohorte /> : null}
+            {cohort}
           </div>
+          {!disabled ? <Chevron color="#0C7CFF" style={{ padding: 0, margin: 0, marginLeft: "15px" }} /> : null}
         </DropdownToggle>
         <DropdownMenu>
           {options
@@ -159,6 +246,6 @@ function EditCohortButton({ cohort }) {
             })}
         </DropdownMenu>
       </UncontrolledDropdown>
-    </>
+    </div>
   );
 }
