@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Title from "../../../components/views/Title";
-import { canViewEmailHistory } from "../../../utils";
+import {canViewEmailHistory, ROLES} from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "./Tab";
@@ -15,14 +15,38 @@ import { translate } from "snu-lib";
 import { Button } from "./Buttons";
 import Bin from "../../../assets/Bin";
 import TakePlace from "../../../assets/icons/TakePlace";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import {toastr} from "react-redux-toastr";
+import {DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown} from "reactstrap";
+import IconChangementCohorte from "../../../assets/IconChangementCohorte";
+import Chevron from "../../../components/Chevron";
 
 export default function YoungHeader({ young, tab, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const [notesCount, setNotesCount] = useState(0);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false });
 
   function onClickDelete() {
-    console.log("delete...");
+    setConfirmModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
+      message: "Cette action est irréversible.",
+    });
   }
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce volontaire a été supprimé.");
+      return history.push("/inscription");
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
+    }
+  };
 
   return (
     <div className="px-[30px] pt-[15px] flex items-end border-b-[#E5E7EB] border-b-[1px]">
@@ -32,9 +56,7 @@ export default function YoungHeader({ young, tab, onChange }) {
             {young.firstName} {young.lastName}
           </div>
           <Badge color="#66A7F4" backgroundColor="#F9FCFF" text={young.cohort} />
-          <div className="flex items-center justify-center p-[9px] rounded-[4px] cursor-pointer border-[1px] border-[transparent] hover:border-[#E5E7EB] mr-[15px]">
-            <Pencil stroke="#66A7F4" className="w-[11px] h-[11px]" />
-          </div>
+          <EditCohortButton cohort={young.cohort} />
           {young.originalCohort && (
             <Badge color="#9A9A9A" backgroundColor="#F6F6F6" text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />
           )}
@@ -98,6 +120,45 @@ export default function YoungHeader({ young, tab, onChange }) {
           ) : null}
         </Col>
       </Row>*/}
+      <ModalConfirm
+        isOpen={confirmModal?.isOpen}
+        title={confirmModal?.title}
+        message={confirmModal?.message}
+        onCancel={() => setConfirmModal({ isOpen: false })}
+        onConfirm={() => {
+          confirmModal?.onConfirm();
+          setConfirmModal({ isOpen: false });
+        }}
+      />
     </div>
+  );
+}
+
+function EditCohortButton({ cohort }) {
+  const user = useSelector((state) => state.Auth.user);
+  const options = ["à venir"];
+  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+
+  return (
+    <>
+      <UncontrolledDropdown setActiveFromChild>
+        <DropdownToggle tag="button" disabled={disabled}>
+          <div className="flex items-center justify-center p-[9px] rounded-[4px] cursor-pointer border-[1px] border-[transparent] hover:border-[#E5E7EB] mr-[15px]">
+            <Pencil stroke="#66A7F4" className="w-[11px] h-[11px]" />
+          </div>
+        </DropdownToggle>
+        <DropdownMenu>
+          {options
+            .filter((e) => e !== cohort)
+            .map((status) => {
+              return (
+                <DropdownItem key={status} className="dropdown-item" onClick={() => onClick(status)}>
+                  Cohorte {status}
+                </DropdownItem>
+              );
+            })}
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    </>
   );
 }
