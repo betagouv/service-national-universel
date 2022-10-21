@@ -203,7 +203,6 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
     // }
 
     value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.WAITING_CONSENT;
-    console.log("🚀 ~ file: reinscription.js ~ line 206 ~ router.put ~ value", value);
 
     young.set(value);
     await young.save({ fromUser: req.user });
