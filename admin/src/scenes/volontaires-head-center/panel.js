@@ -79,7 +79,7 @@ export default function PanelView({ onChange, value }) {
         <Details title="Région" value={young.schoolRegion} />
         <Details title="Dép" value={young.schoolDepartment} />
         <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-        <Details title="Adresse" value={young.schoolAdress} />
+        <Details title="Adresse" value={young.schoolAddress} />
       </Info>
       <Info title="Situations particulières" id={young._id}>
         <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />

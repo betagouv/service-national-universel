@@ -1,16 +1,13 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { getDepartmentByZip } from "snu-lib";
-import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
-import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
-import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
+import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
+import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
+import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
+import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
+import { getDepartmentByZip } from "snu-lib";
 import { capture } from "../../../sentry";
+import { useSelector } from "react-redux";
 import API from "../../../services/api";
 
 export default function NonEligible() {
@@ -70,60 +67,67 @@ export default function NonEligible() {
 
     getMessageNonEligible(young);
   }, [young]);
-
   return (
     <>
-      <div className="bg-white p-4">
-        <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-        {msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{msg}</div>}
-        <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-        <div className="overflow-x-auto flex space-x-6">
-          {engagementPrograms.map((program, index) => {
-            const [isOpen, setIsOpen] = useState(false);
+      <div className="bg-[#f9f6f2] flex justify-center py-10">
+        <div className="bg-white basis-[60%] mx-auto my-0 px-[102px] py-[60px]">
+          <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
+          {msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{msg}</div>}
+          <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
+          <div className="overflow-x-auto flex flex-wrap justify-between">
+            {engagementPrograms.map((program, index) => {
+              const [isOpen, setIsOpen] = useState(false);
 
-            return (
-              <div key={index} className="flex w-96">
-                <div className="w-64 h-min-[700px] ">
-                  <div className="w-full h-[155px] ">
-                    <a href={program.link} target="_blank" rel="noreferrer">
-                      <img src={program.picture} className="object-cover w-full h-full" />
-                    </a>
-                  </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
-                    <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
-                      {" "}
-                      <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-                        {program.description}
+              return (
+                <div key={index} className="flex basis-[48%] mt-4 ">
+                  <div className="w-full h-min-[700px] ">
+                    <div className="w-full h-[155px] ">
+                      <a href={program.link} target="_blank" rel="noreferrer">
+                        <img src={program.picture} className="object-cover w-full h-full" />
                       </a>
                     </div>
-                    <div
-                      className="text-[13px] flex justify-between pr-2 cursor-pointer"
-                      onClick={() => {
-                        setIsOpen(!isOpen);
-                      }}>
-                      {" "}
-                      <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
-                      <img src={arrowRightBlue} className="w-3" />
+                    <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
+                      <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
+                      <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                        {" "}
+                        <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
+                          {program.description}
+                        </a>
+                      </div>
+                      <div
+                        className="text-[13px] flex justify-between pr-2 cursor-pointer"
+                        onClick={() => {
+                          setIsOpen(!isOpen);
+                        }}>
+                        {" "}
+                        <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
+                        <img src={arrowRightBlue} className="w-3" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex justify-center my-8">
-          <div
-            className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%]  p-2 cursor-pointer"
-            onClick={() => {
-              history.push("/public-engagements");
-            }}>
-            Voir plus de formes d’engagement
+              );
+            })}
+          </div>
+          <div className="flex justify-center my-8">
+            <div
+              className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%]  p-2 cursor-pointer"
+              onClick={() => {
+                history.push("/public-engagements");
+              }}>
+              Voir plus de formes d’engagement
+            </div>
+          </div>
+
+          <div className="w-full border-t border-t-[#E5E5E5] flex justify-end">
+            <button
+              className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091] mt-4"
+              onClick={onClickButton}>
+              Revenir à l&apos;accueil
+            </button>
           </div>
         </div>
       </div>
-      <Footer marginBottom={"88px"} />
-      <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />
     </>
   );
 }

@@ -8,15 +8,10 @@ import VerifyAddress from "./VerifyAddress";
 import GhostButton from "./GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
+import ErrorMessage from "./ErrorMessage";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
-
-// const errorMessages = {
-//   addressVerified: "Merci de valider l'adresse",
-//   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
-//   zip: "Le code postal n'est pas valide",
-// };
 
 export const messageStyles = {
   info: "info",
@@ -24,12 +19,11 @@ export const messageStyles = {
 };
 
 export default function SchoolInFrance({ school, onSelectSchool, toggleVerify }) {
-  console.log("🚀 ~ file: ShoolInFrance.js ~ line 27 ~ SchoolInFrance ~ school", school);
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
-  const [manualFilling, setManualFilling] = useState(false);
+  const [manualFilling, setManualFilling] = useState(school?.addressVerified);
   const [manualSchool, setManualSchool] = useState(school ?? {});
   const [errors, setErrors] = useState({});
 
@@ -56,24 +50,27 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
     let errors = {};
 
     if (!school?.fullName) {
-      errors.fullName = "Vous devez mettre le nom de l'établissement";
+      errors.fullName = "Vous devez renseigner le nom de l'établissement";
     }
     if (!city) {
-      errors.city = "Vous devez mettre le nom de la ville";
+      errors.city = "Vous devez renseigner le nom de la ville";
     }
 
-    if (Object.keys(manualSchool).length) {
+    if (manualFilling && Object.keys(manualSchool).length) {
       if (!manualSchool?.fullName) {
-        errors.manualFullName = "Vous devez mettre le nom de l'établissement";
+        errors.manualFullName = "Vous devez renseigner le nom de l'établissement";
       }
       if (!manualSchool?.address) {
-        errors.manualAddress = "Vous devez mettre une adresse";
+        errors.manualAddress = "Vous devez renseigner une adresse";
       }
       if (!manualSchool?.city) {
-        errors.manualCity = "Vous devez mettre le nom de la ville";
+        errors.manualCity = "Vous devez renseigner le nom de la ville";
       }
       if (!(manualSchool?.postCode && validator.isPostalCode(manualSchool?.postCode, "FR"))) {
         errors.manualPostCode = "Vous devez sélectionner un code postal";
+      }
+      if (!manualSchool?.addressVerified) {
+        errors.addressVerified = "Merci de vérifier l'adresse";
       }
     }
 
@@ -89,13 +86,13 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       };
       body.query.bool.filter.push({ term: { "city.keyword": city } });
       const { responses } = await api.esQuery("schoolramses", body);
-      setSchools(responses[0].hits.hits.map((e) => e._source));
+      setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
     }
     getSchools();
   }, [city]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setManualSchool({
+    const newSchool = {
       ...manualSchool,
       addressVerified: "true",
       cityCode: suggestion.cityCode,
@@ -106,9 +103,10 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       address: isConfirmed ? suggestion.address : manualSchool.address,
       postCode: isConfirmed ? suggestion.zip : manualSchool.postCode,
       city: isConfirmed ? suggestion.city : manualSchool.city,
-    });
+    };
+    setManualSchool(newSchool);
     setErrors({ addressVerified: undefined });
-    onSelectSchool(manualSchool);
+    onSelectSchool(newSchool);
   };
 
   return manualFilling ? (
@@ -118,6 +116,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
         label="Nom de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
+          onSelectSchool(null);
         }}
         error={errors.manualFullName}
       />
@@ -126,6 +125,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
         label="Adresse de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, address: value, addressVerified: undefined });
+          onSelectSchool(null);
         }}
         error={errors.manualAddress}
       />
@@ -134,6 +134,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
         label="Code postal de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, postCode: value, addressVerified: undefined });
+          onSelectSchool(null);
         }}
         error={errors.manualPostCode}
       />
@@ -142,6 +143,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
         label="Ville de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
+          onSelectSchool(null);
         }}
         error={errors.manualCity}
       />
@@ -152,9 +154,13 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
         city={city}
         onSuccess={onVerifyAddress(true)}
         onFail={onVerifyAddress(false)}
+        isVerified={manualSchool.addressVerified}
         message={manualSchool.addressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.addressVerified}
         messageStyle={manualSchool.addressVerified === "true" || isVerifyAddressDisabled ? messageStyles.info : messageStyles.error}
       />
+      <div className="flex justify-end">
+        <ErrorMessage>{errors.addressVerified}</ErrorMessage>
+      </div>
       <GhostButton
         name={
           <div className="flex text-center items-center justify-center gap-1">
@@ -176,7 +182,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           options={cities.map((c) => ({ value: c, label: c }))}
           onChange={(value) => {
             setCity(value);
-            setManualSchool({ ...manualSchool, city: value });
+            setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
+            onSelectSchool(null);
           }}
           placeholder="Sélectionnez une commune"
           error={errors.city}
@@ -195,7 +202,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           }}
           placeholder="Sélectionnez un établissement"
           onCreateOption={(value) => {
-            setManualSchool({ ...manualSchool, fullName: value });
+            setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
             onSelectSchool(null);
             setManualFilling(true);
           }}

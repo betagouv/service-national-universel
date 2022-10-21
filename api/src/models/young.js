@@ -190,7 +190,21 @@ const Schema = new mongoose.Schema({
   },
   originalCohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
+    enum: [
+      "Juillet 2023",
+      "Juin 2023",
+      "Avril 2023 - B",
+      "Avril 2023 - A",
+      "Février 2023 - C",
+      "Juillet 2022",
+      "Juin 2022",
+      "Février 2022",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "à venir",
+    ],
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -343,6 +357,13 @@ const Schema = new mongoose.Schema({
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
+    },
+  },
+
+  inscriptionDoneDate: {
+    type: Date,
+    documentation: {
+      description: "Date de validation de l'inscription par le jeune",
     },
   },
 

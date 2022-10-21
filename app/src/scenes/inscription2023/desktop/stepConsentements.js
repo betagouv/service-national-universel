@@ -25,7 +25,7 @@ export default function StepConsentements() {
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
     consentment1: young?.consentment === "true",
-    consentment2: young?.consentment === "true",
+    consentment2: young?.acceptCGU === "true",
   });
 
   const onSubmit = async () => {

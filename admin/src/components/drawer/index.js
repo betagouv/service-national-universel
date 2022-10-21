@@ -181,15 +181,10 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
   );
 }
 
-function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
+function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history, info, setInfo }) {
   // blocage de l'accès inscription pour les référents avec un message.
   // Pour supprimer ce blocage, supprimer tout ce code et remettre tout simplement la ligne :
   // <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-  const [info, setInfo] = useState({
-    isOpen: false,
-    title: "Instruction fermée",
-    message: "L'instruction des dossiers sera ouverte à partir de début novembre, merci de votre patience.",
-  });
 
   function blockInscription(e) {
     e.preventDefault();
@@ -275,6 +270,12 @@ const Drawer = (props) => {
   const history = useHistory();
   const ssoSupportStorage = localStorage?.getItem("sso-support");
 
+  const [info, setInfo] = useState({
+    isOpen: false,
+    title: "Instruction fermée",
+    message: "L'instruction des dossiers sera ouverte à partir de début novembre, merci de votre patience.",
+  });
+
   useEffect(() => {
     setOpen(props.open);
     setIsOpen(props.open);
@@ -325,7 +326,7 @@ const Drawer = (props) => {
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>

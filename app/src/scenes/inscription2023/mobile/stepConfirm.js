@@ -11,6 +11,8 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
 import plausibleEvent from "../../../services/plausible";
+import { supportURL } from "../../../config";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -63,7 +65,12 @@ export default function StepConfirm() {
     <>
       <div className="bg-white p-4 text-[#161616]">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <h1 className="text-xl font-bold mt-2">Vous y êtes presque...</h1>
+        <div className="w-full flex justify-between items-center mt-2">
+          <h1 className="text-xl font-bold">Vous y êtes presque...</h1>
+          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`} target="_blank" rel="noreferrer">
+            <QuestionMarkBlueCircle />
+          </a>
+        </div>
         <div className="text-[#666666] text-sm mt-2">
           Vous êtes sur le point de soumettre votre dossier à l’administration du SNU. Veuillez vérifier vos informations avant de valider votre demande d’inscription.
         </div>

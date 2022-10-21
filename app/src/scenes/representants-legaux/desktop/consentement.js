@@ -158,7 +158,8 @@ export default function Consentement({ step, parentId }) {
   }
 
   function onPrevious() {
-    history.push(`/representants-legaux/verification?token=${token}`);
+    const route = parentId === 2 ? "verification-parent2" : "verification";
+    history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
   // --- submit
@@ -307,7 +308,7 @@ export default function Consentement({ step, parentId }) {
 
   return (
     <>
-      {parentId === 1 && <Navbar step={step} />}
+      <Navbar step={step} />
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
           <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Apporter votre consentement</h1>
@@ -322,7 +323,7 @@ export default function Consentement({ step, parentId }) {
           <div>
             {isParentFromFranceConnect ? (
               <div className="w-[400px] text-[14px] leading-[20px] text-[#666666] mx-auto mb-[32px]">
-                Les information en provenance de FranceConnect du représentant légal n°1 ont bien été enregistrées.
+                Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
               </div>
             ) : (
               <FranceConnectButton callback={franceConnectCallbackUrl} className="flex-column" />
@@ -508,11 +509,9 @@ export default function Consentement({ step, parentId }) {
           <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
             {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
             <div className="flex justify-end ">
-              {parentId === 1 && (
-                <BorderButton className="mr-2" onClick={onPrevious}>
-                  Précédent
-                </BorderButton>
-              )}
+              <BorderButton className="mr-2" onClick={onPrevious}>
+                Précédent
+              </BorderButton>
               <PlainButton onClick={onSubmit} spinner={saving}>
                 Je valide mon consentement
               </PlainButton>

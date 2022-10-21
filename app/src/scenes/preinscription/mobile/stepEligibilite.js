@@ -69,7 +69,8 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez renseigner votre établissement scolaire";
+          // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
+          errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
       }
     }
@@ -91,7 +92,7 @@ export default function StepEligibilite() {
       return history.push("/preinscription/noneligible");
     }
     const res = await api.post("/cohort-session/eligibility/2023", {
-      department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
+      department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
       birthDate: data.birthDate,
       schoolLevel: data.scolarity,
       frenchNationality: data.frenchNationality,
@@ -165,12 +166,10 @@ export default function StepEligibilite() {
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
                 <>
-                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                   <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               ) : (
                 <>
-                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                   <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               )

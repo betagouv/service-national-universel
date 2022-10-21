@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Check from "../components/Check";
 import { COHESION_STAY_START, translate } from "snu-lib";
@@ -18,6 +18,14 @@ export default function CniInvalide() {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (young) {
+      if (young.parentStatementOfHonorInvalidId === "true" || young.parentStatementOfHonorInvalidId === "false") {
+        history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
+      }
+    }
+  }, [young]);
+
   if (!young) return <Loader />;
 
   const youngFullname = young.firstName + " " + young.lastName;
@@ -36,7 +44,7 @@ export default function CniInvalide() {
           return false;
         } else {
           plausibleEvent("Phase0/CTA representant legal - ID perimee");
-          history.push(`/representants-legaux/presentation?token=${token}&parent=1`);
+          history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
         }
       } catch (e) {
         console.log(e);
