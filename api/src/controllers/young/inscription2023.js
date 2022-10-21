@@ -5,7 +5,6 @@ const Joi = require("joi");
 const crypto = require("crypto");
 
 const YoungObject = require("../../models/young");
-const InscriptionGoalModel = require("../../models/inscriptionGoal");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
