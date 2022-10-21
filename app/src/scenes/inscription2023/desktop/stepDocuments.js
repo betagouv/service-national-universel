@@ -66,7 +66,7 @@ export default function StepDocuments() {
           </div>
         </div>
       ))}
-      <div className="mt-2">{young?.files.cniFiles?.length > 0 && <MyDocs young={young} />}</div>
+      {young?.files.cniFiles?.length > 0 && <MyDocs young={young} />}
     </DesktopPageContainer>
   );
 }
