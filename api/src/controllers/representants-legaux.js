@@ -175,7 +175,9 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   let statusChanged = false;
   if (id === 1) {
     if (young.parentAllowSNU !== value.parentAllowSNU) {
-      value.status = value.parentAllowSNU === "true" ? (young.status === "REINSCRIPTION" ? "VALIDATED" : "WAITING_VALIDATION") : "NOT_AUTORISED";
+      if (value.parentAllowSNU === "true") {
+        value.status = young.status === "REINSCRIPTION" ? "VALIDATED" : "WAITING_VALIDATION";
+      } else value.status = "NOT_AUTORISED";
 
       if (!canUpdateYoungStatus({ body: value, current: young })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
