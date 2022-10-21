@@ -14,6 +14,7 @@ const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES, g
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
+const { isGoalReached } = require("../../utils/cohort");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -327,18 +328,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     // Check inscription goals
     const dep = young.schoolDepartment || getDepartmentByZip(young.zip);
     const cohort = sessions2023.filter((e) => e.name === young.cohort)[0];
-    const inscriptionGoal = await InscriptionGoalModel.findOne({ department: dep, cohort: cohort.name });
-    if (inscriptionGoal && inscriptionGoal.max) {
-      const nbYoung = await YoungObject.countDocuments({
-        department: dep,
-        cohort: cohort.name,
-        status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-      });
-      if (nbYoung > 0) {
-        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * cohort.buffer);
-        if (fillingRatio >= 1) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-    }
+    if (isGoalReached(dep, cohort.name)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
