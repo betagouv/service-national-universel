@@ -230,13 +230,18 @@ function sectionsData(young) {
   }
 
   // --- situation
-  let situation = [{ separator: true, label: young.schooled === "true" ? "Situation scolaire" : "Situation", value: translate(young.situation) }];
+  let situation = [
+    { separator: young.status === "REINSCRIPTION" ? false : true, label: young.schooled === "true" ? "Situation scolaire" : "Situation", value: translate(young.situation) },
+  ];
   if (young.schooled === "true") {
     situation.push(
       { label: "Pays de l'établissement", value: young.schoolCountry },
       { label: "Ville de l'établissement", value: young.schoolCity },
       { label: "Nom de l'établissement", value: young.schoolName },
     );
+  }
+  if (young.status === "REINSCRIPTION" && young.schooled === "false") {
+    situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
   }
   // --- situations particulières
   const specials = specialSituations(young);
@@ -277,19 +282,22 @@ function sectionsData(young) {
     },
     {
       title: "Son profil",
-      fields: [
-        { label: "Pays de naissance", value: young.birthCountry },
-        { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
-        { label: "Ville de naissance", value: young.birthCity },
-        { label: "Sexe", value: translate(young.gender) },
-        { label: "Téléphone", value: young.phone },
-        ...titleAddress,
-        { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
-        { label: "Code postal", value: young.zip },
-        { label: "Ville", value: young.city },
-        ...foreignAddress,
-        ...situation,
-      ],
+      fields:
+        young.status === "REINSCRIPTION"
+          ? [...foreignAddress, ...situation]
+          : [
+              { label: "Pays de naissance", value: young.birthCountry },
+              { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
+              { label: "Ville de naissance", value: young.birthCity },
+              { label: "Sexe", value: translate(young.gender) },
+              { label: "Téléphone", value: young.phone },
+              ...titleAddress,
+              { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
+              { label: "Code postal", value: young.zip },
+              { label: "Ville", value: young.city },
+              ...foreignAddress,
+              ...situation,
+            ],
     },
     {
       title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale\u00A0:",
