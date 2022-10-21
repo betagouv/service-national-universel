@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
+const crypto = require("crypto");
 
 const YoungObject = require("../../models/young");
 const config = require("../../config");
@@ -191,10 +192,13 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
       });
     }
 
+    value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    if (value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
       params: {
-        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${value.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
         youngFirstName: young.firstName,
         youngName: young.lastName,
       },

@@ -232,7 +232,20 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE", "ABANDONED", "NOT_AUTORISED"],
+    enum: [
+      "IN_PROGRESS",
+      "WAITING_VALIDATION",
+      "WAITING_CORRECTION",
+      "REINSCRIPTION",
+      "VALIDATED",
+      "REFUSED",
+      "WITHDRAWN",
+      "DELETED",
+      "WAITING_LIST",
+      "NOT_ELIGIBLE",
+      "ABANDONED",
+      "NOT_AUTORISED",
+    ],
     documentation: {
       description: "Statut général du volontaire",
     },
