@@ -23,7 +23,6 @@ export default function changeSejour() {
   const [modalConfirmGoalReached, setmodalConfirmGoalReached] = useState(false);
   const [sejours, setSejours] = useState(null);
   const [sejourGoal, setSejourGoal] = useState(null);
-  console.log("🚀 ~ file: changeSejour.js ~ line 26 ~ changeSejour ~ sejourGoal", sejourGoal);
   const [isEligible, setIsElegible] = useState(false);
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
@@ -47,7 +46,6 @@ export default function changeSejour() {
           department: young.department,
           frenchNationality: young.frenchNationality,
         });
-        console.log("🚀 ~ file: changeSejour.js ~ line 48 ~ getInfo ~ data", data);
         const sejourGoal = data.map((e) => {
           // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
           //var date = new Date();
