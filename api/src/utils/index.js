@@ -29,6 +29,7 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
 const { SUB_ROLES } = require("snu-lib/roles");
+const { getAge } = require("snu-lib/date");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -385,10 +386,15 @@ const updateStatusPhase2 = async (young, fromUser) => {
 const checkStatusContract = (contract) => {
   if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
   // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-  const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
+  const tokenKeys = ["projectManagerToken", "structureManagerToken"];
+  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+  if (isYoungAdult) tokenKeys.push("youngContractToken");
+  else tokenKeys.push("parent1Token", "parent2Token");
+
   const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
   const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
   const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+  console.log("check", tokenCount, validatedCount);
   if (validatedCount >= tokenCount) {
     return "VALIDATED";
   } else {
