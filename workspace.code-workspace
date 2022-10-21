@@ -20,6 +20,9 @@
     },
     {
       "path": "lib"
+    },
+    {
+      "path": "analytics"
     }
   ],
   "settings": {}
