@@ -387,14 +387,20 @@ const checkStatusContract = (contract) => {
   if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
   // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
   const tokenKeys = ["projectManagerToken", "structureManagerToken"];
+  const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
+
   const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
-  if (isYoungAdult) tokenKeys.push("youngContractToken");
-  else tokenKeys.push("parent1Token", "parent2Token");
+  if (isYoungAdult) {
+    tokenKeys.push("youngContractToken");
+    validateKeys.push("youngContractStatus");
+  } else {
+    tokenKeys.push("parent1Token", "parent2Token");
+    validateKeys.push("parent1Status", "parent2Status");
+  }
 
   const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
-  const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
   const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-  console.log("check", tokenCount, validatedCount);
+
   if (validatedCount >= tokenCount) {
     return "VALIDATED";
   } else {
