@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
-import {MiniTitle} from "./commons";
+import { MiniTitle } from "./commons";
 import Bin from "../../../assets/Bin";
 
 /**
@@ -14,17 +14,23 @@ import Bin from "../../../assets/Bin";
  * @returns {JSX.Element}
  * @constructor
  */
-export default function Field({ name, label, value, mode, onChange, className = "", onStartRequest, currentRequest, correctionRequest, onCorrectionRequestChange }) {
+export default function Field({ name, label, value, mode, className = "", onStartRequest, currentRequest, correctionRequest, onCorrectionRequestChange }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
   const [requestText, setRequestText] = useState("");
+  const [hasValidRequest, setHasValidRequest] = useState(false);
 
   useEffect(() => {
     setOpened(currentRequest === name);
   }, [currentRequest]);
 
   useEffect(() => {
-    setRequestText(correctionRequest ? correctionRequest.message : "");
+    setHasValidRequest(correctionRequest ? correctionRequest.status !== "CANCELED" : false);
+    if (hasValidRequest) {
+      setRequestText(correctionRequest.message);
+    } else {
+      setRequestText("");
+    }
   }, [correctionRequest]);
 
   function startRequest() {
@@ -33,8 +39,6 @@ export default function Field({ name, label, value, mode, onChange, className = 
   }
 
   function onChangeRequestText(event) {
-    console.log("change request text: ", event.target.value);
-    // setRequestText(event.target.value);
     onCorrectionRequestChange && onCorrectionRequestChange(name, event.target.value);
   }
 
@@ -52,8 +56,13 @@ export default function Field({ name, label, value, mode, onChange, className = 
         <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>
         <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{value}</div>
         {mode === "correction" && (
-          <div className={(mouseIn ? "block" : "hidden") + " absolute top-[11px] right-[11px] p-[9px] rounded-[100px] bg-[#FFEDD5] cursor-pointer group hover:bg-[#F97316]"} onClick={startRequest}>
-            <PencilAlt className="w-[14px] h-[14px] text-[#F97316] group-hover:text-white" />
+          <div
+            className={`absolute top-[11px] right-[11px] p-[9px] rounded-[100px] cursor-pointer group ${
+              hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " + (mouseIn ? "block" : "hidden")
+            } hover:bg-[#F97316]`}
+            onClick={startRequest}>
+            {hasValidRequest}
+            <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
           </div>
         )}
       </div>

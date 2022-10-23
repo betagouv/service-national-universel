@@ -27,7 +27,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       .items(
         Joi.object({
           cohort: validateFirstName().trim().required(),
-          field: Joi.string().uppercase().trim().required(),
+          field: Joi.string().required(),
           reason: Joi.string(),
           message: Joi.string(),
           status: Joi.string().valid("PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED").required(),
@@ -46,6 +46,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     for (const request of newRequests) {
       request.moderatorId = req.user._id;
       request.sentAt = sentAt;
+      request.status = "SENT";
     }
 
     const requests = young.correctionRequests ? young.correctionRequests : [];

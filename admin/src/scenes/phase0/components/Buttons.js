@@ -1,6 +1,5 @@
 import React from "react";
 import { Spinner } from "reactstrap";
-import PencilAlt from "../../../assets/icons/PencilAlt";
 
 export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel }) {
   if (href) {
