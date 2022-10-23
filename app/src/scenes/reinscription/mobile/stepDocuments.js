@@ -112,7 +112,7 @@ export default function StepDocuments() {
         )}
       </div>
       <Help />
-      <Footer marginBottom={"88px"} />
+      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text="Me réinscrire au SNU" onSubmit={onSubmit} onClickPrevious={() => history.push("/reinscription/consentement")} disabled={!files} />
     </>
   );
