@@ -27,7 +27,7 @@ export default function StepConsentements() {
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
     consentment1: young?.consentment === "true",
-    consentment2: young?.consentment === "true",
+    consentment2: young?.acceptCGU === "true",
   });
 
   const onSubmit = async () => {
@@ -90,7 +90,7 @@ export default function StepConsentements() {
             <div className="text-[#3A3A3A] text-sm flex-1">
               M&apos;engage à respecter le{" "}
               <a
-                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_2022_2023.pdf"
+                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur-2022-2023.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="underline hover:underline">

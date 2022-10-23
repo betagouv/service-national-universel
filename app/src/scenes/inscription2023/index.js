@@ -25,6 +25,7 @@ import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import { getStepFromUrlParam, getStepUrl, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
+import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
@@ -33,6 +34,7 @@ function renderStep(step, device) {
   if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
   if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
   if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
+  if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
   if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
   return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
 }
@@ -61,7 +63,7 @@ const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
   }
 
   return (
-    <div className="flex flex-col h-screen justify-between md:bg-[#f9f6f2] bg-white">
+    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(currentStep, device)}
@@ -74,6 +76,21 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
 
   if (!young) return <Redirect to="/preinscription" />;
+
+  //il n'a pas acces a l'inscription
+  if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young?.status)) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  //Il a fini son inscription
+  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION") {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  //si la periode de modification est finie
+  if (!inscriptionModificationOpenForYoungs(young.cohort)) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
 
   return <SentryRoute path="/inscription2023/:step?/:category?" component={() => <Step young={young} />} />;
 }

@@ -10,7 +10,9 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import ExpirationDate from "../components/ExpirationDate";
+import { formatDateFR, sessions2023 } from "snu-lib";
+
+import DatePickerList from "../../preinscription/components/DatePickerList";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 
@@ -25,45 +27,31 @@ export default function StepUpload() {
   const [checked, setChecked] = useState({ lisible: false, coupe: false, nette: false });
   const [date, setDate] = useState();
 
-  async function upload(files) {
+  async function onSubmit() {
+    const files = [...recto, ...verso];
     for (const file of files) {
       if (file.size > 5000000)
         return setError({
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, new Date(date));
-    if (res.code === "FILE_CORRUPTED") {
-      setError({
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, date);
+    if (res.code === "FILE_CORRUPTED")
+      return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
-    } else if (!res.ok) {
+    if (!res.ok) {
       capture(res.code);
-      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
     }
-  }
-
-  async function onSubmit() {
-    try {
-      if (verso) await upload([...recto, ...verso]);
-      else await upload([...recto]);
-      if (error.length) return;
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
-      if (!ok) {
-        capture(code);
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        return;
-      }
-      dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - CI mobile");
-      history.push("/inscription2023/confirm");
-    } catch (e) {
-      capture(e);
-      setError({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    if (!ok) {
+      capture(code);
+      return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
     }
+    dispatch(setYoung(responseData));
+    plausibleEvent("Phase0/CTA inscription - CI mobile");
+    history.push("/inscription2023/confirm");
   }
 
   const ID = {
@@ -151,7 +139,18 @@ export default function StepUpload() {
         {((ID[category].imgBack && verso) || (!ID[category].imgBack && recto)) && (
           <>
             {checked.lisible === true && checked.coupe === true && checked.nette === true ? (
-              <ExpirationDate ID={ID[category]} date={date} setDate={setDate} />
+              <>
+                <hr className="my-8 h-px bg-gray-200 border-0" />
+                <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+                <div className="text-gray-600 leading-loose my-2">
+                  Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+                  ).
+                </div>
+                <div className="w-3/4 mx-auto">
+                  <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+                </div>
+                <DatePickerList value={date} onChange={(date) => setDate(date)} />
+              </>
             ) : (
               <>
                 <div className="w-full flex items-center justify-center mb-4">

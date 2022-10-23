@@ -69,7 +69,8 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez choisir votre école";
+          // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
+          errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
       }
     }
@@ -91,8 +92,8 @@ export default function StepEligibilite() {
       return history.push("/preinscription/noneligible");
     }
     const res = await api.post("/cohort-session/eligibility/2023", {
-      department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-      birthDate: new Date(data.birthDate),
+      department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
+      birthDate: data.birthDate,
       schoolLevel: data.scolarity,
       frenchNationality: data.frenchNationality,
     });
@@ -143,7 +144,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4">
           Date de naissance
-          <DateFilter title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+          <DateFilter value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (
@@ -165,12 +166,10 @@ export default function StepEligibilite() {
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
                 <>
-                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                   <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               ) : (
                 <>
-                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                   <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               )

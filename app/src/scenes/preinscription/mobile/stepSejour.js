@@ -1,5 +1,5 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { formatStringDate } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -55,9 +55,7 @@ export default function StepSejour() {
               </a>
             </div>
             <div className="text-[#000091] my-4 underline underline-offset-4">
-              <a href={`${supportURL}/base-de-connaissance/les-autres-formes-d-engagement`} target="_blank" rel="noreferrer">
-                Consulter d’autres dispositifs d’engagement
-              </a>
+              <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
             </div>
           </>
         )}

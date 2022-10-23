@@ -13,6 +13,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
 import { getDepartmentByZip } from "snu-lib/region-and-departments";
+import { supportURL } from "../../../config";
 
 export default function StepSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -59,9 +60,9 @@ export default function StepSejour() {
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
@@ -72,12 +73,12 @@ export default function StepSejour() {
             <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
             <div className="text-gray-500 text-sm">
               La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-              <Link to="" className="underline underline-offset-4">
+              <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
                 En savoir plus.
-              </Link>
+              </a>
             </div>
             <div className="text-[#000091] my-4 underline underline-offset-4">
-              <Link to="">Consulter d’autres dispositifs d’engagement</Link>
+              <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
             </div>
           </>
         )}
@@ -87,17 +88,15 @@ export default function StepSejour() {
   );
 
   function SessionButton(session) {
-    const young = useSelector((state) => state.Auth.young);
-
     return (
       <div
         key={session.id}
-        className="border p-4 my-3 flex justify-between items-center"
+        className="border p-4 my-3 flex justify-between items-center hover:cursor-pointer"
         onClick={async () => {
           const { ok, data, code } = await api.put("/young/reinscription/changeCohort", {
             cohortChangeReason: "Réinscription à un nouveau séjour",
             cohort: session.name,
-            originCohort: young.cohort,
+            originalCohort: young.cohort,
           });
           if (!ok) {
             capture(code);

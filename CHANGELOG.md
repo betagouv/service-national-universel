@@ -1,3 +1,42 @@
+# [1.152.0](https://github.com/betagouv/service-national-universel/compare/v1.151.0...v1.152.0) (2022-10-18)
+
+
+### Bug Fixes
+
+* **app:** Correct Eligibilite reinscription ([cf5d475](https://github.com/betagouv/service-national-universel/commit/cf5d47568ebfdeba7d4c87e696cddad6f9cfc2e0))
+* **app:** Fix birthDateAt ([34c637b](https://github.com/betagouv/service-national-universel/commit/34c637be5e81f2b4805b7c68984ce843074783b4))
+* **app:** Fix link reinscription ([ff61405](https://github.com/betagouv/service-national-universel/commit/ff61405988d6fc01ac7c01d40265e89a690074a3))
+* **app:** fix wording ([#1934](https://github.com/betagouv/service-national-universel/issues/1934)) ([cfa57ee](https://github.com/betagouv/service-national-universel/commit/cfa57eeb6aee6fbc355192e2fe081307b8935f73))
+* **app:** Fixup reinscription ([54601ef](https://github.com/betagouv/service-national-universel/commit/54601efc814dd63a5eb112326fff8e140921562a))
+* **app:** footer upload mobile ([26fe638](https://github.com/betagouv/service-national-universel/commit/26fe638aa53e794c93a384fbc2254769aefdb7b4))
+* **app:** phase1 not done reinscription ([059cdb7](https://github.com/betagouv/service-national-universel/commit/059cdb7c936515e567ded278b618ae9debb53ad2))
+* **app:** reglement interieur ([da05036](https://github.com/betagouv/service-national-universel/commit/da050368d7bddaad5916e8849c76f27295dd6cc9))
+
+
+### Features
+
+* **app:** Reinscription desktop + track begin reinscription ([#1932](https://github.com/betagouv/service-national-universel/issues/1932)) ([1eaf86d](https://github.com/betagouv/service-national-universel/commit/1eaf86d1f37faf69ff1da5e2ee18da0769b05c40))
+* **app:** Reinscription desktop + track begin reinscription ([#1932](https://github.com/betagouv/service-national-universel/issues/1932)) ([ceb5fad](https://github.com/betagouv/service-national-universel/commit/ceb5fad18d077c8336aa173154771bbdddc383de))
+
+# [1.151.0](https://github.com/betagouv/service-national-universel/compare/v1.150.0...v1.151.0) (2022-10-17)
+
+
+### Bug Fixes
+
+* **app:** date picker ([adb0585](https://github.com/betagouv/service-national-universel/commit/adb0585d40fbc05e2a133a8b84b95e2abb9a618a))
+* **app:** modal sejour eligibility ([8d9adcb](https://github.com/betagouv/service-national-universel/commit/8d9adcb04d96426c692eb3f69663b50ce09babcd))
+* **app:** open step done to modification ([faad37b](https://github.com/betagouv/service-national-universel/commit/faad37bda54cbb4499bd41d37831cf638024aa0a))
+* **app:** Reinscription conditions ([ba4b3f6](https://github.com/betagouv/service-national-universel/commit/ba4b3f6156c5d2f46d7674654dff6c60a21b7958))
+* franceconnect callback ([026306c](https://github.com/betagouv/service-national-universel/commit/026306c9c77b9c1cee9b39e84d5b29ec710063dd))
+* **app:** saving cohort on mobile ([494b487](https://github.com/betagouv/service-national-universel/commit/494b4878cc0bd058c1fe4727ce46c7e8ae4d801c))
+
+
+### Features
+
+* **admin:** open new cohort for dashboard ([#1905](https://github.com/betagouv/service-national-universel/issues/1905)) ([af7f611](https://github.com/betagouv/service-national-universel/commit/af7f611fbe37bc79f47cbf52f2a71804c5d17658))
+* **app:** reinscription ([#1903](https://github.com/betagouv/service-national-universel/issues/1903)) ([f7c86a9](https://github.com/betagouv/service-national-universel/commit/f7c86a93ebdb23af8533c0b6c51e645c3bda3523))
+* **app:** waiting validation modify inscription ([57b0327](https://github.com/betagouv/service-national-universel/commit/57b0327c338d1897244879febb1fbd44ec5604a8))
+
 # [1.150.0](https://github.com/betagouv/service-national-universel/compare/v1.149.0...v1.150.0) (2022-10-16)
 
 

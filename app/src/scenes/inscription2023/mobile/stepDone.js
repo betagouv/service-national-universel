@@ -16,6 +16,8 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import Footer from "../../../components/footerV2";
 import EditPen from "../../../assets/icons/EditPen";
+import StickyButton from "../../../components/inscription/stickyButton";
+import ConsentDone from "../../../assets/icons/ConsentDone";
 
 const engagementPrograms = [
   {
@@ -60,12 +62,8 @@ export default function StepWaitingConsent() {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    if (young?.parentAllowSNU) {
-      if (young?.parentAllowSNU === "true" && young?.status !== "IN_PROGRESS") {
-        history.push("/");
-      } else if (young?.parentAllowSNU === "false") {
-        setNotAuthorised(true);
-      }
+    if (young?.parentAllowSNU === "false") {
+      setNotAuthorised(true);
     }
   }, [young]);
 
@@ -89,6 +87,26 @@ export default function StepWaitingConsent() {
     }
   };
 
+  const handleDone = async () => {
+    setDisabled(true);
+    try {
+      const { ok, code, data } = await api.put(`/young/inscription2023/done`);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setDisabled(false);
+        return;
+      }
+      dispatch(setYoung(data));
+    } catch (e) {
+      capture(e);
+      setError({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+      setDisabled(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     await api.post(`/young/logout`);
@@ -98,42 +116,67 @@ export default function StepWaitingConsent() {
 
   return !notAuthorised ? (
     <>
-      <div className="bg-white p-4 text-[#161616]">
-        {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <h1 className="text-xl font-bold mt-2">Bravo, vous avez terminé votre inscription.</h1>
-        <div className="text-[#666666] text-sm mt-2">
-          Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
-        </div>
+      {young?.parentAllowSNU === "true" ? (
+        <>
+          <div className="bg-white p-4 text-[#161616]">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <ConsentDone />
+                <h1 className="text-[22px] font-bold flex-1">Bravo, nous allons étudier votre dossier !</h1>
+              </div>
+              <hr className="my-2 h-px bg-gray-200 border-0" />
+              <p className="text-[#161616] text-base ">
+                Bonne nouvelle, votre représentant légal a <strong>déjà donné son consentement.</strong>
+              </p>
+              <p className="text-[#161616] text-base mt-2">Vous pouvez désormais accéder à votre compte volontaire.</p>
+            </div>
+          </div>
+          <Footer marginBottom="mb-[88px]" />
+          <StickyButton text={"Accéder à mon compte volontaire"} onClick={() => handleDone()} />
+        </>
+      ) : (
+        <>
+          <div className="bg-white p-4 text-[#161616]">
+            {error?.text && <Error {...error} onClose={() => setError({})} />}
+            <h1 className="text-xl font-bold mt-2">Bravo, vous avez terminé votre inscription.</h1>
+            <div className="text-[#666666] text-sm mt-2">
+              Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
+            </div>
 
-        <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] p-4 gap-1">
-          <div className="text-[#161616] text-base font-bold">En attente du consentement de :</div>
-          <div className="text-[#3A3A3A] text-base ">
-            {young?.parent1FirstName} {young.parent1LastName}
+            <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] p-4 gap-1">
+              <div className="text-[#161616] text-base font-bold">En attente du consentement de :</div>
+              <div className="text-[#3A3A3A] text-base ">
+                {young?.parent1FirstName} {young.parent1LastName}
+              </div>
+              <div className="text-[#666666] text-sm ">{young?.parent1Email}</div>
+              <div className="flex justify-between mt-2">
+                <button
+                  className="mt-2 h-10 text-base w-1/2 disabled:bg-[#E5E5E5] disabled:text-[#929292] bg-[#000091]  text-white "
+                  disabled={disabled}
+                  onClick={() => handleClick()}>
+                  Relancer
+                </button>
+                <img className="translate-y-4" src={Avatar} />
+              </div>
+            </div>
+            <div className="flex items-center justify-end text-[#000091] text-base my-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
+              <EditPen />
+              Modifier mes informations
+            </div>
           </div>
-          <div className="text-[#666666] text-sm ">{young?.parent1Email}</div>
-          <div className="flex justify-between mt-2">
-            <button className="mt-2 h-10 text-base w-1/2 disabled:bg-[#E5E5E5] disabled:text-[#929292] bg-[#000091]  text-white " disabled={disabled} onClick={() => handleClick()}>
-              Relancer
-            </button>
-            <img className="translate-y-4" src={Avatar} />
+          <div className="fixed bottom-0 w-full z-50">
+            <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
+              <button
+                className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091] disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
+                disabled={loading}
+                onClick={() => logout()}>
+                Revenir à l&apos;accueil
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center justify-end text-[#000091] text-base my-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
-          <EditPen />
-          Modifier mes informations
-        </div>
-      </div>
-      <div className="fixed bottom-0 w-full z-50">
-        <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
-          <button
-            className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091] disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
-            disabled={loading}
-            onClick={() => logout()}>
-            Revenir à l&apos;accueil
-          </button>
-        </div>
-      </div>
-      <Footer marginBottom="mb-[88px]" />
+          <Footer marginBottom="mb-[88px]" />
+        </>
+      )}
     </>
   ) : (
     <>

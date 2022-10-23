@@ -188,6 +188,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
+      acceptCGU: "true",
       consentment: "true",
       inscriptionStep2023: STEPS2023.REPRESENTANTS,
     });
@@ -270,33 +271,35 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // If ID proof expires before session start, notify parent 1.
-    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+    const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
 
-    if (notifyExpirationDate) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+    if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
+      // If no ID proof has a valid date, notify parent 1.
+      const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
+
+      if (notifyExpirationDate) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
       });
+      value.inscriptionDoneDate = new Date();
     }
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
-
-    young.set({
-      informationAccuracy: "true",
-      inscriptionStep2023: STEPS2023.DONE,
-    });
+    young.set(value);
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -337,7 +340,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (type === "next") young.set("inscriptionStep2023", STEPS2023.CONFIRM);
+    if (type === "next") {
+      if (young.files.cniFiles.length > 0) {
+        young.set("inscriptionStep2023", STEPS2023.CONFIRM);
+      } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -351,8 +358,8 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // If ID proof expires before session start, notify parent 1.
-    const notifyExpirationDate = young?.files?.cniFiles?.some((f) => f.expirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+    // If no ID proof has a valid date, notify parent 1.
+    const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
 
@@ -360,7 +367,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`,
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -370,12 +377,45 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
       });
     }
+
+    young.set({ inscriptionDoneDate: new Date() });
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/done", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ inscriptionStep2023: STEPS2023.DONE });
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/goToInscriptionAgain", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+    await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

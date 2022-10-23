@@ -12,8 +12,8 @@ import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SearchableSelect from "../../../components/SearchableSelect";
 import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/CheckBox";
-import DateFilter from "../../preinscription/components/DatePickerList";
+import CheckBox from "../../../components/inscription/checkbox";
+import DatePickerList from "../../preinscription/components/DatePickerList";
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../sentry";
 import { getDepartmentByZip } from "snu-lib";
@@ -21,10 +21,9 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
-import { STEP_LIST } from "../utils/navigation";
+import { STEPS } from "../utils/navigation";
 
 export default function StepEligibilite() {
-  // const [data, setData] = React.useContext(PreInscriptionContext);
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -33,16 +32,15 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
 
   const history = useHistory();
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 22 ~ StepEligibilite ~ data", data);
 
   useEffect(() => {
     if (!young) return;
 
     setData({
       frenchNationality: young.frenchNationality,
-      birthDate: young.birthdateAt.split("T")[0],
+      birthDate: new Date(young.birthdateAt),
       school:
-        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE && young.schooled
+        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE && young.schooled
           ? {
               fullName: young.schoolName,
               type: young.schoolType,
@@ -56,7 +54,7 @@ export default function StepEligibilite() {
               postCode: young.schoolZip,
             }
           : null,
-      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEP_LIST.ELIGIBILITE ? young.grade : null,
+      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE ? young.grade : null,
       zip: young.zip,
     });
   }, [young]);
@@ -79,7 +77,7 @@ export default function StepEligibilite() {
     let errors = {};
 
     // Nationality
-    if (!young?.frenchNationality) {
+    if (!data?.frenchNationality) {
       errors.frenchNationality = "Vous devez être français";
     }
     // Scolarity
@@ -102,7 +100,8 @@ export default function StepEligibilite() {
       } else {
         // School
         if (!data?.school) {
-          errors.school = "Vous devez choisir votre école";
+          // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
+          errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
       }
     }
@@ -119,7 +118,6 @@ export default function StepEligibilite() {
 
     setLoading(true);
     plausibleEvent("Phase1/CTA reinscription - eligibilite");
-    if (data.frenchNationality === "false") return history.push("/reinscription/noneligible");
 
     const updates = {
       grade: data.scolarity,
@@ -129,17 +127,18 @@ export default function StepEligibilite() {
       schoolAddress: data.school?.adresse,
       schoolZip: data.school?.codeCity,
       schoolCity: data.school?.city,
-      schoolDepartment: data.school?.departmentName,
+      schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
       schoolId: data.school?._id,
       zip: data.zip,
+      birthDate: data.birthDate,
     };
 
     try {
       const res = await api.post("/cohort-session/eligibility/2023", {
-        department: data.school?.departmentName || getDepartmentByZip(data.zip) || null,
-        birthDate: new Date(data.birthDate),
+        department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
+        birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
@@ -149,7 +148,7 @@ export default function StepEligibilite() {
         setLoading(false);
       }
 
-      if (!res.data.length) {
+      if (res.data.msg) {
         const res = await api.put("/young/reinscription/noneligible");
         if (!res.ok) {
           capture(res.code);
@@ -186,9 +185,9 @@ export default function StepEligibilite() {
       <div className="bg-white p-4">
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
-          <Link to="/public-besoin-d-aide/">
+          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
-          </Link>
+          </a>
         </div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex flex-col flex-start my-4">
@@ -216,7 +215,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4 text-[#929292]">
           Date de naissance
-          <DateFilter disabled={true} title="" value={data.birthDate} onChange={(e) => setData({ ...data, birthDate: e.target.value })} />
+          <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (
@@ -238,12 +237,10 @@ export default function StepEligibilite() {
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
                 <>
-                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                   <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               ) : (
                 <>
-                  {error.school ? <span className="text-red-500 text-sm">{error.school}</span> : null}
                   <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 </>
               )

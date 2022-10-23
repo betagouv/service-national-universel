@@ -10,14 +10,12 @@ import RadioButton from "../components/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/inscription/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
-// import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
-import { BorderButton, PlainButton } from "../components/Buttons";
 import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
 import plausibleEvent from "../../../services/plausible";
@@ -162,7 +160,8 @@ export default function Consentement({ step, parentId }) {
   }
 
   function onPrevious() {
-    history.push(`/representants-legaux/verification?token=${token}`);
+    const route = parentId === 2 ? "verification-parent2" : "verification";
+    history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
   // --- submit
@@ -225,10 +224,10 @@ export default function Consentement({ step, parentId }) {
 
       if (data.allowSNU) {
         validate("rightOlder", "unchecked", data.rightOlder !== true);
-        validate("personalData", "unchecked", data.personalData !== true);
         if (youngAge < 15) {
-          validate("healthForm", "unchecked", data.healthForm !== true);
+          validate("personalData", "unchecked", data.personalData !== true);
         }
+        validate("healthForm", "unchecked", data.healthForm !== true);
         validate("vaccination", "unchecked", data.vaccination !== true);
         validate("internalRules", "unchecked", data.internalRules !== true);
 
@@ -311,7 +310,7 @@ export default function Consentement({ step, parentId }) {
 
   return (
     <>
-      {parentId === 1 && <Navbar step={step} />}
+      <Navbar step={step} />
       <div className="bg-white px-3 py-4 text-[#161616]">
         <div className="flex flex-col">
           <h1 className="text-[22px]  font-bold text-[#21213F] mb-1">Apporter votre consentement</h1>
@@ -325,7 +324,7 @@ export default function Consentement({ step, parentId }) {
           <div>
             {isParentFromFranceConnect ? (
               <div className="w-[400px] text-[14px] leading-[20px] text-[#666666] mx-auto mb-[32px]">
-                Les information en provenance de FranceConnect du représentant légal n°1 ont bien été enregistrées.
+                Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
               </div>
             ) : (
               <FranceConnectButton callback={franceConnectCallbackUrl} className="flex-column" />
@@ -394,26 +393,26 @@ export default function Consentement({ step, parentId }) {
                     <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
                       Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
                     </Check>
-                    <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                      J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                    </Check>
                     {youngAge < 15 && (
-                      <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                        M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                        cohésion (
-                        <a href={CDN_BASE_URL + "/snu-fiche-sanitaire-de-liaison-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
-                          Télécharger la fiche sanitaire ici
-                        </a>
-                        ).
+                      <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
+                        J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
                       </Check>
                     )}
+                    <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
+                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
+                      cohésion (
+                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                        Télécharger la fiche sanitaire ici
+                      </a>
+                      ).
+                    </Check>
                     <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
                       M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP),
                       et pour les volontaires résidents de Guyane, la fièvre jaune.
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du SNU
                       </a>
                       .
@@ -474,9 +473,9 @@ export default function Consentement({ step, parentId }) {
               </AuthorizeBlock>*/}
               <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
                 <div className="mb-3">
-                  Le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes dûment accrédités par les services communication du
-                  ministère et/ou des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
-                  séparément, sur leurs publications respectives.{" "}
+                  Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
+                  des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
+                  leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
                     <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus
@@ -507,7 +506,7 @@ export default function Consentement({ step, parentId }) {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton onClickPrevious={parentId === 1 && onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
+      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
     </>
   );
 }

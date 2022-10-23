@@ -41,7 +41,6 @@ export default function Closed({ location }) {
       <Header showMessage={false} location={location} />
       <Wrapper>
         <TitleContainer>
-          <TopTitle className="mobileOnly">inscription 2022</TopTitle>
           <Title>Participez au SNU</Title>
           <a
             className="flex items-center justify-center bg-white mb-4 w-12 h-12 rounded-full md:h-20 md:w-20"

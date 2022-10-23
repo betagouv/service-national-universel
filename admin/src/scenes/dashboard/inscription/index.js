@@ -33,7 +33,7 @@ export default function Index({ onChangeFilter = () => {} }) {
         academy: [],
         region: [],
         department: [],
-        cohort: filter?.cohort || ["Juin 2022", "Juillet 2022", "2022"],
+        cohort: filter?.cohort || ["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"],
       }),
       ...n,
     });
@@ -88,6 +88,11 @@ export default function Index({ onChangeFilter = () => {} }) {
                   { value: "Février 2022", label: "Février 2022" },
                   { value: "Juin 2022", label: "Juin 2022" },
                   { value: "Juillet 2022", label: "Juillet 2022" },
+                  { value: "Février 2023 - C", label: "Février 2023 - C" },
+                  { value: "Avril 2023 - A", label: "Avril 2023 - A" },
+                  { value: "Avril 2023 - B", label: "Avril 2023 - B" },
+                  { value: "Juin 2023", label: "Juin 2023" },
+                  { value: "Juillet 2023", label: "Juillet 2023" },
                 ]}
                 onChange={(cohort) => updateFilter({ cohort })}
                 value={filter.cohort}

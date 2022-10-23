@@ -21,7 +21,7 @@ export default function Index() {
     setFilter((f) => ({ ...f, ...n }));
   }
 
-  const cohortList = ["Juillet 2022", "Juin 2022", "Février 2022", "2021"];
+  const cohortList = ["2022", "Février 2022", "Juin 2022", "Juillet 2022"];
 
   useEffect(() => {
     if (state !== undefined && state?.params) {
@@ -61,6 +61,11 @@ export default function Index() {
                   { value: "Février 2022", label: "Février 2022" },
                   { value: "Juin 2022", label: "Juin 2022" },
                   { value: "Juillet 2022", label: "Juillet 2022" },
+                  { value: "Février 2023 - C", label: "Février 2023 - C" },
+                  { value: "Avril 2023 - A", label: "Avril 2023 - A" },
+                  { value: "Avril 2023 - B", label: "Avril 2023 - B" },
+                  { value: "Juin 2023", label: "Juin 2023" },
+                  { value: "Juillet 2023", label: "Juillet 2023" },
                 ]}
                 onChange={(cohort) => updateFilter({ cohort })}
                 value={filter.cohort}

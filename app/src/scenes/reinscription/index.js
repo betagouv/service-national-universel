@@ -6,9 +6,18 @@ import { SentryRoute } from "../../sentry";
 import MobileEligibilite from "./mobile/stepEligibilite";
 import MobileNonEligible from "./mobile/stepNonEligible";
 import MobileSejour from "./mobile/stepSejour";
+import MobileConsentements from "./mobile/stepConsentements";
 import MobileDocuments from "./mobile/stepDocuments";
 import MobileDone from "./mobile/stepDone";
 import MobileUpload from "./mobile/stepUpload";
+
+import DesktopEligibilite from "./desktop/stepEligibilite";
+import DesktopNonEligible from "./desktop/stepNonEligible";
+import DesktopConsentements from "./desktop/stepConsentements";
+import DesktopSejour from "./desktop/stepSejour";
+import DesktopDocuments from "./desktop/stepDocuments";
+import DesktopDone from "./desktop/stepDone";
+import DesktopUpload from "./desktop/stepUpload";
 
 import useDevice from "../../hooks/useDevice";
 
@@ -22,28 +31,26 @@ const getStepUrl = (name) => {
 };
 
 function renderStep(step, device) {
-  if (step === STEPS.ELIGIBILITE) return device === "desktop" ? null : <MobileEligibilite />;
-  if (step === STEPS.NONELIGIBLE) return device === "desktop" ? null : <MobileNonEligible />;
-  if (step === STEPS.SEJOUR) return device === "desktop" ? null : <MobileSejour />;
-  if (step === STEPS.DOCUMENTS) return device === "desktop" ? null : <MobileDocuments />;
-  if (step === STEPS.UPLOAD) return device === "desktop" ? null : <MobileUpload />;
-  if (step === STEPS.DONE) return device === "desktop" ? null : <MobileDone />;
-  return device === "desktop" ? null : <MobileEligibilite />;
+  if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
+  if (step === STEPS.NONELIGIBLE) return device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />;
+  if (step === STEPS.SEJOUR) return device === "desktop" ? <DesktopSejour /> : <MobileSejour />;
+  if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
+  if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
+  if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
+  if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
+  if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
+  return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
 }
 
 const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
-  console.log("🚀 ~ file: index.js ~ line 42 ~ Step ~ eligibleStep", eligibleStep);
+  console.log("🚀 ~ file: index.js ~ line 46 ~ Step ~ eligibleStep", eligibleStep);
   const device = useDevice();
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
+  if (!eligibleStep) return <Redirect to={`/home`} />;
   let currentStep = getStepFromUrlParam(step);
-  console.log("🚀 ~ file: index.js ~ line 47 ~ Step ~ currentStep", currentStep);
-
-  if (!eligibleStep) eligibleStep = getStepFromUrlParam(step);
-  console.log("🚀 ~ file: index.js ~ line 50 ~ Step ~ eligibleStep", eligibleStep);
-
-  if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/reinscription/${getStepUrl(STEPS.DONE)}`} />;
+  if (!currentStep) return <Redirect to={`/reinscription/${getStepUrl(eligibleStep)}`} />;
 
   const eligibleStepDetails = STEP_LIST.find((element) => element.name === eligibleStep);
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === eligibleStep);
@@ -56,7 +63,7 @@ const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(currentStep, device)}
@@ -69,7 +76,10 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
-  if (!young) history.push("/");
+  if (!young) {
+    history.push("/");
+    return null;
+  }
 
   return <SentryRoute path="/reinscription/:step?/:category?" component={() => <Step young={young} />} />;
 }

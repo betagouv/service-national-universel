@@ -194,7 +194,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
         emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/consentement-parent2?token=${young.parent2Inscription2023Token}`,
+          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },

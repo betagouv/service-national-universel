@@ -14,7 +14,7 @@ import { API_VERIFICATION, isReturningParent } from "../commons";
 import { BorderButton, PlainButton } from "../components/Buttons";
 import { supportURL } from "../../../config";
 
-export default function Verification({ step }) {
+export default function Verification({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
   const [certified, setCertified] = React.useState(false);
@@ -23,8 +23,9 @@ export default function Verification({ step }) {
 
   useEffect(() => {
     if (young) {
-      if (isReturningParent(young, 1)) {
-        history.push(`/representants-legaux/done?token=${token}&parent=1`);
+      if (isReturningParent(young, parentId)) {
+        const route = parentId === 2 ? "done-parent2" : "done";
+        history.push(`/representants-legaux/${route}?token=${token}`);
         return;
       }
 
@@ -37,19 +38,24 @@ export default function Verification({ step }) {
   const sections = sectionsData(young).map(Section);
 
   async function onNext() {
-    setSaving(true);
-    setError(null);
-    if (certified) {
-      if (await saveParentCertified()) {
-        history.push(`/representants-legaux/consentement?token=${token}`);
+    if (parentId === 1) {
+      setSaving(true);
+      setError(null);
+      if (certified) {
+        if (await saveParentCertified()) {
+          history.push(`/representants-legaux/consentement?token=${token}`);
+        }
+      } else {
+        setError("Vous devez certifier l'exactitude de ces renseignements avant de pouvoir continuer.");
       }
+      setSaving(false);
     } else {
-      setError("Vous devez certifier l'exactitude de ces renseignements avant de pouvoir continuer.");
+      history.push(`/representants-legaux/consentement-parent2?token=${token}`);
     }
-    setSaving(false);
   }
   function onPrevious() {
-    history.push(`/representants-legaux/presentation?token=${token}`);
+    const route = parentId === 2 ? "presentation-parent2" : "presentation";
+    history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
   async function saveParentCertified() {
@@ -75,27 +81,48 @@ export default function Verification({ step }) {
           <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Voici les informations transmises par {young.firstName}</h1>
 
           <div className="text-[14px] leading-[20px] text-[#666666] mb-[32px] mt-2">
-            <p>Veuillez vérifier la validité de ces informations.</p>
-            <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
-            <p>
-              <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="underline hover:underline">
-                Je vois des informations incorrectes
-              </a>
-            </p>
+            {parentId === 2 ? (
+              <p>
+                La validité de ces informations a été vérifiée par {young.parent1FirstName} {young.parent1LastName}. Pour toute demande de correction, adressez-vous à{" "}
+                {young.firstName} ou à {young.parent1FirstName}.
+              </p>
+            ) : (
+              <>
+                <p>Veuillez vérifier la validité de ces informations.</p>
+                <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
+                <p>
+                  <a
+                    href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline hover:underline">
+                    Je vois des informations incorrectes
+                  </a>
+                </p>
+              </>
+            )}
           </div>
 
-          {sections}
+          <div className="border-b-[1px] border-b-[#E5E5E5] border-b-solid">{sections}</div>
 
-          <div className="flex items-center pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-            <Check checked={certified} onChange={(e) => setCertified(e)}>
-              Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
-              <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="underline hover:underline">
-                cet article
-              </a>{" "}
-              avant de valider.
-            </Check>
-          </div>
-          {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
+          {parentId === 1 && (
+            <>
+              <div className="flex items-center pt-[32px]">
+                <Check checked={certified} onChange={(e) => setCertified(e)}>
+                  Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
+                  <a
+                    href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline hover:underline">
+                    cet article
+                  </a>{" "}
+                  avant de valider.
+                </Check>
+              </div>
+              {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
+            </>
+          )}
 
           <div className="flex justify-content-end pt-[32px]">
             <BorderButton className="mr-2" onClick={onPrevious}>

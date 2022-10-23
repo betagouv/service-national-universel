@@ -11,7 +11,7 @@ export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide"
 
 // --- Docs on CDN
 export const CDN_BASE_URL =
-  environment === "production" ? "https://cellar-c2.services.clever-cloud.com/snu-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/snu-bucket-staging";
+  environment === "production" ? "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/cni-bucket-staging";
 
 // --- errors
 export const ERROR_MESSAGES = {
