@@ -137,7 +137,6 @@ const Espace = () => {
           </>
         ),
         onConfirm: async () => {
-          // todo add field in young model
           const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
           if (!ok) return toastr.error(`Une erreur est survenue : ${code}`);
           return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
@@ -153,9 +152,11 @@ const Espace = () => {
     else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
 
+  const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
+  if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
+
   const forceRedirectInscription =
     [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) || (young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
-
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
