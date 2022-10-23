@@ -13,7 +13,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungModel = require("../models/young");
-const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 
@@ -176,8 +176,13 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   if (id === 1) {
     if (young.parentAllowSNU !== value.parentAllowSNU) {
       if (value.parentAllowSNU === "true") {
-        value.status = young.status === "REINSCRIPTION" ? "VALIDATED" : "WAITING_VALIDATION";
-      } else value.status = "NOT_AUTORISED";
+        if (young.status === YOUNG_STATUS.REINSCRIPTION) {
+          value.status = YOUNG_STATUS.VALIDATED;
+          value.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
+        } else {
+          value.status = YOUNG_STATUS.WAITING_VALIDATION;
+        }
+      } else value.status = YOUNG_STATUS.NOT_AUTORISED;
 
       if (!canUpdateYoungStatus({ body: value, current: young })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
