@@ -154,6 +154,7 @@ export default function StepEligibilite() {
           setError({ text: "Pb avec votre non eligibilite" });
           setLoading(false);
         }
+        dispatch(setYoung(res.data));
         return history.push("/reinscription/noneligible");
       }
 
