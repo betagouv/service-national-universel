@@ -28,7 +28,8 @@ export default function StepUpload() {
   const [date, setDate] = useState();
 
   async function onSubmit() {
-    const files = [...recto, ...verso];
+    let files = [...recto];
+    if (verso) files = [...files, ...verso];
     for (const file of files) {
       if (file.size > 5000000)
         return setError({
@@ -102,7 +103,7 @@ export default function StepUpload() {
             />
             <button className="flex w-full">
               <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
-                Scannez le recto du document
+                Scannez le {ID[category].imgBack && "recto du"} document
               </label>
             </button>
           </>
@@ -134,9 +135,8 @@ export default function StepUpload() {
           <>
             {checked.lisible === true && checked.coupe === true && checked.nette === true ? (
               <>
-                <hr className="my-8 h-px bg-gray-200 border-0" />
                 <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-                <div className="text-gray-600 leading-loose my-2">
+                <div className="text-gray-600 my-2">
                   Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
                   ).
                 </div>
