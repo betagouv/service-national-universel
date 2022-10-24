@@ -268,12 +268,12 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     birthYear = date.year();
   }
 
-  useEffect(async () => {
-    const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
-    const result = await api.get("/young/" + young._id + "/documents/" + lastCniFile._id);
-    console.log("CNI DOWNLOAD FILE: ", result);
-    // cniUploadUrl = CDN_BASE_URL + "/todo/" + lastCniFile.name;
-  }, [young]);
+  // useEffect(async () => {
+  //   const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
+  //   const result = await api.get("/young/" + young._id + "/documents/" + lastCniFile._id);
+  //   console.log("CNI DOWNLOAD FILE: ", result);
+  //   cniUploadUrl = CDN_BASE_URL + "/todo/" + lastCniFile.name;
+  // }, [young]);
 
   return (
     <Section step="Première étape :" title="Vérifier l'identité" editable>
@@ -286,7 +286,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           <div className="flex items-center">
             <CorrectionButton className="mr-[8px]" />
             <DownloadButton className="mr-[8px]" href={cniUploadUrl} target="_blank" />
-            <MoreButton />
+            {/*TODO: à remettre en mode modification */}
+            {false && <MoreButton />}
           </div>
         </div>
 
