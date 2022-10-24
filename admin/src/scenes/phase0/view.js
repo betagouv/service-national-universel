@@ -244,15 +244,18 @@ function FooterNoRequest({ processing, onProcess }) {
 }
 
 function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests }) {
-  const cniExpirationDate = young.files && young.files.cniFiles && young.files.cniFiles.length > 0 ? young.files.cniFiles[young.files.cniFiles.length - 1].expirationDate : null;
   let cniDay = "";
   let cniMonth = "";
   let cniYear = "";
-  if (cniExpirationDate) {
-    const date = dayjs(cniExpirationDate).locale("fr");
-    cniDay = date.date();
-    cniMonth = date.format("MMMM");
-    cniYear = date.year();
+  let cniUploadUrl = null;
+  if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
+    const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
+    if (lastCniFile.expirationDate) {
+      const date = dayjs(lastCniFile.expirationDate).locale("fr");
+      cniDay = date.date();
+      cniMonth = date.format("MMMM");
+      cniYear = date.year();
+    }
   }
 
   let birthDay = "";
@@ -265,6 +268,13 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     birthYear = date.year();
   }
 
+  useEffect(async () => {
+    const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
+    const result = await api.get("/young/" + young._id + "/documents/" + lastCniFile._id);
+    console.log("CNI DOWNLOAD FILE: ", result);
+    // cniUploadUrl = CDN_BASE_URL + "/todo/" + lastCniFile.name;
+  }, [young]);
+
   return (
     <Section step="Première étape :" title="Vérifier l'identité" editable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -275,7 +285,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           </div>
           <div className="flex items-center">
             <CorrectionButton className="mr-[8px]" />
-            <DownloadButton className="mr-[8px]" />
+            <DownloadButton className="mr-[8px]" href={cniUploadUrl} target="_blank" />
             <MoreButton />
           </div>
         </div>

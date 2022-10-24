@@ -14,12 +14,25 @@ export function CorrectionButton({ className = "", onClick = () => {} }) {
   );
 }
 
-export function DownloadButton({ className = "", onClick = () => {} }) {
-  return (
-    <div className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#2563EB] cursor-pointer group hover:bg-[#DBEAFE] ${className}`} onClick={onClick}>
-      <Download className="w-[14px] h-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
-    </div>
-  );
+export function DownloadButton({ className = "", onClick = () => {}, href, target, rel }) {
+  if (href) {
+    return (
+      <a
+        className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#2563EB] cursor-pointer group hover:bg-[#DBEAFE] ${className}`}
+        href={href}
+        target={target}
+        rel={rel}
+        onClick={onClick}>
+        <Download className="w-[14px] h-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+      </a>
+    );
+  } else {
+    return (
+      <div className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#2563EB] cursor-pointer group hover:bg-[#DBEAFE] ${className}`} onClick={onClick}>
+        <Download className="w-[14px] h-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+      </div>
+    );
+  }
 }
 
 export function MoreButton({ className = "", onClick = () => {} }) {

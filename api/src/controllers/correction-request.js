@@ -8,14 +8,10 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-
 const YoungModel = require("../models/young");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
-
 const { ERRORS } = require("../utils");
-
-const { validateFirstName } = require("../utils/validator");
 const passport = require("passport");
 
 router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -26,7 +22,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     const { error, value: newRequests } = Joi.array()
       .items(
         Joi.object({
-          cohort: validateFirstName().trim().required(),
+          cohort: Joi.string().trim().required(),
           field: Joi.string().required(),
           reason: Joi.string(),
           message: Joi.string(),
