@@ -55,7 +55,7 @@ const CorrectionRequest = new mongoose.Schema({
     type: String,
     required: true,
     default: "PENDING",
-    enum: ["PENDING" | "SENT" | "REMINDED" | "CORRECTED" | "CANCELED"],
+    enum: ["PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED"],
     documentation: {
       description: "Etat de la demande de correction",
     },
