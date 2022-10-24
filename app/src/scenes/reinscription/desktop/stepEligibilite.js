@@ -129,7 +129,7 @@ export default function StepEligibilite() {
       schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
-      schoolId: data.school?._id,
+      schoolId: data.school?.id,
       zip: data.zip,
       birthDate: data.birthDate,
     };
@@ -154,6 +154,7 @@ export default function StepEligibilite() {
           setError({ text: "Pb avec votre non eligibilite" });
           setLoading(false);
         }
+        dispatch(setYoung(res.data));
         return history.push("/reinscription/noneligible");
       }
 

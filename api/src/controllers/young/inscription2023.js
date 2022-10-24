@@ -9,10 +9,11 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES, getDepartmentByZip, sessions2023 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
+const { isGoalReached } = require("../../utils/cohort");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -322,6 +323,11 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Check inscription goals
+    const dep = young.schoolDepartment || getDepartmentByZip(young.zip);
+    const cohort = sessions2023.filter((e) => e.name === young.cohort)[0];
+    if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set(value);
     await young.save({ fromUser: req.user });

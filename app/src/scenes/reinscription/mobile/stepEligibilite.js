@@ -1,25 +1,25 @@
 import React, { useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
-import Toggle from "../../../components/inscription/toggle";
-import Input from "../../../components/inscription/input";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import StickyButton from "../../../components/inscription/stickyButton";
-import IconFrance from "../../../assets/IconFrance";
+import { useHistory } from "react-router-dom";
+import { getDepartmentByZip } from "snu-lib";
 import validator from "validator";
-import plausibleEvent from "../../../services/plausible";
-import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
-import SearchableSelect from "../../../components/SearchableSelect";
+import IconFrance from "../../../assets/IconFrance";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Footer from "../../../components/footerV2";
 import CheckBox from "../../../components/inscription/checkbox";
-import DatePickerList from "../../preinscription/components/DatePickerList";
-import { useDispatch, useSelector } from "react-redux";
-import { capture } from "../../../sentry";
-import { getDepartmentByZip } from "snu-lib";
-import api from "../../../services/api";
+import Input from "../../../components/inscription/input";
+import StickyButton from "../../../components/inscription/stickyButton";
+import Toggle from "../../../components/inscription/toggle";
+import SearchableSelect from "../../../components/SearchableSelect";
 import { setYoung } from "../../../redux/auth/actions";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
+import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
+import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
+import DatePickerList from "../../preinscription/components/DatePickerList";
 import Navbar from "../components/Navbar";
 import { STEPS } from "../utils/navigation";
 
@@ -124,13 +124,13 @@ export default function StepEligibilite() {
       schooled: data.school ? "true" : "false",
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,
-      schoolAddress: data.school?.adresse,
-      schoolZip: data.school?.codeCity,
+      schoolAddress: data.school?.address || data.school?.adresse,
+      schoolZip: data.school?.postCode || data.school?.postcode,
       schoolCity: data.school?.city,
       schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
-      schoolId: data.school?._id,
+      schoolId: data.school?.id,
       zip: data.zip,
       birthDate: data.birthDate,
     };
@@ -155,6 +155,7 @@ export default function StepEligibilite() {
           setError({ text: "Pb avec votre non eligibilite" });
           setLoading(false);
         }
+        dispatch(setYoung(res.data));
         return history.push("/reinscription/noneligible");
       }
 
@@ -257,7 +258,7 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <Footer marginBottom={"88px"} />
+      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );
