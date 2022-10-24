@@ -124,13 +124,13 @@ export default function VolontairePhase0View({ young, onChange }) {
             pouvez également <b>modifier</b> vous-même l’information en cliquant sur &quot;modifier&quot;.
           </p>
         </div>
-        <SectionIdentite
+        {/* <SectionIdentite
           young={young}
           requests={requests}
           onStartRequest={onStartRequest}
           currentRequest={currentCorrectionRequestField}
           onCorrectionRequestChange={onCorrectionRequestChange}
-        />
+        /> */}
         <SectionParents
           young={young}
           requests={requests}
@@ -270,7 +270,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 
   useEffect(async () => {
     const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
-    const result = await api.get("/young/" + young._id + "/documents/" + lastCniFile._id);
+    const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + lastCniFile._id);
     console.log("CNI DOWNLOAD FILE: ", result);
     // cniUploadUrl = CDN_BASE_URL + "/todo/" + lastCniFile.name;
   }, [young]);
