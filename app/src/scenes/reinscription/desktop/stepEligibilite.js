@@ -20,6 +20,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 
 import { STEPS } from "../utils/navigation";
+import Navbar from "../components/Navbar";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -153,6 +154,7 @@ export default function StepEligibilite() {
           setError({ text: "Pb avec votre non eligibilite" });
           setLoading(false);
         }
+        dispatch(setYoung(res.data));
         return history.push("/reinscription/noneligible");
       }
 
@@ -178,93 +180,96 @@ export default function StepEligibilite() {
   };
 
   return (
-    <div className="bg-[#f9f6f2] flex justify-center py-10">
-      <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
-        <div className="w-full flex justify-between items-center">
-          <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
-          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
-        <hr className="my-8 h-px bg-gray-200 border-0" />
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col flex-start">
-            <div className="flex items-center">
-              <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+    <>
+      <Navbar />
+      <div className="bg-[#f9f6f2] flex justify-center py-10">
+        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
+          <div className="w-full flex justify-between items-center">
+            <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
+            <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+              <QuestionMarkBlueCircle />
+            </a>
+          </div>
+          <hr className="my-8 h-px bg-gray-200 border-0" />
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col flex-start">
               <div className="flex items-center">
-                <span className="ml-4 mr-2 text-[#929292]">Je suis de nationalité française</span>
-                <IconFrance />
-              </div>
-            </div>
-            {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
-          </div>
-          <div className="flex w-full space-x-4">
-            <div className="flex flex-col w-1/2">
-              <SearchableSelect
-                label="Niveau de scolarité"
-                value={data.scolarity}
-                options={optionsScolarite}
-                onChange={(value) => {
-                  setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
-                }}
-                placeholder="Sélectionnez une option"
-              />
-              {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
-            </div>
-            <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
-              Date de naissance
-              <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-              {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
-            </label>
-          </div>
-          {data.scolarity && (
-            <>
-              <div className="flex justify-between items-center">
-                <p>
-                  <div>
-                    <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
-                  </div>
-                  <div className="h-5 flex items-center">
-                    <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
-                  </div>
-                </p>
-
-                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
-                {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
-              </div>
-
-              {data.scolarity !== "NOT_SCOLARISE" ? (
-                data.isAbroad ? (
-                  <>
-                    <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
-                  </>
-                ) : (
-                  <>
-                    <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
-                  </>
-                )
-              ) : !data.isAbroad ? (
-                <div className="flex flex-col flex-start my-4">
-                  Code Postal
-                  <div className="h-5 flex items-center">
-                    <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
-                  </div>
-                  <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                  {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
+                <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+                <div className="flex items-center">
+                  <span className="ml-4 mr-2 text-[#929292]">Je suis de nationalité française</span>
+                  <IconFrance />
                 </div>
-              ) : null}
-            </>
-          )}
-          <div className="flex justify-end gap-4">
-            <button
-              className="w-1/3 flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
-              onClick={() => onSubmit()}
-              disabled={loading}>
-              Continuer
-            </button>
+              </div>
+              {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
+            </div>
+            <div className="flex w-full space-x-4">
+              <div className="flex flex-col w-1/2">
+                <SearchableSelect
+                  label="Niveau de scolarité"
+                  value={data.scolarity}
+                  options={optionsScolarite}
+                  onChange={(value) => {
+                    setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
+                  }}
+                  placeholder="Sélectionnez une option"
+                />
+                {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
+              </div>
+              <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
+                Date de naissance
+                <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+                {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+              </label>
+            </div>
+            {data.scolarity && (
+              <>
+                <div className="flex justify-between items-center">
+                  <p>
+                    <div>
+                      <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
+                    </div>
+                    <div className="h-5 flex items-center">
+                      <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
+                    </div>
+                  </p>
+
+                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
+                  {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
+                </div>
+
+                {data.scolarity !== "NOT_SCOLARISE" ? (
+                  data.isAbroad ? (
+                    <>
+                      <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                    </>
+                  ) : (
+                    <>
+                      <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                    </>
+                  )
+                ) : !data.isAbroad ? (
+                  <div className="flex flex-col flex-start my-4">
+                    Code Postal
+                    <div className="h-5 flex items-center">
+                      <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
+                    </div>
+                    <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
+                    {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
+                  </div>
+                ) : null}
+              </>
+            )}
+            <div className="flex justify-end gap-4">
+              <button
+                className="w-1/3 flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
+                onClick={() => onSubmit()}
+                disabled={loading}>
+                Continuer
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

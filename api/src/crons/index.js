@@ -16,6 +16,7 @@ const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
+const youngPatches = require("./youngPatches");
 
 // doubt ? -> https://crontab.guru/
 
@@ -110,5 +111,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("30 3 * * *", () => {
     syncContactSupport.handler();
+  });
+
+  // cron.schedule("0 2 * * *", () => {
+  cron.schedule("0 16 * * *", () => {
+    youngPatches.handler();
   });
 }

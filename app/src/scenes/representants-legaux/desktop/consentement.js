@@ -283,6 +283,9 @@ export default function Consentement({ step, parentId }) {
       body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
     }
 
+    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal reinscription - Consentement valide");
+    else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
+
     try {
       const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
@@ -298,7 +301,6 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
-    plausibleEvent("Phase0/CTA representant legal - Consentement valide");
     if (parentId === 1) {
       history.push(`/representants-legaux/done?token=${token}`);
     } else {
