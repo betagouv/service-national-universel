@@ -46,6 +46,14 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
     onStartRequest && onStartRequest(name);
   }
 
+  const reasons = [
+    { value: "UNREADABLE", label: "Pièce illisible" },
+    { value: "MISSING_FRONT", label: "Recto à fournir" },
+    { value: "MISSING_BACK", label: "Verso à fournir" },
+    { value: "NOT_SUITABLE", label: "Pièce ne convenant pas...", defaultMessage: "Passeport ou carte nationale d'identité requis." },
+    { value: "OTHER", label: "Autre" },
+  ];
+
   return (
     <>
       <div className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between ${className}`}>
@@ -64,7 +72,16 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
           {false && <MoreButton />}
         </div>
       </div>
-      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
+      {opened && (
+        <CorrectionRequest
+          name={name}
+          label={label}
+          correctionRequest={correctionRequest}
+          onChangeRequest={onCorrectionRequestChange}
+          reasons={reasons}
+          messagePlaceholder="(Facultatif) Précisez les corrections à apporter ici"
+        />
+      )}
     </>
   );
 }

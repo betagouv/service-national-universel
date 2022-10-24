@@ -43,10 +43,11 @@ export default function VolontairePhase0View({ young, onChange }) {
     setCurrentCorrectionRequestField(fieldName);
   }
 
-  function onCorrectionRequestChange(fieldName, value) {
-    console.log("cor change: ", fieldName, value);
-    if (value === null) {
+  function onCorrectionRequestChange(fieldName, message, reason) {
+    console.log("cor change: ", fieldName, message, reason);
+    if (message === null && reason == null) {
       // delete request.
+      // TODO: traiter le cas des annulation
       setRequests(
         requests.filter((req) => {
           return req.field !== fieldName;
@@ -61,15 +62,15 @@ export default function VolontairePhase0View({ young, onChange }) {
       if (reqIdx >= 0) {
         const reqsBefore = reqIdx > 0 ? requests.slice(0, reqIdx) : [];
         const reqsAfter = reqIdx < requests.length - 1 ? requests.slice(reqIdx + 1) : [];
-        setRequests([...reqsBefore, { ...requests[reqIdx], message: value, status: "PENDING" }, ...reqsAfter]);
+        setRequests([...reqsBefore, { ...requests[reqIdx], message, reason, status: "PENDING" }, ...reqsAfter]);
       } else {
         setRequests([
           ...requests,
           {
             cohort: young.cohort,
             field: fieldName,
-            reason: undefined,
-            message: value,
+            reason,
+            message,
             status: "PENDING",
           },
         ]);
