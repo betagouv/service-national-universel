@@ -254,7 +254,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     if (type === "next") {
       value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
       if (young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
-      if (young?.parent1Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+      if (young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     }
 
     young.set(value);
