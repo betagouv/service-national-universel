@@ -14,6 +14,8 @@ const { serializeYoung } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 const passport = require("passport");
 
+const { YOUNG_STATUS } = require("snu-lib");
+
 router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: error_id, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
@@ -49,6 +51,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     requests.push(...newRequests);
 
     young.set({ correctionRequests: requests });
+    young.set({ status: YOUNG_STATUS.WAITING_CORRECTION });
     await young.save({ fromUser: req.user });
 
     // TODO: send notifications for new corrections requests

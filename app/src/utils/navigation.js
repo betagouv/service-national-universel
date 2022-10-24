@@ -18,6 +18,16 @@ export const PREINSCRIPTION_STEPS = {
   DONE: "DONE",
 };
 
+export const CORRECTION_STEPS = {
+  ELIGIBILITE: "ELIGIBILITE",
+  SEJOUR: "SEJOUR",
+  PROFIL: "PROFIL",
+  COORDONNEES: "COORDONNEES",
+  REPRESENTANTS: "REPRESENTANTS",
+  DOCUMENTS: "DOCUMENTS",
+  UPLOAD: "UPLOAD",
+};
+
 export const INSCRIPTION_STEPS_LIST = [
   { name: INSCRIPTION_STEPS.COORDONNEES, url: "coordonnee" },
   { name: INSCRIPTION_STEPS.CONSENTEMENTS, url: "consentement" },
@@ -36,6 +46,15 @@ export const PREINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.PROFIL, url: "profil" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
   { name: PREINSCRIPTION_STEPS.DONE, url: "done" },
+];
+
+export const CORRECTION_STEPS_LIST = [
+  { name: CORRECTION_STEPS.ELIGIBILITE, url: "eligibilite" },
+  { name: CORRECTION_STEPS.PROFIL, url: "profil" },
+  { name: CORRECTION_STEPS.COORDONNEES, url: "coordonnee" },
+  { name: CORRECTION_STEPS.REPRESENTANTS, url: "representants" },
+  { name: CORRECTION_STEPS.DOCUMENTS, url: "documents", allowNext: true },
+  { name: CORRECTION_STEPS.UPLOAD, url: "televersement" },
 ];
 
 export const getStepFromUrlParam = (param, STEP_LIST, withDefault) => {
