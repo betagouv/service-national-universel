@@ -65,7 +65,6 @@ export default function Field({ group = null, name, label, value, mode, classNam
         <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{value}</div>
         {mode === "correction" && (
           <div className={requestButtonClass} onClick={startRequest}>
-            {hasValidRequest}
             <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
           </div>
         )}

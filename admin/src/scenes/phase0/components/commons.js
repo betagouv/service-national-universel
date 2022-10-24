@@ -1,17 +1,8 @@
 import React from "react";
-import PencilAlt from "../../../assets/icons/PencilAlt";
 import Download from "../../../assets/icons/Download";
 
 export function MiniTitle({ children }) {
   return <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">{children}</div>;
-}
-
-export function CorrectionButton({ className = "", onClick = () => {} }) {
-  return (
-    <div className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#FFEDD5] cursor-pointer group hover:bg-[#F97316] ${className}`} onClick={onClick}>
-      <PencilAlt className="w-[14px] h-[14px] text-[#F97316] group-hover:text-white" />
-    </div>
-  );
 }
 
 export function DownloadButton({ className = "", onClick = () => {}, href, target, rel }) {
