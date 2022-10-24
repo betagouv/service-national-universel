@@ -30,16 +30,12 @@ export default function VolontairePhase0View({ young, onChange }) {
   }, [young]);
 
   useEffect(() => {
-    console.log("Set FOOTER MODE: ");
     if (requests.find((r) => r.status === "PENDING")) {
       setFooterMode("PENDING");
-      console.log("PENDING");
     } else if (requests.find((r) => ["SENT", "REMINDED"].includes(r.status))) {
       setFooterMode("WAITING");
-      console.log("WAITING");
     } else {
       setFooterMode("NO_REQUEST");
-      console.log("NO_REQUEST");
     }
   }, [requests]);
 
@@ -48,6 +44,7 @@ export default function VolontairePhase0View({ young, onChange }) {
   }
 
   function onCorrectionRequestChange(fieldName, value) {
+    console.log("cor change: ", fieldName, value);
     if (value === null) {
       // delete request.
       setRequests(
@@ -64,7 +61,7 @@ export default function VolontairePhase0View({ young, onChange }) {
       if (reqIdx >= 0) {
         const reqsBefore = reqIdx > 0 ? requests.slice(0, reqIdx) : [];
         const reqsAfter = reqIdx < requests.length - 1 ? requests.slice(reqIdx + 1) : [];
-        setRequests([...reqsBefore, { ...requests[reqIdx], message: value }, ...reqsAfter]);
+        setRequests([...reqsBefore, { ...requests[reqIdx], message: value, status: "PENDING" }, ...reqsAfter]);
       } else {
         setRequests([
           ...requests,
@@ -284,7 +281,9 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
         </div>
 
         <FieldsGroup
+          name="cniExpirationDate"
           title="Date d’expiration de la pièce d’identité"
+          mode="correction"
           onStartRequest={onStartRequest}
           currentRequest={currentRequest}
           correctionRequest={getCorrectionRequest(requests, "cniExpirationDate")}
@@ -299,7 +298,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
         </div>
         <div className="mt-[32px]">
           <MiniTitle>Identité et contact</MiniTitle>
-          <div className="mb-[16px] flex">
+          <div className="mb-[16px] flex items-start justify-between">
             <Field
               name="lastName"
               label="Nom"
@@ -359,10 +358,14 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       </div>
 
       <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
+
       <div className="flex-[1_0_50%] pl-[56px]">
         <div>
           <FieldsGroup
+            name="birthdateAt"
             title="Date et lieu de naissance"
+            mode="correction"
+            correctionLabel="Date de naissance"
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -409,6 +412,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
         </div>
         <div className="mt-[32px]">
           <FieldsGroup
+            name="address"
+            mode="correction"
             title="Adresse"
             noflex
             onStartRequest={onStartRequest}
@@ -416,14 +421,10 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             correctionRequest={getCorrectionRequest(requests, "address")}
             onCorrectionRequestChange={onCorrectionRequestChange}>
             <Field name="address" label="Adresse" value={young.address} mode="correction" className="mb-[16px]" />
-            <div className="mb-[16px] flex">
-              <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] flex-[1_1_50%]" />
-              <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] flex-[1_1_50%]" />
-            </div>
-            <div className="flex">
-              <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] flex-[1_1_50%]" />
-              <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] flex-[1_1_50%]" />
-            </div>
+            <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+            <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+            <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+            <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
           </FieldsGroup>
         </div>
       </div>
@@ -434,13 +435,23 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests }) {
   const [currentParent, setCurrentParent] = useState(1);
 
+  function parentHasRequest(parentId) {
+    return (
+      requests &&
+      requests.findIndex((req) => {
+        return req.field.startsWith("parent" + parentId);
+      }) >= 0
+    );
+  }
+
   const tabs = [
-    { label: "Représentant légal 1", value: 1 },
-    { label: "Représentant légal 2", value: 2 },
+    { label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) },
+    { label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) },
   ];
 
   function onParrentTabChange(tab) {
     setCurrentParent(tab);
+    onStartRequest("");
   }
 
   return (
@@ -549,7 +560,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           </div>
 
           <Field
-            name="{`parent${currentParent}Email`}"
+            name={`parent${currentParent}Email`}
             label="Email"
             value={young[`parent${currentParent}Email`]}
             mode="correction"
@@ -560,7 +571,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             onCorrectionRequestChange={onCorrectionRequestChange}
           />
           <Field
-            name="{`parent${currentParent}Phone`}"
+            name={`parent${currentParent}Phone`}
             label="Téléphone"
             value={young[`parent${currentParent}Phone`]}
             mode="correction"
@@ -571,7 +582,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             onCorrectionRequestChange={onCorrectionRequestChange}
           />
           <Field
-            name="{`parent${currentParent}OwnAddress`}"
+            name={`parent${currentParent}OwnAddress`}
             label="Adresse différente de celle du volontaire"
             value={translate(young[`parent${currentParent}OwnAddress`])}
             mode="correction"
@@ -582,6 +593,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           />
           {young[`parent${currentParent}OwnAddress`] === "true" && (
             <FieldsGroup
+              name={`parent${currentParent}Address`}
+              mode="correction"
+              title="Adresse"
               noflex
               className="mt-[16px]"
               onStartRequest={onStartRequest}
@@ -589,14 +603,10 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
               onCorrectionRequestChange={onCorrectionRequestChange}>
               <Field name="address" label="Adresse" value={young.address} mode="correction" className="mb-[16px]" />
-              <div className="mb-[16px] flex">
-                <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] flex-[1_1_50%]" />
-                <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] flex-[1_1_50%]" />
-              </div>
-              <div className="flex">
-                <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] flex-[1_1_50%]" />
-                <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] flex-[1_1_50%]" />
-              </div>
+              <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+              <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+              <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+              <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
             </FieldsGroup>
           )}
         </div>
