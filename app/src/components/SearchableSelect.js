@@ -1,10 +1,11 @@
 import React from "react";
 import Select from "react-select";
+import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
 
-const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "" }) => {
+const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", correction = "" }) => {
   return (
     <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
-      <label className="my-2">{label}</label>
+      <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
       <Select
         styles={customStyles}
         value={options.find((option) => option.value === value)}
@@ -14,7 +15,9 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sél
         placeholder={placeholder}
         noOptionsMessage={() => "Pas d’options"}
       />
-      <div className="h-4 text-red-500 text-sm">{error}</div>
+      <ErrorMessage>{error}</ErrorMessage>
+      <ErrorMessage>{correction}</ErrorMessage>
+      {/* <div className="h-4 text-red-500 text-sm">{error}</div> */}
     </div>
   );
 };
