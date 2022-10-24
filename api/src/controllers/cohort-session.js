@@ -164,7 +164,6 @@ router.post("/eligibility/2023", async (req, res) => {
       if (isGoalReached(department, session.name) === true) session.goalReached = true;
       else session.goalReached = false;
     }
-    console.log(sessionsFiltered);
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
     capture(error);
