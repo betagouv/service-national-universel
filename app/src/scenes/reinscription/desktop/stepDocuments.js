@@ -11,6 +11,7 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 import MyDocs from "../../inscription2023/components/MyDocs";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -25,7 +26,9 @@ export default function StepDocuments() {
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       return;
     }
+    console.log("🚀 ~ file: stepDocuments.js ~ line 36 ~ onSubmit ~ data", responseData);
     dispatch(setYoung(responseData));
+    plausibleEvent("Phase0/CTA reinscription - CI mobile");
     history.push("/reinscription/done");
   }
 
@@ -50,9 +53,10 @@ export default function StepDocuments() {
     <DesktopPageContainer
       title="Ma pièce d’identité"
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
-      onClickPrevious={() => history.push("/reinscription/representants")}
+      onClickPrevious={() => history.push("/reinscription/consentement")}
       onSubmit={onSubmit}
       disabled={young?.files.cniFiles?.length === 0}
+      childrenContinueButton={"Me réinscrire au SNU"}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {docs.map((doc) => (

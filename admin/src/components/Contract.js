@@ -317,7 +317,7 @@ export default function Contract({ young, admin }) {
                 token={contract?.youngContractToken}
                 lastName={contract?.youngLastName}
                 firstName={contract?.youngFirstName}
-                validationDate={contract?.youngValidationDate}
+                validationDate={contract?.youngContractValidationDate}
               />
             )}
           </div>

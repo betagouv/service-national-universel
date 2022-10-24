@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { getDepartmentByZip } from "snu-lib";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
@@ -10,13 +10,16 @@ import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-ge
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
+import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
 
 export default function NonEligible() {
   const young = useSelector((state) => state.Auth.young);
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const engagementPrograms = [
     {
@@ -48,7 +51,11 @@ export default function NonEligible() {
       link: "https://www.reservistes.defense.gouv.fr/",
     },
   ];
-  const onClickButton = () => {
+
+  const logout = async () => {
+    setLoading(true);
+    await API.post(`/young/logout`);
+    dispatch(setYoung(null));
     history.push("/");
   };
 
@@ -122,8 +129,8 @@ export default function NonEligible() {
           </div>
         </div>
       </div>
-      <Footer marginBottom={"88px"} />
-      <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />
+      <Footer marginBottom={"mb-[88px]"} />
+      <StickyButton text="Revenir à l'accueil" onClick={logout} disabled={loading} />
     </>
   );
 }

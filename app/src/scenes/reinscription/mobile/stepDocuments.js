@@ -78,8 +78,13 @@ export default function StepDocuments() {
         {young?.files.cniFiles?.length > 0 && <MyDocs young={young} />}
       </div>
       <Help />
-      <Footer marginBottom={"88px"} />
-      <StickyButton text="Continuer" onSubmit={onSubmit} onClickPrevious={() => history.push("/reinscription/sejour")} disabled={young?.files.cniFiles.length === 0} />
+      <Footer marginBottom={"mb-[88px]"} />
+      <StickyButton
+        text="Me réinscrire au SNU"
+        onClick={onSubmit}
+        onClickPrevious={() => history.push("/reinscription/consentement")}
+        disabled={young?.files.cniFiles.length === 0}
+      />
     </>
   );
 }

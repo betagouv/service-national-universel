@@ -12,6 +12,7 @@ import DatePickerList from "../../preinscription/components/DatePickerList";
 import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
+import Navbar from "../components/Navbar";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -32,7 +33,7 @@ export default function StepUpload() {
     const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
     if (res.code === "FILE_CORRUPTED")
       return setError({
-        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou régénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
     if (!res.ok) {
       capture(res.code);
@@ -45,7 +46,7 @@ export default function StepUpload() {
     }
     dispatch(setYoung(responseData));
     plausibleEvent("Phase0/CTA reinscription - CI mobile");
-    history.push("/inscription2023/confirm");
+    history.push("/reinscription/done");
   }
 
   const ID = {
@@ -79,6 +80,7 @@ export default function StepUpload() {
       subTitle={ID[category].subTitle}
       onClickPrevious={() => history.push("/reinscription/documents")}
       onSubmit={onSubmit}
+      childrenContinueButton={"Me réinscrire au SNU"}
       disabled={!date}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
@@ -136,7 +138,8 @@ export default function StepUpload() {
             <div className="w-1/2">
               <div className="text-xl font-medium">Renseignez la date d’expiration</div>
               <div className="text-gray-600 leading-loose mt-2 mb-8">
-                Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}).
+                Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+                ).
               </div>
               <p className="text-gray-800">Date d&apos;expiration</p>
               <DatePickerList value={date} onChange={(date) => setDate(date)} />
