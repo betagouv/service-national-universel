@@ -4,13 +4,14 @@ const ReferentModel = require("../src/models/referent");
 const MissionModel = require("../src/models/mission");
 const { sendTemplate } = require("../../../../src/sendinblue");
 const { capture } = require("../../../sentry");
+const { ERRORS } = require("../utils");
 
 async function deleteRef(referent) {
   try {
     const referents = await ReferentModel.find({ structureId: referent.structureId });
     const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
-    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
+    if (referents.length === 1) throw ERRORS.LINKED_STRUCTURE;
+    if (missionsLinkedToReferent) throw ERRORS.LINKED_MISSIONS;
 
     await referent.remove();
     console.log(`Referent ${referent._id} has been deleted`);
@@ -30,12 +31,12 @@ exports.handler = async () => {
   await cursor.eachAsync(async function (ref) {
     try {
       if (ref.lastLoginAt > date.setDate(date.getDate() - 7)) {
-        await sendTemplate("1er mail de relance", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+        await sendTemplate("615", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
       } else if (ref.lastLoginAt > date.setDate(date.getDate() - 14)) {
-        await sendTemplate("2eme mail de relance", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+        await sendTemplate("616", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
       } else {
-        const res = await deleteRef(ref);
-        sendTemplate("Votre compte a été supprimé", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+        await deleteRef(ref);
+        // sendTemplate("Votre compte a été supprimé", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
       }
     } catch (e) {
       console.error("error", ref.email);

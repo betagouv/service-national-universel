@@ -17,6 +17,7 @@ const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
 const youngPatches = require("./youngPatches");
+const deleteInactiveRefs = require("./deleteInactiveRefs");
 
 // doubt ? -> https://crontab.guru/
 
@@ -56,6 +57,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
+    deleteInactiveRefs.handler();
   });
 
   // every tuesday at 0900
