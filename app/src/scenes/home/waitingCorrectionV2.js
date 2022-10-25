@@ -3,7 +3,8 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import { redirectToCorrection, translateField, translateCorrectionReason } from "snu-lib";
+import { translateField, translateCorrectionReason } from "snu-lib";
+import { redirectToCorrection } from "../../utils/navigation";
 
 export default function WaitingCorrectionV2() {
   const young = useSelector((state) => state.Auth.young);
