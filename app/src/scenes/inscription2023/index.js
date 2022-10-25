@@ -101,6 +101,7 @@ const StepCorrection = () => {
   return (
     <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+      <Header setIsOpen={setIsOpen} />
       {renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}
       {device === "desktop" && <Footer />}
     </div>
