@@ -260,9 +260,16 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
 
     const { errorBody, value } = Joi.object({
       message: Joi.string().allow(null, ""),
+      attachments: Joi.array().items(
+        Joi.object().keys({
+          name: Joi.string().required(),
+          url: Joi.string().required(),
+          path: Joi.string().required(),
+        }),
+      ),
     }).validate(req.body, { stripUnknown: true });
     if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { message } = value;
+    const { message, attachments } = value;
 
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
@@ -272,7 +279,8 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         lastName: req.user.lastName,
         firstName: req.user.firstName,
         email: req.user.email,
-        message: message,
+        message,
+        attachments,
         ticketId: checkedId,
         attributes: userAttributes,
       }),
@@ -343,7 +351,11 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       }
 
       const data = fs.readFileSync(tempFilePath);
-      const response = await uploadFile(`message/${uuid()}.${name}`, { data, encoding: "base64", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG);
+      const response = await uploadFile(
+        `message/${uuid()}.${name}`,
+        { data, encoding: "base64", mimetype: mimeFromMagicNumbers },
+        { ...SUPPORT_BUCKET_CONFIG, acl: "public-read" },
+      );
       responseData.push({ name, url: response.Location, path: response.key });
       fs.unlinkSync(tempFilePath);
     }

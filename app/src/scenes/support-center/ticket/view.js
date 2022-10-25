@@ -3,6 +3,7 @@ import { Container } from "reactstrap";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
+import * as FileSaver from "file-saver";
 
 import api from "../../../services/api";
 import { formatStringLongDate, colors, ticketStateNameById, translateState, translate, htmlCleaner } from "../../../utils";
@@ -12,12 +13,18 @@ import SendIcon from "../../../components/SendIcon";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
+import FileUpload, { useFileUpload } from "../../../components/FileUpload";
+
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
   e.style.height = `${e.scrollHeight}px`;
+};
+
+const download = (url, name) => {
+  FileSaver.saveAs(url, name);
 };
 
 export default function TicketView(props) {
@@ -27,6 +34,14 @@ export default function TicketView(props) {
   const [messages, setMessages] = useState([]);
   const young = useSelector((state) => state.Auth.young);
   const inputRef = React.useRef();
+
+  const { files, addFiles, deleteFile, error } = useFileUpload();
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   const getTicket = async () => {
     try {
@@ -44,6 +59,7 @@ export default function TicketView(props) {
             date: formatStringLongDate(message.createdAt),
             content: htmlCleaner(message.text),
             createdAt: message.createdAt,
+            attachments: message.attachments,
           };
         })
         .filter((message) => message !== undefined);
@@ -60,8 +76,14 @@ export default function TicketView(props) {
   const send = async () => {
     setSending(true);
     if (!message) return setSending(false);
+    let attachments;
+    if (files.length > 0) {
+      const filesResponse = await api.uploadFile("/zammood/upload", files);
+      if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
+      attachments = filesResponse.data;
+    }
     const id = props.match?.params?.id;
-    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage });
+    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, attachments });
     if (!ok) {
       capture(code);
       toastr.error("Oups, une erreur est survenue", translate(code));
@@ -124,7 +146,7 @@ export default function TicketView(props) {
             </Heading>
             <Messages>
               {messages?.map((message) => (
-                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
+                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} attachments={message?.attachments} />
               ))}
             </Messages>
           </>
@@ -147,18 +169,28 @@ export default function TicketView(props) {
             </LoadingButton>
           </ButtonContainer>
         </InputContainer>
+        <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       </div>
     </Container>
   );
 }
 
-const Message = ({ from, date, content, fromMe }) => {
+const Message = ({ from, date, content, fromMe, attachments = [] }) => {
   if (!content || !content.length) return null;
   return fromMe ? (
     <MessageContainer>
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
+        {attachments.map(({ name, url }) => (
+          <Attachment
+            onClick={() => {
+              download(url, name);
+            }}
+            color="white">
+            {name}
+          </Attachment>
+        ))}
       </MessageBubble>
     </MessageContainer>
   ) : (
@@ -167,6 +199,14 @@ const Message = ({ from, date, content, fromMe }) => {
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
+        {attachments.map(({ name, url }) => (
+          <Attachment
+            onClick={() => {
+              download(url, name);
+            }}>
+            {name}
+          </Attachment>
+        ))}
       </MessageBubble>
     </MessageContainer>
   );
@@ -260,6 +300,15 @@ const MessageDate = styled.div`
 const MessageContent = styled.div`
   font-weight: 400;
   color: ${({ color }) => color};
+`;
+
+const Attachment = styled.div`
+  margin-top: 0.2rem;
+  color: ${({ color }) => color};
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-decoration: underline;
+  cursor: pointer;
 `;
 
 const Heading = styled(Container)`

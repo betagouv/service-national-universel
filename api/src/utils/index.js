@@ -65,7 +65,7 @@ const DEFAULT_BUCKET_CONFIG = {
 };
 
 function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
-  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
+  const { bucket, endpoint, accessKeyId, secretAccessKey, acl } = config;
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
     const params = {
@@ -76,6 +76,9 @@ function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
       ContentType: file.mimetype,
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
+    if (acl) {
+      params.ACL = acl;
+    }
     s3bucket.upload(params, function (err, data) {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
