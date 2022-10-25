@@ -13,6 +13,7 @@ import Banner from "./components/banner";
 import HomePhase2 from "./HomePhase2";
 import { environment } from "../../config";
 import WaitingReinscription from "./WaitingReinscription";
+import WaitingCorrectionV2 from "./waitingCorrectionV2";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -59,7 +60,7 @@ export default () => {
     }
     if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
-      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
+      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
       if (young.status === YOUNG_STATUS.VALIDATED) return <ValidatedV2 />;
     }
