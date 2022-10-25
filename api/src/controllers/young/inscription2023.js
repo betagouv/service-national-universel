@@ -447,13 +447,12 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
 
 router.put("/profil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({
+    const profilSchema = {
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       email: Joi.string().lowercase().trim().email().required(),
-    }).validate(req.body, { stripUnknown: true });
-
-    let keyList = ["firstName", "lastName", "email"];
+    };
+    const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -462,6 +461,7 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const keyList = Object.keys(profilSchema);
     let data = { ...value, ...validateCorrectionRequest(young, keyList) };
 
     if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
