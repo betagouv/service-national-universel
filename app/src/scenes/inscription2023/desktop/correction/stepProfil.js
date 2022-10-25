@@ -28,6 +28,8 @@ export default function StepProfil() {
       const corrections = getCorrectionByStep(young, step);
       if (!Object.keys(corrections).length) return history.push("/");
       else setCorrections(corrections);
+    } else {
+      history.push("/");
     }
     setData({ email: young.email, emailConfirm: young.email, firstName: young.firstName, lastName: young.lastName });
   }, [young]);
