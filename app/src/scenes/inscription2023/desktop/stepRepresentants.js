@@ -69,7 +69,7 @@ export default function StepRepresentants() {
       const corrections = getCorrectionByStep(young, step);
       if (!Object.keys(corrections).length) return history.push("/");
       else setCorrections(corrections);
-      if (!young?.parent2email) setIsParent2Visible(false);
+      if (!young?.parent2Email) setIsParent2Visible(false);
     }
   }, [young]);
 
