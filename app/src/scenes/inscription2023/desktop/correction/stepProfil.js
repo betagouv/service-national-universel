@@ -3,20 +3,13 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
-import Eye from "../../../../assets/icons/Eye";
-import EyeOff from "../../../../assets/icons/EyeOff";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../../components/inscription/checkbox";
 import Input from "../../../../components/inscription/input";
-import { appURL } from "../../../../config";
 import plausibleEvent from "../../../../services/plausible";
-import { getPasswordErrorMessage } from "../../../../utils";
 
 export default function StepProfil() {
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
   const keyList = ["firstName", "lastName", "email", "emailConfirm"];
   const history = useHistory();
