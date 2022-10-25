@@ -462,7 +462,11 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ ...value, ...validateCorrectionRequest(young, keyList) });
+    let data = { ...value, ...validateCorrectionRequest(young, keyList) };
+
+    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(data);
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
