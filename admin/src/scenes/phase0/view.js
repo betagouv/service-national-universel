@@ -44,7 +44,6 @@ export default function VolontairePhase0View({ young, onChange }) {
   }
 
   function onCorrectionRequestChange(fieldName, message, reason) {
-    console.log("cor change: ", fieldName, message, reason);
     if (message === null && reason == null) {
       // delete request.
       // TODO: traiter le cas des annulation

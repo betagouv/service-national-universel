@@ -32,7 +32,6 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       .validate(req.body, { stripUnknown: true });
 
     if (error) {
-      console.log("Joi Error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
