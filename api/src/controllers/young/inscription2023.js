@@ -9,7 +9,7 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, SENDINBLUE_TEMPLATES, getDepartmentByZip, sessions2023 } = require("snu-lib");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES, getDepartmentByZip, sessions2023 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
@@ -38,6 +38,21 @@ const getObjectWithEmptyData = (fields, emptyValue = "") => {
   });
   return object;
 };
+
+router.put("/notEligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ status: YOUNG_STATUS.NOT_ELIGIBLE });
+
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 router.put("/coordinates/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const { error: typeError, value: type } = checkParameter(req.params.type);
