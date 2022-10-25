@@ -1,20 +1,26 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { YOUNG_STATUS } from "snu-lib";
+import { translate, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
+import { setYoung } from "../../../../redux/auth/actions";
+import { capture } from "../../../../sentry";
+import API from "../../../../services/api";
 import { getCorrectionByStep } from "../../../../utils/navigation";
+import Button from "../../components/Button";
 import Input from "../../components/Input";
 
 export default function StepProfil() {
   const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
   const [corrections, setCorrections] = React.useState({});
   const keyList = ["firstName", "lastName", "email", "emailConfirm"];
   const history = useHistory();
   const { step } = useParams();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!young) return;
@@ -54,7 +60,24 @@ export default function StepProfil() {
 
     setError(errors);
     if (!Object.keys(errors).length) {
-      history.push("/");
+      setLoading(true);
+      try {
+        const { ok, code, data: responseData } = await API.put(`/young/inscription2023/profil`, data);
+        if (!ok) {
+          setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(responseData));
+        history.push("/");
+      } catch (e) {
+        capture(e);
+        setError({
+          text: `Une erreur s'est produite`,
+          subText: e?.code ? translate(e.code) : "",
+        });
+      }
+      setLoading(false);
     }
   };
 
@@ -75,11 +98,12 @@ export default function StepProfil() {
             <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} label="E-mail" error={error.email} correction={corrections.email} />
             <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} label="Confirmez votre e-mail" error={error.emailConfirm} />
             <div className="flex justify-end gap-4">
-              <button
+              <Button
                 className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
-                onClick={() => onSubmit()}>
+                onClick={() => onSubmit()}
+                disabled={loading}>
                 Corriger
-              </button>
+              </Button>
             </div>
           </div>
         </div>
