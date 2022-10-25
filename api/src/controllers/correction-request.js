@@ -13,6 +13,9 @@ const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 const passport = require("passport");
+const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { sendTemplate } = require("../sendinblue");
+const { APP_URL } = require("../config");
 
 router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -49,10 +52,24 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     const requests = young.correctionRequests ? young.correctionRequests : [];
     requests.push(...newRequests);
 
-    young.set({ correctionRequests: requests });
+    if (!canUpdateYoungStatus({ body: { status: YOUNG_STATUS.WAITING_CORRECTION }, current: young })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    young.set({ correctionRequests: requests, status: YOUNG_STATUS.WAITING_CORRECTION });
     await young.save({ fromUser: req.user });
 
-    // TODO: send notifications for new corrections requests
+    // --- send notifications for new corrections requests
+    try {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          cta: `${APP_URL}/`,
+        },
+      });
+    } catch (e) {
+      capture(e);
+    }
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
