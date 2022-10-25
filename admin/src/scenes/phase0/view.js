@@ -14,6 +14,16 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
 import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
+import CheckCircle from "../../assets/icons/CheckCircle";
+import XCircle from "../../assets/icons/XCircle";
+import ConfirmationModal from "./components/ConfirmationModal";
+import HourGlass from "../../assets/icons/HourGlass";
+
+const REJECTION_REASONS = {
+  NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
+  TOO_YOUNG: "Le volontaire n&apos;a pas l&apos;âge requis",
+  OTHER: "Autre (préciser)",
+};
 
 export default function VolontairePhase0View({ young, onChange }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
@@ -22,9 +32,9 @@ export default function VolontairePhase0View({ young, onChange }) {
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
 
   useEffect(() => {
-    console.log("VolontairePhase0View: ", young);
+    // console.log("VolontairePhase0View: ", young);
     if (young) {
-      setRequests(young.correctionRequests ? young.correctionRequests : []);
+      setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
     } else {
       setRequests([]);
     }
@@ -44,16 +54,31 @@ export default function VolontairePhase0View({ young, onChange }) {
     setCurrentCorrectionRequestField(fieldName);
   }
 
-  function onCorrectionRequestChange(fieldName, message, reason) {
+  async function onCorrectionRequestChange(fieldName, message, reason) {
     if (message === null && reason == null) {
-      // delete request.
-      // TODO: traiter le cas des annulation
-      setRequests(
-        requests.filter((req) => {
-          return req.field !== fieldName;
-        }),
-      );
-      setCurrentCorrectionRequestField("");
+      const requestIndex = requests.findIndex((req) => req.field === fieldName);
+      if (requestIndex >= 0) {
+        const request = requests[requestIndex];
+        if (request.status === "PENDING") {
+          requests.splice(requestIndex, 1);
+          setRequests(requests);
+        } else {
+          // enregistrer l'annulation de la demande.
+          setProcessing(true);
+          try {
+            await api.remove(`/correction-request/${young._id}/${request.field}`);
+            toastr.success("La demande a bien été annulée.");
+            onChange && onChange();
+            // requests.splice(requestIndex, 1);
+            // setRequests(requests);
+          } catch (err) {
+            console.error(err);
+            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer l'annulation de la demande. Veuillez réessayer dans quelques instants.");
+          }
+          setProcessing(false);
+        }
+        setCurrentCorrectionRequestField("");
+      }
     } else {
       // change request
       const reqIdx = requests.findIndex((req) => {
@@ -105,13 +130,44 @@ export default function VolontairePhase0View({ young, onChange }) {
     setProcessing(false);
   }
 
-  function remindRequests() {
-    // TODO: remind requests
+  async function remindRequests() {
+    setProcessing(true);
+    try {
+      await api.post(`/correction-request/${young._id}/remind`, {});
+      toastr.success("Le volontaire a été relancé.");
+      onChange && onChange();
+    } catch (err) {
+      console.error(err);
+      toastr.error("Erreur !", translate(err.code));
+    }
+    setProcessing(false);
   }
 
-  function processRegistration(state) {
-    // TODO: process registration
-    console.log("process registration: ", state);
+  async function processRegistration(state, data) {
+    setProcessing(true);
+    try {
+      let body = {
+        lastStatusAt: Date.now(),
+        phase: "INSCRIPTION",
+        status: state,
+      };
+
+      if (state === "REFUSED") {
+        if (data.reason === "OTHER") {
+          body.inscriptionRefusedMessage = data.message;
+        } else {
+          body.inscriptionRefusedMessage = REJECTION_REASONS[data.reason];
+        }
+      }
+
+      await api.put(`/referent/young/${young._id}`, body);
+      toastr.success("Votre action a été enregistrée.");
+      onChange && onChange();
+    } catch (err) {
+      console.error(err);
+      toastr.error("Erreur !", translate(err.code));
+    }
+    setProcessing(false);
   }
 
   return (
@@ -145,30 +201,45 @@ export default function VolontairePhase0View({ young, onChange }) {
         <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
       )}
       {footerMode === "WAITING" && <FooterSent requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-      {footerMode === "NO_REQUEST" && <FooterNoRequest processing={processing} onProcess={processRegistration} />}
+      {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
     </>
   );
 }
 
 function FooterPending({ young, requests, sending, onDeletePending, onSendPending }) {
+  const [sentRequestsCount, setSentRequestsCount] = useState(0);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  useEffect(() => {
+    const sent = requests.filter((r) => r.status === "SENT" || r.status === "REMINDED").length;
+    const pending = requests.filter((r) => r.status === "PENDING").length;
+    setSentRequestsCount(sent);
+    setPendingRequestsCount(pending);
+  }, [requests]);
+
   return (
     <div className="fixed bottom-0 left-[220px] right-0 bg-white shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] flex py-[20px] px-[42px]">
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[#242526] text-[18px] font-medium leading-snug">Le dossier est-il conforme&nbsp;?</span>
-          {requests.length > 0 && (
+          {pendingRequestsCount > 0 && (
             <>
+              {sentRequestsCount > 0 && (
+                <span className="py-[4px] px-[10px] bg-[#F7F7F7] text-[#6B7280] text-[12px] ml-[12px] rounded-[100px] border-[#CECECE] border-[1px]">
+                  {sentRequestsCount} {sentRequestsCount > 1 ? "corrections envoyées" : "correction envoyée"}
+                </span>
+              )}
               <span className="py-[4px] px-[10px] bg-[#F97316] text-[#FFFFFF] text-[12px] ml-[12px] rounded-[100px]">
-                {requests.length} {requests.length > 1 ? "corrections demandées" : "correction demandée"}
+                {pendingRequestsCount} {pendingRequestsCount > 1 ? "corrections demandées" : "correction demandée"}
               </span>
               <button className=" ml-[12px] text-[12px] text-[#F87171] ml-[6px] flex items-center" onClick={onDeletePending}>
                 <Bin fill="#F87171" />
-                Supprimer {requests.length > 1 ? "les demandes" : "la demande"}
+                <span className="ml-[5px]">Supprimer {pendingRequestsCount > 1 ? "les demandes" : "la demande"}</span>
               </button>
             </>
           )}
         </div>
-        <p className="text-[14px] leading-[20px] text-[#6B7280]">
+        <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px]">
           Votre demande sera transmise par mail à {young.firstName} {young.lastName} ({young.email})
         </p>
       </div>
@@ -182,6 +253,12 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
 }
 
 function FooterSent({ requests, reminding, onRemindRequests }) {
+  const [sentRequestsCount, setSentRequestsCount] = useState(0);
+
+  useEffect(() => {
+    setSentRequestsCount(requests.filter((r) => r.status === "SENT" || r.status === "REMINDED").length);
+  }, [requests]);
+
   let sentDate = null;
   let remindedDate = null;
   for (const req of requests) {
@@ -204,10 +281,10 @@ function FooterSent({ requests, reminding, onRemindRequests }) {
         <div className="flex items-center">
           <span className="text-[#242526] text-[18px] font-medium leading-snug">Demande de correction envoyée</span>
           <span className="py-[4px] px-[10px] bg-[#F7F7F7] text-[#6B7280] text-[12px] ml-[12px] rounded-[100px] border-[#CECECE] border-[1px]">
-            {requests.length} {requests.length > 1 ? "corrections demandées" : "correction demandée"}
+            {sentRequestsCount} {sentRequestsCount > 1 ? "corrections demandées" : "correction demandée"}
           </span>
         </div>
-        <p className="text-[14px] leading-[20px] text-[#6B7280]">
+        <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px]">
           {sentAt && "Envoyée le " + sentAt} {remindedAt && (sentAt ? "/ " : "") + "Relancé(e) le " + remindedAt}
         </p>
       </div>
@@ -220,7 +297,83 @@ function FooterSent({ requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess }) {
+function FooterNoRequest({ processing, onProcess, young }) {
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionMessage, setRejectionMessage] = useState("");
+  const [error, setError] = useState(null);
+
+  function validate() {
+    setConfirmModal({
+      icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+      title: "Valider le dossier",
+      message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
+      type: "VALIDATED",
+    });
+  }
+
+  function waitingList() {
+    setConfirmModal({
+      icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+      title: "Valider le dossier (liste complémentaire)",
+      message: `Vous vous apprêtez à valider le dossier d'inscription de ${young.firstName} ${young.lastName}. Il sera placé sur liste complémentaire. Un email sera automatiquement envoyé au volontaire.`,
+      type: "WAITING_LIST",
+    });
+  }
+
+  const rejectionReasonOptions = [
+    <option value="" key="none">
+      Motif
+    </option>,
+    <option value="NOT_FRENCH" key="NOT_FRENCH">
+      {REJECTION_REASONS.NOT_FRENCH}
+    </option>,
+    <option value="TOO_YOUNG" key="TOO_YOUNG">
+      {REJECTION_REASONS.TOO_YOUNG}
+    </option>,
+    <option value="OTHER" key="OTHER">
+      {REJECTION_REASONS.OTHER}
+    </option>,
+  ];
+
+  function reject() {
+    setRejectionReason("");
+    setRejectionMessage("");
+
+    setConfirmModal({
+      icon: <XCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+      title: "Refuser le dossier",
+      message: `Vous vous apprêtez à refuser le dossier d’inscription de ${young.firstName} ${young.lastName}. Dites-lui pourquoi ci-dessous. Un email sera automatiquement envoyé au volontaire.`,
+      type: "REFUSED",
+      confirmLabel: "Confirmer le refus",
+      confirmColor: "red",
+    });
+  }
+
+  function confirm() {
+    if (confirmModal.type === "REFUSED") {
+      if (rejectionReason === "") {
+        setError("Vous devez obligatoirement sélectionner un motif.");
+        return;
+      } else if (rejectionReason === "OTHER" && rejectionMessage.trim().length === 0) {
+        setError("Pour le motif 'Autre', vous devez précisez un message.");
+        return;
+      } else {
+        setError(null);
+      }
+    }
+    onProcess(
+      confirmModal.type,
+      confirmModal.type === "REFUSED"
+        ? {
+            reason: rejectionReason,
+            message: rejectionMessage,
+          }
+        : null,
+    );
+    setConfirmModal(null);
+  }
+
   return (
     <div className="fixed bottom-0 left-[220px] right-0 bg-white shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] flex py-[20px] px-[42px]">
       <div className="grow">
@@ -229,17 +382,51 @@ function FooterNoRequest({ processing, onProcess }) {
         </div>
         <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d’inscription.</p>
       </div>
-      <div>
-        <PlainButton spinner={processing} onClick={() => onProcess("validated")}>
+      <div className="flex">
+        <PlainButton spinner={processing} onClick={validate} mode="green" className="ml-[8px]">
+          <CheckCircle className="text-[#10B981]" />
           Valider
         </PlainButton>
-        <PlainButton spinner={processing} onClick={() => onProcess("rejected")}>
+        <PlainButton spinner={processing} onClick={reject} mode="red" className="ml-[8px]">
+          <XCircle className="text-[#EF4444]" />
           Refuser
         </PlainButton>
-        <PlainButton spinner={processing} onClick={() => onProcess("waiting_list")}>
+        <PlainButton spinner={processing} onClick={waitingList} mode="white" className="ml-[8px]">
           Placer sur liste complémentaire
         </PlainButton>
       </div>
+      {confirmModal && (
+        <ConfirmationModal
+          isOpen={true}
+          icon={confirmModal.icon}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmLabel || "Confirmer"}
+          confirmMode={confirmModal.confirmColor || "blue"}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={confirm}>
+          {confirmModal.type === "REFUSED" && (
+            <div className="mt-[24px]">
+              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+                <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
+                  {rejectionReasonOptions}
+                </select>
+                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+              </div>
+              {rejectionReason === "OTHER" && (
+                <textarea
+                  value={rejectionMessage}
+                  onChange={(e) => setRejectionMessage(e.target.value)}
+                  className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+                  rows="5"
+                  placeholder="Précisez la raison de votre refus ici"
+                />
+              )}
+              {error && <div className="text-[#EF4444]">{error}</div>}
+            </div>
+          )}
+        </ConfirmationModal>
+      )}
     </div>
   );
 }
