@@ -445,6 +445,51 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
   }
 });
 
+router.put("/profil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const profilSchema = {
+      firstName: validateFirstName().trim().required(),
+      lastName: Joi.string().uppercase().trim().required(),
+      email: Joi.string().lowercase().trim().email().required(),
+    };
+    const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const keyList = Object.keys(profilSchema);
+    let data = { ...value, ...validateCorrectionRequest(young, keyList) };
+
+    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(data);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+const validateCorrectionRequest = (young, keyList) => {
+  const result = {};
+  result.correctionRequests = young.correctionRequests.map((cr) => {
+    if (keyList.includes(cr.field)) {
+      cr.status = "CORRECTED";
+    }
+    return cr;
+  });
+  const updateStatus = result.correctionRequests.every((cr) => cr.status === "CORRECTED");
+  if (updateStatus) result.status = YOUNG_STATUS.WAITING_VALIDATION;
+
+  return result;
+};
+
 const checkParameter = (parameter) => {
   const keys = ["next", "save", "correction"];
   return Joi.string()
