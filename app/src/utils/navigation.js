@@ -66,10 +66,11 @@ export const getStepUrl = (name, STEP_LIST) => {
   return STEP_LIST.find((step) => step.name === name)?.url;
 };
 
-const WAITING_CORRECTION = [
+const WAITING_CORRECTION_LINK = [
   {
     field: ["firstName", "lastName", "email"],
-    redirect: "/inscription2023/correction/profile",
+    redirect: "/inscription2023/correction/profil",
+    step: "profil",
   },
   {
     field: [
@@ -88,6 +89,7 @@ const WAITING_CORRECTION = [
       "zip",
     ],
     redirect: "/inscription2023/correction/eligibilite",
+    step: "eligibilite",
   },
   {
     field: [
@@ -104,6 +106,7 @@ const WAITING_CORRECTION = [
       "parent2Phone",
     ],
     redirect: "/inscription2023/correction/representants",
+    step: "representants",
   },
   {
     field: [
@@ -142,14 +145,27 @@ const WAITING_CORRECTION = [
       "handicapInSameDepartment",
     ],
     redirect: "/inscription2023/correction/coordonnee",
+    step: "coordonnee",
   },
   {
     field: ["cniFile", "cniExpirationDate"],
     redirect: "/inscription2023/correction/documents",
+    step: "documents",
   },
 ];
 
+export const getCorrectionByStep = (young, step) => {
+  const keyList = WAITING_CORRECTION_LINK.find((link) => link.step === step);
+  const corrections = young?.correctionRequests.reduce((acc, curr) => {
+    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field)) {
+      acc[curr.field] = curr.message;
+    }
+    return acc;
+  }, {});
+  return corrections;
+};
+
 export const redirectToCorrection = (field) => {
-  const correction = WAITING_CORRECTION.find((correction) => correction.field.includes(field));
+  const correction = WAITING_CORRECTION_LINK.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };
