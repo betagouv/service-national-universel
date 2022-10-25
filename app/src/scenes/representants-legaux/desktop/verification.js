@@ -248,15 +248,16 @@ function sectionsData(young) {
       situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
   } else {
-    situation.push({ separator: false, label: young.schooled === "true" ? "Situation scolaire" : "Situation", value: translate(young.situation) });
+    situation.push({ separator: true });
     if (young.schooled === "true") {
       situation.push(
+        { label: "Situation scolaire", value: translate(young.situation) },
         { label: "Pays de l'établissement", value: young.schoolCountry },
         { label: "Ville de l'établissement", value: young.schoolCity },
         { label: "Nom de l'établissement", value: young.schoolName },
       );
     } else {
-      situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
+      situation.push({ label: "Situation", value: translate(young.situation) }, { label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
     // --- situations particulières
     const specials = specialSituations(young);
