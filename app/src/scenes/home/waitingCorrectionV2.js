@@ -34,7 +34,7 @@ export default function WaitingCorrectionV2() {
                             <div className="text-red-500 font-bold text-sm">{translateField(correction.field)}</div>
                           </div>
                           {correction?.reason ? <div className="text-gray-900 text-base font-medium">Motif : {translateCorrectionReason(correction.reason)}</div> : null}
-                          <div className="text-sm text-gray-600 font-normal">{correction.message}</div>
+                          {correction?.message ? <div className="text-sm text-gray-600 font-normal">{correction.message}</div> : null}
                         </div>
                         <button
                           className="text-blue-600 font-medium border-[1px] border-blue-600 px-2 py-2 text-sm hover:text-white hover:bg-blue-600 rounded-lg"
@@ -74,7 +74,7 @@ export default function WaitingCorrectionV2() {
                           <div className="text-red-500 font-bold text-sm">{translateField(correction.field)}</div>
                         </div>
                         {correction?.reason ? <div className="text-gray-900 text-base font-medium">Motif : {translateCorrectionReason(correction.reason)}</div> : null}
-                        <div className="text-sm text-gray-600 font-normal">{correction.message}</div>
+                        {correction?.message ? <div className="text-sm text-gray-600 font-normal">{correction.message}</div> : null}
                       </div>
                       <button
                         className="text-blue-600 font-medium border-[1px] border-blue-600 px-2 py-2 text-sm hover:text-white hover:bg-blue-600 rounded-lg"
