@@ -40,7 +40,7 @@ export default function Index({ ...props }) {
     if (young.status === YOUNG_STATUS.DELETED) {
       return <DeletedDetail young={young} onChange={getYoung} />;
     } else {
-      if ((environment === "development" || environment === "staging") && young.status === YOUNG_STATUS.WAITING_VALIDATION) {
+      if ((environment === "development" || environment === "staging") && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
         return <VolontairePhase0View young={young} onChange={getYoung} />;
       } else {
         return <Details young={young} onChange={getYoung} />;

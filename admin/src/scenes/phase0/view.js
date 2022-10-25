@@ -13,6 +13,7 @@ import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
+import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
 
 export default function VolontairePhase0View({ young, onChange }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
@@ -446,10 +447,10 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     );
   }
 
-  const tabs = [
-    { label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) },
-    { label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) },
-  ];
+  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) }];
+  if (young.parent2Status) {
+    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) });
+  }
 
   function onParrentTabChange(tab) {
     setCurrentParent(tab);
@@ -507,17 +508,27 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         </div>
         <div className="mt-[32px]">
           <MiniTitle>Situations particulières</MiniTitle>
-          <div>TODO: situation particulières...</div>
-          <Field
-            name="specificAmenagmentType"
-            label="Nature de l'aménagement spécifique"
-            value={young.specificAmenagmentType}
+          <FieldSituationsParticulieres
+            name="specificSituations"
+            young={young}
             mode="correction"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+            correctionRequest={getCorrectionRequest(requests, "specificSituations")}
             onCorrectionRequestChange={onCorrectionRequestChange}
           />
+          {young.specificAmenagment === "true" && (
+            <Field
+              name="specificAmenagmentType"
+              label="Nature de l'aménagement spécifique"
+              value={young.specificAmenagmentType}
+              mode="correction"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+          )}
         </div>
       </div>
 
@@ -587,7 +598,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name={`parent${currentParent}OwnAddress`}
             label="Adresse différente de celle du volontaire"
             value={translate(young[`parent${currentParent}OwnAddress`])}
-            mode="correction"
+            mode="readonly"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
             correctionRequest={getCorrectionRequest(requests, `parent${currentParent}OwnAddress`)}
@@ -596,7 +607,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           {young[`parent${currentParent}OwnAddress`] === "true" && (
             <FieldsGroup
               name={`parent${currentParent}Address`}
-              mode="correction"
+              mode="readonly"
               title="Adresse"
               noflex
               className="mt-[16px]"

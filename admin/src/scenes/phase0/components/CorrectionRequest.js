@@ -9,9 +9,7 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
   const [reasonOptions, setReasonOptions] = useState([]);
 
   useEffect(() => {
-    console.log("correction request: ", correctionRequest);
     if (correctionRequest ? correctionRequest.status !== "CANCELED" : false) {
-      console.log("set request reason : ", correctionRequest.reason);
       setRequestText(correctionRequest.message);
       setRequestReason(correctionRequest.reason && correctionRequest.reason !== "" ? correctionRequest.reason : "");
     } else {
@@ -50,7 +48,6 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
     let newText = requestText;
     if (reasons) {
       const choosenReason = reasons.find((r) => r.value === event.target.value);
-      console.log("choosen reason : ", choosenReason);
       if (requestText === "" && choosenReason && choosenReason.defaultMessage) {
         newText = choosenReason.defaultMessage;
       }
