@@ -30,7 +30,7 @@ import useDevice from "../../hooks/useDevice";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
-import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEP_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
+import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 
 function renderStep(step, device) {
@@ -97,7 +97,8 @@ const StepCorrection = () => {
   return (
     <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      {renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEP_LIST), device)}
+      <Header setIsOpen={setIsOpen} />
+      {renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}
       {device === "desktop" && <Footer marginBottom={"0px"} />}
     </div>
   );

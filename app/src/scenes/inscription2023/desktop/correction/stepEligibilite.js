@@ -20,6 +20,7 @@ import { setYoung } from "../../../../redux/auth/actions";
 import { translate } from "../../../../utils";
 
 import Navbar from "../../components/Navbar";
+import ModalSejour from "../../components/ModalSejour";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -28,9 +29,9 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [toggleVerify, setToggleVerify] = React.useState(false);
+  const [modal, setModal] = React.useState({ isOpen: false });
 
   const history = useHistory();
-  console.log("🚀 ~ file: stepEligibilite.js ~ line 33 ~ StepEligibilite ~ history", history);
 
   useEffect(() => {
     if (!young) return;
@@ -146,11 +147,11 @@ export default function StepEligibilite() {
         setLoading(false);
       }
 
+      // ! Grave de toucher au stepReinscription ?
       if (res.data.msg) {
         const res = await api.put("/young/reinscription/noneligible");
         if (!res.ok) {
           capture(res.code);
-          setError({ text: "Pb avec votre non eligibilite" });
           setLoading(false);
         }
         dispatch(setYoung(res.data));
@@ -164,6 +165,7 @@ export default function StepEligibilite() {
     }
 
     try {
+      // ! Ne pas utiliser reinscription pour ne pas toucher au stepReinscription
       const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
       if (!ok) {
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -171,8 +173,11 @@ export default function StepEligibilite() {
         return;
       }
       dispatch(setYoung(responseData));
-      return history.push("/reinscription/sejour");
+      setModal({ isOpen: true });
+      // ! Au retour du modal apres validation, revenir vers
+      // return history.push("/reinscription/sejour");
     } catch (e) {
+      setLoading(false);
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
@@ -180,7 +185,6 @@ export default function StepEligibilite() {
 
   return (
     <>
-      <Navbar />
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
           <div className="w-full flex justify-between items-center">
@@ -263,12 +267,13 @@ export default function StepEligibilite() {
                 className="w-1/3 flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
                 onClick={() => onSubmit()}
                 disabled={loading}>
-                Continuer
+                Corriger
               </button>
             </div>
           </div>
         </div>
       </div>
+      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>
   );
 }

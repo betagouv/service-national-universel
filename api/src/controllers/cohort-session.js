@@ -134,7 +134,6 @@ router.post("/eligibility/2023", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { department, birthDate, schoolLevel, frenchNationality } = value;
-    console.log("🚀 ~ file: cohort-session.js ~ line 137 ~ router.post ~ value", value);
 
     if (!frenchNationality) return res.send({ ok: true, data: { msg: "Pour participer au SNU, vous devez être de nationalité française." } });
 
