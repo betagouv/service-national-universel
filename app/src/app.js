@@ -50,6 +50,14 @@ import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
+import useDevice from "./hooks/useDevice";
+
+import HeaderMenu from "./components/headerMenu";
+import { Footer as FooterV2 } from "./components/footerV2";
+import { Header as HeaderV2 } from "./components/header";
+
+import MobileNonEligible from "./scenes/reinscription/mobile/stepNonEligible";
+import DesktopNonEligible from "./scenes/reinscription/desktop/stepNonEligible";
 
 initSentry();
 initApi();
@@ -118,6 +126,20 @@ export default function App() {
   );
 }
 
+const ComponentNonEligible = () => {
+  const device = useDevice();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  return (
+    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
+      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+      <HeaderV2 setIsOpen={setIsOpen} />
+      {device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />}
+      {device === "desktop" && <FooterV2 />}
+    </div>
+  );
+};
+
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -151,6 +173,8 @@ const Espace = () => {
     if (redirect === "inscription") return <Redirect to="/preinscription" />;
     else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
+
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <SentryRoute path="/noneligible" component={() => <ComponentNonEligible />} />;
 
   const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
   if (forceRedirectReinscription) return <Redirect to="/reinscription" />;

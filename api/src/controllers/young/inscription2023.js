@@ -39,7 +39,57 @@ const getObjectWithEmptyData = (fields, emptyValue = "") => {
   return object;
 };
 
-router.put("/notEligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const { error, value } = Joi.object({
+      schooled: Joi.string().trim().required(),
+      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"),
+      schoolName: Joi.string().trim(),
+      schoolType: Joi.string().trim(),
+      schoolAddress: Joi.string().trim(),
+      schoolZip: Joi.string().trim(),
+      schoolCity: Joi.string().trim(),
+      schoolDepartment: Joi.string().trim(),
+      schoolRegion: Joi.string().trim(),
+      schoolCountry: Joi.string().trim(),
+      schoolId: Joi.string().trim(),
+      zip: Joi.string().trim(),
+    }).validate({ ...req.body }, { stripUnknown: true });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set({
+      ...value,
+      ...(value.livesInFrance === "true"
+        ? {
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
+        : {}),
+    });
+
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/noneligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

@@ -19,8 +19,7 @@ import DatePickerList from "../../../preinscription/components/DatePickerList";
 import { setYoung } from "../../../../redux/auth/actions";
 import { translate } from "../../../../utils";
 
-import Navbar from "../../components/Navbar";
-import ModalSejour from "../../components/ModalSejour";
+import ModalSejourCorrection from "../../components/ModalSejourCorrection";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -147,15 +146,14 @@ export default function StepEligibilite() {
         setLoading(false);
       }
 
-      // ! Grave de toucher au stepReinscription ?
       if (res.data.msg) {
-        const res = await api.put("/young/reinscription/noneligible");
+        const res = await api.put("/young/inscription2023/noneligible");
         if (!res.ok) {
           capture(res.code);
           setLoading(false);
         }
         dispatch(setYoung(res.data));
-        return history.push("/reinscription/noneligible");
+        return history.push("/noneligible");
       }
 
       updates.sessions = res.data;
@@ -164,18 +162,19 @@ export default function StepEligibilite() {
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
 
+    setModal({ data: updates, isOpen: true, onValidation });
+  };
+
+  const onValidation = async (updates, cohort) => {
     try {
-      // ! Ne pas utiliser reinscription pour ne pas toucher au stepReinscription
-      const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
-      if (!ok) {
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
+      const res = await api.put("/young/inscription2023/eligibilite", updates);
+      if (!res.ok) throw new Error(translate(code));
+
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
+      if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
-      setModal({ isOpen: true });
-      // ! Au retour du modal apres validation, revenir vers
-      // return history.push("/reinscription/sejour");
+      toastr.success("Votre séjour a bien été enregistré");
+      return history.push("/home");
     } catch (e) {
       setLoading(false);
       capture(e);
@@ -273,7 +272,7 @@ export default function StepEligibilite() {
           </div>
         </div>
       </div>
-      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      <ModalSejourCorrection data={modal?.data} isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} onValidation={modal?.onValidation} />
     </>
   );
 }
