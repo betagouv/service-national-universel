@@ -15,6 +15,13 @@ import { regexPhoneFrenchCountries, translate } from "../../../utils";
 import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
+import RadioButton from "../components/RadioButton";
+
+const parentsStatus = [
+  { label: "Mère", value: "mother" },
+  { label: "Père", value: "father" },
+  { label: "Représentant(e) légal(e)", value: "representant" },
+];
 
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
@@ -215,39 +222,13 @@ const FormRepresentant = ({ i, data, setData, errors }) => {
   return (
     <div className="flex flex-col my-4">
       <div className="pb-2 text-[#161616] font-bold">Représentant légal {i} </div>
-      <div className="flex flex-col gap-2">
-        <div className="text-[#161616] text-base">Votre lien</div>
-        <div className="flex items-center">
-          <label className="flex items-center mb-0 border-r-[1px] pr-6">
-            <input
-              className="mr-3 accent-[#000091] border-dashed h-5 w-5"
-              type="radio"
-              checked={data[`parent${i}Status`] === "mother"}
-              onChange={() => setData({ ...data, [`parent${i}Status`]: "mother" })}
-            />
-            Mère
-          </label>
-          <label className="flex items-center px-6 mb-0 border-r-[1px]">
-            <input
-              className="mr-3 accent-[#000091] border-dashed h-5 w-5"
-              type="radio"
-              checked={data[`parent${i}Status`] === "father"}
-              onChange={() => setData({ ...data, [`parent${i}Status`]: "father" })}
-            />
-            Père
-          </label>
-          <label className="flex items-center pl-6 mb-0">
-            <input
-              className="mr-3 accent-[#000091] border-dashed h-5 w-5"
-              type="radio"
-              checked={data[`parent${i}Status`] === "representant"}
-              onChange={() => setData({ ...data, [`parent${i}Status`]: "representant" })}
-            />
-            Représentant(e) légal(e)
-          </label>
-        </div>
-        <div className="text-[#CE0500] text-sm">{errors[`parent${i}Status`]}</div>
-      </div>
+      <RadioButton
+        label="Votre lien"
+        options={parentsStatus}
+        onChange={(e) => setData({ ...data, [`parent${i}Status`]: e })}
+        value={data[`parent${i}Status`]}
+        error={errors[`parent${i}Status`]}
+      />
       <Input value={data[`parent${i}FirstName`]} label="Son prénom" onChange={(e) => setData({ ...data, [`parent${i}FirstName`]: e })} error={errors[`parent${i}FirstName`]} />
       <Input value={data[`parent${i}LastName`]} label="Son nom" onChange={(e) => setData({ ...data, [`parent${i}LastName`]: e })} error={errors[`parent${i}LastName`]} />
       <Input value={data[`parent${i}Email`]} label="Son e-mail" onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })} error={errors[`parent${i}Email`]} />

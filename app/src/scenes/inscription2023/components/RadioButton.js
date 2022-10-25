@@ -7,7 +7,7 @@ const RadioButton = ({ options, label, description = "", onChange, value: curren
       <label className={`mb-2 ${correction || error ? "text-[#CE0500]" : "text-[#666666]"}`}>
         {label} <span className="text-[#666666] text-[14px] leading-tight"> {description}</span>
       </label>
-      <div className={`flex flex-wrap max-w-md md:max-w-full ${correction || (error && "pl-2 border-l-2 border-l-[#CE0500]")}`}>
+      <div className={`flex flex-wrap max-w-md md:max-w-full ${(correction || error) && "pl-2 border-l-2 border-l-[#CE0500]"}`}>
         {options.map(({ label, value }) => (
           <Option key={value} label={label} value={value === currentValue} onChange={() => onChange(value)} />
         ))}
