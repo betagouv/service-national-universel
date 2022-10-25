@@ -3,8 +3,7 @@ import YoungHeader from "./components/YoungHeader";
 import { PlainButton, RoundButton, BorderButton } from "./components/Buttons";
 import Pencil from "../../assets/icons/Pencil";
 import ChevronDown from "../../assets/icons/ChevronDown";
-import Cni from "../../assets/icons/Cni";
-import { CorrectionButton, MiniTitle, MoreButton, DownloadButton } from "./components/commons";
+import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
@@ -13,6 +12,7 @@ import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
+import { CniField } from "./components/CniField";
 
 export default function VolontairePhase0View({ young, onChange }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
@@ -43,10 +43,10 @@ export default function VolontairePhase0View({ young, onChange }) {
     setCurrentCorrectionRequestField(fieldName);
   }
 
-  function onCorrectionRequestChange(fieldName, value) {
-    console.log("cor change: ", fieldName, value);
-    if (value === null) {
+  function onCorrectionRequestChange(fieldName, message, reason) {
+    if (message === null && reason == null) {
       // delete request.
+      // TODO: traiter le cas des annulation
       setRequests(
         requests.filter((req) => {
           return req.field !== fieldName;
@@ -61,15 +61,15 @@ export default function VolontairePhase0View({ young, onChange }) {
       if (reqIdx >= 0) {
         const reqsBefore = reqIdx > 0 ? requests.slice(0, reqIdx) : [];
         const reqsAfter = reqIdx < requests.length - 1 ? requests.slice(reqIdx + 1) : [];
-        setRequests([...reqsBefore, { ...requests[reqIdx], message: value, status: "PENDING" }, ...reqsAfter]);
+        setRequests([...reqsBefore, { ...requests[reqIdx], message, reason, status: "PENDING" }, ...reqsAfter]);
       } else {
         setRequests([
           ...requests,
           {
             cohort: young.cohort,
             field: fieldName,
-            reason: undefined,
-            message: value,
+            reason,
+            message,
             status: "PENDING",
           },
         ]);
@@ -247,7 +247,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   let cniDay = "";
   let cniMonth = "";
   let cniYear = "";
-  let cniUploadUrl = null;
+
   if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
     const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
     if (lastCniFile.expirationDate) {
@@ -268,28 +268,19 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     birthYear = date.year();
   }
 
-  // useEffect(async () => {
-  //   const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
-  //   const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + lastCniFile._id);
-  //   console.log("CNI DOWNLOAD FILE: ", result);
-  //   cniUploadUrl = CDN_BASE_URL + "/todo/" + lastCniFile.name;
-  // }, [young]);
-
   return (
     <Section step="Première étape :" title="Vérifier l'identité" editable>
       <div className="flex-[1_0_50%] pr-[56px]">
-        <div className="p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between">
-          <div>
-            <Cni />
-            <MiniTitle>Pièce d&apos;identité</MiniTitle>
-          </div>
-          <div className="flex items-center">
-            <CorrectionButton className="mr-[8px]" />
-            <DownloadButton className="mr-[8px]" href={cniUploadUrl} target="_blank" />
-            {/*TODO: à remettre en mode modification */}
-            {false && <MoreButton />}
-          </div>
-        </div>
+        <CniField
+          name="cniFile"
+          label="Pièce d'identité"
+          young={young}
+          mode="correction"
+          onStartRequest={onStartRequest}
+          currentRequest={currentRequest}
+          correctionRequest={getCorrectionRequest(requests, "cniFile")}
+          onCorrectionRequestChange={onCorrectionRequestChange}
+        />
 
         <FieldsGroup
           name="cniExpirationDate"

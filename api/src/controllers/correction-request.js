@@ -24,8 +24,8 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
         Joi.object({
           cohort: Joi.string().trim().required(),
           field: Joi.string().required(),
-          reason: Joi.string(),
-          message: Joi.string(),
+          reason: Joi.string().allow(""),
+          message: Joi.string().allow(""),
           status: Joi.string().valid("PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED").required(),
         }),
       )
