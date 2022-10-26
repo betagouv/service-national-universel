@@ -59,6 +59,7 @@ export default function VolontairePhase0View({ young, onChange }) {
   }
 
   async function onCorrectionRequestChange(fieldName, message, reason) {
+    console.log("cor change", fieldName, message, reason);
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
