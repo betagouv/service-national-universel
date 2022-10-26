@@ -226,7 +226,7 @@ function sectionsData(young) {
     titleAddress.push({ separator: true, subtitle: "Adresse de l'hébergeur" });
 
     foreignAddress.push(
-      { separator: true, subtitle: "Adresse à l&apos;étranger" },
+      { separator: true, subtitle: "Adresse à l'étranger" },
       { label: "Adresse", value: young.foreignAddress },
       { label: "Code postal", value: young.foreignZip },
       { label: "Ville", value: young.foreignCity },
@@ -237,7 +237,7 @@ function sectionsData(young) {
   // --- situation
   let situation = [];
   if (young.status === "REINSCRIPTION") {
-    situation.push({ separator: false });
+    // situation.push({ separator: false });
     if (young.schooled === "true") {
       situation.push(
         { label: "Pays de l'établissement", value: young.schoolCountry },
