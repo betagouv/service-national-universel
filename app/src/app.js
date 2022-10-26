@@ -51,7 +51,6 @@ import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
-import useDevice from "./hooks/useDevice";
 
 initSentry();
 initApi();

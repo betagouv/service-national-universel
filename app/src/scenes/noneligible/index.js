@@ -11,6 +11,7 @@ import useDevice from "../../hooks/useDevice";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
+import { YOUNG_STATUS } from "snu-lib";
 
 const ComponentNonEligible = () => {
   const device = useDevice();
@@ -29,7 +30,7 @@ const ComponentNonEligible = () => {
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
 
-  if (!young) return <Redirect to={{ pathname: "/" }} />;
+  if (young?.status !== YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to={{ pathname: "/" }} />;
 
   return <SentryRoute path="/noneligible" component={() => <ComponentNonEligible />} />;
 }
