@@ -27,7 +27,7 @@ export default function Footer() {
     ) {
       setShowOldFooter(true);
     } else setShowOldFooter(false);
-  }, [location]);
+  }, [from]);
 
   return showOldFooter ? (
     <FooterContainer>
