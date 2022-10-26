@@ -248,7 +248,7 @@ function sectionsData(young) {
       situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
   } else {
-    situation.push({ separator: true });
+    situation.push({ separator: true, subtitle: "Situation" });
     if (young.schooled === "true") {
       situation.push(
         { label: "Situation scolaire", value: translate(young.situation) },
@@ -301,7 +301,7 @@ function sectionsData(young) {
       title: "Son profil",
       fields:
         young.status === "REINSCRIPTION"
-          ? [...foreignAddress, ...situation]
+          ? situation
           : [
               { label: "Pays de naissance", value: young.birthCountry },
               { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
