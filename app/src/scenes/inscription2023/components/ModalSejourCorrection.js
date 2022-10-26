@@ -29,16 +29,16 @@ export default function ModalSejourCorrection({ data, isOpen, onValidation }) {
           <Loader />
         ) : (
           <>
-            {cohorts?.length !== 0 ? (
+            {data?.sessions?.length !== 0 ? (
               <>
                 <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
                 <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-                <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
+                <div className="my-4">{data?.sessions?.map((e) => SessionButton(e))}</div>
               </>
             ) : (
               <div className="text-gray-500 text-sm my-2">Aucun séjour de cohésion n’est disponible pour le moment.</div>
             )}
-            {cohorts?.length < 3 && (
+            {data?.sessions?.length < 3 && (
               <>
                 <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
                 <div className="text-gray-500 text-sm">

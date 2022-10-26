@@ -34,6 +34,7 @@ import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
+import NonEligible from "./scenes/noneligible";
 import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
@@ -51,13 +52,6 @@ import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 import { youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import useDevice from "./hooks/useDevice";
-
-import HeaderMenu from "./components/headerMenu";
-import { Footer as FooterV2 } from "./components/footerV2";
-import { Header as HeaderV2 } from "./components/header";
-
-import MobileNonEligible from "./scenes/reinscription/mobile/stepNonEligible";
-import DesktopNonEligible from "./scenes/reinscription/desktop/stepNonEligible";
 
 initSentry();
 initApi();
@@ -113,6 +107,7 @@ export default function App() {
             <SentryRoute path="/inscription2023" component={Inscription2023} />
             {/* @todo: clean this */}
             {environment !== "production" ? <SentryRoute path="/reinscription" component={ReInscription} /> : null}
+            {environment !== "production" ? <SentryRoute path="/noneligible" component={NonEligible} /> : null}
             <SentryRoute path="/preinscription" component={PreInscription} />
             <SentryRoute path="/auth" component={AuthV2} />
             <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
@@ -125,20 +120,6 @@ export default function App() {
     </Router>
   );
 }
-
-const ComponentNonEligible = () => {
-  const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  return (
-    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <HeaderV2 setIsOpen={setIsOpen} />
-      {device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />}
-      {device === "desktop" && <FooterV2 />}
-    </div>
-  );
-};
 
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -174,7 +155,7 @@ const Espace = () => {
     else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
 
-  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <SentryRoute path="/noneligible" component={() => <ComponentNonEligible />} />;
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
 
   const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
   if (forceRedirectReinscription) return <Redirect to="/reinscription" />;

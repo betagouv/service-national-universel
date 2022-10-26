@@ -126,7 +126,6 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase1/CTA reinscription - eligibilite");
 
     const updates = {
       grade: data.scolarity,
@@ -141,7 +140,7 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,
       zip: data.zip,
-      birthDate: new Date(data.birthDate),
+      birthdateAt: new Date(data.birthDate),
     };
 
     try {
@@ -157,9 +156,9 @@ export default function StepEligibilite() {
         setLoading(false);
       }
 
-      const cohorts = res?.data?.filter((e) => e.goalReached === false);
+      const cohorts = res.data.length > 0 ? res.data.filter((e) => e?.goalReached === false) : null;
 
-      if (res.data.msg || (cohorts && cohorts.length === 0)) {
+      if (res.data.msg || !cohorts) {
         const res = await api.put("/young/inscription2023/noneligible");
         if (!res.ok) {
           capture(res.code);
@@ -169,7 +168,7 @@ export default function StepEligibilite() {
         return history.push("/noneligible");
       }
 
-      updates.sessions = res.data;
+      updates.sessions = cohorts;
     } catch (e) {
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
@@ -230,9 +229,9 @@ export default function StepEligibilite() {
                   correction={corrections.grade}
                 />
               </div>
-              <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
+              <label className="flex flex-col flex-start text-base w-1/2 mt-2">
                 Date de naissance
-                <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthdateAt: new Date(date) })} />
+                <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: new Date(date) })} />
                 <ErrorMessage>{error.birthDate}</ErrorMessage>
                 <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
               </label>
