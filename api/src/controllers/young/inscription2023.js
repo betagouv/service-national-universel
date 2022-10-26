@@ -65,7 +65,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     const isRequired = type !== "save";
 
-    const { error, value } = Joi.object({
+    const coordonneeSchema = {
       gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
       frenchNationality: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       birthCountry: needRequired(Joi.string().trim(), isRequired),
@@ -146,15 +146,22 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
+    };
+
+    let { error, value } = Joi.object(coordonneeSchema).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+
+    if (type === "correction") {
+      const keyList = Object.keys(coordonneeSchema);
+      value = { ...value, ...validateCorrectionRequest(young, keyList) };
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       ...value,
