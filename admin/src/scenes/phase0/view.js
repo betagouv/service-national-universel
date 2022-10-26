@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { COHESION_STAY_LIMIT_DATE, START_DATE_SESSION_PHASE1, translate, translateGrade } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -22,6 +22,7 @@ import { SPECIFIC_SITUATIONS_KEY } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
+import { useHistory } from "react-router-dom";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -29,7 +30,7 @@ const REJECTION_REASONS = {
   OTHER: "Autre (préciser)",
 };
 
-export default function VolontairePhase0View({ young, onChange }) {
+export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
@@ -179,15 +180,18 @@ export default function VolontairePhase0View({ young, onChange }) {
     <>
       <YoungHeader young={young} tab="file" onChange={onChange} />
       <div className="p-[30px]">
-        <div className="pb-[30px]">
-          <h1 className="font-bold text-[30px] text-center mb-[8px]">Veuillez vérifier le dossier</h1>
-          <p className="text-[14px] leading-[20px] text-center max-w-[826px] mx-auto">
-            Vous pouvez faire une <b>demande de correction</b> si besoin en passant votre curseur sur un champ et en cliquant sur le bouton orange. Si vous le souhaitez, vous
-            pouvez également <b>modifier</b> vous-même l’information en cliquant sur &quot;modifier&quot;.
-          </p>
-        </div>
+        {(young.status === YOUNG_STATUS.WAITING_CORRECTION || young.status === YOUNG_STATUS.WAITING_VALIDATION) && (
+          <div className="pb-[30px]">
+            <h1 className="font-bold text-[30px] text-center mb-[8px]">Veuillez vérifier le dossier</h1>
+            <p className="text-[14px] leading-[20px] text-center max-w-[826px] mx-auto">
+              Vous pouvez faire une <b>demande de correction</b> si besoin en passant votre curseur sur un champ et en cliquant sur le bouton orange. Si vous le souhaitez, vous
+              pouvez également <b>modifier</b> vous-même l’information en cliquant sur &quot;modifier&quot;.
+            </p>
+          </div>
+        )}
         <SectionIdentite
           young={young}
+          globalMode={globalMode}
           requests={requests}
           onStartRequest={onStartRequest}
           currentRequest={currentCorrectionRequestField}
@@ -195,6 +199,7 @@ export default function VolontairePhase0View({ young, onChange }) {
         />
         <SectionParents
           young={young}
+          globalMode={globalMode}
           requests={requests}
           onStartRequest={onStartRequest}
           currentRequest={currentCorrectionRequestField}
@@ -436,21 +441,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests }) {
-  let cniDay = "";
-  let cniMonth = "";
-  let cniYear = "";
-
-  if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
-    const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
-    if (lastCniFile.expirationDate) {
-      const date = dayjs(lastCniFile.expirationDate).locale("fr");
-      cniDay = date.date();
-      cniMonth = date.format("MMMM");
-      cniYear = date.year();
-    }
-  }
-
+function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode }) {
   let birthDay = "";
   let birthMonth = "";
   let birthYear = "";
@@ -462,91 +453,53 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   }
 
   return (
-    <Section step="Première étape :" title="Vérifier l'identité" editable>
+    <Section
+      step={globalMode === "correction" ? "Première étape" : null}
+      title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
+      editable
+      young={young}>
       <div className="flex-[1_0_50%] pr-[56px]">
-        <CniField
-          name="cniFile"
-          label="Pièce d'identité"
-          young={young}
-          mode="correction"
-          onStartRequest={onStartRequest}
-          currentRequest={currentRequest}
-          correctionRequest={getCorrectionRequest(requests, "cniFile")}
-          onCorrectionRequestChange={onCorrectionRequestChange}
-        />
-
-        <FieldsGroup
-          name="cniExpirationDate"
-          title="Date d’expiration de la pièce d’identité"
-          mode="correction"
-          onStartRequest={onStartRequest}
-          currentRequest={currentRequest}
-          correctionRequest={getCorrectionRequest(requests, "cniExpirationDate")}
-          onCorrectionRequestChange={onCorrectionRequestChange}>
-          <Field name="cni_day" label="Jour" value={cniDay} className="mr-[14px] flex-[1_1_23%]" />
-          <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
-          <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
-        </FieldsGroup>
-        <HonorCertificate young={young} />
-        <div className="mt-[32px]">
-          <MiniTitle>Identité et contact</MiniTitle>
-          <div className="mb-[16px] flex items-start justify-between">
-            <Field
-              name="lastName"
-              label="Nom"
-              value={young.lastName}
-              mode="correction"
-              className="mr-[8px] flex-[1_1_50%]"
+        {globalMode === "correction" ? (
+          <>
+            <SectionIdentiteCni
+              young={young}
+              globalMode={globalMode}
+              requests={requests}
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "lastName")}
               onCorrectionRequestChange={onCorrectionRequestChange}
             />
-            <Field
-              name="firstName"
-              label="Prénom"
-              value={young.firstName}
-              mode="correction"
-              className="ml-[8px] flex-[1_1_50%]"
+            <SectionIdentiteContact
+              className="mt-[32px]"
+              young={young}
+              globalMode={globalMode}
+              requests={requests}
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "firstName")}
               onCorrectionRequestChange={onCorrectionRequestChange}
             />
-          </div>
-          <Field
-            name="gender"
-            label="Sexe"
-            value={translate(young.gender)}
-            mode="correction"
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "gender")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-          />
-          <Field
-            name="email"
-            label="Email"
-            value={young.email}
-            mode="correction"
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "email")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-          />
-          <Field
-            name="phone"
-            label="Téléphone"
-            value={young.phone}
-            mode="correction"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "phone")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-          />
-        </div>
+          </>
+        ) : (
+          <>
+            <SectionIdentiteContact
+              young={young}
+              globalMode={globalMode}
+              requests={requests}
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+            <SectionIdentiteCni
+              className="mt-[32px]"
+              young={young}
+              globalMode={globalMode}
+              requests={requests}
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+          </>
+        )}
       </div>
       <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
       <div className="flex-[1_0_50%] pl-[56px]">
@@ -554,7 +507,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           <FieldsGroup
             name="birthdateAt"
             title="Date et lieu de naissance"
-            mode="correction"
+            mode={globalMode}
             correctionLabel="Date de naissance"
             className="mb-[16px]"
             onStartRequest={onStartRequest}
@@ -570,7 +523,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="birthCity"
               label="Ville de naissance"
               value={young.birthCity}
-              mode="correction"
+              mode={globalMode}
               className="mr-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -581,7 +534,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="birthCityZip"
               label="Code postal de naissance"
               value={young.birthCityZip}
-              mode="correction"
+              mode={globalMode}
               className="ml-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -593,7 +546,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             name="birthCountry"
             label="Pays de naissance"
             value={young.birthCountry}
-            mode="correction"
+            mode={globalMode}
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
             correctionRequest={getCorrectionRequest(requests, "birthCountry")}
@@ -606,7 +559,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             name="address"
             label="Adresse"
             value={young.address}
-            mode="correction"
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -618,7 +571,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="zip"
               label="Code postal"
               value={young.zip}
-              mode="correction"
+              mode={globalMode}
               className="mr-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -629,7 +582,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="city"
               label="Ville"
               value={young.city}
-              mode="correction"
+              mode={globalMode}
               className="ml-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -642,7 +595,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="country"
               label="Pays"
               value={young.country}
-              mode="correction"
+              mode={globalMode}
               className="mb-[16px]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -662,7 +615,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="address"
               label="Adresse"
               value={young.foreignAddress}
-              mode="correction"
+              mode={globalMode}
               className="mb-[16px]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -674,7 +627,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 name="zip"
                 label="Code postal"
                 value={young.foreignZip}
-                mode="correction"
+                mode={globalMode}
                 className="mr-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
@@ -685,7 +638,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 name="city"
                 label="Ville"
                 value={young.foreignCity}
-                mode="correction"
+                mode={globalMode}
                 className="ml-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
@@ -697,7 +650,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               name="country"
               label="Pays"
               value={young.foreignCountry}
-              mode="correction"
+              mode={globalMode}
               className="mb-[16px]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -711,7 +664,116 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   );
 }
 
-function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests }) {
+function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className }) {
+  let cniDay = "";
+  let cniMonth = "";
+  let cniYear = "";
+
+  if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
+    const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
+    if (lastCniFile.expirationDate) {
+      const date = dayjs(lastCniFile.expirationDate).locale("fr");
+      cniDay = date.date();
+      cniMonth = date.format("MMMM");
+      cniYear = date.year();
+    }
+  }
+
+  return (
+    <div className={className}>
+      <CniField
+        name="cniFile"
+        label="Pièce d'identité"
+        young={young}
+        mode={globalMode}
+        onStartRequest={onStartRequest}
+        currentRequest={currentRequest}
+        correctionRequest={getCorrectionRequest(requests, "cniFile")}
+        onCorrectionRequestChange={onCorrectionRequestChange}
+      />
+
+      <FieldsGroup
+        name="cniExpirationDate"
+        title="Date d’expiration de la pièce d’identité"
+        mode={globalMode}
+        onStartRequest={onStartRequest}
+        currentRequest={currentRequest}
+        correctionRequest={getCorrectionRequest(requests, "cniExpirationDate")}
+        onCorrectionRequestChange={onCorrectionRequestChange}>
+        <Field name="cni_day" label="Jour" value={cniDay} className="mr-[14px] flex-[1_1_23%]" />
+        <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
+        <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
+      </FieldsGroup>
+      <HonorCertificate young={young} />
+    </div>
+  );
+}
+
+function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className }) {
+  return (
+    <div className={className}>
+      <MiniTitle>Identité et contact</MiniTitle>
+      <div className="mb-[16px] flex items-start justify-between">
+        <Field
+          name="lastName"
+          label="Nom"
+          value={young.lastName}
+          mode={globalMode}
+          className="mr-[8px] flex-[1_1_50%]"
+          onStartRequest={onStartRequest}
+          currentRequest={currentRequest}
+          correctionRequest={getCorrectionRequest(requests, "lastName")}
+          onCorrectionRequestChange={onCorrectionRequestChange}
+        />
+        <Field
+          name="firstName"
+          label="Prénom"
+          value={young.firstName}
+          mode={globalMode}
+          className="ml-[8px] flex-[1_1_50%]"
+          onStartRequest={onStartRequest}
+          currentRequest={currentRequest}
+          correctionRequest={getCorrectionRequest(requests, "firstName")}
+          onCorrectionRequestChange={onCorrectionRequestChange}
+        />
+      </div>
+      <Field
+        name="gender"
+        label="Sexe"
+        value={translate(young.gender)}
+        mode={globalMode}
+        className="mb-[16px]"
+        onStartRequest={onStartRequest}
+        currentRequest={currentRequest}
+        correctionRequest={getCorrectionRequest(requests, "gender")}
+        onCorrectionRequestChange={onCorrectionRequestChange}
+      />
+      <Field
+        name="email"
+        label="Email"
+        value={young.email}
+        mode={globalMode}
+        className="mb-[16px]"
+        onStartRequest={onStartRequest}
+        currentRequest={currentRequest}
+        correctionRequest={getCorrectionRequest(requests, "email")}
+        onCorrectionRequestChange={onCorrectionRequestChange}
+      />
+      <Field
+        name="phone"
+        label="Téléphone"
+        value={young.phone}
+        mode={globalMode}
+        onStartRequest={onStartRequest}
+        currentRequest={currentRequest}
+        correctionRequest={getCorrectionRequest(requests, "phone")}
+        onCorrectionRequestChange={onCorrectionRequestChange}
+      />
+    </div>
+  );
+}
+
+function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode }) {
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
 
@@ -739,7 +801,11 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   }
 
   return (
-    <Section step="Seconde étape :" title="Vérifiez la situation et l'accord parental" editable>
+    <Section
+      step={globalMode === "correction" ? "Seconde étape :" : null}
+      title={globalMode === "correction" ? "Vérifiez la situation et l'accord parental" : "Détails"}
+      editable
+      young={young}>
       <div className="flex-[1_0_50%] pr-[56px]">
         <div>
           <MiniTitle>Situation</MiniTitle>
@@ -747,7 +813,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name="situation"
             label="Statut"
             value={translate(young.situation)}
-            mode="correction"
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -758,7 +824,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name="schoolCity"
             label="Ville de l'établissement"
             value={young.schoolCity}
-            mode="correction"
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -769,7 +835,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name="schoolName"
             label="Nom de l'établissement"
             value={young.schoolName}
-            mode="correction"
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -780,7 +846,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name="grade"
             label="Classe"
             value={translateGrade(young.grade)}
-            mode="correction"
+            mode={globalMode}
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
             correctionRequest={getCorrectionRequest(requests, "grade")}
@@ -821,8 +887,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           <Field
             name={`parent${currentParent}Status`}
             label="Statut"
-            value={young[`parent${currentParent}Status`]}
-            mode="correction"
+            value={translate(young[`parent${currentParent}Status`])}
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -834,7 +900,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               name={`parent${currentParent}LastName`}
               label="Nom"
               value={young[`parent${currentParent}LastName`]}
-              mode="correction"
+              mode={globalMode}
               className="mr-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -845,7 +911,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               name={`parent${currentParent}FirstName`}
               label="Prénom"
               value={young[`parent${currentParent}FirstName`]}
-              mode="correction"
+              mode={globalMode}
               className="ml-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -858,7 +924,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name={`parent${currentParent}Email`}
             label="Email"
             value={young[`parent${currentParent}Email`]}
-            mode="correction"
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -869,7 +935,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             name={`parent${currentParent}Phone`}
             label="Téléphone"
             value={young[`parent${currentParent}Phone`]}
-            mode="correction"
+            mode={globalMode}
             className="mb-[16px]"
             onStartRequest={onStartRequest}
             currentRequest={currentRequest}
@@ -897,11 +963,36 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
               onCorrectionRequestChange={onCorrectionRequestChange}>
-              <Field name="address" label="Adresse" value={young.address} mode="correction" className="mb-[16px]" />
-              <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-              <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-              <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-              <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
+              <Field name={`parent${currentParent}Address`} label="Adresse" value={young[young[`parent${currentParent}Address`]]} mode={globalMode} className="mb-[16px]" />
+              <Field
+                name={`parent${currentParent}Zip`}
+                label="Code postal"
+                value={young[`parent${currentParent}Zip`]}
+                mode={globalMode}
+                className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+              />
+              <Field
+                name={`parent${currentParent}City`}
+                label="Ville"
+                value={young[`parent${currentParent}City`]}
+                mode={globalMode}
+                className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+              />
+              <Field name={`parent${currentParent}Country`} label="Pays" value={young[`parent${currentParent}Country`]} mode={globalMode} className="mb-[16px]" />
+              <Field
+                name={`parent${currentParent}Department`}
+                label="Département"
+                value={young[`parent${currentParent}Department`]}
+                mode="readonly"
+                className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+              />
+              <Field
+                name={`parent${currentParent}Region`}
+                label="Région"
+                value={young[`parent${currentParent}Region`]}
+                mode="readonly"
+                className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+              />
             </FieldsGroup>
           )}
         </div>
@@ -1030,8 +1121,13 @@ function CheckRead({ children }) {
   );
 }
 
-function Section({ step, title, editable, collapsable, children }) {
+function Section({ step, title, editable, collapsable, children, young }) {
   const [collapsed, setCollapsed] = useState(false);
+  const history = useHistory();
+
+  function goToModification() {
+    history.push(`/volontaire/${young._id}/edit`);
+  }
 
   return (
     <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px]">
@@ -1040,7 +1136,7 @@ function Section({ step, title, editable, collapsable, children }) {
         <span className="text-[#242526]">{title}</span>
       </h2>
       {editable && (
-        <RoundButton className="absolute top-[24px] right-[24px]">
+        <RoundButton className="absolute top-[24px] right-[24px]" onClick={goToModification}>
           <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
           Modifier
         </RoundButton>

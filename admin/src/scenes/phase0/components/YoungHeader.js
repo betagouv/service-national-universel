@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Title from "../../../components/views/Title";
-import { canViewEmailHistory, ROLES, translateCohort } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "./Tab";
@@ -11,7 +10,7 @@ import { useSelector } from "react-redux";
 import Pencil from "../../../assets/icons/Pencil";
 import History from "../../../assets/icons/History";
 import Field from "./Field";
-import { translate } from "snu-lib";
+import { translate, YOUNG_STATUS, canViewEmailHistory, ROLES, translateCohort } from "snu-lib";
 import { Button } from "./Buttons";
 import Bin from "../../../assets/Bin";
 import TakePlace from "../../../assets/icons/TakePlace";
@@ -68,6 +67,19 @@ export default function YoungHeader({ young, tab, onChange }) {
           <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
             Dossier d&apos;inscription
           </Tab>
+          {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
+            <>
+              <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+                Phase 1
+              </Tab>
+              <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+                Phase 2
+              </Tab>
+              <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+                Phase 3
+              </Tab>
+            </>
+          )}
           <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
             <div className="flex items-center">
               <History className="block flex-[0_0_18px] mr-[8px]" fill="#9CA3AF" />
@@ -75,7 +87,7 @@ export default function YoungHeader({ young, tab, onChange }) {
             </div>
           </Tab>
           {canViewEmailHistory(user) ? (
-            <Tab isActive={tab === "notifications"} disabled onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
+            <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
               Notifications
             </Tab>
           ) : null}
