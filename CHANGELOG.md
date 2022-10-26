@@ -1,3 +1,17 @@
+# [1.154.0](https://github.com/betagouv/service-national-universel/compare/v1.153.0...v1.154.0) (2022-10-25)
+
+
+### Bug Fixes
+
+* **api/app:** Correction cote jeune routes ([#1963](https://github.com/betagouv/service-national-universel/issues/1963)) ([30dd1ef](https://github.com/betagouv/service-national-universel/commit/30dd1ef5c0f46b4e7ed225230a3e9f3bc8fe4f77))
+* **app:** correct young patch trigger time ([3c7722a](https://github.com/betagouv/service-national-universel/commit/3c7722a40d92debbebf6493b69f73108b429f30b))
+
+
+### Features
+
+* **app:** correction profil ([#1968](https://github.com/betagouv/service-national-universel/issues/1968)) ([b78b78c](https://github.com/betagouv/service-national-universel/commit/b78b78c5161abb4c7af653db6d87c3eb40623630))
+* **app:** home page waiting correction ([#1966](https://github.com/betagouv/service-national-universel/issues/1966)) ([c393a1b](https://github.com/betagouv/service-national-universel/commit/c393a1b413706f31fa15ff735112faf6c39569b1))
+
 # [1.153.0](https://github.com/betagouv/service-national-universel/compare/v1.152.0...v1.153.0) (2022-10-24)
 
 
