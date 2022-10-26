@@ -44,7 +44,7 @@ export default function StepUpload() {
       return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
     }
     dispatch(setYoung(responseData));
-    plausibleEvent("Phase0/CTA inscription - CI mobile");
+    plausibleEvent("Phase0/CTA inscription - CI desktop");
     history.push("/inscription2023/confirm");
   }
 

@@ -18,6 +18,7 @@ export default function MyDocs({ young }) {
     dispatch(setYoung(newYoung));
   }
 
+  if (!young?.files.cniFiles.length > 0) return <></>;
   return (
     <div className="w-full md:w-1/2">
       <h2 className="text-base text-gray-800 font-semibold my-2">Mes documents en ligne</h2>
