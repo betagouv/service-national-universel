@@ -207,11 +207,15 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
         />
         <SectionConsentements young={young} />
       </div>
-      {footerMode === "PENDING" && (
-        <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
+      {globalMode === "correction " && (
+        <>
+          {footerMode === "PENDING" && (
+            <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
+          )}
+          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
+        </>
       )}
-      {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-      {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
     </>
   );
 }
