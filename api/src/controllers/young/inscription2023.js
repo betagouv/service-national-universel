@@ -486,6 +486,7 @@ const validateCorrectionRequest = (young, keyList) => {
   result.correctionRequests = young.correctionRequests.map((cr) => {
     if (keyList.includes(cr.field)) {
       cr.status = "CORRECTED";
+      cr.correctedAt = new Date();
     }
     return cr;
   });
