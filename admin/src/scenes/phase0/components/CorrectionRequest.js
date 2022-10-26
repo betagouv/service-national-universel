@@ -79,8 +79,7 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
       />
       <div className="text-right mt-[16px]">
         <button className="text-[12px] text-[#F87171] ml-[6px] flex items-center" onClick={deleteRequest}>
-          <Bin fill="#F87171" />
-          Supprimer la demande
+          <Bin fill="#F87171" className="mr-[6px]" /> Supprimer la demande
         </button>
       </div>
     </div>

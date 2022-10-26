@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { translate, translateGrade } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, START_DATE_SESSION_PHASE1, translate, translateGrade } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -18,6 +18,10 @@ import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import HourGlass from "../../assets/icons/HourGlass";
+import { SPECIFIC_SITUATIONS_KEY } from "./commons";
+import Check from "../../assets/icons/Check";
+import RadioButton from "./components/RadioButton";
+import MiniSwitch from "./components/MiniSwitch";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -32,7 +36,7 @@ export default function VolontairePhase0View({ young, onChange }) {
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
 
   useEffect(() => {
-    // console.log("VolontairePhase0View: ", young);
+    console.log("VolontairePhase0View: ", young);
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
     } else {
@@ -55,6 +59,7 @@ export default function VolontairePhase0View({ young, onChange }) {
   }
 
   async function onCorrectionRequestChange(fieldName, message, reason) {
+    console.log("cor change", fieldName, message, reason);
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
@@ -77,8 +82,8 @@ export default function VolontairePhase0View({ young, onChange }) {
           }
           setProcessing(false);
         }
-        setCurrentCorrectionRequestField("");
       }
+      setCurrentCorrectionRequestField("");
     } else {
       // change request
       const reqIdx = requests.findIndex((req) => {
@@ -482,10 +487,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
           <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
         </FieldsGroup>
-        <div className="flex items-center justify-between mt-[8px]">
-          <MiniTitle>Attestation sur l&apos;honneur</MiniTitle>
-          <div className="py-[3px] px-[10px] border-[#CECECE] border-[1px] bg-[#FFFFFF] rounded-[100px] text-[12px] font-normal">Validée</div>
-        </div>
+        <HonorCertificate young={young} />
         <div className="mt-[32px]">
           <MiniTitle>Identité et contact</MiniTitle>
           <div className="mb-[16px] flex items-start justify-between">
@@ -546,9 +548,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           />
         </div>
       </div>
-
-      <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
-
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
       <div className="flex-[1_0_50%] pl-[56px]">
         <div>
           <FieldsGroup
@@ -601,21 +601,48 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           />
         </div>
         <div className="mt-[32px]">
-          <FieldsGroup
-            name="address"
-            mode="correction"
-            title="Adresse"
-            noflex
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "address")}
-            onCorrectionRequestChange={onCorrectionRequestChange}>
-            <Field name="address" label="Adresse" value={young.address} mode="correction" className="mb-[16px]" />
-            <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-            <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-            <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-            <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-          </FieldsGroup>
+          <div className="mt-[32px]">
+            <MiniTitle>Adresse</MiniTitle>
+            <Field
+              name="address"
+              label="Adresse"
+              value={young.address}
+              mode="correction"
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "address")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field
+                name="zip"
+                label="Code postal"
+                value={young.zip}
+                mode="correction"
+                className="mr-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "zip")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+              />
+              <Field
+                name="city"
+                label="Ville"
+                value={young.city}
+                mode="correction"
+                className="ml-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "city")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+              />
+            </div>
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field name="department" label="Département" value={young.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
+              <Field name="region" label="Région" value={young.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
+            </div>
+          </div>
         </div>
       </div>
     </Section>
@@ -624,6 +651,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 
 function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests }) {
   const [currentParent, setCurrentParent] = useState(1);
+  const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
+
+  useEffect(() => {
+    setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
+  }, [young]);
 
   function parentHasRequest(parentId) {
     return (
@@ -693,33 +725,34 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             onCorrectionRequestChange={onCorrectionRequestChange}
           />
         </div>
-        <div className="mt-[32px]">
-          <MiniTitle>Situations particulières</MiniTitle>
-          <FieldSituationsParticulieres
-            name="specificSituations"
-            young={young}
-            mode="correction"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "specificSituations")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-          />
-          {young.specificAmenagment === "true" && (
-            <Field
-              name="specificAmenagmentType"
-              label="Nature de l'aménagement spécifique"
-              value={young.specificAmenagmentType}
-              mode="correction"
+        {hasSpecificSituation && (
+          <div className="mt-[32px]">
+            <MiniTitle>Situations particulières</MiniTitle>
+            <FieldSituationsParticulieres
+              name="specificSituations"
+              young={young}
+              mode="readonly"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+              correctionRequest={getCorrectionRequest(requests, "specificSituations")}
               onCorrectionRequestChange={onCorrectionRequestChange}
             />
-          )}
-        </div>
+            {young.specificAmenagment === "true" && (
+              <Field
+                name="specificAmenagmentType"
+                label="Nature de l'aménagement spécifique"
+                value={young.specificAmenagmentType}
+                mode="readonly"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+              />
+            )}
+          </div>
+        )}
       </div>
-
-      <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
       <div className="flex-[1_0_50%] pl-[56px]">
         <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
         <div className="mt-[32px]">
@@ -815,14 +848,123 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   );
 }
 
+const PARENT_STATUS_NAME = {
+  father: "Le père",
+  mother: "La mère",
+  representant: "Le représentant légal",
+};
+
 function SectionConsentements({ young }) {
+  const authorizationOptions = [
+    { value: "true", label: "J'autorise" },
+    { value: "false", label: "Je n'autorise pas" },
+  ];
+
   return (
     <Section title="Consentements" collapsable>
-      <div className="flex-[1_0_50%] pr-[56px]"></div>
-
-      <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
-      <div className="flex-[1_0_50%] pl-[56px]"></div>
+      <div className="flex-[1_0_50%] pr-[56px]">
+        <div className="text-[16px] leading-[24px] font-bold text-[#242526]">
+          Le volontaire{" "}
+          <span className="font-normal text-[#6B7280]">
+            {young.firstName} {young.lastName}
+          </span>
+        </div>
+        <div>
+          <CheckRead>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
+          <CheckRead>A pris connaissance des modaCheckReadtés de traitement de mes données personnelles.</CheckRead>
+          <CheckRead>
+            Est volontaire pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion du 13 au 25 février 2022 puis la
+            réalisation d&apos;une mission d&apos;intérêt général.
+          </CheckRead>
+          <CheckRead>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
+          <CheckRead>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
+        </div>
+      </div>
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+      <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
+        <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+          <div className="grow">
+            {PARENT_STATUS_NAME[young.parent1Status]}{" "}
+            <span className="font-normal text-[#6B7280]">
+              {young.parent1FirstName} {young.parent1LastName}
+            </span>
+          </div>
+          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+        </div>
+        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+        <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
+          <b>
+            {young.firstName} {young.lastName}
+          </b>{" "}
+          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
+          réalisation d&apos;une mission d&apos;intérêt général.
+        </div>
+        <div>
+          <CheckRead>
+            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
+          <CheckRead>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
+          <CheckRead>
+            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+          </CheckRead>
+          <CheckRead>
+            S&apos;engage à ce que{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
+            jaune.
+          </CheckRead>
+          <CheckRead>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+        </div>
+        <div className="mt-[16px] flex itemx-center justify-between">
+          <div className="grow text-[#374151] text-[14px] leading-[20px]">
+            <div className="font-bold">Droit à l&apos;image</div>
+            <div>Accord : {translate(young.parent1AllowImageRights)}</div>
+          </div>
+          <MiniSwitch value={young.parent1AllowImageRights === "true"} />
+        </div>
+        {young.parent2Status && (
+          <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
+            <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+              <div className="grow">
+                {PARENT_STATUS_NAME[young.parent2Status]}{" "}
+                <span className="font-normal text-[#6B7280]">
+                  {young.parent2FirstName} {young.parent2LastName}
+                </span>
+              </div>
+              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+            </div>
+            <div className="mt-[16px] flex itemx-center justify-between">
+              <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                <div className="font-bold">Droit à l&apos;image</div>
+                <div>Accord : {translate(young.parent2AllowImageRights)}</div>
+              </div>
+              <MiniSwitch value={young.parent2AllowImageRights === "true"} />
+            </div>
+          </div>
+        )}
+      </div>
     </Section>
+  );
+}
+
+function CheckRead({ children }) {
+  return (
+    <div className="flex items-center mt-[16px]">
+      <div className="flex-[0_0_14px] mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px]">
+        <Check className="w-[11px] h-[8px]" />
+      </div>
+      <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
+    </div>
   );
 }
 
@@ -857,4 +999,37 @@ function getCorrectionRequest(requests, field) {
   return requests.find((req) => {
     return req.field === field;
   });
+}
+
+function HonorCertificate({ young }) {
+  const cniExpired = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
+
+  async function remind() {
+    try {
+      await api.post(`/correction-request/${young._id}/remind-cni`, {});
+      toastr.success("Le représentant légal a été relancé.");
+    } catch (err) {
+      toastr.error("Erreur !", "Nous n'avons pas pu envoyer la relance. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
+  if (cniExpired) {
+    return (
+      <div className="flex items-center justify-between mt-[8px]">
+        <MiniTitle>Attestation sur l&apos;honneur</MiniTitle>
+        <div className="flex items-center">
+          <div className="py-[3px] px-[10px] border-[#CECECE] border-[1px] bg-[#FFFFFF] rounded-[100px] text-[12px] font-normal">
+            {young.parentStatementOfHonorInvalidId === "true" ? "Validée" : "En attente"}
+          </div>
+          {young.parentStatementOfHonorInvalidId !== "true" && (
+            <BorderButton className="ml-[8px]" onClick={remind}>
+              Relancer
+            </BorderButton>
+          )}
+        </div>
+      </div>
+    );
+  } else {
+    return null;
+  }
 }

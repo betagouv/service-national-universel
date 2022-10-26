@@ -45,7 +45,7 @@ export default function StepUpload() {
       return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
     }
     dispatch(setYoung(responseData));
-    plausibleEvent("Phase0/CTA reinscription - CI mobile");
+    plausibleEvent("Phase0/CTA reinscription - CI desktop");
     history.push("/reinscription/done");
   }
 
