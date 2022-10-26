@@ -61,7 +61,7 @@ export default function Consentement({ step, parentId }) {
       }
 
       let address;
-      if (young[`parent${parentId}OwnAddress`]) {
+      if (young[`parent${parentId}OwnAddress`] === "true") {
         address = {
           address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
           addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
@@ -285,7 +285,7 @@ export default function Consentement({ step, parentId }) {
       body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
     }
 
-    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal reinscription - Consentement valide");
+    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
     else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
 
     try {
