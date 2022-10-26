@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { ES_NO_LIMIT } from "snu-lib";
 import CreatableSelect from "../../../components/CreatableSelect";
 import api from "../../../services/api";
+import ErrorMessage from "./ErrorMessage";
 
-export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify }) {
+export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
@@ -72,6 +73,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           placeholder="Sélectionnez un pays"
           error={errors.country}
         />
+        <ErrorMessage>{corrections?.schoolCountry}</ErrorMessage>
       </div>
       <div className="form-group">
         <CreatableSelect
@@ -88,6 +90,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           placeholder="Sélectionnez un établissement"
           error={errors.fullName}
         />
+        <ErrorMessage>{corrections?.schoolName}</ErrorMessage>
       </div>
     </>
   );

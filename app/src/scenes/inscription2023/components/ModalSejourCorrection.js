@@ -13,9 +13,6 @@ export default function ModalSejourCorrection({ data, isOpen, onValidation }) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
 
-  // ! FIXME : PB si aucune cohorte n'est disponible
-  const cohorts = data?.sessions?.filter((e) => e.goalReached === false);
-
   const onSubmit = async (cohort) => {
     setLoading(true);
     onValidation(data, cohort);

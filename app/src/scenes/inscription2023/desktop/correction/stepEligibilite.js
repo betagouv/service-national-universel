@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import Toggle from "../../../../components/inscription/toggle";
-import Input from "../../../../components/inscription/input";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import { toastr } from "react-redux-toastr";
 import IconFrance from "../../../../assets/IconFrance";
@@ -9,17 +10,19 @@ import validator from "validator";
 import plausibleEvent from "../../../../services/plausible";
 import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
-import SearchableSelect from "../../../../components/SearchableSelect";
 import CheckBox from "../../../../components/inscription/checkbox";
+import { getCorrectionByStep } from "../../../../utils/navigation";
+
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../../sentry";
-import { getDepartmentByZip } from "snu-lib";
+import { getDepartmentByZip, YOUNG_STATUS } from "snu-lib";
 import api from "../../../../services/api";
 import DatePickerList from "../../../preinscription/components/DatePickerList";
 import { setYoung } from "../../../../redux/auth/actions";
 import { translate } from "../../../../utils";
 
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
+import ErrorMessage from "../../components/ErrorMessage";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -30,11 +33,19 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [modal, setModal] = React.useState({ isOpen: false });
 
+  const [corrections, setCorrections] = React.useState({});
+
+  const { step } = useParams();
+
   const history = useHistory();
 
   useEffect(() => {
     if (!young) return;
-
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
+      const corrections = getCorrectionByStep(young, step);
+      if (!Object.keys(corrections).length) return history.push("/");
+      else setCorrections(corrections);
+    }
     setData({
       frenchNationality: young.frenchNationality,
       birthDate: new Date(young.birthdateAt),
@@ -130,7 +141,7 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,
       zip: data.zip,
-      birthDate: data.birthDate,
+      birthDate: new Date(data.birthDate),
     };
 
     try {
@@ -146,7 +157,9 @@ export default function StepEligibilite() {
         setLoading(false);
       }
 
-      if (res.data.msg) {
+      const cohorts = res?.data?.filter((e) => e.goalReached === false);
+
+      if (res.data.msg || (cohorts && cohorts.length === 0)) {
         const res = await api.put("/young/inscription2023/noneligible");
         if (!res.ok) {
           capture(res.code);
@@ -206,21 +219,22 @@ export default function StepEligibilite() {
             </div>
             <div className="flex w-full space-x-4">
               <div className="flex flex-col w-1/2">
-                <SearchableSelect
+                <Select
                   label="Niveau de scolarité"
                   value={data.scolarity}
                   options={optionsScolarite}
                   onChange={(value) => {
                     setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
                   }}
-                  placeholder="Sélectionnez une option"
+                  error={error.scolarity}
+                  correction={corrections.grade}
                 />
-                {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
               </div>
               <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
                 Date de naissance
-                <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-                {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+                <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthdateAt: new Date(date) })} />
+                <ErrorMessage>{error.birthDate}</ErrorMessage>
+                <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
               </label>
             </div>
             {data.scolarity && (
@@ -236,28 +250,30 @@ export default function StepEligibilite() {
                   </p>
 
                   <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
-                  {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
                 </div>
 
                 {data.scolarity !== "NOT_SCOLARISE" ? (
                   data.isAbroad ? (
                     <>
-                      <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                      <SchoolOutOfFrance
+                        school={data.school}
+                        onSelectSchool={(school) => setData({ ...data, school: school })}
+                        toggleVerify={toggleVerify}
+                        corrections={corrections}
+                      />
                     </>
                   ) : (
                     <>
-                      <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                      <SchoolInFrance
+                        school={data.school}
+                        onSelectSchool={(school) => setData({ ...data, school: school })}
+                        toggleVerify={toggleVerify}
+                        corrections={corrections}
+                      />
                     </>
                   )
                 ) : !data.isAbroad ? (
-                  <div className="flex flex-col flex-start my-4">
-                    Code Postal
-                    <div className="h-5 flex items-center">
-                      <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
-                    </div>
-                    <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                    {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
-                  </div>
+                  <Input value={data.lastName} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
                 ) : null}
               </>
             )}

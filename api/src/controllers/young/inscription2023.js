@@ -46,6 +46,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const { error, value } = Joi.object({
+      birthdateAt: Joi.string().trim().required(),
       schooled: Joi.string().trim().required(),
       grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"),
       schoolName: Joi.string().trim(),

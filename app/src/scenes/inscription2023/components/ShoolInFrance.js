@@ -18,7 +18,7 @@ export const messageStyles = {
   error: "error",
 };
 
-export default function SchoolInFrance({ school, onSelectSchool, toggleVerify }) {
+export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
@@ -119,6 +119,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualFullName}
+        correction={corrections?.schoolName}
       />
       <Input
         value={manualSchool.address}
@@ -128,6 +129,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualAddress}
+        correction={corrections?.schoolAddress}
       />
       <Input
         value={manualSchool.postCode}
@@ -137,6 +139,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualPostCode}
+        correction={corrections?.schoolZip}
       />
       <Input
         value={manualSchool.city}
@@ -146,6 +149,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualCity}
+        correction={corrections?.schoolCity}
       />
       <VerifyAddress
         address={manualSchool.address}
@@ -188,6 +192,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           placeholder="Sélectionnez une commune"
           error={errors.city}
         />
+        <ErrorMessage>{corrections?.schoolCity}</ErrorMessage>
       </div>
       <div className="form-group">
         <CreatableSelect
@@ -208,6 +213,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           }}
           error={errors.fullName}
         />
+        <ErrorMessage>{corrections?.schoolName}</ErrorMessage>
       </div>
     </>
   );
