@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { START_DATE_SESSION_PHASE1, translate, translateGrade } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, START_DATE_SESSION_PHASE1, translate, translateGrade } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -19,6 +19,9 @@ import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import HourGlass from "../../assets/icons/HourGlass";
 import { SPECIFIC_SITUATIONS_KEY } from "./commons";
+import Check from "../../assets/icons/Check";
+import RadioButton from "./components/RadioButton";
+import MiniSwitch from "./components/MiniSwitch";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -544,9 +547,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           />
         </div>
       </div>
-
-      <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
-
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
       <div className="flex-[1_0_50%] pl-[56px]">
         <div>
           <FieldsGroup
@@ -723,8 +724,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           </div>
         )}
       </div>
-
-      <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
       <div className="flex-[1_0_50%] pl-[56px]">
         <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
         <div className="mt-[32px]">
@@ -820,14 +820,123 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   );
 }
 
+const PARENT_STATUS_NAME = {
+  father: "Le père",
+  mother: "La mère",
+  representant: "Le représentant légal",
+};
+
 function SectionConsentements({ young }) {
+  const authorizationOptions = [
+    { value: "true", label: "J'autorise" },
+    { value: "false", label: "Je n'autorise pas" },
+  ];
+
   return (
     <Section title="Consentements" collapsable>
-      <div className="flex-[1_0_50%] pr-[56px]"></div>
-
-      <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
-      <div className="flex-[1_0_50%] pl-[56px]"></div>
+      <div className="flex-[1_0_50%] pr-[56px]">
+        <div className="text-[16px] leading-[24px] font-bold text-[#242526]">
+          Le volontaire{" "}
+          <span className="font-normal text-[#6B7280]">
+            {young.firstName} {young.lastName}
+          </span>
+        </div>
+        <div>
+          <CheckRead>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
+          <CheckRead>A pris connaissance des modaCheckReadtés de traitement de mes données personnelles.</CheckRead>
+          <CheckRead>
+            Est volontaire pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion du 13 au 25 février 2022 puis la
+            réalisation d&apos;une mission d&apos;intérêt général.
+          </CheckRead>
+          <CheckRead>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
+          <CheckRead>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
+        </div>
+      </div>
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+      <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
+        <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+          <div className="grow">
+            {PARENT_STATUS_NAME[young.parent1Status]}{" "}
+            <span className="font-normal text-[#6B7280]">
+              {young.parent1FirstName} {young.parent1LastName}
+            </span>
+          </div>
+          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+        </div>
+        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+        <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
+          <b>
+            {young.firstName} {young.lastName}
+          </b>{" "}
+          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
+          réalisation d&apos;une mission d&apos;intérêt général.
+        </div>
+        <div>
+          <CheckRead>
+            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
+          <CheckRead>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
+          <CheckRead>
+            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+          </CheckRead>
+          <CheckRead>
+            S&apos;engage à ce que{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
+            jaune.
+          </CheckRead>
+          <CheckRead>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+        </div>
+        <div className="mt-[16px] flex itemx-center justify-between">
+          <div className="grow text-[#374151] text-[14px] leading-[20px]">
+            <div className="font-bold">Droit à l&apos;image</div>
+            <div>Accord : {translate(young.parent1AllowImageRights)}</div>
+          </div>
+          <MiniSwitch value={young.parent1AllowImageRights === "true"} />
+        </div>
+        {young.parent2Status && (
+          <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
+            <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+              <div className="grow">
+                {PARENT_STATUS_NAME[young.parent2Status]}{" "}
+                <span className="font-normal text-[#6B7280]">
+                  {young.parent2FirstName} {young.parent2LastName}
+                </span>
+              </div>
+              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+            </div>
+            <div className="mt-[16px] flex itemx-center justify-between">
+              <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                <div className="font-bold">Droit à l&apos;image</div>
+                <div>Accord : {translate(young.parent2AllowImageRights)}</div>
+              </div>
+              <MiniSwitch value={young.parent2AllowImageRights === "true"} />
+            </div>
+          </div>
+        )}
+      </div>
     </Section>
+  );
+}
+
+function CheckRead({ children }) {
+  return (
+    <div className="flex items-center mt-[16px]">
+      <div className="flex-[0_0_14px] mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px]">
+        <Check className="w-[11px] h-[8px]" />
+      </div>
+      <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
+    </div>
   );
 }
 
