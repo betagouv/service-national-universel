@@ -6,6 +6,7 @@ import { download } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import CorrectionRequest from "./CorrectionRequest";
 import PencilAlt from "../../../assets/icons/PencilAlt";
+import CorrectedRequest from "./CorrectedRequest";
 
 export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange }) {
   const [opened, setOpened] = useState(false);
@@ -24,7 +25,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   useEffect(() => {
     setRequestButtonClass(
       `items-center justify-center mr-[8px] w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
-        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5]" + (mouseIn ? " flex" : " hidden")
+        hasValidRequest ? "bg-[#F97316] flex" : "bg-[#FFEDD5]" + (mouseIn ? " flex" : " hidden")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);
@@ -78,6 +79,9 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
           {false && <MoreButton />}
         </div>
       </div>
+      {correctionRequest && correctionRequest.status === "CORRECTED" && (
+        <CorrectedRequest correctionRequest={correctionRequest} reasons={reasons} className="mt-[-6px] mb-[15px]" />
+      )}
       {opened && (
         <CorrectionRequest
           name={name}

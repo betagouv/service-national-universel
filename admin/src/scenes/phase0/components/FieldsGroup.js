@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MiniTitle } from "./commons";
 import CorrectionRequest from "./CorrectionRequest";
 import Field from "./Field";
+import CorrectedRequest from "./CorrectedRequest";
 
 export function FieldsGroup({
   name,
@@ -48,6 +49,7 @@ export function FieldsGroup({
       <div className={className} onMouseEnter={() => setMouseIn(true)} onMouseLeave={() => setMouseIn(false)}>
         {title && <MiniTitle>{title}</MiniTitle>}
         <div className={`${noflex ? "" : "flex items center"}`}>{childs}</div>
+        {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} />}
       </div>
       {opened && (
         <CorrectionRequest name={name} label={correctionLabel ? correctionLabel : title} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />
