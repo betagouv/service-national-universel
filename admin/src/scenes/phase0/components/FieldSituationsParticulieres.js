@@ -1,21 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectionRequest from "./CorrectionRequest";
-
-const SITUATIONS_KEY = [
-  "qpv",
-  "handicap",
-  "ppsBeneficiary",
-  "paiBeneficiary",
-  "specificAmenagment",
-  "reducedMobilityAccess",
-  "handicapInSameDepartment",
-  "allergies",
-  "highSkilledActivity",
-  "highSkilledActivityType",
-  "highSkilledActivityInSameDepartment",
-  "highSkilledActivityProofFiles",
-];
+import { SPECIFIC_SITUATIONS_KEY } from "../commons";
 
 /**
  * mode: could be "correction|edition|readonly" (par défaut readonly)
@@ -73,7 +59,7 @@ export default function FieldSituationsParticulieres({
   }
 
   const tags = [];
-  for (const key of SITUATIONS_KEY) {
+  for (const key of SPECIFIC_SITUATIONS_KEY) {
     if (young[key] === "true") {
       tags.push(
         <div className="inline-block text-[12px] text-[#FFFFFF] leading-[22px] px-[10px] py-[1px] bg-[#3B82F6] rounded-[100px] mr-[8px] mb-[8px]" key={key}>
