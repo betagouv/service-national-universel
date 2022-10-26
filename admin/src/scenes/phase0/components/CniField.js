@@ -11,6 +11,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
+  const [mouseIn, setMouseIn] = useState(false);
 
   useEffect(() => {
     setOpened(currentRequest === name);
@@ -22,9 +23,11 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
 
   useEffect(() => {
     setRequestButtonClass(
-      `flex items-center justify-center mr-[8px] w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5]"} hover:bg-[#F97316]`,
+      `items-center justify-center mr-[8px] w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
+        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5]" + (mouseIn ? " flex" : " hidden")
+      } hover:bg-[#F97316]`,
     );
-  }, [hasValidRequest]);
+  }, [mouseIn, hasValidRequest]);
 
   async function downloadCni() {
     if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
@@ -56,7 +59,10 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
 
   return (
     <>
-      <div className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between ${className}`}>
+      <div
+        className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between ${className}`}
+        onMouseEnter={() => setMouseIn(true)}
+        onMouseLeave={() => setMouseIn(false)}>
         <div>
           <Cni />
           <MiniTitle>Pièce d&apos;identité</MiniTitle>

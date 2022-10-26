@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { translate, translateGrade } from "snu-lib";
+import { START_DATE_SESSION_PHASE1, translate, translateGrade } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -18,6 +18,7 @@ import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import HourGlass from "../../assets/icons/HourGlass";
+import { SPECIFIC_SITUATIONS_KEY } from "./commons";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -32,7 +33,7 @@ export default function VolontairePhase0View({ young, onChange }) {
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
 
   useEffect(() => {
-    // console.log("VolontairePhase0View: ", young);
+    console.log("VolontairePhase0View: ", young);
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
     } else {
@@ -482,10 +483,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
           <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
         </FieldsGroup>
-        <div className="flex items-center justify-between mt-[8px]">
-          <MiniTitle>Attestation sur l&apos;honneur</MiniTitle>
-          <div className="py-[3px] px-[10px] border-[#CECECE] border-[1px] bg-[#FFFFFF] rounded-[100px] text-[12px] font-normal">Validée</div>
-        </div>
+        <HonorCertificate young={young} />
         <div className="mt-[32px]">
           <MiniTitle>Identité et contact</MiniTitle>
           <div className="mb-[16px] flex items-start justify-between">
@@ -624,6 +622,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 
 function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests }) {
   const [currentParent, setCurrentParent] = useState(1);
+  const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
+
+  useEffect(() => {
+    setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
+  }, [young]);
 
   function parentHasRequest(parentId) {
     return (
@@ -693,30 +696,32 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             onCorrectionRequestChange={onCorrectionRequestChange}
           />
         </div>
-        <div className="mt-[32px]">
-          <MiniTitle>Situations particulières</MiniTitle>
-          <FieldSituationsParticulieres
-            name="specificSituations"
-            young={young}
-            mode="correction"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "specificSituations")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-          />
-          {young.specificAmenagment === "true" && (
-            <Field
-              name="specificAmenagmentType"
-              label="Nature de l'aménagement spécifique"
-              value={young.specificAmenagmentType}
+        {hasSpecificSituation && (
+          <div className="mt-[32px]">
+            <MiniTitle>Situations particulières</MiniTitle>
+            <FieldSituationsParticulieres
+              name="specificSituations"
+              young={young}
               mode="correction"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+              correctionRequest={getCorrectionRequest(requests, "specificSituations")}
               onCorrectionRequestChange={onCorrectionRequestChange}
             />
-          )}
-        </div>
+            {young.specificAmenagment === "true" && (
+              <Field
+                name="specificAmenagmentType"
+                label="Nature de l'aménagement spécifique"
+                value={young.specificAmenagmentType}
+                mode="correction"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="w-[1px] my[73px] bg-[#E5E7EB]" />
@@ -857,4 +862,37 @@ function getCorrectionRequest(requests, field) {
   return requests.find((req) => {
     return req.field === field;
   });
+}
+
+function HonorCertificate({ young }) {
+  const cniExpired = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
+
+  async function remind() {
+    try {
+      await api.post(`/correction-request/${young._id}/remind-cni`, {});
+      toastr.success("Le représentant légal a été relancé.");
+    } catch (err) {
+      toastr.error("Erreur !", "Nous n'avons pas pu envoyer la relance. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
+  if (cniExpired) {
+    return (
+      <div className="flex items-center justify-between mt-[8px]">
+        <MiniTitle>Attestation sur l&apos;honneur</MiniTitle>
+        <div className="flex items-center">
+          <div className="py-[3px] px-[10px] border-[#CECECE] border-[1px] bg-[#FFFFFF] rounded-[100px] text-[12px] font-normal">
+            {young.parentStatementOfHonorInvalidId === "true" ? "Validée" : "En attente"}
+          </div>
+          {young.parentStatementOfHonorInvalidId !== "true" && (
+            <BorderButton className="ml-[8px]" onClick={remind}>
+              Relancer
+            </BorderButton>
+          )}
+        </div>
+      </div>
+    );
+  } else {
+    return null;
+  }
 }

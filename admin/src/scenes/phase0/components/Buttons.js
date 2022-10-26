@@ -1,11 +1,20 @@
 import React from "react";
 import { Spinner } from "reactstrap";
 
-export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel }) {
+export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "grey" }) {
+  let color;
+  switch (mode) {
+    case "blue":
+      color = "bg-white text-[#1D4ED8] border-[#1D4ED8] hover:!bg-[#1D4ED8] hover:text-white";
+      break;
+    default:
+      color = "bg-white text-[#000091] border-[#000091] hover:!bg-[#000091] hover:text-white";
+  }
+
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-white text-[#000091] border-[1px] border-[#000091] border-solid hover:!bg-[#000091] hover:text-white hover:border-[transparent] ${className}`}
+        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[1px] border-solid hover:border-[transparent] ${color} ${className}`}
         href={href}
         target={target}
         rel={rel}
@@ -16,7 +25,7 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-white text-[#374151] border-[1px] border-[#D1D5DB] rounded-[6px] hover:!bg-[#374151] hover:text-white hover:border-[transparent] ${className}`}
+        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[1px] rounded-[6px] hover:border-[transparent] ${color} ${className}`}
         onClick={onClick}>
         {children}
       </button>

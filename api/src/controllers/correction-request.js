@@ -4,8 +4,8 @@
  * ROUTES
  *   POST   /:youngId             -> create new requests.
  *   DELETE /:youngId/:field      -> cancel request for a field
- *   POST   /:youngId/remind      -> remind if there are still SENT requests.
- *   POST   /:youngId/process     -> validate, reject or put in waiting list the young
+ *   POST   /:youngId/remind      -> remind young if there are still SENT requests
+ *   POST   /:youngId/remind-cni  -> remind parent1 for Invalid CNI honor certificate
  */
 
 const express = require("express");
@@ -19,6 +19,7 @@ const passport = require("passport");
 const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
+const config = require("../config");
 
 router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -175,6 +176,30 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
+  if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
+
+  const young = await YoungModel.findById(youngId);
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  try {
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

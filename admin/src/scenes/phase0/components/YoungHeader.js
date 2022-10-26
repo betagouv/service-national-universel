@@ -21,11 +21,13 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import IconChangementCohorte from "../../../assets/IconChangementCohorte";
 import Chevron from "../../../components/Chevron";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import { useHistory } from "react-router-dom";
 
 export default function YoungHeader({ young, tab, onChange }) {
   const user = useSelector((state) => state.Auth.user);
-  const [notesCount, setNotesCount] = useState(0); // TODO: pour l'instant on ne sait pas ce que c'est ???
+  // const [notesCount, setNotesCount] = useState(0); // TODO: pour l'instant c'est caché
   const [confirmModal, setConfirmModal] = useState({ isOpen: false });
+  const history = useHistory();
 
   function onClickDelete() {
     setConfirmModal({
@@ -77,9 +79,9 @@ export default function YoungHeader({ young, tab, onChange }) {
               Notifications
             </Tab>
           ) : null}
-          <Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
+          {/*<Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
             ({notesCount}) Notes internes
-          </Tab>
+          </Tab>*/}
         </TabList>
       </div>
       <div className="ml-[30px]">
