@@ -59,6 +59,7 @@ export default function VolontairePhase0View({ young, onChange }) {
   }
 
   async function onCorrectionRequestChange(fieldName, message, reason) {
+    console.log("cor change", fieldName, message, reason);
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
@@ -81,8 +82,8 @@ export default function VolontairePhase0View({ young, onChange }) {
           }
           setProcessing(false);
         }
-        setCurrentCorrectionRequestField("");
       }
+      setCurrentCorrectionRequestField("");
     } else {
       // change request
       const reqIdx = requests.findIndex((req) => {
@@ -600,21 +601,48 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           />
         </div>
         <div className="mt-[32px]">
-          <FieldsGroup
-            name="address"
-            mode="correction"
-            title="Adresse"
-            noflex
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "address")}
-            onCorrectionRequestChange={onCorrectionRequestChange}>
-            <Field name="address" label="Adresse" value={young.address} mode="correction" className="mb-[16px]" />
-            <Field name="zip" label="Code postal" value={young.zip} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-            <Field name="city" label="Ville" value={young.city} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-            <Field name="department" label="Département" value={young.department} mode="correction" className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-            <Field name="region" label="Région" value={young.region} mode="correction" className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block" />
-          </FieldsGroup>
+          <div className="mt-[32px]">
+            <MiniTitle>Adresse</MiniTitle>
+            <Field
+              name="address"
+              label="Adresse"
+              value={young.address}
+              mode="correction"
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "address")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field
+                name="zip"
+                label="Code postal"
+                value={young.zip}
+                mode="correction"
+                className="mr-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "zip")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+              />
+              <Field
+                name="city"
+                label="Ville"
+                value={young.city}
+                mode="correction"
+                className="ml-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "city")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+              />
+            </div>
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field name="department" label="Département" value={young.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
+              <Field name="region" label="Région" value={young.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
+            </div>
+          </div>
         </div>
       </div>
     </Section>
@@ -703,7 +731,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             <FieldSituationsParticulieres
               name="specificSituations"
               young={young}
-              mode="correction"
+              mode="readonly"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, "specificSituations")}
@@ -714,7 +742,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 name="specificAmenagmentType"
                 label="Nature de l'aménagement spécifique"
                 value={young.specificAmenagmentType}
-                mode="correction"
+                mode="readonly"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
