@@ -151,26 +151,24 @@ export default function StepEligibilite() {
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Impossible de vérifier votre éligibilité" });
-        setLoading(false);
-      }
+      if (!res.ok) throw new Error(translate(res.code));
 
       const cohorts = res.data.length > 0 ? res.data.filter((e) => e?.goalReached === false) : null;
 
       if (res.data.msg || !cohorts) {
-        const res = await api.put("/young/inscription2023/noneligible");
-        if (!res.ok) {
-          capture(res.code);
-          setLoading(false);
-        }
+        let res = await api.put("/young/inscription2023/noneligible");
+        if (!res.ok) throw new Error(translate(res.code));
+
+        res = await api.put("/young/inscription2023/eligibilite", updates);
+        if (!res.ok) throw new Error(translate(res.code));
+
         dispatch(setYoung(res.data));
         return history.push("/noneligible");
       }
 
       updates.sessions = cohorts;
     } catch (e) {
+      setLoading(false);
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
