@@ -282,7 +282,7 @@ export default function Consentement({ step, parentId }) {
       body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
     }
 
-    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal reinscription - Consentement valide");
+    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
     else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
 
     try {

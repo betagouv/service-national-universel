@@ -117,7 +117,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase1/CTA reinscription - eligibilite");
+    plausibleEvent("Phase0/CTA reinscription - eligibilite");
 
     const updates = {
       grade: data.scolarity,
