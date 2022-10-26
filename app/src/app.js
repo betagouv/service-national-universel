@@ -105,8 +105,8 @@ export default function App() {
             <SentryRoute path="/validate-contract" component={Contract} />
             <SentryRoute path="/inscription2023" component={Inscription2023} />
             {/* @todo: clean this */}
-            {environment !== "production" ? <SentryRoute path="/reinscription" component={ReInscription} /> : null}
             {environment !== "production" ? <SentryRoute path="/noneligible" component={NonEligible} /> : null}
+            <SentryRoute path="/reinscription" component={ReInscription} />
             <SentryRoute path="/preinscription" component={PreInscription} />
             <SentryRoute path="/auth" component={AuthV2} />
             <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :

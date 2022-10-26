@@ -107,6 +107,7 @@ async function process(patch, count, total) {
     }
   } catch (e) {
     capture(`Couldn't create patch for patch id : ${patch._id}`, JSON.stringify(e));
+    throw e;
   }
 }
 

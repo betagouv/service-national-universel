@@ -2,21 +2,27 @@ import { MiniTitle } from "./commons";
 import Bin from "../../../assets/Bin";
 import React, { useEffect, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
+import dayjs from "dayjs";
 
 export default function CorrectionRequest({ name, label, correctionRequest, onChangeRequest, reasons, messagePlaceholder }) {
   const [requestText, setRequestText] = useState("");
   const [requestReason, setRequestReason] = useState("");
   const [reasonOptions, setReasonOptions] = useState([]);
+  const [lastDate, setLastDate] = useState("");
 
   useEffect(() => {
-    console.log("correction request: ", correctionRequest);
     if (correctionRequest ? correctionRequest.status !== "CANCELED" : false) {
-      console.log("set request reason : ", correctionRequest.reason);
       setRequestText(correctionRequest.message);
       setRequestReason(correctionRequest.reason && correctionRequest.reason !== "" ? correctionRequest.reason : "");
+      setLastDate(
+        dayjs(correctionRequest.remindedAt ? correctionRequest.remindedAt : correctionRequest.sentAt)
+          .locale("fr")
+          .format("DD/MM/YYYY"),
+      );
     } else {
       setRequestText("");
       setRequestReason("");
+      setLastDate("");
     }
   }, [correctionRequest]);
 
@@ -50,7 +56,6 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
     let newText = requestText;
     if (reasons) {
       const choosenReason = reasons.find((r) => r.value === event.target.value);
-      console.log("choosen reason : ", choosenReason);
       if (requestText === "" && choosenReason && choosenReason.defaultMessage) {
         newText = choosenReason.defaultMessage;
       }
@@ -64,7 +69,9 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
 
   return (
     <div className="p-[24px] bg-[#F9FAFB] rounded-[7px] my-[16px]">
-      <MiniTitle>Demander une correction - {label}</MiniTitle>
+      <MiniTitle>
+        {!correctionRequest || correctionRequest.status === "PENDING" ? "Demander une correction" : `Correction demandée le ${lastDate}`} - {label}
+      </MiniTitle>
       {reasons && reasons.length > 0 && (
         <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
           <select value={requestReason} onChange={changeReason} className="grow p-[15px] bg-[transparent] appearance-none">
@@ -82,8 +89,7 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
       />
       <div className="text-right mt-[16px]">
         <button className="text-[12px] text-[#F87171] ml-[6px] flex items-center" onClick={deleteRequest}>
-          <Bin fill="#F87171" />
-          Supprimer la demande
+          <Bin fill="#F87171" className="mr-[6px]" /> Supprimer la demande
         </button>
       </div>
     </div>

@@ -103,7 +103,7 @@ export default function StepSejour() {
           }
           dispatch(setYoung(data));
 
-          plausibleEvent(session.event);
+          plausibleEvent(session.event.replace("inscription", "reinscription"));
           history.push("/reinscription/consentement");
         }}>
         <div>
