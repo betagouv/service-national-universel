@@ -601,49 +601,111 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           />
         </div>
         <div className="mt-[32px]">
-          <div className="mt-[32px]">
-            <MiniTitle>Adresse</MiniTitle>
+          <MiniTitle>Adresse</MiniTitle>
+          <Field
+            name="address"
+            label="Adresse"
+            value={young.address}
+            mode="correction"
+            className="mb-[16px]"
+            onStartRequest={onStartRequest}
+            currentRequest={currentRequest}
+            correctionRequest={getCorrectionRequest(requests, "address")}
+            onCorrectionRequestChange={onCorrectionRequestChange}
+          />
+          <div className="mb-[16px] flex items-start justify-between">
             <Field
-              name="address"
-              label="Adresse"
-              value={young.address}
+              name="zip"
+              label="Code postal"
+              value={young.zip}
+              mode="correction"
+              className="mr-[8px] flex-[1_1_50%]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "zip")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+            <Field
+              name="city"
+              label="Ville"
+              value={young.city}
+              mode="correction"
+              className="ml-[8px] flex-[1_1_50%]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "city")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+          </div>
+          {young.country && (
+            <Field
+              name="country"
+              label="Pays"
+              value={young.country}
               mode="correction"
               className="mb-[16px]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "address")}
+              correctionRequest={getCorrectionRequest(requests, "country")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
+          )}
+          <div className="mb-[16px] flex items-start justify-between">
+            <Field name="department" label="Département" value={young.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
+            <Field name="region" label="Région" value={young.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
+          </div>
+        </div>
+        {young.foreignAddress && (
+          <div className="mt-[32px]">
+            <MiniTitle>Adresse à l&apos;étranger</MiniTitle>
+            <Field
+              name="address"
+              label="Adresse"
+              value={young.foreignAddress}
+              mode="correction"
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "foreignAddress")}
               onCorrectionRequestChange={onCorrectionRequestChange}
             />
             <div className="mb-[16px] flex items-start justify-between">
               <Field
                 name="zip"
                 label="Code postal"
-                value={young.zip}
+                value={young.foreignZip}
                 mode="correction"
                 className="mr-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "zip")}
+                correctionRequest={getCorrectionRequest(requests, "foreignZip")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
               />
               <Field
                 name="city"
                 label="Ville"
-                value={young.city}
+                value={young.foreignCity}
                 mode="correction"
                 className="ml-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "city")}
+                correctionRequest={getCorrectionRequest(requests, "foreignCity")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
               />
             </div>
-            <div className="mb-[16px] flex items-start justify-between">
-              <Field name="department" label="Département" value={young.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
-              <Field name="region" label="Région" value={young.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
-            </div>
+            <Field
+              name="country"
+              label="Pays"
+              value={young.foreignCountry}
+              mode="correction"
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "foreignCountry")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+            />
           </div>
-        </div>
+        )}
       </div>
     </Section>
   );
