@@ -226,7 +226,7 @@ function sectionsData(young) {
     titleAddress.push({ separator: true, subtitle: "Adresse de l'hébergeur" });
 
     foreignAddress.push(
-      { separator: true, subtitle: "Adresse à l&apos;étranger" },
+      { separator: true, subtitle: "Adresse à l'étranger" },
       { label: "Adresse", value: young.foreignAddress },
       { label: "Code postal", value: young.foreignZip },
       { label: "Ville", value: young.foreignCity },
@@ -235,25 +235,37 @@ function sectionsData(young) {
   }
 
   // --- situation
-  let situation = [
-    { separator: young.status === "REINSCRIPTION" ? false : true, label: young.schooled === "true" ? "Situation scolaire" : "Situation", value: translate(young.situation) },
-  ];
-  if (young.schooled === "true") {
-    situation.push(
-      { label: "Pays de l'établissement", value: young.schoolCountry },
-      { label: "Ville de l'établissement", value: young.schoolCity },
-      { label: "Nom de l'établissement", value: young.schoolName },
-    );
-  }
-  if (young.status === "REINSCRIPTION" && young.schooled === "false") {
-    situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
-  }
-  // --- situations particulières
-  const specials = specialSituations(young);
-  if (specials.length > 0) {
-    situation = [...situation, { separator: true, subtitle: "Situation particulière" }, ...specials];
+  let situation = [];
+  if (young.status === "REINSCRIPTION") {
+    // situation.push({ separator: false });
+    if (young.schooled === "true") {
+      situation.push(
+        { label: "Pays de l'établissement", value: young.schoolCountry },
+        { label: "Ville de l'établissement", value: young.schoolCity },
+        { label: "Nom de l'établissement", value: young.schoolName },
+      );
+    } else {
+      situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
+    }
   } else {
-    situation.push({ label: "Situation particulière", value: "Non" });
+    situation.push({ separator: true, subtitle: "Situation" });
+    if (young.schooled === "true") {
+      situation.push(
+        { label: "Situation scolaire", value: translate(young.situation) },
+        { label: "Pays de l'établissement", value: young.schoolCountry },
+        { label: "Ville de l'établissement", value: young.schoolCity },
+        { label: "Nom de l'établissement", value: young.schoolName },
+      );
+    } else {
+      situation.push({ label: "Situation", value: translate(young.situation) }, { label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
+    }
+    // --- situations particulières
+    const specials = specialSituations(young);
+    if (specials.length > 0) {
+      situation = [...situation, { separator: true, subtitle: "Situation particulière" }, ...specials];
+    } else {
+      situation.push({ label: "Situation particulière", value: "Non" });
+    }
   }
 
   // --- parent 2
@@ -289,7 +301,7 @@ function sectionsData(young) {
       title: "Son profil",
       fields:
         young.status === "REINSCRIPTION"
-          ? [...foreignAddress, ...situation]
+          ? situation
           : [
               { label: "Pays de naissance", value: young.birthCountry },
               { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },

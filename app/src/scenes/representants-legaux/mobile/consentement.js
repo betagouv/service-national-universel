@@ -61,7 +61,7 @@ export default function Consentement({ step, parentId }) {
       }
 
       let address;
-      if (young[`parent${parentId}OwnAddress`]) {
+      if (young[`parent${parentId}OwnAddress`] === "true") {
         address = {
           address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
           addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
