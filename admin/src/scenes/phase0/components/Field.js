@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectionRequest from "./CorrectionRequest";
+import CorrectedRequest from "./CorrectedRequest";
 
 /**
  *
@@ -20,11 +21,11 @@ export default function Field({ group = null, name, label, value, mode, classNam
   const [requestButtonClass, setRequestButtonClass] = useState("");
 
   useEffect(() => {
-    setOpened(currentRequest === name);
+    setOpened(name && currentRequest === name);
   }, [currentRequest]);
 
   useEffect(() => {
-    setHasValidRequest(correctionRequest ? correctionRequest.status !== "CANCELED" : false);
+    setHasValidRequest(correctionRequest ? correctionRequest.status === "SENT" || correctionRequest.status === "REMINDED" : false);
   }, [correctionRequest]);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function Field({ group = null, name, label, value, mode, classNam
         key={name}
         onMouseEnter={() => mouseOver(true)}
         onMouseLeave={() => mouseOver(false)}>
-        <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>
+        {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
         <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{value}</div>
         {mode === "correction" && (
           <div className={requestButtonClass} onClick={startRequest}>
@@ -69,6 +70,7 @@ export default function Field({ group = null, name, label, value, mode, classNam
           </div>
         )}
       </div>
+      {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} />}
       {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
     </div>
   );

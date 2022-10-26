@@ -59,7 +59,6 @@ export default function VolontairePhase0View({ young, onChange }) {
   }
 
   async function onCorrectionRequestChange(fieldName, message, reason) {
-    console.log("cor change", fieldName, message, reason);
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
@@ -205,7 +204,7 @@ export default function VolontairePhase0View({ young, onChange }) {
       {footerMode === "PENDING" && (
         <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
       )}
-      {footerMode === "WAITING" && <FooterSent requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
+      {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
       {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
     </>
   );
@@ -257,7 +256,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   );
 }
 
-function FooterSent({ requests, reminding, onRemindRequests }) {
+function FooterSent({ young, requests, reminding, onRemindRequests }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
 
   useEffect(() => {
@@ -295,7 +294,7 @@ function FooterSent({ requests, reminding, onRemindRequests }) {
       </div>
       <div>
         <BorderButton spinner={reminding} onClick={onRemindRequests}>
-          Relancere le/la volontaire
+          Relancer {young.gender === "female" ? "la" : "le"} volontaire
         </BorderButton>
       </div>
     </div>
