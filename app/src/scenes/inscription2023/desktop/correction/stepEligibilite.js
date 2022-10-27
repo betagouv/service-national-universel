@@ -171,7 +171,7 @@ export default function StepEligibilite() {
         const res = await api.put("/young/inscription2023/eligibilite", updates);
         if (!res.ok) throw new Error(translate(res.code));
         toastr.success("La correction a été prise en compte");
-        history.push("/home");
+        history.push("/");
       } else {
         setModal({ data: updates, isOpen: true, onValidation });
       }
@@ -214,7 +214,7 @@ export default function StepEligibilite() {
             <div className="flex flex-col flex-start">
               <div className="flex items-center">
                 <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-                <div className="flex items-center">
+                <div className="flex items-center backdrop-opacity-100">
                   <span className="ml-4 mr-2 text-[#929292]">Je suis de nationalité française</span>
                   <IconFrance />
                 </div>

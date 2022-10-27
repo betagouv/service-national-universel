@@ -174,7 +174,7 @@ export default function StepEligibilite() {
         const res = await api.put("/young/inscription2023/eligibilite", updates);
         if (!res.ok) throw new Error(translate(res.code));
         toastr.success("La correction a été prise en compte");
-        history.push("/home");
+        history.push("/");
       } else {
         setModal({ data: updates, isOpen: true, onValidation });
       }
@@ -194,7 +194,7 @@ export default function StepEligibilite() {
       if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
       toastr.success("La correction a été prise en compte");
-      history.push("/home");
+      history.push("/");
     } catch (e) {
       setLoading(false);
       capture(e);
