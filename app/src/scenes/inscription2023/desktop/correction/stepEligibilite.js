@@ -191,7 +191,7 @@ export default function StepEligibilite() {
       if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
       toastr.success("La correction a été prise en compte");
-      history.push("/home");
+      history.push("/");
     } catch (e) {
       setLoading(false);
       capture(e);
