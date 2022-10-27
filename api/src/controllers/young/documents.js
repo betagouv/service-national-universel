@@ -305,6 +305,10 @@ router.post(
         // Add record to young
 
         young.files[key].push(newFile);
+        if (key === "cniFiles") {
+          young.latestCNIFileExpirationDate = body.expirationDate;
+          young.latestCNIFileCategory = body.category;
+        }
       }
 
       // Save young with new records
