@@ -167,13 +167,18 @@ export default function StepEligibilite() {
       }
 
       updates.sessions = cohorts;
+
+      if (cohorts.some((c) => young.cohort === c.name)) {
+        const res = await api.put("/young/inscription2023/eligibilite", updates);
+        if (!res.ok) throw new Error(translate(res.code));
+      } else {
+        setModal({ data: updates, isOpen: true, onValidation });
+      }
     } catch (e) {
       setLoading(false);
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
-
-    setModal({ data: updates, isOpen: true, onValidation });
   };
 
   const onValidation = async (updates, cohort) => {
@@ -185,7 +190,7 @@ export default function StepEligibilite() {
       if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
       toastr.success("Votre séjour a bien été enregistré");
-      return history.push("/home");
+      history.push("/home");
     } catch (e) {
       setLoading(false);
       capture(e);
