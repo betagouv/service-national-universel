@@ -25,10 +25,8 @@ export default function StepUpload() {
   const [error, setError] = useState({});
   const [files, setFiles] = useState({});
   const [date, setDate] = useState(new Date(young?.latestCNIFileExpirationDate));
-  const correctionsFile = young?.correctionRequests.filter((e) => e.field === "cniFile" && ["SENT", "REMINDED"].includes(e.status));
-  console.log("🚀 ~ file: stepUpload.js ~ line 29 ~ StepUpload ~ correctionsFile", correctionsFile);
-  const correctionsDate = young?.correctionRequests.filter((e) => e.field === "cniExpirationDate" && ["SENT", "REMINDED"].includes(e.status));
-  console.log("🚀 ~ file: stepUpload.js ~ line 31 ~ StepUpload ~ correctionsDate", correctionsDate);
+  const correctionsFile = young?.correctionRequests.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
+  const correctionsDate = young?.correctionRequests.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniExpirationDate");
 
   async function onSubmit() {
     for (const file of files) {
@@ -58,7 +56,6 @@ export default function StepUpload() {
 
   async function onCorrect() {
     setLoading(true);
-
     try {
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
@@ -111,8 +108,7 @@ export default function StepUpload() {
       subTitle={ID[category].subTitle}
       onClickPrevious={() => history.push("/inscription2023/documents")}
       onSubmit={onSubmit}
-      // modeCorrection={correctionsFile.length > 0 || correctionsDate.length > 0}
-      modeCorrection={true}
+      modeCorrection={correctionsFile.length > 0 || correctionsDate.length > 0}
       onCorrection={onCorrect}
       disabled={!date || loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
