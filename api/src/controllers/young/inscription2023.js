@@ -65,7 +65,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     const isRequired = type !== "save";
 
-    const { error, value } = Joi.object({
+    const coordonneeSchema = {
       gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
       frenchNationality: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       birthCountry: needRequired(Joi.string().trim(), isRequired),
@@ -146,15 +146,22 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
+    };
+
+    let { error, value } = Joi.object(coordonneeSchema).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+
+    if (type === "correction") {
+      const keyList = Object.keys(coordonneeSchema);
+      value = { ...value, ...validateCorrectionRequest(young, keyList) };
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       ...value,
@@ -295,10 +302,8 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
 
     if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
-      // If no ID proof has a valid date, notify parent 1.
-      const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
-
-      if (notifyExpirationDate) {
+      // If latest ID proof has an invalid date, notify parent 1.
+      if (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]) {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
           emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
           params: {
@@ -384,8 +389,8 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // If no ID proof has a valid date, notify parent 1.
-    const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
+    // If latest ID proof has an invalid date, notify parent 1.
+    const notifyExpirationDate = young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
 

@@ -24,7 +24,7 @@ import RadioButton from "../components/RadioButton";
 const parentsStatus = [
   { label: "Mère", value: "mother" },
   { label: "Père", value: "father" },
-  { label: "Représentant(e) légal(e)", value: "representant" },
+  { label: "Autre", value: "representant" },
 ];
 
 export default function StepRepresentants() {

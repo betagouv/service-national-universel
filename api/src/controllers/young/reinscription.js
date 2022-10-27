@@ -178,10 +178,8 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
 
     if (!young?.parent1Inscription2023Token) young.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (!young?.parent2Inscription2023Token && young?.parent2Email) young.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
-    // If no ID proof has a valid date, notify parent 1.
-    const notifyExpirationDate = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
-
-    if (notifyExpirationDate) {
+    // If latest ID proof has an invalid date, notify parent 1.
+    if (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
