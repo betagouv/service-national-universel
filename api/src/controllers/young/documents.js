@@ -498,17 +498,13 @@ router.put("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
 
     // Get data & check permissions
     const young = await YoungObject.findById(id);
-    console.log("🚀 ~ file: documents.js ~ line 496 ~ young", young.files);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    // Save
     let file = young.files[key].id(fileId);
-    console.log("🚀 ~ file: documents.js ~ line 501 ~ file", file);
-    file.category = category;
-    file.expirationDate = expirationDate;
-    console.log("🚀 ~ file: documents.js ~ line 501 ~ file", file);
+    file.set({ category, expirationDate });
     await young.save({ fromUser: req.user });
-    console.log("🚀 ~ file: documents.js ~ line 506 ~ young", young.files);
     return res.status(200).send({ young: serializeYoung(young, req.user), data: young.files[key], ok: true });
   } catch (e) {
     capture(e);

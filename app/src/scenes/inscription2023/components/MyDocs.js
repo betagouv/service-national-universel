@@ -32,9 +32,9 @@ export default function MyDocs({ young, category = "" }) {
               {translate(e.category)} - Expire le {formatDateFR(e.expirationDate)}
             </p>
           </div>
-          <div className="text-red-500 cursor-pointer hover:text-red-400 flex">
+          <div className="text-blue-600 cursor-pointer hover:text-blue-400 flex">
             <div className="mt-1 mr-1">
-              <Bin fill="red" />
+              <Bin fill="blue" />
             </div>
             <div className="text-sm font-medium" onClick={() => deleteFile(e._id)}>
               Supprimer

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
@@ -11,30 +11,14 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import MyDocs from "../components/MyDocs";
-import { getCorrectionByStep } from "../../../utils/navigation";
 import ErrorMessage from "../components/ErrorMessage";
 
 export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const { step } = useParams();
   const [error, setError] = useState({});
-  // const [corrections, setCorrections] = useState({});
   const corrections = young?.correctionRequests.filter((e) => e.field === "cniFile" && ["SENT", "REMINDED"].includes(e.status));
-  console.log("🚀 ~ file: stepDocuments.js ~ line 23 ~ StepDocuments ~ corrections", corrections);
-
-  // useEffect(() => {
-  //   if (!young) return;
-  //   if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
-  //     const corrections = getCorrectionByStep(young, step);
-  //     if (!Object.keys(corrections).length) return history.push("/");
-  //     else setCorrections(corrections);
-  //   } else {
-  //     history.push("/");
-  //   }
-  //   // setData({ email: young.email, emailConfirm: young.email, firstName: young.firstName, lastName: young.lastName });
-  // }, [young]);
 
   async function onSubmit() {
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
@@ -45,40 +29,6 @@ export default function StepDocuments() {
     }
     dispatch(setYoung(responseData));
     history.push("/inscription2023/confirm");
-  }
-
-  async function onCorrect() {
-    history.push("/");
-
-    // let errors = {};
-    // for (const key of keyList) {
-    //   if (data[key] === undefined || data[key] === "") {
-    //     errors[key] = "Ce champ est obligatoire";
-    //   }
-    // }
-    // errors = { ...errors, ...validate() };
-
-    // setError(errors);
-    // if (!Object.keys(errors).length) {
-    //   setLoading(true);
-    //   try {
-    //     const { ok, code, data: responseData } = await API.put(`/young/inscription2023/profil`, data);
-    //     if (!ok) {
-    //       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-    //       setLoading(false);
-    //       return;
-    //     }
-    //     dispatch(setYoung(responseData));
-    //     history.push("/");
-    //   } catch (e) {
-    //     capture(e);
-    //     setError({
-    //       text: `Une erreur s'est produite`,
-    //       subText: e?.code ? translate(e.code) : "",
-    //     });
-    //   }
-    //   setLoading(false);
-    // }
   }
 
   const docs = [
@@ -105,9 +55,7 @@ export default function StepDocuments() {
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
       onClickPrevious={() => history.push("/inscription2023/representants")}
       onSubmit={onSubmit}
-      onCorrection={onCorrect}
-      disabled={!young?.files.cniFiles.length}
-      modeCorrection={corrections.length > 0}
+      disabled={!young?.files.cniFiles.length || corrections.length > 0}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&
