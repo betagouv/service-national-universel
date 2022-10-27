@@ -36,8 +36,8 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
       setCniButtons(
         young.files.cniFiles.map((file) => (
           <div key={file._id} className="flex items-center justify-end text-[12px] mt-[8px]">
-            {file.name}
-            <DownloadButton className="ml-[8px]" onClick={() => downloadCni(file)} />
+            <div className="text-right">{file.name}</div>
+            <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
           </div>
         )),
       );
