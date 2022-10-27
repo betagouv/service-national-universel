@@ -1,3 +1,19 @@
+# [1.155.0](https://github.com/betagouv/service-national-universel/compare/v1.154.0...v1.155.0) (2022-10-26)
+
+
+### Bug Fixes
+
+* **admin/api:** wording contrat ([844b42b](https://github.com/betagouv/service-national-universel/commit/844b42b869b0ac23a33d03729bf7829b9103114a))
+* **app:** Fix old footer rerender on particular pages ([69c8847](https://github.com/betagouv/service-national-universel/commit/69c8847e8c6e9f281c6a3d3ec0837d974e277c5b))
+* **app:** hide situation infos for RL1 ([#1971](https://github.com/betagouv/service-national-universel/issues/1971)) ([d621aa1](https://github.com/betagouv/service-national-universel/commit/d621aa1092687ce429cfe0ffe971e9f2a0061fbc))
+* **app:** radio button style ([#1972](https://github.com/betagouv/service-national-universel/issues/1972)) ([65b8351](https://github.com/betagouv/service-national-universel/commit/65b8351a8f00ba85e5701941da91a1bdf77ad302))
+* **app:** reinscription home ([94a8e1a](https://github.com/betagouv/service-national-universel/commit/94a8e1a637d9dc2d41f0b9d33f52121100827649))
+
+
+### Features
+
+* **app:** open réinscriptions ([#1974](https://github.com/betagouv/service-national-universel/issues/1974)) ([4915e93](https://github.com/betagouv/service-national-universel/commit/4915e934a5d958fc91868f64a8b4618522dfb196))
+
 # [1.154.0](https://github.com/betagouv/service-national-universel/compare/v1.153.0...v1.154.0) (2022-10-25)
 
 
