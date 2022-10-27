@@ -1,58 +1,23 @@
-require("../mongo");
+require("../../mongo");
 
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
 const mongoose = require("mongoose");
 const { isInRuralArea, getAge } = require("snu-lib");
 
-const { capture } = require("../sentry");
-const YoungModel = require("../models/young");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../config.js");
-const { getDateString, getMinusDate } = require("./utils");
+const { capture } = require("../../sentry");
+const slack = require("../../slack");
+const YoungModel = require("../../models/young");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
 
 let token;
-
-class HTTPResponseError extends Error {
-  constructor(response, ...args) {
-    super(`HTTP Error Response: ${response.status} ${response.statusText}`, ...args);
-    this.response = response;
-  }
-}
-
-const checkResponseStatus = (response) => {
-  if (response.ok) {
-    // response.status >= 200 && response.status < 300
-    return response;
-  } else {
-    throw new HTTPResponseError(response);
-  }
-};
-
-async function getAccessToken() {
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/auth/token`, {
-    method: "GET",
-    redirect: "follow",
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "User-Agent": "*",
-      "Content-Type": "application/json",
-      "x-api-key": API_ANALYTICS_API_KEY,
-    },
-  });
-
-  const data = await response.json();
-  if (data.ok == true && data.token) {
-    token = data.token;
-  } else {
-    throw new Error("Couldn't retrieve auth token");
-  }
-}
+const result = { operation: {} };
 
 async function process(patch, count, total) {
   try {
-    if (count % 100 === 0) console.log(count, "/", total);
-    // console.log("🎉 patch id :", patch._id.toString());
-
+    result.youngScanned = result.youngScanned + 1 || 1;
+    // if (count % 100 === 0) console.log(count, "/", total);
     const actualYoung = await YoungModel.findById(patch.ref.toString());
     if (!actualYoung) return;
     if (patch.ops.length > 0) {
@@ -68,34 +33,43 @@ async function process(patch, count, total) {
             //Inscription step
             case "inscriptionStep2023":
               eventName = "STEP_INSCRIPTION_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "reinscriptionStep2023":
               eventName = "STEP_REINSCRIPTION_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //General status
             case "status":
               eventName = "STATUS_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //SEJOUR status
             case "statusPhase1":
               eventName = "STATUS_PHASE1_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //MIG status
             case "statusPhase2":
               eventName = "STATUS_PHASE2_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "statusPhase3":
               eventName = "STATUS_PHASE3_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //Presence sejour
             case "cohesionStayPresence":
               eventName = "PRESENCE_ARRIVEE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "cohort":
               eventName = "COHORT_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "phase2NumberHoursDone":
               eventName = "HEURE_PHASE2_CHANGE";
+              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
           }
         }
@@ -106,13 +80,12 @@ async function process(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create patch for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(`Couldn't create young log for patch id : ${patch._id}`, JSON.stringify(e));
     throw e;
   }
 }
 
 async function createLog(patch, actualYoung, event, value) {
-  // console.log(`✅ Create new log for event ${event} with patch id :`, patch._id.toString());
   const youngInfos = await actualYoung.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let young = rebuildYoung(youngInfos);
 
@@ -160,36 +133,22 @@ const rebuildYoung = (youngInfos) => {
       young[operation] = op.value;
     }
   }
-  //console.log("✅ young rebuilt :", young);
   return young;
 };
 
-async function findAll(Model, where, cb) {
-  let count = 0;
-  //let process = true;
-  const total = await Model.countDocuments(where);
-  await Model.find(where)
-    .cursor()
-    .addCursorFlag("noCursorTimeout", true)
-    .eachAsync(async (doc) => {
-      count++;
-      //if (doc._doc._id.toString() === "625a947f8aa1df07eaaeb159") process = true;
-      //) {
-      await cb(doc._doc, count, total);
-    });
-}
-
 exports.handler = async () => {
   try {
-    await getAccessToken();
-
-    const todayDateString = getDateString(new Date());
-    const yesterdayDateString = getDateString(getMinusDate(1));
+    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
     const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
 
-    await findAll(young_patches, { date: { $gte: new Date(yesterdayDateString), $lt: new Date(todayDateString) } }, process);
+    await findAll(young_patches, mongooseFilterForDayBefore(), process);
+    slack.info({
+      title: "youngPatch",
+      text: JSON.stringify(result),
+    });
   } catch (e) {
     capture("Error during creation of young patch logs", JSON.stringify(e));
+    slack.error({ title: "youngPatch", text: JSON.stringify(e) });
   }
 };
