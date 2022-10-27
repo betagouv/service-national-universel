@@ -12,7 +12,6 @@ import API from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 
 export default function NonEligible() {
-  console.log("NonEligible");
   const young = useSelector((state) => state.Auth.young);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
