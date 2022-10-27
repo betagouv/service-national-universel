@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import validator from "validator";
 
@@ -30,6 +30,8 @@ import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
+import { YOUNG_STATUS } from "snu-lib";
+import { getCorrectionByStep } from "../../../utils/navigation";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -126,11 +128,13 @@ const defaultState = {
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
+  const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
+  const { step } = useParams();
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -215,6 +219,11 @@ export default function StepCoordonnees() {
         reducedMobilityAccess: young.reducedMobilityAccess || data.reducedMobilityAccess,
         handicapInSameDepartment: young.handicapInSameDepartment || data.handicapInSameDepartment,
       });
+    }
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
+      const corrections = getCorrectionByStep(young, step);
+      if (!Object.keys(corrections).length) return history.push("/");
+      else setCorrections(corrections);
     }
   }, [young]);
 
@@ -344,6 +353,69 @@ export default function StepCoordonnees() {
     setLoading(false);
   };
 
+  const onCorrection = async () => {
+    setLoading(true);
+    let errors = {};
+    const fieldToUpdate = [...commonFields];
+    const requiredFields = [...commonRequiredFields];
+
+    if (!isFrenchResident) {
+      fieldToUpdate.push(...foreignAddressFields);
+      requiredFields.push(...requiredFieldsForeigner);
+    }
+
+    if (addressVerified !== "true") {
+      errors.addressVerified = errorMessages.addressVerified;
+    }
+
+    if (moreInformation) {
+      fieldToUpdate.push(...moreInformationFields);
+      requiredFields.push(...requiredMoreInformationFields);
+    }
+
+    if (specificAmenagment === "true") {
+      fieldToUpdate.push("specificAmenagmentType");
+      requiredFields.push("specificAmenagmentType");
+    }
+
+    for (const key of requiredFields) {
+      if (data[key] === undefined || data[key] === "") {
+        errors[key] = "Ce champ est obligatoire";
+      }
+    }
+
+    errors = { ...errors, ...getErrors() };
+
+    setErrors(errors);
+
+    if (!Object.keys(errors).length) {
+      const updates = {};
+      fieldToUpdate.forEach((field) => {
+        updates[field] = data[field];
+      });
+
+      updates.country = FRANCE;
+      updates.moreInformation = moreInformation.toString();
+
+      try {
+        const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/correction", updates);
+        if (!ok) {
+          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(responseData));
+        history.push("/");
+      } catch (e) {
+        capture(e);
+        toastr.error("Une erreur s'est produite :", translate(e.code));
+      }
+    } else {
+      toastr.error("Merci de corriger les erreurs", "");
+    }
+    setLoading(false);
+  };
+
   const onSave = async () => {
     setLoading(true);
 
@@ -404,9 +476,20 @@ export default function StepCoordonnees() {
       title="Mon profil volontaire"
       onSave={onSave}
       onSubmit={onSubmit}
+      onClickPrevious={() => (young.status === YOUNG_STATUS.WAITING_CORRECTION ? history.push("/") : null)}
+      modeCorrection={young.status === YOUNG_STATUS.WAITING_CORRECTION}
+      childrenContinueButton={young.status === YOUNG_STATUS.WAITING_CORRECTION ? "Corriger" : "Continuer"}
+      onCorrection={onCorrection}
       disabled={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
-      <RadioButton label="Je suis né(e)..." options={frenchNationalityOptions} onChange={setFrenchNationality} value={frenchNationality} />
+      <RadioButton
+        label="Je suis né(e)..."
+        options={frenchNationalityOptions}
+        onChange={setFrenchNationality}
+        value={frenchNationality}
+        error={errors.frenchNationality}
+        correction={corrections?.frenchNationality}
+      />
       {!isFrench && (
         <SearchableSelect
           label="Pays de naissance"
@@ -415,15 +498,38 @@ export default function StepCoordonnees() {
           onChange={updateData("birthCountry")}
           placeholder="Sélectionnez un pays"
           error={errors.birthCountry}
+          correction={corrections.birthCountry}
         />
       )}
       <div className="flex">
-        <Input className="flex-1 mr-3" value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} />
-        <Input className="flex-1 ml-3" value={birthCity} label="Commune de naissance" onChange={updateData("birthCity")} error={errors.birthCity} />
+        <Input
+          className="flex-1 mr-3"
+          value={birthCityZip}
+          label="Code postal de naissance"
+          onChange={updateData("birthCityZip")}
+          error={errors.birthCityZip}
+          correction={corrections.birthCityZip}
+        />
+
+        <Input
+          className="flex-1 ml-3"
+          value={birthCity}
+          label="Commune de naissance"
+          onChange={updateData("birthCity")}
+          error={errors.birthCity}
+          correction={corrections.birthCity}
+        />
       </div>
-      <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} />
-      <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} />
-      <RadioButton label="Je réside..." options={frenchNationalityOptions} onChange={setLivesInFrance} value={livesInFrance} />
+      <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} correction={corrections.gender} error={errors?.gender} />
+      <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} />
+      <RadioButton
+        label="Je réside..."
+        options={frenchNationalityOptions}
+        onChange={setLivesInFrance}
+        value={livesInFrance}
+        correction={corrections.livesInFrance}
+        error={errors?.livesInFrance}
+      />
       {!isFrenchResident && (
         <SearchableSelect
           label="Pays de résidence"
@@ -432,6 +538,7 @@ export default function StepCoordonnees() {
           onChange={updateData("foreignCountry")}
           placeholder="Sélectionnez un pays"
           error={errors.foreignCountry}
+          correction={corrections.foreignCountry}
         />
       )}
       <Input
@@ -439,6 +546,7 @@ export default function StepCoordonnees() {
         label="Adresse de résidence"
         onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
         error={isFrenchResident ? errors.address : errors.foreignAddress}
+        correction={isFrenchResident ? corrections.address : corrections.foreignAddress}
       />
       <div className="flex">
         <Input
@@ -447,6 +555,7 @@ export default function StepCoordonnees() {
           label="Code postal"
           onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
           error={isFrenchResident ? errors.zip : errors.foreignZip}
+          correction={isFrenchResident ? corrections.zip : corrections.foreignZip}
         />
         <Input
           className="flex-1 ml-3"
@@ -454,6 +563,7 @@ export default function StepCoordonnees() {
           label="Ville"
           onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
           error={isFrenchResident ? errors.city : errors.foreignCity}
+          correction={isFrenchResident ? corrections.city : corrections.foreignCity}
         />
       </div>
       {!isFrenchResident && (
@@ -471,8 +581,22 @@ export default function StepCoordonnees() {
             À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="flex">
-            <Input className="flex-1 mr-3" value={hostFirstName} label="Prénom de l’hébergeur" onChange={updateData("hostFirstName")} error={errors.hostFirstName} />
-            <Input className="flex-1 ml-3" value={hostLastName} label="Nom de l’hébergeur" onChange={updateData("hostLastName")} error={errors.hostLastName} />
+            <Input
+              className="flex-1 mr-3"
+              value={hostFirstName}
+              label="Prénom de l’hébergeur"
+              onChange={updateData("hostFirstName")}
+              error={errors.hostFirstName}
+              correction={corrections.hostFirstName}
+            />
+            <Input
+              className="flex-1 ml-3"
+              value={hostLastName}
+              label="Nom de l’hébergeur"
+              onChange={updateData("hostLastName")}
+              error={errors.hostLastName}
+              correction={corrections.hostLastName}
+            />
           </div>
           <Select
             options={hostRelationshipOptions}
@@ -480,11 +604,12 @@ export default function StepCoordonnees() {
             label="Précisez votre lien avec l’hébergeur"
             onChange={updateData("hostRelationship")}
             error={errors.hostRelationship}
+            correction={corrections.hostRelationship}
           />
-          <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address", false)} error={errors.address} />
+          <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address", false)} error={errors.address} correction={corrections.address} />
           <div className="flex">
-            <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} />
-            <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} />
+            <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} correction={corrections.zip} />
+            <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} correction={corrections.city} />
           </div>
         </>
       )}
@@ -508,11 +633,12 @@ export default function StepCoordonnees() {
         value={situation}
         onChange={updateData("situation")}
         error={errors.situation}
+        correction={corrections.situation}
       />
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="mt-0 text-[16px] font-bold">
-            Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d'un aménagement spécifique, ...)
+            Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)
           </h2>
           <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         </div>
