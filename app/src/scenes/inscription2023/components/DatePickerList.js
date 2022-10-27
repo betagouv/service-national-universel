@@ -27,7 +27,6 @@ export default function DatePickerList({ value, label, onChange, error = "", cla
         />
         <FiCalendar />
       </div>
-
       <ErrorMessage>{error}</ErrorMessage>
       <ErrorMessage>{correction}</ErrorMessage>
     </div>
