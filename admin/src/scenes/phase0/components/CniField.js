@@ -13,6 +13,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
   const [mouseIn, setMouseIn] = useState(false);
+  const [cniButtons, setCniButtons] = useState([]);
 
   useEffect(() => {
     setOpened(currentRequest === name);
@@ -24,24 +25,34 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
 
   useEffect(() => {
     setRequestButtonClass(
-      `items-center justify-center mr-[8px] w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
-        hasValidRequest ? "bg-[#F97316] flex" : "bg-[#FFEDD5]" + (mouseIn ? " flex" : " hidden")
+      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
+        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " + (mouseIn ? "visible" : "invisible")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);
 
-  async function downloadCni() {
+  useEffect(() => {
     if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
-      const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
-      try {
-        const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + lastCniFile._id);
-        const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
-        download(blob, result.fileName);
-      } catch (err) {
-        toastr.error("Impossible de télécharger la CNI. Veuillez essayer dans quelques instants.");
-      }
+      setCniButtons(
+        young.files.cniFiles.map((file) => (
+          <div key={file._id} className="flex items-center justify-end text-[12px] mt-[8px]">
+            {file.name}
+            <DownloadButton className="ml-[8px]" onClick={() => downloadCni(file)} />
+          </div>
+        )),
+      );
     } else {
-      toastr.error("Impossible de télécharger la CNI. Veuillez essayer dans quelques instants.");
+      setCniButtons(null);
+    }
+  }, [young]);
+
+  async function downloadCni(cniFile) {
+    try {
+      const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
+      const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
+      download(blob, result.fileName);
+    } catch (err) {
+      toastr.error("Impossible de télécharger la pièce. Veuillez essayer dans quelques instants.");
     }
   }
 
@@ -61,22 +72,24 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   return (
     <>
       <div
-        className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between ${className}`}
+        className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-start justify-between ${className}`}
         onMouseEnter={() => setMouseIn(true)}
         onMouseLeave={() => setMouseIn(false)}>
-        <div>
+        <div className="shrink-0">
           <Cni />
           <MiniTitle>Pièce d&apos;identité</MiniTitle>
         </div>
-        <div className="flex items-center">
-          {mode === "correction" && (
-            <div className={requestButtonClass} onClick={startRequest}>
-              <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
-            </div>
-          )}
-          <DownloadButton className="mr-[8px]" onClick={downloadCni} />
-          {/*TODO: à remettre en mode modification */}
-          {false && <MoreButton />}
+        <div className="grow">
+          <div className="flex items-center justify-end">
+            {mode === "correction" && (
+              <div className={requestButtonClass} onClick={startRequest}>
+                <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
+              </div>
+            )}
+            {/*TODO: à remettre en mode modification */}
+            {false && <MoreButton />}
+          </div>
+          <div className="mt-[16px]">{cniButtons}</div>
         </div>
       </div>
       {correctionRequest && correctionRequest.status === "CORRECTED" && (
