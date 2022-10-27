@@ -196,6 +196,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onStartRequest={onStartRequest}
           currentRequest={currentCorrectionRequestField}
           onCorrectionRequestChange={onCorrectionRequestChange}
+          onChange={onChange}
         />
         <SectionParents
           young={young}
@@ -207,7 +208,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
         />
         <SectionConsentements young={young} />
       </div>
-      {globalMode === "correction " && (
+      {globalMode === "correction" && (
         <>
           {footerMode === "PENDING" && (
             <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
@@ -445,7 +446,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode }) {
+function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange }) {
   let birthDay = "";
   let birthMonth = "";
   let birthYear = "";
@@ -472,6 +473,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
               onCorrectionRequestChange={onCorrectionRequestChange}
+              onChange={onChange}
             />
             <SectionIdentiteContact
               className="mt-[32px]"
@@ -501,6 +503,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
               onCorrectionRequestChange={onCorrectionRequestChange}
+              onChange={onChange}
             />
           </>
         )}
@@ -668,7 +671,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   );
 }
 
-function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className }) {
+function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
   let cniDay = "";
   let cniMonth = "";
   let cniYear = "";
@@ -691,6 +694,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "cniFile")}
         onCorrectionRequestChange={onCorrectionRequestChange}
+        onChange={onChange}
       />
 
       <FieldsGroup
