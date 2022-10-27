@@ -673,14 +673,11 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
   let cniMonth = "";
   let cniYear = "";
 
-  if (young && young.files && young.files.cniFiles && young.files.cniFiles.length > 0) {
-    const lastCniFile = young.files.cniFiles[young.files.cniFiles.length - 1];
-    if (lastCniFile.expirationDate) {
-      const date = dayjs(lastCniFile.expirationDate).locale("fr");
-      cniDay = date.date();
-      cniMonth = date.format("MMMM");
-      cniYear = date.year();
-    }
+  if (young.latestCNIFileExpirationDate) {
+    const date = dayjs(young.latestCNIFileExpirationDate).locale("fr");
+    cniDay = date.date();
+    cniMonth = date.format("MMMM");
+    cniYear = date.year();
   }
 
   return (
@@ -697,12 +694,12 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
       />
 
       <FieldsGroup
-        name="cniExpirationDate"
+        name="latestCNIFileExpirationDate"
         title="Date d’expiration de la pièce d’identité"
         mode={globalMode}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
-        correctionRequest={getCorrectionRequest(requests, "cniExpirationDate")}
+        correctionRequest={getCorrectionRequest(requests, "latestCNIFileExpirationDate")}
         onCorrectionRequestChange={onCorrectionRequestChange}>
         <Field name="cni_day" label="Jour" value={cniDay} className="mr-[14px] flex-[1_1_23%]" />
         <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
@@ -1164,7 +1161,7 @@ function getCorrectionRequest(requests, field) {
 }
 
 function HonorCertificate({ young }) {
-  const cniExpired = young?.files?.cniFiles?.length > 0 && !young?.files?.cniFiles?.some((f) => f.expirationDate > START_DATE_SESSION_PHASE1[young.cohort]);
+  const cniExpired = young?.latestCNIFileExpirationDate > START_DATE_SESSION_PHASE1[young.cohort];
 
   async function remind() {
     try {
