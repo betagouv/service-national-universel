@@ -179,42 +179,38 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     </>
   ) : (
     <>
-      <div className="form-group">
-        <SearchableSelect
-          label="Commune de l'établissement"
-          value={city}
-          options={cities.map((c) => ({ value: c, label: c }))}
-          onChange={(value) => {
-            setCity(value);
-            setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
-            onSelectSchool(null);
-          }}
-          placeholder="Sélectionnez une commune"
-          error={errors.city}
-        />
-        <ErrorMessage>{corrections?.schoolCity}</ErrorMessage>
-      </div>
-      <div className="form-group">
-        <CreatableSelect
-          label="Nom de l'établissement"
-          value={school && `${school.fullName} - ${school.adresse}`}
-          options={schools
-            .map((e) => `${e.fullName} - ${e.adresse}`)
-            .sort()
-            .map((c) => ({ value: c, label: c }))}
-          onChange={(value) => {
-            onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === value));
-          }}
-          placeholder="Sélectionnez un établissement"
-          onCreateOption={(value) => {
-            setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
-            onSelectSchool(null);
-            setManualFilling(true);
-          }}
-          error={errors.fullName}
-        />
-        <ErrorMessage>{corrections?.schoolName}</ErrorMessage>
-      </div>
+      <SearchableSelect
+        label="Commune de l'établissement"
+        value={city}
+        options={cities.map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          setCity(value);
+          setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
+          onSelectSchool(null);
+        }}
+        placeholder="Sélectionnez une commune"
+        error={errors.city}
+        correction={corrections?.schoolCity}
+      />
+      <CreatableSelect
+        label="Nom de l'établissement"
+        value={school && `${school.fullName} - ${school.adresse}`}
+        options={schools
+          .map((e) => `${e.fullName} - ${e.adresse}`)
+          .sort()
+          .map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === value));
+        }}
+        placeholder="Sélectionnez un établissement"
+        onCreateOption={(value) => {
+          setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
+          onSelectSchool(null);
+          setManualFilling(true);
+        }}
+        error={errors.fullName}
+        correction={corrections?.schoolName}
+      />
     </>
   );
 }

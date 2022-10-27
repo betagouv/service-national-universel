@@ -3,7 +3,7 @@ import ErrorMessage from "./ErrorMessage";
 
 export default function Input({ value, placeholder = "", label, onChange, type = "text", error = "", className = "", correction = "" }) {
   return (
-    <div className={`mt2 mb-4 ${className}`}>
+    <div className={`mt-2 mb-4 ${className}`}>
       <label className={`my-2 whitespace-nowrap ${correction || error ? "text-[#CE0500]" : "text-[#3A3A3A]"}`}>{label}</label>
       <input
         className={`flex justify-between items-center gap-3 w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] ${

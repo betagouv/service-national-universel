@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../../sentry";
 import { getDepartmentByZip, YOUNG_STATUS } from "snu-lib";
 import api from "../../../../services/api";
-import DatePickerList from "../../../preinscription/components/DatePickerList";
+import DatePickerList from "../../components/DatePickerList";
 import { setYoung } from "../../../../redux/auth/actions";
 import { translate } from "../../../../utils";
 
@@ -225,24 +225,23 @@ export default function StepEligibilite() {
           </div>
           {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
         </div>
-        <div className="form-group">
-          <Select
-            label="Niveau de scolarité"
-            value={data.scolarity}
-            options={optionsScolarite}
-            onChange={(value) => {
-              setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
-            }}
-            error={error.scolarity}
-            correction={corrections.grade}
-          />
-        </div>
-        <div className="flex flex-col flex-start my-4">
-          Date de naissance
-          <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: new Date(date) })} />
-          <ErrorMessage>{error.birthDate}</ErrorMessage>
-          <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
-        </div>
+        <Select
+          label="Niveau de scolarité"
+          value={data.scolarity}
+          options={optionsScolarite}
+          onChange={(value) => {
+            setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
+          }}
+          error={error.scolarity}
+          correction={corrections.grade}
+        />
+        <DatePickerList
+          label="Date de naissance"
+          value={data.birthDate}
+          onChange={(date) => setData({ ...data, birthDate: new Date(date) })}
+          error={error.birthDate}
+          correction={corrections.birthdateAt}
+        />
         {data.scolarity && (
           <>
             <div className="flex justify-between items-center">

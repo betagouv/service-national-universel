@@ -1,28 +1,27 @@
 import React, { useEffect } from "react";
+import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
+import validator from "validator";
+import IconFrance from "../../../../assets/IconFrance";
+import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
+import CheckBox from "../../../../components/inscription/checkbox";
 import Toggle from "../../../../components/inscription/toggle";
+import plausibleEvent from "../../../../services/plausible";
+import { getCorrectionByStep } from "../../../../utils/navigation";
+import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
+import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
-import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import { toastr } from "react-redux-toastr";
-import IconFrance from "../../../../assets/IconFrance";
-import validator from "validator";
-import plausibleEvent from "../../../../services/plausible";
-import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
-import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
-import CheckBox from "../../../../components/inscription/checkbox";
-import { getCorrectionByStep } from "../../../../utils/navigation";
 
 import { useDispatch, useSelector } from "react-redux";
-import { capture } from "../../../../sentry";
 import { getDepartmentByZip, YOUNG_STATUS } from "snu-lib";
-import api from "../../../../services/api";
-import DatePickerList from "../../../preinscription/components/DatePickerList";
 import { setYoung } from "../../../../redux/auth/actions";
+import { capture } from "../../../../sentry";
+import api from "../../../../services/api";
 import { translate } from "../../../../utils";
+import DatePickerList from "../../components/DatePickerList";
 
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
-import ErrorMessage from "../../components/ErrorMessage";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -223,7 +222,7 @@ export default function StepEligibilite() {
               {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
             </div>
             <div className="flex w-full space-x-4">
-              <div className="flex flex-col w-1/2">
+              <div className="w-1/2">
                 <Select
                   label="Niveau de scolarité"
                   value={data.scolarity}
@@ -235,12 +234,15 @@ export default function StepEligibilite() {
                   correction={corrections.grade}
                 />
               </div>
-              <label className="flex flex-col flex-start text-base w-1/2 mt-2">
-                Date de naissance
-                <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: new Date(date) })} />
-                <ErrorMessage>{error.birthDate}</ErrorMessage>
-                <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
-              </label>
+              <div className="w-1/2">
+                <DatePickerList
+                  label="Date de naissance"
+                  value={data.birthDate}
+                  onChange={(date) => setData({ ...data, birthDate: new Date(date) })}
+                  error={error.birthDate}
+                  correction={corrections.birthdateAt}
+                />
+              </div>
             </div>
             {data.scolarity && (
               <>
