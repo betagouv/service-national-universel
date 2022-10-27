@@ -1652,6 +1652,21 @@ const Schema = new mongoose.Schema({
     militaryPreparationFilesCertificate: [File],
   },
 
+  latestCNIFileExpirationDate: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  latestCNIFileCategory: {
+    type: String,
+    enum: ["cniOld", "cniNew", "passport"],
+    documentation: {
+      description: "Catégorie du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
   missionsInMail: {
     type: [
       {
