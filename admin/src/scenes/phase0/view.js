@@ -460,7 +460,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     <Section
       step={globalMode === "correction" ? "Première étape" : null}
       title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
-      editable
+      editable={young.status !== YOUNG_STATUS.DELETED}
       young={young}>
       <div className="flex-[1_0_50%] pr-[56px]">
         {globalMode === "correction" ? (
@@ -808,7 +808,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     <Section
       step={globalMode === "correction" ? "Seconde étape :" : null}
       title={globalMode === "correction" ? "Vérifiez la situation et l'accord parental" : "Détails"}
-      editable
+      editable={young.status !== YOUNG_STATUS.DELETED}
       young={young}>
       <div className="flex-[1_0_50%] pr-[56px]">
         <div>

@@ -12,7 +12,7 @@ import CardEquivalence from "../components/Equivalence";
 import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
-import WrapperPhase2 from "./wrapper";
+import YoungHeader from "../../phase0/components/YoungHeader";
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   React.useEffect(() => {
@@ -23,8 +23,9 @@ export default function Phase2({ young, onChange }) {
   }, []);
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase2" onChange={onChange} />
+      <div className="p-[30px]">
         <Box>
           <Row>
             <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
@@ -159,8 +160,8 @@ export default function Phase2({ young, onChange }) {
             </div>
           </div>
         ) : null}
-      </WrapperPhase2>
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -25,6 +25,9 @@ import ConfirmationModal from "./ConfirmationModal";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import Warning from "../../../assets/icons/Warning";
 
+const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
+const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
+
 export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION }) {
   const user = useSelector((state) => state.Auth.user);
   // const [notesCount, setNotesCount] = useState(0); // TODO: pour l'instant c'est caché
@@ -181,13 +184,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     <div className="px-[30px] pt-[15px] flex items-end border-b-[#E5E7EB] border-b-[1px]">
       <div className="grow">
         <Title>
-          <div className="mr-[15px]">
-            {young.firstName} {young.lastName}
-          </div>
-          <Badge color="#66A7F4" backgroundColor="#F9FCFF" text={young.cohort} />
-          <EditCohortButton young={young} onChange={onChange} />
-          {young.originalCohort && (
-            <Badge color="#9A9A9A" backgroundColor="#F6F6F6" text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />
+          <div className="mr-[15px]">{young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}</div>
+          <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
+          {young.status !== YOUNG_STATUS.DELETED && (
+            <>
+              <EditCohortButton young={young} onChange={onChange} />
+              {young.originalCohort && <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />}
+            </>
           )}
         </Title>
         <TabList className="mt-[30px]">
@@ -225,19 +228,31 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       </div>
       <div className="ml-[30px]">
         <div className="">
-          <Field mode="edition" name="status" label="Inscription" value={young.status} transformer={translate} type="select" options={statusOptions} onChange={onSelectStatus} />
-          <div className="flex items-center justify-between my-[15px]">
-            <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
-              Supprimer
-            </Button>
-            <Button
-              className="ml-[8px]"
-              icon={<TakePlace className="text-[#6B7280]" />}
-              href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
-              onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-              Prendre sa place
-            </Button>
-          </div>
+          <Field
+            mode="edition"
+            name="status"
+            label={translate(phase)}
+            value={young.status}
+            transformer={translate}
+            type="select"
+            options={statusOptions}
+            onChange={onSelectStatus}
+            className={young.status === YOUNG_STATUS.DELETED ? "mb-[15px]" : ""}
+          />
+          {young.status !== YOUNG_STATUS.DELETED && (
+            <div className="flex items-center justify-between my-[15px]">
+              <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+                Supprimer
+              </Button>
+              <Button
+                className="ml-[8px]"
+                icon={<TakePlace className="text-[#6B7280]" />}
+                href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
+                onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                Prendre sa place
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       {confirmModal && (
