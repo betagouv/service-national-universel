@@ -13,11 +13,12 @@ export default function DesktopPageContainer({
   children,
   onSave,
   onSubmit,
+  onCorrect,
   onClickPrevious,
   disabled,
   questionMarckLink = `${appURL}public-besoin-d-aide/`,
   childrenContinueButton = "Continuer",
-  onCorrect,
+  corrections = "",
 }) {
   return (
     <>
@@ -36,7 +37,7 @@ export default function DesktopPageContainer({
             {children}
             <hr className="my-8 h-px bg-gray-200 border-0" />
             <div className="flex justify-end gap-4">
-              {onCorrect ? (
+              {corrections ? (
                 <Button onClick={onCorrect}>Corriger</Button>
               ) : (
                 <>

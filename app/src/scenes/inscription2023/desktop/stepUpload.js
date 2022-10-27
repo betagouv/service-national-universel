@@ -6,12 +6,14 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
 import { supportURL } from "../../../config";
-import { formatDateFR, sessions2023 } from "snu-lib";
+import { formatDateFR, sessions2023, YOUNG_STATUS } from "snu-lib";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
+import MyDocs from "../components/MyDocs";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -19,9 +21,11 @@ export default function StepUpload() {
   if (category === undefined) category = young?.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [files, setFiles] = useState({});
-  const [date, setDate] = useState();
+  const [date, setDate] = useState(new Date(young?.latestCNIFileExpirationDate));
+  const corrections = young?.correctionRequests.filter((e) => e.field === "cniExpirationDate" && ["SENT", "REMINDED"].includes(e.status));
 
   async function onSubmit() {
     for (const file of files) {
@@ -50,7 +54,25 @@ export default function StepUpload() {
   }
 
   async function onCorrect() {
-    //
+    const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
+    setLoading(true);
+    try {
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/documents/correction`, data);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
+      history.push("/");
+    } catch (e) {
+      capture(e);
+      setError({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+    }
+    setLoading(false);
   }
 
   const ID = {
@@ -85,8 +107,9 @@ export default function StepUpload() {
       subTitle={ID[category].subTitle}
       onClickPrevious={() => history.push("/inscription2023/documents")}
       onSubmit={onSubmit}
+      corrections={corrections}
       onCorrect={onCorrect}
-      disabled={!date}
+      disabled={!date || loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="w-full my-16 flex justify-around">
@@ -136,24 +159,34 @@ export default function StepUpload() {
         </a>
         .
       </div>
-      {files.length > 0 && (
-        <>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="w-full flex">
-            <div className="w-1/2">
-              <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-              <div className="text-gray-600 leading-loose mt-2 mb-8">
-                Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}).
+      <MyDocs young={young} category={category} />
+      {files.length > 0 ||
+        (date && (
+          <>
+            <hr className="my-8 h-px bg-gray-200 border-0" />
+            <div className="w-full flex">
+              <div className="w-1/2">
+                <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+                <div className="text-gray-600 leading-loose mt-2 mb-8">
+                  Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+                  ).
+                </div>
+                {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&
+                  corrections.map((e) => (
+                    <ErrorMessage key={e._id}>
+                      <strong>Date d&apos;expiration incorrecte</strong>
+                      {e.message && ` : ${e.message}`}
+                    </ErrorMessage>
+                  ))}
+                <p className="text-gray-800 mt-4">Date d&apos;expiration</p>
+                <DatePickerList value={date} onChange={(date) => setDate(date)} />
               </div>
-              <p className="text-gray-800">Date d&apos;expiration</p>
-              <DatePickerList value={date} onChange={(date) => setDate(date)} />
+              <div className="w-1/2">
+                <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+              </div>
             </div>
-            <div className="w-1/2">
-              <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        ))}
     </DesktopPageContainer>
   );
 }
