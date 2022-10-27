@@ -223,7 +223,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
 
     const isRequired = type !== "save";
 
-    const { error, value } = Joi.object({
+    const representantSchema = {
       parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
       parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
@@ -247,16 +247,16 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
         otherwise: Joi.isError(new Error()),
       }),
       parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-    }).validate(req.body, { stripUnknown: true });
-    console.log(error);
+    };
+
+    let { error, value } = Joi.object(representantSchema).validate(req.body, { stripUnknown: true });
+
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (!value.parent2) {
       value.parent2Status = "";
@@ -272,6 +272,11 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     }
+    if (type === "correction") {
+      const keyList = Object.keys(representantSchema);
+      value = { ...value, ...validateCorrectionRequest(young, keyList) };
+    }
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -481,6 +486,7 @@ const validateCorrectionRequest = (young, keyList) => {
   result.correctionRequests = young.correctionRequests.map((cr) => {
     if (keyList.includes(cr.field)) {
       cr.status = "CORRECTED";
+      cr.correctedAt = new Date();
     }
     return cr;
   });

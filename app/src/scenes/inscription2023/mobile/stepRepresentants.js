@@ -1,7 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
+import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
@@ -14,9 +15,17 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { regexPhoneFrenchCountries, translate } from "../../../utils";
+import { getCorrectionByStep } from "../../../utils/navigation";
 import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
+import RadioButton from "../components/RadioButton";
+
+const parentsStatus = [
+  { label: "Mère", value: "mother" },
+  { label: "Père", value: "father" },
+  { label: "Représentant(e) légal(e)", value: "representant" },
+];
 
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
@@ -25,8 +34,10 @@ export default function StepRepresentants() {
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName", "parent2Email", "parent2Phone"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
+  const [corrections, setCorrections] = React.useState({});
   const [isParent2Visible, setIsParent2Visible] = React.useState(true);
   const dispatch = useDispatch();
+  const { step } = useParams();
 
   const [data, setData] = React.useState({
     parent1Status: "",
@@ -55,6 +66,12 @@ export default function StepRepresentants() {
         parent2Email: young.parent2Email,
         parent2Phone: young.parent2Phone,
       });
+    }
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
+      const corrections = getCorrectionByStep(young, step);
+      if (!Object.keys(corrections).length) return history.push("/");
+      else setCorrections(corrections);
+      if (!young?.parent2Email) setIsParent2Visible(false);
     }
   }, [young]);
 
@@ -136,6 +153,38 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
+  const onCorrection = async () => {
+    setLoading(true);
+    try {
+      const value = data;
+      if (!isParent2Visible) {
+        value.parent2 = false;
+        delete value.parent2Status;
+        delete value.parent2FirstName;
+        delete value.parent2LastName;
+        delete value.parent2Email;
+        delete value.parent2Phone;
+      } else {
+        value.parent2 = true;
+      }
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/correction`, value);
+      if (!ok) {
+        setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
+      toastr.success("Vos informations ont bien été enregistrées");
+    } catch (e) {
+      capture(e);
+      setErrors({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+    }
+    setLoading(false);
+  };
+
   const onSave = async () => {
     setLoading(true);
     try {
@@ -181,62 +230,65 @@ export default function StepRepresentants() {
         <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
         <hr className="my-4 h-px bg-gray-200 border-0" />
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
-        <FormRepresentant i={1} data={data} setData={setData} errors={errors} />
+        <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} />
         <hr className="my-4 h-px bg-gray-200 border-0" />
         <div className="flex gap-4 items-center">
           <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
           <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
         </div>
-        {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} /> : null}
+        {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} /> : null}
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
+      {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
+        <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
+      ) : (
+        <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
+      )}
     </>
   );
 }
 
-const FormRepresentant = ({ i, data, setData, errors }) => {
+const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
   return (
     <div className="flex flex-col my-4">
-      <div className="pb-2 text-[#161616] font-bold">Représentant(e) légal(e) {i} </div>
-      <div className="flex flex-col gap-2">
-        <div className="text-[#161616] text-base">Votre lien</div>
-        <div className="flex items-center">
-          <label className="flex items-center mb-0 border-r-[1px] pr-4">
-            <input
-              className="mr-3 accent-[#000091] border-dashed h-5 w-5"
-              type="radio"
-              checked={data[`parent${i}Status`] === "mother"}
-              onChange={() => setData({ ...data, [`parent${i}Status`]: "mother" })}
-            />
-            Mère
-          </label>
-          <label className="flex items-center pl-4 mb-0">
-            <input
-              className="mr-3 accent-[#000091] border-dashed h-5 w-5"
-              type="radio"
-              checked={data[`parent${i}Status`] === "father"}
-              onChange={() => setData({ ...data, [`parent${i}Status`]: "father" })}
-            />
-            Père
-          </label>
-        </div>
-        <label className="flex items-center mb-0">
-          <input
-            className="mr-3 accent-[#000091] border-dashed h-5 w-5"
-            type="radio"
-            checked={data[`parent${i}Status`] === "representant"}
-            onChange={() => setData({ ...data, [`parent${i}Status`]: "representant" })}
-          />
-          Autre représentant(e) légal(e)
-        </label>
-        <div className="text-[#CE0500] text-sm">{errors[`parent${i}Status`]}</div>
-      </div>
-      <Input value={data[`parent${i}FirstName`]} label="Son prénom" onChange={(e) => setData({ ...data, [`parent${i}FirstName`]: e })} error={errors[`parent${i}FirstName`]} />
-      <Input value={data[`parent${i}LastName`]} label="Son nom" onChange={(e) => setData({ ...data, [`parent${i}LastName`]: e })} error={errors[`parent${i}LastName`]} />
-      <Input value={data[`parent${i}Email`]} label="Son e-mail" onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })} error={errors[`parent${i}Email`]} />
-      <Input value={data[`parent${i}Phone`]} label="Son numéro de téléphone" onChange={(e) => setData({ ...data, [`parent${i}Phone`]: e })} error={errors[`parent${i}Phone`]} />
+      <div className="pb-2 text-[#161616] font-bold">Représentant légal {i} </div>
+      <RadioButton
+        label="Votre lien"
+        options={parentsStatus}
+        onChange={(e) => setData({ ...data, [`parent${i}Status`]: e })}
+        value={data[`parent${i}Status`]}
+        error={errors[`parent${i}Status`]}
+        correction={corrections[`parent${i}Status`]}
+      />
+      <Input
+        value={data[`parent${i}FirstName`]}
+        label="Son prénom"
+        onChange={(e) => setData({ ...data, [`parent${i}FirstName`]: e })}
+        error={errors[`parent${i}FirstName`]}
+        correction={corrections[`parent${i}FirstName`]}
+      />
+      <Input
+        value={data[`parent${i}LastName`]}
+        label="Son nom"
+        onChange={(e) => setData({ ...data, [`parent${i}LastName`]: e })}
+        error={errors[`parent${i}LastName`]}
+        correction={corrections[`parent${i}LastName`]}
+      />
+      <Input
+        value={data[`parent${i}Email`]}
+        label="Son e-mail"
+        onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })}
+        error={errors[`parent${i}Email`]}
+        correction={corrections[`parent${i}Email`]}
+      />
+      <Input
+        value={data[`parent${i}Phone`]}
+        label="Son numéro de téléphone"
+        onChange={(e) => setData({ ...data, [`parent${i}Phone`]: e })}
+        error={errors[`parent${i}Phone`]}
+        correction={corrections[`parent${i}Phone`]}
+      />
     </div>
   );
 };
