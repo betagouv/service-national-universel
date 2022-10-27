@@ -67,11 +67,9 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const keyList = Object.keys(eligibilityScheme);
 
-    young.set({
+    const update = {
       ...value,
       ...(value.livesInFrance === "true"
         ? {
@@ -85,7 +83,11 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
           }
         : {}),
       ...validateCorrectionRequest(young, keyList),
-    });
+    };
+
+    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(update);
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
