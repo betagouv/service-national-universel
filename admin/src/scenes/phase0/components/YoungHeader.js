@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Title from "../../../components/views/Title";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import Pencil from "../../../assets/icons/Pencil";
 import History from "../../../assets/icons/History";
 import Field from "./Field";
-import { translate, YOUNG_STATUS, canViewEmailHistory, ROLES, translateCohort } from "snu-lib";
+import { translate, YOUNG_STATUS, canViewEmailHistory, ROLES, translateCohort, WITHRAWN_REASONS, SENDINBLUE_TEMPLATES, YOUNG_PHASE } from "snu-lib";
 import { Button } from "./Buttons";
 import Bin from "../../../assets/Bin";
 import TakePlace from "../../../assets/icons/TakePlace";
@@ -21,12 +21,39 @@ import IconChangementCohorte from "../../../assets/IconChangementCohorte";
 import Chevron from "../../../components/Chevron";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import { useHistory } from "react-router-dom";
+import ConfirmationModal from "./ConfirmationModal";
+import ChevronDown from "../../../assets/icons/ChevronDown";
+import Warning from "../../../assets/icons/Warning";
 
-export default function YoungHeader({ young, tab, onChange }) {
+export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION }) {
   const user = useSelector((state) => state.Auth.user);
   // const [notesCount, setNotesCount] = useState(0); // TODO: pour l'instant c'est caché
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false });
+  const [confirmModal, setConfirmModal] = useState(null);
   const history = useHistory();
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
+
+  useEffect(() => {
+    if (young) {
+      let options = [];
+      switch (young.status) {
+        case YOUNG_STATUS.WAITING_LIST:
+          options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+          break;
+        case YOUNG_STATUS.WITHDRAWN:
+          if (user.role === ROLES.ADMIN) {
+            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST];
+          }
+          break;
+        case YOUNG_STATUS.VALIDATED:
+          options = [YOUNG_STATUS.WITHDRAWN];
+          break;
+      }
+      setStatusOptions(options.map((opt) => ({ value: opt, label: translate(opt) })));
+    } else {
+      setStatusOptions([]);
+    }
+  }, [young]);
 
   function onClickDelete() {
     setConfirmModal({
@@ -49,6 +76,106 @@ export default function YoungHeader({ young, tab, onChange }) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
     }
   };
+
+  function onSelectStatus(status) {
+    setWithdrawn({ reason: "", message: "", error: null });
+
+    setConfirmModal({
+      icon: <Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+      title: "Modification de statut",
+      message: `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utlisateur.`,
+      type: status,
+    });
+  }
+
+  const withdrawnReasonOptions = [
+    <option key="none" value="">
+      Motif
+    </option>,
+    ...WITHRAWN_REASONS.map((reason) => (
+      <option key={reason.value} value={reason.value}>
+        {reason.label}
+      </option>
+    )),
+  ];
+
+  async function onConfirm() {
+    if (confirmModal.type === YOUNG_STATUS.WITHDRAWN) {
+      if (withdrawn.reason === "") {
+        setWithdrawn({ ...withdrawn, error: "Vous devez obligatoirement sélectionner un motif." });
+        return;
+      } else if (withdrawn.reason === "other" && withdrawn.message.trim().length === 0) {
+        setWithdrawn({ ...withdrawn, error: "Pour le motif 'Autre', vous devez précisez un message." });
+        return;
+      } else {
+        setWithdrawn({ ...withdrawn, error: null });
+      }
+      await changeStatus(confirmModal.type, { withdrawnReason: withdrawn.reason, withdrawnMessage: withdrawn.message });
+    } else {
+      await changeStatus(confirmModal.type);
+    }
+  }
+
+  async function changeStatus(status, values = {}) {
+    const prevStatus = young.status;
+    if (status === "WITHDRAWN") {
+      young.historic.push({
+        phase,
+        userName: `${user.firstName} ${user.lastName}`,
+        userId: user._id,
+        status,
+        note: WITHRAWN_REASONS.find((r) => r.value === values?.withdrawnReason)?.label + " " + values?.withdrawnMessage,
+      });
+    } else {
+      young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note: values?.note });
+    }
+    young.status = status;
+    const now = new Date();
+    young.lastStatusAt = now.toISOString();
+    if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
+      young.withdrawnReason = values?.withdrawnReason;
+      young.withdrawnMessage = values?.withdrawnMessage || "";
+    }
+    if (status === "WAITING_CORRECTION" && values?.note) young.inscriptionCorrectionMessage = values?.note;
+    if (status === "REFUSED" && values?.note) young.inscriptionRefusedMessage = values?.note;
+    if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
+    try {
+      // we decided to let the validated youngs in the INSCRIPTION phase
+      // referents use the export and need ALL the youngs of the current year
+      // we'll pass every youngs currently in INSCRIPTION in COHESION_STAY once the campaign is done (~20 april 2021)
+
+      // if (status === YOUNG_STATUS.VALIDATED && young.phase === YOUNG_PHASE.INSCRIPTION) {
+      //   young.phase = YOUNG_PHASE.COHESION_STAY;
+      // }
+
+      const { lastStatusAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage, withdrawnReason } = young;
+
+      const { ok, code } = await api.put(`/referent/young/${young._id}`, {
+        status: young.status,
+        lastStatusAt,
+        withdrawnMessage,
+        phase,
+        inscriptionCorrectionMessage,
+        inscriptionRefusedMessage,
+        withdrawnReason,
+      });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+
+      if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+        if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
+        else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+      }
+      if (status === YOUNG_STATUS.WAITING_LIST) {
+        await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
+      }
+
+      onChange && onChange();
+      toastr.success("Mis à jour!");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    }
+  }
 
   return (
     <div className="px-[30px] pt-[15px] flex items-end border-b-[#E5E7EB] border-b-[1px]">
@@ -98,7 +225,7 @@ export default function YoungHeader({ young, tab, onChange }) {
       </div>
       <div className="ml-[30px]">
         <div className="">
-          <Field mode="readonly" name="status" label="Inscription" value={translate(young.status)} />
+          <Field mode="edition" name="status" label="Inscription" value={young.status} transformer={translate} type="select" options={statusOptions} onChange={onSelectStatus} />
           <div className="flex items-center justify-between my-[15px]">
             <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
               Supprimer
@@ -113,16 +240,39 @@ export default function YoungHeader({ young, tab, onChange }) {
           </div>
         </div>
       </div>
-      <ModalConfirm
-        isOpen={confirmModal?.isOpen}
-        title={confirmModal?.title}
-        message={confirmModal?.message}
-        onCancel={() => setConfirmModal({ isOpen: false })}
-        onConfirm={() => {
-          confirmModal?.onConfirm();
-          setConfirmModal({ isOpen: false });
-        }}
-      />
+      {confirmModal && (
+        <ConfirmationModal
+          isOpen={true}
+          icon={confirmModal.icon}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmLabel || "Confirmer"}
+          confirmMode={confirmModal.confirmColor || "blue"}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={onConfirm}>
+          {confirmModal.type === YOUNG_STATUS.WITHDRAWN && (
+            <div className="mt-[24px]">
+              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+                <select
+                  value={withdrawn.reason}
+                  onChange={(e) => setWithdrawn({ ...withdrawn, reason: e.target.value })}
+                  className="block grow p-[15px] bg-[transparent] appearance-none">
+                  {withdrawnReasonOptions}
+                </select>
+                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+              </div>
+              <textarea
+                value={withdrawn.message}
+                onChange={(e) => setWithdrawn({ ...withdrawn, message: e.target.value })}
+                className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+                rows="5"
+                placeholder="Précisez la raison de votre refus ici"
+              />
+              {withdrawn.error && <div className="text-[#EF4444]">{withdrawn.error}</div>}
+            </div>
+          )}
+        </ConfirmationModal>
+      )}
     </div>
   );
 }
