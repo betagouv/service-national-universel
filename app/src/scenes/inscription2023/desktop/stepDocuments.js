@@ -105,8 +105,9 @@ export default function StepDocuments() {
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
       onClickPrevious={() => history.push("/inscription2023/representants")}
       onSubmit={onSubmit}
-      onCorrect={onCorrect}
+      onCorrection={onCorrect}
       disabled={!young?.files.cniFiles.length}
+      modeCorrection={corrections.length > 0}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&

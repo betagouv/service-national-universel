@@ -515,7 +515,7 @@ export default function Consentement({ step, parentId }) {
                 Précédent
               </BorderButton>
               <PlainButton onClick={onSubmit} spinner={saving}>
-                Je valide mon consentement
+                Je valide
               </PlainButton>
             </div>
           </div>
