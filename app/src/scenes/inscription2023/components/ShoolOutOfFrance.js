@@ -62,7 +62,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
 
   return (
     <>
-      <div className="">
+      <div className="form-group">
         <CreatableSelect
           label="Pays de l'établissement"
           value={country}

@@ -1,27 +1,31 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useHistory, useParams } from "react-router-dom";
+import Toggle from "../../../../components/inscription/toggle";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
+import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
-import { getDepartmentByZip } from "snu-lib";
+import IconFrance from "../../../../assets/IconFrance";
 import validator from "validator";
-import IconFrance from "../../../assets/IconFrance";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/checkbox";
-import Input from "../../../components/inscription/input";
-import StickyButton from "../../../components/inscription/stickyButton";
-import Toggle from "../../../components/inscription/toggle";
-import SearchableSelect from "../../../components/SearchableSelect";
-import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
-import { translate } from "../../../utils";
-import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
-import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../../preinscription/components/DatePickerList";
-import Navbar from "../components/Navbar";
-import { STEPS } from "../utils/navigation";
+import plausibleEvent from "../../../../services/plausible";
+import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
+import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
+import CheckBox from "../../../../components/inscription/checkbox";
+import { getCorrectionByStep } from "../../../../utils/navigation";
+
+import { useDispatch, useSelector } from "react-redux";
+import { capture } from "../../../../sentry";
+import { getDepartmentByZip, YOUNG_STATUS } from "snu-lib";
+import api from "../../../../services/api";
+import DatePickerList from "../../../preinscription/components/DatePickerList";
+import { setYoung } from "../../../../redux/auth/actions";
+import { translate } from "../../../../utils";
+
+import ModalSejourCorrection from "../../components/ModalSejourCorrection";
+import ErrorMessage from "../../components/ErrorMessage";
+import Footer from "../../../../components/footerV2";
+import StickyButton from "../../../../components/inscription/stickyButton";
+import Navbar from "../../components/Navbar";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -30,31 +34,39 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [toggleVerify, setToggleVerify] = React.useState(false);
+  const [modal, setModal] = React.useState({ isOpen: false });
+
+  const [corrections, setCorrections] = React.useState({});
+
+  const { step } = useParams();
 
   const history = useHistory();
 
   useEffect(() => {
     if (!young) return;
-
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
+      const corrections = getCorrectionByStep(young, step);
+      if (!Object.keys(corrections).length) return history.push("/");
+      else setCorrections(corrections);
+    }
     setData({
       frenchNationality: young.frenchNationality,
       birthDate: new Date(young.birthdateAt),
-      school:
-        young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE && young.schooled
-          ? {
-              fullName: young.schoolName,
-              type: young.schoolType,
-              adresse: young.schoolAddress,
-              codeCity: young.schoolZip,
-              city: young.schoolCity,
-              departmentName: young.schoolDepartment,
-              region: young.schoolRegion,
-              country: young.schoolCountry,
-              _id: young.schoolId,
-              postCode: young.schoolZip,
-            }
-          : null,
-      scolarity: young.reinscriptionStep2023 && young.reinscriptionStep2023 !== STEPS.ELIGIBILITE ? young.grade : null,
+      school: young.schooled
+        ? {
+            fullName: young.schoolName,
+            type: young.schoolType,
+            adresse: young.schoolAddress,
+            codeCity: young.schoolZip,
+            city: young.schoolCity,
+            departmentName: young.schoolDepartment,
+            region: young.schoolRegion,
+            country: young.schoolCountry,
+            _id: young.schoolId,
+            postCode: young.schoolZip,
+          }
+        : null,
+      scolarity: young.grade,
       zip: young.zip,
     });
   }, [young]);
@@ -117,7 +129,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase0/CTA reinscription - eligibilite");
+    plausibleEvent("Phase0/CTA correction - eligibilite");
 
     const updates = {
       grade: data.scolarity,
@@ -132,7 +144,7 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,
       zip: data.zip,
-      birthDate: data.birthDate,
+      birthdateAt: new Date(data.birthDate),
     };
 
     try {
@@ -142,39 +154,50 @@ export default function StepEligibilite() {
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Impossible de vérifier votre éligibilité" });
-        setLoading(false);
-      }
+      if (!res.ok) throw new Error(translate(res.code));
 
-      if (res.data.msg) {
-        const res = await api.put("/young/reinscription/noneligible");
-        if (!res.ok) {
-          capture(res.code);
-          setError({ text: "Pb avec votre non eligibilite" });
-          setLoading(false);
-        }
+      const cohorts = res.data.length > 0 ? res.data.filter((e) => e?.goalReached === false) : null;
+
+      if (res.data.msg || !cohorts) {
+        let res = await api.put("/young/inscription2023/noneligible");
+        if (!res.ok) throw new Error(translate(res.code));
+
+        res = await api.put("/young/inscription2023/eligibilite", updates);
+        if (!res.ok) throw new Error(translate(res.code));
+
         dispatch(setYoung(res.data));
-        return history.push("/reinscription/noneligible");
+        return history.push("/noneligible");
       }
 
-      updates.sessions = res.data;
+      updates.sessions = cohorts;
+
+      if (cohorts.some((c) => young.cohort === c.name)) {
+        const res = await api.put("/young/inscription2023/eligibilite", updates);
+        if (!res.ok) throw new Error(translate(res.code));
+        toastr.success("La correction a été prise en compte");
+        history.push("/home");
+      } else {
+        setModal({ data: updates, isOpen: true, onValidation });
+      }
     } catch (e) {
+      setLoading(false);
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
+  };
 
+  const onValidation = async (updates, cohort) => {
     try {
-      const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
-      if (!ok) {
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
+      const res = await api.put("/young/inscription2023/eligibilite", updates);
+      if (!res.ok) throw new Error(translate(code));
+
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
+      if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
-      return history.push("/reinscription/sejour");
+      toastr.success("La correction a été prise en compte");
+      history.push("/home");
     } catch (e) {
+      setLoading(false);
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
@@ -203,21 +226,22 @@ export default function StepEligibilite() {
           {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
         </div>
         <div className="form-group">
-          <SearchableSelect
+          <Select
             label="Niveau de scolarité"
             value={data.scolarity}
             options={optionsScolarite}
             onChange={(value) => {
               setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
             }}
-            placeholder="Sélectionnez une option"
+            error={error.scolarity}
+            correction={corrections.grade}
           />
-          {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
         </div>
-        <div className="flex flex-col flex-start my-4 text-[#929292]">
+        <div className="flex flex-col flex-start my-4">
           Date de naissance
-          <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-          {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+          <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: new Date(date) })} />
+          <ErrorMessage>{error.birthDate}</ErrorMessage>
+          <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
         </div>
         {data.scolarity && (
           <>
@@ -232,34 +256,27 @@ export default function StepEligibilite() {
               </p>
 
               <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
-              {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
             </div>
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
                 <>
-                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
                 </>
               ) : (
                 <>
-                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
                 </>
               )
             ) : !data.isAbroad ? (
-              <div className="flex flex-col flex-start my-4">
-                Code Postal
-                <div className="h-5 flex items-center">
-                  <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
-                </div>
-                <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
-              </div>
+              <Input value={data.lastName} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
             ) : null}
           </>
         )}
       </div>
       <Footer marginBottom={"mb-[88px]"} />
-      <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
+      <StickyButton text="Corriger" onClick={() => onSubmit()} disabled={loading} />
+      <ModalSejourCorrection data={modal?.data} isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} onValidation={modal?.onValidation} />
     </>
   );
 }

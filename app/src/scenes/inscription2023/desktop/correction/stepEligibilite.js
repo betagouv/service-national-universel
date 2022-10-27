@@ -126,7 +126,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase1/CTA reinscription - eligibilite");
+    plausibleEvent("Phase0/CTA correction - eligibilite");
 
     const updates = {
       grade: data.scolarity,
@@ -171,6 +171,8 @@ export default function StepEligibilite() {
       if (cohorts.some((c) => young.cohort === c.name)) {
         const res = await api.put("/young/inscription2023/eligibilite", updates);
         if (!res.ok) throw new Error(translate(res.code));
+        toastr.success("La correction a été prise en compte");
+        history.push("/home");
       } else {
         setModal({ data: updates, isOpen: true, onValidation });
       }
@@ -189,7 +191,7 @@ export default function StepEligibilite() {
       const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
       if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
-      toastr.success("Votre séjour a bien été enregistré");
+      toastr.success("La correction a été prise en compte");
       history.push("/home");
     } catch (e) {
       setLoading(false);
