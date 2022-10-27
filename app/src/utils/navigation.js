@@ -148,8 +148,13 @@ const WAITING_CORRECTION_LINK = [
     step: "coordonnee",
   },
   {
-    field: ["cniFile", "cniExpirationDate"],
+    field: ["cniFile"],
     redirect: "/inscription2023/correction/documents",
+    step: "documents",
+  },
+  {
+    field: ["cniExpirationDate"],
+    redirect: "/inscription2023/correction/televersement",
     step: "documents",
   },
 ];

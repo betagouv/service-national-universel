@@ -14,8 +14,9 @@ import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 
 export default function StepUpload() {
-  const { category } = useParams();
+  let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
+  if (category === undefined) category = young?.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
   const [error, setError] = useState({});
@@ -48,6 +49,10 @@ export default function StepUpload() {
     history.push("/inscription2023/confirm");
   }
 
+  async function onCorrect() {
+    //
+  }
+
   const ID = {
     cniNew: {
       category: "cniNew",
@@ -73,12 +78,14 @@ export default function StepUpload() {
     },
   };
 
+  if (!category) return <div>Loading</div>;
   return (
     <DesktopPageContainer
       title={ID[category].title}
       subTitle={ID[category].subTitle}
       onClickPrevious={() => history.push("/inscription2023/documents")}
       onSubmit={onSubmit}
+      onCorrect={onCorrect}
       disabled={!date}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
