@@ -119,7 +119,7 @@ export default function Field({
           <>
             {type === "select" && (
               <div ref={selectOptionsRef}>
-                <div className="flex items-center justify-between cursor-pointer" onClick={toggleSelectOptions}>
+                <div className="flex items-center justify-between cursor-pointer p-[5px] bg-gray-50" onClick={toggleSelectOptions}>
                   <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
                   <ChevronDown className="text-[#1F2937] ml-[8px]" />
                 </div>
@@ -134,7 +134,7 @@ export default function Field({
                 )}
               </div>
             )}
-            {type === "text" && <input type="text" value={value} onChange={onChange} className="" />}
+            {type === "text" && <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />}
           </>
         ) : (
           <>
