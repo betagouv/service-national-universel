@@ -1,5 +1,6 @@
 import React from "react";
 import Download from "../../../assets/icons/Download";
+import Bin from "../../../assets/Bin";
 
 export function MiniTitle({ children }) {
   return <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">{children}</div>;
@@ -34,6 +35,16 @@ export function MoreButton({ className = "", onClick = () => {} }) {
       <div className="bg-[#4B5563] w-[2px] h-[2px] mr-[2px] group-hover:bg-white" />
       <div className="bg-[#4B5563] w-[2px] h-[2px] mr-[2px] group-hover:bg-white" />
       <div className="bg-[#4B5563] w-[2px] h-[2px] group-hover:bg-white" />
+    </div>
+  );
+}
+
+export function DeleteButton({ className = "", onClick = () => {} }) {
+  return (
+    <div
+      className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#EF4444] cursor-pointer group border-[1px] border-[transparent] hover:bg-[#FFFFFF] hover:border-[#EF4444] ${className}`}
+      onClick={onClick}>
+      <Bin className="w-[14px] h-[14px] text-[#FFFFFF] group-hover:text-[#EF4444]" />
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
-import WrapperPhase2 from "./wrapper";
 import PaperClip from "../../../assets/icons/PaperClip";
 import AddImage from "../../../assets/icons/AddImage";
 import { toastr } from "react-redux-toastr";
@@ -12,6 +11,7 @@ import validator from "validator";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import { slugifyFileName, UNSS_TYPE } from "../../../utils";
 import { capture } from "../../../sentry";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function FormEquivalence({ young, onChange }) {
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"];
@@ -154,8 +154,9 @@ export default function FormEquivalence({ young, onChange }) {
   }, []);
 
   return (
-    <div className="flex items-start w-full">
-      <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase2" onChange={onChange} />
+      <div className="p-[30px]">
         <div className="flex flex-col pt-3 gap-8">
           <div className="flex items-center pb-3">
             <div className="rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105" onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
@@ -505,8 +506,8 @@ export default function FormEquivalence({ young, onChange }) {
             </div>
           ) : null}
         </div>
-      </WrapperPhase2>
-    </div>
+      </div>
+    </>
   );
 }
 
