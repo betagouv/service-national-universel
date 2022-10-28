@@ -379,13 +379,12 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
 
     if (type === "correction") {
       const fileSchema = {
-        latestCNIFileExpirationDate: Joi.date(),
-        latestCNIFileCategory: Joi.string().trim(),
+        latestCNIFileExpirationDate: Joi.date().required(),
+        latestCNIFileCategory: Joi.string().trim().required(),
       };
       const { error, value } = Joi.object(fileSchema).validate(req.body, { stripUnknown: true });
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      // const keyList = Object.keys(fileSchema);
       let data = { ...value, ...validateCorrectionRequest(young, ["cniExpirationDate", "cniFile"]) };
       if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       young.set(data);

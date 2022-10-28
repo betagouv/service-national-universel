@@ -6,7 +6,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
 import { supportURL } from "../../../config";
-import { formatDateFR, sessions2023, translateCorrectionReason, YOUNG_STATUS } from "snu-lib";
+import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import DesktopPageContainer from "../components/DesktopPageContainer";
@@ -24,9 +24,10 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [files, setFiles] = useState({});
-  const [date, setDate] = useState(new Date(young?.latestCNIFileExpirationDate));
-  const correctionsFile = young?.correctionRequests.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
-  const correctionsDate = young?.correctionRequests.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniExpirationDate");
+  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
+  const [hasDateChanged, setHasDateChanged] = useState(false);
+  const correctionsFile = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
+  const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniExpirationDate");
 
   async function onSubmit() {
     for (const file of files) {
@@ -108,12 +109,12 @@ export default function StepUpload() {
       subTitle={ID[category].subTitle}
       onClickPrevious={() => history.push("/inscription2023/documents")}
       onSubmit={onSubmit}
-      modeCorrection={correctionsFile.length > 0 || correctionsDate.length > 0}
+      modeCorrection={correctionsFile?.length > 0 || correctionsDate?.length > 0}
       onCorrection={onCorrect}
-      disabled={!date || loading}
+      disabled={!date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length)}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      {correctionsFile.map((e) => (
+      {correctionsFile?.map((e) => (
         <ErrorMessage key={e._id}>
           <strong>{translateCorrectionReason(e.reason)}</strong>
           {e.message && ` : ${e.message}`}
@@ -177,15 +178,20 @@ export default function StepUpload() {
                 Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
                 ).
               </div>
-              {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&
-                correctionsDate.map((e) => (
-                  <ErrorMessage key={e._id}>
-                    <strong>Date d&apos;expiration incorrecte</strong>
-                    {e.message && ` : ${e.message}`}
-                  </ErrorMessage>
-                ))}
+              {correctionsDate?.map((e) => (
+                <ErrorMessage key={e._id}>
+                  <strong>Date d&apos;expiration incorrecte</strong>
+                  {e.message && ` : ${e.message}`}
+                </ErrorMessage>
+              ))}
               <p className="text-gray-800 mt-4">Date d&apos;expiration</p>
-              <DatePickerList value={date} onChange={(date) => setDate(date)} />
+              <DatePickerList
+                value={date}
+                onChange={(date) => {
+                  setDate(date);
+                  setHasDateChanged(true);
+                }}
+              />
             </div>
             <div className="w-1/2">
               <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />

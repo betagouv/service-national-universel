@@ -3,7 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "snu-lib";
+import { translate, translateCorrectionReason } from "snu-lib";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 
@@ -15,12 +15,14 @@ import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import StickyButton from "../../../components/inscription/stickyButton";
 import MyDocs from "../components/MyDocs";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
+  const corrections = young?.correctionRequests?.filter((e) => e.field === "cniFile" && ["SENT", "REMINDED"].includes(e.status));
 
   const IDs = [
     {
@@ -60,6 +62,14 @@ export default function StepDocuments() {
           <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
+        </div>
+        <div className="my-4">
+          {corrections?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>{translateCorrectionReason(e.reason)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
         </div>
         <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((id) => (

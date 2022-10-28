@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { supportURL } from "../../../config";
-import { formatDateFR, sessions2023 } from "snu-lib";
+import { formatDateFR, sessions2023, translateCorrectionReason, YOUNG_STATUS } from "snu-lib";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import Help from "../components/Help";
@@ -16,15 +16,22 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
+import MyDocs from "../components/MyDocs";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function StepUpload() {
-  const { category } = useParams();
+  let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
+  if (category === undefined) category = young?.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [files, setFiles] = useState();
-  const [date, setDate] = useState();
+  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
+  const [hasDateChanged, setHasDateChanged] = useState(false);
+  const correctionsFile = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
+  const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniExpirationDate");
 
   async function onSubmit() {
     for (const file of files) {
@@ -50,6 +57,28 @@ export default function StepUpload() {
     dispatch(setYoung(responseData));
     plausibleEvent("Phase0/CTA inscription - CI mobile");
     history.push("/inscription2023/confirm");
+  }
+
+  async function onCorrect() {
+    setLoading(true);
+    try {
+      const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        setLoading(false);
+        return;
+      }
+      dispatch(setYoung(responseData));
+      history.push("/");
+    } catch (e) {
+      capture(e);
+      setError({
+        text: `Une erreur s'est produite`,
+        subText: e?.code ? translate(e.code) : "",
+      });
+    }
+    setLoading(false);
   }
 
   const ID = {
@@ -89,6 +118,14 @@ export default function StepUpload() {
           </a>
         </div>
         {ID[category].subtitle && <div className="text-xl mb-2 text-gray-600">{ID[category].subtitle}</div>}
+        <div className="my-4">
+          {correctionsFile?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>{translateCorrectionReason(e.reason)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+        </div>
         <div className="w-full flex items-center justify-center my-4">
           <div className="w-3/4 flex flex-col gap-4">
             <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
@@ -131,7 +168,8 @@ export default function StepUpload() {
             )}
           </div>
         </div>
-        {files?.length > 0 && (
+        <MyDocs young={young} category={category} />
+        {(files?.length > 0 || date) && (
           <>
             <hr className="my-8 h-px bg-gray-200 border-0" />
             <div className="text-xl font-medium">Renseignez la date d’expiration</div>
@@ -139,16 +177,40 @@ export default function StepUpload() {
               Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
               ).
             </div>
+            <div className="my-4">
+              {correctionsDate?.map((e) => (
+                <ErrorMessage key={e._id}>
+                  <strong>Date d&apos;expiration incorrecte</strong>
+                  {e.message && ` : ${e.message}`}
+                </ErrorMessage>
+              ))}
+            </div>
             <div className="w-3/4 mx-auto">
               <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
             </div>
-            <DatePickerList value={date} onChange={(date) => setDate(date)} />
+            <DatePickerList
+              value={date}
+              onChange={(date) => {
+                setDate(date);
+                setHasDateChanged(true);
+              }}
+            />
           </>
         )}
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={onSubmit} disabled={!date} />
+      {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
+        <StickyButton
+          text="Corriger"
+          onClickPrevious={() => history.push("/")}
+          onClick={onCorrect}
+          disabled={!date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length)}
+        />
+      ) : (
+        <StickyButton text="Continuer" onClick={onSubmit} disabled={!date || loading} />
+      )}
     </>
   );
 }

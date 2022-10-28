@@ -18,7 +18,7 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests.filter((e) => e.field === "cniFile" && ["SENT", "REMINDED"].includes(e.status));
+  const corrections = young?.correctionRequests?.filter((e) => e.field === "cniFile" && ["SENT", "REMINDED"].includes(e.status));
 
   async function onSubmit() {
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
@@ -55,7 +55,7 @@ export default function StepDocuments() {
       subTitle="Choisissez le justificatif d’identité que vous souhaitez importer :"
       onClickPrevious={() => history.push("/inscription2023/representants")}
       onSubmit={onSubmit}
-      disabled={!young?.files.cniFiles.length || corrections.length > 0}
+      disabled={!young?.files.cniFiles.length > 0 || corrections?.length > 0}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&

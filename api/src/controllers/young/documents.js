@@ -470,46 +470,4 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
   }
 });
 
-router.put("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // Validate params
-    const { error, value } = Joi.object({
-      id: Joi.string().alphanum().length(24).required(),
-      key: Joi.string()
-        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
-        .required(),
-      fileId: Joi.string().alphanum().length(24).required(),
-    })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { id, key, fileId } = value;
-
-    // Validate body
-    const { error: bodyError, value: body } = Joi.object({
-      category: Joi.string(),
-      expirationDate: Joi.date(),
-    }).validate(req.body, { stripUnknown: true });
-    if (bodyError) {
-      capture(bodyError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { category, expirationDate } = body;
-
-    // Get data & check permissions
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
-    // Save
-    let file = young.files[key].id(fileId);
-    file.set({ category, expirationDate });
-    await young.save({ fromUser: req.user });
-    return res.status(200).send({ young: serializeYoung(young, req.user), data: young.files[key], ok: true });
-  } catch (e) {
-    capture(e);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 module.exports = router;
