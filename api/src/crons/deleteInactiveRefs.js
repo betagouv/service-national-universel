@@ -5,6 +5,7 @@ const MissionModel = require("../src/models/mission");
 const { sendTemplate } = require("../../../../src/sendinblue");
 const { capture } = require("../../../sentry");
 const { ERRORS } = require("../utils");
+const slack = require("../slack");
 
 async function deleteRef(referent) {
   try {
@@ -24,45 +25,35 @@ exports.handler = async () => {
   let date = new Date();
   date = date.setMonth(date.getMonth() - 6);
 
-  const cursor = ReferentModel.find({
-    role: { $in: ["referent_department", "referent_region"] },
-    $or: [{ lastLoginAt: null }, { lastLoginAt: { $lte: date } }],
-  });
-  await cursor.eachAsync(async function (ref) {
-    try {
-      if (ref.lastLoginAt > date.setDate(date.getDate() - 7)) {
-        await sendTemplate("615", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
-      } else if (ref.lastLoginAt > date.setDate(date.getDate() - 14)) {
-        await sendTemplate("616", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
-      } else {
-        await deleteRef(ref);
-        // sendTemplate("Votre compte a été supprimé", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
-      }
-    } catch (e) {
-      console.error("error", ref.email);
-      console.error(e);
-    }
-  });
+  try {
+    let cursor = ReferentModel.find({
+      role: { $in: ["referent_department", "referent_region"] },
+      $or: [{ lastLoginAt: date }, { lastLoginAt: null, createdAt: date }],
+    });
+    await cursor.eachAsync(async function (ref) {
+      await sendTemplate("615", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+    });
+
+    cursor = ReferentModel.find({
+      role: { $in: ["referent_department", "referent_region"] },
+      $or: [{ lastLoginAt: date.setDate(date.getDate() - 7) }, { lastLoginAt: null, createdAt: date.setDate(date.getDate() - 7) }],
+    });
+    await cursor.eachAsync(async function (ref) {
+      await sendTemplate("616", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+    });
+
+    cursor = ReferentModel.find({
+      role: { $in: ["referent_department", "referent_region"] },
+      $or: [{ lastLoginAt: date.setDate(date.getDate() - 14) }, { lastLoginAt: null, createdAt: date.setDate(date.getDate() - 14) }],
+    });
+    await cursor.eachAsync(async function (ref) {
+      await deleteRef(ref);
+      slack.info({ title: "Referent deleted", text: `Ref ${ref.email} has been deleted` });
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
   console.log("DONE.");
   process.exit(0);
 };
-
-// Once every week:
-
-// 1. Get inactive refs. Send mail, set inactiveMail01Sent to current date in ref data
-
-// 2. Get refs with inactiveMail01Sent >= current date:
-//  - filter out those that logged in since (set inactiveMail01Sent to null),
-//  - send mail 2 to the others, set inactiveMailSent02 to current date
-
-// 3. Get refs with inactiveMail02Sesnt >= current date:
-//  - filter out those that logged in since (set inactiveMail02Sent to null)
-//  - soft-delete the rest
-
-// V2: Get refs with lastLoginAt >= 6 months ago
-
-// Among them:
-// - if lastLoginAt < 6 months + 1 week: send mail #1
-// - if lastLoginAt < 6 months + 2 weeks: send mail #2
-// - else sodt-delete account, re-allocate structures & missions

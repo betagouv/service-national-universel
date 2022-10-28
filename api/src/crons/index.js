@@ -57,7 +57,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
-    deleteInactiveRefs.handler();
   });
 
   // every tuesday at 0900
@@ -73,6 +72,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // everyday at 0200
   cron.schedule(everyHours(6), () => {
     apiEngagement.handler();
+    deleteInactiveRefs.handler();
   });
 
   cron.schedule(everyHours(6), () => {
