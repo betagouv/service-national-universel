@@ -49,7 +49,7 @@ export default function StepEligibilite() {
               departmentName: young.schoolDepartment,
               region: young.schoolRegion,
               country: young.schoolCountry,
-              _id: young.schoolId,
+              id: young.schoolId,
               postCode: young.schoolZip,
             }
           : null,
@@ -233,7 +233,7 @@ export default function StepEligibilite() {
                     </div>
                   </p>
 
-                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
+                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
                   {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
                 </div>
 

@@ -3,7 +3,7 @@ import { ES_NO_LIMIT } from "snu-lib";
 import CreatableSelect from "../../../components/CreatableSelect";
 import api from "../../../services/api";
 
-export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify }) {
+export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
@@ -61,34 +61,32 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
 
   return (
     <>
-      <div className="">
-        <CreatableSelect
-          label="Pays de l'établissement"
-          value={country}
-          options={countries.map((c) => ({ value: c, label: c }))}
-          onChange={(value) => {
-            setCountry(value);
-          }}
-          placeholder="Sélectionnez un pays"
-          error={errors.country}
-        />
-      </div>
-      <div className="form-group">
-        <CreatableSelect
-          label="Nom de l'établissement"
-          value={school && `${school.fullName}${school.city ? ` - ${school.city}` : ""}`}
-          options={schools
-            .map((e) => `${e.fullName} - ${e.city}`)
-            .sort()
-            .map((c) => ({ value: c, label: c }))}
-          onChange={(value) => {
-            const selectedSchool = schools.find((e) => `${e.fullName} - ${e.city}` === value);
-            onSelectSchool(selectedSchool ?? { fullName: value, country });
-          }}
-          placeholder="Sélectionnez un établissement"
-          error={errors.fullName}
-        />
-      </div>
+      <CreatableSelect
+        label="Pays de l'établissement"
+        value={country}
+        options={countries.map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          setCountry(value);
+        }}
+        placeholder="Sélectionnez un pays"
+        error={errors.country}
+        corrections={corrections?.country}
+      />
+      <CreatableSelect
+        label="Nom de l'établissement"
+        value={school && `${school.fullName}${school.city ? ` - ${school.city}` : ""}`}
+        options={schools
+          .map((e) => `${e.fullName} - ${e.city}`)
+          .sort()
+          .map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          const selectedSchool = schools.find((e) => `${e.fullName} - ${e.city}` === value);
+          onSelectSchool(selectedSchool ?? { fullName: value, country });
+        }}
+        placeholder="Sélectionnez un établissement"
+        error={errors.fullName}
+        correction={corrections?.schoolName}
+      />
     </>
   );
 }

@@ -18,16 +18,16 @@ export const messageStyles = {
   error: "error",
 };
 
-export default function SchoolInFrance({ school, onSelectSchool, toggleVerify }) {
+export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
-  const [manualFilling, setManualFilling] = useState(school?.addressVerified);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
   const [manualSchool, setManualSchool] = useState(school ?? {});
   const [errors, setErrors] = useState({});
 
-  const isVerifyAddressDisabled = !manualSchool.fullName || !manualSchool.address || !manualSchool.city || !manualSchool.postCode;
+  const isVerifyAddressDisabled = !manualSchool.fullName || !manualSchool.adresse || !manualSchool.city || !manualSchool.postCode;
 
   useEffect(() => {
     async function getCities() {
@@ -60,8 +60,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
       if (!manualSchool?.fullName) {
         errors.manualFullName = "Vous devez renseigner le nom de l'établissement";
       }
-      if (!manualSchool?.address) {
-        errors.manualAddress = "Vous devez renseigner une adresse";
+      if (!manualSchool?.adresse) {
+        errors.manualAdresse = "Vous devez renseigner une adresse";
       }
       if (!manualSchool?.city) {
         errors.manualCity = "Vous devez renseigner le nom de la ville";
@@ -94,13 +94,13 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     const newSchool = {
       ...manualSchool,
-      addressVerified: "true",
+      addressVerified: isConfirmed ? "true" : undefined,
       cityCode: suggestion.cityCode,
       region: suggestion.region,
       department: suggestion.department,
       location: suggestion.location,
       // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : manualSchool.address,
+      adresse: isConfirmed ? suggestion.address : manualSchool.adresse,
       postCode: isConfirmed ? suggestion.zip : manualSchool.postCode,
       city: isConfirmed ? suggestion.city : manualSchool.city,
     };
@@ -119,15 +119,17 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualFullName}
+        correction={corrections?.schoolName}
       />
       <Input
-        value={manualSchool.address}
+        value={manualSchool.adresse}
         label="Adresse de l'établissement"
         onChange={(value) => {
-          setManualSchool({ ...manualSchool, address: value, addressVerified: undefined });
+          setManualSchool({ ...manualSchool, adresse: value, addressVerified: undefined });
           onSelectSchool(null);
         }}
-        error={errors.manualAddress}
+        error={errors.manualAdresse}
+        correction={corrections?.schoolAddress}
       />
       <Input
         value={manualSchool.postCode}
@@ -137,6 +139,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualPostCode}
+        correction={corrections?.schoolZip}
       />
       <Input
         value={manualSchool.city}
@@ -146,12 +149,13 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
           onSelectSchool(null);
         }}
         error={errors.manualCity}
+        correction={corrections?.schoolCity}
       />
       <VerifyAddress
-        address={manualSchool.address}
+        address={manualSchool.adresse}
         disabled={isVerifyAddressDisabled}
         zip={manualSchool.postCode}
-        city={city}
+        city={manualSchool.city}
         onSuccess={onVerifyAddress(true)}
         onFail={onVerifyAddress(false)}
         isVerified={manualSchool.addressVerified}
@@ -175,40 +179,38 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify })
     </>
   ) : (
     <>
-      <div className="form-group">
-        <SearchableSelect
-          label="Commune de l'établissement"
-          value={city}
-          options={cities.map((c) => ({ value: c, label: c }))}
-          onChange={(value) => {
-            setCity(value);
-            setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
-            onSelectSchool(null);
-          }}
-          placeholder="Sélectionnez une commune"
-          error={errors.city}
-        />
-      </div>
-      <div className="form-group">
-        <CreatableSelect
-          label="Nom de l'établissement"
-          value={school && `${school.fullName} - ${school.adresse}`}
-          options={schools
-            .map((e) => `${e.fullName} - ${e.adresse}`)
-            .sort()
-            .map((c) => ({ value: c, label: c }))}
-          onChange={(value) => {
-            onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === value));
-          }}
-          placeholder="Sélectionnez un établissement"
-          onCreateOption={(value) => {
-            setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
-            onSelectSchool(null);
-            setManualFilling(true);
-          }}
-          error={errors.fullName}
-        />
-      </div>
+      <SearchableSelect
+        label="Commune de l'établissement"
+        value={city}
+        options={cities.map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          setCity(value);
+          setManualSchool({ city: value, addressVerified: undefined });
+          onSelectSchool(null);
+        }}
+        placeholder="Sélectionnez une commune"
+        error={errors.city}
+        correction={corrections?.schoolCity}
+      />
+      <CreatableSelect
+        label="Nom de l'établissement"
+        value={school && `${school.fullName} - ${school.adresse}`}
+        options={schools
+          .map((e) => `${e.fullName} - ${e.adresse}`)
+          .sort()
+          .map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === value));
+        }}
+        placeholder="Sélectionnez un établissement"
+        onCreateOption={(value) => {
+          setManualSchool({ city: manualSchool.city, fullName: value, addressVerified: undefined });
+          onSelectSchool(null);
+          setManualFilling(true);
+        }}
+        error={errors.fullName}
+        correction={corrections?.schoolName}
+      />
     </>
   );
 }

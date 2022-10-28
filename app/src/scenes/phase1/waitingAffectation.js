@@ -13,7 +13,7 @@ export default function WaitingAffectation({ young }) {
   return (
     <>
       <Container>
-        <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
+        <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center mb-8 lg:mb-0">
           <article>
             <h1 className="text-3xl md:text-5xl mb-4">
               Mon séjour de cohésion

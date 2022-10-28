@@ -1,26 +1,27 @@
 import React, { useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import Toggle from "../../../../components/inscription/toggle";
-import Input from "../../../../components/inscription/input";
-import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import { toastr } from "react-redux-toastr";
-import IconFrance from "../../../../assets/IconFrance";
+import { useHistory, useParams } from "react-router-dom";
 import validator from "validator";
-import plausibleEvent from "../../../../services/plausible";
-import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
-import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
-import SearchableSelect from "../../../../components/SearchableSelect";
+import IconFrance from "../../../../assets/IconFrance";
+import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import CheckBox from "../../../../components/inscription/checkbox";
-import { useDispatch, useSelector } from "react-redux";
-import { capture } from "../../../../sentry";
-import { getDepartmentByZip } from "snu-lib";
-import api from "../../../../services/api";
-import DatePickerList from "../../../preinscription/components/DatePickerList";
-import { setYoung } from "../../../../redux/auth/actions";
-import { translate } from "../../../../utils";
+import Toggle from "../../../../components/inscription/toggle";
+import plausibleEvent from "../../../../services/plausible";
+import { getCorrectionByStep } from "../../../../utils/navigation";
+import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
+import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
 
-import Navbar from "../../components/Navbar";
-import ModalSejour from "../../components/ModalSejour";
+import { useDispatch, useSelector } from "react-redux";
+import { getDepartmentByZip, YOUNG_STATUS } from "snu-lib";
+import { setYoung } from "../../../../redux/auth/actions";
+import { capture } from "../../../../sentry";
+import api from "../../../../services/api";
+import { translate } from "../../../../utils";
+import DatePickerList from "../../components/DatePickerList";
+
+import ModalSejourCorrection from "../../components/ModalSejourCorrection";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -31,11 +32,19 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [modal, setModal] = React.useState({ isOpen: false });
 
+  const [corrections, setCorrections] = React.useState({});
+
+  const { step } = useParams();
+
   const history = useHistory();
 
   useEffect(() => {
     if (!young) return;
-
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
+      const corrections = getCorrectionByStep(young, step);
+      if (!Object.keys(corrections).length) return history.push("/");
+      else setCorrections(corrections);
+    }
     setData({
       frenchNationality: young.frenchNationality,
       birthDate: new Date(young.birthdateAt),
@@ -49,7 +58,7 @@ export default function StepEligibilite() {
             departmentName: young.schoolDepartment,
             region: young.schoolRegion,
             country: young.schoolCountry,
-            _id: young.schoolId,
+            id: young.schoolId,
             postCode: young.schoolZip,
           }
         : null,
@@ -116,7 +125,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase1/CTA reinscription - eligibilite");
+    plausibleEvent("Phase0/CTA correction - eligibilite");
 
     const updates = {
       grade: data.scolarity,
@@ -131,7 +140,7 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,
       zip: data.zip,
-      birthDate: data.birthDate,
+      birthdateAt: new Date(data.birthDate),
     };
 
     try {
@@ -141,41 +150,49 @@ export default function StepEligibilite() {
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Impossible de vérifier votre éligibilité" });
-        setLoading(false);
-      }
+      if (!res.ok) throw new Error(translate(res.code));
 
-      // ! Grave de toucher au stepReinscription ?
-      if (res.data.msg) {
-        const res = await api.put("/young/reinscription/noneligible");
-        if (!res.ok) {
-          capture(res.code);
-          setLoading(false);
-        }
+      const cohorts = res.data.length > 0 ? res.data.filter((e) => e?.goalReached === false) : null;
+
+      if (res.data.msg || !cohorts) {
+        let res = await api.put("/young/inscription2023/noneligible");
+        if (!res.ok) throw new Error(translate(res.code));
+
+        res = await api.put("/young/inscription2023/eligibilite", updates);
+        if (!res.ok) throw new Error(translate(res.code));
+
         dispatch(setYoung(res.data));
-        return history.push("/reinscription/noneligible");
+        return history.push("/noneligible");
       }
 
-      updates.sessions = res.data;
+      updates.sessions = cohorts;
+
+      if (cohorts.some((c) => young.cohort === c.name)) {
+        const res = await api.put("/young/inscription2023/eligibilite", updates);
+        if (!res.ok) throw new Error(translate(res.code));
+        dispatch(setYoung(res.data));
+        toastr.success("La correction a été prise en compte");
+        history.push("/");
+      } else {
+        setModal({ data: updates, isOpen: true, onValidation });
+      }
     } catch (e) {
+      setLoading(false);
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
+  };
 
+  const onValidation = async (updates, cohort) => {
     try {
-      // ! Ne pas utiliser reinscription pour ne pas toucher au stepReinscription
-      const { ok, code, data: responseData } = await api.put("/young/reinscription/eligibilite", updates);
-      if (!ok) {
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
+      const res = await api.put("/young/inscription2023/eligibilite", updates);
+      if (!res.ok) throw new Error(translate(code));
+
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
+      if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
-      setModal({ isOpen: true });
-      // ! Au retour du modal apres validation, revenir vers
-      // return history.push("/reinscription/sejour");
+      toastr.success("La correction a été prise en compte");
+      history.push("/");
     } catch (e) {
       setLoading(false);
       capture(e);
@@ -198,7 +215,7 @@ export default function StepEligibilite() {
             <div className="flex flex-col flex-start">
               <div className="flex items-center">
                 <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-                <div className="flex items-center">
+                <div className="flex items-center backdrop-opacity-100">
                   <span className="ml-4 mr-2 text-[#929292]">Je suis de nationalité française</span>
                   <IconFrance />
                 </div>
@@ -206,23 +223,27 @@ export default function StepEligibilite() {
               {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
             </div>
             <div className="flex w-full space-x-4">
-              <div className="flex flex-col w-1/2">
-                <SearchableSelect
+              <div className="w-1/2">
+                <Select
                   label="Niveau de scolarité"
                   value={data.scolarity}
                   options={optionsScolarite}
                   onChange={(value) => {
                     setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
                   }}
-                  placeholder="Sélectionnez une option"
+                  error={error.scolarity}
+                  correction={corrections.grade}
                 />
-                {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
               </div>
-              <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
-                Date de naissance
-                <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-                {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
-              </label>
+              <div className="w-1/2">
+                <DatePickerList
+                  label="Date de naissance"
+                  value={data.birthDate}
+                  onChange={(date) => setData({ ...data, birthDate: new Date(date) })}
+                  error={error.birthDate}
+                  correction={corrections.birthdateAt}
+                />
+              </div>
             </div>
             {data.scolarity && (
               <>
@@ -236,29 +257,31 @@ export default function StepEligibilite() {
                     </div>
                   </p>
 
-                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
-                  {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
+                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
                 </div>
 
                 {data.scolarity !== "NOT_SCOLARISE" ? (
                   data.isAbroad ? (
                     <>
-                      <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                      <SchoolOutOfFrance
+                        school={data.school}
+                        onSelectSchool={(school) => setData({ ...data, school: school })}
+                        toggleVerify={toggleVerify}
+                        corrections={corrections}
+                      />
                     </>
                   ) : (
                     <>
-                      <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                      <SchoolInFrance
+                        school={data.school}
+                        onSelectSchool={(school) => setData({ ...data, school: school })}
+                        toggleVerify={toggleVerify}
+                        corrections={corrections}
+                      />
                     </>
                   )
                 ) : !data.isAbroad ? (
-                  <div className="flex flex-col flex-start my-4">
-                    Code Postal
-                    <div className="h-5 flex items-center">
-                      <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
-                    </div>
-                    <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                    {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
-                  </div>
+                  <Input value={data.lastName} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
                 ) : null}
               </>
             )}
@@ -273,7 +296,7 @@ export default function StepEligibilite() {
           </div>
         </div>
       </div>
-      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      <ModalSejourCorrection data={modal?.data} isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} onValidation={modal?.onValidation} />
     </>
   );
 }

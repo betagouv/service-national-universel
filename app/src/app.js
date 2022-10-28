@@ -34,6 +34,7 @@ import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
+import NonEligible from "./scenes/noneligible";
 import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
@@ -104,6 +105,7 @@ export default function App() {
             <SentryRoute path="/validate-contract" component={Contract} />
             <SentryRoute path="/inscription2023" component={Inscription2023} />
             {/* @todo: clean this */}
+            <SentryRoute path="/noneligible" component={NonEligible} />
             <SentryRoute path="/reinscription" component={ReInscription} />
             <SentryRoute path="/preinscription" component={PreInscription} />
             <SentryRoute path="/auth" component={AuthV2} />
@@ -151,6 +153,8 @@ const Espace = () => {
     if (redirect === "inscription") return <Redirect to="/preinscription" />;
     else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
+
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
 
   const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
   if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
