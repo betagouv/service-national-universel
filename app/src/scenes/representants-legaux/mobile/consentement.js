@@ -508,7 +508,7 @@ export default function Consentement({ step, parentId }) {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
+      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide" />
     </>
   );
 }

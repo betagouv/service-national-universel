@@ -6,7 +6,7 @@ const ErrorMessage = ({ children, className = "" }) => {
   return (
     <div className="flex items-center mt-2">
       <ErrorIconFill className="mr-2 fill-[#CE0500]" />
-      <div className={"text-[#CE0500] text-sm" + className}>{children}</div>
+      <div className={"text-[#CE0500] text-sm flex-1" + className}>{children}</div>
     </div>
   );
 };

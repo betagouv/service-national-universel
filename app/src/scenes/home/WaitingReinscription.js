@@ -19,7 +19,8 @@ export default function WaitingReinscription() {
   let textPrecision;
   if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour en 2022.";
   else if (young.cohort === "à venir") textPrecision = "Vous êtes inscrit sur un séjour “à venir”.";
-  else if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departInform == null) textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
+  else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departInform == null) || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
+    textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
   else return;
 
   const onClickEligibilte = async () => {
