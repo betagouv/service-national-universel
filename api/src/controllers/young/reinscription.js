@@ -36,8 +36,8 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
 
     const { error, value } = Joi.object({
       schooled: Joi.string().trim().required(),
-      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"),
-      schoolName: Joi.string().trim(),
+      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
+      schoolName: Joi.string().trim().required(),
       schoolType: Joi.string().trim(),
       schoolAddress: Joi.string().trim(),
       schoolZip: Joi.string().trim(),
@@ -56,6 +56,15 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
+      schoolType: "",
+      schoolAddress: "",
+      schoolZip: "",
+      schoolCity: "",
+      schoolDepartment: "",
+      schoolRegion: "",
+      schoolCountry: "",
+      schoolId: "",
+      zip: "",
       ...value,
       ...(value.livesInFrance === "true"
         ? {
