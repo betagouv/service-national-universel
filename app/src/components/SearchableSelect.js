@@ -14,10 +14,10 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sél
         isSearchable
         placeholder={placeholder}
         noOptionsMessage={() => "Pas d’options"}
+        error={correction || error}
       />
       <ErrorMessage>{error}</ErrorMessage>
       <ErrorMessage>{correction}</ErrorMessage>
-      {/* <div className="h-4 text-red-500 text-sm">{error}</div> */}
     </div>
   );
 };
@@ -41,12 +41,12 @@ const customStyles = {
       borderColor: "#EEEEEE",
       ["&:hover"]: {
         borderColor: "#EEEEEE",
-        borderBottom: "2px solid #3A3A3A",
+        borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
       },
       boxShadow: "0 0 0 0 #EEEEEE",
       borderTopLeftRadius: 4,
       borderTopRightRadius: 4,
-      borderBottom: "2px solid #3A3A3A",
+      borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
       background: "#EEEEEE",
       height: 40,
       paddingLeft: 24,

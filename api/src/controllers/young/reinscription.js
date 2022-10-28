@@ -36,17 +36,17 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
 
     const { error, value } = Joi.object({
       schooled: Joi.string().trim().required(),
-      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"),
-      schoolName: Joi.string().trim(),
-      schoolType: Joi.string().trim(),
-      schoolAddress: Joi.string().trim(),
-      schoolZip: Joi.string().trim(),
-      schoolCity: Joi.string().trim(),
-      schoolDepartment: Joi.string().trim(),
-      schoolRegion: Joi.string().trim(),
-      schoolCountry: Joi.string().trim(),
-      schoolId: Joi.string().trim(),
-      zip: Joi.string().trim(),
+      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
+      schoolName: Joi.string().trim().required(),
+      schoolType: Joi.string().trim().allow(null, ""),
+      schoolAddress: Joi.string().trim().allow(null, ""),
+      schoolZip: Joi.string().trim().allow(null, ""),
+      schoolCity: Joi.string().trim().allow(null, ""),
+      schoolDepartment: Joi.string().trim().allow(null, ""),
+      schoolRegion: Joi.string().trim().allow(null, ""),
+      schoolCountry: Joi.string().trim().allow(null, ""),
+      schoolId: Joi.string().trim().allow(null, ""),
+      zip: Joi.string().trim().allow(null, ""),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -56,6 +56,15 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
+      schoolType: "",
+      schoolAddress: "",
+      schoolZip: "",
+      schoolCity: "",
+      schoolDepartment: "",
+      schoolRegion: "",
+      schoolCountry: "",
+      schoolId: "",
+      zip: "",
       ...value,
       ...(value.livesInFrance === "true"
         ? {

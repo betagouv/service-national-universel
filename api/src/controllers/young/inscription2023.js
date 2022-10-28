@@ -39,7 +39,74 @@ const getObjectWithEmptyData = (fields, emptyValue = "") => {
   return object;
 };
 
-router.put("/notEligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const eligibilityScheme = {
+      birthdateAt: Joi.string().trim().required(),
+      schooled: Joi.string().trim().required(),
+      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
+      schoolName: Joi.string().trim().required(),
+      schoolType: Joi.string().trim().allow(null, ""),
+      schoolAddress: Joi.string().trim().allow(null, ""),
+      schoolZip: Joi.string().trim().allow(null, ""),
+      schoolCity: Joi.string().trim().allow(null, ""),
+      schoolDepartment: Joi.string().trim().allow(null, ""),
+      schoolRegion: Joi.string().trim().allow(null, ""),
+      schoolCountry: Joi.string().trim().allow(null, ""),
+      schoolId: Joi.string().trim().allow(null, ""),
+      zip: Joi.string().trim().allow(null, ""),
+    };
+
+    const { error, value } = Joi.object(eligibilityScheme).validate({ ...req.body }, { stripUnknown: true });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const keyList = Object.keys(eligibilityScheme);
+
+    const update = {
+      schoolType: "",
+      schoolAddress: "",
+      schoolZip: "",
+      schoolCity: "",
+      schoolDepartment: "",
+      schoolRegion: "",
+      schoolCountry: "",
+      schoolId: "",
+      zip: "",
+      ...value,
+      ...(value.livesInFrance === "true"
+        ? {
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
+        : {}),
+      ...validateCorrectionRequest(young, keyList),
+    };
+
+    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(update);
+
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/noneligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
