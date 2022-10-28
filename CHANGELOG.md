@@ -1,3 +1,11 @@
+# [1.157.0](https://github.com/betagouv/service-national-universel/compare/v1.156.0...v1.157.0) (2022-10-28)
+
+
+### Features
+
+* **app:** Correction stepEligibilite ([#1970](https://github.com/betagouv/service-national-universel/issues/1970)) ([8988834](https://github.com/betagouv/service-national-universel/commit/89888345f3b56592073bf9f0b6a512a97c56bfa3))
+* **app:** open reinscription to phase 1 exempted ([73f312c](https://github.com/betagouv/service-national-universel/commit/73f312cb4476d433b733ecf63b0d540d632349d3))
+
 # [1.156.0](https://github.com/betagouv/service-national-universel/compare/v1.155.0...v1.156.0) (2022-10-27)
 
 
