@@ -49,7 +49,10 @@ export default () => {
     if (
       [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST].includes(young.status) &&
       ["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort) &&
-      (young.cohort === "à venir" || young.status === YOUNG_STATUS.WAITING_LIST || (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departInform == null))
+      (young.cohort === "à venir" ||
+        young.status === YOUNG_STATUS.WAITING_LIST ||
+        (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departInform == null) ||
+        young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
     ) {
       return <WaitingReinscription />;
     }

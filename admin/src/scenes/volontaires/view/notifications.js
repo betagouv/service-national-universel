@@ -1,14 +1,15 @@
 import React from "react";
 
-import Wrapper from "./wrapper";
 import Emails from "../../../components/views/Emails";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function Notifications({ young, onChange }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <Wrapper young={young} tab="notifications" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="notifications" onChange={onChange} />
+      <div className="p-[30px]">
         <Emails email={young.email} />
-      </Wrapper>
-    </div>
+      </div>
+    </>
   );
 }

@@ -218,9 +218,9 @@ export default function StepRepresentants() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <div className="bg-[#f9f6f2] flex justify-center flex-col py-10">
+      <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="basis-[70%] mx-auto my-0">
-          <div className="bg-white   px-[102px] py-[60px]">
+          <div className="bg-white px-[102px] py-[60px]">
             <div className="w-full flex justify-between items-center mt-2">
               <h1 className="text-xl font-bold">Mes représentants légaux</h1>
               <a href={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`} target="_blank" rel="noreferrer">

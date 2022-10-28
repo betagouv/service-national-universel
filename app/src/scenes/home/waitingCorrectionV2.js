@@ -55,8 +55,8 @@ export default function WaitingCorrectionV2() {
       </div>
       {/* MOBILE */}
       <div className="flex lg:hidden w-full">
-        <div className="flex flex-col-reverse ">
-          <div className="px-4 pb-4">
+        <div className="flex flex-col-reverse w-full">
+          <div className="px-4 pb-4 flex-col w-full">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
@@ -68,7 +68,7 @@ export default function WaitingCorrectionV2() {
                 if (!["SENT", "REMINDED"].includes(correction.status)) return null;
                 return (
                   <>
-                    <div key={i} className="flex flex-col gap-4 ">
+                    <div key={i} className="flex flex-col gap-4 w-full">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <AiOutlineExclamationCircle className="text-red-500 font-bold" />

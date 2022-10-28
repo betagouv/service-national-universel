@@ -9,7 +9,6 @@ import { ENABLE_PM, ES_NO_LIMIT, translate, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } f
 import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
 import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
-import WrapperPhase2 from "../wrapper";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
@@ -20,6 +19,7 @@ import ExportComponent from "../../../../components/ExportXlsx";
 import { apiURL } from "../../../../config";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../sentry";
+import YoungHeader from "../../../phase0/components/YoungHeader";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
@@ -165,8 +165,9 @@ export default function Phase2({ young, onChange }) {
   }, []);
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase2" onChange={onChange} />
+      <div className="p-[30px]">
         <Box>
           <Row>
             <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
@@ -345,7 +346,7 @@ export default function Phase2({ young, onChange }) {
             </div>
           </div>
         ) : null}
-      </WrapperPhase2>
-    </div>
+      </div>
+    </>
   );
 }
