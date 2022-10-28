@@ -22,7 +22,7 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "cniExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
+  const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
 
   const IDs = [
     {
@@ -54,7 +54,7 @@ export default function StepDocuments() {
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
   if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
-  if (corrections?.some((e) => e.field === "cniExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
+  if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
   return (
     <>
       <Navbar />
