@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
@@ -18,7 +18,7 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests?.filter((e) => e.field === "cniFile" && ["SENT", "REMINDED"].includes(e.status));
+  const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "cniExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
 
   async function onSubmit() {
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
@@ -48,7 +48,9 @@ export default function StepDocuments() {
     },
   ];
 
-  if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return history.push("/");
+  if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
+  if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
+  if (corrections?.some((e) => e.field === "cniExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
   return (
     <DesktopPageContainer
       title="Ma pièce d’identité"
@@ -61,7 +63,7 @@ export default function StepDocuments() {
       {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&
         corrections.map((e) => (
           <ErrorMessage key={e._id}>
-            <strong>{translateCorrectionReason(e.reason)}</strong>
+            <strong>{translateCorrectionReason(e.reason) || translate(e.field)}</strong>
             {e.message && ` : ${e.message}`}
           </ErrorMessage>
         ))}

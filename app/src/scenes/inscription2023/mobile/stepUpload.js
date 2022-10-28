@@ -34,33 +34,61 @@ export default function StepUpload() {
   const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniExpirationDate");
 
   async function onSubmit() {
+    setLoading(true);
     for (const file of files) {
       if (file.size > 5000000)
         return setError({
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, date);
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
     if (res.code === "FILE_CORRUPTED")
       return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
     if (!res.ok) {
       capture(res.code);
-      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+      setLoading(false);
+      return;
     }
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
     if (!ok) {
       capture(code);
-      return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      setLoading(false);
+      return;
     }
     dispatch(setYoung(responseData));
-    plausibleEvent("Phase0/CTA inscription - CI mobile");
+    plausibleEvent("Phase0/CTA inscription - CI desktop");
     history.push("/inscription2023/confirm");
   }
 
   async function onCorrect() {
     setLoading(true);
+    if (files.length) {
+      for (const file of files) {
+        if (file.size > 5000000) {
+          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
+          setLoading(false);
+          return;
+        }
+      }
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+      if (res.code === "FILE_CORRUPTED") {
+        setError({
+          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+        });
+        setLoading(false);
+        return;
+      }
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setLoading(false);
+        return;
+      }
+    }
     try {
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
