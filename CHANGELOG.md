@@ -1,3 +1,16 @@
+# [1.156.0](https://github.com/betagouv/service-national-universel/compare/v1.155.0...v1.156.0) (2022-10-27)
+
+
+### Bug Fixes
+
+* **app:** inscription wording SD ([1d291e6](https://github.com/betagouv/service-national-universel/commit/1d291e6072ba7c404981a2b37d653af9299acb40))
+
+
+### Features
+
+* **app:** correction page coordonnee ([#1977](https://github.com/betagouv/service-national-universel/issues/1977)) ([d1ea29a](https://github.com/betagouv/service-national-universel/commit/d1ea29a57f109f6d08c8f952a305533123e187e2))
+* **app:** instruction correction RL ([#1969](https://github.com/betagouv/service-national-universel/issues/1969)) ([834232c](https://github.com/betagouv/service-national-universel/commit/834232cfe61c75068f7b55671ab0487a184e5ba9))
+
 # [1.155.0](https://github.com/betagouv/service-national-universel/compare/v1.154.0...v1.155.0) (2022-10-26)
 
 
