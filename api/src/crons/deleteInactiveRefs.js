@@ -29,7 +29,7 @@ exports.handler = async () => {
     let cursor = ReferentModel.find({
       role: { $in: ["referent_department", "referent_region"] },
       $or: [{ lastLoginAt: date }, { lastLoginAt: null, createdAt: date }],
-    });
+    }).cursor();
     await cursor.eachAsync(async function (ref) {
       await sendTemplate("615", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
     });
@@ -37,15 +37,15 @@ exports.handler = async () => {
     cursor = ReferentModel.find({
       role: { $in: ["referent_department", "referent_region"] },
       $or: [{ lastLoginAt: date.setDate(date.getDate() - 7) }, { lastLoginAt: null, createdAt: date.setDate(date.getDate() - 7) }],
-    });
+    }).cursor();
     await cursor.eachAsync(async function (ref) {
       await sendTemplate("616", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
     });
 
     cursor = ReferentModel.find({
       role: { $in: ["referent_department", "referent_region"] },
-      $or: [{ lastLoginAt: date.setDate(date.getDate() - 14) }, { lastLoginAt: null, createdAt: date.setDate(date.getDate() - 14) }],
-    });
+      $or: [{ lastLoginAt: { $lte: date.setDate(date.getDate() - 14) } }, { lastLoginAt: null, createdAt: { $lte: date.setDate(date.getDate() - 14) } }],
+    }).cursor();
     await cursor.eachAsync(async function (ref) {
       await deleteRef(ref);
       slack.info({ title: "Referent deleted", text: `Ref ${ref.email} has been deleted` });
