@@ -88,7 +88,7 @@ export default function StepDocuments() {
             </div>
           </Link>
         ))}
-        {young.files.cniFiles?.length > 0 && <MyDocs young={young} />}
+        <MyDocs />
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />

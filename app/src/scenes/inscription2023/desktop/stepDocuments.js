@@ -78,7 +78,7 @@ export default function StepDocuments() {
           </div>
         </div>
       ))}
-      <MyDocs young={young} />
+      <MyDocs />
     </DesktopPageContainer>
   );
 }

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "snu-lib";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import Bin from "../../../assets/icons/Bin";
 
-export default function MyDocs({ young, category = "" }) {
+export default function MyDocs({ category = "" }) {
+  const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [error, setError] = useState({});
   const files = category ? young?.files.cniFiles.filter((e) => e.category === category) : young?.files.cniFiles;

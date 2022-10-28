@@ -195,7 +195,7 @@ export default function StepUpload() {
         </a>
         .
       </div>
-      <MyDocs young={young} category={category} />
+      <MyDocs category={category} />
       {(files.length > 0 || date) && (
         <>
           <hr className="my-8 h-px bg-gray-200 border-0" />
