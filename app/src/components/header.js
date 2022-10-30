@@ -54,7 +54,7 @@ const Header = ({ setIsOpen }) => {
                 <img src={File} alt="" />
                 <div>Programme</div>
               </a>
-              <Link className="flex items-center space-x-1 py-1 px-3 cursor-pointer hover:font-bold hover:text-[#000091]" to={`/public-besoin-d-aide?from${pathname}`}>
+              <Link className="flex items-center space-x-1 py-1 px-3 cursor-pointer hover:font-bold hover:text-[#000091]" to={`/public-besoin-d-aide?from=${pathname}`}>
                 <Help />
                 <div>Besoin d&apos;aide</div>{" "}
               </Link>
