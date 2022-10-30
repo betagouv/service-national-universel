@@ -1,3 +1,10 @@
+## [1.157.1](https://github.com/betagouv/service-national-universel/compare/v1.157.0...v1.157.1) (2022-10-30)
+
+
+### Bug Fixes
+
+* **app:** contact form ([a62b33d](https://github.com/betagouv/service-national-universel/commit/a62b33d70515f01faffe7c7dcefbc83273128c7a))
+
 # [1.157.0](https://github.com/betagouv/service-national-universel/compare/v1.156.0...v1.157.0) (2022-10-28)
 
 
