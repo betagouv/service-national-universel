@@ -27,20 +27,22 @@ export default function StepUpload() {
   const [date, setDate] = useState();
 
   async function onSubmit() {
-    for (const file of files) {
-      if (file.size > 5000000)
+    if (files) {
+      for (const file of files) {
+        if (file.size > 5000000)
+          return setError({
+            text: `Ce fichier ${files.name} est trop volumineux.`,
+          });
+      }
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, date);
+      if (res.code === "FILE_CORRUPTED")
         return setError({
-          text: `Ce fichier ${files.name} est trop volumineux.`,
+          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
         });
-    }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, date);
-    if (res.code === "FILE_CORRUPTED")
-      return setError({
-        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      });
-    if (!res.ok) {
-      capture(res.code);
-      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      if (!res.ok) {
+        capture(res.code);
+        return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier" });
+      }
     }
     const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
     if (!ok) {
@@ -148,7 +150,7 @@ export default function StepUpload() {
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Me réinscrire au SNU" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={onSubmit} disabled={!date} />
+      <StickyButton text="Me réinscrire au SNU" onClick={onSubmit} disabled={!date} />
     </>
   );
 }

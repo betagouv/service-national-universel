@@ -31,7 +31,11 @@ export default function ModalSejour({ isOpen, onCancel }) {
           frenchNationality: young.frenchNationality,
         });
         if (res.data.msg) return setError({ text: res.data.msg });
-        setCohorts(res.data);
+        const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+        if (sessionsFiltered.length === 0) {
+          setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
+        }
+        setCohorts(sessionsFiltered);
       } catch (e) {
         capture(e);
         setCohorts([]);
@@ -107,7 +111,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
     return (
       <div
         key={session.id}
-        className="border p-4 my-3 flex justify-between items-center"
+        className="border p-4 my-3 flex justify-between items-center hover:bg-gray-50 cursor-pointer"
         onClick={() => {
           plausibleEvent(session.event);
           onSubmit(session.name);

@@ -1,10 +1,11 @@
 import React from "react";
 import Select from "react-select";
+import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
 
-const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "" }) => {
+const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", correction = "" }) => {
   return (
     <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
-      <label className="my-2">{label}</label>
+      <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
       <Select
         styles={customStyles}
         value={options.find((option) => option.value === value)}
@@ -13,8 +14,10 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sél
         isSearchable
         placeholder={placeholder}
         noOptionsMessage={() => "Pas d’options"}
+        error={correction || error}
       />
-      <div className="h-4 text-red-500 text-sm">{error}</div>
+      <ErrorMessage>{error}</ErrorMessage>
+      <ErrorMessage>{correction}</ErrorMessage>
     </div>
   );
 };
@@ -38,12 +41,12 @@ const customStyles = {
       borderColor: "#EEEEEE",
       ["&:hover"]: {
         borderColor: "#EEEEEE",
-        borderBottom: "2px solid #3A3A3A",
+        borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
       },
       boxShadow: "0 0 0 0 #EEEEEE",
       borderTopLeftRadius: 4,
       borderTopRightRadius: 4,
-      borderBottom: "2px solid #3A3A3A",
+      borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
       background: "#EEEEEE",
       height: 40,
       paddingLeft: 24,

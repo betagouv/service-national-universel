@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
-const { getCohortSessionsAvailability } = require("../utils/cohort");
+const { getCohortSessionsAvailability, isGoalReached } = require("../utils/cohort");
 const { getDepartmentNumber, getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
@@ -134,7 +134,6 @@ router.post("/eligibility/2023", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { department, birthDate, schoolLevel, frenchNationality } = value;
-    console.log("🚀 ~ file: cohort-session.js ~ line 137 ~ router.post ~ value", value);
 
     if (!frenchNationality) return res.send({ ok: true, data: { msg: "Pour participer au SNU, vous devez être de nationalité française." } });
 
@@ -160,23 +159,10 @@ router.post("/eligibility/2023", async (req, res) => {
     if (sessionsFiltered.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
 
     // Check inscription goals
-    if (sessionsFiltered.length) {
-      for (let session of sessionsFiltered) {
-        const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.name });
-        if (!inscriptionGoal || !inscriptionGoal.max) continue;
-        const nbYoung = await YoungModel.countDocuments({
-          department: department,
-          cohort: session.name,
-          status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-        });
-        if (nbYoung === 0) continue;
-        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-        if (fillingRatio >= 1) sessionsFiltered = sessionsFiltered.filter((e) => e.id !== session.id);
-      }
+    for (let session of sessionsFiltered) {
+      if (isGoalReached(department, session.name) === true) session.goalReached = true;
+      else session.goalReached = false;
     }
-    if (sessionsFiltered.length === 0)
-      return res.send({ ok: true, data: { msg: "Il n'y a malheuseusement plus de places disponibles pour les volontaires de votre département." } });
-
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
     capture(error);

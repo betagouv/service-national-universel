@@ -115,8 +115,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     syncContactSupport.handler();
   });
 
-  // cron.schedule("0 2 * * *", () => {
-  cron.schedule("0 16 * * *", () => {
+  cron.schedule("0 2 * * *", () => {
     youngPatches.handler();
   });
 }

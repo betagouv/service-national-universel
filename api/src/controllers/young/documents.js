@@ -273,8 +273,8 @@ router.post(
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+            capture(`File ${name} of user(${req.user.id})is infected`);
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
           }
         }
 
@@ -305,6 +305,10 @@ router.post(
         // Add record to young
 
         young.files[key].push(newFile);
+        if (key === "cniFiles") {
+          young.latestCNIFileExpirationDate = body.expirationDate;
+          young.latestCNIFileCategory = body.category;
+        }
       }
 
       // Save young with new records

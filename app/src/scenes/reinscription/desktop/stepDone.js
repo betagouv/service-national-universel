@@ -1,20 +1,20 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { translate } from "snu-lib";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
+import ConsentDone from "../../../assets/icons/ConsentDone";
 import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
-import Validate from "../assets/Validate";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import Error from "../../../components/error";
-import Avatar from "../../inscription2023/assets/avatar.png";
-import ErrorPic from "../../inscription2023/assets/error.png";
+import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate } from "snu-lib";
-import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../../redux/auth/actions";
+import Avatar from "../../inscription2023/assets/avatar.png";
+import ErrorPic from "../../inscription2023/assets/error.png";
 
 const engagementPrograms = [
   {
@@ -113,25 +113,27 @@ export default function StepWaitingConsent() {
 
   return !notAuthorised ? (
     young?.parentAllowSNU === "true" ? (
-      <div className="bg-white p-4 text-[#161616] w-3/4 mx-auto h-96">
-        <div className="w-full flex items-center">
-          <Validate className="h-12 w-12" />
-          <h1 className="text-xl font-semibold ml-2">
-            {young.firstName} {young.lastName}, bienvenue au SNU !
-          </h1>
-        </div>
-        <hr className="my-3 h-px bg-gray-200 border-0" />
-        <p className="mb-4">
-          Bonne nouvelle, <strong> votre inscription a déjà été validée.</strong>
-        </p>
-        <hr className="my-5 h-px bg-gray-200 border-0" />
-        <div className="flex flex-col items-end w-full">
-          <div className="flex justify-end space-x-4">
-            <button
-              className="flex items-center justify-center py-2 px-4 hover:!text-[#000091] border-[1px] hover:border-[#000091] hover:bg-white cursor-pointer bg-[#000091] text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
-              onClick={handleDone}>
-              Revenir à mon compte volontaire
-            </button>
+      <div className="bg-[#f9f6f2] flex justify-center py-10">
+        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616] relative">
+          <h2 className="font-bold text-[#161616] text-[32px] leading-[40px] pb-[32px] border-b-solid border-b-[1px] border-b-[#E5E5E5] m-[0] mb-[32px]">
+            {young.firstName}, bienvenue au SNU !
+          </h2>
+          <p>
+            Bonne nouvelle, <strong>votre inscription a déjà été validée</strong>.
+          </p>
+          <hr className="my-4 h-px bg-gray-200 border-0" />
+          <div className="flex flex-col items-end w-full mt-4">
+            <div className="flex justify-end space-x-4">
+              <button
+                className="flex items-center justify-center py-2 px-4 hover:!text-[#000091] border-[1px] hover:border-[#000091] hover:bg-white cursor-pointer bg-[#000091] text-white disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-[#E5E5E5]"
+                onClick={() => handleDone()}>
+                Accéder à mon compte volontaire
+              </button>
+            </div>
+          </div>
+
+          <div className="absolute top-[30px] right-[30px]">
+            <ConsentDone />
           </div>
         </div>
       </div>
@@ -141,9 +143,7 @@ export default function StepWaitingConsent() {
           <div className="bg-white p-4 text-[#161616]">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <h1 className="text-[32px] font-bold mt-2">Bravo, vous avez terminé votre inscription.</h1>
-            <div className="text-[#666666] text-sm mt-4">
-              Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
-            </div>
+            <div className="text-[#666666] text-sm mt-4">Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera validé.</div>
 
             <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] py-[32px] px-[48px] gap-1">
               <div className="flex items-center justify-between">

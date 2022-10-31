@@ -18,7 +18,6 @@ const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
-const InscriptionGoalModel = require("../../models/inscriptionGoal");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
@@ -50,6 +49,7 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
+const { isGoalReached } = require("../../utils/cohort");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -171,8 +171,8 @@ router.post(
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+            capture(`File ${name} of user(${user._id})is infected`);
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
           }
         }
 
@@ -511,33 +511,12 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ meetingPointId: undefined });
     }
 
-    let inscriptionGoal = await InscriptionGoalModel.findOne({ department: young.department, cohort });
-    let goalIsReached = false;
-
-    if (inscriptionGoal && inscriptionGoal.max) {
-      const nbYoung = await YoungObject.find({
-        department: young.department,
-        cohort,
-        status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-      }).count();
-      if (nbYoung === 0) {
-        goalIsReached = false;
-      } else {
-        const buffer = 1.25;
-        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * buffer);
-        if (fillingRatio >= 1) goalIsReached = true;
-        else goalIsReached = false;
-      }
-    } else {
-      goalIsReached = false;
-    }
-
     // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
     if (!young.originalCohort) {
       young.set({ originalCohort: young.cohort });
     }
 
-    if (goalIsReached === true) {
+    if (isGoalReached(young.department, cohort) === true) {
       young.set({
         cohort,
         cohortChangeReason,

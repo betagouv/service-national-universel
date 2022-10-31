@@ -13,14 +13,13 @@ import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
 import Error from "../../../components/error";
-import Bin from "../../../assets/icons/Bin";
 import Help from "../../inscription2023/components/Help";
+import MyDocs from "../../inscription2023/components/MyDocs";
 
 export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [files, setFiles] = useState(young?.files.cniFiles);
   const [error, setError] = useState({});
 
   const IDs = [
@@ -39,17 +38,6 @@ export default function StepDocuments() {
       title: "Passeport",
     },
   ];
-
-  async function deleteFile(fileId) {
-    try {
-      const res = await api.remove(`/young/${young._id}/documents/cniFiles/${fileId}`);
-      if (!res.ok) setError({ text: "Wesh" });
-      setFiles(res.data);
-    } catch (e) {
-      capture(e);
-      setError({ text: "Impossible de supprimer ce fichier." });
-    }
-  }
 
   async function onSubmit() {
     const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
@@ -87,33 +75,16 @@ export default function StepDocuments() {
             </div>
           </Link>
         ))}
-        {files?.length > 0 && (
-          <>
-            <h2 className="text-base text-gray-800 font-semibold my-2">Documents en ligne&nbsp;:</h2>
-            <div className="space-y-2">
-              {files.map((e) => (
-                <div key={e._id} className="flex w-full justify-between">
-                  <div className="w-2/3">
-                    <p className="text-gray-800 text-sm truncate">{e.name}</p>
-                    <p className="text-gray-600 text-xs truncate">{translate(e.category)}</p>
-                  </div>
-                  <div className="text-blue-800 flex">
-                    <div className="mt-1 mr-1">
-                      <Bin />
-                    </div>
-                    <p className="text-sm font-medium cursor-pointer" onClick={() => deleteFile(e._id)}>
-                      Supprimer
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        <MyDocs />
       </div>
       <Help />
-      <Footer marginBottom={"88px"} />
-      <StickyButton text="Me réinscrire au SNU" onSubmit={onSubmit} onClickPrevious={() => history.push("/reinscription/consentement")} disabled={!files} />
+      <Footer marginBottom={"mb-[88px]"} />
+      <StickyButton
+        text="Me réinscrire au SNU"
+        onClick={onSubmit}
+        onClickPrevious={() => history.push("/reinscription/consentement")}
+        disabled={young?.files.cniFiles.length === 0}
+      />
     </>
   );
 }

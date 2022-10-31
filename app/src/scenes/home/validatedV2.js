@@ -34,7 +34,7 @@ export default function ValidatedV2() {
                     plausibleEvent("Phase1/CTA - Fill documents");
                     history.push("/phase1");
                   }}>
-                  Fournir mes documents justificatifs
+                  Fournir ma fiche sanitaire
                 </button>
                 <div className="ml-28 mt-2">
                   <PrepareSejour />
@@ -65,7 +65,7 @@ export default function ValidatedV2() {
                 plausibleEvent("Phase1/CTA - Fill documents");
                 history.push("/phase1");
               }}>
-              Fournir mes documents justificatifs
+              Fournir ma fiche sanitaire
             </button>
             <div className="ml-28 mt-2">
               <PrepareSejour />

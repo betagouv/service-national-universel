@@ -1,22 +1,22 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { translate } from "snu-lib";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
+import ConsentDone from "../../../assets/icons/ConsentDone";
 import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import Error from "../../../components/error";
-import Avatar from "../../inscription2023/assets/avatar.png";
-import ErrorPic from "../../inscription2023/assets/error.png";
-import Validate from "../assets/Validate";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
-import { translate } from "snu-lib";
-import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../../redux/auth/actions";
 import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
+import { setYoung } from "../../../redux/auth/actions";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import Avatar from "../../inscription2023/assets/avatar.png";
+import ErrorPic from "../../inscription2023/assets/error.png";
 
 const engagementPrograms = [
   {
@@ -119,18 +119,18 @@ export default function StepWaitingConsent() {
       {young?.parentAllowSNU === "true" ? (
         <>
           <div className="bg-white p-4 text-[#161616]">
-            <div className="w-full flex items-center">
-              <Validate className="h-12 w-12" />
-              <h1 className="text-xl font-semibold ml-2">
-                {young.firstName} {young.lastName}, bienvenue au SNU !
-              </h1>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <ConsentDone />
+                <h1 className="text-[22px] font-bold flex-1"> {young.firstName}, bienvenue au SNU !</h1>
+              </div>
+              <hr className="my-2 h-px bg-gray-200 border-0" />
+              <p className="text-[#161616] text-base ">
+                Bonne nouvelle, <strong>votre inscription a déjà été validée</strong>.
+              </p>
             </div>
-            <hr className="my-3 h-px bg-gray-200 border-0" />
-            <p className="mb-4">
-              Bonne nouvelle, <strong> votre inscription a déjà été validée.</strong>
-            </p>
           </div>
-          <Footer marginBottom={"88px"} />
+          <Footer marginBottom="mb-[88px]" />
           <StickyButton text="Revenir à mon compte volontaire" onClick={handleDone} />
         </>
       ) : (

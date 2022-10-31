@@ -59,7 +59,7 @@ export default function Consentement({ step, parentId }) {
       }
 
       let address;
-      if (young[`parent${parentId}OwnAddress`]) {
+      if (young[`parent${parentId}OwnAddress`] === "true") {
         address = {
           address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
           addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
@@ -88,7 +88,6 @@ export default function Consentement({ step, parentId }) {
       const confirmAddress = !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true });
 
       const internalRules = stringToBoolean(young[`rulesParent${parentId}`]);
-
       setData({
         firstName: young[`parent${parentId}FirstName`] ? young[`parent${parentId}FirstName`] : "",
         lastName: young[`parent${parentId}LastName`] ? young[`parent${parentId}LastName`] : "",
@@ -283,6 +282,9 @@ export default function Consentement({ step, parentId }) {
       body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
     }
 
+    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
+    else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
+
     try {
       const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
@@ -298,7 +300,6 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
-    plausibleEvent("Phase0/CTA representant legal - Consentement valide");
     if (parentId === 1) {
       history.push(`/representants-legaux/done?token=${token}`);
     } else {
@@ -344,6 +345,7 @@ export default function Consentement({ step, parentId }) {
               <div className="flex-grow-1">
                 <b>Je réside</b> {formattedAddress}
               </div>
+
               <Toggle onClick={() => setData({ ...data, confirmAddress: !data.confirmAddress })} toggled={data.confirmAddress} />
               {errors.confirmAddress ? <span className="text-red-500 text-sm">{errors.confirmAddress}</span> : null}
             </div>
@@ -513,7 +515,7 @@ export default function Consentement({ step, parentId }) {
                 Précédent
               </BorderButton>
               <PlainButton onClick={onSubmit} spinner={saving}>
-                Je valide mon consentement
+                Je valide
               </PlainButton>
             </div>
           </div>

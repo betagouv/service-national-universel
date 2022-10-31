@@ -1,3 +1,109 @@
+## [1.157.1](https://github.com/betagouv/service-national-universel/compare/v1.157.0...v1.157.1) (2022-10-30)
+
+
+### Bug Fixes
+
+* **app:** contact form ([a62b33d](https://github.com/betagouv/service-national-universel/commit/a62b33d70515f01faffe7c7dcefbc83273128c7a))
+
+# [1.157.0](https://github.com/betagouv/service-national-universel/compare/v1.156.0...v1.157.0) (2022-10-28)
+
+
+### Features
+
+* **app:** Correction stepEligibilite ([#1970](https://github.com/betagouv/service-national-universel/issues/1970)) ([8988834](https://github.com/betagouv/service-national-universel/commit/89888345f3b56592073bf9f0b6a512a97c56bfa3))
+* **app:** open reinscription to phase 1 exempted ([73f312c](https://github.com/betagouv/service-national-universel/commit/73f312cb4476d433b733ecf63b0d540d632349d3))
+
+# [1.156.0](https://github.com/betagouv/service-national-universel/compare/v1.155.0...v1.156.0) (2022-10-27)
+
+
+### Bug Fixes
+
+* **app:** inscription wording SD ([1d291e6](https://github.com/betagouv/service-national-universel/commit/1d291e6072ba7c404981a2b37d653af9299acb40))
+
+
+### Features
+
+* **app:** correction page coordonnee ([#1977](https://github.com/betagouv/service-national-universel/issues/1977)) ([d1ea29a](https://github.com/betagouv/service-national-universel/commit/d1ea29a57f109f6d08c8f952a305533123e187e2))
+* **app:** instruction correction RL ([#1969](https://github.com/betagouv/service-national-universel/issues/1969)) ([834232c](https://github.com/betagouv/service-national-universel/commit/834232cfe61c75068f7b55671ab0487a184e5ba9))
+
+# [1.155.0](https://github.com/betagouv/service-national-universel/compare/v1.154.0...v1.155.0) (2022-10-26)
+
+
+### Bug Fixes
+
+* **admin/api:** wording contrat ([844b42b](https://github.com/betagouv/service-national-universel/commit/844b42b869b0ac23a33d03729bf7829b9103114a))
+* **app:** Fix old footer rerender on particular pages ([69c8847](https://github.com/betagouv/service-national-universel/commit/69c8847e8c6e9f281c6a3d3ec0837d974e277c5b))
+* **app:** hide situation infos for RL1 ([#1971](https://github.com/betagouv/service-national-universel/issues/1971)) ([d621aa1](https://github.com/betagouv/service-national-universel/commit/d621aa1092687ce429cfe0ffe971e9f2a0061fbc))
+* **app:** radio button style ([#1972](https://github.com/betagouv/service-national-universel/issues/1972)) ([65b8351](https://github.com/betagouv/service-national-universel/commit/65b8351a8f00ba85e5701941da91a1bdf77ad302))
+* **app:** reinscription home ([94a8e1a](https://github.com/betagouv/service-national-universel/commit/94a8e1a637d9dc2d41f0b9d33f52121100827649))
+
+
+### Features
+
+* **app:** open réinscriptions ([#1974](https://github.com/betagouv/service-national-universel/issues/1974)) ([4915e93](https://github.com/betagouv/service-national-universel/commit/4915e934a5d958fc91868f64a8b4618522dfb196))
+
+# [1.154.0](https://github.com/betagouv/service-national-universel/compare/v1.153.0...v1.154.0) (2022-10-25)
+
+
+### Bug Fixes
+
+* **api/app:** Correction cote jeune routes ([#1963](https://github.com/betagouv/service-national-universel/issues/1963)) ([30dd1ef](https://github.com/betagouv/service-national-universel/commit/30dd1ef5c0f46b4e7ed225230a3e9f3bc8fe4f77))
+* **app:** correct young patch trigger time ([3c7722a](https://github.com/betagouv/service-national-universel/commit/3c7722a40d92debbebf6493b69f73108b429f30b))
+
+
+### Features
+
+* **app:** correction profil ([#1968](https://github.com/betagouv/service-national-universel/issues/1968)) ([b78b78c](https://github.com/betagouv/service-national-universel/commit/b78b78c5161abb4c7af653db6d87c3eb40623630))
+* **app:** home page waiting correction ([#1966](https://github.com/betagouv/service-national-universel/issues/1966)) ([c393a1b](https://github.com/betagouv/service-national-universel/commit/c393a1b413706f31fa15ff735112faf6c39569b1))
+
+# [1.153.0](https://github.com/betagouv/service-national-universel/compare/v1.152.0...v1.153.0) (2022-10-24)
+
+
+### Bug Fixes
+
+* **admin:** Close inscriptions for non admin ([e34dbaf](https://github.com/betagouv/service-national-universel/commit/e34dbaf1ab8a800e70976fc1561c2c7e4173f91c))
+* **admin:** Fix correction cni ([c793c31](https://github.com/betagouv/service-national-universel/commit/c793c31676762952645c9bfebbba3c8b2a4fa575))
+* **admin:** Redirect to home except admin ([5986980](https://github.com/betagouv/service-national-universel/commit/59869800b7c9a21da5588025966c3f388442c7c9))
+* **api:** Reinscription token ([9ab68ed](https://github.com/betagouv/service-national-universel/commit/9ab68ed7b3010c984f09a4d82e7b8c687af5b3b1))
+* **api:** token représentant généré une seul fois ([#1958](https://github.com/betagouv/service-national-universel/issues/1958)) ([01ee305](https://github.com/betagouv/service-national-universel/commit/01ee305d48a7a717e1c127a9e0a3d7061bf904a6))
+* **api:** validation contrat ([#1953](https://github.com/betagouv/service-national-universel/issues/1953)) ([c7f269a](https://github.com/betagouv/service-national-universel/commit/c7f269ae4c8fbec4f5719047825cbb9ef4d97862))
+* **api/app:** réinscription done ([#1956](https://github.com/betagouv/service-national-universel/issues/1956)) ([275c9a1](https://github.com/betagouv/service-national-universel/commit/275c9a112cccb85e79d05595048ba04d43a29444))
+* **app:** accept CGU ([1a2b873](https://github.com/betagouv/service-national-universel/commit/1a2b873d59c5b63402baf08f3f192fdb56a0b0fa))
+* **app:** Adjust reason ([f736738](https://github.com/betagouv/service-national-universel/commit/f7367381e713edf8a89d88717f5e7516be39da08))
+* **app:** change sejour ([6931a9e](https://github.com/betagouv/service-national-universel/commit/6931a9eb84c4ce87fe77783ce495858e9d1bcd04))
+* **app:** consentement ([35e50af](https://github.com/betagouv/service-national-universel/commit/35e50af7d63ade872ba4790e8da902423818f331))
+* **app:** Do not verify if not manual school filled ([eabafc9](https://github.com/betagouv/service-national-universel/commit/eabafc9f2e454c2b0f684e5a97d5c43035ac1000))
+* **app:** fix address saving and eligibility query reinscription & preinscription ([4c9d15f](https://github.com/betagouv/service-national-universel/commit/4c9d15f9f57cab5a060aac3c4b9f0e5f5918924d))
+* **app:** Fix checkbox + reinscription ([4e72799](https://github.com/betagouv/service-national-universel/commit/4e72799136656bbedf86e0d2ec06d999d0bc6f84))
+* **app:** Fix modal change sejour ([f47fcb2](https://github.com/betagouv/service-national-universel/commit/f47fcb2009a7716eeaa2290e724ba0823cf00148))
+* **app:** Fix reinscription ([1a3b896](https://github.com/betagouv/service-national-universel/commit/1a3b896c3d3e7b2aa367cb7b62bbb1e48e5d2458))
+* **app:** footer ([beb36d6](https://github.com/betagouv/service-national-universel/commit/beb36d6cc79dbb9b116b131f86ff8ef5cd411f93))
+* **app:** Link page confirm ([d964dd7](https://github.com/betagouv/service-national-universel/commit/d964dd709b080f640b5253cbb0c5f2ac8471daf2))
+* **app:** Manual filling address ([8ad6738](https://github.com/betagouv/service-national-universel/commit/8ad67385c84c71aad84fdf39e84140cb4ccb8d22))
+* **app:** missing school data ([#1949](https://github.com/betagouv/service-national-universel/issues/1949)) ([eb9deb9](https://github.com/betagouv/service-national-universel/commit/eb9deb9c26763f230a84e229878311b17084508d))
+* **app:** plus de landing page ([796ed94](https://github.com/betagouv/service-national-universel/commit/796ed9428b4521ea5d985da70e59910d21f0cc00))
+* **app:** redirect inscription ([a4c1b70](https://github.com/betagouv/service-national-universel/commit/a4c1b70fb88f53730013ee1c17ab645196aa35b2))
+* **app:** reinscription desktop ([68a7368](https://github.com/betagouv/service-national-universel/commit/68a736836f1562e2fcb599247e0d1b78257efccc))
+* **app:** Verify adress ([024b358](https://github.com/betagouv/service-national-universel/commit/024b3588b69046f78bc005bc1942587e1515cae7))
+* **gihub:** Self host github ([d783377](https://github.com/betagouv/service-national-universel/commit/d7833774bd2f3ac24fc9867002631f9ef5db7591))
+* **github:** Change to ubuntu 20 runner ([16eb1d0](https://github.com/betagouv/service-national-universel/commit/16eb1d08e70d065759592b05266e585e2eca3f58))
+* **github:** Change to ubuntu 22 runner ([687f8dc](https://github.com/betagouv/service-national-universel/commit/687f8dc8a57ca8bbf1705a0e6ce4301371f415aa))
+* **github:** Run api github on github machines ([4608006](https://github.com/betagouv/service-national-universel/commit/4608006349c707e0105dd26545e8a79d868bc240))
+
+
+### Features
+
+* **api/analytics:** add young patch log cron ([#1945](https://github.com/betagouv/service-national-universel/issues/1945)) ([b494277](https://github.com/betagouv/service-national-universel/commit/b4942777ccb4ec4957d66b862731fd5cfd17e487))
+* **api/app:** Update reinscription with new step ([#1955](https://github.com/betagouv/service-national-universel/issues/1955)) ([41814c9](https://github.com/betagouv/service-national-universel/commit/41814c934d6e70b58fd70a680c8a63a25ab4bab4))
+* **app:** ouverture inscription 2023 ([#1942](https://github.com/betagouv/service-national-universel/issues/1942)) ([86bbd47](https://github.com/betagouv/service-national-universel/commit/86bbd47eb627600d3e093e707c41244a6cea31cb))
+* **app:** phase 1 Waiting-affectation ([efcd881](https://github.com/betagouv/service-national-universel/commit/efcd8811f581020939a802704abbf2d3f81890b6))
+* **app:** Rework reinscription ([#1938](https://github.com/betagouv/service-national-universel/issues/1938)) ([420f2c4](https://github.com/betagouv/service-national-universel/commit/420f2c45e986f662e99d55ad41774dd8a8c7dbb2))
+
+
+### Reverts
+
+* Revert "fix(github): Run on both self-hosted and ubuntu-latest" ([3467792](https://github.com/betagouv/service-national-universel/commit/3467792e1370f1783df2812c5575d1824c371b17))
+
 # [1.152.0](https://github.com/betagouv/service-national-universel/compare/v1.151.0...v1.152.0) (2022-10-18)
 
 

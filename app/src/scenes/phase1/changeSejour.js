@@ -22,6 +22,7 @@ export default function changeSejour() {
   const [modalConfirmControlOk, setmodalConfirmControlOk] = useState(false);
   const [modalConfirmGoalReached, setmodalConfirmGoalReached] = useState(false);
   const [sejours, setSejours] = useState(null);
+  const [sejourGoal, setSejourGoal] = useState(null);
   const [isEligible, setIsElegible] = useState(false);
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
@@ -48,11 +49,17 @@ export default function changeSejour() {
         const isArray = Array.isArray(data);
         if (isArray) {
           const sejourGoal = data.map((e) => {
+            // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
+            //var date = new Date();
+            //console.log(date.toISOString());
+            //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer
             return { sejour: e.name, goal: e.goalReached };
           });
           const sejour = sejourGoal.map((e) => e.sejour);
+
           setSejours(sejour);
-          setIsElegible(true);
+          setIsElegible(!!data);
+          setSejourGoal(sejourGoal);
         } else {
           setIsElegible(false);
           setSejours([]);
@@ -67,7 +74,13 @@ export default function changeSejour() {
 
   const onConfirmer = () => {
     if (newSejour && motif) {
-      setmodalConfirmControlOk(true);
+      let isGoalTrue = sejourGoal.find((obj) => obj.goal === true && obj.sejour === newSejour);
+      //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
+      if (isGoalTrue === undefined) {
+        setmodalConfirmControlOk(true);
+      } else {
+        setmodalConfirmGoalReached(true);
+      }
     } else {
       toastr.info("Veuillez renseigner tous les champs");
     }
@@ -84,7 +97,7 @@ export default function changeSejour() {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", translate(code));
       }
-      toastr.success("Cohorte modifiée avec succés. Votre nouvelle cohorte se tiendra en " + newSejour);
+      toastr.success("Cohorte modifiée avec succés. Votre nouvelle session se tiendra en " + newSejour);
       dispatch(setYoung(data));
       setmodalConfirmControlOk(false);
       history.push("/phase1");

@@ -55,7 +55,7 @@ const CorrectionRequest = new mongoose.Schema({
     type: String,
     required: true,
     default: "PENDING",
-    enum: ["PENDING" | "SENT" | "REMINDED" | "CORRECTED" | "CANCELED"],
+    enum: ["PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED"],
     documentation: {
       description: "Etat de la demande de correction",
     },
@@ -1650,6 +1650,21 @@ const Schema = new mongoose.Schema({
     militaryPreparationFilesCensus: [File],
     militaryPreparationFilesAuthorization: [File],
     militaryPreparationFilesCertificate: [File],
+  },
+
+  latestCNIFileExpirationDate: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  latestCNIFileCategory: {
+    type: String,
+    enum: ["cniOld", "cniNew", "passport"],
+    documentation: {
+      description: "Catégorie du fichier le plus récent dans files.cniFiles",
+    },
   },
 
   missionsInMail: {

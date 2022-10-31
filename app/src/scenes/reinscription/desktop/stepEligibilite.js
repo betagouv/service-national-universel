@@ -49,7 +49,7 @@ export default function StepEligibilite() {
               departmentName: young.schoolDepartment,
               region: young.schoolRegion,
               country: young.schoolCountry,
-              _id: young.schoolId,
+              id: young.schoolId,
               postCode: young.schoolZip,
             }
           : null,
@@ -116,7 +116,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase1/CTA reinscription - eligibilite");
+    plausibleEvent("Phase0/CTA reinscription - eligibilite");
 
     const updates = {
       grade: data.scolarity,
@@ -129,7 +129,7 @@ export default function StepEligibilite() {
       schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
       schoolCountry: data.school?.country,
-      schoolId: data.school?._id,
+      schoolId: data.school?.id,
       zip: data.zip,
       birthDate: data.birthDate,
     };
@@ -154,6 +154,7 @@ export default function StepEligibilite() {
           setError({ text: "Pb avec votre non eligibilite" });
           setLoading(false);
         }
+        dispatch(setYoung(res.data));
         return history.push("/reinscription/noneligible");
       }
 
@@ -232,7 +233,7 @@ export default function StepEligibilite() {
                     </div>
                   </p>
 
-                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
+                  <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
                   {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
                 </div>
 

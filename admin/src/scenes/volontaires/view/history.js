@@ -1,14 +1,15 @@
 import React from "react";
 
-import WrapperHistory from "./wrapper";
 import HistoricComponent from "../../../components/views/Historic";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function History({ young, onChange }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperHistory young={young} tab="historique" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="historique" onChange={onChange} />
+      <div className="p-[30px]">
         <HistoricComponent model="young" value={young} />
-      </WrapperHistory>
-    </div>
+      </div>
+    </>
   );
 }

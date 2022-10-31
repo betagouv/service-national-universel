@@ -526,8 +526,8 @@ router.post(
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+            capture(`File ${name} of user(${user._id})is infected`);
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
           }
         }
         const data = fs.readFileSync(tempFilePath);

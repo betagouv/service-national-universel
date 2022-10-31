@@ -61,7 +61,7 @@ export default function Consentement({ step, parentId }) {
       }
 
       let address;
-      if (young[`parent${parentId}OwnAddress`]) {
+      if (young[`parent${parentId}OwnAddress`] === "true") {
         address = {
           address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
           addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
@@ -285,6 +285,9 @@ export default function Consentement({ step, parentId }) {
       body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
     }
 
+    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
+    else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
+
     try {
       const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
@@ -300,7 +303,6 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
-    plausibleEvent("Phase0/CTA representant legal - Consentement valide");
     if (parentId === 1) {
       history.push(`/representants-legaux/done?token=${token}`);
     } else {
@@ -506,7 +508,7 @@ export default function Consentement({ step, parentId }) {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide mon consentement" />
+      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide" />
     </>
   );
 }

@@ -82,6 +82,7 @@ app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
 app.use("/representants-legaux", require("./controllers/representants-legaux"));
+app.use("/correction-request", require("./controllers/correction-request"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
