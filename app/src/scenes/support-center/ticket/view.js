@@ -23,8 +23,15 @@ const updateHeightElement = (e) => {
   e.style.height = `${e.scrollHeight}px`;
 };
 
-const download = (url, name) => {
-  FileSaver.saveAs(url, name);
+const download = async (file) => {
+  try {
+    const s3Id = file.path.split("/")[1];
+    console.log({ s3Id });
+    const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
+    FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
+  } catch (e) {
+    toast.error("Le fichier n'a pas pu être téléchargé");
+  }
 };
 
 export default function TicketView(props) {
@@ -35,7 +42,7 @@ export default function TicketView(props) {
   const young = useSelector((state) => state.Auth.young);
   const inputRef = React.useRef();
 
-  const { files, addFiles, deleteFile, error } = useFileUpload();
+  const { files, addFiles, deleteFile, resetFiles, error } = useFileUpload();
 
   useEffect(() => {
     if (error) {
@@ -59,7 +66,7 @@ export default function TicketView(props) {
             date: formatStringLongDate(message.createdAt),
             content: htmlCleaner(message.text),
             createdAt: message.createdAt,
-            attachments: message.attachments,
+            files: message.files,
           };
         })
         .filter((message) => message !== undefined);
@@ -76,18 +83,19 @@ export default function TicketView(props) {
   const send = async () => {
     setSending(true);
     if (!message) return setSending(false);
-    let attachments;
+    let uploadedFiles;
     if (files.length > 0) {
       const filesResponse = await api.uploadFile("/zammood/upload", files);
       if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
-      attachments = filesResponse.data;
+      uploadedFiles = filesResponse.data;
     }
     const id = props.match?.params?.id;
-    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, attachments });
+    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
     if (!ok) {
       capture(code);
       toastr.error("Oups, une erreur est survenue", translate(code));
     }
+    resetFiles();
     setMessage("");
     updateHeightElement(inputRef?.current);
     getTicket();
@@ -146,7 +154,7 @@ export default function TicketView(props) {
             </Heading>
             <Messages>
               {messages?.map((message) => (
-                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} attachments={message?.attachments} />
+                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} files={message?.files} />
               ))}
             </Messages>
           </>
@@ -175,21 +183,21 @@ export default function TicketView(props) {
   );
 }
 
-const Message = ({ from, date, content, fromMe, attachments = [] }) => {
+const Message = ({ from, date, content, fromMe, files = [] }) => {
   if (!content || !content.length) return null;
   return fromMe ? (
     <MessageContainer>
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
-        {attachments.map(({ name, url }) => (
-          <Attachment
+        {files.map((file) => (
+          <File
             onClick={() => {
-              download(url, name);
+              download(file);
             }}
             color="white">
-            {name}
-          </Attachment>
+            {file.name}
+          </File>
         ))}
       </MessageBubble>
     </MessageContainer>
@@ -199,13 +207,13 @@ const Message = ({ from, date, content, fromMe, attachments = [] }) => {
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
-        {attachments.map(({ name, url }) => (
-          <Attachment
+        {files.map((file) => (
+          <File
             onClick={() => {
-              download(url, name);
+              download(file);
             }}>
-            {name}
-          </Attachment>
+            {file.name}
+          </File>
         ))}
       </MessageBubble>
     </MessageContainer>
@@ -302,7 +310,7 @@ const MessageContent = styled.div`
   color: ${({ color }) => color};
 `;
 
-const Attachment = styled.div`
+const File = styled.div`
   margin-top: 0.2rem;
   color: ${({ color }) => color};
   font-size: 0.8rem;

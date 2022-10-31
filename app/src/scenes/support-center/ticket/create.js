@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
@@ -23,6 +23,12 @@ export default function TicketCreate(props) {
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
   const fromPage = new URLSearchParams(props.location.search).get("from");
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   return (
     <Container>
@@ -60,11 +66,11 @@ export default function TicketCreate(props) {
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
-              let attachments;
+              let uploadedFiles;
               if (files.length > 0) {
                 const filesResponse = await api.uploadFile("/zammood/upload", files);
                 if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
-                attachments = filesResponse.data;
+                uploadedFiles = filesResponse.data;
               }
               const { message, step1, step2 } = values;
               const title = `${step1?.label} - ${step2?.label}`;
@@ -74,7 +80,7 @@ export default function TicketCreate(props) {
                 fromPage,
                 subjectStep1: step1?.id,
                 subjectStep2: step2?.id,
-                attachments,
+                files: uploadedFiles,
               });
               if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               toastr.success("Demande envoyée");

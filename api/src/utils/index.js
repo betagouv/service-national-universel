@@ -65,7 +65,7 @@ const DEFAULT_BUCKET_CONFIG = {
 };
 
 function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
-  const { bucket, endpoint, accessKeyId, secretAccessKey, acl } = config;
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
     const params = {
@@ -76,15 +76,26 @@ function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
       ContentType: file.mimetype,
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
-    if (acl) {
-      params.ACL = acl;
-    }
+
     s3bucket.upload(params, function (err, data) {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
     });
   });
 }
+
+const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
+  const p = new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+    const params = { Bucket: bucket, Key: name };
+    s3bucket.getObject(params, (err, data) => {
+      if (err) return reject(err);
+      resolve(data);
+    });
+  });
+  return p;
+};
 
 function uploadPublicPicture(path, file) {
   return new Promise((resolve, reject) => {
@@ -125,18 +136,6 @@ function listFiles(path) {
     });
   });
 }
-
-const getFile = (name) => {
-  const p = new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: name };
-    s3bucket.getObject(params, (err, data) => {
-      if (err) return reject(err);
-      resolve(data);
-    });
-  });
-  return p;
-};
 
 function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
