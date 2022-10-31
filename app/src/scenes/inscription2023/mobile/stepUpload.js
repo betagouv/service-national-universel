@@ -34,23 +34,25 @@ export default function StepUpload() {
   const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
 
   async function onSubmit() {
-    setLoading(true);
-    for (const file of files) {
-      if (file.size > 5000000)
+    if (files) {
+      setLoading(true);
+      for (const file of files) {
+        if (file.size > 5000000)
+          return setError({
+            text: `Ce fichier ${files.name} est trop volumineux.`,
+          });
+      }
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+      if (res.code === "FILE_CORRUPTED")
         return setError({
-          text: `Ce fichier ${files.name} est trop volumineux.`,
+          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
         });
-    }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
-    if (res.code === "FILE_CORRUPTED")
-      return setError({
-        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      });
-    if (!res.ok) {
-      capture(res.code);
-      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
-      setLoading(false);
-      return;
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setLoading(false);
+        return;
+      }
     }
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
     if (!ok) {
@@ -132,6 +134,16 @@ export default function StepUpload() {
       imgFront: "passport.png",
       imgDate: "passportDate.png",
     },
+  };
+
+  const isDisabled = () => {
+    return (
+      young.files.cniFiles.filter((e) => e.category === category) > 0 ||
+      !date ||
+      loading ||
+      (correctionsDate?.length && !hasDateChanged) ||
+      (correctionsFile?.length && !files?.length)
+    );
   };
 
   return (
@@ -228,14 +240,8 @@ export default function StepUpload() {
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/documents")} onClick={onSubmit} disabled={!date} />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-        <StickyButton
-          text="Corriger"
-          onClickPrevious={() => history.push("/")}
-          onClick={onCorrect}
-          disabled={!date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length)}
-        />
+        <StickyButton text="Corriger" onClick={onCorrect} disabled={isDisabled} />
       ) : (
         <StickyButton text="Continuer" onClick={onSubmit} disabled={!date || loading} />
       )}

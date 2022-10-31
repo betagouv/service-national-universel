@@ -31,22 +31,24 @@ export default function StepUpload() {
 
   async function onSubmit() {
     setLoading(true);
-    for (const file of files) {
-      if (file.size > 5000000)
+    if (files) {
+      for (const file of files) {
+        if (file.size > 5000000)
+          return setError({
+            text: `Ce fichier ${files.name} est trop volumineux.`,
+          });
+      }
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+      if (res.code === "FILE_CORRUPTED")
         return setError({
-          text: `Ce fichier ${files.name} est trop volumineux.`,
+          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
         });
-    }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
-    if (res.code === "FILE_CORRUPTED")
-      return setError({
-        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      });
-    if (!res.ok) {
-      capture(res.code);
-      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
-      setLoading(false);
-      return;
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setLoading(false);
+        return;
+      }
     }
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
     if (!ok) {
@@ -105,6 +107,16 @@ export default function StepUpload() {
     setLoading(false);
   }
 
+  const isDisabled = () => {
+    return (
+      young.files.cniFiles.filter((e) => e.category === category) > 0 ||
+      !date ||
+      loading ||
+      (correctionsDate?.length && !hasDateChanged) ||
+      (correctionsFile?.length && !files?.length)
+    );
+  };
+
   const ID = {
     cniNew: {
       category: "cniNew",
@@ -135,11 +147,10 @@ export default function StepUpload() {
     <DesktopPageContainer
       title={ID[category].title}
       subTitle={ID[category].subTitle}
-      onClickPrevious={() => history.push("/inscription2023/documents")}
       onSubmit={onSubmit}
       modeCorrection={correctionsFile?.length > 0 || correctionsDate?.length > 0}
       onCorrection={onCorrect}
-      disabled={!date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length)}
+      disabled={isDisabled}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {correctionsFile?.map((e) => (
