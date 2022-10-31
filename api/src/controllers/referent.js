@@ -480,7 +480,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       params: {
         motif: cohortChangeReason,
         message: validatedMessage.value,
-        cohortPeriod: translateCohort(cohort),
+        cohort: translateCohort(cohort),
       },
       cc,
     });
