@@ -107,15 +107,12 @@ export default function StepUpload() {
     setLoading(false);
   }
 
-  const isDisabled = () => {
-    return (
-      young.files.cniFiles.filter((e) => e.category === category) > 0 ||
-      !date ||
-      loading ||
-      (correctionsDate?.length && !hasDateChanged) ||
-      (correctionsFile?.length && !files?.length)
-    );
-  };
+  const isDisabled =
+    !young.files.cniFiles.filter((e) => e.category === category).length ||
+    !date ||
+    loading ||
+    (correctionsDate?.length && !hasDateChanged) ||
+    (correctionsFile?.length && !files?.length);
 
   const ID = {
     cniNew: {
