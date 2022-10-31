@@ -1,9 +1,9 @@
 require("dotenv").config({ path: "../.env-prod" });
-require("../src/mongo");
-const ReferentModel = require("../src/models/referent");
-const MissionModel = require("../src/models/mission");
-const { sendTemplate } = require("../../../../src/sendinblue");
-const { capture } = require("../../../sentry");
+require("../mongo");
+const ReferentModel = require("../models/referent");
+const MissionModel = require("../models/mission");
+const { sendTemplate } = require("../sendinblue");
+const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
