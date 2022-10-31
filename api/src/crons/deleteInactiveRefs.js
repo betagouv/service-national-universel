@@ -6,6 +6,13 @@ const { sendTemplate } = require("../../../../src/sendinblue");
 const { capture } = require("../../../sentry");
 const { ERRORS } = require("../utils");
 const slack = require("../slack");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+
+const diffDays = (date1, date2) => {
+  const diffTime = Math.abs(date2 - date1);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
 
 async function deleteRef(referent) {
   try {
@@ -13,47 +20,35 @@ async function deleteRef(referent) {
     const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
     if (referents.length === 1) throw ERRORS.LINKED_STRUCTURE;
     if (missionsLinkedToReferent) throw ERRORS.LINKED_MISSIONS;
-
     await referent.remove();
-    console.log(`Referent ${referent._id} has been deleted`);
   } catch (error) {
     capture(error);
   }
 }
 
 exports.handler = async () => {
-  let date = new Date();
-  date = date.setMonth(date.getMonth() - 6);
-
   try {
-    let cursor = ReferentModel.find({
+    const now = new Date();
+    const sixMonthsAgo = now.setMonth(now.getMonth() - 6);
+    const cursor = ReferentModel.find({
       role: { $in: ["referent_department", "referent_region"] },
-      $or: [{ lastLoginAt: date }, { lastLoginAt: null, createdAt: date }],
+      $or: [{ lastLoginAt: { $lte: sixMonthsAgo } }, { lastLoginAt: null, createdAt: { $lte: sixMonthsAgo } }],
     }).cursor();
     await cursor.eachAsync(async function (ref) {
-      await sendTemplate("615", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
-    });
-
-    cursor = ReferentModel.find({
-      role: { $in: ["referent_department", "referent_region"] },
-      $or: [{ lastLoginAt: date.setDate(date.getDate() - 7) }, { lastLoginAt: null, createdAt: date.setDate(date.getDate() - 7) }],
-    }).cursor();
-    await cursor.eachAsync(async function (ref) {
-      await sendTemplate("616", { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
-    });
-
-    cursor = ReferentModel.find({
-      role: { $in: ["referent_department", "referent_region"] },
-      $or: [{ lastLoginAt: { $lte: date.setDate(date.getDate() - 14) } }, { lastLoginAt: null, createdAt: { $lte: date.setDate(date.getDate() - 14) } }],
-    }).cursor();
-    await cursor.eachAsync(async function (ref) {
-      await deleteRef(ref);
-      slack.info({ title: "Referent deleted", text: `Ref ${ref.email} has been deleted` });
+      const lastLogin = ref.lastLoginAt === null ? ref.createdAt : ref.lastLoginAt;
+      if (diffDays(lastLogin, sixMonthsAgo) === 0) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_1, { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+      }
+      if (diffDays(lastLogin, sixMonthsAgo) === 7) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_2, { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+      }
+      if (diffDays(lastLogin, sixMonthsAgo) >= 14) {
+        await deleteRef(ref);
+        slack.info({ title: "Referent deleted", text: `Ref ${ref.email} has been deleted` });
+      }
     });
   } catch (e) {
-    console.error(e);
+    capture(e);
+    slack.error({ title: "Delete inactive refs", text: JSON.stringify(e) });
   }
-
-  console.log("DONE.");
-  process.exit(0);
 };
