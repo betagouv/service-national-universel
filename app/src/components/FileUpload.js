@@ -89,7 +89,11 @@ export const useFileUpload = () => {
     [files],
   );
 
-  return { files, addFiles, deleteFile, error };
+  const resetFiles = useCallback(() => {
+    setFiles([]);
+  }, [files]);
+
+  return { files, addFiles, deleteFile, resetFiles, error };
 };
 
 export default FileUpload;

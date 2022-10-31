@@ -34,12 +34,12 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            let attachments;
+            let uploadedFiles;
             setLoading(true);
             if (files.length > 0) {
               const filesResponse = await api.uploadFile("/zammood/upload", files);
               if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
-              attachments = filesResponse.data;
+              uploadedFiles = filesResponse.data;
             }
 
             const { message, subject, firstName, lastName, email, step1, step2, department } = values;
@@ -55,7 +55,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               region: department2region[department],
               role: "young exterior",
               fromPage,
-              attachments,
+              files: uploadedFiles,
             });
 
             setOpen(false);

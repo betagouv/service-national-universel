@@ -13,13 +13,14 @@ const slack = require("../slack");
 const { cookieOptions } = require("../cookie-options");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
-const { ERRORS, isYoung, uploadFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, ENVIRONMENT } = require("../config.js");
+const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
+const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const { validateId } = require("../utils/validator");
+const { encrypt, decrypt } = require("../cryptoUtils");
 
 const router = express.Router();
 
@@ -102,7 +103,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       fromPage: req.body.fromPage,
       formSubjectStep1: req.body.subjectStep1,
       formSubjectStep2: req.body.subjectStep2,
-      attachments: req.body.attachments,
+      files: req.body.files,
     };
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
@@ -110,7 +111,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       fromPage: Joi.string(),
       formSubjectStep1: Joi.string(),
       formSubjectStep2: Joi.string(),
-      attachments: Joi.array().items(
+      files: Joi.array().items(
         Joi.object().keys({
           name: Joi.string().required(),
           url: Joi.string().required(),
@@ -122,7 +123,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       .validate(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { subject, message, formSubjectStep1, formSubjectStep2, attachments } = value;
+    const { subject, message, formSubjectStep1, formSubjectStep2, files } = value;
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -137,7 +138,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         formSubjectStep1,
         formSubjectStep2,
         attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
-        attachments,
+        files,
       }),
     });
     if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
@@ -168,7 +169,7 @@ router.post("/ticket/form", async (req, res) => {
       formSubjectStep2: req.body.subjectStep2,
       role: req.body.role,
       fromPage: req.body.fromPage,
-      attachments: req.body.attachments,
+      files: req.body.files,
     };
     const { error, value } = Joi.object({
       email: Joi.string().email().required(),
@@ -182,7 +183,7 @@ router.post("/ticket/form", async (req, res) => {
       formSubjectStep2: Joi.string().required(),
       role: Joi.string().required(),
       fromPage: Joi.string(),
-      attachments: Joi.array().items(
+      files: Joi.array().items(
         Joi.object().keys({
           name: Joi.string().required(),
           url: Joi.string().required(),
@@ -193,7 +194,7 @@ router.post("/ticket/form", async (req, res) => {
       .unknown()
       .validate(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, attachments } = value;
+    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -215,7 +216,7 @@ router.post("/ticket/form", async (req, res) => {
         attributes: userAttributes,
         formSubjectStep1,
         formSubjectStep2,
-        attachments,
+        files,
       }),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
@@ -260,7 +261,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
 
     const { errorBody, value } = Joi.object({
       message: Joi.string().allow(null, ""),
-      attachments: Joi.array().items(
+      files: Joi.array().items(
         Joi.object().keys({
           name: Joi.string().required(),
           url: Joi.string().required(),
@@ -269,7 +270,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       ),
     }).validate(req.body, { stripUnknown: true });
     if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { message, attachments } = value;
+    const { message, files } = value;
 
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
@@ -280,7 +281,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         firstName: req.user.firstName,
         email: req.user.email,
         message,
-        attachments,
+        files,
         ticketId: checkedId,
         attributes: userAttributes,
       }),
@@ -351,11 +352,9 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       }
 
       const data = fs.readFileSync(tempFilePath);
-      const response = await uploadFile(
-        `message/${uuid()}.${name}`,
-        { data, encoding: "base64", mimetype: mimeFromMagicNumbers },
-        { ...SUPPORT_BUCKET_CONFIG, acl: "public-read" },
-      );
+      const path = getS3Path(name);
+      const encryptedBuffer = encrypt(data, FILE_ENCRYPTION_SECRET_SUPPORT);
+      const response = await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG);
       responseData.push({ name, url: response.Location, path: response.key });
       fs.unlinkSync(tempFilePath);
     }
@@ -367,6 +366,22 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.get("/s3file/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
+    const buffer = decrypt(file.Body, FILE_ENCRYPTION_SECRET_SUPPORT);
+    return res.status(200).send({ ok: true, data: buffer });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+const getS3Path = (fileName) => {
+  const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+  return `message/${uuid()}.${extension}`;
+};
 
 const getUserAttributes = async (user) => {
   const departmentReferentPhase2 = await ReferentObject.findOne({
