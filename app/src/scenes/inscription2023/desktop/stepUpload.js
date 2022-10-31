@@ -107,12 +107,7 @@ export default function StepUpload() {
     setLoading(false);
   }
 
-  const isDisabled =
-    !young.files.cniFiles.filter((e) => e.category === category).length ||
-    !date ||
-    loading ||
-    (correctionsDate?.length && !hasDateChanged) ||
-    (correctionsFile?.length && !files?.length);
+  const isDisabled = !young.files.cniFiles || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
 
   const ID = {
     cniNew: {
@@ -148,6 +143,7 @@ export default function StepUpload() {
       modeCorrection={correctionsFile?.length > 0 || correctionsDate?.length > 0}
       onCorrection={onCorrect}
       disabled={isDisabled}
+      loading={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {correctionsFile?.map((e) => (

@@ -136,12 +136,7 @@ export default function StepUpload() {
     },
   };
 
-  const isDisabled =
-    !young.files.cniFiles.filter((e) => e.category === category).length ||
-    !date ||
-    loading ||
-    (correctionsDate?.length && !hasDateChanged) ||
-    (correctionsFile?.length && !files?.length);
+  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
 
   return (
     <>
@@ -238,9 +233,9 @@ export default function StepUpload() {
       <Help />
       <Footer marginBottom="mb-[88px]" />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-        <StickyButton text="Corriger" onClick={onCorrect} disabled={isDisabled} />
+        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={isDisabled} />
       ) : (
-        <StickyButton text="Continuer" onClick={onSubmit} disabled={!date || loading} />
+        <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
       )}
     </>
   );
