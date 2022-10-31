@@ -70,7 +70,7 @@ export default function StepDocuments() {
           </div>
         </div>
       ))}
-      {young?.files.cniFiles?.length > 0 && <MyDocs young={young} />}
+      <MyDocs />
     </DesktopPageContainer>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "snu-lib";
+import { translate, translateCorrectionReason, YOUNG_STATUS } from "snu-lib";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 
@@ -15,12 +15,14 @@ import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import StickyButton from "../../../components/inscription/stickyButton";
 import MyDocs from "../components/MyDocs";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
+  const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
 
   const IDs = [
     {
@@ -50,6 +52,9 @@ export default function StepDocuments() {
     history.push("/inscription2023/confirm");
   }
 
+  if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
+  if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
+  if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
   return (
     <>
       <Navbar />
@@ -60,6 +65,14 @@ export default function StepDocuments() {
           <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
+        </div>
+        <div className="my-4">
+          {corrections?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>{translateCorrectionReason(e.reason) || translate(e.field)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
         </div>
         <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((id) => (
@@ -75,7 +88,7 @@ export default function StepDocuments() {
             </div>
           </Link>
         ))}
-        {young.files.cniFiles?.length > 0 && <MyDocs young={young} />}
+        <MyDocs />
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
