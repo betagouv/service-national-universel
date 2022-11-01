@@ -6,7 +6,7 @@ import KnowledgeBasePublicContent from "../../components/knowledge-base/Knowledg
 import useUser from "../../hooks/useUser";
 import Modal from "../../components/Modal";
 import Link from "next/link";
-import { adminURL, appURL, supportURL } from "../../config";
+import { adminURL, appURL, baseDeConnaissanceURL } from "../../config";
 
 const Content = () => {
   const router = useRouter();
