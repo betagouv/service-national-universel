@@ -1,3 +1,10 @@
+## [1.158.1](https://github.com/betagouv/service-national-universel/compare/v1.158.0...v1.158.1) (2022-11-01)
+
+
+### Bug Fixes
+
+* **app:** preinscription etrangers ([39f3029](https://github.com/betagouv/service-national-universel/commit/39f3029da4b0a4e16048d9d40c142cf459d47263))
+
 # [1.158.0](https://github.com/betagouv/service-national-universel/compare/v1.157.1...v1.158.0) (2022-10-31)
 
 
