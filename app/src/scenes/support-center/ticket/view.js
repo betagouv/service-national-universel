@@ -26,7 +26,6 @@ const updateHeightElement = (e) => {
 const download = async (file) => {
   try {
     const s3Id = file.path.split("/")[1];
-    console.log({ s3Id });
     const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
     FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
   } catch (e) {
@@ -81,25 +80,34 @@ export default function TicketView(props) {
   }, []);
 
   const send = async () => {
-    setSending(true);
-    if (!message) return setSending(false);
-    let uploadedFiles;
-    if (files.length > 0) {
-      const filesResponse = await api.uploadFile("/zammood/upload", files);
-      if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
-      uploadedFiles = filesResponse.data;
+    try {
+      setSending(true);
+      if (!message) return setSending(false);
+      let uploadedFiles;
+      if (files.length > 0) {
+        const filesResponse = await api.uploadFile("/zammood/upload", files);
+        if (!filesResponse.ok) {
+          setSending(false);
+          return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
+        }
+        uploadedFiles = filesResponse.data;
+      }
+      const id = props.match?.params?.id;
+      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
+      if (!ok) {
+        capture(code);
+        setSending(false);
+        toastr.error("Oups, une erreur est survenue", translate(code));
+      }
+      resetFiles();
+      setMessage("");
+      updateHeightElement(inputRef?.current);
+      getTicket();
+      setSending(false);
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue", translate(error.code));
+      setSending(false);
     }
-    const id = props.match?.params?.id;
-    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
-    if (!ok) {
-      capture(code);
-      toastr.error("Oups, une erreur est survenue", translate(code));
-    }
-    resetFiles();
-    setMessage("");
-    updateHeightElement(inputRef?.current);
-    getTicket();
-    setSending(false);
   };
 
   if (ticket === undefined) return <Loader />;
@@ -172,9 +180,13 @@ export default function TicketView(props) {
             value={message}
           />
           <ButtonContainer>
-            <LoadingButton onClick={send} disabled={!message || sending} color="white">
-              <SendIcon color={!message ? "grey" : null} />
-            </LoadingButton>
+            {sending ? (
+              <Loader size="25px" />
+            ) : (
+              <LoadingButton onClick={send} disabled={!message || sending} color="white">
+                <SendIcon color={!message ? "grey" : null} />
+              </LoadingButton>
+            )}
           </ButtonContainer>
         </InputContainer>
         <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
