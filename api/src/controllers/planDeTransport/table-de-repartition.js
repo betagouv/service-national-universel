@@ -10,7 +10,6 @@ const Joi = require("joi");
 
 router.get("/all/:cohort/:fromRegion", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    console.log(req.params);
     const { error, value } = Joi.object({ cohort: Joi.string().required(), fromRegion: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -31,7 +30,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       fromRegion: Joi.string().required(),
       ...regionList.reduce((prev, region) => ({ ...prev, [region]: Joi.array().items(Joi.string().allow(null, "")) }), {}),
     }).validate(req.body, { stripUnknown: true });
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canEditPlanDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -49,7 +47,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         await tableDeRepartition.create({ cohort, fromRegion, toRegion: region });
       } else {
         const toAdd = departements.map((departement) => ({ cohort, fromRegion, toRegion: region, toDepartment: departement }));
-        console.log(toAdd);
         await tableDeRepartition.insertMany(toAdd);
       }
     }

@@ -1,7 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { regionList, region2department } from "snu-lib";
-import Plus from "../../assets/icons/Plus";
+import { region2department, regionList } from "snu-lib";
 import api from "../../services/api";
 
 export default function tableDeRepartition() {
@@ -11,7 +10,6 @@ export default function tableDeRepartition() {
   const getTable = async () => {
     const { ok, data } = await api.get(`/table-de-repartition/all/${cohort}/${region}`);
     if (ok) {
-      console.log(data);
       let update = {};
       data.map((item) => {
         if (update[item.toRegion]) {
@@ -59,11 +57,9 @@ export default function tableDeRepartition() {
   const onSubmit = async () => {
     selected.fromRegion = region;
     selected.cohort = cohort;
-    console.log(selected);
     const { ok, data } = await api.post(`/table-de-repartition`, selected);
-    if (ok) {
-      console.log(data);
-    }
+    //use data to refresh the table
+    console.log(ok, data);
   };
 
   return (
