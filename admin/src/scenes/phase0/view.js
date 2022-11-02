@@ -1013,7 +1013,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             onChange={(value) => onLocalChange("grade", value)}
           />
         </div>
-        {hasSpecificSituation && (
+        {(sectionMode === "edition" || hasSpecificSituation) && (
           <div className="mt-[32px]">
             <MiniTitle>Situations particulières</MiniTitle>
             <FieldSituationsParticulieres

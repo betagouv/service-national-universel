@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectionRequest from "./CorrectionRequest";
 import { SPECIFIC_SITUATIONS_KEY } from "../commons";
-import Close from "../../../assets/Close";
-import Plus from "../../../assets/icons/Plus";
+import Minus from "../../../assets/icons/Minus";
+import ConfirmationModal from "./ConfirmationModal";
 
 /**
  * mode: could be "correction|edition|readonly" (par défaut readonly)
@@ -25,8 +25,7 @@ export default function FieldSituationsParticulieres({
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
-  const [plusOpened, setPlusOpened] = useState(false);
-  const [plusSituations, setPlusSituations] = useState([]);
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     setOpened(currentRequest === name);
@@ -50,19 +49,6 @@ export default function FieldSituationsParticulieres({
     );
   }, [mouseIn, hasValidRequest]);
 
-  useEffect(() => {
-    setPlusSituations(
-      SPECIFIC_SITUATIONS_KEY.filter((key) => young[key] !== "true").map((key) => (
-        <div
-          key={key}
-          onClick={(e) => addSituation(key, e)}
-          className="px-[10px] py-[6px] text-[14px] text-[#1F2937] border-t-[1px] border-t[#E5E7EB] first:border-t-[0px] hover:bg-[#E5E7EB] cursor-pointer whitespace-nowrap">
-          {translateSpecialSituation(key)}
-        </div>
-      )),
-    );
-  }, [young]);
-
   function startRequest() {
     if (group === null || group === undefined) {
       setOpened(true);
@@ -77,12 +63,21 @@ export default function FieldSituationsParticulieres({
   }
 
   function removeSituation(key) {
+    setConfirmModal({
+      title: "Supprimer une situation particulière",
+      message: `Vous êtes sur le point de supprimer "${translateSpecialSituation(key)}".`,
+      confirmLabel: "Supprimer",
+      confirmColor: "red",
+      confirm: () => confirmRemoveSituation(key),
+    });
+  }
+
+  function confirmRemoveSituation(key) {
+    setConfirmModal(null);
     onChange && onChange(key, "false");
   }
 
-  function addSituation(key, e) {
-    e.stopPropagation();
-    setPlusOpened(false);
+  function addSituation(key) {
     onChange && onChange(key, "true");
   }
 
@@ -91,33 +86,33 @@ export default function FieldSituationsParticulieres({
   for (const key of SPECIFIC_SITUATIONS_KEY) {
     if (young[key] === "true") {
       tags.push(
-        <div className="inline-flex text-[12px] text-[#FFFFFF] leading-[22px] px-[10px] py-[1px] bg-[#3B82F6] rounded-[100px] mr-[8px] mb-[8px]" key={key}>
-          {translateSpecialSituation(key)}
+        <div className="inline-flex mr-[8px] mb-[8px]" key={key}>
+          <div className="text-[12px] text-[#FFFFFF] leading-[22px] px-[10px] py-[1px] bg-[#3B82F6] rounded-[100px]">{translateSpecialSituation(key)}</div>
           {mode === "edition" && (
             <div
-              className="ml-[8px] border-l-[1px] border-l-[rgba(255,255,255,0.3)] pl-[8px] text-[rgba(255,255,255,0.3)] flex items-center hover:text-[rgba(255,255,255,1)] cursor-pointer"
+              className="ml-[8px] border-[1px] border-[#CECECE] rounded-[100px] py-[8px] px-[6px] text-[#CECECE] flex items-center hover:text-[#3B82F6] hover:border-[#3B82F6] cursor-pointer"
               onClick={() => removeSituation(key)}>
-              <Close className="w-[10px] h-[10px]" />
+              <Minus />
             </div>
           )}
         </div>,
       );
     }
   }
-  if (mode === "edition" && plusSituations.length > 0) {
-    tags.push(
-      <div
-        key="__plus"
-        className="relative text-[#374151] w-[24px] h-[24px] border-[1px] border-[#CECECE] rounded-[100px] flex items-center justify-center cursor-pointer hover:border-[#374151]"
-        onClick={() => setPlusOpened(true)}>
-        <Plus />
-        {plusOpened && (
-          <div className="absolute left-[50%] top-[50%] bg-[#FFFFFF] border-[#E5E7EB] border-[1px] rounded-[6px] z-10 shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
-            {plusSituations}
-          </div>
-        )}
-      </div>,
-    );
+  if (mode === "edition") {
+    for (const key of SPECIFIC_SITUATIONS_KEY) {
+      if (young[key] !== "true" && !["qpv"].includes(key)) {
+        tags.push(
+          <div className="inline-flex mr-[8px] mb-[8px]" key={key}>
+            <div
+              className="text-[12px] text-[#374151] leading-[22px] px-[10px] py-[1px] bg-[#F3F4F6] rounded-[100px] cursor-pointer border-[transparent] border-[1px] hover:border-[#374151]"
+              onClick={() => addSituation(key)}>
+              {translateSpecialSituation(key)}
+            </div>
+          </div>,
+        );
+      }
+    }
   }
 
   return (
@@ -131,6 +126,18 @@ export default function FieldSituationsParticulieres({
         )}
       </div>
       {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
+      {confirmModal && (
+        <ConfirmationModal
+          isOpen={true}
+          icon={confirmModal.icon}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmLabel || "Confirmer"}
+          confirmMode={confirmModal.confirmColor || "blue"}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={confirmModal.confirm}
+        />
+      )}
     </div>
   );
 }
