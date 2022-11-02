@@ -43,6 +43,10 @@ import DeletedInscriptionPanel from "./deletedPanel";
 const FILTERS = [
   "SEARCH",
   "STATUS",
+  "SITUATION",
+  "RURAL",
+  "SEXE",
+  "PARENT_ALLOW_SNU",
   "REGION",
   "DEPARTMENT",
   "SCHOOL",
@@ -116,6 +120,7 @@ export default function Inscription() {
                         _id: data._id,
                         Cohorte: data.cohort,
                         Prénom: data.firstName,
+
                         Nom: data.lastName,
                         "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
                         "Pays de naissance": data.birthCountry || "France",
@@ -324,6 +329,23 @@ export default function Inscription() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
+                  placeholder="Autorisation de la participation"
+                  componentId="PARENT_ALLOW_SNU"
+                  dataField="parentAllowSNU.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PARENT_ALLOW_SNU") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  missingLabel="En attente de consentement"
+                  showMissing
+                  renderLabel={(items) => getFilterLabel(items, "Autorisation de la participation", "Autorisation de la participation")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
@@ -338,7 +360,7 @@ export default function Inscription() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Pays"
+                  placeholder="Pays de résidence"
                   componentId="COUNTRY"
                   dataField="country.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
@@ -348,7 +370,7 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Pays", "Pays")}
+                  renderLabel={(items) => getFilterLabel(items, "Pays de résidence", "Pays de résidence")}
                 />
                 <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
@@ -372,6 +394,38 @@ export default function Inscription() {
                   renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
                   showMissing
                   missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Situation"
+                  componentId="SITUATION"
+                  dataField="situation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SITUATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Situation", "Situation")}
+                  showMissing
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Sexe"
+                  componentId="SEXE"
+                  dataField="gender.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SEXE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Sexe", "Sexe")}
+                  showMissing
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -400,6 +454,20 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Zone Rurale"
+                  componentId="RURAL"
+                  dataField="handicapInSameDepartment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "RURAL") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Zone Rurale", "Zone Rurale")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
