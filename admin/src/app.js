@@ -44,6 +44,7 @@ import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
+import TableDeRepartition from "./scenes/tableDeRepartition";
 
 initSentry();
 initApi();
@@ -183,6 +184,7 @@ const Home = () => {
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
+            <RestrictedRoute path="/table-de-repartition" component={TableDeRepartition} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>

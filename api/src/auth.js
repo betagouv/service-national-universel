@@ -98,6 +98,7 @@ class Auth {
         cohort: Joi.string().trim().required(),
       }).validate(req.body);
 
+      console.log(error);
       if (error) {
         if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
         if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });

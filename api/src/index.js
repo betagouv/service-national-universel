@@ -83,6 +83,7 @@ app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
 app.use("/representants-legaux", require("./controllers/representants-legaux"));
 app.use("/correction-request", require("./controllers/correction-request"));
+app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
