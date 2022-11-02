@@ -8,7 +8,7 @@ export default function tableDeRepartition() {
   const [viewDepartement, setViewDepartment] = React.useState({ open: false, region: "" });
   const [selected, setSelected] = React.useState({});
   const getTable = async () => {
-    const { ok, data } = await api.get(`/table-de-repartition/all/${cohort}/${region}`);
+    const { ok, data } = await api.get(`/table-de-repartition/from-region/${region}/cohort/${cohort}`);
     if (ok) {
       let update = {};
       data.map((item) => {

@@ -8,7 +8,7 @@ const tableDeRepartition = require("../../models/tableDeRepartition");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 
-router.get("/all/:cohort/:fromRegion", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/from-region/:fromRegion/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required(), fromRegion: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
