@@ -458,20 +458,6 @@ export default function Inscription() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Zone Rurale"
-                  componentId="RURAL"
-                  dataField="handicapInSameDepartment.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "RURAL") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Zone Rurale", "Zone Rurale")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
                   placeholder="QPV"
                   componentId="QPV"
                   dataField="qpv.keyword"
