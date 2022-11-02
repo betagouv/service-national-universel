@@ -14,7 +14,7 @@ const Joi = require("joi");
 const YoungModel = require("../models/young");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
-const { ERRORS } = require("../utils");
+const { ERRORS, deleteFile } = require("../utils");
 const passport = require("passport");
 const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("../sendinblue");
@@ -52,6 +52,13 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       request.moderatorId = req.user._id;
       request.sentAt = sentAt;
       request.status = "SENT";
+
+      // If unreadable/incorrect/other issue with id proof, delete it.
+      if (["UNREADABLE", "OTHER", "NOT_SUITABLE"].includes(request.reason) && request.status === "SENT") {
+        for (const file of young.files.cniFiles) {
+          await deleteFile(`app/young/${young._id}/cniFiles/${file._id}`);
+        }
+      }
 
       const oldIndex = requests.findIndex((r) => r.field === request.field);
       if (oldIndex >= 0) {
