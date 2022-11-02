@@ -12,37 +12,47 @@ import DatePickerList from "../../preinscription/components/DatePickerList";
 import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
-import Navbar from "../components/Navbar";
 
 export default function StepUpload() {
   const { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [files, setFiles] = useState({});
   const [date, setDate] = useState();
 
   async function onSubmit() {
-    for (const file of files) {
-      if (file.size > 5000000)
-        return setError({
-          text: `Ce fichier ${files.name} est trop volumineux.`,
+    setLoading(true);
+    if (files) {
+      for (const file of files) {
+        if (file.size > 5000000)
+          return setError({
+            text: `Ce fichier ${files.name} est trop volumineux.`,
+          });
+      }
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+      if (res.code === "FILE_CORRUPTED") {
+        setError({
+          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou régénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
         });
-    }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
-    if (res.code === "FILE_CORRUPTED")
-      return setError({
-        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou régénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      });
-    if (!res.ok) {
-      capture(res.code);
-      return setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setLoading(false);
+        return;
+      }
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setLoading(false);
+        return;
+      }
     }
     const { ok, code, data: responseData } = await api.put("/young/reinscription/documents");
     if (!ok) {
       capture(code);
-      return setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      setLoading(false);
+      return;
     }
     dispatch(setYoung(responseData));
     plausibleEvent("Phase0/CTA reinscription - CI desktop");
@@ -78,10 +88,10 @@ export default function StepUpload() {
     <DesktopPageContainer
       title={ID[category].title}
       subTitle={ID[category].subTitle}
-      onClickPrevious={() => history.push("/reinscription/documents")}
       onSubmit={onSubmit}
       childrenContinueButton={"Me réinscrire au SNU"}
       disabled={!date}
+      loading={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="w-full my-16 flex justify-around">

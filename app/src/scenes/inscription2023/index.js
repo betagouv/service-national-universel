@@ -129,7 +129,7 @@ export default function Index() {
   }
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
-    return <SentryRoute path="/inscription2023/correction/:step?" component={() => <StepCorrection young={young} />} />;
+    return <SentryRoute path="/inscription2023/correction/:step?/:category?" component={() => <StepCorrection young={young} />} />;
   }
 
   return <SentryRoute path="/inscription2023/:step?/:category?" component={() => <Step young={young} />} />;

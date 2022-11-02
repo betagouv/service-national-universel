@@ -1,3 +1,38 @@
+## [1.158.1](https://github.com/betagouv/service-national-universel/compare/v1.158.0...v1.158.1) (2022-11-01)
+
+
+### Bug Fixes
+
+* **app:** preinscription etrangers ([39f3029](https://github.com/betagouv/service-national-universel/commit/39f3029da4b0a4e16048d9d40c142cf459d47263))
+
+# [1.158.0](https://github.com/betagouv/service-national-universel/compare/v1.157.1...v1.158.0) (2022-10-31)
+
+
+### Bug Fixes
+
+* **api:** Clamscan use binary ([5064596](https://github.com/betagouv/service-national-universel/commit/5064596269e9254e367911ae5f9cea828d3e48f2))
+* **api:** Rework output in case of file infected ([83307aa](https://github.com/betagouv/service-national-universel/commit/83307aacfeefb44540438ec13de53190d7ee4a2e))
+
+
+### Features
+
+* **api/app:** demandes de corrections pages documents et televersement ([#1981](https://github.com/betagouv/service-national-universel/issues/1981)) ([294767b](https://github.com/betagouv/service-national-universel/commit/294767b14c3d7e797bc345854ba561035877801d))
+
+## [1.157.1](https://github.com/betagouv/service-national-universel/compare/v1.157.0...v1.157.1) (2022-10-30)
+
+
+### Bug Fixes
+
+* **app:** contact form ([a62b33d](https://github.com/betagouv/service-national-universel/commit/a62b33d70515f01faffe7c7dcefbc83273128c7a))
+
+# [1.157.0](https://github.com/betagouv/service-national-universel/compare/v1.156.0...v1.157.0) (2022-10-28)
+
+
+### Features
+
+* **app:** Correction stepEligibilite ([#1970](https://github.com/betagouv/service-national-universel/issues/1970)) ([8988834](https://github.com/betagouv/service-national-universel/commit/89888345f3b56592073bf9f0b6a512a97c56bfa3))
+* **app:** open reinscription to phase 1 exempted ([73f312c](https://github.com/betagouv/service-national-universel/commit/73f312cb4476d433b733ecf63b0d540d632349d3))
+
 # [1.156.0](https://github.com/betagouv/service-national-universel/compare/v1.155.0...v1.156.0) (2022-10-27)
 
 
