@@ -12,7 +12,7 @@ const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
 
 let token;
-const result = { operation: {} };
+const result = { event: {} };
 
 async function process(patch, count, total) {
   try {
@@ -28,13 +28,12 @@ async function process(patch, count, total) {
 
         if (operation === "status") {
           eventName = "CANDIDATURE_STATUS_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "createdAt") {
           eventName = "NOUVELLE_CANDIDATURE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         }
 
         if (eventName) {
+          result.event[eventName] = result.event[eventName] + 1 || 1;
           await createLog(patch, actualApplication, eventName, eventName !== "CANDIDATURE_CHANGE" ? op.value : operation);
         }
       }
@@ -95,7 +94,7 @@ exports.handler = async () => {
     await findAll(application_patches, mongooseFilterForDayBefore(), process);
     slack.info({
       title: "applicationPatch",
-      text: JSON.stringify(result),
+      text: `${result.applicationScanned} applications were scanned: ${JSON.stringify(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of application patch logs", JSON.stringify(e));

@@ -11,7 +11,7 @@ const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
 
 let token;
-const result = { operation: {} };
+const result = { event: {} };
 
 async function process(patch, count, total) {
   try {
@@ -27,13 +27,12 @@ async function process(patch, count, total) {
 
         if (["status", "legalStatus", "types", "sousType", "name", "department", "region", "isMilitaryPreparation", "isNetwork"].includes(operation)) {
           eventName = "STRUCTURE_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "createdAt") {
           eventName = "NOUVELLE_STRUCTURE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         }
 
         if (eventName) {
+          result.event[eventName] = result.event[eventName] + 1 || 1;
           await createLog(patch, structure, eventName, eventName === "STRUCTURE_CHANGE" ? operation : op.value);
         }
       }
@@ -104,7 +103,7 @@ exports.handler = async () => {
     await findAll(structure_patches, mongooseFilterForDayBefore(), process);
     slack.info({
       title: "structurePatch",
-      text: JSON.stringify(result),
+      text: `${result.structureScanned} structures were scanned: ${JSON.stringify(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of young structure logs", JSON.stringify(e));

@@ -11,7 +11,7 @@ const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
 
 let token;
-let result = { operation: {} };
+let result = { event: {} };
 
 async function process(patch, count, total) {
   try {
@@ -27,25 +27,20 @@ async function process(patch, count, total) {
 
         if (["name", "department", "region", "duration", "isMilitaryPreparation", "isJvaMission"].includes(operation)) {
           eventName = "MISSION_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "placesTotal") {
           eventName = "PLACES_TOTAL_MISSION_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "placesLeft") {
           eventName = "PLACES_LEFT_MISSION_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "createdAt") {
           eventName = "NOUVELLE_MISSION";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "mainDomain") {
           eventName = "DOMAINE_MISSION_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         } else if (operation === "status") {
           eventName = "STATUS_MISSION_CHANGE";
-          result.operation[operation] = result.operation[operation] + 1 || 1;
         }
 
         if (eventName) {
+          result.event[eventName] = result.event[eventName] + 1 || 1;
           await createLog(patch, mission, eventName, eventName !== "MISSION_CHANGE" ? op.value : operation);
         }
       }
@@ -113,8 +108,9 @@ exports.handler = async () => {
 
     await findAll(mission_patches, mongooseFilterForDayBefore(), process);
     slack.info({
-      title: "mission_patches",
+      title: "missioinPatch",
       text: JSON.stringify(result),
+      text: `${result.missionScanned} missions were scanned: ${JSON.stringify(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of mission patch logs", JSON.stringify(e));

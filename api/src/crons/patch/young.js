@@ -12,7 +12,7 @@ const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
 
 let token;
-const result = { operation: {} };
+const result = { event: {} };
 
 async function process(patch, count, total) {
   try {
@@ -33,48 +33,40 @@ async function process(patch, count, total) {
             //Inscription step
             case "inscriptionStep2023":
               eventName = "STEP_INSCRIPTION_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "reinscriptionStep2023":
               eventName = "STEP_REINSCRIPTION_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //General status
             case "status":
               eventName = "STATUS_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //SEJOUR status
             case "statusPhase1":
               eventName = "STATUS_PHASE1_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //MIG status
             case "statusPhase2":
               eventName = "STATUS_PHASE2_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "statusPhase3":
               eventName = "STATUS_PHASE3_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             //Presence sejour
             case "cohesionStayPresence":
               eventName = "PRESENCE_ARRIVEE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "cohort":
               eventName = "COHORT_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
             case "phase2NumberHoursDone":
               eventName = "HEURE_PHASE2_CHANGE";
-              result.operation[operation] = result.operation[operation] + 1 || 1;
               break;
           }
         }
 
         if (eventName) {
+          result.event[eventName] = result.event[eventName] + 1 || 1;
           await createLog(patch, actualYoung, eventName, op.value);
         }
       }
@@ -145,7 +137,7 @@ exports.handler = async () => {
     await findAll(young_patches, mongooseFilterForDayBefore(), process);
     slack.info({
       title: "youngPatch",
-      text: JSON.stringify(result),
+      text: `${result.youngScanned} youngs were scanned: ${JSON.stringify(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of young patch logs", JSON.stringify(e));
