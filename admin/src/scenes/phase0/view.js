@@ -23,6 +23,7 @@ import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
+import SchoolEditor from "./components/SchoolEditor";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -902,6 +903,10 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     setData({ ...data, [field]: value });
   }
 
+  function onSchoolChange(changes) {
+    setData({ ...data, ...changes });
+  }
+
   function onCancel() {
     setData({ ...young });
   }
@@ -975,30 +980,36 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             options={situationOptions}
             onChange={(value) => onLocalChange("situation", value)}
           />
-          <Field
-            name="schoolCity"
-            label="Ville de l'établissement"
-            value={data.schoolCity}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "schoolCity")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            onChange={(value) => onLocalChange("schoolCity", value)}
-          />
-          <Field
-            name="schoolName"
-            label="Nom de l'établissement"
-            value={data.schoolName}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "schoolName")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            onChange={(value) => onLocalChange("schoolName", value)}
-          />
+          {sectionMode === "edition" ? (
+            <SchoolEditor young={data} onChange={onSchoolChange} />
+          ) : (
+            <>
+              <Field
+                name="schoolCity"
+                label="Ville de l'établissement"
+                value={data.schoolCity}
+                mode={sectionMode}
+                className="mb-[16px]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "schoolCity")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange("schoolCity", value)}
+              />
+              <Field
+                name="schoolName"
+                label="Nom de l'établissement"
+                value={data.schoolName}
+                mode={sectionMode}
+                className="mb-[16px]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "schoolName")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange("schoolName", value)}
+              />
+            </>
+          )}
           <Field
             name="grade"
             label="Classe"

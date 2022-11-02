@@ -20,6 +20,7 @@ export default function Field({
   onCorrectionRequestChange,
   type = "text",
   options = [],
+  filterOnType = false,
   onChange = () => {},
   transformer,
 }) {
@@ -27,6 +28,7 @@ export default function Field({
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
+  const [editable, setEditable] = useState(false);
 
   // const [editable, setEditable] = useState(false);
 
@@ -52,6 +54,21 @@ export default function Field({
     );
   }, [mouseIn, hasValidRequest]);
 
+  useEffect(() => {
+    let edit = true;
+    if (mode === "edition") {
+      if (type === "select") {
+        if (options.length === 0) {
+          edit = false;
+        }
+      }
+    } else {
+      edit = false;
+    }
+    // console.log(name + " editable: ", edit, mode, type, options);
+    setEditable(edit);
+  }, [options, mode, type]);
+
   function startRequest() {
     if (group === null || group === undefined) {
       setOpened(true);
@@ -65,18 +82,6 @@ export default function Field({
     }
   }
 
-  // --- compute if we can edit field.
-  let editable = true;
-  if (mode === "edition") {
-    if (type === "select") {
-      if (options.length === 0) {
-        editable = false;
-      }
-    }
-  } else {
-    editable = false;
-  }
-
   return (
     <div className={className}>
       <div
@@ -87,7 +92,7 @@ export default function Field({
         {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
         {mode === "edition" && editable ? (
           <>
-            {type === "select" && <SimpleSelect value={value} transformer={transformer} options={options} onChange={onChange} />}
+            {type === "select" && <SimpleSelect value={value} transformer={transformer} options={options} onChange={onChange} filterOnType={filterOnType} />}
             {type === "text" && <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />}
           </>
         ) : (
