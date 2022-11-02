@@ -3,7 +3,6 @@ import { Container } from "reactstrap";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import * as FileSaver from "file-saver";
 
 import api from "../../../services/api";
 import { formatStringLongDate, colors, ticketStateNameById, translateState, translate, htmlCleaner } from "../../../utils";
@@ -13,24 +12,12 @@ import SendIcon from "../../../components/SendIcon";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
-import FileUpload, { useFileUpload } from "../../../components/FileUpload";
-
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
   e.style.height = `${e.scrollHeight}px`;
-};
-
-const download = async (file) => {
-  try {
-    const s3Id = file.path.split("/")[1];
-    const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
-    FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
-  } catch (e) {
-    toast.error("Le fichier n'a pas pu être téléchargé");
-  }
 };
 
 export default function TicketView(props) {
@@ -40,14 +27,6 @@ export default function TicketView(props) {
   const [messages, setMessages] = useState([]);
   const young = useSelector((state) => state.Auth.young);
   const inputRef = React.useRef();
-
-  const { files, addFiles, deleteFile, resetFiles, error } = useFileUpload();
-
-  useEffect(() => {
-    if (error) {
-      toastr.error(error, "");
-    }
-  }, [error]);
 
   const getTicket = async () => {
     try {
@@ -65,7 +44,6 @@ export default function TicketView(props) {
             date: formatStringLongDate(message.createdAt),
             content: htmlCleaner(message.text),
             createdAt: message.createdAt,
-            files: message.files,
           };
         })
         .filter((message) => message !== undefined);
@@ -80,34 +58,18 @@ export default function TicketView(props) {
   }, []);
 
   const send = async () => {
-    try {
-      setSending(true);
-      if (!message) return setSending(false);
-      let uploadedFiles;
-      if (files.length > 0) {
-        const filesResponse = await api.uploadFile("/zammood/upload", files);
-        if (!filesResponse.ok) {
-          setSending(false);
-          return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
-        }
-        uploadedFiles = filesResponse.data;
-      }
-      const id = props.match?.params?.id;
-      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
-      if (!ok) {
-        capture(code);
-        setSending(false);
-        toastr.error("Oups, une erreur est survenue", translate(code));
-      }
-      resetFiles();
-      setMessage("");
-      updateHeightElement(inputRef?.current);
-      getTicket();
-      setSending(false);
-    } catch (error) {
-      toastr.error("Oups, une erreur est survenue", translate(error.code));
-      setSending(false);
+    setSending(true);
+    if (!message) return setSending(false);
+    const id = props.match?.params?.id;
+    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage });
+    if (!ok) {
+      capture(code);
+      toastr.error("Oups, une erreur est survenue", translate(code));
     }
+    setMessage("");
+    updateHeightElement(inputRef?.current);
+    getTicket();
+    setSending(false);
   };
 
   if (ticket === undefined) return <Loader />;
@@ -162,7 +124,7 @@ export default function TicketView(props) {
             </Heading>
             <Messages>
               {messages?.map((message) => (
-                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} files={message?.files} />
+                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
               ))}
             </Messages>
           </>
@@ -180,37 +142,23 @@ export default function TicketView(props) {
             value={message}
           />
           <ButtonContainer>
-            {sending ? (
-              <Loader size="25px" />
-            ) : (
-              <LoadingButton onClick={send} disabled={!message || sending} color="white">
-                <SendIcon color={!message ? "grey" : null} />
-              </LoadingButton>
-            )}
+            <LoadingButton onClick={send} disabled={!message || sending} color="white">
+              <SendIcon color={!message ? "grey" : null} />
+            </LoadingButton>
           </ButtonContainer>
         </InputContainer>
-        <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       </div>
     </Container>
   );
 }
 
-const Message = ({ from, date, content, fromMe, files = [] }) => {
+const Message = ({ from, date, content, fromMe }) => {
   if (!content || !content.length) return null;
   return fromMe ? (
     <MessageContainer>
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
-        {files.map((file) => (
-          <File
-            onClick={() => {
-              download(file);
-            }}
-            color="white">
-            {file.name}
-          </File>
-        ))}
       </MessageBubble>
     </MessageContainer>
   ) : (
@@ -219,14 +167,6 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
-        {files.map((file) => (
-          <File
-            onClick={() => {
-              download(file);
-            }}>
-            {file.name}
-          </File>
-        ))}
       </MessageBubble>
     </MessageContainer>
   );
@@ -320,15 +260,6 @@ const MessageDate = styled.div`
 const MessageContent = styled.div`
   font-weight: 400;
   color: ${({ color }) => color};
-`;
-
-const File = styled.div`
-  margin-top: 0.2rem;
-  color: ${({ color }) => color};
-  font-size: 0.8rem;
-  font-weight: 400;
-  text-decoration: underline;
-  cursor: pointer;
 `;
 
 const Heading = styled(Container)`
