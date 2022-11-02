@@ -22,6 +22,7 @@ import { SPECIFIC_SITUATIONS_KEY } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
+import FranceConnect from "../../assets/icons/FranceConnect";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -1170,6 +1171,18 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 onChange={(value) => onLocalChange(`parent${currentParent}Country`, value)}
               />
             </FieldsGroup>
+          )}
+          {data[`parent${currentParent}FromFranceConnect`] === "true" && (
+            <div className="flex items-center bg-[#F9FAFB] p-[18px] rounded-[7px] mt-[16px]">
+              <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
+              <div>
+                <div className="text-[14px] leading-[20px] text-[#242526] text-bold mb-[6px]">Attestation des représentants légaux</div>
+                <div className="text-[12px] leading-[20px] text-[#000000] grow">
+                  Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir
+                  du document de consentement papier.
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
