@@ -334,10 +334,6 @@ export default function VolontaireList() {
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
-
-  const getIdentityQuery = () => ({
-    //
-  });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
@@ -716,20 +712,6 @@ export default function VolontaireList() {
                   renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
                   showMissing
                   missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getIdentityQuery}
-                  className="dropdown-filter"
-                  placeholder="Attestation - Pièce d’identité périmée"
-                  componentId=""
-                  dataField="imageRight.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "IMAGE_RIGHT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
