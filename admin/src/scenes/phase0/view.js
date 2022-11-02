@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { COHESION_STAY_LIMIT_DATE, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, YOUNG_SITUATIONS, GRADES } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, YOUNG_SITUATIONS, GRADES, getAge } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -538,12 +538,13 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             />
             <SectionIdentiteContact
               className="mt-[32px]"
-              young={young}
+              young={data}
               globalMode={sectionMode}
               requests={requests}
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
               onCorrectionRequestChange={onCorrectionRequestChange}
+              onChange={onLocalChange}
             />
           </>
         ) : (
@@ -1183,6 +1184,16 @@ const PARENT_STATUS_NAME = {
 };
 
 function SectionConsentements({ young }) {
+  const [youngAge, setYoungAge] = useState("?");
+
+  useEffect(() => {
+    if (young) {
+      setYoungAge(getAge(young.birthdateAt));
+    } else {
+      setYoungAge("?");
+    }
+  }, [young]);
+
   const authorizationOptions = [
     { value: "true", label: "J'autorise" },
     { value: "false", label: "Je n'autorise pas" },
@@ -1199,7 +1210,7 @@ function SectionConsentements({ young }) {
         </div>
         <div>
           <CheckRead>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
-          <CheckRead>A pris connaissance des modaCheckReadtés de traitement de mes données personnelles.</CheckRead>
+          <CheckRead>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead>
             Est volontaire pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion du 13 au 25 février 2022 puis la
             réalisation d&apos;une mission d&apos;intérêt général.
@@ -1234,12 +1245,14 @@ function SectionConsentements({ young }) {
               {young.firstName} {young.lastName}
             </b>
           </CheckRead>
-          <CheckRead>
-            Accepte la collecte et le traitement des données personnelles de{" "}
-            <b>
-              {young.firstName} {young.lastName}
-            </b>
-          </CheckRead>
+          {youngAge < 15 && (
+            <CheckRead>
+              Accepte la collecte et le traitement des données personnelles de{" "}
+              <b>
+                {young.firstName} {young.lastName}
+              </b>
+            </CheckRead>
+          )}
           <CheckRead>
             S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
           </CheckRead>
