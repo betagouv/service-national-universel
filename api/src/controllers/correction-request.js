@@ -54,7 +54,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       request.status = "SENT";
 
       // If unreadable/incorrect/other issue with id proof, delete it.
-      if (["UNREADABLE", "OTHER", "NOT_SUITABLE"].includes(request.reason) && request.status === "SENT") {
+      if (request.field === "cniFile" && ["UNREADABLE", "OTHER", "NOT_SUITABLE"].includes(request.reason) && request.status === "SENT") {
         for (const file of young.files.cniFiles) await deleteFile(`app/young/${young._id}/cniFiles/${file._id}`);
         young.set({ "files.cniFiles": [] });
       }
