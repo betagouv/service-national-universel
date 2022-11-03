@@ -38,7 +38,9 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
             setLoading(true);
             if (files.length > 0) {
               const filesResponse = await api.uploadFile("/zammood/upload", files);
-              if (!filesResponse.ok) return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code));
+              if (!filesResponse.ok) {
+                return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code), { timeOut: 5000 });
+              }
               uploadedFiles = filesResponse.data;
             }
 

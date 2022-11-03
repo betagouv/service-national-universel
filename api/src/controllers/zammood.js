@@ -341,14 +341,18 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       }
 
       if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
-        const clamscan = await new NodeClam().init({
-          preference: "clamscan",
-          removeInfected: true,
-        });
-        const { isInfected } = await clamscan.isInfected(tempFilePath);
-        if (isInfected) {
-          capture(`File ${name} is infected`);
-          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        try {
+          const clamscan = await new NodeClam().init({
+            preference: "clamscan",
+            removeInfected: true,
+          });
+          const { isInfected } = await clamscan.isInfected(tempFilePath);
+          if (isInfected) {
+            capture(`File ${name} is infected`);
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          }
+        } catch {
+          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
         }
       }
 
