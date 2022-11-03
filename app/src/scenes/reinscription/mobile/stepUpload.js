@@ -46,7 +46,7 @@ export default function StepUpload() {
       }
       if (!res.ok) {
         capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" });
         setLoading(false);
         return;
       }

@@ -88,7 +88,8 @@ export default function TicketView(props) {
         const filesResponse = await api.uploadFile("/zammood/upload", files);
         if (!filesResponse.ok) {
           setSending(false);
-          return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(filesResponse.code), { timeOut: 5000 });
+          const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
+          return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
         }
         uploadedFiles = filesResponse.data;
       }
