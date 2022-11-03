@@ -85,7 +85,6 @@ const FILTERS = [
   "COHESION_JDM",
   "DEPART",
   "DEPART_MOTIF",
-  "SAME_DEPARTMENT_SPORT",
 ];
 
 export default function VolontaireList() {
@@ -719,7 +718,7 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Affectation dans son département (handicap)"
+                  placeholder="Affectation dans son département"
                   componentId="SAME_DEPARTMENT"
                   dataField="handicapInSameDepartment.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
@@ -728,21 +727,7 @@ export default function VolontaireList() {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département (handicap)", "Affectation dans son département (handicap)")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Affectation dans son département (sport)"
-                  componentId="SAME_DEPARTMENT_SPORT"
-                  dataField="highSkilledActivityInSameDepartment.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT_SPORT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département (sport)", "Affectation dans son département (sport)")}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
