@@ -14,7 +14,16 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea } = require("snu-lib");
+
+const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
+const youngSchooledSituationOptions = [
+  YOUNG_SITUATIONS.GENERAL_SCHOOL,
+  YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
+  YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
+  YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
+  YOUNG_SITUATIONS.APPRENTICESHIP,
+];
 
 router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -58,6 +67,9 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     console.log("body: ", req.body);
 
     young.set(value);
+    young.set({
+      isRegionRural: isInRuralArea({ ...young, ...value }),
+    });
     await young.save({ fromUser: req.user });
 
     // --- result
@@ -111,9 +123,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       reducedMobilityAccess: Joi.string().trim().valid("true", "false").allow("", null),
       handicapInSameDepartment: Joi.string().trim().valid("true", "false").allow("", null),
       allergies: Joi.string().trim().valid("true", "false").allow("", null),
-      highSkilledActivity: Joi.string().trim().valid("true", "false").allow("", null),
-      highSkilledActivityType: Joi.string().trim().valid("true", "false").allow("", null),
-      highSkilledActivityInSameDepartment: Joi.string().trim().valid("true", "false").allow("", null),
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
@@ -131,6 +140,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     console.log("body: ", req.body);
 
     young.set(value);
+    young.set({
+      employed: youngEmployedSituationOptions.includes(value.situation) ? "true" : "false",
+      schooled: youngSchooledSituationOptions.includes(value.situation) ? "true" : "false",
+    });
     await young.save({ fromUser: req.user });
 
     // --- result

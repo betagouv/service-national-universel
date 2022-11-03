@@ -18,7 +18,7 @@ import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import HourGlass from "../../assets/icons/HourGlass";
-import { countryOptions, SPECIFIC_SITUATIONS_KEY } from "./commons";
+import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
@@ -927,7 +927,12 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
   function onLocalChange(field, value) {
     console.log("on the local change: ", field, value);
-    setData({ ...data, [field]: value });
+    const newData = { ...data, [field]: value };
+    if (field === "situation") {
+      newData.employed = youngEmployedSituationOptions.includes(value) ? "true" : "false";
+      newData.schooled = youngSchooledSituationOptions.includes(value) ? "true" : "false";
+    }
+    setData(newData);
   }
 
   function onSchoolChange(changes) {
@@ -1008,53 +1013,57 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             onChange={(value) => onLocalChange("situation", value)}
             young={young}
           />
-          {sectionMode === "edition" ? (
-            <SchoolEditor young={data} onChange={onSchoolChange} />
-          ) : (
+          {data.schooled === "true" && (
             <>
+              {sectionMode === "edition" ? (
+                <SchoolEditor young={data} onChange={onSchoolChange} />
+              ) : (
+                <>
+                  <Field
+                    name="schoolCity"
+                    label="Ville de l'établissement"
+                    value={data.schoolCity}
+                    mode={sectionMode}
+                    className="mb-[16px]"
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, "schoolCity")}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    onChange={(value) => onLocalChange("schoolCity", value)}
+                    young={young}
+                  />
+                  <Field
+                    name="schoolName"
+                    label="Nom de l'établissement"
+                    value={data.schoolName}
+                    mode={sectionMode}
+                    className="mb-[16px]"
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, "schoolName")}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    onChange={(value) => onLocalChange("schoolName", value)}
+                    young={young}
+                  />
+                </>
+              )}
               <Field
-                name="schoolCity"
-                label="Ville de l'établissement"
-                value={data.schoolCity}
+                name="grade"
+                label="Classe"
+                value={data.grade}
+                transformer={translateGrade}
                 mode={sectionMode}
-                className="mb-[16px]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "schoolCity")}
+                correctionRequest={getCorrectionRequest(requests, "grade")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("schoolCity", value)}
-                young={young}
-              />
-              <Field
-                name="schoolName"
-                label="Nom de l'établissement"
-                value={data.schoolName}
-                mode={sectionMode}
-                className="mb-[16px]"
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "schoolName")}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("schoolName", value)}
+                type="select"
+                options={gradeOptions}
+                onChange={(value) => onLocalChange("grade", value)}
                 young={young}
               />
             </>
           )}
-          <Field
-            name="grade"
-            label="Classe"
-            value={data.grade}
-            transformer={translateGrade}
-            mode={sectionMode}
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "grade")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            type="select"
-            options={gradeOptions}
-            onChange={(value) => onLocalChange("grade", value)}
-            young={young}
-          />
         </div>
         {(sectionMode === "edition" || hasSpecificSituation) && (
           <div className="mt-[32px]">
