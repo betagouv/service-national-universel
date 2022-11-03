@@ -69,7 +69,6 @@ const FILTERS = [
   "EQUIVALENCE_STATUS",
   "PPS",
   "PAI",
-  "RURAL",
   "QPV",
   "HANDICAP",
   "ZRR",

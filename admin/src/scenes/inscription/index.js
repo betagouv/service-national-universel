@@ -44,7 +44,6 @@ const FILTERS = [
   "SEARCH",
   "STATUS",
   "SITUATION",
-  "RURAL",
   "SEXE",
   "PARENT_ALLOW_SNU",
   "REGION",
