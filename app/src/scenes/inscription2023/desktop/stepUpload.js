@@ -50,7 +50,7 @@ export default function StepUpload() {
         return;
       }
     }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
