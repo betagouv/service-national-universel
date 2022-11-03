@@ -1,5 +1,5 @@
 import Cni from "../../../assets/icons/Cni";
-import { DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
+import { AddButton, DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import { download } from "snu-lib";
@@ -11,6 +11,7 @@ import { Modal } from "reactstrap";
 import { BorderButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
+import { capture } from "../../../../../app/src/sentry";
 
 export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange }) {
   const [opened, setOpened] = useState(false);
@@ -97,6 +98,7 @@ function CniModal({ young, onClose }) {
   const [error, setError] = useState(null);
   const [changes, setChanges] = useState(false);
   const [cniFiles, setCniFiles] = useState([]);
+  const [filesToUpload, setFilesToUpload] = useState();
 
   useEffect(() => {
     if (young && young.files && young.files.cniFiles) {
@@ -141,10 +143,39 @@ function CniModal({ young, onClose }) {
     }
   }
 
+  useEffect(() => {
+    upload([...filesToUpload]);
+    setFilesToUpload();
+  }, [filesToUpload]);
+
+  async function upload(files) {
+    for (const file of files) {
+      if (file.size > 5000000)
+        return setError({
+          text: `Ce fichier ${files.name} est trop volumineux.`,
+        });
+    }
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+    if (res.code === "FILE_CORRUPTED")
+      return setError({
+        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+      });
+    if (!res.ok) {
+      capture(res.code);
+      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+      return;
+    }
+  }
+
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
       <div className="bg-white rounded-[8px]">
         <div className="p-[24px]">
+          <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={(e) => setFilesToUpload(e.target.files)} className="hidden" />
+          <label htmlFor="file-upload" className="flex text-sm text-gray-600 space-x-2 items-center">
+            <AddButton className="" />
+            <div>Ajouter un fichier</div>
+          </label>
           {cniFiles.length > 0 ? (
             cniFiles.map((file) => (
               <div key={file._id} className="flex items-center justify-between text-[12px] mt-[8px] border-b-[#E5E7EB] border-b-[1px] last:border-b-[0px] py-[12px]">
