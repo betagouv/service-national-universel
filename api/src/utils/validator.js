@@ -383,6 +383,7 @@ function validateYoung(young, user) {
     city: Joi.string().allow(null, ""),
     cityCode: Joi.string().allow(null, ""),
     populationDensity: Joi.string().allow(null, ""),
+    isRegionRural: Joi.string().allow(null, ""),
     department: Joi.string().allow(null, ""),
     region: Joi.string().allow(null, ""),
     country: Joi.string().allow(null, ""),
