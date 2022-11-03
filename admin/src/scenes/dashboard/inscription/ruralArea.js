@@ -6,6 +6,8 @@ import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
+import { Link } from "react-router-dom";
+import { getLink } from "../../../utils";
 
 export default function RuralArea({ filter }) {
   const [value, setValue] = useState(null);
@@ -41,8 +43,12 @@ export default function RuralArea({ filter }) {
 
     return (
       <Content>
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`RURAL=%5B"false"%5D`] })}>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
+        </Link>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SITUATION=%5B"true"%5D`] })}>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
+        </Link>
       </Content>
     );
   }

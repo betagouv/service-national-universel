@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { getLink, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
+import { Link } from "react-router-dom";
 
 export default function scholarshipSituation({ filter }) {
   const [value, setValue] = useState(null);
@@ -41,7 +42,9 @@ export default function scholarshipSituation({ filter }) {
         {Object.keys(value).map((e, i) => {
           return (
             <Col style={{ marginTop: "15px" }} key={i}>
-              <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e)} />
+              <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SITUATION=%5B"${e}"%5D`] })}>
+                <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e)} />
+              </Link>
             </Col>
           );
         })}

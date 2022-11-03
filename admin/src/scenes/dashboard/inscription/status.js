@@ -42,33 +42,75 @@ export default function Status({ filter }) {
 
   return (
     <Row>
-      {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-        <>
-          <Col md={6} xl={2}>
-            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })} color={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-              <CardTitle>En cours</CardTitle>
-              <CardSubtitle>Inscriptions en cours</CardSubtitle>
-              <CardValueWrapper>
-                <CardValue>{status.IN_PROGRESS || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </LinkCard>
-          </Col>
-          <Col md={6} xl={2}>
-            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"ABANDONED"%5D'] })} color={YOUNG_STATUS_COLORS.ABANDONED}>
-              <CardTitle>Abandonnées</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{status.ABANDONED || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </LinkCard>
-          </Col>
-        </>
-      )}
+      <Col md={6} xl={2}>
+        <LinkCard
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })}
+          color={YOUNG_STATUS_COLORS.IN_PROGRESS}
+          disabled={user.role === ROLES.VISITOR}>
+          <CardTitle>En cours</CardTitle>
+          <CardSubtitle>Inscriptions en cours</CardSubtitle>
+          <CardValueWrapper>
+            <CardValue>{status.IN_PROGRESS || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
+      </Col>
+      <Col md={6} xl={2}>
+        <LinkCard
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"REINSCRIPTION"%5D'] })}
+          color={YOUNG_STATUS_COLORS.REINSCRIPTION}
+          disabled={user.role === ROLES.VISITOR}>
+          <CardTitle>Réinscription</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.REINSCRIPTION || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
+      </Col>
+      <Col md={6} xl={2}>
+        <LinkCard
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_AUTORISED"%5D'] })}
+          color={YOUNG_STATUS_COLORS.NOT_AUTORISED}
+          disabled={user.role === ROLES.VISITOR}>
+          <CardTitle>Non autorisées</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.NOT_AUTORISED || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
+      </Col>
+      <Col md={6} xl={2}>
+        <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })} color={YOUNG_STATUS_COLORS.NOT_ELIGIBLE}>
+          <CardTitle>Non éligibles</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
+      </Col>
+      <Col md={6} xl={2}>
+        <LinkCard
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"ABANDONED"%5D'] })}
+          color={YOUNG_STATUS_COLORS.ABANDONED}
+          disabled={user.role === ROLES.VISITOR}>
+          <CardTitle>Abandonnées</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.ABANDONED || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
+      </Col>
+
       <Col md={6} xl={2}>
         <LinkCard
           disabled={user.role === ROLES.VISITOR}
@@ -139,32 +181,20 @@ export default function Status({ filter }) {
           </CardValueWrapper>
         </LinkCard>
       </Col>
-      {user.role === ROLES.ADMIN && (
-        <>
-          <Col md={6} xl={2}>
-            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })} color={YOUNG_STATUS_COLORS.NOT_ELIGIBLE}>
-              <CardTitle>Non éligibles</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </LinkCard>
-          </Col>
-          <Col md={6} xl={2}>
-            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"DELETED"%5D'] })} color={YOUNG_STATUS_COLORS.DELETED}>
-              <CardTitle>Supprimées</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{status.DELETED || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </LinkCard>
-          </Col>
-        </>
-      )}
+      <Col md={6} xl={2}>
+        <LinkCard
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"DELETED"%5D'] })}
+          color={YOUNG_STATUS_COLORS.DELETED}
+          disabled={user.role === ROLES.VISITOR}>
+          <CardTitle>Supprimées</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.DELETED || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
+      </Col>
     </Row>
   );
 }
