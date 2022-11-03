@@ -8,7 +8,6 @@ const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
-const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -31,7 +30,6 @@ const {
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
-const { getQPV, getDensity } = require("../geo");
 const { SUB_ROLES } = require("snu-lib/roles");
 const { getAge } = require("snu-lib/date");
 
@@ -471,38 +469,6 @@ const getBaseUrl = () => {
   if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
   return "http://localhost:8080";
 };
-
-async function inscriptionCheck(value, young, req) {
-  // Check quartier prioritaires.
-  if (value.zip && value.city && value.address) {
-    const qpv = await getQPV(value.zip, value.city, value.address);
-    if (qpv === true) young.set({ qpv: "true" });
-    else if (qpv === false) young.set({ qpv: "false" });
-    else young.set({ qpv: "" });
-    await young.save({ fromUser: req.user });
-  }
-
-  // Check quartier prioritaires.
-  if (value.cityCode) {
-    const populationDensity = await getDensity(value.cityCode);
-    young.set({ populationDensity });
-    await young.save({ fromUser: req.user });
-  }
-
-  // if withdrawn, cascade withdrawn on every status
-  if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-    if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
-    if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
-    if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
-    await young.save({ fromUser: req.user });
-  }
-
-  // if they had a cohesion center, we check if we need to update the places taken / left
-  if (young.sessionPhase1Id) {
-    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-  }
-}
 
 const updateApplication = async (mission, fromUser = null) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
