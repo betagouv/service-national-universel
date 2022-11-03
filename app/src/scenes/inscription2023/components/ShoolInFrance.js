@@ -39,7 +39,6 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
         },
       };
       const { responses } = await api.esQuery("schoolramses", body);
-      console.log("cities: ", responses[0].aggregations?.cities.buckets);
       setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
     }
     getCities();
