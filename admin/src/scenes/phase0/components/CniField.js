@@ -144,8 +144,10 @@ function CniModal({ young, onClose }) {
   }
 
   useEffect(() => {
-    upload([...filesToUpload]);
-    setFilesToUpload();
+    if (filesToUpload?.length) {
+      upload(filesToUpload);
+      setFilesToUpload();
+    }
   }, [filesToUpload]);
 
   async function upload(files) {
@@ -155,11 +157,13 @@ function CniModal({ young, onClose }) {
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), young.latestCNIFileCategory, young.latestCNIFileExpirationDate);
     if (res.code === "FILE_CORRUPTED")
       return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
       });
+    setCniFiles(res.data);
+
     if (!res.ok) {
       capture(res.code);
       setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -171,11 +175,6 @@ function CniModal({ young, onClose }) {
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
       <div className="bg-white rounded-[8px]">
         <div className="p-[24px]">
-          <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={(e) => setFilesToUpload(e.target.files)} className="hidden" />
-          <label htmlFor="file-upload" className="flex text-sm text-gray-600 space-x-2 items-center">
-            <AddButton className="" />
-            <div>Ajouter un fichier</div>
-          </label>
           {cniFiles.length > 0 ? (
             cniFiles.map((file) => (
               <div key={file._id} className="flex items-center justify-between text-[12px] mt-[8px] border-b-[#E5E7EB] border-b-[1px] last:border-b-[0px] py-[12px]">
@@ -190,6 +189,11 @@ function CniModal({ young, onClose }) {
             <div className="text-[14px] text-[#6B7280] text-center">Aucune pièce d&apos;identité</div>
           )}
           {error && <div className="text-[#EF4444] text-[12px] leading-[1.4em] mt-[16px]">{error}</div>}
+          <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={(e) => setFilesToUpload(e.target.files)} className="hidden" />
+          <label htmlFor="file-upload" className="flex text-xs space-x-4 items-center mt-4">
+            <AddButton className="" />
+            <div className="cursor-pointer text-gray-500 hover:text-gray-800">Ajouter un fichier</div>
+          </label>
         </div>
         <div className="flex p-[24px] items-center justify-center">
           <BorderButton onClick={() => onClose(changes)}>Fermer</BorderButton>
