@@ -78,7 +78,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   // everyday at 0200
-  cron.schedule(everyHours(6), () => {
+  cron.schedule("0 0 * * *", () => {
     deleteInactiveRefs.handler();
   });
 
