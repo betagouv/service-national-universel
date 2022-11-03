@@ -34,7 +34,7 @@ export default function StepUpload() {
   const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
 
   async function onSubmit() {
-    if (files) {
+    if (files.length) {
       setLoading(true);
       for (const file of files) {
         if (file.size > 5000000)
@@ -136,7 +136,7 @@ export default function StepUpload() {
     },
   };
 
-  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
+  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && hasDateChanged == false) || (correctionsFile?.length && !files?.length);
 
   return (
     <>

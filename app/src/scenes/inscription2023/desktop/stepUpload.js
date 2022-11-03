@@ -31,7 +31,7 @@ export default function StepUpload() {
 
   async function onSubmit() {
     setLoading(true);
-    if (files) {
+    if (files.length) {
       for (const file of files) {
         if (file.size > 5000000)
           return setError({
