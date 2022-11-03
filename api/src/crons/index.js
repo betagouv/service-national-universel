@@ -16,6 +16,7 @@ const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
+const deleteInactiveRefs = require("./deleteInactiveRefs");
 const applicationPatches = require("./patch/application");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
@@ -74,6 +75,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // everyday at 0200
   cron.schedule(everyHours(6), () => {
     apiEngagement.handler();
+  });
+
+  // everyday at 0200
+  cron.schedule(everyHours(6), () => {
+    deleteInactiveRefs.handler();
   });
 
   cron.schedule(everyHours(6), () => {
