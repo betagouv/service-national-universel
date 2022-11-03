@@ -522,6 +522,7 @@ router.post(
         }
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
           const clamscan = await new NodeClam().init({
+            preference: 'clamscan',
             removeInfected: true,
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);

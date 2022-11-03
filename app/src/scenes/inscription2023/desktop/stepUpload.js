@@ -31,7 +31,7 @@ export default function StepUpload() {
 
   async function onSubmit() {
     setLoading(true);
-    if (files) {
+    if (files.length) {
       for (const file of files) {
         if (file.size > 5000000)
           return setError({
@@ -50,7 +50,7 @@ export default function StepUpload() {
         return;
       }
     }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -95,6 +95,7 @@ export default function StepUpload() {
         setLoading(false);
         return;
       }
+      plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
@@ -107,12 +108,7 @@ export default function StepUpload() {
     setLoading(false);
   }
 
-  const isDisabled =
-    !young.files.cniFiles.filter((e) => e.category === category).length ||
-    !date ||
-    loading ||
-    (correctionsDate?.length && !hasDateChanged) ||
-    (correctionsFile?.length && !files?.length);
+  const isDisabled = !young.files.cniFiles || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
 
   const ID = {
     cniNew: {
@@ -148,6 +144,7 @@ export default function StepUpload() {
       modeCorrection={correctionsFile?.length > 0 || correctionsDate?.length > 0}
       onCorrection={onCorrect}
       disabled={isDisabled}
+      loading={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {correctionsFile?.map((e) => (

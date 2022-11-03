@@ -344,8 +344,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        dispatch(setYoung(responseData));
         plausibleEvent("Phase0/CTA inscription - profil");
+        dispatch(setYoung(responseData));
         history.push("/inscription2023/consentement");
       } catch (e) {
         capture(e);
@@ -408,6 +408,7 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
+        plausibleEvent("Phase0/CTA demande correction - Corriger Coordonnees");
         dispatch(setYoung(responseData));
         history.push("/");
       } catch (e) {

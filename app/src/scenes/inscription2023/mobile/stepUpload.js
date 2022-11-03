@@ -34,7 +34,7 @@ export default function StepUpload() {
   const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
 
   async function onSubmit() {
-    if (files) {
+    if (files.length) {
       setLoading(true);
       for (const file of files) {
         if (file.size > 5000000)
@@ -54,7 +54,7 @@ export default function StepUpload() {
         return;
       }
     }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -99,6 +99,7 @@ export default function StepUpload() {
         setLoading(false);
         return;
       }
+      plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
@@ -136,12 +137,7 @@ export default function StepUpload() {
     },
   };
 
-  const isDisabled =
-    !young.files.cniFiles.filter((e) => e.category === category).length ||
-    !date ||
-    loading ||
-    (correctionsDate?.length && !hasDateChanged) ||
-    (correctionsFile?.length && !files?.length);
+  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && hasDateChanged == false) || (correctionsFile?.length && !files?.length);
 
   return (
     <>
@@ -238,9 +234,9 @@ export default function StepUpload() {
       <Help />
       <Footer marginBottom="mb-[88px]" />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-        <StickyButton text="Corriger" onClick={onCorrect} disabled={isDisabled} />
+        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={isDisabled} />
       ) : (
-        <StickyButton text="Continuer" onClick={onSubmit} disabled={!date || loading} />
+        <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
       )}
     </>
   );

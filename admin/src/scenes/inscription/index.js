@@ -13,7 +13,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL, appURL, supportURL } from "../../config";
+import { apiURL, appURL, environment, supportURL } from "../../config";
 import Panel from "./panel";
 import {
   translate,
@@ -76,7 +76,7 @@ export default function Inscription() {
     setInfosClick(!infosClick);
   };
 
-  if (user.role !== ROLES.ADMIN) history.push("/");
+  if (user.role !== ROLES.ADMIN && environment === "production") history.push("/");
 
   return (
     <div>

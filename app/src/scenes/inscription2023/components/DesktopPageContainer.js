@@ -19,6 +19,7 @@ export default function DesktopPageContainer({
   childrenContinueButton = "Continuer",
   modeCorrection = false,
   onCorrection,
+  loading = false,
 }) {
   return (
     <>
@@ -36,6 +37,7 @@ export default function DesktopPageContainer({
             <hr className="my-4 h-px bg-gray-200 border-0" />
             {children}
             <hr className="my-8 h-px bg-gray-200 border-0" />
+            {loading && <div>Veuillez patienter : scan antivirus en cours...</div>}
             <div className="flex justify-end gap-4">
               {onClickPrevious && (
                 <button

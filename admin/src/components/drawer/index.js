@@ -199,10 +199,10 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      {environment === "production" ? (
-        <DrawerTabWithoutLink to="/inscription" title="Inscriptions" onClick={blockInscription} />
-      ) : (
+      {environment !== "production" ? (
         <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      ) : (
+        <DrawerTabWithoutLink to="/inscription" title="Inscriptions" onClick={blockInscription} />
       )}
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />

@@ -1,3 +1,36 @@
+# [1.159.0](https://github.com/betagouv/service-national-universel/compare/v1.158.1...v1.159.0) (2022-11-02)
+
+
+### Bug Fixes
+
+* **api:** fix ([b47863a](https://github.com/betagouv/service-national-universel/commit/b47863a5d11ebb670d9329fd91289cc07c372ca0))
+
+
+### Features
+
+* **api:** cron for patch logs ([#1980](https://github.com/betagouv/service-national-universel/issues/1980)) ([e8b8305](https://github.com/betagouv/service-national-universel/commit/e8b8305dab6ff729fb4fe3f68eadab8418c512c2))
+* **api/app:** file scan error message ([1d649ef](https://github.com/betagouv/service-national-universel/commit/1d649ef9836e68351ac1927149f36e16b4e66314))
+
+## [1.158.1](https://github.com/betagouv/service-national-universel/compare/v1.158.0...v1.158.1) (2022-11-01)
+
+
+### Bug Fixes
+
+* **app:** preinscription etrangers ([39f3029](https://github.com/betagouv/service-national-universel/commit/39f3029da4b0a4e16048d9d40c142cf459d47263))
+
+# [1.158.0](https://github.com/betagouv/service-national-universel/compare/v1.157.1...v1.158.0) (2022-10-31)
+
+
+### Bug Fixes
+
+* **api:** Clamscan use binary ([5064596](https://github.com/betagouv/service-national-universel/commit/5064596269e9254e367911ae5f9cea828d3e48f2))
+* **api:** Rework output in case of file infected ([83307aa](https://github.com/betagouv/service-national-universel/commit/83307aacfeefb44540438ec13de53190d7ee4a2e))
+
+
+### Features
+
+* **api/app:** demandes de corrections pages documents et televersement ([#1981](https://github.com/betagouv/service-national-universel/issues/1981)) ([294767b](https://github.com/betagouv/service-national-universel/commit/294767b14c3d7e797bc345854ba561035877801d))
+
 ## [1.157.1](https://github.com/betagouv/service-national-universel/compare/v1.157.0...v1.157.1) (2022-10-30)
 
 

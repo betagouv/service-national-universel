@@ -171,6 +171,7 @@ export default function StepRepresentants() {
         setLoading(false);
         return;
       }
+      plausibleEvent("Phase0/CTA demande correction - Corriger Representant");
       dispatch(setYoung(responseData));
       toastr.success("Vos informations ont bien été enregistrées");
     } catch (e) {

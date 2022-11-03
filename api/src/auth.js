@@ -88,7 +88,7 @@ class Auth {
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
-        schoolZip: Joi.string().trim(),
+        schoolZip: Joi.string().trim().allow(null, ""),
         schoolCity: Joi.string().trim(),
         schoolDepartment: Joi.string().trim(),
         schoolRegion: Joi.string().trim(),

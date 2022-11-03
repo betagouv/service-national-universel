@@ -9,6 +9,7 @@ import StickyButton from "../../../../components/inscription/stickyButton";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
+import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import Input from "../../components/Input";
 
@@ -71,6 +72,7 @@ export default function StepProfil() {
           setLoading(false);
           return;
         }
+        plausibleEvent("Phase0/CTA demande correction - Corriger Profil");
         dispatch(setYoung(responseData));
         history.push("/");
       } catch (e) {
