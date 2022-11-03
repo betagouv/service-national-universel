@@ -8,7 +8,7 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 import { capture } from "../../sentry";
 import FileUpload, { useFileUpload } from "../../components/FileUpload";
