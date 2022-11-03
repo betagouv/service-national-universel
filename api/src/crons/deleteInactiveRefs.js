@@ -22,6 +22,7 @@ async function deleteRef(referent) {
     if (missionsLinkedToReferent) throw ERRORS.LINKED_MISSIONS;
     await referent.remove();
   } catch (error) {
+    slack.error(`Could not delete referent ${referent._id}:`, JSON.stringify(error));
     capture(error);
   }
 }
