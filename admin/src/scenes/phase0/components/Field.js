@@ -23,6 +23,7 @@ export default function Field({
   filterOnType = false,
   onChange = () => {},
   transformer,
+  young,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
@@ -106,8 +107,8 @@ export default function Field({
           </>
         )}
       </div>
-      {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} />}
-      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
+      {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
+      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} young={young} />}
     </div>
   );
 }

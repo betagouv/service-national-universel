@@ -18,7 +18,7 @@ import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import HourGlass from "../../assets/icons/HourGlass";
-import { SPECIFIC_SITUATIONS_KEY } from "./commons";
+import { countryOptions, SPECIFIC_SITUATIONS_KEY } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
@@ -588,7 +588,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             onCorrectionRequestChange={onCorrectionRequestChange}
             type="date"
             value={data.birthdateAt}
-            onChange={(value) => onLocalChange("birthdateAt", value)}>
+            onChange={(value) => onLocalChange("birthdateAt", value)}
+            young={young}>
             <Field name="birth_day" label="Jour" value={birthDate.day} className="mr-[14px] flex-[1_1_23%]" />
             <Field name="birth_month" label="Mois" value={birthDate.month} className="mr-[14px] flex-[1_1_42%]" />
             <Field name="birth_year" label="Année" value={birthDate.year} className="flex-[1_1_35%]" />
@@ -605,6 +606,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               correctionRequest={getCorrectionRequest(requests, "birthCity")}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange("birthCity", value)}
+              young={young}
             />
             <Field
               name="birthCityZip"
@@ -617,6 +619,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               correctionRequest={getCorrectionRequest(requests, "birthCityZip")}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange("birthCityZip", value)}
+              young={young}
             />
           </div>
           <Field
@@ -628,7 +631,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             currentRequest={currentRequest}
             correctionRequest={getCorrectionRequest(requests, "birthCountry")}
             onCorrectionRequestChange={onCorrectionRequestChange}
+            type="select"
+            options={countryOptions}
+            filterOnType
             onChange={(value) => onLocalChange("birthCountry", value)}
+            young={young}
           />
         </div>
         <div className="mt-[32px]">
@@ -644,6 +651,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             correctionRequest={getCorrectionRequest(requests, "address")}
             onCorrectionRequestChange={onCorrectionRequestChange}
             onChange={(value) => onLocalChange("address", value)}
+            young={young}
           />
           <div className="mb-[16px] flex items-start justify-between">
             <Field
@@ -657,6 +665,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               correctionRequest={getCorrectionRequest(requests, "zip")}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange("zip", value)}
+              young={young}
             />
             <Field
               name="city"
@@ -669,6 +678,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               correctionRequest={getCorrectionRequest(requests, "city")}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange("city", value)}
+              young={young}
             />
           </div>
           {data.country && (
@@ -682,7 +692,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, "country")}
               onCorrectionRequestChange={onCorrectionRequestChange}
+              type="select"
+              options={countryOptions}
+              filterOnType
               onChange={(value) => onLocalChange("country", value)}
+              young={young}
             />
           )}
           <div className="mb-[16px] flex items-start justify-between">
@@ -704,6 +718,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               correctionRequest={getCorrectionRequest(requests, "foreignAddress")}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange("foreignAddress", value)}
+              young={young}
             />
             <div className="mb-[16px] flex items-start justify-between">
               <Field
@@ -717,6 +732,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 correctionRequest={getCorrectionRequest(requests, "foreignZip")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange("foreignZip", value)}
+                young={young}
               />
               <Field
                 name="city"
@@ -729,6 +745,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 correctionRequest={getCorrectionRequest(requests, "foreignCity")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange("foreignCity", value)}
+                young={young}
               />
             </div>
             <Field
@@ -741,7 +758,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, "foreignCountry")}
               onCorrectionRequestChange={onCorrectionRequestChange}
+              type="select"
+              options={countryOptions}
+              filterOnType
               onChange={(value) => onLocalChange("foreignCountry", value)}
+              young={young}
             />
           </div>
         )}
@@ -786,7 +807,8 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         onCorrectionRequestChange={onCorrectionRequestChange}
         type="date"
         value={young.latestCNIFileExpirationDate}
-        onChange={(value) => onChange("latestCNIFileExpirationDate", value)}>
+        onChange={(value) => onChange("latestCNIFileExpirationDate", value)}
+        young={young}>
         <Field name="cni_day" label="Jour" value={cniDay} className="mr-[14px] flex-[1_1_23%]" />
         <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
         <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
@@ -817,6 +839,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
           correctionRequest={getCorrectionRequest(requests, "lastName")}
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={(value) => onChange("lastName", value)}
+          young={young}
         />
         <Field
           name="firstName"
@@ -829,6 +852,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
           correctionRequest={getCorrectionRequest(requests, "firstName")}
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={(value) => onChange("firstName", value)}
+          young={young}
         />
       </div>
       <Field
@@ -845,6 +869,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         options={genderOptions}
         transformer={translate}
         onChange={(value) => onChange("gender", value)}
+        young={young}
       />
       <Field
         name="email"
@@ -857,6 +882,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         correctionRequest={getCorrectionRequest(requests, "email")}
         onCorrectionRequestChange={onCorrectionRequestChange}
         onChange={(value) => onChange("email", value)}
+        young={young}
       />
       <Field
         name="phone"
@@ -868,6 +894,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         correctionRequest={getCorrectionRequest(requests, "phone")}
         onCorrectionRequestChange={onCorrectionRequestChange}
         onChange={(value) => onChange("phone", value)}
+        young={young}
       />
     </div>
   );
@@ -979,6 +1006,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             type="select"
             options={situationOptions}
             onChange={(value) => onLocalChange("situation", value)}
+            young={young}
           />
           {sectionMode === "edition" ? (
             <SchoolEditor young={data} onChange={onSchoolChange} />
@@ -995,6 +1023,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 correctionRequest={getCorrectionRequest(requests, "schoolCity")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange("schoolCity", value)}
+                young={young}
               />
               <Field
                 name="schoolName"
@@ -1007,6 +1036,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 correctionRequest={getCorrectionRequest(requests, "schoolName")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange("schoolName", value)}
+                young={young}
               />
             </>
           )}
@@ -1023,6 +1053,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             type="select"
             options={gradeOptions}
             onChange={(value) => onLocalChange("grade", value)}
+            young={young}
           />
         </div>
         {(sectionMode === "edition" || hasSpecificSituation) && (
@@ -1049,6 +1080,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange("specificAmenagmentType", value)}
+                young={young}
               />
             )}
           </div>
@@ -1072,6 +1104,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             type="select"
             options={parentStatusOptions}
             onChange={(value) => onLocalChange(`parent${currentParent}Status`, value)}
+            young={young}
           />
           <div className="mb-[16px] flex">
             <Field
@@ -1085,6 +1118,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               correctionRequest={getCorrectionRequest(requests, `parent${currentParent}LastName`)}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange(`parent${currentParent}LastName`, value)}
+              young={young}
             />
             <Field
               name={`parent${currentParent}FirstName`}
@@ -1097,6 +1131,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               correctionRequest={getCorrectionRequest(requests, `parent${currentParent}FirstName`)}
               onCorrectionRequestChange={onCorrectionRequestChange}
               onChange={(value) => onLocalChange(`parent${currentParent}FirstName`, value)}
+              young={young}
             />
           </div>
 
@@ -1111,6 +1146,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Email`)}
             onCorrectionRequestChange={onCorrectionRequestChange}
             onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
+            young={young}
           />
           <Field
             name={`parent${currentParent}Phone`}
@@ -1123,6 +1159,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
             onCorrectionRequestChange={onCorrectionRequestChange}
             onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
+            young={young}
           />
           <Field
             name={`parent${currentParent}OwnAddress`}
@@ -1137,6 +1174,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             type="select"
             options={booleanOptions}
             onChange={(value) => onLocalChange(`parent${currentParent}OwnAddress`, value)}
+            young={young}
           />
           {data[`parent${currentParent}OwnAddress`] === "true" && (
             <FieldsGroup
@@ -1148,7 +1186,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
-              onCorrectionRequestChange={onCorrectionRequestChange}>
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              young={young}>
               <Field
                 name={`parent${currentParent}Address`}
                 label="Adresse"
@@ -1156,6 +1195,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 mode={sectionMode}
                 className="mb-[16px]"
                 onChange={(value) => onLocalChange(`parent${currentParent}Address`, value)}
+                young={young}
               />
               <Field
                 name={`parent${currentParent}Zip`}
@@ -1164,6 +1204,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 mode={sectionMode}
                 className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
                 onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
+                young={young}
               />
               <Field
                 name={`parent${currentParent}City`}
@@ -1172,6 +1213,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 mode={sectionMode}
                 className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
                 onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
+                young={young}
               />
               <Field
                 name={`parent${currentParent}Country`}
@@ -1179,7 +1221,11 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 value={data[`parent${currentParent}Country`] || ""}
                 mode={sectionMode}
                 className="mb-[16px]"
+                type="select"
+                options={countryOptions}
+                filterOnType
                 onChange={(value) => onLocalChange(`parent${currentParent}Country`, value)}
+                young={young}
               />
             </FieldsGroup>
           )}
