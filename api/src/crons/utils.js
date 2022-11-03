@@ -8,10 +8,6 @@ const getMinusDate = (v) => {
   return d;
 };
 
-const getDateString = (date) => {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-};
-
 const getDataInscriptions = async ({ department, region }) => {
   let obj = { all: {}, february: {}, june: {}, july: {} };
   const filter = { cohort: { $in: ["Février 2022", "Juin 2022", "Juillet 2022"] } };
@@ -52,5 +48,4 @@ module.exports = {
   getDataInscriptions,
   departmentList,
   regionList,
-  getDateString,
 };

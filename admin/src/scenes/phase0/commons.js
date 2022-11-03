@@ -8,7 +8,5 @@ export const SPECIFIC_SITUATIONS_KEY = [
   "handicapInSameDepartment",
   "allergies",
   "highSkilledActivity",
-  "highSkilledActivityType",
   "highSkilledActivityInSameDepartment",
-  "highSkilledActivityProofFiles",
 ];
