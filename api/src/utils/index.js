@@ -750,7 +750,6 @@ module.exports = {
   STEPS,
   STEPS2023,
   STEPS2023REINSCRIPTION,
-  inscriptionCheck,
   updateApplication,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
