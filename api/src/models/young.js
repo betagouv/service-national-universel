@@ -715,6 +715,13 @@ const Schema = new mongoose.Schema({
       description: "Densité de la ville  pendant le snu du volontaire",
     },
   },
+  isRegionRural: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Ruralité de la ville pendant le snu du volontaire",
+    },
+  },
   department: {
     type: String,
     documentation: {

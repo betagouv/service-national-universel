@@ -54,6 +54,7 @@ const whiteListYoung = [
   "department",
   "region",
   "populationDensity",
+  "isRegionRural",
   "foreignAddress",
   "foreignCity",
   "foreignZip",
