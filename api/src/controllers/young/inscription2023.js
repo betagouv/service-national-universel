@@ -14,6 +14,7 @@ const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { isGoalReached } = require("../../utils/cohort");
+const { isInRuralArea } = require("snu-lib");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -251,6 +252,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     if (value.cityCode) {
       const populationDensity = await getDensity(value.cityCode);
       young.set({ populationDensity });
+      const isRegionRural = isInRuralArea(young);
+      young.set({ isRegionRural })
     }
 
     await young.save({ fromUser: req.user });
