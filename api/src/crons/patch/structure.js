@@ -8,14 +8,14 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const StructureModel = require("../../models/structure");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
-const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
+const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
 const result = { event: {} };
 
 async function process(patch, count, total) {
   try {
-    result.structureScanned = result.structureScanned + 1 || 1;
+    result.structurePatchScanned = result.structurePatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
     const structure = await StructureModel.findById(patch.ref.toString());
     if (!structure) return;
@@ -102,11 +102,11 @@ exports.handler = async () => {
 
     await findAll(structure_patches, mongooseFilterForDayBefore(), process);
     slack.info({
-      title: "structurePatch",
-      text: `${result.structureScanned} structures were scanned: ${JSON.stringify(result.event)}`,
+      title: "✅ Structure Logs",
+      text: `${result.structurePatchScanned} structure patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of young structure logs", JSON.stringify(e));
-    slack.error({ title: "structurePatch", text: JSON.stringify(e) });
+    slack.error({ title: "❌ Structure Logs", text: JSON.stringify(e) });
   }
 };
