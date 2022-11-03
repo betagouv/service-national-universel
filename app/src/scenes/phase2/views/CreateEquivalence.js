@@ -10,7 +10,7 @@ import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
 import validator from "validator";
-import { slugifyFileName, UNSS_TYPE } from "../../../utils";
+import { slugifyFileName, UNSS_TYPE, translate } from "../../../utils";
 import plausibleEvent from "../../../services/plausible";
 import { capture } from "../../../sentry";
 
@@ -68,7 +68,7 @@ export default function CreateEquivalence() {
     setFilesList(files);
     setUploading(true);
     const res = await api.uploadFile("/young/file/equivalenceFiles", files);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier", translate(res.code));
     // We update it instant ( because the bucket is updated instant )
     setData({ ...data, files: res.data });
     toastr.success("Fichier téléversé");
