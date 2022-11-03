@@ -24,6 +24,9 @@ import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
 import SchoolEditor from "./components/SchoolEditor";
+import validator from "validator";
+import SectionContext from "./context/SectionContext";
+import VerifyAddress from "./components/VerifyAddress";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -464,6 +467,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
   const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (young) {
@@ -495,193 +499,239 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 
   function onCancel() {
     setData({ ...young });
+    setErrors({});
   }
 
   async function onSave() {
     setSaving(true);
-    try {
-      const result = await api.put(`/young-edition/${young._id}/identite`, data);
-      console.log("RESULT = ", result);
-      if (result.ok) {
-        toastr.success("Les données ont bien été enregistrées.");
-        setSectionMode(globalMode);
-        onChange();
-      } else {
+    if (validate()) {
+      try {
+        const result = await api.put(`/young-edition/${young._id}/identite`, data);
+        console.log("RESULT = ", result);
+        if (result.ok) {
+          toastr.success("Les données ont bien été enregistrées.");
+          setSectionMode(globalMode);
+          onChange();
+        } else {
+          toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
+        }
+      } catch (err) {
+        console.log(err);
         toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
       }
-    } catch (err) {
-      console.log(err);
-      toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
     }
     setSaving(false);
   }
 
+  function validate() {
+    let result = true;
+    let errors = {};
+
+    if (!validator.isEmail(data.email)) {
+      errors.email = "L'email ne semble pas valide";
+      result = false;
+    }
+    if (!validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+      errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide.";
+      result = false;
+    }
+    result = validateEmpty(data, "lastName", errors) && result;
+    result = validateEmpty(data, "firstName", errors) && result;
+    result = validateEmpty(data, "birthCity", errors) && result;
+    result = validateEmpty(data, "birthCityZip", errors) && result;
+    result = validateEmpty(data, "birthCountry", errors) && result;
+
+    result = validateEmpty(data, "address", errors) && result;
+    result = validateEmpty(data, "zip", errors) && result;
+    result = validateEmpty(data, "city", errors) && result;
+    result = validateEmpty(data, "country", errors) && result;
+
+    console.log("Errors: ", errors);
+    setErrors(errors);
+    return result;
+  }
+
+  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+    setData({
+      ...data,
+      addressVerified: true,
+      cityCode: suggestion.cityCode,
+      region: suggestion.region,
+      department: suggestion.department,
+      location: suggestion.location,
+      // if the suggestion is not confirmed we keep the address typed by the user
+      address: isConfirmed ? suggestion.address : data.address,
+      zip: isConfirmed ? suggestion.zip : data.zip,
+      city: isConfirmed ? suggestion.city : data.city,
+    });
+  };
+
   return (
-    <Section
-      step={globalMode === "correction" ? "Première étape" : null}
-      title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
-      editable={young.status !== YOUNG_STATUS.DELETED}
-      mode={sectionMode}
-      onChangeMode={onSectionChangeMode}
-      saving={saving}
-      onSave={onSave}
-      onCancel={onCancel}>
-      <div className="flex-[1_0_50%] pr-[56px]">
-        {globalMode === "correction" ? (
-          <>
-            <SectionIdentiteCni
-              young={young}
-              globalMode={sectionMode}
-              requests={requests}
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={onLocalChange}
-            />
-            <SectionIdentiteContact
-              className="mt-[32px]"
-              young={data}
-              globalMode={sectionMode}
-              requests={requests}
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={onLocalChange}
-            />
-          </>
-        ) : (
-          <>
-            <SectionIdentiteContact
-              young={data}
-              globalMode={sectionMode}
-              requests={requests}
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={onLocalChange}
-            />
-            <SectionIdentiteCni
-              className="mt-[32px]"
-              young={data}
-              globalMode={sectionMode}
-              requests={requests}
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={onLocalChange}
-            />
-          </>
-        )}
-      </div>
-      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
-      <div className="flex-[1_0_50%] pl-[56px]">
-        <div>
-          <FieldsGroup
-            name="birthdateAt"
-            title="Date et lieu de naissance"
-            mode={sectionMode}
-            correctionLabel="Date de naissance"
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "birthdateAt")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            type="date"
-            value={data.birthdateAt}
-            onChange={(value) => onLocalChange("birthdateAt", value)}
-            young={young}>
-            <Field name="birth_day" label="Jour" value={birthDate.day} className="mr-[14px] flex-[1_1_23%]" />
-            <Field name="birth_month" label="Mois" value={birthDate.month} className="mr-[14px] flex-[1_1_42%]" />
-            <Field name="birth_year" label="Année" value={birthDate.year} className="flex-[1_1_35%]" />
-          </FieldsGroup>
-          <div className="mb-[16px] flex">
-            <Field
-              name="birthCity"
-              label="Ville de naissance"
-              value={data.birthCity}
-              mode={sectionMode}
-              className="mr-[8px] flex-[1_1_50%]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "birthCity")}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("birthCity", value)}
-              young={young}
-            />
-            <Field
-              name="birthCityZip"
-              label="Code postal de naissance"
-              value={data.birthCityZip}
-              mode={sectionMode}
-              className="ml-[8px] flex-[1_1_50%]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "birthCityZip")}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("birthCityZip", value)}
-              young={young}
-            />
-          </div>
-          <Field
-            name="birthCountry"
-            label="Pays de naissance"
-            value={data.birthCountry}
-            mode={sectionMode}
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "birthCountry")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            type="select"
-            options={countryOptions}
-            filterOnType
-            onChange={(value) => onLocalChange("birthCountry", value)}
-            young={young}
-          />
+    <SectionContext.Provider value={{ errors }}>
+      <Section
+        step={globalMode === "correction" ? "Première étape" : null}
+        title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
+        editable={young.status !== YOUNG_STATUS.DELETED}
+        mode={sectionMode}
+        onChangeMode={onSectionChangeMode}
+        saving={saving}
+        onSave={onSave}
+        onCancel={onCancel}>
+        <div className="flex-[1_0_50%] pr-[56px]">
+          {globalMode === "correction" ? (
+            <>
+              <SectionIdentiteCni
+                young={young}
+                globalMode={sectionMode}
+                requests={requests}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={onLocalChange}
+              />
+              <SectionIdentiteContact
+                className="mt-[32px]"
+                young={data}
+                globalMode={sectionMode}
+                requests={requests}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={onLocalChange}
+              />
+            </>
+          ) : (
+            <>
+              <SectionIdentiteContact
+                young={data}
+                globalMode={sectionMode}
+                requests={requests}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={onLocalChange}
+              />
+              <SectionIdentiteCni
+                className="mt-[32px]"
+                young={data}
+                globalMode={sectionMode}
+                requests={requests}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={onLocalChange}
+              />
+            </>
+          )}
         </div>
-        <div className="mt-[32px]">
-          <MiniTitle>Adresse</MiniTitle>
-          <Field
-            name="address"
-            label="Adresse"
-            value={data.address}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "address")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            onChange={(value) => onLocalChange("address", value)}
-            young={young}
-          />
-          <div className="mb-[16px] flex items-start justify-between">
-            <Field
-              name="zip"
-              label="Code postal"
-              value={data.zip}
+        <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+        <div className="flex-[1_0_50%] pl-[56px]">
+          <div>
+            <FieldsGroup
+              name="birthdateAt"
+              title="Date et lieu de naissance"
               mode={sectionMode}
-              className="mr-[8px] flex-[1_1_50%]"
+              correctionLabel="Date de naissance"
+              className="mb-[16px]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "zip")}
+              correctionRequest={getCorrectionRequest(requests, "birthdateAt")}
               onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("zip", value)}
-              young={young}
-            />
+              type="date"
+              value={data.birthdateAt}
+              onChange={(value) => onLocalChange("birthdateAt", value)}
+              young={young}>
+              <Field name="birth_day" label="Jour" value={birthDate.day} className="mr-[14px] flex-[1_1_23%]" />
+              <Field name="birth_month" label="Mois" value={birthDate.month} className="mr-[14px] flex-[1_1_42%]" />
+              <Field name="birth_year" label="Année" value={birthDate.year} className="flex-[1_1_35%]" />
+            </FieldsGroup>
+            <div className="mb-[16px] flex">
+              <Field
+                name="birthCity"
+                label="Ville de naissance"
+                value={data.birthCity}
+                mode={sectionMode}
+                className="mr-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "birthCity")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange("birthCity", value)}
+                young={young}
+              />
+              <Field
+                name="birthCityZip"
+                label="Code postal de naissance"
+                value={data.birthCityZip}
+                mode={sectionMode}
+                className="ml-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "birthCityZip")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange("birthCityZip", value)}
+                young={young}
+              />
+            </div>
             <Field
-              name="city"
-              label="Ville"
-              value={data.city}
+              name="birthCountry"
+              label="Pays de naissance"
+              value={data.birthCountry}
               mode={sectionMode}
-              className="ml-[8px] flex-[1_1_50%]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "city")}
+              correctionRequest={getCorrectionRequest(requests, "birthCountry")}
               onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("city", value)}
+              type="select"
+              options={countryOptions}
+              filterOnType
+              onChange={(value) => onLocalChange("birthCountry", value)}
               young={young}
             />
           </div>
-          {data.country && (
+          <div className="mt-[32px]">
+            <MiniTitle>Adresse</MiniTitle>
+            <Field
+              name="address"
+              label="Adresse"
+              value={data.address}
+              mode={sectionMode}
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "address")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              onChange={(value) => onLocalChange("address", value)}
+              young={young}
+            />
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field
+                name="zip"
+                label="Code postal"
+                value={data.zip}
+                mode={sectionMode}
+                className="mr-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "zip")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange("zip", value)}
+                young={young}
+              />
+              <Field
+                name="city"
+                label="Ville"
+                value={data.city}
+                mode={sectionMode}
+                className="ml-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "city")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange("city", value)}
+                young={young}
+              />
+            </div>
             <Field
               name="country"
               label="Pays"
@@ -698,76 +748,87 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               onChange={(value) => onLocalChange("country", value)}
               young={young}
             />
-          )}
-          <div className="mb-[16px] flex items-start justify-between">
-            <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
-            <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
-          </div>
-        </div>
-        {data.foreignAddress && (
-          <div className="mt-[32px]">
-            <MiniTitle>Adresse à l&apos;étranger</MiniTitle>
-            <Field
-              name="address"
-              label="Adresse"
-              value={data.foreignAddress}
-              mode={sectionMode}
-              className="mb-[16px]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "foreignAddress")}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("foreignAddress", value)}
-              young={young}
-            />
             <div className="mb-[16px] flex items-start justify-between">
+              <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
+              <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
+            </div>
+            {sectionMode === "edition" && (
+              <VerifyAddress
+                address={data.address}
+                zip={data.zip}
+                city={data.city}
+                onSuccess={onVerifyAddress(true)}
+                onFail={onVerifyAddress()}
+                isVerified={data.addressVerified === true}
+                buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+              />
+            )}
+          </div>
+          {data.foreignAddress && (
+            <div className="mt-[32px]">
+              <MiniTitle>Adresse à l&apos;étranger</MiniTitle>
               <Field
-                name="zip"
-                label="Code postal"
-                value={data.foreignZip}
+                name="address"
+                label="Adresse"
+                value={data.foreignAddress}
                 mode={sectionMode}
-                className="mr-[8px] flex-[1_1_50%]"
+                className="mb-[16px]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "foreignZip")}
+                correctionRequest={getCorrectionRequest(requests, "foreignAddress")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("foreignZip", value)}
+                onChange={(value) => onLocalChange("foreignAddress", value)}
                 young={young}
               />
+              <div className="mb-[16px] flex items-start justify-between">
+                <Field
+                  name="zip"
+                  label="Code postal"
+                  value={data.foreignZip}
+                  mode={sectionMode}
+                  className="mr-[8px] flex-[1_1_50%]"
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  correctionRequest={getCorrectionRequest(requests, "foreignZip")}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  onChange={(value) => onLocalChange("foreignZip", value)}
+                  young={young}
+                />
+                <Field
+                  name="city"
+                  label="Ville"
+                  value={data.foreignCity}
+                  mode={sectionMode}
+                  className="ml-[8px] flex-[1_1_50%]"
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  correctionRequest={getCorrectionRequest(requests, "foreignCity")}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  onChange={(value) => onLocalChange("foreignCity", value)}
+                  young={young}
+                />
+              </div>
               <Field
-                name="city"
-                label="Ville"
-                value={data.foreignCity}
+                name="country"
+                label="Pays"
+                value={data.foreignCountry}
                 mode={sectionMode}
-                className="ml-[8px] flex-[1_1_50%]"
+                className="mb-[16px]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "foreignCity")}
+                correctionRequest={getCorrectionRequest(requests, "foreignCountry")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("foreignCity", value)}
+                type="select"
+                options={countryOptions}
+                filterOnType
+                onChange={(value) => onLocalChange("foreignCountry", value)}
                 young={young}
               />
             </div>
-            <Field
-              name="country"
-              label="Pays"
-              value={data.foreignCountry}
-              mode={sectionMode}
-              className="mb-[16px]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "foreignCountry")}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              type="select"
-              options={countryOptions}
-              filterOnType
-              onChange={(value) => onLocalChange("foreignCountry", value)}
-              young={young}
-            />
-          </div>
-        )}
-      </div>
-    </Section>
+          )}
+        </div>
+      </Section>
+    </SectionContext.Provider>
   );
 }
 
@@ -906,6 +967,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [sectionMode, setSectionMode] = useState(globalMode);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (young) {
@@ -941,25 +1003,57 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
   function onCancel() {
     setData({ ...young });
+    setErrors({});
   }
 
   async function onSave() {
     setSaving(true);
-    try {
-      const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
-      console.log("RESULT = ", result);
-      if (result.ok) {
-        toastr.success("Les données ont bien été enregistrées.");
-        setSectionMode(globalMode);
-        onChange && onChange();
-      } else {
+    if (validate()) {
+      try {
+        const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
+        console.log("RESULT = ", result);
+        if (result.ok) {
+          toastr.success("Les données ont bien été enregistrées.");
+          setSectionMode(globalMode);
+          onChange && onChange();
+        } else {
+          toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
+        }
+      } catch (err) {
+        console.log(err);
         toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
       }
-    } catch (err) {
-      console.log(err);
-      toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
     }
     setSaving(false);
+  }
+
+  function validate() {
+    let result = true;
+    let errors = {};
+
+    for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
+      if (!validator.isEmail(data[`parent${parent}Email`])) {
+        errors[`parent${parent}Email`] = "L'email ne semble pas valide";
+        result = false;
+      }
+      if (!validator.isMobilePhone(data[`parent${parent}Phone`], ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+        errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide.";
+        result = false;
+      }
+      result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
+      result = validateEmpty(data, `parent${parent}FirstName`, errors) && result;
+
+      if (data[`parent${parent}OwnAddress`] === "true") {
+        result = validateEmpty(data, `parent${parent}Address`, errors) && result;
+        result = validateEmpty(data, `parent${parent}Zip`, errors) && result;
+        result = validateEmpty(data, `parent${parent}City`, errors) && result;
+        result = validateEmpty(data, `parent${parent}Country`, errors) && result;
+      }
+    }
+
+    console.log("Errors: ", errors);
+    setErrors(errors);
+    return result;
   }
 
   function parentHasRequest(parentId) {
@@ -985,274 +1079,276 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const gradeOptions = Object.keys(GRADES).map((s) => ({ value: s, label: translateGrade(s) }));
 
   return (
-    <Section
-      step={globalMode === "correction" ? "Seconde étape :" : null}
-      title={globalMode === "correction" ? "Vérifiez la situation et l'accord parental" : "Détails"}
-      editable={young.status !== YOUNG_STATUS.DELETED}
-      mode={sectionMode}
-      onChangeMode={onSectionChangeMode}
-      saving={saving}
-      onSave={onSave}
-      onCancel={onCancel}>
-      <div className="flex-[1_0_50%] pr-[56px]">
-        <div>
-          <MiniTitle>Situation</MiniTitle>
-          <Field
-            name="situation"
-            label="Statut"
-            value={data.situation}
-            transformer={translate}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, "situation")}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            type="select"
-            options={situationOptions}
-            onChange={(value) => onLocalChange("situation", value)}
-            young={young}
-          />
-          {data.schooled === "true" && (
-            <>
-              {sectionMode === "edition" ? (
-                <SchoolEditor young={data} onChange={onSchoolChange} />
-              ) : (
-                <>
-                  <Field
-                    name="schoolCity"
-                    label="Ville de l'établissement"
-                    value={data.schoolCity}
-                    mode={sectionMode}
-                    className="mb-[16px]"
-                    onStartRequest={onStartRequest}
-                    currentRequest={currentRequest}
-                    correctionRequest={getCorrectionRequest(requests, "schoolCity")}
-                    onCorrectionRequestChange={onCorrectionRequestChange}
-                    onChange={(value) => onLocalChange("schoolCity", value)}
-                    young={young}
-                  />
-                  <Field
-                    name="schoolName"
-                    label="Nom de l'établissement"
-                    value={data.schoolName}
-                    mode={sectionMode}
-                    className="mb-[16px]"
-                    onStartRequest={onStartRequest}
-                    currentRequest={currentRequest}
-                    correctionRequest={getCorrectionRequest(requests, "schoolName")}
-                    onCorrectionRequestChange={onCorrectionRequestChange}
-                    onChange={(value) => onLocalChange("schoolName", value)}
-                    young={young}
-                  />
-                </>
-              )}
-              <Field
-                name="grade"
-                label="Classe"
-                value={data.grade}
-                transformer={translateGrade}
-                mode={sectionMode}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "grade")}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                type="select"
-                options={gradeOptions}
-                onChange={(value) => onLocalChange("grade", value)}
-                young={young}
-              />
-            </>
-          )}
-        </div>
-        {(sectionMode === "edition" || hasSpecificSituation) && (
-          <div className="mt-[32px]">
-            <MiniTitle>Situations particulières</MiniTitle>
-            <FieldSituationsParticulieres
-              name="specificSituations"
-              young={data}
-              mode={sectionMode === "edition" ? "edition" : "readonly"}
+    <SectionContext.Provider value={{ errors }}>
+      <Section
+        step={globalMode === "correction" ? "Seconde étape :" : null}
+        title={globalMode === "correction" ? "Vérifiez la situation et l'accord parental" : "Détails"}
+        editable={young.status !== YOUNG_STATUS.DELETED}
+        mode={sectionMode}
+        onChangeMode={onSectionChangeMode}
+        saving={saving}
+        onSave={onSave}
+        onCancel={onCancel}>
+        <div className="flex-[1_0_50%] pr-[56px]">
+          <div>
+            <MiniTitle>Situation</MiniTitle>
+            <Field
+              name="situation"
+              label="Statut"
+              value={data.situation}
+              transformer={translate}
+              mode={sectionMode}
+              className="mb-[16px]"
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "specificSituations")}
+              correctionRequest={getCorrectionRequest(requests, "situation")}
               onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={onLocalChange}
+              type="select"
+              options={situationOptions}
+              onChange={(value) => onLocalChange("situation", value)}
+              young={young}
             />
-            {data.specificAmenagment === "true" && (
-              <Field
-                name="specificAmenagmentType"
-                label="Nature de l'aménagement spécifique"
-                value={data.specificAmenagmentType}
+            {data.schooled === "true" && (
+              <>
+                {sectionMode === "edition" ? (
+                  <SchoolEditor young={data} onChange={onSchoolChange} />
+                ) : (
+                  <>
+                    <Field
+                      name="schoolCity"
+                      label="Ville de l'établissement"
+                      value={data.schoolCity}
+                      mode={sectionMode}
+                      className="mb-[16px]"
+                      onStartRequest={onStartRequest}
+                      currentRequest={currentRequest}
+                      correctionRequest={getCorrectionRequest(requests, "schoolCity")}
+                      onCorrectionRequestChange={onCorrectionRequestChange}
+                      onChange={(value) => onLocalChange("schoolCity", value)}
+                      young={young}
+                    />
+                    <Field
+                      name="schoolName"
+                      label="Nom de l'établissement"
+                      value={data.schoolName}
+                      mode={sectionMode}
+                      className="mb-[16px]"
+                      onStartRequest={onStartRequest}
+                      currentRequest={currentRequest}
+                      correctionRequest={getCorrectionRequest(requests, "schoolName")}
+                      onCorrectionRequestChange={onCorrectionRequestChange}
+                      onChange={(value) => onLocalChange("schoolName", value)}
+                      young={young}
+                    />
+                  </>
+                )}
+                <Field
+                  name="grade"
+                  label="Classe"
+                  value={data.grade}
+                  transformer={translateGrade}
+                  mode={sectionMode}
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  correctionRequest={getCorrectionRequest(requests, "grade")}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  type="select"
+                  options={gradeOptions}
+                  onChange={(value) => onLocalChange("grade", value)}
+                  young={young}
+                />
+              </>
+            )}
+          </div>
+          {(sectionMode === "edition" || hasSpecificSituation) && (
+            <div className="mt-[32px]">
+              <MiniTitle>Situations particulières</MiniTitle>
+              <FieldSituationsParticulieres
+                name="specificSituations"
+                young={data}
                 mode={sectionMode === "edition" ? "edition" : "readonly"}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+                correctionRequest={getCorrectionRequest(requests, "specificSituations")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("specificAmenagmentType", value)}
-                young={young}
+                onChange={onLocalChange}
               />
-            )}
-          </div>
-        )}
-      </div>
-      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
-      <div className="flex-[1_0_50%] pl-[56px]">
-        <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
-        <div className="mt-[32px]">
-          <Field
-            name={`parent${currentParent}Status`}
-            label="Statut"
-            value={data[`parent${currentParent}Status`]}
-            transformer={translate}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Status`)}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            type="select"
-            options={parentStatusOptions}
-            onChange={(value) => onLocalChange(`parent${currentParent}Status`, value)}
-            young={young}
-          />
-          <div className="mb-[16px] flex">
-            <Field
-              name={`parent${currentParent}LastName`}
-              label="Nom"
-              value={data[`parent${currentParent}LastName`]}
-              mode={sectionMode}
-              className="mr-[8px] flex-[1_1_50%]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}LastName`)}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange(`parent${currentParent}LastName`, value)}
-              young={young}
-            />
-            <Field
-              name={`parent${currentParent}FirstName`}
-              label="Prénom"
-              value={data[`parent${currentParent}FirstName`]}
-              mode={sectionMode}
-              className="ml-[8px] flex-[1_1_50%]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}FirstName`)}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange(`parent${currentParent}FirstName`, value)}
-              young={young}
-            />
-          </div>
-
-          <Field
-            name={`parent${currentParent}Email`}
-            label="Email"
-            value={data[`parent${currentParent}Email`]}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Email`)}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
-            young={young}
-          />
-          <Field
-            name={`parent${currentParent}Phone`}
-            label="Téléphone"
-            value={data[`parent${currentParent}Phone`]}
-            mode={sectionMode}
-            className="mb-[16px]"
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
-            young={young}
-          />
-          <Field
-            name={`parent${currentParent}OwnAddress`}
-            label="Adresse différente de celle du volontaire"
-            value={data[`parent${currentParent}OwnAddress`]}
-            transformer={translate}
-            mode={sectionMode === "edition" ? "edition" : "readonly"}
-            onStartRequest={onStartRequest}
-            currentRequest={currentRequest}
-            correctionRequest={getCorrectionRequest(requests, `parent${currentParent}OwnAddress`)}
-            onCorrectionRequestChange={onCorrectionRequestChange}
-            type="select"
-            options={booleanOptions}
-            onChange={(value) => onLocalChange(`parent${currentParent}OwnAddress`, value)}
-            young={young}
-          />
-          {data[`parent${currentParent}OwnAddress`] === "true" && (
-            <FieldsGroup
-              name={`parent${currentParent}Address`}
-              mode={sectionMode === "edition" ? "edition" : "readonly"}
-              title="Adresse"
-              noflex
-              className="mt-[16px]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              young={young}>
-              <Field
-                name={`parent${currentParent}Address`}
-                label="Adresse"
-                value={data[`parent${currentParent}Address`] || ""}
-                mode={sectionMode}
-                className="mb-[16px]"
-                onChange={(value) => onLocalChange(`parent${currentParent}Address`, value)}
-                young={young}
-              />
-              <Field
-                name={`parent${currentParent}Zip`}
-                label="Code postal"
-                value={data[`parent${currentParent}Zip`] || ""}
-                mode={sectionMode}
-                className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
-                onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
-                young={young}
-              />
-              <Field
-                name={`parent${currentParent}City`}
-                label="Ville"
-                value={data[`parent${currentParent}City`] || ""}
-                mode={sectionMode}
-                className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
-                onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
-                young={young}
-              />
-              <Field
-                name={`parent${currentParent}Country`}
-                label="Pays"
-                value={data[`parent${currentParent}Country`] || ""}
-                mode={sectionMode}
-                className="mb-[16px]"
-                type="select"
-                options={countryOptions}
-                filterOnType
-                onChange={(value) => onLocalChange(`parent${currentParent}Country`, value)}
-                young={young}
-              />
-            </FieldsGroup>
-          )}
-          {data[`parent${currentParent}FromFranceConnect`] === "true" && (
-            <div className="flex items-center bg-[#F9FAFB] p-[18px] rounded-[7px] mt-[16px]">
-              <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
-              <div>
-                <div className="text-[14px] leading-[20px] text-[#242526] text-bold mb-[6px]">Attestation des représentants légaux</div>
-                <div className="text-[12px] leading-[20px] text-[#000000] grow">
-                  Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir
-                  du document de consentement papier.
-                </div>
-              </div>
+              {data.specificAmenagment === "true" && (
+                <Field
+                  name="specificAmenagmentType"
+                  label="Nature de l'aménagement spécifique"
+                  value={data.specificAmenagmentType}
+                  mode={sectionMode === "edition" ? "edition" : "readonly"}
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  correctionRequest={getCorrectionRequest(requests, "specificAmenagmentType")}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  onChange={(value) => onLocalChange("specificAmenagmentType", value)}
+                  young={young}
+                />
+              )}
             </div>
           )}
         </div>
-      </div>
-    </Section>
+        <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+        <div className="flex-[1_0_50%] pl-[56px]">
+          <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
+          <div className="mt-[32px]">
+            <Field
+              name={`parent${currentParent}Status`}
+              label="Statut"
+              value={data[`parent${currentParent}Status`]}
+              transformer={translate}
+              mode={sectionMode}
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Status`)}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              type="select"
+              options={parentStatusOptions}
+              onChange={(value) => onLocalChange(`parent${currentParent}Status`, value)}
+              young={young}
+            />
+            <div className="mb-[16px] flex">
+              <Field
+                name={`parent${currentParent}LastName`}
+                label="Nom"
+                value={data[`parent${currentParent}LastName`]}
+                mode={sectionMode}
+                className="mr-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}LastName`)}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange(`parent${currentParent}LastName`, value)}
+                young={young}
+              />
+              <Field
+                name={`parent${currentParent}FirstName`}
+                label="Prénom"
+                value={data[`parent${currentParent}FirstName`]}
+                mode={sectionMode}
+                className="ml-[8px] flex-[1_1_50%]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}FirstName`)}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                onChange={(value) => onLocalChange(`parent${currentParent}FirstName`, value)}
+                young={young}
+              />
+            </div>
+
+            <Field
+              name={`parent${currentParent}Email`}
+              label="Email"
+              value={data[`parent${currentParent}Email`]}
+              mode={sectionMode}
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Email`)}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
+              young={young}
+            />
+            <Field
+              name={`parent${currentParent}Phone`}
+              label="Téléphone"
+              value={data[`parent${currentParent}Phone`]}
+              mode={sectionMode}
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
+              young={young}
+            />
+            <Field
+              name={`parent${currentParent}OwnAddress`}
+              label="Adresse différente de celle du volontaire"
+              value={data[`parent${currentParent}OwnAddress`]}
+              transformer={translate}
+              mode={sectionMode === "edition" ? "edition" : "readonly"}
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, `parent${currentParent}OwnAddress`)}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              type="select"
+              options={booleanOptions}
+              onChange={(value) => onLocalChange(`parent${currentParent}OwnAddress`, value)}
+              young={young}
+            />
+            {data[`parent${currentParent}OwnAddress`] === "true" && (
+              <FieldsGroup
+                name={`parent${currentParent}Address`}
+                mode={sectionMode === "edition" ? "edition" : "readonly"}
+                title="Adresse"
+                noflex
+                className="mt-[16px]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                young={young}>
+                <Field
+                  name={`parent${currentParent}Address`}
+                  label="Adresse"
+                  value={data[`parent${currentParent}Address`] || ""}
+                  mode={sectionMode}
+                  className="mb-[16px]"
+                  onChange={(value) => onLocalChange(`parent${currentParent}Address`, value)}
+                  young={young}
+                />
+                <Field
+                  name={`parent${currentParent}Zip`}
+                  label="Code postal"
+                  value={data[`parent${currentParent}Zip`] || ""}
+                  mode={sectionMode}
+                  className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+                  onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
+                  young={young}
+                />
+                <Field
+                  name={`parent${currentParent}City`}
+                  label="Ville"
+                  value={data[`parent${currentParent}City`] || ""}
+                  mode={sectionMode}
+                  className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+                  onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
+                  young={young}
+                />
+                <Field
+                  name={`parent${currentParent}Country`}
+                  label="Pays"
+                  value={data[`parent${currentParent}Country`] || ""}
+                  mode={sectionMode}
+                  className="mb-[16px]"
+                  type="select"
+                  options={countryOptions}
+                  filterOnType
+                  onChange={(value) => onLocalChange(`parent${currentParent}Country`, value)}
+                  young={young}
+                />
+              </FieldsGroup>
+            )}
+            {data[`parent${currentParent}FromFranceConnect`] === "true" && (
+              <div className="flex items-center bg-[#F9FAFB] p-[18px] rounded-[7px] mt-[16px]">
+                <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
+                <div>
+                  <div className="text-[14px] leading-[20px] text-[#242526] text-bold mb-[6px]">Attestation des représentants légaux</div>
+                  <div className="text-[12px] leading-[20px] text-[#000000] grow">
+                    Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir
+                    du document de consentement papier.
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </Section>
+    </SectionContext.Provider>
   );
 }
 
@@ -1403,7 +1499,7 @@ function Section({ step, title, editable, collapsable, children, mode, onChangeM
 
   return (
     <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px]">
-      <h2 className="text-center py-[28px] text-[18px] leading-snug font-medium border-[1px] border-[#E5E7EB]">
+      <h2 className={`py-[28px] text-[18px] leading-snug font-medium border-[1px] border-[#E5E7EB] ${mode === "edition" ? "text-left pl-[28px]" : "text-center"}`}>
         {step && <span className="text-[#6B7280]">{step} </span>}
         <span className="text-[#242526]">{title}</span>
       </h2>
@@ -1476,5 +1572,15 @@ function HonorCertificate({ young }) {
     );
   } else {
     return null;
+  }
+}
+
+function validateEmpty(value, name, errors, message = "Ne peut être vide") {
+  // console.log("test ", name, value, !value[name] || validator.isEmpty(value[name], { ignore_whitespace: true }));
+  if (!value[name] || validator.isEmpty(value[name], { ignore_whitespace: true })) {
+    errors[name] = message;
+    return false;
+  } else {
+    return true;
   }
 }
