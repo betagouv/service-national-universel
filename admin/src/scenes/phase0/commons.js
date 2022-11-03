@@ -11,8 +11,6 @@ export const SPECIFIC_SITUATIONS_KEY = [
   "reducedMobilityAccess",
   "handicapInSameDepartment",
   "allergies",
-  "highSkilledActivity",
-  "highSkilledActivityInSameDepartment",
 ];
 
 export const countryOptions = Object.values(countriesList)
