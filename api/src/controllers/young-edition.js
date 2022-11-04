@@ -69,7 +69,6 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    young.CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
     console.log("SAVE VALUE: ", value);
     console.log("body: ", req.body);
 
@@ -92,7 +91,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       value.isRegionRural = isRegionRural;
     }
 
-    young.set(value);
+    const CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+    young.set({ ...value, CNIFileNotValidOnStart });
     await young.save({ fromUser: req.user });
 
     // --- result

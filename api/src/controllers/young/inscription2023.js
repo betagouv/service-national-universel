@@ -461,8 +461,8 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
 
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile"]) };
       if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      young.CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
-      young.set(data);
+      const CNIFileNotValidOnStart = (data.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+      young.set({ ...data, CNIFileNotValidOnStart });
     }
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
