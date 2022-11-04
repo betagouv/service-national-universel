@@ -50,7 +50,7 @@ initSentry();
 initApi();
 
 function FallbackComponent() {
-  return <div>An error has occurred</div>;
+  return <></>;
 }
 
 const myFallback = <FallbackComponent />;
@@ -77,7 +77,7 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Sentry.ErrorBoundary fallback={myFallback} showDialog>
+    <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
         <div className="main">
           <Switch>
