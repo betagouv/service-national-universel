@@ -189,7 +189,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       }
       statusChanged = true;
 
-      if (value.parentAllowSNU === "true") {
+      if (value.parentAllowSNU === "true"&& value.parent1AllowImageRights === "true") {
         shouldSendToParent2 = true;
       }
       if (value.parent1AllowImageRights === "false") {
@@ -197,7 +197,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       }
     }
   } else {
-    if (value.parent2AllowImageRights === "true" && young.parent1AllowImageRights === "true") {
+    if (value.parent2AllowImageRights === "true") {
       value.imageRight = "true";
     } else {
       value.imageRight = "false";
