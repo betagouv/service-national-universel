@@ -14,7 +14,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, START_DATE_SESSION_PHASE1 } = require("snu-lib");
 
 router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -54,6 +54,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+    young.CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
     console.log("SAVE VALUE: ", value);
     console.log("body: ", req.body);
 

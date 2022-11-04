@@ -1666,6 +1666,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  CNIFileNotValidOnStart: {
+    type: String,
+    enum: ["false", "true"],
+    documentation: {
+      description: "Date d'expiration de la CNI File non valide au début de la Cohorte",
+    },
+  },
+
   latestCNIFileCategory: {
     type: String,
     enum: ["cniOld", "cniNew", "passport"],
