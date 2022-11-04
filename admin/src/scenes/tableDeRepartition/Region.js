@@ -3,18 +3,20 @@ import { useParams } from "react-router-dom";
 import { region2department, regionList } from "snu-lib";
 import api from "../../services/api";
 import { FiChevronDown } from "react-icons/fi";
+import { BsArrowRight } from "react-icons/bs";
+import Select from "react-select";
 
 export default function tableDeRepartition() {
-  const { region, cohort } = useParams();
+  const { fromRegion, cohort } = useParams();
   const [selected, setSelected] = React.useState({});
   const getTable = async () => {
-    const { ok, data } = await api.get(`/table-de-repartition/from-region/${region}/cohort/${cohort}`);
+    const { ok, data } = await api.get(`/table-de-repartition/from-region/${fromRegion}/cohort/${cohort}`);
     if (ok) {
       let update = {};
       data.map((item) => {
         if (update[item.toRegion]) {
           if (update[item.toRegion].includes(item.toDepartment)) {
-            update[item.toRegion] = update[region].filter((e) => e !== item.toDepartment);
+            update[item.toRegion] = update[fromRegion].filter((e) => e !== item.toDepartment);
           } else {
             update[item.toRegion].push(item.toDepartment);
           }
@@ -30,17 +32,19 @@ export default function tableDeRepartition() {
     getTable();
   }, []);
 
-  const onSelected = (region, departement) => {
+  const onSelected = (region, fromDepartement, departements) => {
     let update = { ...selected };
     if (update[region]) {
-      if (update[region].includes(departement)) {
-        update[region] = update[region].filter((e) => e !== departement);
+      let find = update[region].find((d) => d.fromDepartment === fromDepartement);
+      if (find) {
+        find.toDepartments = departements.map((d) => d.value);
       } else {
-        update[region].push(departement);
+        update[region].push({ fromDepartment: fromDepartement, toDepartments: departements.map((d) => d.value) });
       }
     } else {
-      update[region] = [departement];
+      update[region] = [{ fromDepartement, toDepartments: [departements.map((d) => d.value)] }];
     }
+    console.log(update);
     setSelected(update);
   };
 
@@ -55,7 +59,7 @@ export default function tableDeRepartition() {
   };
 
   const onSubmit = async () => {
-    selected.fromRegion = region;
+    selected.fromRegion = fromRegion;
     selected.cohort = cohort;
     const { ok, data } = await api.post(`/table-de-repartition`, selected);
     //use data to refresh the table
@@ -65,7 +69,7 @@ export default function tableDeRepartition() {
   return (
     <div className="flex flex-col w-full p-4 ">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-xl font-bold ">Répartition des régions d’accueil - {region}</div>
+        <div className="text-xl font-bold ">Répartition des régions d’accueil - {fromRegion}</div>
       </div>
       <div className="flex flex-col bg-white rounded-xl">
         <div className="flex items-center justify-end gap-4 px-6 py-4">
@@ -75,16 +79,16 @@ export default function tableDeRepartition() {
           </button>
         </div>
         {regionList
-          .filter((r) => r !== region)
+          .filter((r) => r !== fromRegion)
           .map((r, index) => (
-            <Region key={index} onSelectRegion={onSelectRegion} onSelected={onSelected} selected={selected} region={r} />
+            <Region key={index} onSelectRegion={onSelectRegion} onSelected={onSelected} selected={selected} region={r} fromRegion={fromRegion} />
           ))}
       </div>
     </div>
   );
 }
 
-const Region = ({ onSelectRegion, onSelected, selected, region }) => {
+const Region = ({ onSelectRegion, onSelected, selected, region, fromRegion }) => {
   const [open, setOpen] = React.useState(false);
   return (
     <>
@@ -103,15 +107,21 @@ const Region = ({ onSelectRegion, onSelected, selected, region }) => {
             </div>
             <div className="flex flex-col gap-1">
               <div className="font-bold text-base">{region}</div>
-              {selected[region]?.length > 0 && <div className="text-gray-800 font-normal text-xs">{selected[region]?.reduce((prev, d) => `${prev}, ${d}`)}</div>}
             </div>
           </div>
           <FiChevronDown className={`text-gray-400 h-6 w-6 transform ${open ? "rotate-180" : ""}`} />
         </div>
         {open ? (
-          <div className="grid grid-cols-3 gap-y-2 gap-x-4 mt-4">
-            {region2department[region].map((department, index) => (
-              <Department key={index} onSelected={onSelected} selected={selected} region={region} department={department} />
+          <div className="flex flex-col gap-2">
+            <div className="flex">
+              <div className="w-[45%]"> Départements de ma région</div>
+              <div className="w-[10%]">
+                <BsArrowRight className="text-gray-400 h-6 w-6 " />
+              </div>
+              <div className="mb-4 w-[45%]">Départements de la région d’accueil</div>
+            </div>
+            {region2department[fromRegion].map((fromDepartment, index) => (
+              <Department key={index} onSelected={onSelected} selected={selected} region={region} fromDepartment={fromDepartment} />
             ))}
           </div>
         ) : null}
@@ -120,11 +130,27 @@ const Region = ({ onSelectRegion, onSelected, selected, region }) => {
   );
 };
 
-const Department = ({ onSelected, selected, region, department }) => {
+const Department = ({ onSelected, selected, region, fromDepartment }) => {
   return (
-    <div className="flex items-center basis-1/3 p-2 gap-4 bg-gray-300 rounded-xl">
-      <input type="checkbox" checked={selected[region]?.includes(department) || false} onChange={() => onSelected(region, department)} />
-      <div className="text-base text-gray-800">{department}</div>
-    </div>
+    <>
+      <div className="flex">
+        <div className="w-[45%] text-base text-gray-800">{fromDepartment}</div>
+        <div className="w-[10%]">
+          <BsArrowRight className="text-gray-400 h-6 w-6" />
+        </div>
+        <Select
+          isMulti
+          className="w-[45%]"
+          options={region2department[region].map((d) => ({ value: d, label: d }))}
+          onChange={(e) => {
+            onSelected(region, fromDepartment, e);
+          }}
+          value={selected[region]?.find((d) => d.fromDepartment === fromDepartment)?.toDepartment?.map((d) => ({ value: d, label: d }))}
+        />
+        {/* <div className="flex items-center basis-1/3 p-2 gap-4 bg-gray-300 rounded-xl">
+        <input type="checkbox" checked={selected[region]?.includes(fromDepartment) || false} onChange={() => onSelected(region, fromDepartment)} />
+      </div> */}
+      </div>
+    </>
   );
 };

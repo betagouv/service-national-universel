@@ -14,6 +14,13 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
+  fromDepartement: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Département d'origine",
+    },
+  },
   fromRegion: {
     type: String,
     required: true,

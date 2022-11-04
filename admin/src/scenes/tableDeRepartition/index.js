@@ -11,7 +11,7 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/table-de-repartition/:region/:cohort" component={Region} />
+      <SentryRoute path="/table-de-repartition/:fromRegion/:cohort" component={Region} />
       <SentryRoute path="/table-de-repartition" component={List} />
     </Switch>
   );
