@@ -87,7 +87,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       }
     }
     const isRegionRural = isInRuralArea({ ...young, ...value });
-    if (isRegionRural) {
+    if (isRegionRural !== null) {
       value.isRegionRural = isRegionRural;
     }
 
