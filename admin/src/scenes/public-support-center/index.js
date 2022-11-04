@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { colors, urlWithScheme } from "../../utils";
 import { adminURL, supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
+import ZammoodForm from "./form";
 
 const articles = [
   {
@@ -234,6 +235,7 @@ export default function PublicSupportCenter(props) {
             </div>
           </div>
         </div>
+        {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </div>
