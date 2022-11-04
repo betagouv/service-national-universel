@@ -9,7 +9,7 @@ import { NavLink, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
-import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
