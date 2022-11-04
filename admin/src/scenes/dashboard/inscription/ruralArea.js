@@ -46,7 +46,7 @@ export default function RuralArea({ filter }) {
         <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`RURAL=%5B"false"%5D`] })}>
           <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
         </Link>
-        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SITUATION=%5B"true"%5D`] })}>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`RURAL=%5B"true"%5D`] })}>
           <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
         </Link>
       </Content>
