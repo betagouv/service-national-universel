@@ -167,6 +167,7 @@ function CniModal({ young, onClose, mode }) {
     }
     setError(null);
     setCniFiles(res.data);
+    setChanges(true);
     setFilesToUpload(null);
   }
 
@@ -241,11 +242,7 @@ function CniModal({ young, onClose, mode }) {
                       mode="edition"
                       type="select"
                       className="w-1/2"
-                      options={[
-                        { value: "cniNew", label: "CI (nouveau format)" },
-                        { value: "cniOld", label: "CI (ancien format)" },
-                        { value: "passport", label: "Passeport" },
-                      ]}
+                      options={["cniNew", "cniOld", "passport"].map((e) => ({ value: e, label: translate(e) }))}
                       onChange={(val) => setCategory(val)}
                     />
                   </div>
