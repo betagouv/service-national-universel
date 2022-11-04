@@ -1,16 +1,19 @@
 import Cni from "../../../assets/icons/Cni";
-import { DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
+import { AddButton, DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
-import { download } from "snu-lib";
+import { download, translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import CorrectionRequest from "./CorrectionRequest";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectedRequest from "./CorrectedRequest";
 import { Modal } from "reactstrap";
-import { BorderButton } from "./Buttons";
+import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
+import { capture } from "../../../../../app/src/sentry";
+import dayjs from "dayjs";
+import Field from "./Field";
 
 export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange }) {
   const [opened, setOpened] = useState(false);
@@ -97,6 +100,9 @@ function CniModal({ young, onClose }) {
   const [error, setError] = useState(null);
   const [changes, setChanges] = useState(false);
   const [cniFiles, setCniFiles] = useState([]);
+  const [filesToUpload, setFilesToUpload] = useState();
+  const [date, setDate] = useState(new Date(young?.latestCNIFileExpirationDate) || null);
+  const [category, setCategory] = useState(young?.latestCNIFileCategory || null);
 
   useEffect(() => {
     if (young && young.files && young.files.cniFiles) {
@@ -141,6 +147,27 @@ function CniModal({ young, onClose }) {
     }
   }
 
+  async function upload(files) {
+    for (const file of files) {
+      if (file.size > 5000000)
+        return setError({
+          text: `Ce fichier ${files.name} est trop volumineux.`,
+        });
+    }
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), {}, category, date);
+    if (res.code === "FILE_CORRUPTED")
+      return setError({
+        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+      });
+    if (!res.ok) {
+      capture(res.code);
+      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+      return;
+    }
+    setCniFiles(res.data);
+    setFilesToUpload(null);
+  }
+
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
       <div className="bg-white rounded-[8px]">
@@ -159,6 +186,59 @@ function CniModal({ young, onClose }) {
             <div className="text-[14px] text-[#6B7280] text-center">Aucune pièce d&apos;identité</div>
           )}
           {error && <div className="text-[#EF4444] text-[12px] leading-[1.4em] mt-[16px]">{error}</div>}
+          <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={(e) => setFilesToUpload(e.target.files)} className="hidden" />
+          <div className="flex items-center justify-between mt-4">
+            <label htmlFor="file-upload" className="flex text-xs space-x-4 items-center">
+              <AddButton className="" />
+              <div className="cursor-pointer text-gray-500 hover:text-gray-800">Ajouter un document</div>
+            </label>
+          </div>
+          {filesToUpload && (
+            <>
+              <div className="w-full flex space-x-2 justify-between mt-2 items-center">
+                <div className="3/4">
+                  {Array.from(filesToUpload).map((file) => (
+                    <div key={file.name} className="text-[12px]">
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+                <div className="1/4">
+                  <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date}>
+                    Téléverser
+                  </PlainButton>
+                </div>
+              </div>
+              <div className="flex mt-4 w-full space-x-2">
+                <div className="relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] w-1/2">
+                  <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">Date d&apos;expiration</label>
+                  <input
+                    type="date"
+                    value={dayjs(date).locale("fr").format("YYYY-MM-DD")}
+                    onChange={(e) => setDate(e.target.value)}
+                    onClick={(e) => {
+                      if (e.target?.showPicker) e.target.showPicker();
+                    }}
+                    className="block bg-gray-50 w-[100%] cursor-pointer"
+                  />
+                </div>
+                <Field
+                  label="Catégorie"
+                  value={category}
+                  transformer={translate}
+                  mode="edition"
+                  type="select"
+                  className="w-1/2"
+                  options={[
+                    { value: "cniNew", label: "CI (nouveau format)" },
+                    { value: "cniOld", label: "CI (ancien format)" },
+                    { value: "passport", label: "Passeport" },
+                  ]}
+                  onChange={(val) => setCategory(val)}
+                />
+              </div>
+            </>
+          )}
         </div>
         <div className="flex p-[24px] items-center justify-center">
           <BorderButton onClick={() => onClose(changes)}>Fermer</BorderButton>
