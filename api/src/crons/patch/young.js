@@ -9,14 +9,14 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const YoungModel = require("../../models/young");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
-const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
+const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
 const result = { event: {} };
 
 async function process(patch, count, total) {
   try {
-    result.youngScanned = result.youngScanned + 1 || 1;
+    result.youngPatchScanned = result.youngPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
     const actualYoung = await YoungModel.findById(patch.ref.toString());
     if (!actualYoung) return;
@@ -136,11 +136,11 @@ exports.handler = async () => {
 
     await findAll(young_patches, mongooseFilterForDayBefore(), process);
     slack.info({
-      title: "youngPatch",
-      text: `${result.youngScanned} youngs were scanned: ${JSON.stringify(result.event)}`,
+      title: "✅ Young Logs",
+      text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of young patch logs", JSON.stringify(e));
-    slack.error({ title: "youngPatch", text: JSON.stringify(e) });
+    slack.error({ title: "❌ Young Logs", text: JSON.stringify(e) });
   }
 };

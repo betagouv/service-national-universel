@@ -60,9 +60,16 @@ async function findAll(Model, where, cb) {
     });
 }
 
+function printResult(events) {
+  return Object.keys(events)
+    .map((key) => `${key} => ${events[key]}`)
+    .join(`\n`);
+}
+
 module.exports = {
   mongooseFilterForDayBefore,
   checkResponseStatus,
   getAccessToken,
   findAll,
+  printResult,
 };

@@ -8,14 +8,14 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const MissionModel = require("../../models/mission");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
-const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll } = require("./utils");
+const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
 let result = { event: {} };
 
 async function process(patch, count, total) {
   try {
-    result.missionScanned = result.missionScanned + 1 || 1;
+    result.missionPatchScanned = result.missionPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
     const mission = await MissionModel.findById(patch.ref.toString());
     if (!mission) return;
@@ -108,12 +108,12 @@ exports.handler = async () => {
 
     await findAll(mission_patches, mongooseFilterForDayBefore(), process);
     slack.info({
-      title: "missioinPatch",
+      title: "✅ Mission Logs",
       text: JSON.stringify(result),
-      text: `${result.missionScanned} missions were scanned: ${JSON.stringify(result.event)}`,
+      text: `${result.missionPatchScanned} missions were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
     capture("Error during creation of mission patch logs", JSON.stringify(e));
-    slack.error({ title: "mission_patches", text: JSON.stringify(e) });
+    slack.error({ title: "❌ Mission Logs", text: JSON.stringify(e) });
   }
 };

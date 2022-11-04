@@ -52,6 +52,7 @@ const FILTERS = [
   "COHORT",
   "PPS",
   "PAI",
+  "RURAL",
   "QPV",
   "HANDICAP",
   "ZRR",
@@ -453,6 +454,22 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Région rurale"
+                  componentId="RURAL"
+                  dataField="isRegionRural.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "RURAL") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Région rurale", "Région rurale")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
