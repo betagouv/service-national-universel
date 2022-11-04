@@ -77,6 +77,7 @@ const FILTERS = [
   "SITUATION",
   "PMR",
   "IMAGE_RIGHT",
+  "CNI_EXPIRED",
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
   "ALLERGIES",
@@ -696,6 +697,21 @@ export default function VolontaireList() {
                   renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
                   showMissing
                   missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Attestation - Pièce d’identité périmée"
+                  componentId="CNI_EXPIRED"
+                  dataField="CNIFileNotValidOnStart.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CNI_EXPIRED") }}
+                  renderItem={(e, count) => {
+                    if(e === "true") return `En attente (${count})`;
+                    return `Validée (${count})`
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Attestation - Pièce d’identité périmée", "Attestation - Pièce d’identité périmée")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
