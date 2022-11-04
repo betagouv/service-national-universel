@@ -20,6 +20,7 @@ export function FieldsGroup({
   value,
   onChange,
   type,
+  young,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [group, setGroup] = useState({});
@@ -62,13 +63,13 @@ export function FieldsGroup({
             }}
             className="block p-[5px] bg-gray-50 w-[100%] cursor-pointer"
           />
-          {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} />}
+          {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
         </div>
       ) : (
         <div className={className} onMouseEnter={() => setMouseIn(true)} onMouseLeave={() => setMouseIn(false)}>
           {title && <MiniTitle>{title}</MiniTitle>}
           <div className={`${noflex ? "" : "flex items center"}`}>{childs}</div>
-          {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} />}
+          {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
         </div>
       )}
       {opened && (

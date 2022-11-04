@@ -14,7 +14,17 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { getDensity, getQPV } = require("../geo");
+
+const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
+const youngSchooledSituationOptions = [
+  YOUNG_SITUATIONS.GENERAL_SCHOOL,
+  YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
+  YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
+  YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
+  YOUNG_SITUATIONS.APPRENTICESHIP,
+];
 
 router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -37,6 +47,11 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       zip: Joi.string().trim(),
       city: Joi.string().trim(),
       country: Joi.string().trim().allow(""),
+      cityCode: Joi.string().trim().allow(""),
+      region: Joi.string().trim().allow(""),
+      department: Joi.string().trim().allow(""),
+      location: Joi.any(),
+      addressVerified: Joi.boolean(),
       foreignAddress: Joi.string().trim().allow(""),
       foreignZip: Joi.string().trim().allow(""),
       foreignCity: Joi.string().trim().allow(""),
@@ -57,6 +72,25 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     young.CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
     console.log("SAVE VALUE: ", value);
     console.log("body: ", req.body);
+
+    if (value.zip && value.city && value.address) {
+      const qpv = await getQPV(value.zip, value.city, value.address);
+      if (qpv === true) value.qpv = "true";
+      else if (qpv === false) value.qpv = "false";
+      else value.qpv = "";
+    }
+
+    // Check quartier prioritaires.
+    if (value.cityCode) {
+      const populationDensity = await getDensity(value.cityCode);
+      if (populationDensity) {
+        value.populationDensity = populationDensity;
+      }
+    }
+    const isRegionRural = isInRuralArea({ ...young, ...value });
+    if (isRegionRural) {
+      value.isRegionRural = isRegionRural;
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -112,9 +146,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       reducedMobilityAccess: Joi.string().trim().valid("true", "false").allow("", null),
       handicapInSameDepartment: Joi.string().trim().valid("true", "false").allow("", null),
       allergies: Joi.string().trim().valid("true", "false").allow("", null),
-      highSkilledActivity: Joi.string().trim().valid("true", "false").allow("", null),
-      highSkilledActivityType: Joi.string().trim().valid("true", "false").allow("", null),
-      highSkilledActivityInSameDepartment: Joi.string().trim().valid("true", "false").allow("", null),
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
@@ -132,6 +163,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     console.log("body: ", req.body);
 
     young.set(value);
+    young.set({
+      employed: youngEmployedSituationOptions.includes(value.situation) ? "true" : "false",
+      schooled: youngSchooledSituationOptions.includes(value.situation) ? "true" : "false",
+    });
     await young.save({ fromUser: req.user });
 
     // --- result

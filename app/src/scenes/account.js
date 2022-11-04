@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import api from "../services/api";
 import { setYoung } from "../redux/auth/actions";
-import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
 import { getPasswordErrorMessage, translate, putLocation } from "../utils";
 import validator from "validator";
 import AddressInputV2 from "../components/addressInputV2";

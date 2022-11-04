@@ -4,6 +4,7 @@ import CorrectionRequest from "./CorrectionRequest";
 import { SPECIFIC_SITUATIONS_KEY } from "../commons";
 import Minus from "../../../assets/icons/Minus";
 import ConfirmationModal from "./ConfirmationModal";
+import CorrectedRequest from "./CorrectedRequest";
 
 /**
  * mode: could be "correction|edition|readonly" (par défaut readonly)
@@ -125,6 +126,7 @@ export default function FieldSituationsParticulieres({
           </div>
         )}
       </div>
+      {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
       {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
       {confirmModal && (
         <ConfirmationModal

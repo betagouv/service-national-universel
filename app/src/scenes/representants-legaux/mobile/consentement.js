@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
-import FranceConnectButton from "../../inscription/components/FranceConnectButton";
+import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../inscription2023/components/RadioButton";
 import RadioButton from "../components/RadioButton";

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
-import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
 import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";

@@ -34,18 +34,22 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   useEffect(() => {
     if (young) {
       let options = [];
-      switch (young.status) {
-        case YOUNG_STATUS.WAITING_LIST:
-          options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
-          break;
-        case YOUNG_STATUS.WITHDRAWN:
-          if (user.role === ROLES.ADMIN) {
-            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST];
-          }
-          break;
-        case YOUNG_STATUS.VALIDATED:
-          options = [YOUNG_STATUS.WITHDRAWN];
-          break;
+      if (user.role === ROLES.ADMIN) {
+        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status);
+      } else {
+        switch (young.status) {
+          case YOUNG_STATUS.WAITING_LIST:
+            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+            break;
+          case YOUNG_STATUS.WITHDRAWN:
+            if (user.role === ROLES.ADMIN) {
+              options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST];
+            }
+            break;
+          case YOUNG_STATUS.VALIDATED:
+            options = [YOUNG_STATUS.WITHDRAWN];
+            break;
+        }
       }
       setStatusOptions(options.map((opt) => ({ value: opt, label: translate(opt) })));
     } else {
