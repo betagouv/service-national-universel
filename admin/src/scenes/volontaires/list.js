@@ -712,7 +712,7 @@ export default function VolontaireList() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
                   showMissing
-                  missingLabel="Non renseigné"
+                  missingLabel="En attente"
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

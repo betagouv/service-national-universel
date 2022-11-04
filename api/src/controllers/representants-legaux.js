@@ -174,7 +174,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   let shouldSendToParent2 = false;
   let statusChanged = false;
   if (id === 1) {
-    if (young.parentAllowSNU !== value.parentAllowSNU) {
+    if (young.parentAllowSNU !== value.parentAllowSNU || value.parent1AllowImageRights !== young.parent1AllowImageRights) {
       if (value.parentAllowSNU === "true") {
         if (young.status === YOUNG_STATUS.REINSCRIPTION) {
           value.status = YOUNG_STATUS.VALIDATED;
@@ -193,6 +193,15 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
         shouldSendToParent2 = true;
       }
     }
+    if (value.parent1AllowImageRights === "false") {
+      value.imageRight = "false";
+    }
+  } else {
+    if (value.parent2AllowImageRights === "true") {
+      value.imageRight = "true";
+    } else {
+      value.imageRight = "false";
+    }
   }
 
   if (shouldSendToParent2) {
@@ -206,6 +215,8 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
           youngName: young.lastName,
         },
       });
+    } else {
+      value.imageRight = "true";
     }
   }
 
