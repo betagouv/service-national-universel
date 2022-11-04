@@ -4,7 +4,6 @@ const { initSentry } = require("./sentry");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
-const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const logger = require("morgan");
@@ -59,10 +58,7 @@ app.use(cookieParser());
 
 app.use(express.static(__dirname + "/../public"));
 
-app.use(session({ secret: "secret", resave: false, saveUninitialized: true }));
-
 app.use(passport.initialize());
-app.use(passport.session({}));
 
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));
@@ -85,7 +81,9 @@ app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
-app.use("/educonnect", require("./controllers/educonnect"));
+app.use("/representants-legaux", require("./controllers/representants-legaux"));
+app.use("/correction-request", require("./controllers/correction-request"));
+app.use("/young-edition", require("./controllers/young-edition"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

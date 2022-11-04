@@ -18,7 +18,7 @@ export default function Goal() {
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState([]);
-  const [cohort, setCohort] = useState("2021");
+  const [cohort, setCohort] = useState("Février 2023 - C");
 
   const getInscriptionGoals = async () => {
     if (!cohort) return;
@@ -56,6 +56,11 @@ export default function Goal() {
               { key: "Février 2022", label: "Février 2022" },
               { key: "Juin 2022", label: "Juin 2022" },
               { key: "Juillet 2022", label: "Juillet 2022" },
+              { key: "Février 2023 - C", label: "Février 2023 - C" },
+              { key: "Avril 2023 - A", label: "Avril 2023 - A" },
+              { key: "Avril 2023 - B", label: "Avril 2023 - B" },
+              { key: "Juin 2023", label: "Juin 2023" },
+              { key: "Juillet 2023", label: "Juillet 2023" },
             ]}
             onChange={(c) => setCohort(c)}
             value={cohort}

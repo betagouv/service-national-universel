@@ -41,7 +41,6 @@ class api {
     })
       .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
-        Sentry.captureMessage("Error caught in esQuery");
         Sentry.captureException(e);
         console.error(e);
         return { responses: [] };
@@ -214,7 +213,7 @@ class api {
     });
   }
 
-  uploadFile(path, arr, properties) {
+  uploadFile(path, arr, properties, category, expirationDate) {
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -222,6 +221,8 @@ class api {
       formData.append(files[i].name, files[i], files[i].name);
     }
     formData.append("body", JSON.stringify({ names, ...properties }));
+    if (category) formData.set("category", category);
+    if (expirationDate) formData.set("expirationDate", expirationDate);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {

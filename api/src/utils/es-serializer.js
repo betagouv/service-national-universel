@@ -37,9 +37,27 @@ function serializeSchools(body) {
       city: hit.city,
       postcode: hit.postcode,
       name2: hit.name2,
-      type: hit.type,
       fullName: hit.fullName,
       uai: hit.uai,
+    };
+  });
+}
+
+function serializeRamsesSchools(body) {
+  return serializeHits(body, (hit) => {
+    return {
+      uai: hit.uai,
+      fullName: hit.fullName,
+      type: hit.type,
+      departmentName: hit.departmentName,
+      region: hit.region,
+      country: hit.country,
+      city: hit.city,
+      postcode: hit.postcode,
+      adresse: hit.adresse,
+      codeCity: hit.codeCity,
+      department: hit.department,
+      codePays: hit.codePays,
     };
   });
 }
@@ -48,11 +66,13 @@ function serializeYoungs(body) {
   return serializeHits(body, (hit) => {
     delete hit.sqlId;
     delete hit.password;
+    delete hit.nextLoginAttemptIn;
     delete hit.forgotPasswordResetToken;
     delete hit.forgotPasswordResetExpires;
     delete hit.invitationToken;
     delete hit.invitationExpires;
     delete hit.phase3Token;
+    delete hit.loginAttempts;
     return hit;
   });
 }
@@ -70,10 +90,12 @@ function serializeReferents(body) {
   return serializeHits(body, (hit) => {
     delete hit.sqlId;
     delete hit.password;
+    delete hit.nextLoginAttemptIn;
     delete hit.forgotPasswordResetToken;
     delete hit.forgotPasswordResetExpires;
     delete hit.invitationToken;
     delete hit.invitationExpires;
+    delete hit.loginAttempts;
     delete hit.__v;
     return hit;
   });
@@ -89,6 +111,7 @@ function serializeApplications(body) {
 module.exports = {
   serializeMissions,
   serializeSchools,
+  serializeRamsesSchools,
   serializeYoungs,
   serializeStructures,
   serializeReferents,

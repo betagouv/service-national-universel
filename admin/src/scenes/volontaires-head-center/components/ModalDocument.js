@@ -10,10 +10,6 @@ import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 
-function getFileName(file) {
-  return (file && file.name) || file;
-}
-
 export default function ModalDocument({ isOpen, onCancel, initialValues, young, title, nameFiles }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(false);
@@ -31,10 +27,10 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
   const onConfirm = async (file) => {
     setLoading(true);
     try {
-      const f = await api.get(`/referent/youngFile/${young._id}/${nameFiles}/${getFileName(file)}`);
-      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
+      const f = await api.get(`/young/${young._id}/documents/${nameFiles}/${file._id}`);
+      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName);
     } catch (e) {
-      toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
+      toastr.error("Oups, une erreur est survenue pendant le téléchargement", e.toString());
     }
     setLoading(false);
   };
@@ -57,7 +53,7 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                     <Download color="#5145cd" className="mr-2" />
                     Télécharger
                   </LoadingButton>
-                  <div className="ml-2">{getFileName(e)}</div>
+                  <div className="ml-2">{e.name}</div>
                 </div>
               ))}
             </div>

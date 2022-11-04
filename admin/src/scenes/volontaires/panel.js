@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -23,7 +24,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { ImQuotesLeft } from "react-icons/im";
 
@@ -31,6 +32,7 @@ export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const onClickDelete = () => {
@@ -182,22 +184,24 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Région" value={young.schoolRegion} />
           <Details title="Dép" value={young.schoolDepartment} />
           <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-          <Details title="Adresse" value={young.schoolAdress} />
+          <Details title="Adresse" value={young.schoolAddress} />
         </Info>
-        <Info title="Situations particulières" id={young._id}>
-          <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
-          <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
-          <Details title="Handicap" value={t(young.handicap)} />
-          <Details title="Allergies ou intolérances" value={t(young.allergies)} />
-          <Details title="PPS" value={t(young.ppsBeneficiary)} />
-          <Details title="PAI" value={t(young.paiBeneficiary)} />
-          <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
-          <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
-          <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
-          <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
-          <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-          <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
-        </Info>
+
+        {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
+          <Info title="Situations particulières" id={young._id}>
+            <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
+            <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
+            <Details title="Handicap" value={t(young.handicap)} />
+            <Details title="Allergies ou intolérances" value={t(young.allergies)} />
+            <Details title="PPS" value={t(young.ppsBeneficiary)} />
+            <Details title="PAI" value={t(young.paiBeneficiary)} />
+            <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
+            <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
+            <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
+            <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
+          </Info>
+        )}
+
         {young.parent1Status && (
           <Info title="Représentant légal n°1" id={young._id}>
             <Details title="Statut" value={t(young.parent1Status)} />
@@ -224,7 +228,9 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Région" value={young.parent2Region} />
           </Info>
         )}
-        <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
+
+        {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>}
+
         {young.motivations && (
           <div className="info">
             <div className="info-title">Motivations</div>

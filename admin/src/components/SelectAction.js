@@ -5,6 +5,7 @@ export default function SelectAction({
   optionsGroup,
   title,
   Icon,
+  disabled = false,
   alignItems = "left",
   buttonClassNames = "border-[1px] border-gray-300",
   textClassNames = "text-gray-700 font-medium text-sm",
@@ -40,8 +41,10 @@ export default function SelectAction({
       <div className="py-2 relative">
         {/* select item */}
         <button
-          disabled={loading}
-          className={`flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait ${buttonClassNames}`}
+          disabled={loading || disabled}
+          className={`flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 ${
+            loading ? "disabled:cursor-wait" : "disabled:cursor-auto"
+          } ${buttonClassNames}`}
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2">

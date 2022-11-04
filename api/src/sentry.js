@@ -1,7 +1,27 @@
 const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
-const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, Integrations: NodeIntegrations, init, Handlers } = require("@sentry/node");
+const {
+  addGlobalEventProcessor,
+  captureException: sentryCaptureException,
+  captureMessage: sentryCaptureMessage,
+  Integrations: NodeIntegrations,
+  init,
+  Handlers,
+} = require("@sentry/node");
 const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
+
+const regex = /[0-9a-fA-F]{24}/g;
+
+const sanitizeTransactionName = (name) => {
+  return name.replace(regex, ":id");
+};
+
+addGlobalEventProcessor((event) => {
+  if (event.type === "transaction") {
+    event.transaction = sanitizeTransactionName(event.transaction);
+  }
+  return event;
+});
 
 function initSentry(app) {
   init({

@@ -11,91 +11,51 @@ const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung, updateApplicationsWithYoungOrMission, updateApplication } = require("../utils/index.js");
+const { ERRORS, isYoung, updateApplication } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
+const { ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
 const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, putLocation } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
-
-const putLocation = async (city, zip) => {
-  // try with municipality = city + zip
-  const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
-    mode: "cors",
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-  const resMunicipality = await responseMunicipality.json();
-  if (resMunicipality.features.length > 0) {
-    return {
-      lon: resMunicipality.features[0].geometry.coordinates[0],
-      lat: resMunicipality.features[0].geometry.coordinates[1],
-    };
-  }
-  // try with locality = city + zip
-  const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
-    mode: "cors",
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-  const resLocality = await responseLocality.json();
-  if (resLocality.features.length > 0) {
-    return {
-      lon: resLocality.features[0].geometry.coordinates[0],
-      lat: resLocality.features[0].geometry.coordinates[1],
-    };
-  }
-  // try with postcode = zip
-  let url = `https://api-adresse.data.gouv.fr/search/?q=${city || zip}`;
-  if (zip) url += `&postcode=${zip}`;
-  const responsePostcode = await fetch(url, {
-    mode: "cors",
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-  const resPostcode = await responsePostcode.json();
-  if (resPostcode.features.length > 0) {
-    return {
-      lon: resPostcode.features[0].geometry.coordinates[0],
-      lat: resPostcode.features[0].geometry.coordinates[1],
-    };
-  }
-  return {
-    lon: 2.352222,
-    lat: 48.856613,
-  };
-};
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canCreateOrModifyMission(req.user, checkedMission)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    let structure = {};
+    if (req.user.role === ROLES.SUPERVISOR) structure = await StructureObject.findById(checkedMission.structureId);
 
-    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+
+    if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
+      if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+      }
     }
 
     const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
-    const referentsDepartment = await UserObject.find({
-      department: checkedMission.department,
-      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
-    });
-    if (referentsDepartment?.length) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
-        emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
-        params: {
-          cta: `${ADMIN_URL}/mission/${data._id}`,
-        },
-      });
-    }
-
     if (data.status === MISSION_STATUS.WAITING_VALIDATION) {
+      const referentsDepartment = await UserObject.find({
+        department: checkedMission.department,
+        subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+      });
+      if (referentsDepartment?.length) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+          emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
+          params: {
+            cta: `${ADMIN_URL}/mission/${data._id}`,
+          },
+        });
+      }
+
       const responsible = await UserObject.findById(checkedMission.tutorId);
       if (responsible)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
@@ -121,19 +81,27 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canCreateOrModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role === ROLES.SUPERVISOR) var structure = await StructureObject.findById(mission.structureId);
+
+    if (!canCreateOrModifyMission(req.user, mission, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    // await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
-
-    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
+      if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+      }
     }
 
-    if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
-      checkedMission.status = "WAITING_VALIDATION";
+    if (checkedMission.status !== MISSION_STATUS.DRAFT) {
+      // Sur changement de description ou actions, on doit revalider la mission
+      if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
+        checkedMission.status = "WAITING_VALIDATION";
+      }
     }
 
     const oldStatus = mission.status;
@@ -144,6 +112,18 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (oldStatus !== mission.status) {
       await updateApplication(mission, req.user);
       if (mission.status === MISSION_STATUS.WAITING_VALIDATION) {
+        const referentsDepartment = await UserObject.find({
+          department: checkedMission.department,
+          subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+        });
+        if (referentsDepartment?.length) {
+          await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+            emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
+            params: {
+              cta: `${ADMIN_URL}/mission/${mission._id}`,
+            },
+          });
+        }
         const responsible = await UserObject.findById(mission.tutorId);
         if (responsible)
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
@@ -167,6 +147,49 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     res.status(200).send({ ok: true, data: mission });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/multiaction/change-tutor", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      ids: Joi.array().items(Joi.string().required()).required(),
+      tutorId: Joi.string().required(),
+      tutorName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const { tutorId, tutorName, ids } = value;
+
+    const missions = await MissionObject.find({ _id: { $in: ids } });
+    if (missions?.length !== ids.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (missions.some((mission) => !canCreateOrModifyMission(req.user, mission))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    for (let mission of missions) {
+      mission.set({ tutorId, tutorName });
+      await mission.save({ fromUser: req.user });
+
+      // ! update application ne met pas à jour le tutorId. Faire cette tache pour corriger : https://www.notion.so/jeveuxaider/Model-Supprimer-tutorId-de-applications-et-contrats-5dae140ba40745e69dde7029baecdabd
+      //await updateApplication(mission, req.user);
+
+      // ? Envoi d'un email au nouveau responsable
+      // await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
+      //   emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+      //   params: {
+      //     missionName: mission.name,
+      //   },
+      // });
+    }
+
+    res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -218,7 +241,10 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
 
     if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await ApplicationObject.find({ missionId: id });
+    let data = [];
+    if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
+      data = await ApplicationObject.find({ missionId: id, status: { $ne: "WAITING_ACCEPTATION " } });
+    } else data = await ApplicationObject.find({ missionId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     for (let i = 0; i < data.length; i++) {
       const application = data[i];
@@ -276,10 +302,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canCreateOrModifyMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canCreateOrModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const applications = await ApplicationObject.find({ missionId: mission._id });
     if (applications && applications.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });

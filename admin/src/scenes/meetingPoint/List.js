@@ -135,7 +135,7 @@ export default function MeetingPoint() {
                       showSearch={true}
                       searchPlaceholder="Rechercher..."
                       size={1000}
-                      defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                      defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}

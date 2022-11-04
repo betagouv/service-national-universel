@@ -4,7 +4,7 @@ import { Row, Col } from "reactstrap";
 import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
-import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
@@ -60,7 +60,6 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
     const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
       mode: "cors",
       method: "GET",
-      headers: { "Content-Type": "application/json" },
     });
     const res = await response.json();
     const arr = res.features.filter((e) => e.properties.type !== "municipality");

@@ -21,7 +21,7 @@ const useUser = ({ redirectOnLoggedOut = "/base-de-connaissance" } = {}) => {
 
   const restriction = useMemo(() => {
     if (!user) return "public";
-    if (user.role !== "admin") return user.allowedRole || "public";
+    if (!["admin", "referent_region", "referent_department"].includes(user.role)) return user.allowedRole || "public";
     if (seeAs) return seeAs;
     return user.allowedRole || "public";
   }, [user?.allowedRole, seeAs]);

@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { setYoung } from "../../../redux/auth/actions";
 import { MISSION_DOMAINS, translate, YOUNG_STATUS_PHASE3 } from "../../../utils";
-import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 
@@ -42,7 +42,7 @@ export default function WaitingRealisation() {
           dispatch(setYoung(data));
           history.push(`/`);
         } catch (e) {
-          return toastr.error("Une erreur s'est produite ", e?.error?.message);
+          return toastr.error("Une erreur s'est produite ", e?.message);
         }
       }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (

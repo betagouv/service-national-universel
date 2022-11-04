@@ -5,27 +5,13 @@ const { capture } = require("../sentry");
 
 const CohesionCenterModel = require("../models/cohesionCenter");
 const SessionPhase1 = require("../models/sessionPhase1");
-const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const {
-  ERRORS,
-  updatePlacesCenter,
-  updatePlacesBus,
-  sendAutoCancelMeetingPoint,
-  getSignedUrl,
-  updateCenterDependencies,
-  deleteCenterDependencies,
-  isYoung,
-  getBaseUrl,
-  sanitizeAll,
-  YOUNG_STATUS,
-} = require("../utils");
-const renderFromHtml = require("../htmlToPdf");
-const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
+const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, updateCenterDependencies, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
+const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
 const Joi = require("joi");
-const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
+const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -107,12 +93,12 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (center.waitingList.indexOf(young._id) !== -1) {
       const i = center.waitingList.indexOf(young._id);
       center.waitingList.splice(i, 1);
-      await center.save();
+      await center.save({ fromUser: req.user });
     }
     if (oldCenter && oldCenter.waitingList.indexOf(young._id) !== -1) {
       const i = oldCenter.waitingList.indexOf(young._id);
       oldCenter.waitingList.splice(i, 1);
-      await oldCenter.save();
+      await oldCenter.save({ fromUser: req.user });
     }
     // update center infos
     if (bus) await updatePlacesBus(bus);
@@ -154,7 +140,7 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
     await young.save({ fromUser: req.user });
 
     center.waitingList.push(young._id);
-    await center.save();
+    await center.save({ fromUser: req.user });
 
     return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
   } catch (error) {
@@ -181,7 +167,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
 router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+    const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -200,7 +186,7 @@ router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent
 });
 
 router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+  const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -317,12 +303,12 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
 
 router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const center = await CohesionCenterModel.findById(value.id);
+    const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
@@ -347,7 +333,7 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
 });
 router.get("/young/:youngId", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.youngId);
+    const { error, value: id } = validateId(req.params.youngId);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungModel.findById(id);
@@ -382,7 +368,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const previousCohorts = center.cohorts || [];
     center.set(newCenter);
-    await center.save();
+    await center.save({ fromUser: req.user });
 
     // if we change the cohorts, we need to update the sessionPhase1
     if (newCenter?.cohorts?.length) {
@@ -398,7 +384,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
           if (session) {
             session.set({ placesTotal, placesLeft, status });
-            await session.save();
+            await session.save({ fromUser: req.user });
           } else {
             await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
           }
@@ -418,7 +404,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    await updateCenterDependencies(center);
+    await updateCenterDependencies(center, req.user);
 
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
@@ -429,7 +415,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

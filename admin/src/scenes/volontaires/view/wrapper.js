@@ -16,7 +16,7 @@ import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 import Chevron from "../../../components/Chevron";
 import IconChangementCohorte from "../../../assets/IconChangementCohorte.js";
 

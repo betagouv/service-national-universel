@@ -10,6 +10,7 @@ import api from "../../services/api";
 import { translate, ENABLE_CHOOSE_MEETING_POINT } from "../../utils";
 import MeetingPointCard from "./components/MeetingPointCard";
 import MeetingPointCardNotFound from "./components/MeetingPointCardNotFound";
+import { capture } from "../../sentry";
 
 export default function SelectMeetingPoint() {
   const young = useSelector((state) => state.Auth.young);
@@ -101,7 +102,10 @@ export default function SelectMeetingPoint() {
         meetingPointId,
         deplacementPhase1Autonomous: meetingPointNotFoundSelected ? "true" : "false",
       });
-      if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", translate(code));
+      }
       toastr.success("Votre choix a bien été pris en compte");
       if (data) dispatch(setYoung(data));
     } catch (error) {
@@ -109,6 +113,7 @@ export default function SelectMeetingPoint() {
         return toastr.error("Oups, une erreur est survenue. Il semblerait que ce bus soit déjà complet", translate(error?.code), {
           timeOut: 5000,
         });
+      capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error?.code));
     }
   };

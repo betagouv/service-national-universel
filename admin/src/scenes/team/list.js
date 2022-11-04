@@ -13,13 +13,14 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL } from "../../config";
 import api from "../../services/api";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import { canUpdateReferent, ES_NO_LIMIT, formatLongDateFR, formatStringLongDate, getFilterLabel, ROLES, translate, canDeleteReferent } from "../../utils";
 import Nav from "./components/nav";
 import Panel from "./panel";
 import Eye from "../../assets/icons/Eye";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -38,6 +39,7 @@ export default function List() {
       query: { bool: { must: { match_all: {} }, filter: [] } },
       track_total_hits: true,
     };
+    if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
     if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
     if (filter.role?.length) body.query.bool.filter.push({ terms: { "role.keyword": filter.role } });
     return body;
@@ -61,7 +63,7 @@ export default function List() {
     getService();
     updateFilter({ region: [user.region] });
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department] });
+      updateFilter({ department: user.department });
     }
   }, []);
 
@@ -85,15 +87,19 @@ export default function List() {
                       const services = await getService();
                       return all.map((data) => {
                         let structure = {};
+                        let department = Array.isArray(data.department) ? data.department : [data.department];
+                        department = department.find((d) => filter.department[0] === d);
+
                         if (data.structureId && structures) {
                           structure = structures.find((s) => s._id === data.structureId);
                           if (!structure) structure = {};
                         }
                         let service = {};
                         if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
-                          service = services.find((s) => s.department === data.department);
+                          service = services.find((s) => s.department === department);
                           if (!service) service = {};
                         }
+
                         return {
                           _id: data._id,
                           Prénom: data.firstName,
@@ -103,11 +109,11 @@ export default function List() {
                           Fonction: translate(data.subRole),
                           Téléphone: data.phone,
                           Portable: data.mobile,
-                          Département: data.department,
+                          Département: department,
                           Région: data.region,
                           Structure: structure?.name,
                           "Nom de la direction du service départemental": service?.directionName,
-                          "Adresse du service départemental": service?.address + service?.complementAddress,
+                          "Adresse du service départemental": service?.address ? service?.address + service?.complementAddress : "",
                           "Code Postal du service départemental": service?.zip,
                           "Ville du service départemental": service?.city,
                           "Créé lé": formatLongDateFR(data.createdAt),
@@ -271,6 +277,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const onClickDelete = () => {
     setModal({
@@ -281,13 +288,18 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
     });
   };
 
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.go(0);
+      return onReferentDeleted();
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
@@ -324,6 +336,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.go(0)} />
     </>
   );
 };

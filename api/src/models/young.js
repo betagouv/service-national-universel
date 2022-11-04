@@ -8,6 +8,92 @@ const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
 
+const File = new mongoose.Schema({
+  name: String,
+  uploadedAt: Date,
+  size: Number,
+  mimetype: String,
+  category: String,
+  expirationDate: Date,
+});
+
+const CorrectionRequest = new mongoose.Schema({
+  moderatorId: {
+    type: mongoose.ObjectId,
+    required: true,
+    documentation: {
+      description: "Identifiant du demandeur",
+    },
+  },
+  cohort: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Cohorte du jeune au moment de la dernière action sur cette demande de correction",
+    },
+  },
+  field: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Champs concerné pour la demande de correction. (une seule demande par champs",
+    },
+  },
+  reason: {
+    type: String,
+    documentation: {
+      description: "Motif de la demande de correction",
+    },
+  },
+  message: {
+    type: String,
+    documentation: {
+      description: "Message complétementaire pour la demande de correction",
+    },
+  },
+  status: {
+    type: String,
+    required: true,
+    default: "PENDING",
+    enum: ["PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED"],
+    documentation: {
+      description: "Etat de la demande de correction",
+    },
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    documentation: {
+      description: "Date de création de la demande de correction",
+    },
+  },
+
+  sentAt: {
+    type: Date,
+    documentation: {
+      description: "Date de premier envoi de la demande de correction",
+    },
+  },
+  remindedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de la dernière relance envoyée au jeune",
+    },
+  },
+  correctedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de correction du jeune",
+    },
+  },
+  canceledAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'annulation de la demande",
+    },
+  },
+});
+
 const Schema = new mongoose.Schema({
   sqlId: {
     type: String,
@@ -81,47 +167,44 @@ const Schema = new mongoose.Schema({
       description: "Date de naissance du volontaire",
     },
   },
-  INEHash: {
-    type: String,
-    documentation: {
-      description: "Hash INE du jeune connecte via Educonnect",
-    },
-  },
-  codeUAI: {
-    type: String,
-    documentation: {
-      description: "UAI de(s) établissement(s) de rattachement administratif de l'élève (dans la plupart des cas, il sera monovalué)",
-    },
-  },
-  niveau: {
-    type: String,
-    documentation: {
-      description: "Code de la nomenclature BCN N MEF STAT 4Code de la nomenclature BCN N MEF STAT 4",
-    },
-  },
-  urlLogOut: {
-    type: String,
-    documentation: {
-      description: "Url de deconnexion Educonnect",
-    },
-  },
-  affiliation: {
-    type: String,
-    documentation: {
-      description: "Type d'utilisateur (1d, 2d, les 2)",
-    },
-  },
   cohort: {
     type: String,
-    default: "2022",
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
+    enum: [
+      "Juillet 2023",
+      "Juin 2023",
+      "Avril 2023 - B",
+      "Avril 2023 - A",
+      "Février 2023 - C",
+      "Juillet 2022",
+      "Juin 2022",
+      "Février 2022",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "à venir",
+    ],
     documentation: {
       description: "Cohorte",
     },
   },
   originalCohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
+    enum: [
+      "Juillet 2023",
+      "Juin 2023",
+      "Avril 2023 - B",
+      "Avril 2023 - A",
+      "Février 2023 - C",
+      "Juillet 2022",
+      "Juin 2022",
+      "Février 2022",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "à venir",
+    ],
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -149,7 +232,20 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE", "ABANDONED"],
+    enum: [
+      "IN_PROGRESS",
+      "WAITING_VALIDATION",
+      "WAITING_CORRECTION",
+      "REINSCRIPTION",
+      "VALIDATED",
+      "REFUSED",
+      "WITHDRAWN",
+      "DELETED",
+      "WAITING_LIST",
+      "NOT_ELIGIBLE",
+      "ABANDONED",
+      "NOT_AUTORISED",
+    ],
     documentation: {
       description: "Statut général du volontaire",
     },
@@ -251,6 +347,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  reinscriptionStep2023: {
+    type: String,
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
+    documentation: {
+      description: "Étape du tunnel de réinscription 2023",
+    },
+  },
+
+  inscriptionStep2023: {
+    type: String,
+    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    documentation: {
+      description: "Étape du tunnel d'inscription 2023",
+    },
+  },
+
   // keep track of the current inscription step
   inscriptionStep: {
     type: String,
@@ -258,6 +370,13 @@ const Schema = new mongoose.Schema({
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
+    },
+  },
+
+  inscriptionDoneDate: {
+    type: Date,
+    documentation: {
+      description: "Date de validation de l'inscription par le jeune",
     },
   },
 
@@ -321,6 +440,12 @@ const Schema = new mongoose.Schema({
     default: Date.now,
     documentation: {
       description: "Date de dernière connexion",
+    },
+  },
+  nextLoginAttemptIn: {
+    type: Date,
+    documentation: {
+      description: "Date pour autoriser la prochaine tentative de connexion",
     },
   },
   forgotPasswordResetToken: {
@@ -590,6 +715,13 @@ const Schema = new mongoose.Schema({
       description: "Densité de la ville  pendant le snu du volontaire",
     },
   },
+  isRegionRural: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Ruralité de la ville pendant le snu du volontaire",
+    },
+  },
   department: {
     type: String,
     documentation: {
@@ -814,6 +946,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 1",
     },
   },
+  parent1CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la Ville du parent 1",
+    },
+  },
   parent1Department: {
     type: String,
     documentation: {
@@ -842,6 +980,40 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le parent 1 s'est identifié via France Connect",
+    },
+  },
+  parent1Inscription2023Token: {
+    type: String,
+    documentation: {
+      description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent1DataVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AddressVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AllowCovidAutotest: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 autorise les autotests Covid",
+    },
+  },
+  parent1AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 donne les droits à l'image de son enfant.",
     },
   },
 
@@ -906,6 +1078,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 2",
     },
   },
+  parent2CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la ville du parent 2",
+    },
+  },
   parent2Department: {
     type: String,
     documentation: {
@@ -934,6 +1112,19 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le parent 2 s'est identifié via France Connect",
+    },
+  },
+  parent2Inscription2023Token: {
+    type: String,
+    documentation: {
+      description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent2AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 2 donne les droits à l'image de son enfant.",
     },
   },
 
@@ -1132,6 +1323,13 @@ const Schema = new mongoose.Schema({
   },
 
   // * Consentements
+  parentAllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Les representants autorise le jeune à participer au SNU",
+    },
+  },
   dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
@@ -1276,6 +1474,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac",
     },
   },
+  parentStatementOfHonorInvalidId: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant a fait une déclaration sur l'honneur qu'il allait mettre à jour la CNI du volontaire.",
+    },
+  },
 
   // * JDC
   jdc: {
@@ -1317,7 +1522,7 @@ const Schema = new mongoose.Schema({
   },
   period: {
     type: String,
-    enum: ["DURING_HOLIDAYS", "DURING_SCHOOL"],
+    enum: ["WHENEVER", "DURING_HOLIDAYS", "DURING_SCHOOL"],
     documentation: {
       description: "Période privilégiée pour réaliser des missions",
     },
@@ -1431,7 +1636,50 @@ const Schema = new mongoose.Schema({
   },
   statusMilitaryPreparationFiles: {
     type: String,
-    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
+    enum: ["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"],
+  },
+  militaryPreparationCorrectionMessage: {
+    type: String,
+    documentation: {
+      description: "Message de correction du dossier de préparation militaire",
+    },
+  },
+
+  files: {
+    cniFiles: [File],
+    highSkilledActivityProofFiles: [File],
+    dataProcessingConsentmentFiles: [File],
+    parentConsentmentFiles: [File],
+    imageRightFiles: [File],
+    autoTestPCRFiles: [File],
+    rulesFiles: [File],
+    militaryPreparationFilesIdentity: [File],
+    militaryPreparationFilesCensus: [File],
+    militaryPreparationFilesAuthorization: [File],
+    militaryPreparationFilesCertificate: [File],
+  },
+
+  latestCNIFileExpirationDate: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  CNIFileNotValidOnStart: {
+    type: String,
+    enum: ["false", "true"],
+    documentation: {
+      description: "Date d'expiration de la CNI File non valide au début de la Cohorte",
+    },
+  },
+
+  latestCNIFileCategory: {
+    type: String,
+    enum: ["cniOld", "cniNew", "passport"],
+    documentation: {
+      description: "Catégorie du fichier le plus récent dans files.cniFiles",
+    },
   },
 
   missionsInMail: {
@@ -1452,6 +1700,22 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le volontaire a accepté les conditions de la phase 1",
+    },
+  },
+
+  status_equivalence: {
+    type: String,
+    documentation: {
+      description: "Statut de la dernière demande d'équivalence phase 2",
+    },
+  },
+
+  // --- demandes de corrections : phase 0
+  correctionRequests: {
+    type: [CorrectionRequest],
+    default: undefined,
+    documentation: {
+      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
     },
   },
 
@@ -1492,7 +1756,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  // sendinblue.sync(doc, MODELNAME);
+  sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
@@ -1510,6 +1774,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
@@ -1521,12 +1786,39 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token", "/loginAttempts"],
+  excludes: [
+    "/password",
+    "/lastLoginAt",
+    "/nextLoginAttemptIn",
+    "/forgotPasswordResetToken",
+    "/forgotPasswordResetExpires",
+    "/invitationToken",
+    "/invitationExpires",
+    "/phase3Token",
+    "/loginAttempts",
+    "/updatedAt",
+    "/statusPhase2UpdatedAt",
+    "/statusPhase3UpdatedAt",
+    "/statusPhase2ValidatedAt",
+    "/statusPhase3ValidatedAt",
+  ],
 });
 
 Schema.plugin(
   mongooseElastic(esClient, {
-    ignore: ["historic", "missionsInMail", "password", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationExpires", "phase3Token", "loginAttempts"],
+    ignore: [
+      "historic",
+      "missionsInMail",
+      "password",
+      "nextLoginAttemptIn",
+      "forgotPasswordResetToken",
+      "forgotPasswordResetExpires",
+      "invitationExpires",
+      "phase3Token",
+      "loginAttempts",
+      "parent1Inscription2023Token",
+      "parent2Inscription2023Token",
+    ],
   }),
   MODELNAME,
 );

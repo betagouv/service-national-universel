@@ -20,11 +20,15 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import { canDeleteReferent } from "snu-lib/roles";
 import DeleteBtnComponent from "./components/DeleteBtnComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,16 +44,30 @@ export default function Edit(props) {
     });
   };
 
+  const onDeleteTutorLinked = (target) => {
+    setModalTutor({
+      isOpen: true,
+      value: target,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async (target) => {
     try {
       const { ok, code } = await api.remove(`/referent/${target._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_MISSION") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
-      if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(target);
+
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
       setReferents(referents.filter((referent) => referent._id !== target._id));
-      return true;
+
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
@@ -111,6 +129,23 @@ export default function Edit(props) {
         try {
           setLoading(true);
           let id = values._id;
+          // If the address was typed in manually, look for gps coordinates.
+          if (!values.location) {
+            const response = await fetch(
+              `https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${values.address}, ${values.city} ${values.zip}&limit=1&postcode=${values.zip}`,
+              {
+                mode: "cors",
+                method: "GET",
+              },
+            );
+            const res = await response.json();
+            const arr = res.features[0];
+            if (arr.length === 0) return toastr.error("Impossible de trouver les coordonnées de votre structure.");
+            values.location = {
+              lon: arr.geometry.coordinates[0],
+              lat: arr.geometry.coordinates[1],
+            };
+          }
           if (!id) {
             values.placesLeft = values.placesTotal;
             const { ok, data, code } = await api.post("/structure", values);
@@ -346,21 +381,21 @@ export default function Edit(props) {
                           </option>
                         </Field>
                       </FormGroup>
-                      {ENABLE_PM ? (
-                        <FormGroup>
-                          <label>PRÉPARATION MILITAIRE</label>
-                          <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
-                            <option key="false" value="false">
-                              Non
-                            </option>
-                            <option key="true" value="true">
-                              Oui
-                            </option>
-                          </Field>
-                        </FormGroup>
-                      ) : null}
                     </>
                   )}
+                  {ENABLE_PM && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
+                    <FormGroup>
+                      <label>PRÉPARATION MILITAIRE</label>
+                      <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                        <option key="false" value="false">
+                          Non
+                        </option>
+                        <option key="true" value="true">
+                          Oui
+                        </option>
+                      </Field>
+                    </FormGroup>
+                  ) : null}
                 </Wrapper>
               </Col>
               <Col md={6}>
@@ -422,6 +457,18 @@ export default function Edit(props) {
               {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
             </LoadingButton>
           </Header>
+          <ModalChangeTutor
+            isOpen={modalTutor?.isOpen}
+            title={modalTutor?.title}
+            message={modalTutor?.message}
+            tutor={modalTutor?.value}
+            onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+            onConfirm={() => {
+              modalTutor?.onConfirm();
+              setModalTutor({ isOpen: false, onConfirm: null });
+            }}
+          />
+          <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
         </Wrapper>
       )}
     </Formik>

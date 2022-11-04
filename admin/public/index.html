@@ -6,13 +6,20 @@
     <meta name="google" content="notranslate" />
     <title>Service National Universel</title>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script defer data-domain="admin.snu.gouv.fr" src="https://plausible.io/js/plausible.js"></script>
+    <script defer data-domain="admin.snu.gouv.fr" src="https://plausible.io/js/script.manual.outbound-links.file-downloads.js"></script>
     <script>
       window.plausible =
         window.plausible ||
         function () {
           (window.plausible.q = window.plausible.q || []).push(arguments);
         };
+    </script>
+    <script>
+      var url = window.location.href;
+      // Replace every all-numeric sequences located between two slashes by "_ID_"
+      var redactedUrl = url.replace(/[0-9a-fA-F]{24}/g, ":id");
+      // Send the pageview event to Plausible
+      plausible("pageview", { u: redactedUrl });
     </script>
   </head>
 

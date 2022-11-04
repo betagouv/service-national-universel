@@ -11,7 +11,7 @@ const { ERRORS } = require("../utils");
 // Update all inscription goals for a cohort
 router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   // Validate cohort...
-  const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
+  const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
   if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
   // ... then body
   const { error, value: inscriptionsGoals } = Joi.array()
@@ -44,7 +44,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
 
 router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
+    const { error, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -59,7 +59,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 });
 
 router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params);
+  const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
   if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -77,7 +77,7 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
 });
 
 router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+  const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
   if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

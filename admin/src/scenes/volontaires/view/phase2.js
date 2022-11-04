@@ -11,9 +11,8 @@ import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } f
 import CardEquivalence from "../components/Equivalence";
 import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
-import Phase2militaryPrepartionV2 from "./phase2MilitaryPreparationV2";
-import WrapperPhase2 from "./wrapper";
-
+import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
+import YoungHeader from "../../phase0/components/YoungHeader";
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   React.useEffect(() => {
@@ -24,8 +23,9 @@ export default function Phase2({ young, onChange }) {
   }, []);
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase2" onChange={onChange} />
+      <div className="p-[30px]">
         <Box>
           <Row>
             <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
@@ -73,7 +73,7 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        {ENABLE_PM ? <Phase2militaryPrepartionV2 young={young} /> : null}
+        {ENABLE_PM ? <Phase2MilitaryPreparation young={young} /> : null}
         {equivalences.map((equivalence, index) => (
           <CardEquivalence key={index} equivalence={equivalence} young={young} />
         ))}
@@ -160,8 +160,8 @@ export default function Phase2({ young, onChange }) {
             </div>
           </div>
         ) : null}
-      </WrapperPhase2>
-    </div>
+      </div>
+    </>
   );
 }
 

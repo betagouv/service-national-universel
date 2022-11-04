@@ -1,7 +1,7 @@
 import React from "react";
 import { BsArrowUpShort } from "react-icons/bs";
 import Prepa from "../../../../assets/icons/Prepa";
-import { translate } from "../../../../utils";
+import { translateStatusMilitaryPreparationFiles } from "../../../../utils";
 import ModalPM from "./ModalPM";
 
 export default function CardPM({ young }) {
@@ -9,13 +9,13 @@ export default function CardPM({ young }) {
 
   const theme = {
     background: {
-      WAITING_VALIDATION: "bg-sky-100",
+      WAITING_VERIFICATION: "bg-sky-100",
       WAITING_CORRECTION: "bg-[#FD7A02]",
       VALIDATED: "bg-[#71C784]",
       REFUSED: "bg-red-500",
     },
     text: {
-      WAITING_VALIDATION: "text-sky-600",
+      WAITING_VERIFICATION: "text-sky-600",
       WAITING_CORRECTION: "text-white",
       VALIDATED: "text-white",
       REFUSED: "text-white",
@@ -31,7 +31,7 @@ export default function CardPM({ young }) {
               className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                 theme.text[young.statusMilitaryPreparationFiles]
               } px-2 py-[2px] rounded-sm `}>
-              {translate(young.statusMilitaryPreparationFiles)}
+              {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
             </div>
             {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsArrowUpShort className="rotate-45 text-gray-400 h-8 w-8" /> : null}
           </div>

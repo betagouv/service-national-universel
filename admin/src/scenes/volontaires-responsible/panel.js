@@ -80,16 +80,7 @@ export default function PanelView({ onChange, value, application }) {
         <Details title="Région" value={young.schoolRegion} />
         <Details title="Dép" value={young.schoolDepartment} />
         <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-        <Details title="Adresse" value={young.schoolAdress} />
-      </Info>
-      <Info title="Situations particulières">
-        <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
-        <Details title="Handicap" value={t(young.handicap)} />
-        <Details title="PPS" value={t(young.ppsBeneficiary)} />
-        <Details title="PAI" value={t(young.paiBeneficiary)} />
-        <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
-        <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
-        <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
+        <Details title="Adresse" value={young.schoolAddress} />
       </Info>
       {young.motivations && (
         <div className="info">

@@ -79,7 +79,7 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
       id: Joi.string().required(),
       cohort: Joi.string().required(),
       contactId: Joi.string().required(),
-    }).validate(req.params);
+    }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
@@ -137,7 +137,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
       mobile: Joi.string().required(),
       email: Joi.string().required(),
       role: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);

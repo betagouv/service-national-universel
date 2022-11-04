@@ -6,6 +6,7 @@ import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
+import { toastr } from "react-redux-toastr";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -70,9 +71,9 @@ export default function AddressInputV2({
   }, [values[keys.zip]]);
 
   const onSuggestionSelected = () => {
-    let depart = suggestion.properties.postcode.substr(0, 2);
+    let depart = suggestion.properties.postcode?.substr(0, 2) || suggestion.properties.citycode.substr(0, 2);
     if (["97", "98"].includes(depart)) {
-      depart = suggestion.properties.postcode.substr(0, 3);
+      depart = suggestion.properties.postcode?.substr(0, 3) || suggestion.properties.citycode.substr(0, 3);
     }
     if (depart === "20") {
       depart = suggestion.properties.context.substr(0, 2);
@@ -105,17 +106,34 @@ export default function AddressInputV2({
     const text = item;
 
     setLoading(true);
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
+    let url = `https://api-adresse.data.gouv.fr/search/?q=${text}`;
+    // For Nouvelle-Calédonie, we don't add the postcode to the query
+    if (parseInt(values.zip.substr(0, 3)) !== 988) url = url.concat(`&postcode=${values.zip}`);
+    const response = await fetch(url, {
       mode: "cors",
       method: "GET",
-      headers: { "Content-Type": "application/json" },
     });
     const res = await response.json();
-    const arr = res.features.filter((e) => e.properties.type !== "municipality");
+    const arr = res.features;
 
     setLoading(false);
     if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-    else addressVerifiedHelpers.setValue("true");
+    else {
+      // If no match with complete query, try with postcode only
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${values.zip}&limit=1&postcode=${values.zip}`, {
+        mode: "cors",
+        method: "GET",
+      });
+      const res = await response.json();
+      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+
+      setLoading(false);
+      if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+      else {
+        toastr.error("Aucune adresse n'a été trouvée.");
+        addressVerifiedHelpers.setValue("false");
+      }
+    }
   };
 
   // keys is not defined at first load ??
@@ -270,7 +288,7 @@ export default function AddressInputV2({
               <SecondaryButton
                 onClick={() => {
                   setSuggestion({});
-                  addressVerifiedHelpers.setValue("true");
+                  addressVerifiedHelpers.setValue("false");
                 }}>
                 Non
               </SecondaryButton>

@@ -15,6 +15,7 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { capture } from "../../../sentry";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -28,7 +29,10 @@ export default function ApplicationList({ young, onChangeApplication }) {
   const getApplications = async () => {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
     data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
     return setApplications(data);
   };
@@ -118,7 +122,10 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
     (async () => {
       if (!hit.missionId) return;
       const { ok, data, code } = await api.get(`/mission/${hit.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       return setMission(data);
     })();
   }, []);
@@ -219,7 +226,7 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
                   message: "Souhaitez-vous renvoyer un mail à la structure ?",
                   onConfirm: async () => {
                     try {
-                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
+                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
                       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
                       toastr.success("L'email a bien été envoyé");
                     } catch (e) {
@@ -242,39 +249,6 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
             />
           </React.Fragment>
         )}
-        {hit.status === "WAITING_VERIFICATION" && (!young.statusMilitaryPreparationFiles || young.statusMilitaryPreparationFiles === "WAITING_UPLOAD") ? (
-          <React.Fragment>
-            <CopyLink
-              onClick={async () => {
-                setModal({
-                  isOpen: true,
-                  title: "Envoyer un rappel",
-                  message: "Souhaitez-vous envoyer un mail au volontaire pour lui rappeler de remplir les documents pour la préparation militaire ?",
-                  onConfirm: async () => {
-                    try {
-                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER_RENOTIFY}`);
-                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                      toastr.success("L'email a bien été envoyé");
-                    } catch (e) {
-                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                    }
-                  },
-                });
-              }}>
-              ✉️ Envoyer un rappel au volontaire
-            </CopyLink>
-            <ModalConfirm
-              isOpen={modal?.isOpen}
-              title={modal?.title}
-              message={modal?.message}
-              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-              onConfirm={() => {
-                modal?.onConfirm();
-                setModal({ isOpen: false, onConfirm: null });
-              }}
-            />
-          </React.Fragment>
-        ) : null}
       </td>
       <td>
         {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (

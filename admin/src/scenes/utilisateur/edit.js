@@ -21,7 +21,7 @@ import HistoricComponent from "../../components/views/Historic";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser as ReduxSetUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import {
   canDeleteReferent,
   canUpdateReferent,
@@ -38,16 +38,23 @@ import {
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import Badge from "../../components/Badge";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
+import CustomMultiSelect from "../../components/CustomMultiSelect";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
-  const [service, setService] = useState();
+  console.log("🚀 ~ file: edit.js ~ line 49 ~ Edit ~ user", user);
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -62,11 +69,6 @@ export default function Edit(props) {
         if (!userResponse.ok) return setUser(null);
         setUser(userResponse.data);
         setDocumentTitle(`${userResponse.data.firstName} ${userResponse.data.lastName}`);
-
-        // fetching service info
-        const serviceResponse = await api.get(`/department-service/${userResponse.data.department}`);
-        if (!serviceResponse.ok) return setService(null);
-        setService(serviceResponse.data);
 
         // fetching structures info
         const structureResponse = await api.get("/structure");
@@ -99,7 +101,7 @@ export default function Edit(props) {
     })();
   }, [user]);
 
-  if (user === undefined || service === undefined) return <Loader />;
+  if (user === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
@@ -130,7 +132,7 @@ export default function Edit(props) {
       history.go(0);
     } catch (e) {
       setLoadingChangeStructure(false);
-      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
+      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.message);
     }
   }
 
@@ -157,15 +159,35 @@ export default function Edit(props) {
     });
   };
 
+  const onDeleteTutorLinked = (target) => {
+    setModalTutor({
+      isOpen: true,
+      value: target,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
+  const onUniqueResponsible = (target) => {
+    setModalUniqueResponsable({
+      isOpen: true,
+      responsable: target,
+    });
+  };
+
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${user._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_MISSION") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
-      if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
+      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(user);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.push(`/user`);
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
@@ -301,21 +323,7 @@ export default function Edit(props) {
                           </>
                         ) : null}
 
-                        {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                          <Select
-                            disabled={currentUser.role !== ROLES.ADMIN}
-                            name="department"
-                            values={values}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              handleChange({ target: { name: "department", value } });
-                              const region = department2region[value];
-                              handleChange({ target: { name: "region", value: region } });
-                            }}
-                            title="Département"
-                            options={departmentList.map((d) => ({ value: d, label: d }))}
-                          />
-                        ) : null}
+                        {values.role === ROLES.REFERENT_DEPARTMENT ? <ChooseDepartment handleChange={handleChange} currentUser={currentUser} /> : null}
                         {values.role === ROLES.REFERENT_REGION ? (
                           <Select
                             disabled={values.role === ROLES.REFERENT_DEPARTMENT}
@@ -386,9 +394,51 @@ export default function Edit(props) {
           }}
         />
       </div>
+      <ModalChangeTutor
+        isOpen={modalTutor?.isOpen}
+        title={modalTutor?.title}
+        message={modalTutor?.message}
+        tutor={modalTutor?.value}
+        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalTutor?.onConfirm();
+          setModalTutor({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalUniqueResponsable
+        isOpen={modalUniqueResponsable?.isOpen}
+        responsable={modalUniqueResponsable?.responsable}
+        onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
+      />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
     </>
   );
 }
+
+const ChooseDepartment = ({ currentUser, handleChange }) => {
+  const list = departmentList.map((e) => ({ value: e, label: e }));
+
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>Département(s)</label>
+      </Col>
+      <Col md={8}>
+        <Field
+          name="department"
+          options={list}
+          component={CustomMultiSelect}
+          placeholder="Sélectionnez le(s) département(s)..."
+          disabled={currentUser.role !== ROLES.ADMIN}
+          onChangeAdditionnel={(val) => {
+            handleChange({ target: { name: "region", value: department2region[val[0]] } });
+          }}
+          validate={(v) => !v.length && requiredMessage}
+        />
+      </Col>
+    </Row>
+  );
+};
 
 const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
   const renderInput = () => {

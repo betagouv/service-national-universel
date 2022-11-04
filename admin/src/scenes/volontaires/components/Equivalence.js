@@ -11,6 +11,7 @@ import Download from "../../../assets/icons/Download";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import SimpleFileIcon from "../../../assets/icons/SimpleFileIcon";
 import XCircle from "../../../assets/icons/XCircle";
+import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { copyToClipboard, formatDateFR, translate, translateEquivalenceStatus } from "../../../utils";
 import ModalChangeStatus from "./ModalChangeStatus";
@@ -73,6 +74,7 @@ export default function CardEquivalence({ young, equivalence }) {
       }
       toastr.success("Fichier téléversé");
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue");
       return;
     }
@@ -170,6 +172,7 @@ export default function CardEquivalence({ young, equivalence }) {
               <div className="grid grid-cols-2 py-2">
                 <div className="flex flex-col gap-y-4 text-sm leading-none font-normal text-gray-400">
                   <span>Type d’engagement :</span>
+                  {equivalence.sousType ? <span>Catégorie :</span> : null}
                   <span>Structure d’accueil :</span>
                   <span>Dates :</span>
                   {equivalence.frequency ? <span>Fréquence :</span> : null}
@@ -179,6 +182,7 @@ export default function CardEquivalence({ young, equivalence }) {
                 </div>
                 <div className="flex flex-col gap-y-4 text-sm leading-none font-medium">
                   <span>{equivalence.type}</span>
+                  {equivalence.sousType ? <span>{equivalence.sousType}</span> : null}
                   <span>{equivalence.structureName}</span>
                   <span>
                     Du {formatDateFR(equivalence.startDate)} au {formatDateFR(equivalence.endDate)}

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
-import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
 import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
+import validator from "validator";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -88,7 +89,6 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
       mode: "cors",
       method: "GET",
-      headers: { "Content-Type": "application/json" },
     });
     const res = await response.json();
     const arr = res.features.filter((e) => e.properties.type !== "municipality");
@@ -153,7 +153,10 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) =>
+                (!v && requiredMessage) ||
+                (values[keys.country] === "France" && !validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")
+              }
               className="form-control"
               placeholder="Code postal"
               name={keys.zip}

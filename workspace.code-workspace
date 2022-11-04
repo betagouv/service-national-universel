@@ -16,8 +16,14 @@
       "path": "pdf"
     },
     {
+      "path": "send-in-blue"
+    },
+    {
       "path": "lib"
     },
+    {
+      "path": "analytics"
+    }
   ],
   "settings": {}
 }

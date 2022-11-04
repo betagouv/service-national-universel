@@ -69,7 +69,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const session = await SessionPhase1Model.findById(id);
@@ -93,7 +93,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
 
 router.get("/:id", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const session = await SessionPhase1Model.findById(id);
@@ -134,9 +134,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     sessionPhase1.set(value);
-    await sessionPhase1.save();
+    await sessionPhase1.save({ fromUser: req.user });
 
-    const data = await updatePlacesSessionPhase1(sessionPhase1);
+    const data = await updatePlacesSessionPhase1(sessionPhase1, req.user);
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
@@ -145,8 +145,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: id } = Joi.string().required().validate(req.params.id);
+  const { error, value: id } = validateId(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+  const { errorBody } = Joi.object({
+    options: Joi.object().allow(null, {}),
+  }).validate({ ...req.body }, { stripUnknown: true });
+  if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   const session = await SessionPhase1Model.findById(id);
   if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -224,7 +229,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const sessionPhase1 = await SessionPhase1Model.findById(id);
@@ -284,8 +289,8 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     await young.save({ fromUser: req.user });
 
     // update session infos
-    const data = await updatePlacesSessionPhase1(session);
-    if (oldSession) await updatePlacesSessionPhase1(oldSession);
+    const data = await updatePlacesSessionPhase1(session, req.user);
+    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
     if (bus) await updatePlacesBus(bus);
 
     return res.status(200).send({

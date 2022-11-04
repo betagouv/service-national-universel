@@ -6,6 +6,7 @@ import { Formik, Field } from "formik";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { translate, ROLES } from "../../../utils";
+import { capture } from "../../../sentry";
 
 import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure, step1Public } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
@@ -74,6 +75,7 @@ export default function Create(props) {
               history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
+              capture(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
           }}>
@@ -109,7 +111,7 @@ export default function Create(props) {
                   souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
               ) : null}
-              {values.type?.id && values.type?.id !== "OTHER" && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
+              {values.type?.id && !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}

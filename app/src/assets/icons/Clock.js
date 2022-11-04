@@ -1,13 +1,17 @@
 import * as React from "react";
 
 const Clock = (props) => (
-  <svg width={10} height={10} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M5 9.8A4.8 4.8 0 1 0 5 .2a4.8 4.8 0 0 0 0 9.6Zm.6-7.2a.6.6 0 1 0-1.2 0V5a.6.6 0 0 0 .175.424l1.697 1.698a.6.6 0 0 0 .849-.849L5.599 4.752V2.6Z"
-      fill="currentColor"
-    />
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g opacity="0.8">
+      <rect width="32" height="32" rx="16" fill="#F3F4F6" />
+      <path
+        d="M16 12.6667V16L18.5 18.5M23.5 16C23.5 20.1421 20.1421 23.5 16 23.5C11.8579 23.5 8.5 20.1421 8.5 16C8.5 11.8579 11.8579 8.5 16 8.5C20.1421 8.5 23.5 11.8579 23.5 16Z"
+        stroke="#4B5563"
+        stroke-width="1.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </g>
   </svg>
 );
 

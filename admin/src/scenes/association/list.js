@@ -167,7 +167,7 @@ export default function List() {
                 <DepartmentFilter
                   dataField={"coordonnees_adresse_departement.keyword"}
                   filters={FILTERS}
-                  defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                  defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

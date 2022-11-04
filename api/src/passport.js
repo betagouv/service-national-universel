@@ -8,8 +8,6 @@ const Joi = require("joi");
 const Young = require("./models/young");
 const Referent = require("./models/referent");
 
-const SSO = require("./sso/eduConnect");
-
 function getToken(req) {
   let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req);
   if (!token) token = req.cookies.jwt;
@@ -52,8 +50,6 @@ module.exports = function () {
       return done(null, false);
     }),
   );
-
-  SSO(passport);
 };
 
 module.exports.getToken = getToken;

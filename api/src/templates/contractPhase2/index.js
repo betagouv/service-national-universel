@@ -20,7 +20,7 @@ const addParents = (str, context, field) => {
   let content = "";
   if (context.isYoungAdult === "false") {
     content = `
-      <h2>Représenté par ses représentant légaux</h2>
+      <h2>Représenté par ses représentants légaux</h2>
       <div>
         1) Le représentant légal du volontaire n°1 disposant de l’autorité parentale :
         <div class="field" name="parent1Name" placeholder="Prénom" context="{context}">

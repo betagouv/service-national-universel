@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "missionequivalence";
+const { UNSS_TYPE } = require("snu-lib");
 
 const Schema = new mongoose.Schema({
   youngId: {
@@ -20,9 +21,16 @@ const Schema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["Service Civique", "BAFA", "Jeune Sapeur Pompier"],
+    enum: ["Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"],
     documentation: {
       description: "Type de mission",
+    },
+  },
+  sousType: {
+    type: String,
+    enum: [...UNSS_TYPE],
+    documentation: {
+      description: "Sous-type de mission UNSS",
     },
   },
   structureName: {
@@ -112,6 +120,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
@@ -123,6 +132,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
+  excludes: ["/updatedAt"],
 });
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 

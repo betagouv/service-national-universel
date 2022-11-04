@@ -1,13 +1,14 @@
 import React from "react";
 import Contract from "../../../components/Contract";
-import Wrapper from "./wrapper";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function Phase2Contract({ young, onChange }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <Wrapper young={young} tab="phase2" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase2" onChange={onChange} />
+      <div className="p-[30px]">
         <Contract young={young} admin={true} />
-      </Wrapper>
-    </div>
+      </div>
+    </>
   );
 }

@@ -13,6 +13,7 @@ import Trash from "../../../assets/icons/Trash";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import Template from "../../../assets/icons/Template.js";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import { capture } from "../../../sentry";
 
 export default function Team({ focusedSession: focusedSessionfromProps }) {
   const { id, sessionId } = useParams();
@@ -56,8 +57,8 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
             </div>
           ),
           isOpen: true,
-          onConfirm: () => inviteChefDeCentre(teamate)
-        })
+          onConfirm: () => inviteChefDeCentre(teamate),
+        });
         return {};
       }
 
@@ -78,7 +79,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     } catch (e) {
       toastr.error("Erreur !", translate(e));
     }
-  }
+  };
 
   const setTeamate = async (teamate) => {
     const obj = { team: focusedSession.team };
@@ -117,14 +118,18 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
       <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
         <Template className="" />
         <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>Centres</Link>
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>
+          Centres
+        </Link>
         <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>Fiche du centre</Link>
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
+          Fiche du centre
+        </Link>
         <ChevronRight className="" />
         <div className="text-xs">Équipe</div>
       </div>
       <div className="p-4">
-        <Box >
+        <Box>
           <Wrapper gridTemplateColumns="repeat(2,1fr)" style={{ background: "linear-gradient(#E5E4E8,#E5E4E8) center/1px 100% no-repeat" }}>
             <div>
               <ChefCenterBlock headCenterId={focusedSession?.headCenterId} />
@@ -144,7 +149,6 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-
     </>
   );
 }
@@ -158,7 +162,10 @@ const ChefCenterBlock = ({ headCenterId }) => {
   useEffect(() => {
     (async () => {
       const { ok, data, code } = await api.get(`/referent/${headCenterId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       setChefCenter(data);
     })();
   }, [headCenterId]);
@@ -263,8 +270,11 @@ const AddBlock = ({ addTeamate }) => {
               disabled={isSubmitting}
               placeholder="Adresse e-mail"
               validate={(v) => (!v && "Ce champ est obligatoire") || (!validator.isEmail(v) && "Format email incorrect")}
-              name="email" value={values.email} onChange={handleChange} />
-              <p className="text-red-500 text-center mt-2 text-xs">{errors.email}</p>
+              name="email"
+              value={values.email}
+              onChange={handleChange}
+            />
+            <p className="text-red-500 text-center mt-2 text-xs">{errors.email}</p>
             <Field
               disabled={isSubmitting}
               as="select"

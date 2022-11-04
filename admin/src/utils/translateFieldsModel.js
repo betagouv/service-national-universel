@@ -329,7 +329,7 @@ const translateFieldYoung = (f) => {
     case "militaryPreparationFilesCensus":
       return "Attestation de recensement";
     case "militaryPreparationFilesIdentity":
-      return "Pièce d’identité en cours de validité (CNI, passeport)";
+      return "Pièce d’identité en cours de validité (CNI recto/verso, passeport) ";
     case "rulesFiles":
       return "Fichiers règlement intérieur";
     case "dataProcessingConsentmentFiles":

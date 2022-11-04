@@ -6,10 +6,12 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung } = require("./utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
+const { getDepartmentByZip, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
+const { isGoalReached } = require("./utils/cohort");
+
 class Auth {
   constructor(model) {
     this.model = model;
@@ -30,11 +32,6 @@ class Auth {
         rulesYoung: Joi.string().trim().required().valid("true"),
         acceptCGU: Joi.string().trim().required().valid("true"),
         frenchNationality: Joi.string().trim().required().valid("true"),
-        INEHash: Joi.string().trim().length(32).allow(""),
-        codeUAI: Joi.string().trim().allow(""),
-        niveau: Joi.string().trim().allow(""),
-        urlLogOut: Joi.string().trim().allow(""),
-        affiliation: Joi.string().trim().allow(""),
       }).validate(req.body);
 
       if (error) {
@@ -43,33 +40,11 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const {
-        email,
-        firstName,
-        lastName,
-        password,
-        birthdateAt,
-        birthCountry,
-        birthCity,
-        birthCityZip,
-        frenchNationality,
-        acceptCGU,
-        rulesYoung,
-        INEHash,
-        codeUAI,
-        niveau,
-        urlLogOut,
-        affiliation,
-      } = value;
+      const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
-      if (INEHash) {
-        countDocuments = await this.model.countDocuments({ INEHash });
-        if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.EDUCONNECT_USER_ALREADY_REGISTERED });
-      }
 
       const user = await this.model.create({
         email,
@@ -83,11 +58,6 @@ class Auth {
         frenchNationality,
         acceptCGU,
         rulesYoung,
-        INEHash,
-        codeUAI,
-        niveau,
-        urlLogOut,
-        affiliation,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
@@ -104,21 +74,137 @@ class Auth {
     }
   }
 
+  async signUp2023(req, res) {
+    try {
+      const { error, value } = Joi.object({
+        email: Joi.string().lowercase().trim().email().required(),
+        firstName: validateFirstName().trim().required(),
+        lastName: Joi.string().uppercase().trim().required(),
+        password: Joi.string().required(),
+        birthdateAt: Joi.date().required(),
+        frenchNationality: Joi.string().trim().required(),
+        schooled: Joi.string().trim().required(),
+        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        schoolName: Joi.string().trim(),
+        schoolType: Joi.string().trim(),
+        schoolAddress: Joi.string().trim(),
+        schoolZip: Joi.string().trim().allow(null, ""),
+        schoolCity: Joi.string().trim(),
+        schoolDepartment: Joi.string().trim(),
+        schoolRegion: Joi.string().trim(),
+        schoolCountry: Joi.string().trim(),
+        schoolId: Joi.string().trim(),
+        zip: Joi.string().trim(),
+        cohort: Joi.string().trim().required(),
+      }).validate(req.body);
+
+      if (error) {
+        if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+        if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const {
+        email,
+        firstName,
+        lastName,
+        password,
+        birthdateAt,
+        frenchNationality,
+        schooled,
+        schoolName,
+        schoolType,
+        schoolAddress,
+        schoolZip,
+        schoolCity,
+        schoolDepartment,
+        schoolRegion,
+        schoolCountry,
+        schoolId,
+        zip,
+        cohort,
+        grade,
+      } = value;
+      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+
+      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
+      console.log("count = ", countDocuments, typeof countDocuments, countDocuments > 0);
+      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+      const dep = schoolDepartment || getDepartmentByZip(zip);
+      if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+      const user = await this.model.create({
+        email,
+        firstName,
+        lastName,
+        password,
+        birthdateAt,
+        frenchNationality,
+        schooled,
+        schoolName,
+        schoolType,
+        schoolAddress,
+        schoolZip,
+        schoolCity,
+        schoolDepartment,
+        schoolRegion,
+        schoolCountry,
+        schoolId,
+        zip,
+        cohort,
+        grade,
+        inscriptionStep2023: STEPS2023.COORDONNEES,
+      });
+      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt", token, cookieOptions());
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+        params: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+        },
+      });
+
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: serializeYoung(user, user),
+      });
+    } catch (error) {
+      console.log("Error ", error);
+      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
   async signin(req, res) {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
 
     const { password, email } = value;
     try {
+      const now = new Date();
       const user = await this.model.findOne({ email });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      if (user.loginAttempts > 15) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
-        user.set({ loginAttempts });
+
+        let date = now;
+        if (loginAttempts > 5) {
+          date = new Date(now.getTime() + 60 * 1000);
+        }
+
+        user.set({ loginAttempts, nextLoginAttemptIn: date });
         await user.save();
+        if (date > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 

@@ -1,8 +1,17 @@
+require("dotenv").config({ path: "./.env" });
+
 const express = require("express");
 const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
+const { initSentry, capture } = require("./sentry");
+
+const fs = require("fs");
+
+const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
+
 const app = express();
-const port = process.env.PORT || 8087;
+
+const registerSentryErrorHandler = initSentry(app);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -45,28 +54,31 @@ app.get("/", (req, res) => {
 
 app.post("/render", async (req, res) => {
   try {
-    // ! For testing purpose. To delete !
-    // throw new Error("Test error");
-    // await new Promise((resolve) => setTimeout(resolve, 4000));
     const buffer = await renderFromHtml(
       req.body.html.replace(
         /http(.*?)\/css\/style\.css/,
         "https://app-a2524146-ef53-4802-9027-80e4e0e79565.cleverapps.io/style.css"
-        // 'http://localhost:8087/style.css'
       ),
       req.body.options || {}
     );
-    console.log(req.body.html);
-    console.log(buffer);
+    // console.log(`${req.body.html} generated`);
+    if (GENERATE_LOCALLY)
+      fs.writeFileSync(
+        `generated/${new Date().toISOString()}_test.pdf`,
+        buffer
+      );
     res.contentType("application/pdf");
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
     res.send(buffer);
   } catch (error) {
     console.log(error);
+    capture(error);
     res.status(500).send({ ok: false, error });
   }
 });
+
+registerSentryErrorHandler();
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

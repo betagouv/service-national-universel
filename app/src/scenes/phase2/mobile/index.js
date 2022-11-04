@@ -40,7 +40,7 @@ export default function IndexPhase2Mobile() {
   }, []);
 
   React.useEffect(() => {
-    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles)) {
+    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VERIFICATION"].includes(young.statusMilitaryPreparationFiles)) {
       setHasPM(true);
     } else {
       setHasPM(false);
@@ -131,7 +131,7 @@ export default function IndexPhase2Mobile() {
               <div className="font-bold">Contacter mon référent</div>
               <MdOutlineContentCopy className="text-gray-400 cursor-pointer" />
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-[13px] text-gray-600">
               {referentManagerPhase2.firstName} {referentManagerPhase2.lastName} - {referentManagerPhase2.email}
             </div>
           </div>

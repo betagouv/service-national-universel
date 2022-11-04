@@ -120,7 +120,7 @@ export default function Presence() {
                       />
                       <DepartmentFilter
                         filters={FILTERS}
-                        defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                        defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
                         onValueChange={(e) => setFilter((prev) => ({ ...prev, department: e }))}
                       />
                       <MultiDropdownList

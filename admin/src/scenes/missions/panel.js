@@ -9,6 +9,8 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Badge from "../../components/Badge";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { ROLES } from "snu-lib/roles";
+import { useSelector } from "react-redux";
 
 export default function PanelView({ onChange, mission }) {
   const [tutor, setTutor] = useState();
@@ -19,6 +21,7 @@ export default function PanelView({ onChange, mission }) {
   const domains = mission?.domains?.filter((d) => {
     return d !== mission.mainDomain;
   });
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -65,7 +68,7 @@ export default function PanelView({ onChange, mission }) {
     mission.name += " (copie)";
     delete mission._id;
     mission.placesLeft = mission.placesTotal;
-    mission.status = MISSION_STATUS.WAITING_VALIDATION;
+    mission.status = MISSION_STATUS.DRAFT;
     const { data, ok, code } = await api.post("/mission", mission);
     if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
     toastr.success("Mission dupliquée !");
@@ -96,13 +99,16 @@ export default function PanelView({ onChange, mission }) {
           <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
-      <Info title="Volontaires">
-        <Details title="Candidature(s)" value={applications?.length} />
-        <Details title="Validée(s)" value={mission.placesTotal - mission.placesLeft} />
-        <Details title="Disponible(s)" value={mission.placesLeft} />
-        <Details title="Total" value={mission.placesTotal} />
+      <Info title="Candidatures">
+        <Details title="Volontaire(s) ayant candidaté" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length || "0"} />
+        {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && (
+          <Details title="Volontaire(s) ayant reçu une proposition de mission" value={applications?.filter((e) => e.status == "WAITING_ACCEPTATION").length || "0"} />
+        )}
+        <Details title="Place(s) proposée(s)" value={mission.placesTotal || "0"} />
+        <Details title="Place(s) occupés(s)" value={mission.placesTotal - mission.placesLeft || "0"} />
+        <Details title="Place(s) disponible(s)" value={mission.placesLeft || "0"} />
         <Link to={`/mission/${mission._id}/youngs`}>
-          <PanelActionButton icon="eye" title="Consulter tous les volontaires" />
+          <PanelActionButton icon="eye" title="Consulter toutes les candidatures" />
         </Link>
       </Info>
       <Info title="La structure">

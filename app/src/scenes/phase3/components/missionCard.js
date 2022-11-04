@@ -30,7 +30,7 @@ export default function MissionCard({ mission, image }) {
       </Col>
       <Col md={6} xl={4}>
         <Button onClick={handleClick} target="_blank" href={urlWithScheme(mission.applicationUrl)} rel="noreferrer">
-          Voir sur<b> {mission.publisherName}</b>
+          Voir&nbsp;sur&nbsp;<b>{mission.publisherName}</b>
           <img src={require("../../../assets/external-link.svg")} height={15} width={15} color="white" />
         </Button>
       </Col>

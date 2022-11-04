@@ -4,12 +4,13 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, colors, htmlCleaner } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, htmlCleaner } from "../../../utils";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
+import { VscWarning } from "react-icons/vsc";
 
 const rowStyle = { marginRight: 0, marginLeft: 0 };
 
@@ -26,6 +27,34 @@ export default function DetailsView({ mission, structure, tutor }) {
           <Row style={rowStyle}>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7", padding: 0 }}>
               <Bloc title="La mission">
+                {/* Message sur le statut des candidatures de la mission. */}
+                {mission.placesLeft < 1 ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <VscWarning className="w-6 h-6 text-red-500" />
+                    <div>
+                      La mission est <strong>fermée</strong> aux candidatures de manière automatique : aucune place disponible.
+                    </div>
+                  </div>
+                ) : mission.pendingApplications >= mission.placesLeft * 5 ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <VscWarning className="w-6 h-6 text-red-500" />
+                    <div>
+                      La mission est <strong>fermée</strong> aux candidatures. Vous avez atteint le seuil des{" "}
+                      <Link to={`${mission._id}/youngs`} className="underline text-blue-800">
+                        candidatures à traiter
+                      </Link>
+                      .
+                    </div>
+                  </div>
+                ) : mission.visibility === "HIDDEN" ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <VscWarning className="w-6 h-6 text-red-500" />
+                    <div>
+                      La mission est <strong>fermée</strong> aux candidatures par l&apos;action d&apos;un administrateur.
+                    </div>
+                  </div>
+                ) : null}
+
                 <Details title="Format" value={translate(mission.format)} />
                 {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
                 {mission.domains ? <Details title="Domaine(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}

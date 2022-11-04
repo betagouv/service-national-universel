@@ -45,12 +45,12 @@ export default function CardRepresentant({ representant, getService, department,
               <>
                 <div className="flex flex-1 flex-row justify-center items-center border-r-[1px] border-gray-200 my-2 px-2">
                   <HiPhone className="text-gray-400" />
-                  <div className="pl-2 text-gray-700 text-sm whitespace-nowrap text-xs">{formatPhoneNumberFR(representant.mobile)}</div>
+                  <div className="pl-2 text-gray-700 whitespace-nowrap text-xs">{formatPhoneNumberFR(representant.mobile)}</div>
                 </div>
               </>
             ) : null}
             <div className={`flex flex-2 my-2 px-2 truncate ${!representant.mobile ? "items-center justify-center w-full" : ""}`}>
-              <div className="pr-2 flex-row text-gray-700 text-sm truncate text-xs">{representant.email}</div>
+              <div className="pr-2 flex-row text-gray-700 truncate text-xs">{representant.email}</div>
               <div
                 className="flex items-center justify-center cursor-pointer hover:scale-105"
                 onClick={() => {

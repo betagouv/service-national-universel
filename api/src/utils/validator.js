@@ -18,6 +18,10 @@ function validateString(string) {
   return Joi.string().validate(string, { stripUnknown: true });
 }
 
+function validateArray(array) {
+  return Joi.array().items(Joi.string().allow(null, "")).validate(array, { stripUnknown: true });
+}
+
 function validateMission(mission) {
   return Joi.object()
     .keys({
@@ -51,10 +55,12 @@ function validateMission(mission) {
       department: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       country: Joi.string().allow(null, ""),
-      location: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
+      location: Joi.object()
+        .keys({
+          lat: Joi.number().allow(null),
+          lon: Joi.number().allow(null),
+        })
+        .allow(null, ""),
       addressVerified: Joi.string().allow(null, ""),
       remote: Joi.string().allow(null, ""),
       isMilitaryPreparation: Joi.string().allow(null, ""),
@@ -377,6 +383,7 @@ function validateYoung(young, user) {
     city: Joi.string().allow(null, ""),
     cityCode: Joi.string().allow(null, ""),
     populationDensity: Joi.string().allow(null, ""),
+    isRegionRural: Joi.string().allow(null, ""),
     department: Joi.string().allow(null, ""),
     region: Joi.string().allow(null, ""),
     country: Joi.string().allow(null, ""),
@@ -542,6 +549,7 @@ function validateYoung(young, user) {
     militaryPreparationFilesAuthorization: Joi.array().items(Joi.string().allow(null, "")),
     militaryPreparationFilesCertificate: Joi.array().items(Joi.string().allow(null, "")),
     statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
+    militaryPreparationCorrectionMessage: Joi.string().allow(null, ""),
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
   };
 
@@ -592,7 +600,7 @@ function validateReferent(referent) {
         .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
@@ -626,7 +634,7 @@ function validateSelf(referent) {
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST]),
@@ -670,9 +678,35 @@ function validatePhase1Document(phase1document, key) {
   }
 }
 
+function validatePhase2Preference(preferences) {
+  return Joi.object()
+    .keys({
+      professionnalProject: Joi.string().allow(null, ""),
+      professionnalProjectPrecision: Joi.string().allow(null, ""),
+      engaged: Joi.string().allow(null, ""),
+      desiredLocation: Joi.string().allow(null, ""),
+      engagedDescription: Joi.string().allow(null, ""),
+      domains: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      missionFormat: Joi.string().allow(null, ""),
+      mobilityTransport: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      period: Joi.string().allow(null, ""),
+      mobilityTransportOther: Joi.string().allow(null, ""),
+      mobilityNearHome: Joi.string().allow(null, ""),
+      mobilityNearSchool: Joi.string().allow(null, ""),
+      mobilityNearRelative: Joi.string().allow(null, ""),
+      mobilityNearRelativeName: Joi.string().allow(null, ""),
+      mobilityNearRelativeAddress: Joi.string().allow(null, ""),
+      mobilityNearRelativeZip: Joi.string().allow(null, ""),
+      mobilityNearRelativeCity: Joi.string().allow(null, ""),
+      periodRanking: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+    })
+    .validate(preferences, { stripUnknown: true });
+}
+
 module.exports = {
   validateId,
   validateString,
+  validateArray,
   validateMission,
   validateStructure,
   validateProgram,
@@ -691,4 +725,5 @@ module.exports = {
   validateEvent,
   validateSessionPhase1,
   validatePhase1Document,
+  validatePhase2Preference,
 };

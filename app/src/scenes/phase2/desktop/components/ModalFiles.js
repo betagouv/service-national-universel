@@ -46,7 +46,7 @@ export default function ModalFiles({ isOpen, onCancel, initialValues, young, nam
           <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
           <div className="px-2 pt-2 pb-4 text-center w-full flex flex-col items-center">
             <div className="mb-4">
-              <h3 className="mb-3">Télécharger vos documents d&quot;équivalence</h3>
+              <h3 className="mb-3">Télécharger vos documents d&apos;équivalence</h3>
             </div>
 
             <div className="text-lg mb-4">Telecharger le(s) document(s) : </div>

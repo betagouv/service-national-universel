@@ -14,8 +14,9 @@ import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
 import ModalFilesPM from "../components/ModalFilesPM";
+import { capture } from "../../../sentry";
 
 export default function Phase2militaryPrepartionV2({ young }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
@@ -28,6 +29,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
   const history = useHistory();
 
   const theme = {
+    WAITING_VERIFICATION: "text-sky-400 h-4 w-4",
     WAITING_CORRECTION: "text-[#4484FF] h-4 w-4",
     VALIDATED: "text-[#27AF66] h-4 w-4",
     REFUSED: "text-[#EF6737] h-4 w-4",
@@ -35,13 +37,13 @@ export default function Phase2militaryPrepartionV2({ young }) {
 
   const themeBadge = {
     background: {
-      WAITING_VALIDATION: "bg-sky-100",
+      WAITING_VERIFICATION: "bg-sky-100",
       WAITING_CORRECTION: "bg-[#FD7A02]",
       VALIDATED: "bg-[#71C784]",
       REFUSED: "bg-red-500",
     },
     text: {
-      WAITING_VALIDATION: "text-sky-600",
+      WAITING_VERIFICATION: "text-sky-600",
       WAITING_CORRECTION: "text-white",
       VALIDATED: "text-white",
       REFUSED: "text-white",
@@ -55,13 +57,16 @@ export default function Phase2militaryPrepartionV2({ young }) {
   const getApplications = async () => {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
     return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));
   };
 
   if (!applicationsToMilitaryPreparation) return <Loader />;
 
-  if (!["WAITING_VALIDATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+  if (!["WAITING_VERIFICATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
     // display nothing if the young has not validated the files at least one time
     return null;
   }
@@ -74,6 +79,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
       // validate the files
       const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "VALIDATED" });
       if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
+      await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
 
       // change status of applications
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
@@ -85,16 +91,10 @@ export default function Phase2militaryPrepartionV2({ young }) {
               translate(responseApplication.code),
               `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
             );
-        }
-      }
-      setModal({ isOpen: false, template: null, data: null });
-      await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
-      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-        const app = applicationsToMilitaryPreparation[i];
-        if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
           await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
         }
       }
+      setModal({ isOpen: false, template: null, data: null });
     } catch (e) {
       console.error(e);
       toastr.error("Une erreur est survenue", translate(e.code));
@@ -108,7 +108,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
   };
   const onCorrection = async (message) => {
     // update the young
-    const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "WAITING_CORRECTION" });
+    const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "WAITING_CORRECTION", militaryPreparationCorrectionMessage: message });
     if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
 
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}`, { message });
@@ -146,20 +146,6 @@ export default function Phase2militaryPrepartionV2({ young }) {
     history.go(0);
   };
 
-  const onChangeFiles = async ({ data, name }) => {
-    try {
-      const { ok } = await api.put(`/referent/young/${young._id.toString()}/removeMilitaryFile/${name}`, { files: data });
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue");
-        return;
-      }
-      toastr.success("Fichiers mises à jour");
-    } catch (error) {
-      toastr.error("Oups, une erreur est survenue");
-      return;
-    }
-  };
-
   return (
     <>
       <ModalConfirm
@@ -188,15 +174,14 @@ export default function Phase2militaryPrepartionV2({ young }) {
         onChange={() => setModal({ isOpen: false, template: null, data: null })}
         onConfirm={onRefuse}
       />
-      <ModalFilesPM
-        isOpen={modalFiles?.isOpen}
-        onCancel={() => setModalFiles({ isOpen: false })}
-        initialValues={modalFiles?.initialValues ? modalFiles.initialValues : []}
-        young={young}
-        nameFiles={modalFiles?.nameFiles}
-        title={modalFiles?.title}
-        onChange={onChangeFiles}
-      />
+      {modalFiles.nameFiles ? (
+        <ModalFilesPM
+          isOpen={modalFiles?.isOpen}
+          onCancel={() => setModalFiles({ isOpen: false })}
+          title={modalFiles?.title}
+          path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
+        />
+      ) : null}
       <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
@@ -212,13 +197,14 @@ export default function Phase2militaryPrepartionV2({ young }) {
                   className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${
                     themeBadge.text[young.statusMilitaryPreparationFiles]
                   } px-2 py-[2px] rounded-sm `}>
-                  {translate(young.statusMilitaryPreparationFiles)}
+                  {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                 </div>
                 <BsChevronDown className="text-gray-400 h-5 w-5 cursor-pointer" onClick={() => setCardOpen(true)} />
               </div>
             ) : (
               <>
-                {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
+                {/* todo: remove WAITING_VALIDATION after sync */}
+                {young.statusMilitaryPreparationFiles === "WAITING_VERIFICATION" ? (
                   <div className="flex items-center gap-5 ">
                     <button
                       className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"
@@ -249,7 +235,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
                           onClick={() => setOpen((e) => !e)}>
                           <div className="flex items-center gap-2">
                             <GoPrimitiveDot className={theme[young.statusMilitaryPreparationFiles]} />
-                            <span className="text-sm leading-5 font-normal">{translate(young.statusMilitaryPreparationFiles)}</span>
+                            <span className="text-sm leading-5 font-normal">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
                           </div>
                           <ChevronDown className="ml-2 text-gray-400 cursor-pointer" />
                         </button>
@@ -297,53 +283,52 @@ export default function Phase2militaryPrepartionV2({ young }) {
               <FileCard
                 name="Pièce d’identité"
                 icon="reglement"
-                filled={young.militaryPreparationFilesIdentity.length}
+                filled={young.files.militaryPreparationFilesIdentity.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Pièce d'identité",
                     nameFiles: "militaryPreparationFilesIdentity",
-                    initialValues: young.militaryPreparationFilesIdentity,
                   })
                 }
               />
               <FileCard
                 name="Autorisation parentale"
                 icon="image"
-                filled={young.militaryPreparationFilesAuthorization.length}
+                filled={young.files.militaryPreparationFilesAuthorization.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Autorisation parentale",
                     nameFiles: "militaryPreparationFilesAuthorization",
-                    initialValues: young.militaryPreparationFilesAuthorization,
+                    initialValues: young.files.militaryPreparationFilesAuthorization,
                   })
                 }
               />
               <FileCard
                 name="Certifical médical de non contre-indication..."
                 icon="autotest"
-                filled={young.militaryPreparationFilesCertificate.length}
+                filled={young.files.militaryPreparationFilesCertificate.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Certifical médical de non contre-indication...",
                     nameFiles: "militaryPreparationFilesCertificate",
-                    initialValues: young.militaryPreparationFilesCertificate,
+                    initialValues: young.files.militaryPreparationFilesCertificate,
                   })
                 }
               />
               <FileCard
                 name="Attestation de recensement"
                 icon="sanitaire"
-                filled={young.militaryPreparationFilesCensus.length}
+                filled={young.files.militaryPreparationFilesCensus.length}
                 description="Facultatif"
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Attestation de recensement",
                     nameFiles: "militaryPreparationFilesCensus",
-                    initialValues: young.militaryPreparationFilesCensus,
+                    initialValues: young.files.militaryPreparationFilesCensus,
                   })
                 }
               />

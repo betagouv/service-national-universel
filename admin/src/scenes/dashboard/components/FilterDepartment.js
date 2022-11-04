@@ -15,8 +15,12 @@ export default function FilterDepartment({ value = [], onChange, filter }) {
     return filter.region?.reduce((previous, current) => previous?.concat(region2department[current]?.map((d) => ({ label: d, value: d }))), []);
   };
 
+  const getDepartmentOptions = () => {
+    return user?.department?.map((d) => ({ label: d, value: d }));
+  };
+
   if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-    return <MultiSelect disabled label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
+    return <MultiSelect label="Département(s)" options={getDepartmentOptions()} onChange={onChange} value={value} />;
   }
   return <MultiSelect label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
 }

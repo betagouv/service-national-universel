@@ -140,7 +140,7 @@ describe("Program", () => {
     await deleteAllProgram();
     let programFixtureRegionDepartment = getNewProgramFixture();
     programFixtureRegionDepartment.region = passport.user.region;
-    programFixtureRegionDepartment.department = passport.user.department;
+    programFixtureRegionDepartment.department = passport.user.department[0];
     const programRegionDepartment = await createProgramHelper(programFixtureRegionDepartment);
     let programFixtureNoRegionAndDepartment = getNewProgramFixture();
     programFixtureNoRegionAndDepartment.region = "";

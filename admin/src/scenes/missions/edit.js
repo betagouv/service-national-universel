@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -29,6 +29,7 @@ import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { HiOutlineLockClosed } from "react-icons/hi";
+import { capture } from "../../sentry";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Missions");
@@ -58,6 +59,7 @@ export default function Edit(props) {
     setDefaultValue(data);
     setIsJvaMission(data.isJvaMission === "true");
   }
+
   async function initReferents() {
     if (!structure) return;
     const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT };
@@ -114,7 +116,7 @@ export default function Edit(props) {
         submitButton: false,
         changeStructureButton: false,
       });
-      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
+      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.message);
     }
   }
 
@@ -161,40 +163,47 @@ export default function Edit(props) {
         }
       }
       onSubmit={async (values) => {
-        values.status === "DRAFT"
-          ? setLoadings({
+        try {
+          if (values.status === "DRAFT") {
+            setLoadings({
               saveButton: true,
               submitButton: false,
               changeStructureButton: false,
-            })
-          : setLoadings({
+            });
+            values.placesLeft = values.placesTotal;
+          } else {
+            setLoadings({
               saveButton: false,
               submitButton: true,
               changeStructureButton: false,
             });
-        //if new mission, init placesLeft to placesTotal
-        if (isNew) values.placesLeft = values.placesTotal;
-        //if edit mission, add modified delta to placesLeft
-        else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
-        try {
-          //if mission doesn't have location, put one from city and zip code
-          //or put Paris location
-          if (!values.location || !values.location.lat || !values.location.lon) {
-            values.location = await putLocation(values.city, values.zip);
+            if (!defaultValue?.placesTotal) values.placesLeft = values.placesTotal;
+            else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
+
+            if (values.placesLeft < 0) {
+              return toastr.error("Le nombre de places ne peut pas être inférieur au nombre de places déjà attribuées");
+            }
+
+            if (!values.location || !values.location.lat || !values.location.lon) {
+              values.location = await putLocation(values.city, values.zip);
+              if (!values.location) return toastr.error("Il y a un soucis avec le nom de la ville ou/et le zip code");
+              toastr.warning("Une localisation a été ajoutée automatiquement à partir de la ville et du code postal");
+            }
+
+            if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
           }
-
           values.duration = values.duration?.toString();
-          if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
+          if (!ok) throw new Error(translate(code));
 
           setLoadings({
             saveButton: false,
             submitButton: false,
             changeStructureButton: false,
           });
-          if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
+
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
@@ -203,10 +212,11 @@ export default function Edit(props) {
             submitButton: false,
             changeStructureButton: false,
           });
-          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
+          capture(e);
+          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField, validateForm }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
@@ -237,8 +247,13 @@ export default function Edit(props) {
               <LoadingButton
                 loading={loadings.submitButton}
                 disabled={loadings.saveButton || loadings.changeStructureButton}
-                onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                onClick={async () => {
+                  await handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  const erroredFields = await validateForm();
+                  if (Object.keys(erroredFields).length) {
+                    await handleChange({ target: { value: "DRAFT", name: "status" } });
+                    return toastr.error("Il y a des erreurs dans le formulaire");
+                  }
                   handleSubmit();
                 }}>
                 Enregistrer et proposer la mission
@@ -264,29 +279,72 @@ export default function Edit(props) {
                     <BoxTitle>Détails de la mission</BoxTitle>
                     {values.status === "VALIDATED" ? (
                       <FormGroup>
-                        <label className="uppercase">
-                          <span>*</span>visibilité pour les candidats
-                        </label>
-                        <div className="flex items-center">
-                          <div
-                            onClick={() => {
-                              handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
-                            }}
-                            name="visibility"
-                            className={`flex items-center w-9 h-4 rounded-full ${
-                              values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
-                            } cursor-pointer transition duration-100 ease-in`}>
-                            <div
-                              className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
-                                values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
-                              } transition duration-100 ease-in shadow-nina`}>
-                              {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                        <label className="uppercase">Visibilité pour les candidats</label>
+
+                        {values.placesLeft < 1 ? (
+                          // Si les places sont toutes attribuées, on l'indique.
+                          <div className="flex items-center">
+                            <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
+                              <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
+                                <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />
+                              </div>
+                            </div>
+                            <div className="ml-2">
+                              La mission est <strong>fermée</strong> aux candidatures. Toutes les places sont attribuées.
                             </div>
                           </div>
-                          <div className="ml-2 ">
-                            La mission est <label className="font-bold">{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux candidatures
+                        ) : values.pendingApplications >= values.placesLeft * 5 ? (
+                          // Si il y a trop de candidatures en attente, on l'indique.
+                          <div className="flex items-center">
+                            <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
+                              <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
+                                {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                              </div>
+                            </div>
+                            <div className="ml-2">
+                              La mission est <strong>fermée</strong> aux candidatures. Vous avez atteint le seuil des{" "}
+                              <Link to="youngs" className="underline text-blue-800">
+                                candidatures à traiter
+                              </Link>
+                              .
+                            </div>
                           </div>
-                        </div>
+                        ) : values.visibility == "VISIBLE" ? (
+                          // Toggle de visibilité
+                          <div className="flex items-center">
+                            <div
+                              onClick={() => {
+                                handleChange({ target: { value: "HIDDEN", name: "visibility" } });
+                              }}
+                              name="visibility"
+                              className="flex items-center w-9 h-4 rounded-full bg-blue-600 cursor-pointer transition duration-100 ease-in">
+                              <div className="flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+                            </div>
+                            <div className="flex ml-2 items-center">
+                              <div>
+                                La mission est <strong>ouverte</strong> aux candidatures.
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <div
+                              onClick={() => {
+                                handleChange({ target: { value: "VISIBLE", name: "visibility" } });
+                              }}
+                              name="visibility"
+                              className="flex items-center w-9 h-4 rounded-full bg-red-500 cursor-pointer transition duration-100 ease-in">
+                              <div className="flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] translate-x-0 transition duration-100 ease-in shadow-nina">
+                                <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />
+                              </div>
+                            </div>
+                            <div className="flex ml-2 items-center">
+                              <div>
+                                La mission est <strong>fermée</strong> aux candidatures.
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </FormGroup>
                     ) : null}
                     <FormGroup>
@@ -302,9 +360,7 @@ export default function Edit(props) {
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>
-                        <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
-                      </label>
+                      <label>DOMAINE D&apos;ACTION PRINCIPAL</label>
                       {!values.mainDomain && values.domains.length > 1 ? (
                         <ul style={{ color: "#a0aec1", fontSize: 12, marginBottom: "1rem" }}>
                           <li>Précédemment, vous aviez sélectionné plusieurs domaines :</li>
@@ -314,7 +370,13 @@ export default function Edit(props) {
                           <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un ou plusieurs domaine(s) secondaire(s) (facultatif)</li>
                         </ul>
                       ) : null}
-                      <Field disabled={isJvaMission} component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
+                      <Field
+                        disabled={isJvaMission}
+                        component="select"
+                        value={values.mainDomain}
+                        onChange={handleChange}
+                        name="mainDomain"
+                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}>
                         <option value="" label="Sélectionnez un domaine principal">
                           Sélectionnez un domaine principal
                         </option>
@@ -339,10 +401,13 @@ export default function Edit(props) {
                       />
                     </FormGroup>
                     <FormGroup>
-                      <label>
-                        <span>*</span>TYPE DE MISSION
-                      </label>
-                      <Field validate={(v) => !v && requiredMessage} component="select" name="format" value={values.format} onChange={handleChange}>
+                      <label>TYPE DE MISSION</label>
+                      <Field
+                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}
+                        component="select"
+                        name="format"
+                        value={values.format}
+                        onChange={handleChange}>
                         <option key="CONTINUOUS" value="CONTINUOUS">
                           {translate("CONTINUOUS")}
                         </option>
@@ -353,15 +418,13 @@ export default function Edit(props) {
                       <ErrorMessage errors={errors} touched={touched} name="format" />
                     </FormGroup>
                     <FormGroup>
-                      <label>
-                        <span>*</span>OBJECTIFS DE LA MISSION
-                      </label>
+                      <label>OBJECTIFS DE LA MISSION</label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
                         En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau étudiée par
                         votre référent départemental.
                       </p>
                       <Field
-                        validate={(v) => !v && requiredMessage}
+                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}
                         name="description"
                         component="textarea"
                         rows={4}
@@ -372,15 +435,13 @@ export default function Edit(props) {
                       <ErrorMessage errors={errors} touched={touched} name="description" />
                     </FormGroup>
                     <FormGroup>
-                      <label>
-                        <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
-                      </label>
+                      <label>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)</label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
                         En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau étudiée par
                         votre référent départemental.
                       </p>
                       <Field
-                        validate={(v) => !v && requiredMessage}
+                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}
                         name="actions"
                         component="textarea"
                         rows={4}
@@ -471,7 +532,26 @@ export default function Edit(props) {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input type="number" name="duration" id="duration" onChange={handleChange} value={values.duration} />
+                            <input
+                              type="text"
+                              name="duration"
+                              id="duration"
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
+                                if (re.test(value) || !value) {
+                                  handleChange({ target: { value: value, name: "duration" } });
+                                }
+                              }}
+                              value={values.duration}
+                            />
+                            <Field
+                              hidden
+                              value={values.duration}
+                              name="duration"
+                              validate={(v) => (parseInt(v) < 1 || parseInt(v) > 99) && "Le nombre saisi doit être compris entre 1 et 100"}
+                            />
+                            <ErrorMessage errors={errors} touched={touched} name="duration" />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>
@@ -534,9 +614,7 @@ export default function Edit(props) {
                   <Wrapper>
                     <BoxTitle>Tuteur de la mission</BoxTitle>
                     <FormGroup>
-                      <label>
-                        <span>*</span>TUTEUR
-                      </label>
+                      <label>TUTEUR</label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
                         Sélectionner le tuteur qui va s&apos;occuper de la mission. <br />
                         {/* todo invite tuteur */}
@@ -556,7 +634,13 @@ export default function Edit(props) {
                           </span>
                         )}
                       </p>
-                      <Field validate={(v) => !v && requiredMessage} disabled={isJvaMission} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
+                      <Field
+                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}
+                        disabled={isJvaMission}
+                        component="select"
+                        name="tutorId"
+                        value={values.tutorId}
+                        onChange={handleChange}>
                         <option value="">Sélectionner un tuteur</option>
                         {referents &&
                           referents.map((referent) => {
@@ -580,7 +664,7 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                       validateField={validateField}
-                      required={true}
+                      required={values.status === "WAITING_VALIDATION"}
                       disabled={isJvaMission}
                     />
                   </Wrapper>
@@ -662,8 +746,13 @@ export default function Edit(props) {
                 <LoadingButton
                   loading={loadings.submitButton}
                   disabled={loadings.saveButton || loadings.changeStructureButton}
-                  onClick={() => {
-                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  onClick={async () => {
+                    await handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                    const erroredFields = await validateForm();
+                    if (Object.keys(erroredFields).length) {
+                      await handleChange({ target: { value: "DRAFT", name: "status" } });
+                      return toastr.error("Il y a des erreurs dans le formulaire");
+                    }
                     handleSubmit();
                   }}>
                   Enregistrer et proposer la mission

@@ -10,14 +10,18 @@ const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
 const { ERRORS, getCcOfYoung } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
+const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier").required(),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)").required(),
+      sousType: Joi.string()
+        .trim()
+        .valid(...UNSS_TYPE),
       structureName: Joi.string().trim().required(),
       address: Joi.string().trim().required(),
       zip: Joi.string().trim().required(),
@@ -32,7 +36,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       contactFullName: Joi.string().trim().required(),
       contactEmail: Joi.string().trim().required(),
       files: Joi.array().items(Joi.string().required()).required().min(1),
-    }).validate({ ...req.params, ...req.body });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
@@ -52,6 +56,13 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     const youngId = value.id;
     delete value.id;
     await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
+    if (isYoung) {
+      young.set({ status_equivalence: "WAITING_VERIFICATION" });
+    }
+    if (!isYoung) {
+      young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+    }
+    await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
     let cc = getCcOfYoung({ template, young });
@@ -62,23 +73,30 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     if (isYoung) {
       // get the manager_phase2
-      let data = await ReferentModel.findOne({
+      let data = await ReferentModel.find({
         subRole: SUB_ROLES.manager_phase2,
         role: ROLES.REFERENT_DEPARTMENT,
         department: young.department,
       });
+
       // if not found, get the manager_department
       if (!data) {
-        data = await ReferentModel.findOne({
-          subRole: SUB_ROLES.manager_department,
-          role: ROLES.REFERENT_DEPARTMENT,
-          department: young.department,
-        });
+        data = [];
+        data.push(
+          await ReferentModel.findOne({
+            subRole: SUB_ROLES.manager_department,
+            role: ROLES.REFERENT_DEPARTMENT,
+            department: young.department,
+          }),
+        );
       }
 
       template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
       await sendTemplate(template, {
-        emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
+        emailTo: data.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
         params: {
           cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
           youngFirstName: young.firstName,
@@ -100,7 +118,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       id: Joi.string().required(),
       idEquivalence: Joi.string().required(),
       status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier"),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"),
+      sousType: Joi.string()
+        .trim()
+        .valid(...UNSS_TYPE),
       structureName: Joi.string().trim(),
       address: Joi.string().trim(),
       zip: Joi.string().trim(),
@@ -116,7 +137,11 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
-    }).validate({ ...req.params, ...req.body });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+
+    if (value.type !== "Certification Union Nationale du Sport scolaire (UNSS)") {
+      value.sousType = undefined;
+    }
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
@@ -130,7 +155,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
       if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
-        young.set({ statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+        young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
         const applications = await ApplicationModel.find({ youngId: young._id });
@@ -143,6 +168,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
           young.set({ statusPhase2: "WAITING_REALISATION" });
         }
       }
+    }
+
+    if (young.statusPhase2 !== "VALIDATED" && !["VALIDATED"].includes(value.status)) {
+      young.set({ status_equivalence: value.status });
     }
 
     delete value.id;
@@ -168,7 +197,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
 router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params });
+    const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);
@@ -184,7 +213,7 @@ router.get("/equivalences", passport.authenticate(["referent", "young"], { sessi
 
 router.get("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params });
+    const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);
@@ -202,11 +231,14 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      statusMilitaryPreparationFiles: Joi.string().required().valid("VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"),
-    }).validate({
-      ...req.params,
-      ...req.body,
-    });
+      statusMilitaryPreparationFiles: Joi.string().required().valid("VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"),
+    }).validate(
+      {
+        ...req.params,
+        ...req.body,
+      },
+      { stripUnknown: true },
+    );
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);
@@ -215,6 +247,28 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
     await young.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorBody, value: checkedBody } = validatePhase2Preference(req.body);
+    if (errorId || errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungModel.findById(checkedId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    young.set(checkedBody);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -4,7 +4,6 @@ let apiURL = "http://localhost:8080";
 let adminURL = "http://localhost:8082";
 let appURL = "http://localhost:8081";
 let supportURL = "http://localhost:8083";
-let educonnectAllowed = true;
 let maintenance = false;
 let SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
 let SENTRY_TRACING_SAMPLE_RATE = 1.0;
@@ -22,7 +21,6 @@ if (environment === "production") {
   adminURL = "https://admin.snu.gouv.fr";
   appURL = "https://moncompte.snu.gouv.fr";
   supportURL = "https://support.snu.gouv.fr";
-  educonnectAllowed = false;
   SENTRY_URL = "https://d09670865360498e9567369808de4064@sentry.selego.co/13";
   SENTRY_TRACING_SAMPLE_RATE = 0.01;
 }
@@ -41,4 +39,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, franceConnectUrl, adminURL, appURL, supportURL, educonnectAllowed, maintenance };
+export { apiURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, franceConnectUrl, adminURL, appURL, supportURL, maintenance };

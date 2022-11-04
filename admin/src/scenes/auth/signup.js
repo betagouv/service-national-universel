@@ -14,6 +14,8 @@ import MultiSelect from "../../components/Multiselect";
 
 import { legalStatus, typesStructure, sousTypesStructure, translate, getRegionByZip, getDepartmentByZip } from "../../utils";
 import { adminURL } from "../../config";
+import { requiredMessage } from "../../components/errorMessage";
+import { capture } from "../../sentry";
 
 export default function Signup() {
   const dispatch = useDispatch();
@@ -61,6 +63,7 @@ export default function Signup() {
             history.push("/");
           } catch (e) {
             if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
+            capture(e);
             toastr.error("Oups, une erreur est survenue", translate(e?.code), { timeOut: 3000 });
             actions.setSubmitting(false);
             console.log("e", e);
@@ -337,7 +340,7 @@ export default function Signup() {
                     </label>
                     <Field
                       className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est obligatoire"}
+                      validate={(v) => (!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")}
                       value={values.structure.zip}
                       onChange={handleChange}
                       name="structure.zip"

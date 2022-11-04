@@ -42,12 +42,10 @@ const {
   translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
-  //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
 const { translateCohort } = require("snu-lib/translation");
 const {
@@ -70,7 +68,10 @@ const {
   canModifyStructure,
   canSearchSessionPhase1,
   canCreateOrUpdateSessionPhase1,
-} = require("snu-lib/roles");
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS_PHASE1,
+  MILITARY_FILE_KEYS,
+} = require("snu-lib");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -167,7 +168,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
         .required(),
       subRole: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       structureId: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
@@ -301,9 +302,19 @@ router.post("/signup_invite", async (req, res) => {
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
+    const toName = `${referent.firstName} ${referent.lastName}`;
+
     if (referent.role === ROLES.REFERENT_DEPARTMENT) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME_REF_DEP, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: { toName },
+      });
+    }
+
+    if (referent.role === ROLES.REFERENT_REGION) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME_REF_REG, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: { toName },
       });
     }
 
@@ -376,15 +387,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.populationDensity = populationDensity;
     }
 
-    // await updateApplicationsWithYoungOrMission({ young, newYoung });
-
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -405,10 +414,9 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
 
     const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
-    const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
-    for (let key of militaryKeys) {
+    for (let key of MILITARY_FILE_KEYS) {
       young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
-      newYoung[key] = [];
+      delete young.files[key];
     }
 
     young.set(newYoung);
@@ -453,7 +461,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
@@ -491,7 +499,11 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
       template: Joi.string().required(),
       subject: Joi.string().allow(null, ""),
       message: Joi.string().allow(null, ""),
-      app: Joi.object().allow(null, {}),
+      app: Joi.object({
+        missionName: Joi.string().allow(null, ""),
+        youngFirstName: Joi.string().allow(null, ""),
+        youngLastName: Joi.string().allow(null, ""),
+      }).allow(null, {}),
       missionName: Joi.string().allow(null, ""),
     })
       .unknown()
@@ -564,7 +576,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       case ROLES.SUPERVISOR:
       case ROLES.RESPONSIBLE: {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] }).cursor();
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         if (!structures.reduce((acc, curr) => acc || canViewYoungFile(req.user, young, curr), false))
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -598,7 +610,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({
@@ -642,7 +654,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({
@@ -724,19 +736,23 @@ router.post(
         }
 
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          try {
+            const clamscan = await new NodeClam().init({
+              removeInfected: true,
+            });
+            const { isInfected } = await clamscan.isInfected(tempFilePath);
+            if (isInfected) {
+              capture(`File ${name} of user(${req.user.id})is infected`);
+              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+            }
+          } catch {
+            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
           }
         }
 
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
         if (militaryKeys.includes(key)) {
           await uploadFile(`app/young/${young._id}/military-preparation/${key}/${name}`, resultingFile);
         } else {
@@ -886,11 +902,12 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     user.set(value);
-    await user.save();
+    await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
     capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
@@ -928,8 +945,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const referents = await ReferentModel.find({ structureId: referent.structureId });
     const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
     if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
 
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);

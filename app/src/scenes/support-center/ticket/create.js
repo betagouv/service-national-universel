@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
@@ -8,15 +8,29 @@ import { NavLink, useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
-import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
+import FileUpload, { useFileUpload } from "../../../components/FileUpload";
+import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
+import { capture } from "../../../sentry";
+import Unlock from "../../../assets/icons/Unlock";
+import QuestionBubble from "../../../assets/icons/QuestionBubble";
+import ChevronRight from "../../../assets/icons/ChevronRight";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default function TicketCreate(props) {
+  const { files, addFiles, deleteFile, error } = useFileUpload();
+  const [isLoading, setLoading] = useState(false);
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
   const fromPage = new URLSearchParams(props.location.search).get("from");
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   return (
     <Container>
@@ -25,6 +39,28 @@ export default function TicketCreate(props) {
         <h4>Contacter quelqu&apos;un</h4>
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l&apos;un de vos référents ?</p>
       </Heading>
+
+      {/* Links to Phase 1 page */}
+
+      {["EXEMPTED", "DONE"].includes(young?.statusPhase1) && (
+        <div className="mx-auto mb-3 gap-4 flex flex-col w-full md:flex-row md:w-4/5 md:max-w-[1000px] md:min-w-[700px]">
+          <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
+            <div className="w-12">
+              <Unlock style={{ transform: "scale(0.7)" }} />
+            </div>
+            <div className="text-sm font-bold grow">Débloquez votre accès gratuit au code de la route</div>
+            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-4 mr-1" />
+          </div>
+          <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
+            <div className="ml-1 w-11">
+              <QuestionBubble />
+            </div>
+            <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
+            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-4 mr-1" />
+          </div>
+        </div>
+      )}
+
       <Form>
         <Formik
           initialValues={{ step1: null, step2: null, message: "" }}
@@ -32,6 +68,17 @@ export default function TicketCreate(props) {
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
+              setLoading(true);
+              let uploadedFiles;
+              if (files.length > 0) {
+                const filesResponse = await api.uploadFile("/zammood/upload", files);
+                if (!filesResponse.ok) {
+                  setLoading(false);
+                  const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
+                  return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
+                }
+                uploadedFiles = filesResponse.data;
+              }
               const { message, step1, step2 } = values;
               const title = `${step1?.label} - ${step2?.label}`;
               const response = await api.post("/zammood/ticket", {
@@ -40,12 +87,18 @@ export default function TicketCreate(props) {
                 fromPage,
                 subjectStep1: step1?.id,
                 subjectStep2: step2?.id,
+                files: uploadedFiles,
               });
-              if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
+              if (!response.ok) {
+                setLoading(false);
+                return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
+              }
+              setLoading(false);
               toastr.success("Demande envoyée");
               history.push("/besoin-d-aide");
             } catch (e) {
-              console.log(e);
+              capture(e);
+              setLoading(false);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
           }}>
@@ -59,6 +112,8 @@ export default function TicketCreate(props) {
                 handleChange={handleChange}
                 value={values?.step1?.id}
                 values={values}
+                errors={errors}
+                touched={touched}
               />
               {values.step1?.id === "TECHNICAL" ? (
                 <SelectTag
@@ -69,6 +124,8 @@ export default function TicketCreate(props) {
                   handleChange={handleChange}
                   value={values.step2?.id}
                   values={values}
+                  errors={errors}
+                  touched={touched}
                 />
               ) : null}
               {values.step1?.id === "QUESTION" ? (
@@ -80,6 +137,8 @@ export default function TicketCreate(props) {
                   handleChange={handleChange}
                   value={values.step2?.id}
                   values={values}
+                  errors={errors}
+                  touched={touched}
                 />
               ) : null}
               <Item
@@ -93,9 +152,17 @@ export default function TicketCreate(props) {
                 touched={touched}
                 rows="5"
               />
-              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+              <FileUpload className="px-[15px]" files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
+              <LoadingButton loading={isLoading} type="submit" style={{ marginLeft: 10, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
                 Envoyer
-              </ContinueButton>
+              </LoadingButton>
+              {/* {isLoading ? (
+                <StyledLoader size="30px" />
+              ) : (
+                <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+                  Envoyer
+                </ContinueButton>
+              )} */}
             </>
           )}
         </Formik>
@@ -170,29 +237,6 @@ const Label = styled.div`
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 5px;
-`;
-
-const ContinueButton = styled.button`
-  @media (max-width: 767px) {
-    margin: 1rem 0;
-  }
-  color: #fff;
-  background-color: #5145cd;
-  padding: 10px 40px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  display: block;
-  width: auto;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  align-self: flex-start;
-  margin-top: 1rem;
-  :hover {
-    opacity: 0.9;
-  }
 `;
 
 const Form = styled.div`

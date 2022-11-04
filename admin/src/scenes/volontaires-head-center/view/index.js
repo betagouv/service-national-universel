@@ -3,7 +3,7 @@ import { Switch } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
-import Details from "../../../components/volontaires-view/Details";
+import Details from "./Details";
 import Wrapper from "./wrapper";
 import Phase1 from "./phase1";
 

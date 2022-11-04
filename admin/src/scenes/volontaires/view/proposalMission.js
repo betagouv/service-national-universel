@@ -9,7 +9,7 @@ import api from "../../../services/api";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
 import Loadingbutton from "../../../components/buttons/LoadingButton";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 
 export default function xxxxxxx({ young, onSend }) {
   const FILTERS = ["SEARCH"];
@@ -19,6 +19,13 @@ export default function xxxxxxx({ young, onSend }) {
     return {
       query: {
         bool: {
+          must: [
+            {
+              script: {
+                script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
+              },
+            },
+          ],
           filter: [
             {
               range: {
@@ -28,6 +35,7 @@ export default function xxxxxxx({ young, onSend }) {
               },
             },
             { term: { "status.keyword": "VALIDATED" } },
+            { term: { "visibility.keyword": "VISIBLE" } },
             {
               range: {
                 placesLeft: {

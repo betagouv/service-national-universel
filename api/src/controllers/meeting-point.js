@@ -81,7 +81,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     departureAtString: Joi.string().required(),
     returnAtString: Joi.string().required(),
     hideDepartmentInConvocation: Joi.string(),
-  }).validate({ ...req.params, ...req.body });
+  }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -114,7 +114,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     departureAtString: Joi.string().required(),
     returnAtString: Joi.string().required(),
     hideDepartmentInConvocation: Joi.string(),
-  }).validate({ ...req.params, ...req.body });
+  }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
