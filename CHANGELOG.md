@@ -1,3 +1,23 @@
+# [1.161.0](https://github.com/betagouv/service-national-universel/compare/v1.160.0...v1.161.0) (2022-11-04)
+
+
+### Bug Fixes
+
+* **admin:** missingLabel rural filter ([8db77b2](https://github.com/betagouv/service-national-universel/commit/8db77b2916cb3b8fa0fc934697b40f869deef4ef))
+* **api:** Clamav deamon ([e9a6f26](https://github.com/betagouv/service-national-universel/commit/e9a6f266a2df73fc1380aee859dbb9fe3c4ac2e6))
+
+
+### Features
+
+* **admin:** cni_expired filter volontaire / inscription ([#1999](https://github.com/betagouv/service-national-universel/issues/1999)) ([a8f4287](https://github.com/betagouv/service-national-universel/commit/a8f4287dbd10a9e6ab59b36a0f33b6f0cdff4e9b))
+* **admin:** filter rural inscription / volontaire ([6f539f9](https://github.com/betagouv/service-national-universel/commit/6f539f9e4f5adbf111e75038e67024263d124794))
+* **admin:** upload ID for young ([#1996](https://github.com/betagouv/service-national-universel/issues/1996)) ([9992755](https://github.com/betagouv/service-national-universel/commit/9992755473f72c4d96a5940f0ee6f3cc89c8f3ce))
+* **admin/app:** ErrorBoundary ([#1699](https://github.com/betagouv/service-national-universel/issues/1699)) ([5adf7ab](https://github.com/betagouv/service-national-universel/commit/5adf7ab4ff72ca3ffc671cc9ce480b712be96512))
+* **api:** young field CNIFileNotValidOnStart ([#2000](https://github.com/betagouv/service-national-universel/issues/2000)) ([d4056c8](https://github.com/betagouv/service-national-universel/commit/d4056c806f209cdbcecb9aab4fac9ee450e47525))
+* **api/admin:** Retours sur l'admin de modification ([#1997](https://github.com/betagouv/service-national-universel/issues/1997)) ([009a2b9](https://github.com/betagouv/service-national-universel/commit/009a2b9e381af64db5068fb9cf329e5ca053969a))
+* **api/admin:** young imageRight concat parents ([#2002](https://github.com/betagouv/service-national-universel/issues/2002)) ([d603181](https://github.com/betagouv/service-national-universel/commit/d603181336af6fb62e47bab71861d4f5da26475c))
+* **app/api:** Clean old inscription ([#1993](https://github.com/betagouv/service-national-universel/issues/1993)) ([9cd0728](https://github.com/betagouv/service-national-universel/commit/9cd0728fd9d5695b1086518702c64b0deb864da0))
+
 # [1.160.0](https://github.com/betagouv/service-national-universel/compare/v1.159.0...v1.160.0) (2022-11-03)
 
 
