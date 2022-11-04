@@ -468,6 +468,8 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Région rurale", "Région rurale")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
