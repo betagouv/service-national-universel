@@ -14,7 +14,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, START_DATE_SESSION_PHASE1 } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
@@ -91,7 +91,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       value.isRegionRural = isRegionRural;
     }
 
-    young.set(value);
+    const CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+    young.set({ ...value, CNIFileNotValidOnStart });
     await young.save({ fromUser: req.user });
 
     // --- result
