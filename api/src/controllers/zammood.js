@@ -343,7 +343,6 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
         try {
           const clamscan = await new NodeClam().init({
-            preference: "clamscan",
             removeInfected: true,
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);

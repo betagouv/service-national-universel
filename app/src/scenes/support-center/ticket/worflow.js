@@ -2,7 +2,7 @@ import React from "react";
 import { Col } from "reactstrap";
 import styled from "styled-components";
 import { Field } from "formik";
-import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
 
 export const SelectTag = ({ options, name, value, title, selectPlaceholder, handleChange, errors, touched }) => {
   return (

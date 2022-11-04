@@ -11,7 +11,7 @@ import { ModalContainer } from "../../components/modals/Modal";
 import { setYoung } from "../../redux/auth/actions";
 import api from "../../services/api";
 import { colors, translate } from "../../utils";
-import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
 import DownloadButton from "./components/DownloadButton";
 import { Footer, FormGroup, FormRow, Logo, SuccessMessage, Title } from "./components/printable";
 import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";

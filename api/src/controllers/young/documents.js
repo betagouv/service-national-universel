@@ -10,7 +10,7 @@ const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib/constants");
 const config = require("../../config");
 const NodeClam = require("clamscan");
 const fs = require("fs");
@@ -270,7 +270,6 @@ router.post(
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
           try {
             const clamscan = await new NodeClam().init({
-              preference: "clamscan",
               removeInfected: true,
             });
             const { isInfected } = await clamscan.isInfected(tempFilePath);
@@ -312,6 +311,7 @@ router.post(
         young.files[key].push(newFile);
         if (key === "cniFiles") {
           young.latestCNIFileExpirationDate = body.expirationDate;
+          young.CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
           young.latestCNIFileCategory = body.category;
         }
       }
