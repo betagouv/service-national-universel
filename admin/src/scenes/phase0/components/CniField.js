@@ -75,7 +75,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
         </div>
       </div>
       {correctionRequest && correctionRequest.status === "CORRECTED" && (
-        <CorrectedRequest correctionRequest={correctionRequest} reasons={reasons} className="mt-[-6px] mb-[15px]" />
+        <CorrectedRequest correctionRequest={correctionRequest} reasons={reasons} className="mt-[-6px] mb-[15px]" young={young} />
       )}
       {opened && (
         <CorrectionRequest

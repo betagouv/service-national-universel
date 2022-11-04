@@ -103,6 +103,7 @@ export default function SchoolEditor({ young, onChange, className }) {
         filterOnType
         options={cities ? cities.map((c) => ({ value: c, label: c })) : []}
         onChange={(val) => onLocalChange("schoolCity", val)}
+        young={young}
       />
       <Field
         name="schoolName"
@@ -114,6 +115,7 @@ export default function SchoolEditor({ young, onChange, className }) {
         filterOnType
         options={schools ? schools.map((s) => ({ value: s.id, label: s.fullName })) : []}
         onChange={(value) => onLocalChange("schoolId", value)}
+        young={young}
       />
     </div>
   );

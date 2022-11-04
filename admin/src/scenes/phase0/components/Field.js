@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectionRequest from "./CorrectionRequest";
 import CorrectedRequest from "./CorrectedRequest";
 import SimpleSelect from "./SimpleSelect";
+import SectionContext from "../context/SectionContext";
 
 /**
  * mode  could be "correction|edition|readonly" (default readonly)
@@ -23,6 +24,7 @@ export default function Field({
   filterOnType = false,
   onChange = () => {},
   transformer,
+  young,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
@@ -30,7 +32,7 @@ export default function Field({
   const [requestButtonClass, setRequestButtonClass] = useState("");
   const [editable, setEditable] = useState(false);
 
-  // const [editable, setEditable] = useState(false);
+  const { errors } = useContext(SectionContext);
 
   useEffect(() => {
     setOpened(name && currentRequest === name);
@@ -85,7 +87,7 @@ export default function Field({
   return (
     <div className={className}>
       <div
-        className="relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px]"
+        className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${errors[name] ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
         key={name}
         onMouseEnter={() => mouseOver(true)}
         onMouseLeave={() => mouseOver(false)}>
@@ -94,6 +96,7 @@ export default function Field({
           <>
             {type === "select" && <SimpleSelect value={value} transformer={transformer} options={options} onChange={onChange} filterOnType={filterOnType} />}
             {type === "text" && <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />}
+            {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
           </>
         ) : (
           <>
@@ -106,8 +109,8 @@ export default function Field({
           </>
         )}
       </div>
-      {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} />}
-      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
+      {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
+      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} young={young} />}
     </div>
   );
 }
