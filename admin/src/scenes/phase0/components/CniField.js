@@ -11,7 +11,7 @@ import { Modal } from "reactstrap";
 import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
-import { capture } from "../../../../../app/src/sentry";
+import { capture } from "../../../../src/sentry";
 import dayjs from "dayjs";
 import Field from "./Field";
 
@@ -154,7 +154,7 @@ function CniModal({ young, onClose, mode }) {
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    if (!category || !date) setError("Veuillez sélectionner une catégorie et une date d'expiration.");
+    if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
     const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), {}, category, date);
     if (res.code === "FILE_CORRUPTED")
       return setError(
@@ -165,6 +165,7 @@ function CniModal({ young, onClose, mode }) {
       setError("Une erreur s'est produite lors du téléversement de votre fichier.");
       return;
     }
+    setError(null);
     setCniFiles(res.data);
     setFilesToUpload(null);
   }
