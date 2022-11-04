@@ -71,7 +71,6 @@ router.post("/structure", auth, async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogStructureModel.create(value);
-  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
@@ -104,7 +103,6 @@ router.post("/mission", auth, async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogMissionModel.create(value);
-  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
@@ -130,7 +128,6 @@ router.post("/application", auth, async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogApplicationModel.create(value);
-  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 

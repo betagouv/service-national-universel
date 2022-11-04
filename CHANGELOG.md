@@ -1,3 +1,36 @@
+# [1.160.0](https://github.com/betagouv/service-national-universel/compare/v1.159.0...v1.160.0) (2022-11-03)
+
+
+### Bug Fixes
+
+* **admin:** improve address search in DOM-TOM ([33615da](https://github.com/betagouv/service-national-universel/commit/33615dad1ff0fd880f47ae18e9a96ead95c65a1a))
+* **api/app:** allow young to change expiration date without reuploading (before correction step) ([#1992](https://github.com/betagouv/service-national-universel/issues/1992)) ([c9ad894](https://github.com/betagouv/service-national-universel/commit/c9ad8940ff0ff0bdadd974572ecd66db5ff37106))
+* **app:** fix condition in onSubmit stepUpload ([cf3d571](https://github.com/betagouv/service-national-universel/commit/cf3d57147cff22a56abdb4b45baaf028b942b76d))
+* **app:** fix condition onSubmit stepUpload v2 ([e633459](https://github.com/betagouv/service-national-universel/commit/e6334595d5f650579a596450423ca14a1d04783f))
+
+
+### Features
+
+* **admin:** filtres volontaire / inscription ([#1991](https://github.com/betagouv/service-national-universel/issues/1991)) ([ef6c268](https://github.com/betagouv/service-national-universel/commit/ef6c2687791e5da9da776709de4d049ed40387cd))
+* **admin:** update dashboard ([38a2e5a](https://github.com/betagouv/service-national-universel/commit/38a2e5af4bcd28ddafa379f7a76ec471b08a6a82))
+* **admin/api:** Ajout de l'édition des Jeunes côté admin ([#1982](https://github.com/betagouv/service-national-universel/issues/1982)) ([29cee46](https://github.com/betagouv/service-national-universel/commit/29cee468b87843f106d6ef2a03a772c68372f674))
+* **api:** better cron slack messages ([1079701](https://github.com/betagouv/service-national-universel/commit/1079701d4435ac06685b8102b6eee3739d616459))
+* **api/app:** file scan down error message ([#1989](https://github.com/betagouv/service-national-universel/issues/1989)) ([499b87b](https://github.com/betagouv/service-national-universel/commit/499b87b43d4a169ed1793686ab947dfaeab9622b))
+* **app:** changement de cohort admin ([#1983](https://github.com/betagouv/service-national-universel/issues/1983)) ([1b00b2c](https://github.com/betagouv/service-national-universel/commit/1b00b2c54edfd33b9f9de8cead284c1296cc6d3e))
+
+# [1.159.0](https://github.com/betagouv/service-national-universel/compare/v1.158.1...v1.159.0) (2022-11-02)
+
+
+### Bug Fixes
+
+* **api:** fix ([b47863a](https://github.com/betagouv/service-national-universel/commit/b47863a5d11ebb670d9329fd91289cc07c372ca0))
+
+
+### Features
+
+* **api:** cron for patch logs ([#1980](https://github.com/betagouv/service-national-universel/issues/1980)) ([e8b8305](https://github.com/betagouv/service-national-universel/commit/e8b8305dab6ff729fb4fe3f68eadab8418c512c2))
+* **api/app:** file scan error message ([1d649ef](https://github.com/betagouv/service-national-universel/commit/1d649ef9836e68351ac1927149f36e16b4e66314))
+
 ## [1.158.1](https://github.com/betagouv/service-national-universel/compare/v1.158.0...v1.158.1) (2022-11-01)
 
 

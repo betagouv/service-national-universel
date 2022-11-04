@@ -404,6 +404,7 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
+        plausibleEvent("Phase0/CTA demande correction - Corriger Coordonnees");
         dispatch(setYoung(responseData));
         history.push("/");
       } catch (e) {

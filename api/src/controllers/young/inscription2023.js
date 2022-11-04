@@ -14,6 +14,7 @@ const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { isGoalReached } = require("../../utils/cohort");
+const { isInRuralArea } = require("snu-lib");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -251,6 +252,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     if (value.cityCode) {
       const populationDensity = await getDensity(value.cityCode);
       young.set({ populationDensity });
+      const isRegionRural = isInRuralArea(young);
+      young.set({ isRegionRural })
     }
 
     await young.save({ fromUser: req.user });
@@ -442,6 +445,9 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       if (young.files.cniFiles.length > 0) {
         young.set("inscriptionStep2023", STEPS2023.CONFIRM);
       } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      const { error, value } = Joi.object({ date: Joi.date().required() }).validate(req.body, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      young.set({ latestCNIFileExpirationDate: value.date });
     }
 
     if (type === "correction") {

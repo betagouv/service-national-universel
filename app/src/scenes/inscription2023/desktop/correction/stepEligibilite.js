@@ -125,7 +125,7 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase0/CTA correction - eligibilite");
+    plausibleEvent("Phase0/CTA demande correction - Corriger Eligibilite");
 
     const updates = {
       grade: data.scolarity,
@@ -170,6 +170,7 @@ export default function StepEligibilite() {
       if (cohorts.some((c) => young.cohort === c.name)) {
         const res = await api.put("/young/inscription2023/eligibilite", updates);
         if (!res.ok) throw new Error(translate(res.code));
+
         dispatch(setYoung(res.data));
         toastr.success("La correction a été prise en compte");
         history.push("/");
