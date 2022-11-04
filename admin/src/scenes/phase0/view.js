@@ -587,7 +587,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={onLocalChange}
+                onChange={onChange}
               />
               <SectionIdentiteContact
                 className="mt-[32px]"
@@ -619,7 +619,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={onLocalChange}
+                onChange={onChange}
               />
             </>
           )}
