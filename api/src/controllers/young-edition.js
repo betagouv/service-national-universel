@@ -14,7 +14,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
@@ -91,8 +91,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       value.isRegionRural = isRegionRural;
     }
 
-    const CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
-    young.set({ ...value, CNIFileNotValidOnStart });
+    young.set(value);
     await young.save({ fromUser: req.user });
 
     // --- result
@@ -111,8 +110,15 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     // --- validate data
     const bodySchema = Joi.object().keys({
       situation: Joi.string().valid(...Object.keys(YOUNG_SITUATIONS)),
-      schoolCity: Joi.string().trim().allow(""),
       schoolName: Joi.string().trim().allow(""),
+      schoolCity: Joi.string().trim().allow(""),
+      schoolCountry: Joi.string().trim().allow(""),
+      schoolType: Joi.string().trim().allow(""),
+      schoolAddress: Joi.string().trim().allow(""),
+      schoolComplementAdresse: Joi.string().trim().allow(""),
+      schoolZip: Joi.string().trim().allow(""),
+      schoolDepartment: Joi.string().trim().allow(""),
+      schoolRegion: Joi.string().trim().allow(""),
       grade: Joi.string().valid(...Object.keys(GRADES)),
 
       parent1Status: Joi.string().trim().allow(""),

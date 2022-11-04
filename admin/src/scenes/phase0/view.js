@@ -587,7 +587,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={onChange}
+                onChange={onLocalChange}
               />
               <SectionIdentiteContact
                 className="mt-[32px]"
@@ -619,7 +619,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={onChange}
+                onChange={onLocalChange}
               />
             </>
           )}
@@ -752,7 +752,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
               <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
             </div>
-            {sectionMode === "edition" && (
+            {sectionMode === "edition" && data.country && data.country.toUpperCase() === "FRANCE" && (
               <VerifyAddress
                 address={data.address}
                 zip={data.zip}
@@ -1076,7 +1076,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   }
 
   const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
-  const gradeOptions = Object.keys(GRADES).map((s) => ({ value: s, label: translateGrade(s) }));
+  const gradeOptions = Object.keys(GRADES)
+    .filter((g) => g !== GRADES.NOT_SCOLARISE)
+    .map((g) => ({ value: g, label: translateGrade(g) }));
 
   return (
     <SectionContext.Provider value={{ errors }}>
