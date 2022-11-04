@@ -3,8 +3,8 @@ const router = express.Router();
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const {  isGoalReached } = require("../utils/cohort");
-const {  getZoneByDepartment, sessions2023 } = require("snu-lib");
+const { isGoalReached } = require("../utils/cohort");
+const { getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.post("/eligibility/2023", async (req, res) => {
   try {
@@ -47,7 +47,8 @@ router.post("/eligibility/2023", async (req, res) => {
         session.eligibility.zones.includes(zone) &&
         session.eligibility.schoolLevels.includes(schoolLevel) &&
         session.eligibility.bornAfter < birthDate &&
-        session.eligibility.bornBefore > birthDate,
+        session.eligibility.bornBefore > birthDate &&
+        session.eligibility.inscriptionEndDate > Date.now(),
     );
     if (sessionsFiltered.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
 

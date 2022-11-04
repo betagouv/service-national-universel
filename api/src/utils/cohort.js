@@ -1,3 +1,4 @@
+const { YOUNG_STATUS } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 
@@ -7,7 +8,7 @@ async function isGoalReached(department, cohort) {
     const nbYoung = await YoungModel.countDocuments({
       department: department,
       cohort: cohort,
-      status: { $nin: ["REFUSED", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+      status: { $nin: [YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
     });
     if (nbYoung > 0) {
       const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * cohort.buffer);
