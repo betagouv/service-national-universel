@@ -11,7 +11,7 @@ import { Modal } from "reactstrap";
 import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
-import { capture } from "../../../../src/sentry";
+import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 import Field from "./Field";
 
