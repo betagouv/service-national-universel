@@ -69,6 +69,7 @@ const FILTERS = [
   "EQUIVALENCE_STATUS",
   "PPS",
   "PAI",
+  "RURAL",
   "QPV",
   "HANDICAP",
   "ZRR",
@@ -608,6 +609,20 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Région rurale"
+                  componentId="RURAL"
+                  dataField="isRegionRural.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "RURAL") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Région rurale", "Région rurale")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
