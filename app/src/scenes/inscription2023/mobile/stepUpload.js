@@ -1,24 +1,22 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import { supportURL } from "../../../config";
-import { formatDateFR, sessions2023, translateCorrectionReason, YOUNG_STATUS } from "snu-lib";
+import { ID } from "../utils";
+import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
+import CheckBox from "../../../components/inscription/checkbox";
 import DatePickerList from "../../preinscription/components/DatePickerList";
+import Error from "../../../components/error";
+import ErrorMessage from "../components/ErrorMessage";
+import Footer from "../../../components/footerV2";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import MyDocs from "../components/MyDocs";
-import ErrorMessage from "../components/ErrorMessage";
-import CheckBox from "../../../components/inscription/checkbox";
+import StickyButton from "../../../components/inscription/stickyButton";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -26,17 +24,17 @@ export default function StepUpload() {
   if (category === undefined) category = young?.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
-  // const [files, setFiles] = useState();
-  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
-  const [hasDateChanged, setHasDateChanged] = useState(false);
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();
   const [checked, setChecked] = useState({ coupe: false, lisible: false, nette: false });
+  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
 
   const correctionsFile = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
   const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
+  const mode = correctionsFile.length || correctionsDate.length ? "correction" : "inscription";
 
   async function uploadFiles() {
     let files = [...recto];
@@ -71,7 +69,7 @@ export default function StepUpload() {
       return;
     }
     dispatch(setYoung(responseData));
-    plausibleEvent("Phase0/CTA inscription - CI desktop");
+    plausibleEvent("Phase0/CTA inscription - CI mobile");
     history.push("/inscription2023/confirm");
   }
 
@@ -91,232 +89,145 @@ export default function StepUpload() {
     setLoading(false);
   }
 
-  const ID = {
-    cniNew: {
-      category: "cniNew",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Nouveau format (après août 2021)",
-      imgFront: "cniNewFront.png",
-      imgBack: "cniNewBack.png",
-      imgDate: "cniNewDate.png",
-    },
-    cniOld: {
-      category: "cniOld",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Ancien format",
-      imgFront: "cniOldFront.png",
-      imgBack: "cniOldBack.png",
-      imgDate: "cniOldDate.png",
-    },
-    passport: {
-      category: "passport",
-      title: "Passeport",
-      imgFront: "passport.png",
-      imgDate: "passportDate.png",
-    },
-  };
+  function renderInscription() {
+    if (recto && ["cniNew", "cniOld"].includes(category) && !verso) return <Verso />;
+    if (checked.lisible === true && checked.coupe === true && checked.nette === true) return <ExpirationDate />;
+    if (verso || (recto && category === "passport")) return <Confirm />;
+    return <Recto />;
+  }
 
-  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && hasDateChanged == false) || (correctionsFile?.length && !files?.length);
+  function renderCorrection() {
+    if (category === null) return <div>Loading</div>;
+    if (correctionsFile?.length && correctionsFile?.some((e) => e.reason === "MISSING_BACK")) return <Verso />;
+    if (correctionsDate?.length) return <ExpirationDate />;
+    if (verso || (recto && category === "passport")) return <Confirm />;
+    return <Recto />;
+  }
 
   return (
     <>
       <Navbar />
-
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-
-        {/* Recto */}
-        {!recto && (
-          <>
-            <div className="w-full flex items-center justify-center mb-4">
-              <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-            </div>
-            <input
-              type="file"
-              capture="environment"
-              id="file-upload"
-              name="file-upload"
-              accept="image/*"
-              onChange={(e) => {
-                setRecto(e.target.files);
-              }}
-              className="hidden"
-            />
-            <button className="flex w-full">
-              <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
-                Scannez le {ID[category].imgBack && "recto du"} document
-              </label>
-            </button>
-          </>
-        )}
-
-        {/* Verso */}
-        {ID[category].imgBack && recto && !verso && (
-          <>
-            <div className="w-full flex items-center justify-center mb-4">
-              <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
-            </div>
-            <input
-              type="file"
-              capture="environment"
-              id="file-upload"
-              name="file-upload"
-              accept="image/*"
-              onChange={(e) => {
-                setVerso(e.target.files);
-              }}
-              className="hidden"
-            />
-            <button className="flex w-full">
-              <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
-                Scannez le verso du document
-              </label>
-            </button>
-          </>
-        )}
-
-        {/* Expiration date */}
-        {(ID[category].imgBack && verso) ||
-          (!ID[category].imgBack && recto) ||
-          (correctionsDate.length && (
-            <>
-              {checked.lisible === true && checked.coupe === true && checked.nette === true ? (
-                <>
-                  <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-                  <div className="text-gray-600 my-2">
-                    Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le{" "}
-                    {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
-                    ).
-                  </div>
-                  <div className="w-3/4 mx-auto">
-                    <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
-                  </div>
-                  <DatePickerList value={date} onChange={(date) => setDate(date)} />
-                </>
-              ) : (
-                <>
-                  <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
-                    <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />
-                    {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
-                  </div>
-                  <p className="text-lg text-gray-800 font-semibold my-4">Vérifiez les points suivants</p>
-                  <div className="flex items-center my-2">
-                    <CheckBox type="checkbox" checked={checked.lisible} onChange={() => setChecked((prev) => ({ ...prev, lisible: !checked.lisible }))} />
-                    <span className="ml-2 mr-2">
-                      Toutes les informations sont <strong>lisibles</strong>
-                    </span>
-                  </div>
-                  <div className="flex items-center my-4">
-                    <CheckBox type="checkbox" checked={checked.coupe} onChange={() => setChecked((prev) => ({ ...prev, coupe: !checked.coupe }))} />
-                    <span className="ml-2 mr-2">
-                      Le document n&apos;est <strong>pas coupé</strong>
-                    </span>
-                  </div>
-                  <div className="flex items-center my-4">
-                    <CheckBox type="checkbox" checked={checked.nette} onChange={() => setChecked((prev) => ({ ...prev, nette: !checked.nete }))} />
-                    <span className="ml-2 mr-2">
-                      La photo est <strong>nette</strong>
-                    </span>
-                  </div>
-                </>
-              )}
-            </>
-          ))}
+        {correctionsFile?.map((e) => (
+          <ErrorMessage key={e._id}>
+            <strong>{translateCorrectionReason(e.reason)}</strong>
+            {e.message && ` : ${e.message}`}
+          </ErrorMessage>
+        ))}
+        {mode === "correction" ? renderCorrection() : renderInscription()}
       </div>
-
-      {/* <div className="bg-white p-4">
-        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="w-full flex justify-between items-center mt-2">
-          <div className="text-2xl font-semibold text-gray-800 flex-1">{ID[category].title}</div>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
-        {ID[category].subtitle && <div className="text-xl mb-2 text-gray-600">{ID[category].subtitle}</div>}
-        <div className="my-4">
-          {correctionsFile?.map((e) => (
-            <ErrorMessage key={e._id}>
-              <strong>{translateCorrectionReason(e.reason)}</strong>
-              {e.message && ` : ${e.message}`}
-            </ErrorMessage>
-          ))}
-        </div>
-        <div className="w-full flex items-center justify-center my-4">
-          <div className="w-3/4 flex flex-col gap-4">
-            <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-            {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
-          </div>
-        </div>
-        <div className="my-2 border-l-8 border-l-[#6A6AF4] pl-4">
-          Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
-          document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
-        </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
-        <div>Ajouter un fichier</div>
-        <div className="text-gray-500 text-sm mt-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Plusieurs fichiers possibles.</div>
-        <input
-          type="file"
-          multiple
-          id="file-upload"
-          name="file-upload"
-          accept=".png, .jpg, .jpeg, .pdf"
-          onChange={(e) => {
-            setFiles(e.target.files);
-          }}
-          className="hidden"
-        />
-        <div className="flex w-full mt-4">
-          <div>
-            <label htmlFor="file-upload" className="bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
-              Parcourir...
-            </label>
-          </div>
-          <div className="ml-4">
-            {files ? (
-              Array.from(files).map((e) => (
-                <p className="text-gray-800 text-sm mt-2" key={e.name}>
-                  {e.name}
-                </p>
-              ))
-            ) : (
-              <div className="text-gray-800 text-sm mt-2">Aucun fichier sélectionné.</div>
-            )}
-          </div>
-        </div>
-        <MyDocs category={category} />
-        {(files?.length > 0 || date) && (
-          <>
-            <div className="w-full flex items-center justify-center mb-4">
-              <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-            </div>
-            <div className="my-4">
-              {correctionsDate?.map((e) => (
-                <ErrorMessage key={e._id}>
-                  <strong>Date d&apos;expiration incorrecte</strong>
-                  {e.message && ` : ${e.message}`}
-                </ErrorMessage>
-              ))}
-            </div>
-            <div className="w-3/4 mx-auto">
-              <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
-            </div>
-            <DatePickerList
-              value={date}
-              onChange={(date) => {
-                setDate(date);
-                setHasDateChanged(true);
-              }}
-            />
-          </>
-        )}
-      </div> */}
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={isDisabled} />
+      {mode === "correction" ? (
+        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={correctionsDate.length || correctionsFile.length} />
       ) : (
         <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
       )}
     </>
   );
+
+  function Recto() {
+    return (
+      <>
+        <div className="w-full flex items-center justify-center mb-4">
+          <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+        </div>
+        <input
+          type="file"
+          capture="environment"
+          id="file-upload"
+          name="file-upload"
+          accept="image/*"
+          onChange={(e) => {
+            setRecto(e.target.files);
+          }}
+          className="hidden"
+        />
+        <button className="flex w-full">
+          <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
+            Scannez le {ID[category].imgBack && "recto du"} document
+          </label>
+        </button>
+      </>
+    );
+  }
+
+  function Verso() {
+    return (
+      <>
+        <div className="w-full flex items-center justify-center mb-4">
+          <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
+        </div>
+        <input
+          type="file"
+          capture="environment"
+          id="file-upload"
+          name="file-upload"
+          accept="image/*"
+          onChange={(e) => {
+            setVerso(e.target.files);
+          }}
+          className="hidden"
+        />
+        <button className="flex w-full">
+          <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
+            Scannez le verso du document
+          </label>
+        </button>
+      </>
+    );
+  }
+
+  function Confirm() {
+    return (
+      <>
+        <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
+          <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />
+          {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
+        </div>
+        <p className="text-lg text-gray-800 font-semibold my-4">Vérifiez les points suivants</p>
+        <div className="flex items-center my-2">
+          <CheckBox type="checkbox" checked={checked.lisible} onChange={() => setChecked((prev) => ({ ...prev, lisible: !checked.lisible }))} />
+          <span className="ml-2 mr-2">
+            Toutes les informations sont <strong>lisibles</strong>
+          </span>
+        </div>
+        <div className="flex items-center my-4">
+          <CheckBox type="checkbox" checked={checked.coupe} onChange={() => setChecked((prev) => ({ ...prev, coupe: !checked.coupe }))} />
+          <span className="ml-2 mr-2">
+            Le document n&apos;est <strong>pas coupé</strong>
+          </span>
+        </div>
+        <div className="flex items-center my-4">
+          <CheckBox type="checkbox" checked={checked.nette} onChange={() => setChecked((prev) => ({ ...prev, nette: !checked.nette }))} />
+          <span className="ml-2 mr-2">
+            La photo est <strong>nette</strong>
+          </span>
+        </div>
+      </>
+    );
+  }
+
+  function ExpirationDate() {
+    return (
+      <>
+        {correctionsDate?.map((e) => (
+          <ErrorMessage key={e._id}>
+            <strong>Date d&apos;expiration incorrecte</strong>
+            {e.message && ` : ${e.message}`}
+          </ErrorMessage>
+        ))}
+        <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+        <div className="text-gray-600 my-2">
+          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+          ).
+        </div>
+        <div className="w-3/4 mx-auto">
+          <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+        </div>
+        <DatePickerList value={date} onChange={(date) => setDate(date)} />
+      </>
+    );
+  }
 }
