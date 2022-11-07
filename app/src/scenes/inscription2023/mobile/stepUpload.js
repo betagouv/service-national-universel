@@ -60,7 +60,7 @@ export default function StepUpload() {
   }
 
   async function onSubmit() {
-    if (recto?.length) uploadFiles;
+    if (recto) uploadFiles();
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
