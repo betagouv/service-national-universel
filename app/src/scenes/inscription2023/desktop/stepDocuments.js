@@ -17,7 +17,6 @@ export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  console.log("🚀 ~ file: stepDocuments.js ~ line 20 ~ StepDocuments ~ young", young);
   const [error, setError] = useState({});
   const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
 
