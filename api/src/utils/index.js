@@ -643,20 +643,13 @@ const updateYoungApplicationFilesType = async (application, user) => {
   const applications = await ApplicationModel.find({ youngId: application.youngId });
 
   const listFiles = applications.reduce((prev, acc) => {
-    if (acc.contractAvenantFiles.length !== 0) {
-      prev.push("contractAvenant");
-    }
-    if (acc.justificatifsFiles.length !== 0) {
-      prev.push("justificatifs");
-    }
-    if (acc.feedBackExperienceFiles.length !== 0) {
-      prev.push("feedBackExperience");
-    }
-    if (acc.othersFiles.length !== 0) {
-      prev.push("others");
-    }
+    if (acc.contractAvenantFiles.length !== 0 && !prev.includes("contractAvenantFiles")) prev.push("contractAvenantFiles");
+    if (acc.justificatifsFiles.length !== 0 && !prev.includes("justificatifsFiles")) prev.push("justificatifsFiles");
+    if (acc.feedBackExperienceFiles.length !== 0 && !prev.includes("feedBackExperienceFiles")) prev.push("feedBackExperienceFiles");
+    if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
     return prev;
   }, []);
+  console.log(listFiles);
   young.set({ phase2ApplicationFilesType: listFiles });
   await young.save({ fromUser: user });
 };
