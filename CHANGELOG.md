@@ -1,3 +1,22 @@
+# [1.162.0](https://github.com/betagouv/service-national-universel/compare/v1.161.0...v1.162.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* **app:** add expiration date in body of req for documents/next ([#2008](https://github.com/betagouv/service-national-universel/issues/2008)) ([40f54ed](https://github.com/betagouv/service-national-universel/commit/40f54ed87e110d01b0231ab6c5d1e8ffe705437c))
+* **deps:** update dependency babel-loader to v8.3.0 ([#1039](https://github.com/betagouv/service-national-universel/issues/1039)) ([fbf2f60](https://github.com/betagouv/service-national-universel/commit/fbf2f60b745a1dc119ffbf288b6d5bab15b527a4))
+* **deps:** update dependency react-redux to v7.2.9 ([#2014](https://github.com/betagouv/service-national-universel/issues/2014)) ([120e227](https://github.com/betagouv/service-national-universel/commit/120e227c575a8e12bca91ab2e9e8c7d213a7c518))
+* **deps:** update dependency react-router-dom to v5.3.4 ([#2015](https://github.com/betagouv/service-national-universel/issues/2015)) ([7f69e71](https://github.com/betagouv/service-national-universel/commit/7f69e7121c383f664eabd8cf783af3394daa1a36))
+* **deps/KB:** Update packages ([0265462](https://github.com/betagouv/service-national-universel/commit/0265462aa02b54bf4d0be6d375b8065f1e26e8f3))
+
+
+### Features
+
+* **admin:** add filter application file type ([#2017](https://github.com/betagouv/service-national-universel/issues/2017)) ([340b7d8](https://github.com/betagouv/service-national-universel/commit/340b7d8d03195d50cbd7a12d45dab18770178782))
+* **admin:** Hide button new inscription ([a9f2786](https://github.com/betagouv/service-national-universel/commit/a9f27860d71c52bca736257e76b787bbf2544732))
+* **admin:** Open instruction ([#2010](https://github.com/betagouv/service-national-universel/issues/2010)) ([ced5122](https://github.com/betagouv/service-national-universel/commit/ced512264c4ca48123636859038b7079b6997b42))
+* **api:** model + synchro young applications files ([#2016](https://github.com/betagouv/service-national-universel/issues/2016)) ([7e1cf7e](https://github.com/betagouv/service-national-universel/commit/7e1cf7e6167d1c127dd39f680f9520dac3f6557b))
+
 # [1.161.0](https://github.com/betagouv/service-national-universel/compare/v1.160.0...v1.161.0) (2022-11-04)
 
 
