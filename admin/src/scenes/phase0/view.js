@@ -512,7 +512,6 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     if (validate()) {
       try {
         const result = await api.put(`/young-edition/${young._id}/identite`, data);
-        console.log("RESULT = ", result);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
