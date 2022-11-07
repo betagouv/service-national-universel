@@ -81,7 +81,9 @@ describe("Referent", () => {
     it("should return 200", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper())
+        .post("/referent/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
     });
