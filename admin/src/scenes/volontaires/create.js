@@ -48,7 +48,12 @@ export default function Create() {
           firstName: "",
           lastName: "",
           birthdateAt: "",
-          cniFiles: [],
+          files: {
+            cniFiles: [],
+            highSkilledActivityProofFiles: [],
+            parentConsentmentFiles: [],
+            imageRightFiles: [],
+          },
           email: "",
           phone: "",
           address: "",
@@ -56,9 +61,6 @@ export default function Create() {
           zip: "",
           department: "",
           region: "",
-          parentConsentmentFiles: [],
-          highSkilledActivityProofFiles: [],
-          imageRightFiles: [],
           cohort: options[0],
         }}
         validateOnBlur={false}
