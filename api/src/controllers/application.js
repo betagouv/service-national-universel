@@ -545,7 +545,7 @@ router.post(
       application.set({ [key]: names });
       await application.save({ fromUser: req.user });
 
-      await updateYoungApplicationFilesType(application, user);
+      await updateYoungApplicationFilesType(application, req.user);
 
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
