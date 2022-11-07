@@ -17,7 +17,7 @@ const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
+const { ROLES, SENDINBLUE_TEMPLATES, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication, serializeYoung } = require("../utils/serializer");
 const { config } = require("dotenv");
 const {
@@ -31,6 +31,7 @@ const {
   getFile,
   updateYoungStatusPhase2Contract,
   getReferentManagerPhase2,
+  updateYoungApplicationFilesType,
 } = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
@@ -543,6 +544,9 @@ router.post(
       }
       application.set({ [key]: names });
       await application.save({ fromUser: req.user });
+
+      await updateYoungApplicationFilesType(application, req.user);
+
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);

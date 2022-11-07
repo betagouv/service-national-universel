@@ -638,6 +638,21 @@ const getReferentManagerPhase2 = async (department) => {
   return toReferent;
 };
 
+const updateYoungApplicationFilesType = async (application, user) => {
+  const young = await YoungModel.findById(application.youngId);
+  const applications = await ApplicationModel.find({ youngId: application.youngId });
+
+  const listFiles = applications.reduce((prev, acc) => {
+    if (acc.contractAvenantFiles.length !== 0 && !prev.includes("contractAvenantFiles")) prev.push("contractAvenantFiles");
+    if (acc.justificatifsFiles.length !== 0 && !prev.includes("justificatifsFiles")) prev.push("justificatifsFiles");
+    if (acc.feedBackExperienceFiles.length !== 0 && !prev.includes("feedBackExperienceFiles")) prev.push("feedBackExperienceFiles");
+    if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
+    return prev;
+  }, []);
+  young.set({ phase2ApplicationFilesType: listFiles });
+  await young.save({ fromUser: user });
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -759,4 +774,5 @@ module.exports = {
   autoValidationSessionPhase1Young,
   getReferentManagerPhase2,
   SUPPORT_BUCKET_CONFIG,
+  updateYoungApplicationFilesType,
 };
