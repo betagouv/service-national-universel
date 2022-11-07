@@ -152,6 +152,9 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       reducedMobilityAccess: Joi.string().trim().valid("true", "false").allow("", null),
       handicapInSameDepartment: Joi.string().trim().valid("true", "false").allow("", null),
       allergies: Joi.string().trim().valid("true", "false").allow("", null),
+
+      // old cohorts
+      imageRightFilesStatus: Joi.string().trim().valid("TO_UPLOAD", "WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED"),
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
