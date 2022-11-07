@@ -923,7 +923,7 @@ export default function VolontaireList() {
                   className="dropdown-filter"
                   componentId="APPLICATION_FILES_TYPE"
                   dataField="phase2ApplicationFilesType.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
+                  react={{ and: FILTERS.filter((e) => e !== "APPLICATION_FILES_TYPE") }}
                   renderItem={(e, count) => {
                     return `${translateApplicationFileType(e)} (${count})`;
                   }}
