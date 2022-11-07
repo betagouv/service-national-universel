@@ -140,15 +140,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           ) : (
             <>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{newTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{openedTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
                 <div>{closedTickets}</div>
               </div>
             </>
@@ -161,15 +161,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           ) : (
             <>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{newTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{openedTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
                 <div>{closedTickets}</div>
               </div>
             </>
@@ -199,10 +199,10 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      {environment === "production" ? (
-        <DrawerTabWithoutLink to="/inscription" title="Inscriptions" onClick={blockInscription} />
-      ) : (
+      {environment !== "production" ? (
         <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      ) : (
+        <DrawerTabWithoutLink to="/inscription" title="Inscriptions" onClick={blockInscription} />
       )}
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
@@ -215,15 +215,15 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
         ) : (
           <>
             <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{newTickets}</div>
             </div>
             <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{openedTickets}</div>
             </div>
             <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+              <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
               <div>{closedTickets}</div>
             </div>
           </>

@@ -43,7 +43,8 @@ export default function CniInvalide() {
           setError("Une erreur s'est produite" + (code ? " : " + translate(code) : ""));
           return false;
         } else {
-          plausibleEvent("Phase0/CTA representant legal - ID perimee");
+          if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - ID perimee - reinscription");
+          else plausibleEvent("Phase0/CTA representant legal - ID perimee");
           history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
         }
       } catch (e) {

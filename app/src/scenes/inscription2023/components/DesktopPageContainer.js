@@ -17,6 +17,9 @@ export default function DesktopPageContainer({
   disabled,
   questionMarckLink = `${appURL}public-besoin-d-aide/`,
   childrenContinueButton = "Continuer",
+  modeCorrection = false,
+  onCorrection,
+  loading = false,
 }) {
   return (
     <>
@@ -34,9 +37,21 @@ export default function DesktopPageContainer({
             <hr className="my-4 h-px bg-gray-200 border-0" />
             {children}
             <hr className="my-8 h-px bg-gray-200 border-0" />
+            {loading && <div>Veuillez patienter : scan antivirus en cours...</div>}
             <div className="flex justify-end gap-4">
-              {onClickPrevious && <Button onClick={onClickPrevious}>Précédent</Button>}
-              {onSubmit && <Button onClick={onSubmit} disabled={disabled} children={childrenContinueButton} />}
+              {onClickPrevious && (
+                <button
+                  className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:bg-[#000091] hover:text-white"
+                  onClick={onClickPrevious}
+                  disabled={disabled}>
+                  Précédent
+                </button>
+              )}
+              {modeCorrection ? (
+                <Button onClick={onCorrection} disabled={disabled} children={childrenContinueButton} />
+              ) : (
+                onSubmit && <Button onClick={onSubmit} disabled={disabled} children={childrenContinueButton} />
+              )}
             </div>
           </div>
           <div className="mt-8 bg-white">

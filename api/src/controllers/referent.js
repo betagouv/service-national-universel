@@ -736,13 +736,17 @@ router.post(
         }
 
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          try {
+            const clamscan = await new NodeClam().init({
+              removeInfected: true,
+            });
+            const { isInfected } = await clamscan.isInfected(tempFilePath);
+            if (isInfected) {
+              capture(`File ${name} of user(${req.user.id})is infected`);
+              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+            }
+          } catch {
+            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
           }
         }
 

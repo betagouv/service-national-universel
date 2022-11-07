@@ -3,13 +3,13 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
 import { YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
-import WrapperPhase3 from "./wrapper";
 import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function Phase3({ young, onChange }) {
   const [edit, setEdit] = useState(false);
@@ -50,8 +50,9 @@ export default function Phase3({ young, onChange }) {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase3 young={young} tab="phase3" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase3" onChange={onChange} />
+      <div className="p-[30px]">
         <Box>
           <Bloc title="Réalisation d'une nouvelle mission d'intérêt général">
             <div style={{ display: "flex" }}>
@@ -147,8 +148,8 @@ export default function Phase3({ young, onChange }) {
             Télécharger l&apos;attestation de réalisation de la phase 3
           </DownloadAttestationButton>
         ) : null}
-      </WrapperPhase3>
-    </div>
+      </div>
+    </>
   );
 }
 

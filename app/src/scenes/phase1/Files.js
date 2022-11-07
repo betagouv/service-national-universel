@@ -9,7 +9,7 @@ export default function DocumentsPhase1({ young }) {
 
   return (
     <>
-      <h3>Ma fiche sanitaire</h3>
+      <h3 className="text-2xl font-medium">Ma fiche sanitaire</h3>
       <ScrollSection
         className={`flex flex-col md:flex-row items-center ${young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
         {young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
@@ -27,7 +27,6 @@ export default function DocumentsPhase1({ young }) {
           </>
         ) : null}
       </ScrollSection>
-
       <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
     </>
   );

@@ -38,7 +38,7 @@ import {
   translateFileStatusPhase1,
   translateStatusMilitaryPreparationFiles,
 } from "../../utils";
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import plausibleEvent from "../../services/plausible";
@@ -53,8 +53,10 @@ const FILTERS = [
   "STATUS",
   "COHORT",
   "ORIGINAL_COHORT",
+  "COUNTRY",
   "DEPARTMENT",
   "REGION",
+  "ACADEMY",
   "STATUS_PHASE_1",
   "STATUS_PHASE_2",
   "STATUS_PHASE_3",
@@ -67,16 +69,16 @@ const FILTERS = [
   "EQUIVALENCE_STATUS",
   "PPS",
   "PAI",
+  "RURAL",
   "QPV",
   "HANDICAP",
   "ZRR",
   "GRADE",
+  "SEXE",
+  "SITUATION",
   "PMR",
   "IMAGE_RIGHT",
-  "IMAGE_RIGHT_STATUS",
-  "RULES",
-  "AUTOTEST",
-  "AUTOTEST_STATUS",
+  "CNI_EXPIRED",
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
   "ALLERGIES",
@@ -84,7 +86,6 @@ const FILTERS = [
   "COHESION_JDM",
   "DEPART",
   "DEPART_MOTIF",
-  "SAME_DEPARTMENT_SPORT",
 ];
 
 export default function VolontaireList() {
@@ -513,7 +514,23 @@ export default function VolontaireList() {
                   renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
                   defaultValue={[YOUNG_STATUS.VALIDATED]}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Pays de résidence"
+                  componentId="COUNTRY"
+                  dataField="country.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Pays de résidence", "Pays de résidence")}
+                />
 
+                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
               </FilterRow>
@@ -533,6 +550,38 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Sexe"
+                  componentId="SEXE"
+                  dataField="gender.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SEXE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Sexe", "Sexe")}
+                  showMissing
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Situation"
+                  componentId="SITUATION"
+                  dataField="situation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SITUATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Situation", "Situation")}
+                  showMissing
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -565,6 +614,22 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
+                  placeholder="Région rurale"
+                  componentId="RURAL"
+                  dataField="isRegionRural.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "RURAL") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Région rurale", "Région rurale")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
                   placeholder="QPV"
                   componentId="QPV"
                   dataField="qpv.keyword"
@@ -589,6 +654,22 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder=""
+                  componentId="ALLERGIES"
+                  dataField="allergies.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -632,87 +713,22 @@ export default function VolontaireList() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
                   showMissing
-                  missingLabel="Non renseigné"
+                  missingLabel="En attente"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Droit à l'image - Statut"
-                  componentId="IMAGE_RIGHT_STATUS"
-                  dataField="imageRightFilesStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "IMAGE_RIGHT_STATUS") }}
+                  placeholder="Attestation - Pièce d’identité périmée"
+                  componentId="CNI_EXPIRED"
+                  dataField="CNIFileNotValidOnStart.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CNI_EXPIRED") }}
                   renderItem={(e, count) => {
-                    return `${translateFileStatusPhase1(e)} (${count})`;
+                    if(e === "true") return `En attente (${count})`;
+                    return `Validée (${count})`
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Droit à l'image - Statut", "Statut fichier phase 1")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Règlement intérieur"
-                  componentId="RULES"
-                  dataField="rulesYoung.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "RULES") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Règlement intérieur", "Règlement intérieur")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Utilisation d’autotest"
-                  componentId="AUTOTEST"
-                  dataField="autoTestPCR.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "AUTOTEST") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest", "Utilisation d’autotest")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Utilisation d’autotest - Statut"
-                  componentId="AUTOTEST_STATUS"
-                  dataField="autoTestPCRFilesStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "AUTOTEST_STATUS") }}
-                  renderItem={(e, count) => {
-                    return `${translateFileStatusPhase1(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest - Statut", "Statut fichier phase 1")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder=""
-                  componentId="ALLERGIES"
-                  dataField="allergies.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
-                  showMissing
-                  missingLabel="Non renseigné"
+                  renderLabel={(items) => getFilterLabel(items, "Attestation - Pièce d’identité périmée", "Attestation - Pièce d’identité périmée")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
@@ -734,7 +750,7 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Affectation dans son département (handicap)"
+                  placeholder="Affectation dans son département"
                   componentId="SAME_DEPARTMENT"
                   dataField="handicapInSameDepartment.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
@@ -743,21 +759,7 @@ export default function VolontaireList() {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département (handicap)", "Affectation dans son département (handicap)")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Affectation dans son département (sport)"
-                  componentId="SAME_DEPARTMENT_SPORT"
-                  dataField="highSkilledActivityInSameDepartment.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT_SPORT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département (sport)", "Affectation dans son département (sport)")}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

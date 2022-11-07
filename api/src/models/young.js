@@ -55,7 +55,7 @@ const CorrectionRequest = new mongoose.Schema({
     type: String,
     required: true,
     default: "PENDING",
-    enum: ["PENDING" | "SENT" | "REMINDED" | "CORRECTED" | "CANCELED"],
+    enum: ["PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED"],
     documentation: {
       description: "Etat de la demande de correction",
     },
@@ -713,6 +713,13 @@ const Schema = new mongoose.Schema({
     enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "Densité de la ville  pendant le snu du volontaire",
+    },
+  },
+  isRegionRural: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Ruralité de la ville pendant le snu du volontaire",
     },
   },
   department: {
@@ -1650,6 +1657,29 @@ const Schema = new mongoose.Schema({
     militaryPreparationFilesCensus: [File],
     militaryPreparationFilesAuthorization: [File],
     militaryPreparationFilesCertificate: [File],
+  },
+
+  latestCNIFileExpirationDate: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  CNIFileNotValidOnStart: {
+    type: String,
+    enum: ["false", "true"],
+    documentation: {
+      description: "Date d'expiration de la CNI File non valide au début de la Cohorte",
+    },
+  },
+
+  latestCNIFileCategory: {
+    type: String,
+    enum: ["cniOld", "cniNew", "passport"],
+    documentation: {
+      description: "Catégorie du fichier le plus récent dans files.cniFiles",
+    },
   },
 
   missionsInMail: {

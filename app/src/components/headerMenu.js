@@ -49,7 +49,7 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <img src={File} />
             <div>Le programme</div>
           </a>
-          <Link className="flex space-x-2 items-center pt-3" to={`/public-besoin-d-aide?from${pathname}`}>
+          <Link className="flex space-x-2 items-center pt-3" to={`/public-besoin-d-aide?from=${pathname}`}>
             <Help />
             <div>Besoin d&apos;aide ?</div>
           </Link>

@@ -33,8 +33,8 @@ import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPoint
 import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
-import WrapperPhase1 from "./wrapper";
 import Select from "../../../components/Select2";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -183,8 +183,9 @@ export default function Phase1(props) {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase1 young={young} tab="phase1" onChange={props.onChange}>
+    <>
+      <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
+      <div className="p-[30px]">
         <Box>
           <article className="flex">
             <Bloc
@@ -305,7 +306,7 @@ export default function Phase1(props) {
             </Row>
           ) : null}
         </Box>
-      </WrapperPhase1>
+      </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -338,7 +339,7 @@ export default function Phase1(props) {
         young={young}
       />
       <ModalAffectations isOpen={modalAffectations?.isOpen} onCancel={() => setModalAffectation({ isOpen: false })} young={young} />
-    </div>
+    </>
   );
 }
 

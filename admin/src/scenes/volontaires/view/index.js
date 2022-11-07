@@ -17,6 +17,7 @@ import { YOUNG_STATUS } from "../../../utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import FormEquivalence from "./FormEquivalence";
 import { environment } from "../../../config";
+import VolontairePhase0View from "../../phase0/view";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
@@ -36,10 +37,15 @@ export default function Index({ ...props }) {
   };
 
   const getDetail = () => {
-    if (young.status === YOUNG_STATUS.DELETED) {
-      return <DeletedDetail young={young} onChange={getYoung} />;
+    if (environment === "development" || environment === "staging") {
+      const mode = [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? "correction" : "readonly";
+      return <VolontairePhase0View young={young} onChange={getYoung} globalMode={mode} />;
     } else {
-      return <Details young={young} onChange={getYoung} />;
+      if (young.status === YOUNG_STATUS.DELETED) {
+        return <DeletedDetail young={young} onChange={getYoung} />;
+      } else {
+        return <Details young={young} onChange={getYoung} />;
+      }
     }
   };
 

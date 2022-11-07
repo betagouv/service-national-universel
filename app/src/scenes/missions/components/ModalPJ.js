@@ -5,7 +5,7 @@ import DndFileInput from "../../../components/dndFileInput";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { Formik } from "formik";
-import { translateAddFilePhase2 } from "../../../utils";
+import { translateAddFilePhase2, translate } from "../../../utils";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import { BsCheck2 } from "react-icons/bs";
 import { useEffect } from "react";
@@ -36,7 +36,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
         { timeOut: 0 },
       );
     }
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier", translate(res.code));
     onCancel();
     setStepOne(true);
   };
@@ -103,7 +103,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
                               { timeOut: 0 },
                             );
                           }
-                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier", translate(res.code));
                           toastr.success("Fichier téléversé");
                           handleChange({ target: { value: res.data, name } });
                         }}

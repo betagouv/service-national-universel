@@ -7,13 +7,16 @@ import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.j
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import { getDepartmentByZip } from "snu-lib";
 import { capture } from "../../../sentry";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import API from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
 
 export default function NonEligible() {
   const young = useSelector((state) => state.Auth.young);
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const engagementPrograms = [
     {
@@ -45,7 +48,10 @@ export default function NonEligible() {
       link: "https://www.reservistes.defense.gouv.fr/",
     },
   ];
-  const onClickButton = () => {
+  const logout = async () => {
+    setLoading(true);
+    await API.post(`/young/logout`);
+    dispatch(setYoung(null));
     history.push("/");
   };
 
@@ -122,7 +128,8 @@ export default function NonEligible() {
           <div className="w-full border-t border-t-[#E5E5E5] flex justify-end">
             <button
               className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091] mt-4"
-              onClick={onClickButton}>
+              onClick={logout}
+              disabled={loading}>
               Revenir à l&apos;accueil
             </button>
           </div>

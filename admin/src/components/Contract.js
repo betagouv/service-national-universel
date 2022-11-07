@@ -394,7 +394,7 @@ export default function Contract({ young, admin }) {
                             <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
                             <ContractField name="youngLastName" placeholder="Nom" context={context} />
                             <div>
-                              né le :
+                              né(e) le :
                               <ContractField name="youngBirthdate" context={context} type="date" placeholder="jj/mm/yyyy" />
                             </div>
                             <div>
@@ -461,7 +461,7 @@ export default function Contract({ young, admin }) {
                             <br />
                           </div>
                           <div>
-                            Les objectifs de la missions sont les suivants :
+                            Les objectifs de la mission sont les suivants :
                             <ContractField name="missionObjective" placeholder="Objectifs" as="textarea" context={context} />
                           </div>
                           <div>
@@ -617,7 +617,7 @@ export default function Contract({ young, admin }) {
                             <div>
                               Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
                               <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                              représenté par ses représentant légaux :
+                              représenté par ses représentants légaux :
                             </div>
                             <div>
                               <br />

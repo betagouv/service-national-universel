@@ -8,7 +8,6 @@ const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
-const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -23,11 +22,14 @@ const {
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
+  CELLAR_ENDPOINT_SUPPORT,
+  CELLAR_KEYID_SUPPORT,
+  CELLAR_KEYSECRET_SUPPORT,
+  PUBLIC_BUCKET_NAME_SUPPORT,
 } = require("../config");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
-const { getQPV, getDensity } = require("../geo");
 const { SUB_ROLES } = require("snu-lib/roles");
 const { getAge } = require("snu-lib/date");
 
@@ -46,23 +48,52 @@ function getReq(url, cb) {
   return http.get(url, cb);
 }
 
-function uploadFile(path, file) {
+const SUPPORT_BUCKET_CONFIG = {
+  bucket: PUBLIC_BUCKET_NAME_SUPPORT,
+  endpoint: CELLAR_ENDPOINT_SUPPORT,
+  accessKeyId: CELLAR_KEYID_SUPPORT,
+  secretAccessKey: CELLAR_KEYSECRET_SUPPORT,
+};
+
+const DEFAULT_BUCKET_CONFIG = {
+  bucket: BUCKET_NAME,
+  endpoint: CELLAR_ENDPOINT,
+  accessKeyId: CELLAR_KEYID,
+  secretAccessKey: CELLAR_KEYSECRET,
+};
+
+function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: bucket,
       Key: path,
       Body: file.data,
       ContentEncoding: file.encoding,
       ContentType: file.mimetype,
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
+
     s3bucket.upload(params, function (err, data) {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
     });
   });
 }
+
+const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
+  const p = new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+    const params = { Bucket: bucket, Key: name };
+    s3bucket.getObject(params, (err, data) => {
+      if (err) return reject(err);
+      resolve(data);
+    });
+  });
+  return p;
+};
 
 function uploadPublicPicture(path, file) {
   return new Promise((resolve, reject) => {
@@ -103,18 +134,6 @@ function listFiles(path) {
     });
   });
 }
-
-const getFile = (name) => {
-  const p = new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: name };
-    s3bucket.getObject(params, (err, data) => {
-      if (err) return reject(err);
-      resolve(data);
-    });
-  });
-  return p;
-};
 
 function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
@@ -451,38 +470,6 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-async function inscriptionCheck(value, young, req) {
-  // Check quartier prioritaires.
-  if (value.zip && value.city && value.address) {
-    const qpv = await getQPV(value.zip, value.city, value.address);
-    if (qpv === true) young.set({ qpv: "true" });
-    else if (qpv === false) young.set({ qpv: "false" });
-    else young.set({ qpv: "" });
-    await young.save({ fromUser: req.user });
-  }
-
-  // Check quartier prioritaires.
-  if (value.cityCode) {
-    const populationDensity = await getDensity(value.cityCode);
-    young.set({ populationDensity });
-    await young.save({ fromUser: req.user });
-  }
-
-  // if withdrawn, cascade withdrawn on every status
-  if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-    if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
-    if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
-    if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
-    await young.save({ fromUser: req.user });
-  }
-
-  // if they had a cohesion center, we check if we need to update the places taken / left
-  if (young.sessionPhase1Id) {
-    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-  }
-}
-
 const updateApplication = async (mission, fromUser = null) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
     return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
@@ -661,6 +648,8 @@ const ERRORS = {
   PASSWORD_NOT_VALIDATED: "PASSWORD_NOT_VALIDATED",
   INVITATION_TOKEN_EXPIRED_OR_INVALID: "INVITATION_TOKEN_EXPIRED_OR_INVALID",
   FILE_CORRUPTED: "FILE_CORRUPTED",
+  FILE_INFECTED: "FILE_INFECTED",
+  FILE_SCAN_DOWN: "FILE_SCAN_DOWN",
   YOUNG_ALREADY_REGISTERED: "YOUNG_ALREADY_REGISTERED",
   UNSUPPORTED_TYPE: "UNSUPPORTED_TYPE",
   USER_NOT_FOUND: "USER_NOT_FOUND",
@@ -762,7 +751,6 @@ module.exports = {
   STEPS,
   STEPS2023,
   STEPS2023REINSCRIPTION,
-  inscriptionCheck,
   updateApplication,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
@@ -770,4 +758,5 @@ module.exports = {
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
   getReferentManagerPhase2,
+  SUPPORT_BUCKET_CONFIG,
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -8,13 +8,23 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 import { capture } from "../../sentry";
+import FileUpload, { useFileUpload } from "../../components/FileUpload";
+
+const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
 
 export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) {
-  const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
   const [loading, setLoading] = useState(false);
+  const { files, addFiles, deleteFile, error } = useFileUpload();
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
+
   return (
     <Form>
       <img src={close} onClick={() => setOpen(false)} />
@@ -24,7 +34,17 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            let uploadedFiles;
             setLoading(true);
+            if (files.length > 0) {
+              const filesResponse = await api.uploadFile("/zammood/upload", files);
+              if (!filesResponse.ok) {
+                const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
+                return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
+              }
+              uploadedFiles = filesResponse.data;
+            }
+
             const { message, subject, firstName, lastName, email, step1, step2, department } = values;
             const response = await api.post("/zammood/ticket/form", {
               message,
@@ -38,8 +58,9 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               region: department2region[department],
               role: "young exterior",
               fromPage,
+              files: uploadedFiles,
             });
-            setLoading(false);
+
             setOpen(false);
             if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
             toastr.success("Ticket créé");
@@ -48,6 +69,8 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
             console.log(e);
             capture(e);
             toastr.error("Oups, une erreur est survenue", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
@@ -166,6 +189,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               rows="5"
               infos="Merci d’apporter le plus de précisions possibles afin de faciliter le traitement de votre demande"
             />
+            <FileUpload className="px-[15px]" files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
             <LoadingButton loading={loading} type="submit" style={{ marginLeft: 15, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
               Envoyer
             </LoadingButton>

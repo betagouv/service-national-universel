@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import Download from "../assets/icons/Download";
-import { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
+import { translate } from "../utils";
 import api from "../services/api";
 import ModalConfirm from "./modals/ModalConfirm";
 
@@ -61,7 +62,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
         { timeOut: 0 },
       );
     }
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier", translate(res.code));
     if (onChange) onChange();
     setFilesList(res.data);
   }

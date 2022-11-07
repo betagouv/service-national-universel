@@ -21,13 +21,13 @@ export default function Footer() {
 
   useEffect(() => {
     if (
-      ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements", "inscription"].findIndex((route) =>
+      ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements", "inscription", "noneligible"].findIndex((route) =>
         location.pathname.includes(route),
       ) === -1
     ) {
       setShowOldFooter(true);
     } else setShowOldFooter(false);
-  }, [location]);
+  }, [from]);
 
   return showOldFooter ? (
     <FooterContainer>
