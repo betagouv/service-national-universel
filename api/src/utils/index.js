@@ -649,7 +649,6 @@ const updateYoungApplicationFilesType = async (application, user) => {
     if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
     return prev;
   }, []);
-  console.log(listFiles);
   young.set({ phase2ApplicationFilesType: listFiles });
   await young.save({ fromUser: user });
 };
