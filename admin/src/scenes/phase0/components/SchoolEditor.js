@@ -116,12 +116,14 @@ export default function SchoolEditor({ young, onChange, className }) {
       },
     };
     const { responses } = await api.esQuery("schoolramses", body);
-    setCountries(
-      responses[0].aggregations.countries.buckets
-        .filter((e) => e.key !== "FRANCE")
-        .map((e) => e.key)
-        .sort(),
-    );
+    if (responses && responses.length > 0) {
+      setCountries(
+        responses[0].aggregations.countries.buckets
+          .filter((e) => e.key !== "FRANCE")
+          .map((e) => e.key)
+          .sort(),
+      );
+    }
   }
 
   async function loadFrenchSchools() {
@@ -135,7 +137,9 @@ export default function SchoolEditor({ young, onChange, className }) {
       };
       body.query.bool.filter.push({ term: { "city.keyword": young.schoolCity } });
       const { responses } = await api.esQuery("schoolramses", body);
-      setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+      if (responses && responses.length > 0) {
+        setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+      }
     }
     setLoadingSchools(false);
   }
@@ -151,7 +155,9 @@ export default function SchoolEditor({ young, onChange, className }) {
       };
       body.query.bool.filter.push({ term: { "country.keyword": young.schoolCountry } });
       const { responses } = await api.esQuery("schoolramses", body);
-      setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+      if (responses && responses.length > 0) {
+        setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+      }
     }
     setLoadingSchools(false);
   }
