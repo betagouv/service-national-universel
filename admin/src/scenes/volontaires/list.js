@@ -45,7 +45,7 @@ import plausibleEvent from "../../services/plausible";
 import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import { youngExportFields } from "snu-lib";
+import { translateApplicationFileType, youngExportFields } from "snu-lib";
 import ModalExport from "../../components/modals/ModalExport";
 
 const FILTERS = [
@@ -86,6 +86,7 @@ const FILTERS = [
   "COHESION_JDM",
   "DEPART",
   "DEPART_MOTIF",
+  "APPLICATION_FILES_TYPE",
 ];
 
 export default function VolontaireList() {
@@ -723,8 +724,8 @@ export default function VolontaireList() {
                   dataField="CNIFileNotValidOnStart.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "CNI_EXPIRED") }}
                   renderItem={(e, count) => {
-                    if(e === "true") return `En attente (${count})`;
-                    return `Validée (${count})`
+                    if (e === "true") return `En attente (${count})`;
+                    return `Validée (${count})`;
                   }}
                   title=""
                   URLParams={true}
@@ -916,6 +917,22 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Dossier d’éligibilité aux Préparations Militaires", "Dossier d’éligibilité aux Préparations Militaires")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="APPLICATION_FILES_TYPE"
+                  dataField="phase2ApplicationFilesType.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateApplicationFileType(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Pièces jointes", "Pièces jointes")}
+                  showMissing={true}
+                  missingLabel="Aucune pièce jointe"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
