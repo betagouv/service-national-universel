@@ -1524,8 +1524,8 @@ function SectionOldConsentements({ young }) {
             <li className="mt-[16px]">A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel&nbsp;;</li>
             <li className="mt-[16px]">A pris connaissance des modalités de traitement de mes données personnelles&nbsp;;</li>
             <li className="mt-[16px]">
-              Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de
-              cohésion puis la réalisation d&apos;une mission d&apos;intérêt général&nbsp;;
+              Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session {young.cohort} du Service National Universel qui comprend la participation au
+              séjour de cohésion puis la réalisation d&apos;une mission d&apos;intérêt général&nbsp;;
             </li>
             <li className="mt-[16px]">Certifie l&apos;exactitude des renseignements fournis&nbsp;;</li>
             <li className="mt-[16px]">
@@ -1542,8 +1542,8 @@ function SectionOldConsentements({ young }) {
           <ul className="list-outside ml-[24px]">
             <li className="mt-[16px]">Confirmation d&apos;être titulaire de l&apos;autorité parentale/le représentant légal du volontaire&nbsp;;</li>
             <li className="mt-[16px]">
-              Autorisation du volontaire à participer à la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation
-              d&apos;une mission d&apos;intérêt général&nbsp;;
+              Autorisation du volontaire à participer à la session {young.cohort} du Service National Universel qui comprend la participation au séjour de cohésion puis la
+              réalisation d&apos;une mission d&apos;intérêt général&nbsp;;
             </li>
             <li className="mt-[16px]">Engagement à renseigner le consentement relatif aux droits à l&apos;image avant le début du séjour de cohésion&nbsp;;</li>
             <li className="mt-[16px]">Engagement à renseigner l&apos;utilisation d&apos;autotest COVID avant le début du séjour de cohésion&nbsp;;</li>
