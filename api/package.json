@@ -58,7 +58,7 @@
     "passport-jwt": "^4.0.0",
     "passport-saml": "^3.2.4",
     "password-validator": "^5.3.0",
-    "puppeteer": "^10.2.0",
+    "puppeteer": "^13.0.0",
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
     "snu-lib": "file:../lib",
