@@ -24,6 +24,9 @@ export default function StepUpload() {
   if (category === undefined) category = young?.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
+  const correctionsFile = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
+  const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
+  const mode = correctionsFile.length || correctionsDate.length ? "correction" : "inscription";
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
@@ -31,22 +34,18 @@ export default function StepUpload() {
   const [verso, setVerso] = useState();
   const [checked, setChecked] = useState({ coupe: false, lisible: false, nette: false });
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
-
-  const correctionsFile = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
-  const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
-  const mode = correctionsFile.length || correctionsDate.length ? "correction" : "inscription";
+  const [step, setStep] = useState(getStep());
 
   async function uploadFiles() {
     let files = [...recto];
-    if (verso?.length) files = [...files, ...verso];
-    setLoading(true);
+    if (verso) files = [...files, ...verso];
     for (const file of files) {
       if (file.size > 5000000)
         return setError({
           text: `Ce fichier ${files.name} est trop volumineux.`,
         });
     }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, new Date(date));
     if (res.code === "FILE_CORRUPTED")
       return setError({
         text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
@@ -60,6 +59,7 @@ export default function StepUpload() {
   }
 
   async function onSubmit() {
+    setLoading(true);
     if (recto) uploadFiles();
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
@@ -68,17 +68,18 @@ export default function StepUpload() {
       setLoading(false);
       return;
     }
-    dispatch(setYoung(responseData));
     plausibleEvent("Phase0/CTA inscription - CI mobile");
+    dispatch(setYoung(responseData));
     history.push("/inscription2023/confirm");
   }
 
   async function onCorrect() {
     setLoading(true);
-    if (recto?.length) uploadFiles();
+    if (recto) uploadFiles();
     const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
     if (!ok) {
+      capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       setLoading(false);
       return;
@@ -86,22 +87,27 @@ export default function StepUpload() {
     plausibleEvent("Phase0/CTA demande correction - Corriger ID");
     dispatch(setYoung(responseData));
     history.push("/");
-    setLoading(false);
   }
 
-  function renderInscription() {
-    if (recto && ["cniNew", "cniOld"].includes(category) && !verso) return <Verso />;
-    if (checked.lisible === true && checked.coupe === true && checked.nette === true) return <ExpirationDate />;
-    if (verso || (recto && category === "passport")) return <Confirm />;
-    return <Recto />;
+  function getStep() {
+    if (mode === "correction") {
+      if (category === null) return <div>Loading</div>;
+      if (correctionsFile?.length && correctionsFile?.some((e) => e.reason === "MISSING_BACK")) return "verso";
+      if (correctionsDate?.length) return "expirationStep";
+      if (verso || (recto && category === "passport")) return "verify";
+      return "recto";
+    }
+    if (recto && ["cniNew", "cniOld"].includes(category) && !verso) return "verso";
+    if (checked.lisible === true && checked.coupe === true && checked.nette === true) return "expirationDate";
+    if (verso || (recto && category === "passport")) return "verify";
+    return "recto";
   }
 
-  function renderCorrection() {
-    if (category === null) return <div>Loading</div>;
-    if (correctionsFile?.length && correctionsFile?.some((e) => e.reason === "MISSING_BACK")) return <Verso />;
-    if (correctionsDate?.length) return <ExpirationDate />;
-    if (verso || (recto && category === "passport")) return <Confirm />;
-    return <Recto />;
+  function renderStep(step) {
+    if (step === "recto") return <Recto />;
+    if (step === "verso") return <Verso />;
+    if (step === "expirationDate") return <ExpirationDate />;
+    if (step === "verify") return <Verify />;
   }
 
   return (
@@ -115,14 +121,27 @@ export default function StepUpload() {
             {e.message && ` : ${e.message}`}
           </ErrorMessage>
         ))}
-        {mode === "correction" ? renderCorrection() : renderInscription()}
+        {renderStep(step)}
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      {mode === "correction" ? (
-        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={correctionsDate.length || correctionsFile.length} />
-      ) : (
+      {step === "verify" && (
+        <StickyButton
+          text="Continuer"
+          onClick={() => setStep("expirationDate")}
+          onClickPrevious={() => {
+            setRecto(null);
+            setVerso(null);
+            setStep(correctionsFile?.some((e) => (e.reason === "MISSING_BACK" ? "verso" : "recto")));
+          }}
+          disabled={Object.values(checked).some((e) => e === false)}
+        />
+      )}
+      {mode === "inscription" && step === "expirationDate" && (
         <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
+      )}
+      {mode === "correction" && step === "expirationDate" && (
+        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={correctionsDate.length || correctionsFile.length} />
       )}
     </>
   );
@@ -141,6 +160,7 @@ export default function StepUpload() {
           accept="image/*"
           onChange={(e) => {
             setRecto(e.target.files);
+            setStep(category === "passport" ? "verify" : "verso");
           }}
           className="hidden"
         />
@@ -167,6 +187,7 @@ export default function StepUpload() {
           accept="image/*"
           onChange={(e) => {
             setVerso(e.target.files);
+            setStep("verify");
           }}
           className="hidden"
         />
@@ -179,7 +200,7 @@ export default function StepUpload() {
     );
   }
 
-  function Confirm() {
+  function Verify() {
     return (
       <>
         <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
