@@ -81,7 +81,7 @@ describe("Referent", () => {
     it("should return 200", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper())
+      const res = await request(getAppHelper())
         .post("/referent/signup")
         .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.status).toBe(200);
@@ -90,7 +90,7 @@ describe("Referent", () => {
 
     it("should transform firstName and lastName", async () => {
       const fixture = getNewReferentFixture();
-      res = await request(getAppHelper())
+      const res = await request(getAppHelper())
         .post("/referent/signup")
         .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.body.user.firstName).toBe("Foo");
@@ -102,7 +102,7 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper())
+      const res = await request(getAppHelper())
         .post("/referent/signup")
         .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.status).toBe(409);
