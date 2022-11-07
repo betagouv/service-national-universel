@@ -81,14 +81,18 @@ describe("Referent", () => {
     it("should return 200", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper())
+        .post("/referent/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
     });
 
     it("should transform firstName and lastName", async () => {
       const fixture = getNewReferentFixture();
-      res = await request(getAppHelper()).post("/referent/signup").send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper())
+        .post("/referent/signup")
+        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
       expect(res.body.user.email).toBe(fixture.email.toLowerCase());
@@ -98,14 +102,16 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper())
+        .post("/referent/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606" });
       expect(res.status).toBe(409);
     });
     it("should return 400 when user doesnt specify CGU choice", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      let res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+      let res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", phone: "0606060606" });
       expect(res.status).toBe(400);
     });
   });
