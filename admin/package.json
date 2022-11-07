@@ -78,7 +78,7 @@
     "react-icons": "^4.6.0",
     "react-loading": "2.0.3",
     "react-multi-select-component": "3.0.7",
-    "react-redux": "7.2.6",
+    "react-redux": "7.2.9",
     "react-redux-toastr": "7.6.10",
     "react-router-dom": "5.3.4",
     "react-select": "4.3.1",
