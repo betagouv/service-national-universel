@@ -1,14 +1,15 @@
+import { Field, Formik } from "formik";
 import React, { useState } from "react";
-import { Col, Row, Input } from "reactstrap";
-import styled from "styled-components";
-import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
+import { Col, Input, Row } from "reactstrap";
+import styled from "styled-components";
 
-import api from "../../../services/api";
-import { translate, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
+import validator from "validator";
 import LoadingButton from "../../../components/buttons/LoadingButton";
+import api from "../../../services/api";
+import { regexPhoneFrenchCountries, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 
-export default function Invite({ structure, onSent, setInvited }) {
+export default function Invite({ structure, onSent }) {
   const [sent, setSent] = useState();
   return sent ? (
     <Wrapper>
@@ -23,15 +24,18 @@ export default function Invite({ structure, onSent, setInvited }) {
         initialValues={{ role: ROLES.RESPONSIBLE, structureId: structure._id, structureName: structure.name }}
         onSubmit={async (values, actions) => {
           try {
-            if (!values.firstName || !values.lastName || !values.email) {
+            if (!values.firstName || !values.lastName || !values.email || !values.phone) {
               toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
+              return;
+            }
+            if (!validator.matches(values.phone, regexPhoneFrenchCountries)) {
+              toastr.error("Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX");
               return;
             }
             if (structure.isNetwork === "true") values.role = ROLES.SUPERVISOR;
             const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, values);
             if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
             setSent(`${values.firstName} ${values.lastName}`);
-            setInvited(`${values.firstName} ${values.lastName}`);
             onSent?.();
             return toastr.success("Invitation envoyée");
           } catch (e) {
@@ -69,6 +73,20 @@ export default function Invite({ structure, onSent, setInvited }) {
                   <span>*</span>ADRESSE EMAIL
                 </label>
                 <Input type="email" value={values.email} name="email" onChange={handleChange} placeholder="Adresse Email" />
+              </FormGroup>
+              <FormGroup>
+                <label>
+                  <span>*</span>Téléphone
+                </label>
+                <Field
+                  className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                  name="phone"
+                  type="tel"
+                  id="phone"
+                  value={values.phone}
+                  onChange={handleChange}
+                  placeholder="06/02 00 00 00 00"
+                />
               </FormGroup>
               <ButtonContainer>
                 <LoadingButton type="submit" onClick={handleSubmit}>
