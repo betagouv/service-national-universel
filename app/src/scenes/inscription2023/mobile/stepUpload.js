@@ -21,20 +21,33 @@ import StickyButton from "../../../components/inscription/stickyButton";
 export default function StepUpload() {
   let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
-  if (category === undefined) category = young?.latestCNIFileCategory;
+  if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
-  const correctionsFile = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
-  const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
-  const mode = correctionsFile.length || correctionsDate.length ? "correction" : "inscription";
+  const correctionsFile = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
+  const correctionsDate = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();
   const [checked, setChecked] = useState({ coupe: false, lisible: false, nette: false });
-  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
+  const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
   const [step, setStep] = useState(getStep());
+
+  function getStep() {
+    if (correctionsFile?.some((e) => e.reason === "MISSING_BACK")) return "verso";
+    if (correctionsFile?.length) return "recto";
+    if (correctionsDate?.length) return "date";
+    return "recto";
+  }
+
+  function renderStep(step) {
+    if (step === "recto") return <Recto />;
+    if (step === "verso") return <Verso />;
+    if (step === "verify") return <Verify />;
+    if (step === "date") return <ExpirationDate />;
+  }
 
   async function uploadFiles() {
     let files = [...recto];
@@ -89,38 +102,11 @@ export default function StepUpload() {
     history.push("/");
   }
 
-  function getStep() {
-    if (mode === "correction") {
-      if (category === null) return <div>Loading</div>;
-      if (correctionsFile?.length && correctionsFile?.some((e) => e.reason === "MISSING_BACK")) return "verso";
-      if (correctionsDate?.length) return "expirationStep";
-      if (verso || (recto && category === "passport")) return "verify";
-      return "recto";
-    }
-    if (recto && ["cniNew", "cniOld"].includes(category) && !verso) return "verso";
-    if (checked.lisible === true && checked.coupe === true && checked.nette === true) return "expirationDate";
-    if (verso || (recto && category === "passport")) return "verify";
-    return "recto";
-  }
-
-  function renderStep(step) {
-    if (step === "recto") return <Recto />;
-    if (step === "verso") return <Verso />;
-    if (step === "expirationDate") return <ExpirationDate />;
-    if (step === "verify") return <Verify />;
-  }
-
   return (
     <>
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        {correctionsFile?.map((e) => (
-          <ErrorMessage key={e._id}>
-            <strong>{translateCorrectionReason(e.reason)}</strong>
-            {e.message && ` : ${e.message}`}
-          </ErrorMessage>
-        ))}
         {renderStep(step)}
       </div>
       <Help />
@@ -128,27 +114,35 @@ export default function StepUpload() {
       {step === "verify" && (
         <StickyButton
           text="Continuer"
-          onClick={() => setStep("expirationDate")}
+          onClick={() => setStep("date")}
           onClickPrevious={() => {
             setRecto(null);
             setVerso(null);
-            setStep(correctionsFile?.some((e) => (e.reason === "MISSING_BACK" ? "verso" : "recto")));
+            setStep(correctionsFile?.some((e) => e.reason === "MISSING_BACK") ? "verso" : "recto");
           }}
           disabled={Object.values(checked).some((e) => e === false)}
         />
       )}
-      {mode === "inscription" && step === "expirationDate" && (
-        <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
-      )}
-      {mode === "correction" && step === "expirationDate" && (
-        <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={correctionsDate.length || correctionsFile.length} />
-      )}
+      {step === "date" &&
+        (correctionsFile.length || correctionsDate.length ? (
+          <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!date || loading} />
+        ) : (
+          <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
+        ))}
     </>
   );
 
   function Recto() {
     return (
       <>
+        <div className="mb-4">
+          {correctionsFile?.map((e) => (
+            <ErrorMessage key={e._id} className="">
+              <strong>{translateCorrectionReason(e.reason)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+        </div>
         <div className="w-full flex items-center justify-center mb-4">
           <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         </div>
@@ -160,13 +154,13 @@ export default function StepUpload() {
           accept="image/*"
           onChange={(e) => {
             setRecto(e.target.files);
-            setStep(category === "passport" ? "verify" : "verso");
+            setStep(correctionsFile?.some((e) => e.reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
           }}
           className="hidden"
         />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
-            Scannez le {ID[category].imgBack && "recto du"} document
+            {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
           </label>
         </button>
       </>
@@ -176,6 +170,14 @@ export default function StepUpload() {
   function Verso() {
     return (
       <>
+        <div className="mb-4">
+          {correctionsFile?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>{translateCorrectionReason(e.reason)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+        </div>
         <div className="w-full flex items-center justify-center mb-4">
           <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
         </div>
@@ -233,12 +235,14 @@ export default function StepUpload() {
   function ExpirationDate() {
     return (
       <>
-        {correctionsDate?.map((e) => (
-          <ErrorMessage key={e._id}>
-            <strong>Date d&apos;expiration incorrecte</strong>
-            {e.message && ` : ${e.message}`}
-          </ErrorMessage>
-        ))}
+        <div className="mb-4">
+          {correctionsDate?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>Date d&apos;expiration incorrecte</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+        </div>
         <div className="text-xl font-medium">Renseignez la date d’expiration</div>
         <div className="text-gray-600 my-2">
           Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
