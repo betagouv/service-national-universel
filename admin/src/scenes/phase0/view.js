@@ -1426,8 +1426,8 @@ function SectionConsentements({ young }) {
           <CheckRead>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
           <CheckRead>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead>
-            Est volontaire pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion du 13 au 25 février 2022 puis la
-            réalisation d&apos;une mission d&apos;intérêt général.
+            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
+            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
           <CheckRead>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
