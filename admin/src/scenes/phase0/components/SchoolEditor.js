@@ -142,7 +142,7 @@ export default function SchoolEditor({ young, onChange, className }) {
 
   async function loadCountrySchools() {
     setLoadingSchools(true);
-    if (!young.country) {
+    if (!young.schoolCountry) {
       setSchools([]);
     } else {
       const body = {
