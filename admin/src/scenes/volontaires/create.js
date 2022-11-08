@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Formik } from "formik";
+import validator from "validator";
 import "dayjs/locale/fr";
 
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -54,6 +55,23 @@ export default function Create() {
       return true;
     }
   }
+  const validate = (values, props /* only available when using withFormik */) => {
+    const errors = {};
+    const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId"]
+    if (!values.email) {
+      errors.email = 'Ne peut être vide';
+
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+      errors.email = 'Adresse email invalide';
+
+    }
+    for (const key in values) {
+      if (required.includes(key) && (!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
+        errors[key] = 'Ne peut être vide';
+      }
+    }
+    return errors;
+  };
 
   return (
     <Wrapper>
@@ -65,6 +83,7 @@ export default function Create() {
           birthdateAt: null,
           birthCityZip: "",
           birthCity: "",
+          gender: "",
           birthCountry: "",
           files: {
             cniFiles: [],
@@ -76,7 +95,7 @@ export default function Create() {
           expirationDate: null,
           phone: "",
           cohort: options[0],
-          parentStatementOfHonorInvalidId: true,
+          parentStatementOfHonorInvalidId: "true",
           addressObject: {
             addressVerified: false,
             zip: "",
@@ -88,6 +107,7 @@ export default function Create() {
         }}
         validateOnBlur={false}
         validateOnChange={false}
+        validate={validate}
         onSubmit={async (values) => {
           try {
             const transformedObject = Object.assign({}, values);
@@ -98,7 +118,7 @@ export default function Create() {
             transformedObject.department = values.addressObject.department;
             transformedObject.address = values.addressObject.address;
             delete transformedObject.addressObject;
-            console.log("Transformed object", transformedObject);            
+            console.log("Transformed object", transformedObject);
 
             const { ok, code } = await api.post("/young/invite", transformedObject);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
@@ -116,9 +136,6 @@ export default function Create() {
                 Valider cette candidature
               </SaveBtn>
             </div>
-            {Object.values(errors).filter((e) => !!e).length ? (
-              <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
-            ) : null}
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
               <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
               <div className={"p-[32px]"}>
@@ -129,7 +146,6 @@ export default function Create() {
                       values={values}
                       handleChange={handleChange}
                       handleSubmit={handleSubmit}
-                      required={{ firstName: true, lastName: true, birthdateAt: true, gender: true }}
                       errors={errors}
                       touched={touched}
                     />
@@ -140,7 +156,6 @@ export default function Create() {
                       values={values}
                       handleChange={handleChange}
                       setFieldValue={setFieldValue}
-                      required={{ email: true, phone: true, address: true, city: true, zip: true, department: true, region: true }}
                       errors={errors}
                       touched={touched}
                       validateField={validateField}
@@ -212,6 +227,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
         <Field
           name="birthdateAt"
           type="date"
+          errors={errors}
           value={values.birthdateAt}
           transformer={translate}
           className="mb-[16px]"
@@ -221,6 +237,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           <Field
             name="birthCity"
             label="Ville de naissance"
+            errors={errors}
             value={values.birthCity}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
@@ -229,6 +246,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           <Field
             name="birthCityZip"
             label="Code postal de naissance"
+            errors={errors}
             value={values.birthCityZip}
             transformer={translate}
             className="flex-[1_1_50%]"
@@ -238,6 +256,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
         <Field
           name="birthCountry"
           label="Pays de naissance"
+          errors={errors}
           value={values.birthCountry}
           transformer={translate}
           className="flex-[1_1_50%]"
@@ -248,6 +267,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
         <Field
           name="addressObject.address"
           label="Adresse"
+          errors={errors}
           value={values.addressObject.address}
           transformer={translate}
           className="mb-[16px]"
@@ -257,6 +277,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           <Field
             name="addressObject.zip"
             label="Code postal"
+            errors={errors}
             value={values.addressObject.zip}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
@@ -265,6 +286,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           <Field
             name="addressObject.city"
             label="Ville"
+            errors={errors}
             value={values.addressObject.city}
             transformer={translate}
             className="flex-[1_1_50%]"
@@ -284,6 +306,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           <Field
             name="addressObject.department"
             label="Département"
+            errors={errors}
             value={values.addressObject.department}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
@@ -292,6 +315,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           <Field
             name="addressObject.region"
             label="Région"
+            errors={errors}
             value={values.addressObject.region}
             transformer={translate}
             className="flex-[1_1_50%]"
@@ -320,6 +344,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
           <Field
             name="lastName"
             label="Nom"
+            errors={errors}
             value={values.lastName}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
@@ -328,6 +353,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
           <Field
             name="firstName"
             label="Prénom"
+            errors={errors}
             value={values.firstName}
             transformer={translate}
             className="flex-[1_1_50%]"
@@ -337,6 +363,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
         <Field
           name="gender"
           label="Sexe"
+          errors={errors}
           value={values.gender}
           className="mb-[16px]"
           type="select"
@@ -347,6 +374,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
         <Field
           name="email"
           label="Email"
+          errors={errors}
           value={values.email}
           className="mb-[16px]"
           transformer={translate}
@@ -355,6 +383,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
         <Field
           name="phone"
           label="Téléphone"
+          errors={errors}
           value={values.phone}
           transformer={translate}
           handleChange={handleChange}
@@ -376,6 +405,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
           name="expirationDate"
           label="Date d'expiration de la pièce d'identité"
           type="date"
+          errors={errors}
           value={values.expirationDate}
           transformer={translate}
           className="mb-[16px]"
@@ -383,10 +413,10 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
         />
         <div className="mt-[16px] w-100 flex flew-row justify-between">
           <div>Attestation sur l'honneur</div>
-          {values.parentStatementOfHonorInvalidId === true ? (
-            <a onClick={(e) => handleChangeBool(e, false)} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">Validée</a>
+          {values.parentStatementOfHonorInvalidId === "true" ? (
+            <a onClick={(e) => handleChangeBool(e, "false")} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">Validée</a>
           ) : (
-            <a onClick={(e) => handleChangeBool(e, true)} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">Non validée</a>
+            <a onClick={(e) => handleChangeBool(e, "true")} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">Non validée</a>
           )}
         </div>
       </BoxContent>

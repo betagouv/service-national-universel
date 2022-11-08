@@ -18,9 +18,9 @@ export default function Field({
   filterOnType = false,
   handleChange,
   transformer,
+  errors = {},
 }) {
   const [mouseIn, setMouseIn] = useState(false);
-  const { errors } = useContext(SectionContext);
 
   useEffect(() => {
     if (group) {
@@ -36,7 +36,7 @@ export default function Field({
   if (type === "date") {
     return (
       <div className={className}>
-        <div className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px`}>
+        <div className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${errors[name] ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}>
           <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>
           <input
             type="date"
@@ -48,6 +48,7 @@ export default function Field({
             }}
             className="block p-[5px] w-[100%] cursor-pointer"
           />
+          {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
         </div>
       </div>
     )
