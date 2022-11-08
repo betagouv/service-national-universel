@@ -95,7 +95,7 @@ export default function Create() {
           expirationDate: null,
           phone: "",
           cohort: options[0],
-          parentStatementOfHonorInvalidId: "true",
+          parentStatementOfHonorInvalidId: "false",
           addressObject: {
             addressVerified: false,
             zip: "",
