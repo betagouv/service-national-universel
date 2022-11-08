@@ -45,6 +45,16 @@ export default function Create() {
     };
   }, []);
 
+  function validateEmpty(value, name, errors, message = "Ne peut être vide") {
+    // console.log("test ", name, value, !value[name] || validator.isEmpty(value[name], { ignore_whitespace: true }));
+    if (!value[name] || validator.isEmpty(value[name], { ignore_whitespace: true })) {
+      errors[name] = message;
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   return (
     <Wrapper>
       <Formik
@@ -65,18 +75,32 @@ export default function Create() {
           email: "",
           expirationDate: null,
           phone: "",
-          address: "",
-          city: "",
-          zip: "",
-          department: "",
-          region: "",
           cohort: options[0],
+          parentStatementOfHonorInvalidId: true,
+          addressObject: {
+            addressVerified: false,
+            zip: "",
+            city: "",
+            region: "",
+            department: "",
+            address: "",
+          },
         }}
         validateOnBlur={false}
         validateOnChange={false}
         onSubmit={async (values) => {
           try {
-            const { ok, code } = await api.post("/young/invite", values);
+            const transformedObject = Object.assign({}, values);
+            transformedObject.addressVerified = values.addressObject.addressVerified.toString();
+            transformedObject.zip = values.addressObject.zip;
+            transformedObject.city = values.addressObject.city;
+            transformedObject.region = values.addressObject.region;
+            transformedObject.department = values.addressObject.department;
+            transformedObject.address = values.addressObject.address;
+            delete transformedObject.addressObject;
+            console.log("Transformed object", transformedObject);            
+
+            const { ok, code } = await api.post("/young/invite", transformedObject);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Volontaire créé !");
             return history.push("/inscription");
@@ -115,6 +139,7 @@ export default function Create() {
                     <Coordonnees
                       values={values}
                       handleChange={handleChange}
+                      setFieldValue={setFieldValue}
                       required={{ email: true, phone: true, address: true, city: true, zip: true, department: true, region: true }}
                       errors={errors}
                       touched={touched}
@@ -166,20 +191,19 @@ function Situation({ values, handleChange, required = {}, errors, touched, setFi
     </Box>
   );
 }
-function Coordonnees({ values, handleChange, required = {}, errors, touched, validateField }) {
+function Coordonnees({ values, handleChange, setFieldValue, required = {}, errors, touched, validateField }) {
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
+    setFieldValue("addressObject", {
       addressVerified: true,
       cityCode: suggestion.cityCode,
       region: suggestion.region,
       department: suggestion.department,
       location: suggestion.location,
       // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
-    });
+      address: isConfirmed ? suggestion.address : values.addressObject.address,
+      zip: isConfirmed ? suggestion.zip : values.addressObject.zip,
+      city: isConfirmed ? suggestion.city : values.addressObject.city,
+    })
   };
   return (
     <Box>
@@ -222,53 +246,53 @@ function Coordonnees({ values, handleChange, required = {}, errors, touched, val
 
         <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
         <Field
-          name="adress"
+          name="addressObject.address"
           label="Adresse"
-          value={values.adress}
+          value={values.addressObject.address}
           transformer={translate}
           className="mb-[16px]"
           handleChange={handleChange}
         />
         <div className="mb-[16px] flex items-start justify-between">
           <Field
-            name="zip"
+            name="addressObject.zip"
             label="Code postal"
-            value={values.zip}
+            value={values.addressObject.zip}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <Field
-            name="city"
+            name="addressObject.city"
             label="Ville"
-            value={values.city}
+            value={values.addressObject.city}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
           />
         </div>
         <VerifyAddress
-          address={values.address}
-          zip={values.zip}
-          city={values.city}
+          address={values.addressObject.address}
+          zip={values.addressObject.zip}
+          city={values.addressObject.city}
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
-          isVerified={values.addressVerified === true}
+          isVerified={values.addressObject.addressVerified}
           buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
         />
-        <div className="mb-[16px] flex items-start justify-between">
+        <div className="mb-[16px] flex items-start justify-between mt-[16px]">
           <Field
-            name="zip"
+            name="addressObject.department"
             label="Département"
-            value={values.department}
+            value={values.addressObject.department}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <Field
-            name="city"
+            name="addressObject.region"
             label="Région"
-            value={values.region}
+            value={values.addressObject.region}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
@@ -284,6 +308,10 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
     { value: "male", label: "Homme" },
     { value: "female", label: "Femme" },
   ];
+  const handleChangeBool = (e, value) => {
+    e.target.value = value;
+    handleChange(e);
+  }
   return (
     <Box>
       <BoxContent direction="column">
@@ -331,17 +359,19 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
           transformer={translate}
           handleChange={handleChange}
         />
-        <CniField
-          name="cniFile"
-          label="Pièce d'identité"
-          young={values}
-          mode="edition"
-          onStartRequest={null}
-          currentRequest={null}
-          correctionRequest={false}
-          onCorrectionRequestChange={null}
-          onChange={handleChange}
-        />
+        <div className="mt-[32px]">
+          <CniField
+            name="cniFile"
+            label="Pièce d'identité"
+            young={values}
+            mode="edition"
+            onStartRequest={null}
+            currentRequest={null}
+            correctionRequest={false}
+            onCorrectionRequestChange={null}
+            onChange={handleChange}
+          />
+        </div>
         <Field
           name="expirationDate"
           label="Date d'expiration de la pièce d'identité"
@@ -351,71 +381,79 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
           className="mb-[16px]"
           handleChange={handleChange}
         />
+        <div className="mt-[16px] w-100 flex flew-row justify-between">
+          <div>Attestation sur l'honneur</div>
+          {values.parentStatementOfHonorInvalidId === true ? (
+            <a onClick={(e) => handleChangeBool(e, false)} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">Validée</a>
+          ) : (
+            <a onClick={(e) => handleChangeBool(e, true)} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">Non validée</a>
+          )}
+        </div>
       </BoxContent>
     </Box>
   );
 }
 
 const Wrapper = styled.div`
-  padding: 20px 40px;
+padding: 20px 40px;
 `;
 
 const TitleWrapper = styled.div`
-  margin: 32px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
+margin: 32px 0;
+display: flex;
+justify-content: space-between;
+align-items: center;
+button {
+background-color: #5245cc;
+border: none;
+border-radius: 5px;
+padding: 7px 30px;
+font-size: 14px;
+font-weight: 700;
+color: #fff;
+cursor: pointer;
+:hover {
+  background: #372f78;
+}
+}
 `;
 const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 28px;
+color: #242526;
+font-weight: bold;
+font-size: 28px;
 `;
 
 const Alert = styled.h3`
-  border: 1px solid #fc8181;
-  border-radius: 0.25em;
-  background-color: #fff5f5;
-  color: #c53030;
-  font-weight: 400;
-  font-size: 12px;
-  padding: 1em;
-  text-align: center;
+border: 1px solid #fc8181;
+border-radius: 0.25em;
+background-color: #fff5f5;
+color: #c53030;
+font-weight: 400;
+font-size: 12px;
+padding: 1em;
+text-align: center;
 `;
 
 const SaveBtn = styled(LoadingButton)`
-  background-color: #5245cc;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    background: #372f78;
-  }
-  &.outlined {
-    :hover {
-      background: #fff;
-    }
-    background-color: transparent;
-    border: solid 1px #5245cc;
-    color: #5245cc;
-    font-size: 13px;
-    padding: 4px 20px;
-  }
+background-color: #5245cc;
+border: none;
+border-radius: 5px;
+padding: 7px 30px;
+font-size: 14px;
+font-weight: 700;
+color: #fff;
+cursor: pointer;
+:hover {
+background: #372f78;
+}
+&.outlined {
+:hover {
+  background: #fff;
+}
+background-color: transparent;
+border: solid 1px #5245cc;
+color: #5245cc;
+font-size: 13px;
+padding: 4px 20px;
+}
 `;
