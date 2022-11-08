@@ -73,7 +73,7 @@ export default function StepUpload() {
 
   async function onSubmit() {
     setLoading(true);
-    if (recto) uploadFiles();
+    if (recto) await uploadFiles();
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
@@ -88,7 +88,7 @@ export default function StepUpload() {
 
   async function onCorrect() {
     setLoading(true);
-    if (recto) uploadFiles();
+    if (recto) await uploadFiles();
     const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
     if (!ok) {
