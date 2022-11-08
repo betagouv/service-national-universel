@@ -18,6 +18,7 @@ import MobileDocuments from "./mobile/stepDocuments";
 import MobileDone from "./mobile/stepDone";
 import MobileRepresentants from "./mobile/stepRepresentants";
 import MobileUpload from "./mobile/stepUpload";
+import MobileUploadV2 from "./mobile/stepUploadV2";
 
 import DesktopCorrectionEligibilite from "./desktop/correction/stepEligibilite";
 import DesktopCorrectionProfil from "./desktop/correction/stepProfil";
@@ -32,13 +33,15 @@ import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { environment } from "../../config";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
   if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants /> : <MobileRepresentants />;
   if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
   if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-  if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
+  if (step === STEPS.UPLOAD && environment === "staging") return device === "desktop" ? <DesktopUpload /> : <MobileUploadV2 />;
+  if (step === STEPS.UPLOAD && environment !== "staging") return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
   if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
   if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
   if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
