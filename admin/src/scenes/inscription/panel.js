@@ -91,9 +91,6 @@ export default function InscriptionPanel({ onChange, value }) {
           <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          <Link to={`/volontaire/${value._id}/edit`} onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
-            <PanelActionButton icon="pencil" title="Modifier" />
-          </Link>
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>

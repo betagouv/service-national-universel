@@ -104,6 +104,7 @@ router.post("/signup", async (req, res) => {
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
       acceptCGU: Joi.string().required(),
+      phone: Joi.string().required(),
     })
       .unknown()
       .validate(req.body);
@@ -112,12 +113,12 @@ router.post("/signup", async (req, res) => {
       if (error.details.find((e) => e.path.find((p) => p === "email"))) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { email, lastName, password, acceptCGU } = value;
+    const { email, lastName, password, acceptCGU, phone } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
     const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
     const role = ROLES.RESPONSIBLE; // responsible by default
 
-    const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU });
+    const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
@@ -173,6 +174,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
+      phone: Joi.string().required(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -180,7 +182,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId } = value;
+    const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone } = value;
     const referentProperties = {};
     if (email) referentProperties.email = email.trim().toLowerCase();
     if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
@@ -192,6 +194,10 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (structureId) referentProperties.structureId = structureId;
     if (cohesionCenterName) referentProperties.cohesionCenterName = cohesionCenterName;
     if (cohesionCenterId) referentProperties.cohesionCenterId = cohesionCenterId;
+    if (phone) {
+      referentProperties.phone = phone;
+      referentProperties.mobile = phone;
+    }
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
