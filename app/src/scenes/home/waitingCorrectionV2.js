@@ -24,7 +24,7 @@ export default function WaitingCorrectionV2() {
               <div className="text-[#738297] text-sm mt-2">Merci d’effectuer les modifications demandées par votre référent :</div>
               <div className="flex flex-col gap-5 mt-3 overflow-auto max-h-[250px]">
                 <hr className="border-gray-200" />
-                {young.correctionRequests?.map((correction, i) => {
+                {young.correctionRequests.map((correction, i) => {
                   if (!["SENT", "REMINDED"].includes(correction.status)) return null;
                   return (
                     <>
@@ -64,7 +64,7 @@ export default function WaitingCorrectionV2() {
             <div className="text-[#738297] text-sm mt-2">Merci d’effectuer les modifications demandées par votre référent :</div>
             <div className="flex flex-col gap-5 mt-3">
               <hr className="border-gray-200" />
-              {young.correctionRequests?.map((correction, i) => {
+              {young.correctionRequests.map((correction, i) => {
                 if (!["SENT", "REMINDED"].includes(correction.status)) return null;
                 return (
                   <>
