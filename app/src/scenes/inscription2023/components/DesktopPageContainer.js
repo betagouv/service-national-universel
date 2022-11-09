@@ -24,10 +24,10 @@ export default function DesktopPageContainer({
   return (
     <>
       <Navbar onSave={onSave} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10 text-[#161616]">
-        <div className="basis-[70%] mx-auto ">
-          <div className="bg-white my-0 px-[102px] py-[60px]">
-            <div className="w-full flex justify-between items-center mt-2">
+      <div className="bg-[#f9f6f2] flex justify-center pb-10 text-[#161616]">
+        <div className="mx-auto drop-shadow bg-white">
+          <div className="w-[50rem] mx-[80px] my-[40px] p-4">
+            <div className="flex justify-between items-center mt-2">
               <h1 className="text-xl font-bold">{title}</h1>
               <a className="hover:scale-105" href={questionMarckLink} target="_blank" rel="noreferrer">
                 <QuestionMarkBlueCircle />
