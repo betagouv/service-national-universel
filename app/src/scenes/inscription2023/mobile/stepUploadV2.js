@@ -126,7 +126,7 @@ export default function StepUpload() {
         />
       )}
       {step === "date" &&
-        (correctionsFile.length || correctionsDate.length ? (
+        (correctionsFile?.length || correctionsDate?.length ? (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!date || loading} />
         ) : (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
