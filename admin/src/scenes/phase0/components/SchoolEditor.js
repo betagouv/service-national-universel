@@ -126,7 +126,7 @@ export default function SchoolEditor({ young, onChange, className }) {
 
   async function loadFrenchSchools() {
     setLoadingSchools(true);
-    if (!young.schoolCity) {
+    if (!young.schoolCity || young.schoolCity.length === 0) {
       setSchools([]);
     } else {
       const body = {
@@ -142,7 +142,7 @@ export default function SchoolEditor({ young, onChange, className }) {
 
   async function loadCountrySchools() {
     setLoadingSchools(true);
-    if (!young.schoolCountry) {
+    if (!young.schoolCountry || young.schoolCountry.length === 0 || young.schoolCountry === "FRANCE") {
       setSchools([]);
     } else {
       const body = {
