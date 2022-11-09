@@ -33,7 +33,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   useEffect(() => {
     setRequestButtonClass(
       `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
-        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " + (mouseIn ? "visible" : "invisible")
+        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);

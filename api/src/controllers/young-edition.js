@@ -3,6 +3,8 @@
  *
  * ROUTES
  *   PUT   /young-edition/:id/identite
+ *   PUT   /young-edition/:id/situationparents
+ *   PUT   /young-edition/:id/phasestatus
  */
 
 const express = require("express");
@@ -192,4 +194,58 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
   }
 });
 
+router.put("/:id/phasestatus", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // --- validate data
+    const bodySchema = Joi.object().keys({
+      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"),
+      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"),
+      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"),
+    });
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("joi error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // --- get young
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // --- update dates
+    const now = new Date();
+
+    if (value.statusPhase2) {
+      value.statusPhase2UpdatedAt = now;
+      if (value.statusPhase2 === "VALIDATED") {
+        value.statusPhase2ValidatedAt = now;
+      }
+    }
+
+    if (value.statusPhase3) {
+      value.statusPhase3UpdatedAt = now;
+      if (value.statusPhase3 === "VALIDATED") {
+        value.statusPhase3ValidatedAt = now;
+      }
+    }
+
+    value.lastStatusAt = now;
+
+    // --- update young
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    // --- result
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 module.exports = router;

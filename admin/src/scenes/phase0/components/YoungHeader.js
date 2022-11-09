@@ -19,6 +19,7 @@ import { ChangeCohortPen } from "./ChangeCohortPen";
 import ConfirmationModal from "./ConfirmationModal";
 import Field from "./Field";
 import Tab from "./Tab";
+import PhaseStatusSelector from "./PhaseStatusSelector";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -225,7 +226,8 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           </Tab>*/}
         </TabList>
       </div>
-      <div className="ml-[30px]">
+      <div className="ml-[30px] flex">
+        <div className="mr-[16px]">{young.status === YOUNG_STATUS.VALIDATED && user.role === ROLES.ADMIN && <PhaseStatusSelector young={young} onChange={onChange} />}</div>
         <div className="">
           <Field
             mode="edition"
