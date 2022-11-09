@@ -13,9 +13,10 @@ import { BorderButton, PlainButton } from "./Buttons";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
-  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
   const [changeCohortModal, setChangeCohortModal] = useState(false);
   const [options, setOptions] = useState(null);
+
+  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   const getEligibleCohorts = async () => {
     const { data } = await api.post("/cohort-session/eligibility/2023", {
