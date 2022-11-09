@@ -72,13 +72,12 @@ export default function PhaseStatusSelector({ young, onChange }) {
   function confirmChangePhaseStatus(phase, status) {
     setConfirmChangeModal({
       phase,
-      fromStatus: young[`statusPhase${phase}`],
-      toStatus: status,
+      status,
       message: (
         <div>
-          Voulez-vous vraiment modifier le statut de la phase {confirmChangeModal.phase}
+          Voulez-vous vraiment modifier le statut de la phase {phase}
           <br />
-          du statut <b>{translate(confirmChangeModal.fromStatus)}</b> au statut <b>{translate(confirmChangeModal.toStatus)}</b>.
+          du statut <b>{translate(young[`statusPhase${phase}`])}</b> au statut <b>{translate(status)}</b>.
         </div>
       ),
     });
@@ -155,7 +154,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
           message={confirmChangeModal.message}
           confirmText="Confirmer le changement"
           onCancel={() => setConfirmChangeModal(null)}
-          onConfirm={() => changePhaseStatus(confirmChangeModal.phase, confirmChangeModal.toStatus)}
+          onConfirm={() => changePhaseStatus(confirmChangeModal.phase, confirmChangeModal.status)}
         />
       )}
     </>
