@@ -183,10 +183,7 @@ class Auth {
 
   async signin(req, res) {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
-    }
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
 
     const { password, email } = value;
     try {
@@ -266,10 +263,8 @@ class Auth {
       .unknown()
       .validate(req.body);
 
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
     const { password, verifyPassword, newPassword } = value;
 
     if (!validatePassword(newPassword)) {
