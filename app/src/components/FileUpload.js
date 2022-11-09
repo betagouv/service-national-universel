@@ -11,7 +11,7 @@ const FILES_ACCEPTED = {
 
 const MAX_FILE_SIZE = 5000000;
 
-const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted = ["jpeg", "png", "pdf"] }) => {
+const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted = ["jpeg", "png", "pdf"], disabled = false }) => {
   const accept = Object.keys(FILES_ACCEPTED).reduce((previous, current) => {
     if (filesAccepted.includes(current)) {
       return `${previous}${previous ? ", " : ""}${FILES_ACCEPTED[current].join(", ")}`;
@@ -24,6 +24,7 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
       <label className="text-[#374151] font-semibold text-[14px]">Ajouter un fichier</label>
       <div className="text-gray-500 text-sm mt-1">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf, docx, xlsx. Plusieurs fichiers possibles.</div>
       <input
+        disabled={disabled}
         type="file"
         multiple
         id="file-upload"
@@ -36,7 +37,7 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
       />
       <div className={`flex md:flex-row flex-col ${files.length === 0 && "flex-row"} w-full mt-4`}>
         <div>
-          <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+          <label htmlFor="file-upload" className={`cursor-pointer ${disabled && "cursor-not-allowed"} bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600`}>
             Parcourir...
           </label>
         </div>
@@ -47,7 +48,7 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
                 <p className="text-gray-800 text-sm w-3/5 md:w-1/3 lg:w-1/2 xl:w-3/5 truncate overflow-hidden" key={e.name}>
                   {e.name}
                 </p>
-                <div onClick={() => deleteFile(i)} className="cursor-pointer text-blue-800 flex ml-2 w-1/3">
+                <div onClick={() => !disabled && deleteFile(i)} className={`cursor-pointer ${disabled && "cursor-not-allowed"} text-blue-800 flex ml-2 w-1/3`}>
                   <div className="mt-1">
                     <Bin />
                   </div>

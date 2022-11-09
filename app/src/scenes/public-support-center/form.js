@@ -189,10 +189,20 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               rows="5"
               infos="Merci d’apporter le plus de précisions possibles afin de faciliter le traitement de votre demande"
             />
-            <FileUpload className="px-[15px]" files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
-            <LoadingButton loading={loading} type="submit" style={{ marginLeft: 15, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
-              Envoyer
-            </LoadingButton>
+            <FileUpload
+              disabled={loading}
+              className="px-[15px]"
+              files={files}
+              addFiles={addFiles}
+              deleteFile={deleteFile}
+              filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
+            />
+            <div className="flex md:flex-row flex-col mt-[15px] ml-[15px]">
+              <LoadingButton loading={loading} type="submit" style={{ maxWidth: "150px" }} onClick={handleSubmit} disabled={isSubmitting}>
+                Envoyer
+              </LoadingButton>
+              {loading && files.length > 0 && <div className="text-gray-500 text-sm mt-2 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+            </div>
           </>
         )}
       </Formik>
