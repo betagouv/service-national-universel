@@ -11,8 +11,6 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 import SituationsParticulieres from "./edit/situations-particulieres";
-import Representant1 from "./edit/representant-legal1";
-import Representant2 from "./edit/representant-legal2";
 import Consentement from "./edit/consentement";
 import ConsentementImage from "./edit/consentement-image";
 import ChevronDown from "../../assets/icons/ChevronDown";
@@ -40,6 +38,7 @@ export default function Create() {
   const options = ["Juillet 2022", "à venir"];
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
+  const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -131,6 +130,26 @@ export default function Create() {
           ppsBeneficiary: "false",
           paiBeneficiary: "false",
           allergies: "false",
+          parent1Status: "",
+          parent1FirstName: "",
+          parent1LastName: "",
+          parent1Email: "",
+          parent1Phone: "",
+          parent1OwnAddress: "false",
+          parent1Address: "",
+          parent1Zip: "",
+          parent1City: "",
+          parent1Country: "",
+          parent2Status: "",
+          parent2FirstName: "",
+          parent2LastName: "",
+          parent2Email: "",
+          parent2Phone: "",
+          parent2OwnAddress: "false",
+          parent2Address: "",
+          parent2Zip: "",
+          parent2City: "",
+          parent2Country: "",
         }}
         validateOnBlur={false}
         validateOnChange={false}
@@ -165,29 +184,27 @@ export default function Create() {
             </div>
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
               <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
-              <div className={"p-[32px]"}>
-                <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
-                <div className={`flex ${false ? "hidden" : "block"}`}>
-                  <div className="flex-[1_0_50%] pr-[56px]">
-                    <Identite
-                      values={values}
-                      handleChange={handleChange}
-                      handleSubmit={handleSubmit}
-                      errors={errors}
-                      touched={touched}
-                    />
-                  </div>
-                  <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
-                  <div className="flex-[1_0_50%] pl-[56px]">
-                    <Coordonnees
-                      values={values}
-                      handleChange={handleChange}
-                      setFieldValue={setFieldValue}
-                      errors={errors}
-                      touched={touched}
-                      validateField={validateField}
-                    />
-                  </div>
+              <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
+              <div className={`flex ${false ? "hidden" : "block"}`}>
+                <div className="flex-[1_0_50%] pr-[56px]">
+                  <Identite
+                    values={values}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                    errors={errors}
+                    touched={touched}
+                  />
+                </div>
+                <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+                <div className="flex-[1_0_50%] pl-[56px]">
+                  <Coordonnees
+                    values={values}
+                    handleChange={handleChange}
+                    setFieldValue={setFieldValue}
+                    errors={errors}
+                    touched={touched}
+                    validateField={validateField}
+                  />
                 </div>
               </div>
             </div>
@@ -199,7 +216,19 @@ export default function Create() {
                 </div>
                 <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
                 <div className="flex-[1_0_50%] pl-[56px]">
-                  <Representant1 values={values} handleChange={handleChange} />
+                  <Box>
+                    <BoxContent direction="column">
+                      <div className="ml-[32px] mb-[24px] flex items-start justify-start">
+                        <div onClick={() => setSelectedRepresentant(1)} className={`cursor-pointer pb-[18px] ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-[36px]`}>Représentant légal 1</div>
+                        <div onClick={() => setSelectedRepresentant(2)} className={`cursor-pointer pb-[18px] ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-[36px]`}>Représentant légal 2</div>
+                      </div>
+                      {selectedRepresentant === 1 ?
+                        <Representant1 values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
+                        :
+                        <Representant2 values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
+                      }
+                    </BoxContent>
+                  </Box>
                 </div>
               </div>
             </div>
@@ -222,6 +251,222 @@ export default function Create() {
         )}
       </Formik>
     </Wrapper >
+  );
+}
+
+function Representant2({ values, handleChange, required = {}, errors, touched, setFieldValue }) {
+  return (
+    <>
+      <Field
+        name="parent2Status"
+        label="Statut"
+        errors={errors}
+        type="select"
+        value={values.parent2Status}
+        options={[
+          { value: "mother", label: "Mère" },
+          { value: "father", label: "Père" },
+          { value: "representant", label: "Représentant légal" },
+        ]}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      <div className="mb-[16px] flex items-start justify-between">
+        <Field
+          name="parent2LastName"
+          label="Nom"
+          errors={errors}
+          value={values.parent2LastName}
+          transformer={translate}
+          className="mr-[8px] flex-[1_1_50%]"
+          handleChange={handleChange}
+        />
+        <Field
+          name="parent2FirstName"
+          label="Prénom"
+          errors={errors}
+          value={values.parent2FirstName}
+          transformer={translate}
+          className="flex-[1_1_50%]"
+          handleChange={handleChange}
+        />
+      </div>
+      <Field
+        name="parent2Email"
+        label="Email"
+        errors={errors}
+        value={values.parent2Email}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      <Field
+        name="parent2OwnAddress"
+        label="Adresse différente de celle du volontaire"
+        errors={errors}
+        type="select"
+        value={values.parent2OwnAddress}
+        options={[
+          { value: "true", label: "Oui" },
+          { value: "false", label: "Non" },
+        ]}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      {values.parent2OwnAddress === "true" &&
+        <>
+          <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
+          <Field
+            name="parent2Address"
+            label="Adresse"
+            errors={errors}
+            value={values.parent2Address}
+            transformer={translate}
+            className="mr-[8px] flex-[1_1_50%]"
+            handleChange={handleChange}
+          />
+          <div className="mb-[16px] flex items-start justify-between mt-[16px]">
+            <Field
+              name="parent2Zip"
+              label="Code postal"
+              errors={errors}
+              value={values.parent2Zip}
+              transformer={translate}
+              className="mr-[8px] flex-[1_1_50%]"
+              handleChange={handleChange}
+            />
+            <Field
+              name="parent2City"
+              label="Ville"
+              errors={errors}
+              value={values.parent2City}
+              transformer={translate}
+              className="flex-[1_1_50%]"
+              handleChange={handleChange}
+            />
+          </div>
+          <Field
+            name="parent2Country"
+            label="Pays"
+            errors={errors}
+            value={values.parent2Country}
+            transformer={translate}
+            className="flex-[1_1_50%]"
+            handleChange={handleChange}
+          />
+        </>
+      }
+    </>
+  );
+}
+
+function Representant1({ values, handleChange, required = {}, errors, touched, setFieldValue }) {
+  return (
+    <>
+      <Field
+        name="parent1Status"
+        label="Statut"
+        errors={errors}
+        type="select"
+        value={values.parent1Status}
+        options={[
+          { value: "mother", label: "Mère" },
+          { value: "father", label: "Père" },
+          { value: "representant", label: "Représentant légal" },
+        ]}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      <div className="mb-[16px] flex items-start justify-between">
+        <Field
+          name="parent1LastName"
+          label="Nom"
+          errors={errors}
+          value={values.parent1LastName}
+          transformer={translate}
+          className="mr-[8px] flex-[1_1_50%]"
+          handleChange={handleChange}
+        />
+        <Field
+          name="parent1FirstName"
+          label="Prénom"
+          errors={errors}
+          value={values.parent1FirstName}
+          transformer={translate}
+          className="flex-[1_1_50%]"
+          handleChange={handleChange}
+        />
+      </div>
+      <Field
+        name="parent1Email"
+        label="Email"
+        errors={errors}
+        value={values.parent1Email}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      <Field
+        name="parent1OwnAddress"
+        label="Adresse différente de celle du volontaire"
+        errors={errors}
+        type="select"
+        value={values.parent1OwnAddress}
+        options={[
+          { value: "true", label: "Oui" },
+          { value: "false", label: "Non" },
+        ]}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      {values.parent1OwnAddress === "true" &&
+        <>
+          <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
+          <Field
+            name="parent1address"
+            label="Adresse"
+            errors={errors}
+            value={values.parent1address}
+            transformer={translate}
+            className="mr-[8px] flex-[1_1_50%]"
+            handleChange={handleChange}
+          />
+          <div className="mb-[16px] flex items-start justify-between mt-[16px]">
+            <Field
+              name="parent1Zip"
+              label="Code postal"
+              errors={errors}
+              value={values.parent1Zip}
+              transformer={translate}
+              className="mr-[8px] flex-[1_1_50%]"
+              handleChange={handleChange}
+            />
+            <Field
+              name="parent1City"
+              label="Ville"
+              errors={errors}
+              value={values.parent1City}
+              transformer={translate}
+              className="flex-[1_1_50%]"
+              handleChange={handleChange}
+            />
+          </div>
+          <Field
+            name="parent1Country"
+            label="Pays"
+            errors={errors}
+            value={values.parent1Country}
+            transformer={translate}
+            className="flex-[1_1_50%]"
+            handleChange={handleChange}
+          />
+        </>
+      }
+    </>
   );
 }
 
@@ -258,7 +503,7 @@ function Situation({ values, handleChange, required = {}, errors, touched, setFi
           errors={errors}
           value={values.situation}
           transformer={translate}
-          className="mr-[8px] flex-[1_1_50%]"
+          className="flex-[1_1_50%]"
           options={situationOptions}
           handleChange={onChangeSituation}
         />
@@ -272,7 +517,7 @@ function Situation({ values, handleChange, required = {}, errors, touched, setFi
               errors={errors}
               value={values.grade}
               transformer={translate}
-              className="mr-[8px] flex-[1_1_50%]"
+              className="flex-[1_1_50%]"
               options={gradeOptions}
               handleChange={handleChange}
             />
