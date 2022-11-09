@@ -18,14 +18,21 @@ import ConsentementImage from "./edit/consentement-image";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import { BsCheck2 } from "react-icons/bs";
 
+import { START_DATE_SESSION_PHASE1, translateGrade, YOUNG_SITUATIONS, GRADES } from "snu-lib";
+import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
+
+
+
 //Identite
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Field from "./components/Field";
 import Documents from "./components/Documents";
 import DndFileInput from "../../components/dndFileInputV2";
 import { CniField } from "../phase0/components/CniField";
-
+import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
+import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
+
 
 
 export default function Create() {
@@ -84,6 +91,7 @@ export default function Create() {
           birthCityZip: "",
           birthCity: "",
           gender: "",
+          grade: "",
           birthCountry: "",
           files: {
             cniFiles: [],
@@ -104,6 +112,25 @@ export default function Create() {
             department: "",
             address: "",
           },
+          schoolId: "",
+          schoolName: "",
+          schoolType: "",
+          schoolAddress: "",
+          schoolZip: "",
+          schoolDepartment: "",
+          schoolRegion: "",
+          schoolCity: "",
+          schoolCountry: "FRANCE",
+          schooled: "true",
+          employed: "false",
+          specificAmenagment: "false",
+          specificAmenagmentType: "",
+          specificSituations: "",
+          reducedMobilityAccess: "false",
+          handicapInSameDepartment: "false",
+          ppsBeneficiary: "false",
+          paiBeneficiary: "false",
+          allergies: "false",
         }}
         validateOnBlur={false}
         validateOnChange={false}
@@ -165,6 +192,7 @@ export default function Create() {
               </div>
             </div>
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
+              <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
               <div className={`flex ${false ? "hidden" : "block"}`}>
                 <div className="flex-[1_0_50%] pr-[56px]">
                   <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} touched={touched} />
@@ -198,10 +226,77 @@ export default function Create() {
 }
 
 function Situation({ values, handleChange, required = {}, errors, touched, setFieldValue }) {
+  const onChange = (e) => {
+    for (const key in e) {
+      if (e[key] !== values[key]) {
+        console.log("CHANGE", key, e[key])
+        setFieldValue(key, e[key])
+      }
+    }
+
+  }
+  const onChangeSituation = (e) => {
+    setFieldValue("employed", youngEmployedSituationOptions.includes(e.target.value) ? "true" : "false")
+    setFieldValue("schooled", youngSchooledSituationOptions.includes(e.target.value) ? "true" : "false")
+    setFieldValue("situation", e.target.value);
+  }
+  const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
+  const gradeOptions = Object.keys(GRADES)
+    .filter((g) => g !== GRADES.NOT_SCOLARISE)
+    .map((g) => ({ value: g, label: translateGrade(g) }));
+  const onParticuliereChange = (key, value) => {
+    setFieldValue(key, value);
+  }
   return (
     <Box>
       <BoxContent direction="column">
-        <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Date et lieu de naissance</div>
+        <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Situation</div>
+        <Field
+          name="situation"
+          label="Statut"
+          type="select"
+          errors={errors}
+          value={values.situation}
+          transformer={translate}
+          className="mr-[8px] flex-[1_1_50%]"
+          options={situationOptions}
+          handleChange={onChangeSituation}
+        />
+        {values.schooled === "true" &&
+          <div className="mt-[16px]">
+            <SchoolEditor young={values} onChange={onChange} />
+            <Field
+              name="grade"
+              label="Classe"
+              type="select"
+              errors={errors}
+              value={values.grade}
+              transformer={translate}
+              className="mr-[8px] flex-[1_1_50%]"
+              options={gradeOptions}
+              handleChange={handleChange}
+            />
+          </div>
+        }
+        <div className="mt-[32px]">
+          <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Situations particulières</div>
+          <FieldSituationsParticulieres
+            name="specificSituations"
+            young={values}
+            mode={"edition"}
+            onChange={onParticuliereChange}
+          />
+          {values.specificAmenagment === "true" && (
+            <Field
+              name="specificAmenagmentType"
+              label="Nature de l'aménagement spécifique"
+              value={values.specificAmenagmentType}
+              mode="edition"
+              onChange={handleChange}
+              young={values}
+            />
+          )}
+        </div>
       </BoxContent>
     </Box>
   );
