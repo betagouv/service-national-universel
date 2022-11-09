@@ -104,7 +104,10 @@ router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { s
 router.post("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
@@ -172,7 +175,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 router.put("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateUpdateApplication(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -257,7 +263,10 @@ router.put("/:id/visibilite", passport.authenticate(["young"], { session: false,
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const data = await ApplicationObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -278,7 +287,10 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
 router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const { error, value: template } = Joi.string().required().validate(req.params.template);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (error) {
+    capture(error);
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  }
 
   const toReferents = await getReferentManagerPhase2(req.user.department);
   if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -308,7 +320,10 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { id, template: defaultTemplate, message, type, multipleDocument } = value;
 
@@ -565,7 +580,10 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { id, key, name } = value;
 
