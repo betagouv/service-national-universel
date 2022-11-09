@@ -29,7 +29,10 @@ const youngSchooledSituationOptions = [
 router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error_id) {
+      capture(error_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     // --- validate data
     const bodySchema = Joi.object().keys({
@@ -60,7 +63,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -105,7 +108,10 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 router.put("/:id/situationparents", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error_id) {
+      capture(error_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     // --- validate data
     const bodySchema = Joi.object().keys({
@@ -159,7 +165,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
