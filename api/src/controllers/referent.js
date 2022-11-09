@@ -807,15 +807,13 @@ router.post(
 //todo: refactor: in young controller (if referent, add the applications)
 router.get("/young/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
+    const { error, value } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canViewYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await YoungModel.findById(value.id);
+    const data = await YoungModel.findById(value);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
     let applications = [];
