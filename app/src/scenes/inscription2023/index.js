@@ -40,8 +40,8 @@ function renderStep(step, device) {
   if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants /> : <MobileRepresentants />;
   if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
   if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-  if (step === STEPS.UPLOAD && environment === "staging") return device === "desktop" ? <DesktopUpload /> : <MobileUploadV2 />;
-  if (step === STEPS.UPLOAD && environment !== "staging") return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
+  if (step === STEPS.UPLOAD && environment === "production") return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
+  if (step === STEPS.UPLOAD && environment !== "production") return device === "desktop" ? <DesktopUpload /> : <MobileUploadV2 />;
   if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
   if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
   if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
