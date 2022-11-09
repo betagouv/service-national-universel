@@ -42,6 +42,7 @@ const {
   translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
+  STEPS2023REINSCRIPTION,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
@@ -369,6 +370,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (young.statusPhase1 !== "DONE") newYoung.statusPhase1 = "WITHDRAWN";
       if (young.statusPhase2 !== "VALIDATED") newYoung.statusPhase2 = "WITHDRAWN";
       if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
+    }
+
+    if (newYoung.status === "REINSCRIPTION") {
+      newYoung.reinscriptionStep2023 = STEPS2023REINSCRIPTION.ELIGIBILITE;
     }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
