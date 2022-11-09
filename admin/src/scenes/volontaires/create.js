@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Formik } from "formik";
+import { Formik, Field as FieldFormik } from "formik";
 import validator from "validator";
 import "dayjs/locale/fr";
 
@@ -52,15 +52,6 @@ export default function Create() {
     };
   }, []);
 
-  function validateEmpty(value, name, errors, message = "Ne peut être vide") {
-    // console.log("test ", name, value, !value[name] || validator.isEmpty(value[name], { ignore_whitespace: true }));
-    if (!value[name] || validator.isEmpty(value[name], { ignore_whitespace: true })) {
-      errors[name] = message;
-      return false;
-    } else {
-      return true;
-    }
-  }
   const validate = (values, props /* only available when using withFormik */) => {
     const errors = {};
     const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId"]
@@ -75,6 +66,9 @@ export default function Create() {
       if (required.includes(key) && (!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
         errors[key] = 'Ne peut être vide';
       }
+    }
+    if(Object.keys(errors).length > 0) {
+      toastr.error("Une erreur s'est produite : \n Le formulaire n'est pas complet");
     }
     return errors;
   };
@@ -150,6 +144,7 @@ export default function Create() {
           parent2Zip: "",
           parent2City: "",
           parent2Country: "",
+          cohort: "",
         }}
         validateOnBlur={false}
         validateOnChange={false}
@@ -177,11 +172,6 @@ export default function Create() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched, setFieldValue, validateField }) => (
           <>
-            <div className="flex items-center justify-between my-8">
-              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                Valider cette candidature
-              </SaveBtn>
-            </div>
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
               <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
               <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
@@ -232,21 +222,31 @@ export default function Create() {
                 </div>
               </div>
             </div>
-            {/* 
-            <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
-              <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-              <div className="flex-[1_0_50%] pl-[56px]">
-                <Row>
-                  <Representant2 values={values} handleChange={handleChange} />
-                </Row>
-                <Row>
-                  <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-                  <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-                </Row>
+
+            <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
+              <div className="ml-[32px] text-[18px] font-[500]">Choisissez un séjour pour le volontaire</div>
+              <div className="flex justify-start flex-row flex-wrap pl-[24px]">
+                {Object.keys(START_DATE_SESSION_PHASE1).map((key, value) => {
+                  return (
+                    <div onClick={() => setFieldValue("cohort", key)} className="cursor-pointer flex flex-row justify-start items-center w-[237px] h-[54px] border border-[#3B82F6] rounded-[6px] m-[16px]">
+                      <FieldFormik
+                        id="checkboxCGU"
+                        type="checkbox"
+                        value={key === values.cohort}
+                        onChange={() => setFieldValue("cohort", key)}
+                        name="cohort"
+                        checked={key === values.cohort}
+                        className="rounded-full ml-[13px] mr-[11px]"
+                      />
+                      <div>{key}</div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
-            */}
-
+            <div className="flex items-center w-100 justify-center">
+              <div onClick={handleSubmit} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">Créer l'inscription</div>
+            </div>
           </>
         )}
       </Formik>
@@ -324,7 +324,7 @@ function Representant2({ values, handleChange, required = {}, errors, touched, s
             errors={errors}
             value={values.parent2Address}
             transformer={translate}
-            className="mr-[8px] flex-[1_1_50%]"
+            className="flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <div className="mb-[16px] flex items-start justify-between mt-[16px]">
@@ -432,7 +432,7 @@ function Representant1({ values, handleChange, required = {}, errors, touched, s
             errors={errors}
             value={values.parent1address}
             transformer={translate}
-            className="mr-[8px] flex-[1_1_50%]"
+            className="flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <div className="mb-[16px] flex items-start justify-between mt-[16px]">
@@ -639,6 +639,8 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           city={values.addressObject.city}
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
+          verifyButtonText="Vérifier l'adresse"
+          verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postale et ville."
           isVerified={values.addressObject.addressVerified}
           buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
         />
