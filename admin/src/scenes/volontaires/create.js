@@ -53,24 +53,37 @@ export default function Create() {
 
   const validate = (values, props /* only available when using withFormik */) => {
     const errors = {};
-    const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "parent1Email", "situation"]
+    const errorEmpty = "Ne peut être vide";
+    console.log(values);
+    const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "parent1Email", "situation", "address", "city", "zip"]
     if (!values.email) {
-      errors.email = 'Ne peut être vide';
+      errors.email = errorEmpty;
 
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
       errors.email = 'Adresse email invalide';
 
     }
     for (const key of required) {
+      console.log(key)
       if ((!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
-        errors[key] = 'Ne peut être vide';
+        errors[key] = errorEmpty;
       }
     }
-    if(values.country === "FRANCE") {
-      if(values.schoolCity === "") {
-        errors.schoolCity = 'Ne peut être vide';
+    if (values.country === "FRANCE") {
+      if (values.schoolCity === "") {
+        errors.schoolCity = errorEmpty;
       }
     }
+    if (values.specificAmenagment === "true" && values.specificAmenagmentType === "") {
+      errors.specificAmenagmentType = errorEmpty;
+    }
+    // permet de vérifier si l'adresse a été entièrement remplie mais pas vérifiée
+    if (!(errors.address || errors.city || errors.zip)) {
+      if (values.department === "" || values.region === "") {
+        toastr.error("Une erreur s'est produite : \n Vous devez vérifier l'adresse");
+      }
+    }
+
     if (Object.keys(errors).length > 0) {
       toastr.error("Une erreur s'est produite : \n Le formulaire n'est pas complet");
     }
@@ -104,14 +117,12 @@ export default function Create() {
           phone: "",
           cohort: Object.keys(START_DATE_SESSION_PHASE1)[0],
           parentStatementOfHonorInvalidId: "false",
-          addressObject: {
-            addressVerified: false,
-            zip: "",
-            city: "",
-            region: "",
-            department: "",
-            address: "",
-          },
+          addressVerified: false,
+          zip: "",
+          city: "",
+          region: "",
+          department: "",
+          address: "",
           situation: "",
           schoolId: "",
           schoolName: "",
@@ -158,17 +169,7 @@ export default function Create() {
         validate={validate}
         onSubmit={async (values) => {
           try {
-            const transformedObject = Object.assign({}, values);
-            transformedObject.addressVerified = values.addressObject.addressVerified.toString();
-            transformedObject.zip = values.addressObject.zip;
-            transformedObject.city = values.addressObject.city;
-            transformedObject.region = values.addressObject.region;
-            transformedObject.department = values.addressObject.department;
-            transformedObject.address = values.addressObject.address;
-            delete transformedObject.addressObject;
-            console.log("Transformed object", transformedObject);
-
-            const { ok, code } = await api.post("/young/invite", transformedObject);
+            const { ok, code } = await api.post("/young/invite", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Volontaire créé !");
             return history.push("/inscription");
@@ -542,6 +543,7 @@ function Situation({ values, handleChange, required = {}, errors, touched, setFi
             <Field
               name="specificAmenagmentType"
               label="Nature de l'aménagement spécifique"
+              errors={errors}
               value={values.specificAmenagmentType}
               mode="edition"
               onChange={handleChange}
@@ -554,18 +556,20 @@ function Situation({ values, handleChange, required = {}, errors, touched, setFi
   );
 }
 function Coordonnees({ values, handleChange, setFieldValue, required = {}, errors, touched, validateField }) {
+
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setFieldValue("addressObject", {
-      addressVerified: true,
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : values.addressObject.address,
-      zip: isConfirmed ? suggestion.zip : values.addressObject.zip,
-      city: isConfirmed ? suggestion.city : values.addressObject.city,
-    })
+    setFieldValue("addressVerified", "true");
+    for (const key in suggestion) {
+      if (suggestion[key] !== values[key]) {
+        if ((key === "address" || key === "zip" || key === "city")) {
+          if (isConfirmed) {
+            setFieldValue(key, suggestion[key])
+          }
+        } else {
+          setFieldValue(key, suggestion[key])
+        }
+      }
+    }
   };
   return (
     <Box>
@@ -612,62 +616,62 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
 
         <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
         <Field
-          name="addressObject.address"
+          name="address"
           label="Adresse"
           errors={errors}
-          value={values.addressObject.address}
+          value={values.address}
           transformer={translate}
           className="mb-[16px]"
           handleChange={handleChange}
         />
         <div className="mb-[16px] flex items-start justify-between">
           <Field
-            name="addressObject.zip"
+            name="zip"
             label="Code postal"
             errors={errors}
-            value={values.addressObject.zip}
+            value={values.zip}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <Field
-            name="addressObject.city"
+            name="city"
             label="Ville"
             errors={errors}
-            value={values.addressObject.city}
+            value={values.city}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
           />
         </div>
         <VerifyAddress
-          address={values.addressObject.address}
-          zip={values.addressObject.zip}
-          city={values.addressObject.city}
+          address={values.address}
+          zip={values.zip}
+          city={values.city}
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
           verifyButtonText="Vérifier l'adresse"
           verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postale et ville."
-          isVerified={values.addressObject.addressVerified}
+          isVerified={values.addressVerified}
           buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
         />
         <div className="mb-[16px] flex items-start justify-between mt-[16px]">
           <Field
-            name="addressObject.department"
+            name="department"
             label="Département"
             errors={errors}
             readyOnly={true}
-            value={values.addressObject.department}
+            value={values.department}
             transformer={translate}
             className="mr-[8px] flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <Field
-            name="addressObject.region"
+            name="region"
             label="Région"
             errors={errors}
             readyOnly={true}
-            value={values.addressObject.region}
+            value={values.region}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
@@ -745,6 +749,7 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
             label="Pièce d'identité"
             young={values}
             mode="edition"
+            blockUpload={true}
             onStartRequest={null}
             currentRequest={null}
             correctionRequest={false}
