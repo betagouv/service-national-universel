@@ -108,12 +108,8 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     if (category) young.latestCNIFileCategory = category;
     if (date) young.latestCNIFileExpirationDate = date;
   }, [filesToUpload, category, date])
-  useEffect(() => {
-
-  }, [category])
 
   useEffect(() => {
-    console.log("File to upload is : ", young.filesToUpload);
     if (blockUpload) return setFilesToUpload(young.filesToUpload);
     if (young && young.files && young.files.cniFiles) {
       setCniFiles(young.files.cniFiles);
