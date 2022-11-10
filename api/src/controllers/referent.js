@@ -478,6 +478,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
+        cohort,
         motif: cohortChangeReason,
         message: validatedMessage.value,
         cohortPeriod: translateCohort(cohort),

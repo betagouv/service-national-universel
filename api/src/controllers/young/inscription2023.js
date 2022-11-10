@@ -253,7 +253,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       const populationDensity = await getDensity(value.cityCode);
       young.set({ populationDensity });
       const isRegionRural = isInRuralArea(young);
-      young.set({ isRegionRural })
+      young.set({ isRegionRural });
     }
 
     await young.save({ fromUser: req.user });

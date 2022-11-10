@@ -507,6 +507,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     }
 
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
+    console.log("🚀 ~ file: index.js ~ line 510 ~ router.put ~ cohort", cohort);
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
