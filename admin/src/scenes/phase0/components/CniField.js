@@ -15,7 +15,7 @@ import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 import Field from "./Field";
 
-export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange, blockUpload = false }) {
+export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange, blockUpload = false, onInscriptionChange = null }) {
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
@@ -53,6 +53,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   function cniModalClose(changes) {
     setCniModalOpened(false);
     if (changes) {
+      onInscriptionChange && onInscriptionChange(young);
       onChange && onChange();
     }
   }
@@ -105,8 +106,9 @@ function CniModal({ young, onClose, mode, blockUpload }) {
 
   useEffect(() => {
     if (filesToUpload) young.filesToUpload = filesToUpload;
-    if (category) young.latestCNIFileCategory = category;
-    if (date) young.latestCNIFileExpirationDate = date;
+    if (category !== null) young.latestCNIFileCategory = category;
+    if (date !== null) young.latestCNIFileExpirationDate = date;
+    setChanges(true);
   }, [filesToUpload, category, date])
 
   useEffect(() => {
@@ -176,7 +178,6 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }
 
   const removeFileInscription = (file) => {
-    console.log(file);
     setFilesToUpload(oldFiles => {
       const newArray = [];
       oldFiles.map((oldFile) => {
@@ -216,8 +217,19 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                 accept=".png, .jpg, .jpeg, .pdf"
                 onChange={(e) => {
                   if (blockUpload) {
-                    setFilesToUpload([...filesToUpload, ...e.target.files])
-                    setChanges(true);
+                    const array = [];
+                    let error = "";
+                    for (const file of e.target.files) {
+                      if (file.size > 5000000) {
+                        error += `Le fichier ${file.name} est trop volumineux.`
+                      } else {
+                        array.push(file)
+                      }
+                    }
+                    setError(error);
+                    console.log(array)
+                    setFilesToUpload([...filesToUpload, ...array])
+
                   } else {
                     setFilesToUpload(e.target.files)
                   }
