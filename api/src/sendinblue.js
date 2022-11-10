@@ -4,6 +4,7 @@ const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
+const SENDER_NAME_SMS = "SNU";
 const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
@@ -25,13 +26,14 @@ const api = async (path, options = {}) => {
 };
 
 // https://developers.sendinblue.com/reference/sendtransacsms
-async function sendSMS(phoneNumber, content) {
+async function sendSMS(phoneNumber, content, tag) {
   try {
     const body = {};
-    body.sender = SENDER_NAME;
+    body.sender = SENDER_NAME_SMS;
     body.recipient = phoneNumber;
     body.content = content;
     body.type = "transactional";
+    body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
     if (ENVIRONMENT !== "production") {
@@ -253,4 +255,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { api, sync, unsync, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = { api, sync, unsync, sendSMS, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
