@@ -1,3 +1,17 @@
+# [1.164.0](https://github.com/betagouv/service-national-universel/compare/v1.163.0...v1.164.0) (2022-11-10)
+
+
+### Bug Fixes
+
+* **api:** Allow no phone if different from resp or supervisor ([aece7c7](https://github.com/betagouv/service-national-universel/commit/aece7c7245d523202201d0c1b6cfc05dd0390c3c))
+* **app/admin:**  toastr.success upload + dispatch young PM ([#1813](https://github.com/betagouv/service-national-universel/issues/1813)) ([2318f37](https://github.com/betagouv/service-national-universel/commit/2318f37cbe5f0e72c4918f32d8e0b02e8b839982))
+* **kb:** broken link design ([f28c8fd](https://github.com/betagouv/service-national-universel/commit/f28c8fddf00fc15d9950a42124e875fba549ca52))
+
+
+### Features
+
+* **api:** Delete pending applications when validating phase 2 ([#2018](https://github.com/betagouv/service-national-universel/issues/2018)) ([049e382](https://github.com/betagouv/service-national-universel/commit/049e3825c56cec7462b3869c9ef6bf380693b894))
+
 # [1.163.0](https://github.com/betagouv/service-national-universel/compare/v1.162.0...v1.163.0) (2022-11-09)
 
 
