@@ -1632,7 +1632,13 @@ function getCorrectionRequest(requests, field) {
 }
 
 function HonorCertificate({ young }) {
-  const cniExpired = young?.latestCNIFileExpirationDate > START_DATE_SESSION_PHASE1[young.cohort];
+  let cniExpired = false;
+  if (young && young.cohort && young.latestCNIFileExpirationDate) {
+    const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
+    if (cohortDate) {
+      cniExpired = new Date(young.latestCNIFileExpirationDate).valueOf() < cohortDate.valueOf();
+    }
+  }
 
   async function remind() {
     try {
