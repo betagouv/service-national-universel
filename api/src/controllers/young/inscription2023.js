@@ -304,8 +304,9 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
       parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
-      parent1Email: needRequired(Joi.string().lowercase().trim().email(), isRequired),
-      parent1Phone: needRequired(Joi.string().trim(), isRequired),
+      parent1ContactPreference: needRequired(Joi.string().trim().valid("email", "phone"), isRequired),
+      parent1Email: Joi.string().trim().email(),
+      parent1Phone: Joi.string().trim(),
       parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
       parent2Status: Joi.alternatives().conditional("parent2", {
         is: true,
@@ -318,12 +319,21 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
         then: needRequired(Joi.string().uppercase().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      parent2Email: Joi.alternatives().conditional("parent2", {
+      parent2ContactPreference: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: needRequired(Joi.string().lowercase().trim().email(), isRequired),
+        then: needRequired(Joi.string().trim().valid("email", "phone"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2Email: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.string().trim().email(),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Phone: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.string().trim(),
+        otherwise: Joi.isError(new Error()),
+      }),
     };
 
     let { error, value } = Joi.object(representantSchema).validate(req.body, { stripUnknown: true });
@@ -345,7 +355,13 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     }
 
     if (type === "next") {
+      if (value?.parent1ContactPreference === "email") value.parent1Phone = "";
+      if (value?.parent1ContactPreference === "phone") value.parent1Email = "";
+      if (value?.parent2ContactPreference === "email") value.parent2Phone = "";
+      if (value?.parent2ContactPreference === "phone") value.parent2Email = "";
+
       value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     }

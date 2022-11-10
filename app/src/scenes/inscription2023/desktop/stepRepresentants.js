@@ -25,11 +25,16 @@ const parentsStatus = [
   { label: "Autre", value: "representant" },
 ];
 
+const contactTypes = [
+  { label: "Adresse e-mail", value: "email" },
+  { label: "Téléphone", value: "phone" },
+];
+
 export default function StepRepresentants() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-  const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1Email", "parent1Phone"];
-  const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName", "parent2Email", "parent2Phone"];
+  const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName", "parent1ContactPreference"];
+  const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName", "parent2ContactPreference"];
   const [loading, setLoading] = React.useState(false);
   const [corrections, setCorrections] = React.useState({});
   const [errors, setErrors] = React.useState({});
@@ -43,11 +48,13 @@ export default function StepRepresentants() {
     parent1LastName: "",
     parent1Email: "",
     parent1Phone: "",
+    parent1ContactPreference: "",
     parent2Status: "",
     parent2FirstName: "",
     parent2LastName: "",
     parent2Email: "",
     parent2Phone: "",
+    parent2ContactPreference: "",
   });
 
   React.useEffect(() => {
@@ -58,18 +65,20 @@ export default function StepRepresentants() {
         parent1LastName: young.parent1LastName,
         parent1Email: young.parent1Email,
         parent1Phone: young.parent1Phone,
+        parent1ContactPreference: young.parent1ContactPreference,
         parent2Status: young.parent2Status,
         parent2FirstName: young.parent2FirstName,
         parent2LastName: young.parent2LastName,
         parent2Email: young.parent2Email,
         parent2Phone: young.parent2Phone,
+        parent2ContactPreference: young.parent2ContactPreference,
       });
     }
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
       const corrections = getCorrectionByStep(young, step);
       if (!Object.keys(corrections).length) return history.push("/");
       else setCorrections(corrections);
-      if (!young?.parent2Email) setIsParent2Visible(false);
+      if (!young?.parent2Email && !young?.parent2Phone) setIsParent2Visible(false);
     }
   }, [young]);
 
@@ -98,6 +107,24 @@ export default function StepRepresentants() {
     setLoading(true);
     let error = {};
     error = getErrors();
+
+    if (data?.parent1ContactPreference === "phone") {
+      parent1Keys.push("parent1Phone");
+      delete data.parent1Email;
+    }
+    if (data?.parent1ContactPreference === "email") {
+      parent1Keys.push("parent1Email");
+      delete data.parent1Phone;
+    }
+    if (data?.parent2ContactPreference === "phone") {
+      parent2Keys.push("parent2Phone");
+      delete data.parent2Email;
+    }
+    if (data?.parent2ContactPreference === "email") {
+      parent2Keys.push("parent2Email");
+      delete data.parent2Phone;
+    }
+
     for (const key of parent1Keys) {
       if (data[key] === undefined || data[key] === "") {
         error[key] = "Ce champ est obligatoire";
@@ -126,6 +153,7 @@ export default function StepRepresentants() {
         delete value.parent2LastName;
         delete value.parent2Email;
         delete value.parent2Phone;
+        delete value.parent2ContactPreference;
       } else {
         value.parent2 = true;
       }
@@ -153,33 +181,63 @@ export default function StepRepresentants() {
 
   const onCorrection = async () => {
     setLoading(true);
-    try {
-      const value = data;
-      if (!isParent2Visible) {
-        value.parent2 = false;
-        delete value.parent2Status;
-        delete value.parent2FirstName;
-        delete value.parent2LastName;
-        delete value.parent2Email;
-        delete value.parent2Phone;
-      } else {
-        value.parent2 = true;
+    let error = {};
+    error = getErrors();
+    parent1Keys.push("parent1Phone");
+    parent1Keys.push("parent1Email");
+    parent2Keys.push("parent2Phone");
+    parent2Keys.push("parent2Email");
+
+    for (const key of parent1Keys) {
+      if (data[key] === undefined || data[key] === "") {
+        error[key] = "Ce champ est obligatoire";
       }
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/correction`, value);
-      if (!ok) {
-        setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
+    }
+
+    if (isParent2Visible) {
+      for (const key of parent2Keys) {
+        if (data[key] === undefined || data[key] === "") {
+          error[key] = "Ce champ est obligatoire";
+        }
       }
-      plausibleEvent("Phase0/CTA demande correction - Corriger Representant");
-      dispatch(setYoung(responseData));
-      toastr.success("Vos informations ont bien été enregistrées");
-    } catch (e) {
-      capture(e);
-      setErrors({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
+    }
+    for (const key in error) {
+      if (error[key] === undefined) {
+        delete error[key];
+      }
+    }
+    setErrors(error);
+    if (!Object.keys(error).length) {
+      try {
+        const value = data;
+        if (!isParent2Visible) {
+          value.parent2 = false;
+          delete value.parent2Status;
+          delete value.parent2FirstName;
+          delete value.parent2LastName;
+          delete value.parent2Email;
+          delete value.parent2Phone;
+          delete value.parent2ContactPreference;
+        } else {
+          value.parent2 = true;
+        }
+
+        const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/correction`, value);
+        if (!ok) {
+          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          setLoading(false);
+          return;
+        }
+        plausibleEvent("Phase0/CTA demande correction - Corriger Representant");
+        dispatch(setYoung(responseData));
+        toastr.success("Vos informations ont bien été enregistrées");
+      } catch (e) {
+        capture(e);
+        setErrors({
+          text: `Une erreur s'est produite`,
+          subText: e?.code ? translate(e.code) : "",
+        });
+      }
     }
     setLoading(false);
   };
@@ -195,9 +253,11 @@ export default function StepRepresentants() {
         delete value.parent2LastName;
         delete value.parent2Email;
         delete value.parent2Phone;
+        delete value.parent2ContactPreference;
       } else {
         value.parent2 = true;
       }
+
       const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/save`, value);
       if (!ok) {
         setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -231,13 +291,13 @@ export default function StepRepresentants() {
             <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
             <hr className="my-4 h-px bg-gray-200 border-0" />
             {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
-            <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} />
+            <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
             <hr className="my-4 h-px bg-gray-200 border-0" />
             <div className="flex gap-4 items-center">
               <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
               <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
             </div>
-            {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} /> : null}
+            {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
             <hr className="my-8 h-px bg-gray-200 border-0" />
             {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
               <div className="flex justify-end gap-4">
@@ -274,7 +334,7 @@ export default function StepRepresentants() {
   );
 }
 
-const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
+const FormRepresentant = ({ i, data, setData, errors, corrections, young }) => {
   return (
     <div className="flex flex-col my-4">
       <div className="pb-2 text-[#161616] font-bold">Représentant légal {i} </div>
@@ -300,20 +360,52 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         error={errors[`parent${i}LastName`]}
         correction={corrections[`parent${i}LastName`]}
       />
-      <Input
-        value={data[`parent${i}Email`]}
-        label="Son e-mail"
-        onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })}
-        error={errors[`parent${i}Email`]}
-        correction={corrections[`parent${i}Email`]}
+      <RadioButton
+        label="Moyen de contact favori"
+        options={contactTypes}
+        onChange={(e) => setData({ ...data, [`parent${i}ContactPreference`]: e, [`parent${i}Email`]: "", [`parent${i}Phone`]: "" })}
+        value={data[`parent${i}ContactPreference`]}
+        error={errors[`parent${i}ContactPreference`]}
+        correction={corrections[`parent${i}ContactPreference`]}
       />
-      <Input
-        value={data[`parent${i}Phone`]}
-        label="Son numéro de téléphone"
-        onChange={(e) => setData({ ...data, [`parent${i}Phone`]: e })}
-        error={errors[`parent${i}Phone`]}
-        correction={corrections[`parent${i}Phone`]}
-      />
+      {young.status !== YOUNG_STATUS.WAITING_CORRECTION ? (
+        data[`parent${i}ContactPreference`] ? (
+          data[`parent${i}ContactPreference`] === "email" ? (
+            <Input
+              value={data[`parent${i}Email`]}
+              label="Son e-mail"
+              onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })}
+              error={errors[`parent${i}Email`]}
+              correction={corrections[`parent${i}Email`]}
+            />
+          ) : (
+            <Input
+              value={data[`parent${i}Phone`]}
+              label="Son numéro de téléphone"
+              onChange={(e) => setData({ ...data, [`parent${i}Phone`]: e })}
+              error={errors[`parent${i}Phone`]}
+              correction={corrections[`parent${i}Phone`]}
+            />
+          )
+        ) : null
+      ) : (
+        <>
+          <Input
+            value={data[`parent${i}Email`]}
+            label="Son e-mail"
+            onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })}
+            error={errors[`parent${i}Email`]}
+            correction={corrections[`parent${i}Email`]}
+          />
+          <Input
+            value={data[`parent${i}Phone`]}
+            label="Son numéro de téléphone"
+            onChange={(e) => setData({ ...data, [`parent${i}Phone`]: e })}
+            error={errors[`parent${i}Phone`]}
+            correction={corrections[`parent${i}Phone`]}
+          />
+        </>
+      )}
     </div>
   );
 };
