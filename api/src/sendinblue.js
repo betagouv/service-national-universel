@@ -24,6 +24,25 @@ const api = async (path, options = {}) => {
   return await res.text();
 };
 
+// https://developers.sendinblue.com/reference/sendtransacsms
+async function sendSMS(phoneNumber, content) {
+  try {
+    const body = {};
+    body.sender = SENDER_NAME;
+    body.recipient = phoneNumber;
+    body.content = content;
+    body.type = "transactional";
+
+    const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
+    if (ENVIRONMENT !== "production") {
+      console.log(body, sms);
+    }
+  } catch (e) {
+    console.log("Erreur in sendSMS", e);
+    capture(e);
+  }
+}
+
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
