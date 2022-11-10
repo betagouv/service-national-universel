@@ -1,21 +1,22 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
-import { Spinner } from "reactstrap";
-import { toastr } from "react-redux-toastr";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { Spinner } from "reactstrap";
 
-import api from "../../../services/api";
-import { apiURL } from "../../../config";
-import MissionView from "./wrapper";
-import { ResultTable } from "../../../components/list";
+import { getFilterLabel, translateApplication, translatePhase2 } from "snu-lib";
 import styled from "styled-components";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import { getResultLabel, isInRuralArea, translate, SENDINBLUE_TEMPLATES, APPLICATION_STATUS, ROLES } from "../../../utils";
 import PinLocation from "../../../assets/PinLocation";
+import { FilterRow, ResultTable } from "../../../components/list";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import { apiURL } from "../../../config";
+import api from "../../../services/api";
+import { APPLICATION_STATUS, getResultLabel, isInRuralArea, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import MissionView from "./wrapper";
 
-const FILTERS = ["SEARCH"];
+const FILTERS = ["SEARCH", "COHORT", "STATUS_PHASE_2", "APPLICATION_STATUS"];
 
 export default function ProposeMission({ mission, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
@@ -66,27 +67,78 @@ export default function ProposeMission({ mission, updateMission }) {
 
 const SearchBox = ({ getDefaultQuery, setSearch }) => {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: "#FFFFFF", padding: "3rem", borderRadius: "10px" }}>
-      <div>
-        <h3 style={{ color: "#111827", fontWeight: "bold" }}>Suggérez la mission à un volontaire</h3>
-        <p style={{ color: "#6B7280" }}>Un e-mail lui sera envoyé avec la présentation de la mission ainsi qu’un lien pour candidater.</p>
+    <div className="flex flex-col bg-white px-12 pt-12 pb-4">
+      <div className="flex items-center justify-between rounded-lg">
+        <div>
+          <h3 style={{ color: "#111827", fontWeight: "bold" }}>Suggérez la mission à un volontaire</h3>
+          <p style={{ color: "#6B7280" }}>Un e-mail lui sera envoyé avec la présentation de la mission ainsi qu’un lien pour candidater.</p>
+        </div>
+        <SearchStyle>
+          <DataSearch
+            defaultQuery={getDefaultQuery}
+            showIcon={false}
+            placeholder="Rechercher un volontaire..."
+            react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+            componentId="SEARCH"
+            dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
+            style={{ flex: 1, marginRight: "1rem" }}
+            innerClass={{ input: "searchbox" }}
+            autosuggest={false}
+            queryFormat="and"
+            onValueChange={setSearch}
+          />
+          <p>Nom, prénom ou bien e-mail</p>
+        </SearchStyle>
       </div>
-      <SearchStyle>
-        <DataSearch
-          defaultQuery={getDefaultQuery}
-          showIcon={false}
-          placeholder="Rechercher un volontaire..."
-          react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-          componentId="SEARCH"
-          dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
-          style={{ flex: 1, marginRight: "1rem" }}
-          innerClass={{ input: "searchbox" }}
-          autosuggest={false}
-          queryFormat="and"
-          onValueChange={setSearch}
-        />
-        <p>Nom, prénom ou bien e-mail</p>
-      </SearchStyle>
+      <div className="flex rounded-xl mt-4 bg-gray-50 p-4 items-center">
+        <FilterRow visible>
+          <div className="uppercase text-sm text-gray-500">Filtres :</div>
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            placeholder="Cohorte"
+            componentId="COHORT"
+            dataField="cohort.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
+          />
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="STATUS_PHASE_2"
+            dataField="statusPhase2.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
+            renderItem={(e, count) => {
+              return `${translatePhase2(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            renderLabel={(items) => getFilterLabel(items, "Statut phase 2", "Statut phase 2")}
+          />
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="APPLICATION_STATUS"
+            dataField="phase2ApplicationStatus.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
+            renderItem={(e, count) => {
+              return `${translateApplication(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            renderLabel={(items) => getFilterLabel(items, "Statut mission (candidature)", "Statut mission (candidature)")}
+            showMissing={true}
+          />
+        </FilterRow>
+      </div>
     </div>
   );
 };
