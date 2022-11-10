@@ -68,7 +68,10 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
       .validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, type, template } = value;
 
     const young = await YoungObject.findById(id);
@@ -132,7 +135,10 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     })
       .unknown()
       .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, type, template, fileName, contract_id } = value;
 
     const young = await YoungObject.findById(id);
@@ -209,7 +215,10 @@ router.post(
           .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
           .required(),
       }).validate(req.params, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
       const { id, key } = value;
 
       const { error: filesError, value: files } = Joi.array()
@@ -311,7 +320,7 @@ router.post(
         young.files[key].push(newFile);
         if (key === "cniFiles") {
           young.latestCNIFileExpirationDate = body.expirationDate;
-          young.CNIFileNotValidOnStart = (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]);
+          young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
           young.latestCNIFileCategory = body.category;
         }
       }
@@ -342,7 +351,10 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
     })
       .unknown()
       .validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, key, fileId } = value;
 
     // Check permissions
@@ -386,7 +398,10 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, key } = value;
 
     // Check permissions
@@ -423,7 +438,10 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, key, fileId } = value;
 
     // Check permissions

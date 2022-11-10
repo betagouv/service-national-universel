@@ -5,6 +5,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
+import { ID } from "../utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
@@ -109,31 +110,6 @@ export default function StepUpload() {
   }
 
   const isDisabled = !young.files.cniFiles || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
-
-  const ID = {
-    cniNew: {
-      category: "cniNew",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Nouveau format (après août 2021)",
-      imgFront: "cniNewFront.png",
-      imgBack: "cniNewBack.png",
-      imgDate: "cniNewDate.png",
-    },
-    cniOld: {
-      category: "cniOld",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Ancien format",
-      imgFront: "cniOldFront.png",
-      imgBack: "cniOldBack.png",
-      imgDate: "cniOldDate.png",
-    },
-    passport: {
-      category: "passport",
-      title: "Passeport",
-      imgFront: "passport.png",
-      imgDate: "passportDate.png",
-    },
-  };
 
   if (!category) return <div>Loading</div>;
   return (

@@ -446,7 +446,10 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
         young.set("inscriptionStep2023", STEPS2023.CONFIRM);
       } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       const { error, value } = Joi.object({ date: Joi.date().required() }).validate(req.body, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
       const CNIFileNotValidOnStart = value.date < START_DATE_SESSION_PHASE1[young.cohort];
       young.set({ latestCNIFileExpirationDate: value.date, CNIFileNotValidOnStart });
     }
@@ -457,7 +460,10 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
         latestCNIFileCategory: Joi.string().trim().required(),
       };
       const { error, value } = Joi.object(fileSchema).validate(req.body, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
 
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile"]) };
       if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

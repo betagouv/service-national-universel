@@ -22,7 +22,7 @@ export function ChangeCohortPen({ young, onChange }) {
     const { data } = await api.post("/cohort-session/eligibility/2023", {
       birthDate: young.birthdateAt,
       schoolLevel: young.grade,
-      department: young.department,
+      department: young?.schoolDepartment || young?.department,
       frenchNationality: young.frenchNationality,
     });
     const isArray = Array.isArray(data);

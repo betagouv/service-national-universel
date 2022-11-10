@@ -22,7 +22,10 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const { departSejourMotif, departSejourAt, departSejourMotifComment, id } = value;
 
@@ -51,7 +54,10 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     const { error, value } = Joi.object({
       id: Joi.string().required(),
     }).validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -86,7 +92,10 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const { value: newValue, key, id } = value;
 

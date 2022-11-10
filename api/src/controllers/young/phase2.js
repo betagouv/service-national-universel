@@ -38,7 +38,10 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       files: Joi.array().items(Joi.string().required()).required().min(1),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -143,7 +146,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       value.sousType = undefined;
     }
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -198,7 +204,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -214,7 +223,10 @@ router.get("/equivalences", passport.authenticate(["referent", "young"], { sessi
 router.get("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -239,7 +251,10 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
       },
       { stripUnknown: true },
     );
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });

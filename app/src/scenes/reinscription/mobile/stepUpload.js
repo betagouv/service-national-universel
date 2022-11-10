@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { formatDateFR, sessions2023 } from "snu-lib";
 import { translate } from "../../../utils";
+import { ID } from "../../inscription2023/utils";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import Error from "../../../components/error";
@@ -62,31 +63,6 @@ export default function StepUpload() {
     plausibleEvent("Phase0/CTA reinscription - CI desktop");
     history.push("/reinscription/done");
   }
-
-  const ID = {
-    cniNew: {
-      category: "cniNew",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Nouveau format (après août 2021)",
-      imgFront: "cniNewFront.png",
-      imgBack: "cniNewBack.png",
-      imgDate: "cniNewDate.png",
-    },
-    cniOld: {
-      category: "cniOld",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Ancien format",
-      imgFront: "cniOldFront.png",
-      imgBack: "cniOldBack.png",
-      imgDate: "cniOldDate.png",
-    },
-    passport: {
-      category: "passport",
-      title: "Passeport",
-      imgFront: "passport.png",
-      imgDate: "passportDate.png",
-    },
-  };
 
   return (
     <>
