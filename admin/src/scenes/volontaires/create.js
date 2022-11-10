@@ -89,6 +89,11 @@ export default function Create() {
           errors.schooled = "missing";
           toastr.error("Une erreur s'est produite : \n Des informations sont manquantes au niveau de l'établissement");
         }
+      } else {
+        if (validator.isEmpty(values.schoolCountry) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
+          errors.schooled = "missing";
+          toastr.error("Une erreur s'est produite : \n Des informations sont manquantes au niveau de l'établissement");
+        }
       }
     }
     // il faut check le RP2 si rempli à moitié
