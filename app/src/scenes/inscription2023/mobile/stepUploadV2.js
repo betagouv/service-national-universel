@@ -45,7 +45,13 @@ export default function StepUpload() {
   function renderStep(step) {
     if (step === "recto") return <Recto />;
     if (step === "verso") return <Verso />;
-    if (step === "verify") return <Verify />;
+    if (step === "verify")
+      return (
+        <>
+          <Gallery />
+          <Verify checked={checked} setChecked={setChecked} />
+        </>
+      );
     if (step === "date") return <ExpirationDate />;
   }
 
@@ -150,7 +156,6 @@ export default function StepUpload() {
         </div>
         <input
           type="file"
-          capture="environment"
           id="file-upload"
           name="file-upload"
           accept="image/*"
@@ -185,7 +190,6 @@ export default function StepUpload() {
         </div>
         <input
           type="file"
-          capture="environment"
           id="file-upload"
           name="file-upload"
           accept="image/*"
@@ -204,13 +208,9 @@ export default function StepUpload() {
     );
   }
 
-  function Verify() {
+  function Verify({ checked, setChecked }) {
     return (
       <>
-        <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
-          <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />
-          {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
-        </div>
         <p className="text-lg text-gray-800 font-semibold my-4">Vérifiez les points suivants</p>
         <div className="flex items-center my-2">
           <CheckBox type="checkbox" checked={checked.lisible} onChange={() => setChecked((prev) => ({ ...prev, lisible: !checked.lisible }))} />
@@ -231,6 +231,15 @@ export default function StepUpload() {
           </span>
         </div>
       </>
+    );
+  }
+
+  function Gallery() {
+    return (
+      <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
+        <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />
+        {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
+      </div>
     );
   }
 
