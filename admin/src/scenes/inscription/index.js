@@ -81,8 +81,6 @@ export default function Inscription() {
     setInfosClick(!infosClick);
   };
 
-  if (user.role !== ROLES.ADMIN && environment === "production") history.push("/");
-
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -91,11 +89,11 @@ export default function Inscription() {
             <Header>
               <Title>Inscriptions</Title>
               <div className="flex gap-2">
-                <Link to="/volontaire/create">
+                {/* <Link to="/volontaire/create">
                   <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
                     <p>Nouvelle inscription</p>
                   </VioletButton>
-                </Link>
+                </Link> */}
                 <ExportComponent
                   handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"
@@ -566,8 +564,8 @@ export default function Inscription() {
                   dataField="CNIFileNotValidOnStart.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "CNI_EXPIRED") }}
                   renderItem={(e, count) => {
-                    if(e === "true") return `En attente (${count})`;
-                    return `Validée (${count})`
+                    if (e === "true") return `En attente (${count})`;
+                    return `Validée (${count})`;
                   }}
                   title=""
                   URLParams={true}
@@ -689,7 +687,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
           </MultiLine>
         </td>
         <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-          <SelectStatus hit={hit} options={STATUS} />
+          <SelectStatus hit={hit} options={STATUS} disabled />
         </td>
         <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />
@@ -715,9 +713,6 @@ const Action = ({ hit }) => {
           </DropdownItem>
           {hit.status !== YOUNG_STATUS.DELETED ? (
             <>
-              <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
-                <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
-              </DropdownItem>
               <DropdownItem className="dropdown-item">
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
                   Prendre sa place

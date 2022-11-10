@@ -1,18 +1,19 @@
+import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { Formik, Field } from "formik";
-import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 
-import MultiSelect from "../../components/Multiselect";
+import validator from "validator";
 import AddressInput from "../../components/addressInput";
-import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxTitle } from "../../components/box";
-import { translate, ROLES, SENDINBLUE_TEMPLATES, legalStatus, typesStructure, sousTypesStructure, ENABLE_PM } from "../../utils";
-import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
+import MultiSelect from "../../components/Multiselect";
+import api from "../../services/api";
+import { ENABLE_PM, legalStatus, regexPhoneFrenchCountries, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
 
 export default function Create() {
   const user = useSelector((state) => state.Auth.user);
@@ -77,7 +78,8 @@ export default function Create() {
           toastr.success("Structure créée");
 
           const role = values.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
-          if (!values.firstName || !values.lastName || !values.email) return toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
+          if (!values.firstName || !values.lastName || !values.email || !values.phone)
+            return toastr.error("Vous devez remplir tous les champs", "nom, prénom, téléphone et e-mail");
           const obj = {
             firstName: values.firstName,
             lastName: values.lastName,
@@ -85,6 +87,7 @@ export default function Create() {
             email: values.email,
             structureId: data._id,
             structureName: data.name,
+            phone: values.phone,
           };
           const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE}`, obj);
           if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
@@ -352,6 +355,25 @@ export default function Create() {
                       </FormGroup>
                     </Col>
                   </Row>
+                  <FormGroup>
+                    <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span>*</span>Téléphone
+                    </label>
+                    <Field
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      name="phone"
+                      type="tel"
+                      id="phone"
+                      value={values.phone}
+                      onChange={handleChange}
+                      placeholder="06/02 00 00 00 00"
+                      validate={(v) =>
+                        (!v && requiredMessage) ||
+                        (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                      }
+                    />
+                    <ErrorMessage errors={errors} touched={touched} name="phone" />
+                  </FormGroup>
                   <FormGroup>
                     <label>
                       <span>*</span>ADRESSE EMAIL

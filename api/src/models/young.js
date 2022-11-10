@@ -637,6 +637,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  phase2ApplicationFilesType: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des type de fichier des candidatures de phase 2 pour le jeune",
+    },
+  },
+
   phase2NumberHoursDone: {
     type: String,
     documentation: {

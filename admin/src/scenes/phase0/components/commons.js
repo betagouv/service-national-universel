@@ -3,8 +3,8 @@ import Download from "../../../assets/icons/Download";
 import Plus from "../../../assets/icons/Plus";
 import Bin from "../../../assets/Bin";
 
-export function MiniTitle({ children }) {
-  return <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">{children}</div>;
+export function MiniTitle({ children, className = "" }) {
+  return <div className={`font-medium text-[12px] text-[#242526] leading-snug mb-[8px] ${className}`}>{children}</div>;
 }
 
 export function DownloadButton({ className = "", onClick = () => {}, href, target, rel }) {

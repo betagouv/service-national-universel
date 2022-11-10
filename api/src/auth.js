@@ -264,6 +264,7 @@ class Auth {
       .validate(req.body);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
     const { password, verifyPassword, newPassword } = value;
 
     if (!validatePassword(newPassword)) {

@@ -21,7 +21,7 @@ export default function ConfirmationModal({
         <div className="px-[24px] pt-[24px]">
           {icon && <div className="flex justify-center">{icon}</div>}
           <h1 className="text-[20px] leading-[28px] text-[#111827] mt-[24px] text-center">{title}</h1>
-          <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{message}</p>
+          <div className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{message}</div>
           {children}
         </div>
         <div className="flex p-[24px] items-center justify-between">
