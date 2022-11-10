@@ -1504,6 +1504,13 @@ function SectionConsentements({ young }) {
               </div>
               <MiniSwitch value={young.parent2AllowImageRights === "true"} />
             </div>
+            <div className="mt-[16px] flex itemx-center justify-between">
+              <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                <div className="font-bold">Consentement à la participation</div>
+              </div>
+              {}
+              <MiniSwitch value={young.parent2AllowImageRights === "true"} />
+            </div>
           </div>
         )}
       </div>
