@@ -260,7 +260,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           )}
         </div>
       </div>
-      {confirmModal && !console.log(confirmModal) && (
+      {confirmModal && (
         <ConfirmationModal
           isOpen={true}
           loading={loading}
