@@ -78,6 +78,7 @@ export default function Create() {
       } else {
         setSelectedRepresentant(1);
       }
+    }
 
     for (const key of required) {
       if ((!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
