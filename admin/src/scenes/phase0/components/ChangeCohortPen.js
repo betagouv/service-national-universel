@@ -71,6 +71,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
 
   async function handleChangeCohort() {
     try {
+      if (!message) return toastr.error("Veuillez indiquer un message");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       await onChange();
       toastr.success("Cohorte modifiée avec succès");
@@ -96,7 +97,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
           close();
           setModalConfirmWithMessage(true);
         }}
-        disableConfirm={!motif}
+        disableConfirm={!motif || !newCohort.name}
         showHeaderIcon={true}
         showHeaderText={false}>
         <>
