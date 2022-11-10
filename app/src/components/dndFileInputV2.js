@@ -1,10 +1,9 @@
 import { Field } from "formik";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import Download from "../assets/icons/Download";
 import { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
-import { translate } from "../utils";
 import api from "../services/api";
 import ModalConfirm from "./modals/ModalConfirm";
 
