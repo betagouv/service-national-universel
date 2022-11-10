@@ -28,12 +28,12 @@ const Breadcrumb = ({ parents, path }) => {
 
 const Crumb = ({ href, children, index }) => (
   <>
-    <Link href={href} passHref>
+    <Link legacyBehavior href={href} passHref>
       <a href="#" style={{ marginLeft: `${index + 0.5}rem` }} id="mobile">
         {children}
       </a>
     </Link>
-    <Link href={href} passHref>
+    <Link legacyBehavior href={href} passHref>
       <a href="#" id="desktop">
         {children}
       </a>

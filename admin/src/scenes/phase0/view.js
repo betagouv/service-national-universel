@@ -586,7 +586,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           {globalMode === "correction" ? (
             <>
               <SectionIdentiteCni
-                young={young}
+                young={data}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}

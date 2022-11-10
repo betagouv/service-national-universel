@@ -17,7 +17,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
 
@@ -238,6 +238,11 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     }
 
     value.lastStatusAt = now;
+
+    // --- check rights
+    if (!canUserUpdateYoungStatus(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     // --- update young
     young.set(value);
