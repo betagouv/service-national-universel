@@ -35,7 +35,6 @@ import FieldSituationsParticulieres from "../phase0/components/FieldSituationsPa
 
 export default function Create() {
   const history = useHistory();
-  const options = ["Juillet 2022", "à venir"];
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
@@ -67,7 +66,7 @@ export default function Create() {
         errors[key] = 'Ne peut être vide';
       }
     }
-    if(Object.keys(errors).length > 0) {
+    if (Object.keys(errors).length > 0) {
       toastr.error("Une erreur s'est produite : \n Le formulaire n'est pas complet");
     }
     return errors;
@@ -95,7 +94,7 @@ export default function Create() {
           email: "",
           expirationDate: null,
           phone: "",
-          cohort: options[0],
+          cohort: Object.keys(START_DATE_SESSION_PHASE1)[0],
           parentStatementOfHonorInvalidId: "false",
           addressObject: {
             addressVerified: false,
@@ -144,7 +143,6 @@ export default function Create() {
           parent2Zip: "",
           parent2City: "",
           parent2Country: "",
-          cohort: "",
         }}
         validateOnBlur={false}
         validateOnChange={false}
@@ -753,14 +751,17 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
           className="mb-[16px]"
           handleChange={handleChange}
         />
-        <div className="mt-[16px] w-100 flex flew-row justify-between">
-          <div>Attestation sur l'honneur</div>
-          {values.parentStatementOfHonorInvalidId === "true" ? (
-            <a onClick={(e) => handleChangeBool(e, "false")} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">Validée</a>
-          ) : (
-            <a onClick={(e) => handleChangeBool(e, "true")} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">Non validée</a>
-          )}
-        </div>
+        {(values.expirationDate !== null && new Date(values.expirationDate).getTime() < START_DATE_SESSION_PHASE1[values.cohort].getTime()) &&
+          <div className="mt-[16px] w-100 flex flew-row justify-between">
+            <div>Attestation sur l'honneur</div>
+            {values.parentStatementOfHonorInvalidId === "true" ? (
+              <a onClick={(e) => handleChangeBool(e, "false")} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">Validée</a>
+            ) : (
+              <a onClick={(e) => handleChangeBool(e, "true")} name="parentStatementOfHonorInvalidId" className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">Non validée</a>
+            )}
+          </div>
+        }
+
       </BoxContent>
     </Box>
   );
