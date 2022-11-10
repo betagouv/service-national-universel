@@ -107,7 +107,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   ];
 
   const onConfirmStatus = async (type) => {
-    console.log("🚀 ~ file: YoungHeader.js ~ line 108 ~ onConfirmStatus ~ confirmModal", confirmModal);
     if (type === YOUNG_STATUS.WITHDRAWN) {
       if (withdrawn.reason === "") {
         setWithdrawn({ ...withdrawn, error: "Vous devez obligatoirement sélectionner un motif." });
