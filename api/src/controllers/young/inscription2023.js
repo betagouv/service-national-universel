@@ -9,8 +9,8 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES, getDepartmentByZip, sessions2023 } = require("snu-lib");
-const { sendTemplate } = require("./../../sendinblue");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES, getDepartmentByZip, sessions2023, SENDINBLUE_SMS } = require("snu-lib");
+const { sendTemplate, sendSMS } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { isGoalReached } = require("../../utils/cohort");
@@ -400,14 +400,23 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
         });
       }
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
+      if (young.parent1ContactPreference === "email") {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      } else if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone.replace(/0([6,7])/, "33$1"),
+          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+        );
+      } else throw new Error("Invalid parent 1 contact preference");
+
       value.inscriptionDoneDate = new Date();
     }
 
@@ -515,14 +524,22 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       });
     }
     if (needParent1Relance) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
+      if (young.parent1ContactPreference === "email") {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      } else if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone.replace(/0([6,7])/, "33$1"),
+          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+        );
+      } else throw new Error("Invalid parent 1 contact preference");
     }
 
     young.set({ inscriptionDoneDate: new Date() });
