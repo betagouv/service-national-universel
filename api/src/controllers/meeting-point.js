@@ -82,7 +82,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     returnAtString: Joi.string().required(),
     hideDepartmentInConvocation: Joi.string(),
   }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (error) {
+    capture(error);
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  }
   if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
   const meetingPoint = await MeetingPointModel.findById(value.id);
@@ -115,7 +118,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     returnAtString: Joi.string().required(),
     hideDepartmentInConvocation: Joi.string(),
   }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (error) {
+    capture(error);
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  }
   if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
   const meetingPoint = await MeetingPointModel.create(value);
@@ -125,7 +131,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     if (!canDeleteMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 

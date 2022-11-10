@@ -1,21 +1,21 @@
+import { Field, Formik } from "formik";
 import React from "react";
-import { Formik, Field } from "formik";
-import validator from "validator";
-import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Link, Redirect, useHistory } from "react-router-dom";
+import validator from "validator";
 
-import { setUser } from "../../redux/auth/actions";
-import PasswordEye from "../../components/PasswordEye";
-import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import Header from "./components/header";
 import MultiSelect from "../../components/Multiselect";
+import PasswordEye from "../../components/PasswordEye";
+import { setUser } from "../../redux/auth/actions";
+import api from "../../services/api";
+import Header from "./components/header";
 
-import { legalStatus, typesStructure, sousTypesStructure, translate, getRegionByZip, getDepartmentByZip } from "../../utils";
-import { adminURL } from "../../config";
 import { requiredMessage } from "../../components/errorMessage";
+import { adminURL } from "../../config";
 import { capture } from "../../sentry";
+import { getDepartmentByZip, getRegionByZip, legalStatus, regexPhoneFrenchCountries, sousTypesStructure, translate, typesStructure } from "../../utils";
 
 export default function Signup() {
   const dispatch = useDispatch();
@@ -41,8 +41,8 @@ export default function Signup() {
         initialValues={{ user: {}, structure: {} }}
         onSubmit={async (values, actions) => {
           try {
-            const { firstName, lastName, email, password, acceptCGU } = values?.user || {};
-            const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password, acceptCGU });
+            const { firstName, lastName, email, password, acceptCGU, phone } = values?.user || {};
+            const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password, acceptCGU, phone });
             if (!ok) {
               if (code === "PASSWORD_NOT_VALIDATED")
                 return toastr.error(
@@ -69,7 +69,7 @@ export default function Signup() {
             console.log("e", e);
           }
         }}>
-        {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => {
+        {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
           return (
             <div className="flex flex-col items-center p-8">
               <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-2">Inscrivez votre structure d&apos;accueil</h1>
@@ -132,35 +132,26 @@ export default function Signup() {
                     />
                     <p className="text-xs text-red-500">{errors.user?.lastName}</p>
                   </div>
-                  <div>
-                    <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                      Téléphone
-                    </label>
-                    <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      name="user.phone"
-                      type="tel"
-                      id="phone"
-                      value={values.user.phone}
-                      onChange={handleChange}
-                      placeholder="02 00 00 00 00"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="mobile" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                      Téléphone portable
-                    </label>
-                    <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      name="user.mobile"
-                      type="tel"
-                      id="mobile"
-                      value={values.user.mobile}
-                      onChange={handleChange}
-                      placeholder="06 00 00 00 00"
-                    />
-                  </div>
                   <div className="col-span-2">
+                    <div className="mb-2">
+                      <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        <span className="mr-1 text-red-500">*</span>Téléphone
+                      </label>
+                      <Field
+                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                        name="user.phone"
+                        type="tel"
+                        id="phone"
+                        value={values.user.phone}
+                        onChange={handleChange}
+                        placeholder="06/02 00 00 00 00"
+                        validate={(v) =>
+                          (!v && requiredMessage) ||
+                          (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                        }
+                      />
+                      <p className="text-xs text-red-500">{errors.user?.phone}</p>
+                    </div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>Mot de passe
                     </label>

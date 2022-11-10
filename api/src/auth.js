@@ -6,10 +6,12 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung } = require("./utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
+const { getDepartmentByZip, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
+const { isGoalReached } = require("./utils/cohort");
+
 class Auth {
   constructor(model) {
     this.model = model;
@@ -66,6 +68,113 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
+      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async signUp2023(req, res) {
+    try {
+      const { error, value } = Joi.object({
+        email: Joi.string().lowercase().trim().email().required(),
+        firstName: validateFirstName().trim().required(),
+        lastName: Joi.string().uppercase().trim().required(),
+        password: Joi.string().required(),
+        birthdateAt: Joi.date().required(),
+        frenchNationality: Joi.string().trim().required(),
+        schooled: Joi.string().trim().required(),
+        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        schoolName: Joi.string().trim(),
+        schoolType: Joi.string().trim(),
+        schoolAddress: Joi.string().trim(),
+        schoolZip: Joi.string().trim().allow(null, ""),
+        schoolCity: Joi.string().trim(),
+        schoolDepartment: Joi.string().trim(),
+        schoolRegion: Joi.string().trim(),
+        schoolCountry: Joi.string().trim(),
+        schoolId: Joi.string().trim(),
+        zip: Joi.string().trim(),
+        cohort: Joi.string().trim().required(),
+      }).validate(req.body);
+
+      if (error) {
+        if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+        if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const {
+        email,
+        firstName,
+        lastName,
+        password,
+        birthdateAt,
+        frenchNationality,
+        schooled,
+        schoolName,
+        schoolType,
+        schoolAddress,
+        schoolZip,
+        schoolCity,
+        schoolDepartment,
+        schoolRegion,
+        schoolCountry,
+        schoolId,
+        zip,
+        cohort,
+        grade,
+      } = value;
+      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+
+      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
+      console.log("count = ", countDocuments, typeof countDocuments, countDocuments > 0);
+      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+      const dep = schoolDepartment || getDepartmentByZip(zip);
+      if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+      const user = await this.model.create({
+        email,
+        firstName,
+        lastName,
+        password,
+        birthdateAt,
+        frenchNationality,
+        schooled,
+        schoolName,
+        schoolType,
+        schoolAddress,
+        schoolZip,
+        schoolCity,
+        schoolDepartment,
+        schoolRegion,
+        schoolCountry,
+        schoolId,
+        zip,
+        cohort,
+        grade,
+        inscriptionStep2023: STEPS2023.COORDONNEES,
+      });
+      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt", token, cookieOptions());
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+        params: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+        },
+      });
+
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: serializeYoung(user, user),
+      });
+    } catch (error) {
+      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -155,6 +264,7 @@ class Auth {
       .validate(req.body);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
     const { password, verifyPassword, newPassword } = value;
 
     if (!validatePassword(newPassword)) {

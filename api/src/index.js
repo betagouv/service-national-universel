@@ -81,6 +81,9 @@ app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
+app.use("/representants-legaux", require("./controllers/representants-legaux"));
+app.use("/correction-request", require("./controllers/correction-request"));
+app.use("/young-edition", require("./controllers/young-edition"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

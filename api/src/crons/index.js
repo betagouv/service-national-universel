@@ -7,6 +7,7 @@ const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
 const noticePushMission = require("./noticePushMission");
 //const missionEnd = require("./missionEnd");
+const contratRelance = require("./contratRelance");
 const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
 //const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
@@ -15,6 +16,11 @@ const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
+const deleteInactiveRefs = require("./deleteInactiveRefs");
+const applicationPatches = require("./patch/application");
+const missionPatches = require("./patch/mission");
+const structurePatches = require("./patch/structure");
+const youngPatches = require("./patch/young");
 
 // doubt ? -> https://crontab.guru/
 
@@ -72,6 +78,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   // everyday at 0200
+  cron.schedule("0 0 * * *", () => {
+    deleteInactiveRefs.handler();
+  });
+
   cron.schedule(everyHours(6), () => {
     jeVeuxAiderDaily.handler();
   });
@@ -81,13 +91,15 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   autoAffectationCohesionCenter.handler();
   // });
 
-  // everyday at 02:00 UTC
+  cron.schedule("0 6 * * *", () => {
+    contratRelance.handler();
+  });
+
   cron.schedule("0 8 * * *", () => {
     missionOutdated.handler();
     missionOutdated.handlerNotice1Week();
   });
 
-  // everyday at 1:00 UTC
   cron.schedule("0 7 * * *", () => {
     applicationOutaded.handler();
     applicationOutaded.handlerNotice1Week();
@@ -108,5 +120,21 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("30 3 * * *", () => {
     syncContactSupport.handler();
+  });
+
+  cron.schedule("30 1 * * *", () => {
+    structurePatches.handler();
+  });
+
+  cron.schedule("0 2 * * *", () => {
+    missionPatches.handler();
+  });
+
+  cron.schedule("30 2 * * *", () => {
+    applicationPatches.handler();
+  });
+
+  cron.schedule("0 3 * * *", () => {
+    youngPatches.handler();
   });
 }

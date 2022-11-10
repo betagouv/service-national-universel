@@ -29,6 +29,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
   try {
     const body = {};
     if (ENVIRONMENT !== "production") {
+      console.log("to before filter:", to);
       const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       to = to.filter((e) => e.email.match(regexp));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
@@ -58,6 +59,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
   try {
     const body = { templateId: parseInt(id) };
     if (!force && ENVIRONMENT !== "production") {
+      console.log("emailTo before filter:", emailTo);
       const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       emailTo = emailTo.filter((e) => e.email.match(regexp));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));

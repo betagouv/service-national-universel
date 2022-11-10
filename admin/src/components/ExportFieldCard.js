@@ -16,7 +16,7 @@ export default function ExportFieldCard({ category, selectedFields, setSelectedF
           }
         }}>
         <div className="flex justify-between w-full">
-          <div className="text-left text-lg w-3/4">{category.title}</div>
+          <div className="text-left text-lg w-3/4 font-medium mb-1 text-gray-600">{category.title}</div>
           <div className="h-4">
             <input readOnly type="checkbox" checked={selectedFields.includes(category.id)} />
           </div>

@@ -170,6 +170,7 @@ export default function Edit(props) {
               submitButton: false,
               changeStructureButton: false,
             });
+            values.placesLeft = values.placesTotal;
           } else {
             setLoadings({
               saveButton: false,

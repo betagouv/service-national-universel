@@ -24,9 +24,15 @@ const { ADMIN_URL } = require("../config");
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
 
-    if (!canCreateOrModifyMission(req.user, checkedMission)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    let structure = {};
+    if (req.user.role === ROLES.SUPERVISOR) structure = await StructureObject.findById(checkedMission.structureId);
+
+    if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
@@ -78,7 +84,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canCreateOrModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role === ROLES.SUPERVISOR) var structure = await StructureObject.findById(mission.structureId);
+
+    if (!canCreateOrModifyMission(req.user, mission, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -157,7 +165,10 @@ router.post("/multiaction/change-tutor", passport.authenticate("referent", { ses
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
 
     const { tutorId, tutorName, ids } = value;
 
@@ -194,7 +205,10 @@ router.post("/multiaction/change-tutor", passport.authenticate("referent", { ses
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -232,7 +246,10 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
 router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -295,7 +312,10 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

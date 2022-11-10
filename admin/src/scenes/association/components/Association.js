@@ -4,7 +4,7 @@ import api from "../../../services/api";
 import styled from "styled-components";
 
 import Chevron from "../../../components/Chevron";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 import { urlWithScheme } from "../../../utils";
 
 export default function Association({ hit, missionsInfo }) {

@@ -9,7 +9,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";

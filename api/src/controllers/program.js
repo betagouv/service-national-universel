@@ -11,7 +11,10 @@ const { ROLES, canCreateOrUpdateProgram } = require("snu-lib/roles");
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedProgram } = validateProgram(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
     if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await ProgramObject.create(checkedProgram);
     return res.status(200).send({ ok: true, data });
@@ -42,7 +45,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const data = await ProgramObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
@@ -75,10 +81,23 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
+router.get("/public/engagements", async (req, res) => {
+  try {
+    const data = await ProgramObject.find({ visibility: "NATIONAL" });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const program = await ProgramObject.findById(checkedId);
     if (!canCreateOrUpdateProgram(req.user, program)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await program.remove();

@@ -22,8 +22,8 @@ export default function changeSejour() {
   const [modalConfirmControlOk, setmodalConfirmControlOk] = useState(false);
   const [modalConfirmGoalReached, setmodalConfirmGoalReached] = useState(false);
   const [sejours, setSejours] = useState(null);
-  const [isEligible, setIsElegible] = useState(false);
   const [sejourGoal, setSejourGoal] = useState(null);
+  const [isEligible, setIsElegible] = useState(false);
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
   const history = useHistory();
@@ -40,23 +40,30 @@ export default function changeSejour() {
   useEffect(() => {
     (async function getInfo() {
       try {
-        const { data } = await api.post("/cohort-session/eligibility/2022", {
+        const { data } = await api.post("/cohort-session/eligibility/2023", {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
           department: young.department,
+          frenchNationality: young.frenchNationality,
         });
-        const sejourGoal = data.map((e) => {
-          // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
-          //var date = new Date();
-          //console.log(date.toISOString());
-          //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer
-          return { sejour: e.id, goal: e.goalReached };
-        });
-        const sejour = sejourGoal.map((e) => e.sejour);
+        const isArray = Array.isArray(data);
+        if (isArray) {
+          const sejourGoal = data.map((e) => {
+            // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
+            //var date = new Date();
+            //console.log(date.toISOString());
+            //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer
+            return { sejour: e.name, goal: e.goalReached };
+          });
+          const sejour = sejourGoal.map((e) => e.sejour);
 
-        setSejours(sejour);
-        setIsElegible(!!data);
-        setSejourGoal(sejourGoal);
+          setSejours(sejour);
+          setIsElegible(!!data);
+          setSejourGoal(sejourGoal);
+        } else {
+          setIsElegible(false);
+          setSejours([]);
+        }
       } catch (e) {
         capture(e);
         toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -90,7 +97,7 @@ export default function changeSejour() {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", translate(code));
       }
-      toastr.success("Cohorte modifiée avec succés. Votre nouvelle cohorte se tiendra en " + newSejour);
+      toastr.success("Cohorte modifiée avec succés. Votre nouvelle session se tiendra en " + newSejour);
       dispatch(setYoung(data));
       setmodalConfirmControlOk(false);
       history.push("/phase1");
@@ -151,9 +158,9 @@ export default function changeSejour() {
                                 </DropdownItem>
                               );
                             })}
-                          <DropdownItem className="dropdown-item" onClick={() => setNewSejour("à venir")}>
+                          {/* <DropdownItem className="dropdown-item" onClick={() => setNewSejour("à venir")}>
                             Séjour à venir
-                          </DropdownItem>
+                          </DropdownItem> */}
                         </DropdownMenu>
                       </UncontrolledDropdown>
                       <a

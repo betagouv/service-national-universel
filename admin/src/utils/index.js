@@ -1,11 +1,10 @@
-import React from "react";
 import passwordValidator from "password-validator";
+import React from "react";
+import sanitizeHtml from "sanitize-html";
+import slugify from "slugify";
 import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
-import { environment } from "../config";
-import sanitizeHtml from "sanitize-html";
-import slugify from "slugify";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
@@ -197,3 +196,9 @@ export function urlWithScheme(url) {
 export function slugifyFileName(str) {
   return slugify(str, { replacement: "-", remove: /[*+~.()'"!:@]/g });
 }
+
+export function capitalizeFirstLetter(string) {
+  return string[0].toUpperCase() + string.slice(1);
+}
+
+export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07|02)(?:\\W*\\d){8}$`;

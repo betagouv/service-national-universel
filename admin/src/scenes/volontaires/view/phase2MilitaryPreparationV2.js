@@ -79,6 +79,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
       // validate the files
       const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "VALIDATED" });
       if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
+      await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
 
       // change status of applications
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
@@ -90,16 +91,10 @@ export default function Phase2militaryPrepartionV2({ young }) {
               translate(responseApplication.code),
               `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
             );
-        }
-      }
-      setModal({ isOpen: false, template: null, data: null });
-      await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
-      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-        const app = applicationsToMilitaryPreparation[i];
-        if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
           await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
         }
       }
+      setModal({ isOpen: false, template: null, data: null });
     } catch (e) {
       console.error(e);
       toastr.error("Une erreur est survenue", translate(e.code));

@@ -9,15 +9,19 @@ const YoungModel = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
+const { ERRORS, getCcOfYoung, cancelPendingApplications } = require("../../utils");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
+const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier").required(),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)").required(),
+      sousType: Joi.string()
+        .trim()
+        .valid(...UNSS_TYPE),
       structureName: Joi.string().trim().required(),
       address: Joi.string().trim().required(),
       zip: Joi.string().trim().required(),
@@ -34,7 +38,10 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       files: Joi.array().items(Joi.string().required()).required().min(1),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -57,6 +64,11 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     }
     if (!isYoung) {
       young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+      const applications = await ApplicationModel.find({ youngId: young._id });
+      const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+      await cancelPendingApplications(pendingApplication, req.user);
+      const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+      young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
     }
     await young.save({ fromUser: req.user });
 
@@ -114,7 +126,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       id: Joi.string().required(),
       idEquivalence: Joi.string().required(),
       status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier"),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"),
+      sousType: Joi.string()
+        .trim()
+        .valid(...UNSS_TYPE),
       structureName: Joi.string().trim(),
       address: Joi.string().trim(),
       zip: Joi.string().trim(),
@@ -132,7 +147,14 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       message: Joi.string().trim(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (value.type !== "Certification Union Nationale du Sport scolaire (UNSS)") {
+      value.sousType = undefined;
+    }
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -143,11 +165,15 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
+      const applications = await ApplicationModel.find({ youngId: young._id });
       if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
         young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+        const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+        await cancelPendingApplications(pendingApplication, req.user);
+        const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+        young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
-        const applications = await ApplicationModel.find({ youngId: young._id });
         const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
 
         //Le status phase deux est set a In_Progress si on a des candidateure active
@@ -187,7 +213,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -203,7 +232,10 @@ router.get("/equivalences", passport.authenticate(["referent", "young"], { sessi
 router.get("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -228,7 +260,10 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
       },
       { stripUnknown: true },
     );
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -236,6 +271,28 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
     await young.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorBody, value: checkedBody } = validatePhase2Preference(req.body);
+    if (errorId || errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungModel.findById(checkedId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    young.set(checkedBody);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

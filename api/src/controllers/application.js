@@ -17,10 +17,22 @@ const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
+const { ROLES, SENDINBLUE_TEMPLATES, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication, serializeYoung } = require("../utils/serializer");
 const { config } = require("dotenv");
-const { uploadFile, ERRORS, isYoung, isReferent, getCcOfYoung, updateYoungPhase2Hours, updateStatusPhase2, getFile, updateYoungStatusPhase2Contract } = require("../utils");
+const {
+  uploadFile,
+  ERRORS,
+  isYoung,
+  isReferent,
+  getCcOfYoung,
+  updateYoungPhase2Hours,
+  updateStatusPhase2,
+  getFile,
+  updateYoungStatusPhase2Contract,
+  getReferentManagerPhase2,
+  updateYoungApplicationFilesType,
+} = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
@@ -49,38 +61,6 @@ async function updateMission(app, fromUser) {
     console.error(e);
   }
 }
-
-const getReferentManagerPhase2 = async (department) => {
-  // get the referent_department manager_phase2
-  let toReferent = await ReferentObject.find({
-    subRole: SUB_ROLES.manager_phase2,
-    role: ROLES.REFERENT_DEPARTMENT,
-    department,
-  });
-  // if not found, get the referent_region manager_phase2
-  if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.manager_phase2,
-        role: ROLES.REFERENT_REGION,
-        region: department2region[department],
-      }),
-    );
-  }
-  // if not found, get the manager_department
-  if (!toReferent) {
-    toReferent = [];
-    toReferent.push(
-      await ReferentObject.findOne({
-        subRole: SUB_ROLES.manager_department,
-        role: ROLES.REFERENT_DEPARTMENT,
-        department,
-      }),
-    );
-  }
-  return toReferent;
-};
 
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -124,7 +104,10 @@ router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { s
 router.post("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
@@ -192,7 +175,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 router.put("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateUpdateApplication(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -277,7 +263,10 @@ router.put("/:id/visibilite", passport.authenticate(["young"], { session: false,
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const data = await ApplicationObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -298,7 +287,10 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
 router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const { error, value: template } = Joi.string().required().validate(req.params.template);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (error) {
+    capture(error);
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  }
 
   const toReferents = await getReferentManagerPhase2(req.user.department);
   if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -328,7 +320,10 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { id, template: defaultTemplate, message, type, multipleDocument } = value;
 
@@ -375,7 +370,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
 
     if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-      params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+      params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2/application/${application._id}/contrat` };
     } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       params = { ...params, cta: `${APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire` };
@@ -394,13 +389,19 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
-        const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = referentManagerPhase2.map((referent) => ({
-          name: `${referent.firstName} ${referent.lastName}`,
-          email: referent.email,
-        }));
-        template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+        if (young.statusMilitaryPreparationFiles === "VALIDATED") {
+          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+          template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
+          params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+        } else {
+          const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
+          emailTo = referentManagerPhase2.map((referent) => ({
+            name: `${referent.firstName} ${referent.lastName}`,
+            email: referent.email,
+          }));
+          template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
+          params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+        }
       } else {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
@@ -434,7 +435,10 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         });
 
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }];
+        emailTo = referentManagerPhase2.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        }));
         params = {
           ...params,
           cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
@@ -533,13 +537,17 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          try {
+            const clamscan = await new NodeClam().init({
+              removeInfected: true,
+            });
+            const { isInfected } = await clamscan.isInfected(tempFilePath);
+            if (isInfected) {
+              capture(`File ${name} of user(${user._id})is infected`);
+              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+            }
+          } catch {
+            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
           }
         }
         const data = fs.readFileSync(tempFilePath);
@@ -551,6 +559,9 @@ router.post(
       }
       application.set({ [key]: names });
       await application.save({ fromUser: req.user });
+
+      await updateYoungApplicationFilesType(application, req.user);
+
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);
@@ -569,7 +580,10 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { id, key, name } = value;
 

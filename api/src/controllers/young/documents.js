@@ -10,7 +10,7 @@ const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib/constants");
 const config = require("../../config");
 const NodeClam = require("clamscan");
 const fs = require("fs");
@@ -68,7 +68,10 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
       .validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, type, template } = value;
 
     const young = await YoungObject.findById(id);
@@ -132,7 +135,10 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     })
       .unknown()
       .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, type, template, fileName, contract_id } = value;
 
     const young = await YoungObject.findById(id);
@@ -209,7 +215,10 @@ router.post(
           .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
           .required(),
       }).validate(req.params, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
       const { id, key } = value;
 
       const { error: filesError, value: files } = Joi.array()
@@ -233,8 +242,16 @@ router.post(
           Object.keys(req.files || {}).map((e) => req.files[e]),
           { stripUnknown: true },
         );
-      console.log("files:", files);
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+      const { error: bodyError, value: body } = Joi.object({
+        category: Joi.string(),
+        expirationDate: Joi.date(),
+      }).validate(req.body, { stripUnknown: true });
+      if (bodyError) {
+        capture(bodyError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
 
       // Check permissions
 
@@ -260,13 +277,17 @@ router.post(
         }
 
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          try {
+            const clamscan = await new NodeClam().init({
+              removeInfected: true,
+            });
+            const { isInfected } = await clamscan.isInfected(tempFilePath);
+            if (isInfected) {
+              capture(`File ${name} of user(${req.user.id})is infected`);
+              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+            }
+          } catch {
+            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
           }
         }
 
@@ -278,6 +299,8 @@ router.post(
           size,
           uploadedAt: Date.now(),
           mimetype,
+          category: body.category,
+          expirationDate: body.expirationDate,
         };
 
         // Upload file using ObjectId as file name
@@ -295,6 +318,11 @@ router.post(
         // Add record to young
 
         young.files[key].push(newFile);
+        if (key === "cniFiles") {
+          young.latestCNIFileExpirationDate = body.expirationDate;
+          young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
+          young.latestCNIFileCategory = body.category;
+        }
       }
 
       // Save young with new records
@@ -323,7 +351,10 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
     })
       .unknown()
       .validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, key, fileId } = value;
 
     // Check permissions
@@ -367,7 +398,10 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, key } = value;
 
     // Check permissions
@@ -404,7 +438,10 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { id, key, fileId } = value;
 
     // Check permissions

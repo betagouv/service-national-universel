@@ -189,7 +189,10 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     const { error: idError, value: id } = validateOptionalId(req.body._id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { error, value: data } = validateContract(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
@@ -249,7 +252,10 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
 router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { error: typeError, value: type } = Joi.string().valid("projectManager", "structureManager", "parent1", "parent2", "young").required().validate(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });

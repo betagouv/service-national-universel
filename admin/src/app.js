@@ -44,9 +44,16 @@ import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
+import * as Sentry from "@sentry/react";
 
 initSentry();
 initApi();
+
+function FallbackComponent() {
+  return <></>;
+}
+
+const myFallback = <FallbackComponent />;
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -56,7 +63,10 @@ export default function App() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
         const res = await api.get("/referent/signin_token");
-        if (!res.ok || !res.user) return setLoading(false);
+        if (!res.ok || !res.user) {
+          dispatch(setUser(null));
+          return setLoading(false);
+        }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
       } catch (e) {
@@ -70,19 +80,21 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
-      <div className="main">
-        <Switch>
-          <SentryRoute path="/validate" component={Validate} />
-          <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-          <SentryRoute path="/auth" component={Auth} />
-          <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
-          <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-          <SentryRoute path="/" component={Home} />
-        </Switch>
-        <Footer />
-      </div>
-    </Router>
+    <Sentry.ErrorBoundary fallback={myFallback}>
+      <Router history={history}>
+        <div className="main">
+          <Switch>
+            <SentryRoute path="/validate" component={Validate} />
+            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+            <SentryRoute path="/auth" component={Auth} />
+            <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+            <SentryRoute path="/" component={Home} />
+          </Switch>
+          <Footer />
+        </div>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 

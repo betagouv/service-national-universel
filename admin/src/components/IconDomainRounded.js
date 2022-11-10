@@ -50,9 +50,9 @@ export default function IconDomain({ domain, bgStyle = null, iconStyle = "text-w
   }, [domain]);
 
   return domain ? (
-    <div className={`w-9 h-9 flex justify-center items-center rounded-xl  ${bgStyle ? bgStyle : "bg-[#212B44]"}`}>{icon}</div>
+    <div className={`w-9 h-9 flex justify-center items-center rounded-xl  p-1.5 ${bgStyle ? bgStyle : "bg-[#212B44]"}`}>{icon}</div>
   ) : (
-    <div className={`w-9 h-9 flex justify-center items-center rounded-xl ${bgStyle ? bgStyle : "bg-[#212B44]"} `}>
+    <div className={`w-9 h-9 flex justify-center items-center rounded-xl p-1.5 ${bgStyle ? bgStyle : "bg-[#212B44]"} `}>
       <img className="h-8 w-8" src={Default} style={{}} />
     </div>
   );

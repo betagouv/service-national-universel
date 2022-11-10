@@ -8,7 +8,6 @@ const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
-const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -23,11 +22,16 @@ const {
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
+  CELLAR_ENDPOINT_SUPPORT,
+  CELLAR_KEYID_SUPPORT,
+  CELLAR_KEYSECRET_SUPPORT,
+  PUBLIC_BUCKET_NAME_SUPPORT,
 } = require("../config");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
-const { getQPV, getDensity } = require("../geo");
+const { SUB_ROLES } = require("snu-lib/roles");
+const { getAge } = require("snu-lib/date");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -44,23 +48,52 @@ function getReq(url, cb) {
   return http.get(url, cb);
 }
 
-function uploadFile(path, file) {
+const SUPPORT_BUCKET_CONFIG = {
+  bucket: PUBLIC_BUCKET_NAME_SUPPORT,
+  endpoint: CELLAR_ENDPOINT_SUPPORT,
+  accessKeyId: CELLAR_KEYID_SUPPORT,
+  secretAccessKey: CELLAR_KEYSECRET_SUPPORT,
+};
+
+const DEFAULT_BUCKET_CONFIG = {
+  bucket: BUCKET_NAME,
+  endpoint: CELLAR_ENDPOINT,
+  accessKeyId: CELLAR_KEYID,
+  secretAccessKey: CELLAR_KEYSECRET,
+};
+
+function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: bucket,
       Key: path,
       Body: file.data,
       ContentEncoding: file.encoding,
       ContentType: file.mimetype,
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
+
     s3bucket.upload(params, function (err, data) {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
     });
   });
 }
+
+const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
+  const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
+  const p = new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+    const params = { Bucket: bucket, Key: name };
+    s3bucket.getObject(params, (err, data) => {
+      if (err) return reject(err);
+      resolve(data);
+    });
+  });
+  return p;
+};
 
 function uploadPublicPicture(path, file) {
   return new Promise((resolve, reject) => {
@@ -101,18 +134,6 @@ function listFiles(path) {
     });
   });
 }
-
-const getFile = (name) => {
-  const p = new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: name };
-    s3bucket.getObject(params, (err, data) => {
-      if (err) return reject(err);
-      resolve(data);
-    });
-  });
-  return p;
-};
 
 function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
@@ -325,11 +346,11 @@ async function updateYoungPhase2Hours(young, fromUser) {
   });
   await young.save({ fromUser });
 }
+
 // This function should always be called after updateYoungPhase2Hours.
 // This could be refactored in one function.
 const updateStatusPhase2 = async (young, fromUser) => {
   const applications = await ApplicationModel.find({ youngId: young._id });
-  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
   const activeApplication = applications.filter(
     (a) =>
@@ -339,11 +360,14 @@ const updateStatusPhase2 = async (young, fromUser) => {
       a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
   );
 
+  const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+
   young.set({ statusPhase2UpdatedAt: Date.now() });
 
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
     // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
     young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
+    await cancelPendingApplications(pendingApplication, fromUser);
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({
@@ -355,6 +379,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
       "files.militaryPreparationFilesCertificate": [],
       statusMilitaryPreparationFiles: undefined,
     });
+    await cancelPendingApplications(pendingApplication, fromUser);
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
@@ -368,19 +393,33 @@ const updateStatusPhase2 = async (young, fromUser) => {
     // We change young status to IN_PROGRESS if he has an 'active' application.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
   } else {
-    // We change young status to WAITING_LIST if he has no estimated hours of phase 2.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
   }
+
+  const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+  young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
+
   await young.save({ fromUser });
 };
 
 const checkStatusContract = (contract) => {
   if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
   // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-  const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
+  const tokenKeys = ["projectManagerToken", "structureManagerToken"];
+  const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
+
+  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+  if (isYoungAdult) {
+    tokenKeys.push("youngContractToken");
+    validateKeys.push("youngContractStatus");
+  } else {
+    tokenKeys.push("parent1Token", "parent2Token");
+    validateKeys.push("parent1Status", "parent2Status");
+  }
+
   const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
-  const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
   const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+
   if (validatedCount >= tokenCount) {
     return "VALIDATED";
   } else {
@@ -407,6 +446,29 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   await young.save({ fromUser });
 };
 
+async function cancelPendingApplications(pendingApplication, fromUser) {
+  for (const application of pendingApplication) {
+    application.set({ status: APPLICATION_STATUS.CANCEL });
+    await application.save({ fromUser });
+    await sendNotificationApplicationClosedBecausePhase2Validated(application);
+  }
+}
+
+async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
+  if (application.tutorId) {
+    const responsible = await ReferentModel.findById(application.tutorId);
+    if (responsible)
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
+        emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+        params: {
+          missionName: application.missionName,
+          youngFirstName: application.youngFirstName,
+          youngLastName: application.youngLastName,
+        },
+      });
+  }
+}
+
 function isYoung(user) {
   return user instanceof YoungModel;
 }
@@ -423,38 +485,6 @@ const getBaseUrl = () => {
   if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
   return "http://localhost:8080";
 };
-
-async function inscriptionCheck(value, young, req) {
-  // Check quartier prioritaires.
-  if (value.zip && value.city && value.address) {
-    const qpv = await getQPV(value.zip, value.city, value.address);
-    if (qpv === true) young.set({ qpv: "true" });
-    else if (qpv === false) young.set({ qpv: "false" });
-    else young.set({ qpv: "" });
-    await young.save({ fromUser: req.user });
-  }
-
-  // Check quartier prioritaires.
-  if (value.cityCode) {
-    const populationDensity = await getDensity(value.cityCode);
-    young.set({ populationDensity });
-    await young.save({ fromUser: req.user });
-  }
-
-  // if withdrawn, cascade withdrawn on every status
-  if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-    if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
-    if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
-    if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
-    await young.save({ fromUser: req.user });
-  }
-
-  // if they had a cohesion center, we check if we need to update the places taken / left
-  if (young.sessionPhase1Id) {
-    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-  }
-}
 
 const updateApplication = async (mission, fromUser = null) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
@@ -584,6 +614,61 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   }
 }
 
+const getReferentManagerPhase2 = async (department) => {
+  let toReferent = await ReferentModel.find({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department,
+  });
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.secretariat,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.assistant_manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+  return toReferent;
+};
+
+const updateYoungApplicationFilesType = async (application, user) => {
+  const young = await YoungModel.findById(application.youngId);
+  const applications = await ApplicationModel.find({ youngId: application.youngId });
+
+  const listFiles = applications.reduce((prev, acc) => {
+    if (acc.contractAvenantFiles.length !== 0 && !prev.includes("contractAvenantFiles")) prev.push("contractAvenantFiles");
+    if (acc.justificatifsFiles.length !== 0 && !prev.includes("justificatifsFiles")) prev.push("justificatifsFiles");
+    if (acc.feedBackExperienceFiles.length !== 0 && !prev.includes("feedBackExperienceFiles")) prev.push("feedBackExperienceFiles");
+    if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
+    return prev;
+  }, []);
+  young.set({ phase2ApplicationFilesType: listFiles });
+  await young.save({ fromUser: user });
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -594,6 +679,8 @@ const ERRORS = {
   PASSWORD_NOT_VALIDATED: "PASSWORD_NOT_VALIDATED",
   INVITATION_TOKEN_EXPIRED_OR_INVALID: "INVITATION_TOKEN_EXPIRED_OR_INVALID",
   FILE_CORRUPTED: "FILE_CORRUPTED",
+  FILE_INFECTED: "FILE_INFECTED",
+  FILE_SCAN_DOWN: "FILE_SCAN_DOWN",
   YOUNG_ALREADY_REGISTERED: "YOUNG_ALREADY_REGISTERED",
   UNSUPPORTED_TYPE: "UNSUPPORTED_TYPE",
   USER_NOT_FOUND: "USER_NOT_FOUND",
@@ -644,6 +731,24 @@ const STEPS = {
   DOCUMENTS: "DOCUMENTS",
   DONE: "DONE",
 };
+const STEPS2023 = {
+  COORDONNEES: "COORDONNEES",
+  CONSENTEMENTS: "CONSENTEMENTS",
+  REPRESENTANTS: "REPRESENTANTS",
+  DOCUMENTS: "DOCUMENTS",
+  CONFIRM: "CONFIRM",
+  WAITING_CONSENT: "WAITING_CONSENT",
+  DONE: "DONE",
+};
+const STEPS2023REINSCRIPTION = {
+  ELIGIBILITE: "ELIGIBILITE",
+  NONELIGIBLE: "NONELIGIBLE",
+  SEJOUR: "SEJOUR",
+  CONSENTEMENTS: "CONSENTEMENTS",
+  DOCUMENTS: "DOCUMENTS",
+  WAITING_CONSENT: "WAITING_CONSENT",
+  DONE: "DONE",
+};
 
 module.exports = {
   timeout,
@@ -675,11 +780,16 @@ module.exports = {
   YOUNG_STATUS,
   YOUNG_SITUATIONS,
   STEPS,
-  inscriptionCheck,
+  STEPS2023,
+  STEPS2023REINSCRIPTION,
   updateApplication,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
+  getReferentManagerPhase2,
+  SUPPORT_BUCKET_CONFIG,
+  cancelPendingApplications,
+  updateYoungApplicationFilesType,
 };

@@ -6,6 +6,8 @@ import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
+import { Link } from "react-router-dom";
+import { getLink } from "../../../utils";
 
 export default function Gender({ filter }) {
   const [gender, setGender] = useState(null);
@@ -42,8 +44,12 @@ export default function Gender({ filter }) {
 
     return (
       <Content>
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={malePercent} title={male} subtitle="Garçons" />
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={femalePercent} title={female} subtitle="Filles" />
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SEXE=%5B"male"%5D`] })}>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={malePercent} title={male} subtitle="Garçons" />
+        </Link>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SEXE=%"female"%5D`] })}>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={femalePercent} title={female} subtitle="Filles" />
+        </Link>
       </Content>
     );
   }
