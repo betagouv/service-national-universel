@@ -9,8 +9,8 @@ const YoungModel = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE } = require("snu-lib");
+const { ERRORS, getCcOfYoung, cancelPendingApplications } = require("../../utils");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
@@ -64,6 +64,9 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     }
     if (!isYoung) {
       young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+      const applications = await ApplicationModel.find({ youngId: young._id });
+      const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+      await cancelPendingApplications(pendingApplication, req.user);
     }
     await young.save({ fromUser: req.user });
 
@@ -160,11 +163,13 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
+      const applications = await ApplicationModel.find({ youngId: young._id });
       if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
         young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+        const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+        await cancelPendingApplications(pendingApplication, req.user);
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
-        const applications = await ApplicationModel.find({ youngId: young._id });
         const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
 
         //Le status phase deux est set a In_Progress si on a des candidateure active
