@@ -28,6 +28,7 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
+import Warning from "../../assets/icons/Warning";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -227,7 +228,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onChange={onChange}
           oldCohort={oldCohort}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} />}
+        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} />}
       </div>
       {globalMode === "correction" && (
         <>
@@ -1396,8 +1397,9 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young }) {
+function SectionConsentements({ young, onChange }) {
   const [youngAge, setYoungAge] = useState("?");
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     if (young) {
@@ -1411,6 +1413,37 @@ function SectionConsentements({ young }) {
     { value: "true", label: "J'autorise" },
     { value: "false", label: "Je n'autorise pas" },
   ];
+
+  function parent2RejectSNU() {
+    setConfirmModal({
+      icon: <Warning />,
+      title: "Consentement refusé",
+      message: (
+        <div>
+          Vous vous apprêtez à passer le dossier d&apos;inscription de {young.firstName} {young.lastName} en statut &laquo;non autorisé&raquo;.
+          <br />
+          {young.firstName} ne pourra pas participer au SNU.
+          <br />
+          Un email lui sera automatiquement envoyé.
+        </div>
+      ),
+      confirm: confirmParent2Rejection,
+    });
+  }
+
+  async function confirmParent2Rejection() {
+    try {
+      setConfirmModal(null);
+      await api.put(`/young-edition/${young._id}/parent-allow-snu`, {
+        parent: 2,
+        allow: false,
+      });
+      toastr.success("Le refus a été pris en compte. Le jeune a été notifié.");
+      onChange && onChange();
+    } catch (err) {
+      toastr.error("Nous n'avons pas pu enregistrer le refus. Veuillez réessayer dans quelques instants.");
+    }
+  }
 
   return (
     <Section title="Consentements" collapsable>
@@ -1486,13 +1519,15 @@ function SectionConsentements({ young }) {
           </div>
           <MiniSwitch value={young.parent1AllowImageRights === "true"} />
         </div>
-        <div className="mt-[16px] flex itemx-center justify-between">
-          <div className="grow text-[#374151] text-[14px] leading-[20px]">
-            <div className="font-bold">Consentement à la participation</div>
-            <div>Accord : {translate(young.parent1AllowSNU)}</div>
+        {(young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && (
+          <div className="mt-[16px] flex itemx-center justify-between">
+            <div className="grow text-[#374151] text-[14px] leading-[20px]">
+              <div className="font-bold">Consentement à la participation</div>
+              <div>Accord : {translate(young.parent1AllowSNU)}</div>
+            </div>
+            <MiniSwitch value={young.parent1AllowSNU === "true"} />
           </div>
-          <MiniSwitch value={young.parent2AllowSNU === "true"} />
-        </div>
+        )}
         {young.parent2Status && (
           <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
             <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
@@ -1504,24 +1539,41 @@ function SectionConsentements({ young }) {
               </div>
               <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
             </div>
-            <div className="mt-[16px] flex itemx-center justify-between">
+            <div className="mt-[16px] flex items-center justify-between">
               <div className="grow text-[#374151] text-[14px] leading-[20px]">
                 <div className="font-bold">Droit à l&apos;image</div>
                 <div>Accord : {translate(young.parent2AllowImageRights)}</div>
               </div>
               <MiniSwitch value={young.parent2AllowImageRights === "true"} />
             </div>
-            <div className="mt-[16px] flex itemx-center justify-between">
-              <div className="grow text-[#374151] text-[14px] leading-[20px]">
+            <div className="mt-[16px] flex items-center justify-between">
+              <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
                 <div className="font-bold">Consentement à la participation</div>
                 {(young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false") && <div>Accord : {translate(young.parent2AllowSNU)}</div>}
               </div>
-              {}
-              <MiniSwitch value={young.parent2AllowSNU === "true"} />
+              {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
+                <MiniSwitch value={young.parent2AllowSNU === "true"} />
+              ) : (
+                <BorderButton mode="red" onClick={parent2RejectSNU}>
+                  Déclarer un refus
+                </BorderButton>
+              )}
             </div>
           </div>
         )}
       </div>
+      {confirmModal && (
+        <ConfirmationModal
+          isOpen={true}
+          icon={confirmModal.icon}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmLabel || "Confirmer"}
+          confirmMode={confirmModal.confirmColor || "blue"}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={confirmModal.confirm}
+        />
+      )}
     </Section>
   );
 }
