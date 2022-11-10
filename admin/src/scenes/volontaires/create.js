@@ -56,14 +56,29 @@ export default function Create() {
   const validate = (values, props /* only available when using withFormik */) => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
-    const required = ["latestCNIFileExpirationDate", "firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "parent1Email", "situation", "address", "city", "zip"]
+    const required = ["latestCNIFileExpirationDate", "firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "situation", "address", "city", "zip"]
+    // check email volontaire
     if (!values.email) {
       errors.email = errorEmpty;
 
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
       errors.email = 'Adresse email invalide';
-
     }
+    // check email parent1
+    if (!values.parent1Email) {
+      errors.parent1Email = errorEmpty;
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.parent1Email)) {
+      errors.parent1Email = 'Adresse email invalide';
+    }
+    //check email parent2 if exist
+    if (values.parent2Email !== "") {
+      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.parent2Email)) {
+        setSelectedRepresentant(2);
+        errors.parent2Email = 'Adresse email invalide';
+      } else {
+        setSelectedRepresentant(1);
+      }
+
     for (const key of required) {
       if ((!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
         errors[key] = errorEmpty;
