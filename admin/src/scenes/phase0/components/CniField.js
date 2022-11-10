@@ -156,9 +156,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   async function upload(files) {
     for (const file of files) {
       if (file.size > 5000000)
-        return setError({
-          text: `Ce fichier ${files.name} est trop volumineux.`,
-        });
+        return setError(`Le fichier ${file.name} est trop volumineux.`);
     }
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
     const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), {}, category, date);
