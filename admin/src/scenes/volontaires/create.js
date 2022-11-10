@@ -53,7 +53,7 @@ export default function Create() {
 
   const validate = (values, props /* only available when using withFormik */) => {
     const errors = {};
-    const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId"]
+    const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "parent1Email", "situation"]
     if (!values.email) {
       errors.email = 'Ne peut être vide';
 
@@ -61,9 +61,14 @@ export default function Create() {
       errors.email = 'Adresse email invalide';
 
     }
-    for (const key in values) {
-      if (required.includes(key) && (!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
+    for (const key of required) {
+      if ((!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
         errors[key] = 'Ne peut être vide';
+      }
+    }
+    if(values.country === "FRANCE") {
+      if(values.schoolCity === "") {
+        errors.schoolCity = 'Ne peut être vide';
       }
     }
     if (Object.keys(errors).length > 0) {
@@ -85,6 +90,9 @@ export default function Create() {
           gender: "",
           grade: "",
           birthCountry: "",
+          filesToUpload: [],
+          latestCNIFileExpirationDate: "",
+          latestCNIFileCategory: "",
           files: {
             cniFiles: [],
             highSkilledActivityProofFiles: [],
@@ -104,6 +112,7 @@ export default function Create() {
             department: "",
             address: "",
           },
+          situation: "",
           schoolId: "",
           schoolName: "",
           schoolType: "",
