@@ -67,6 +67,8 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       const applications = await ApplicationModel.find({ youngId: young._id });
       const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
       await cancelPendingApplications(pendingApplication, req.user);
+      const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+      young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
     }
     await young.save({ fromUser: req.user });
 
@@ -168,6 +170,8 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
         young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
         const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
         await cancelPendingApplications(pendingApplication, req.user);
+        const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+        young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
         const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
