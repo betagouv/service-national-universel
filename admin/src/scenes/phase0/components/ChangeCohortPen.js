@@ -13,15 +13,16 @@ import { BorderButton, PlainButton } from "./Buttons";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
-  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
   const [changeCohortModal, setChangeCohortModal] = useState(false);
   const [options, setOptions] = useState(null);
+
+  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   const getEligibleCohorts = async () => {
     const { data } = await api.post("/cohort-session/eligibility/2023", {
       birthDate: young.birthdateAt,
       schoolLevel: young.grade,
-      department: young.department,
+      department: young?.schoolDepartment || young?.department,
       frenchNationality: young.frenchNationality,
     });
     const isArray = Array.isArray(data);
@@ -70,6 +71,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
 
   async function handleChangeCohort() {
     try {
+      if (!message) return toastr.error("Veuillez indiquer un message");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       await onChange();
       toastr.success("Cohorte modifiée avec succès");
@@ -95,7 +97,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
           close();
           setModalConfirmWithMessage(true);
         }}
-        disableConfirm={!motif}
+        disableConfirm={!motif || !newCohort.name}
         showHeaderIcon={true}
         showHeaderText={false}>
         <>

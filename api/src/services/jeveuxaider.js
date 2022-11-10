@@ -18,7 +18,10 @@ const { ERRORS, checkStatusContract } = require("../utils");
 router.get("/signin", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    }
 
     const { token, email } = value;
 
@@ -55,7 +58,10 @@ router.get("/signin", async (req, res) => {
 router.get("/actions", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    }
 
     const { token, email } = value;
 

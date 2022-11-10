@@ -152,17 +152,20 @@ export default function TicketCreate(props) {
                 touched={touched}
                 rows="5"
               />
-              <FileUpload className="px-[15px]" files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
-              <LoadingButton loading={isLoading} type="submit" style={{ marginLeft: 10, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
-                Envoyer
-              </LoadingButton>
-              {/* {isLoading ? (
-                <StyledLoader size="30px" />
-              ) : (
-                <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+              <FileUpload
+                disabled={isLoading}
+                className="px-[15px]"
+                files={files}
+                addFiles={addFiles}
+                deleteFile={deleteFile}
+                filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
+              />
+              <div className="flex md:flex-row flex-col mt-[15px] ml-[15px]">
+                <LoadingButton loading={isLoading} type="submit" style={{ maxWidth: "150px" }} onClick={handleSubmit} disabled={isSubmitting}>
                   Envoyer
-                </ContinueButton>
-              )} */}
+                </LoadingButton>
+                {isLoading && files.length > 0 && <div className="text-gray-500 text-sm mt-2 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+              </div>
             </>
           )}
         </Formik>

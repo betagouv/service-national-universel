@@ -82,7 +82,10 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
 router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const messages = await zammood.api(`/v0/ticket/withMessages?ticketId=${checkedId}`, { method: "GET", credentials: "include" });
     if (!messages.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -108,7 +111,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
-      fromPage: Joi.string(),
+      fromPage: Joi.string().allow(null),
       formSubjectStep1: Joi.string(),
       formSubjectStep2: Joi.string(),
       files: Joi.array().items(
@@ -121,7 +124,10 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     })
       .unknown()
       .validate(obj);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { subject, message, formSubjectStep1, formSubjectStep2, files } = value;
     const userAttributes = await getUserAttributes(req.user);
@@ -182,7 +188,7 @@ router.post("/ticket/form", async (req, res) => {
       formSubjectStep1: Joi.string().required(),
       formSubjectStep2: Joi.string().required(),
       role: Joi.string().required(),
-      fromPage: Joi.string(),
+      fromPage: Joi.string().allow(null),
       files: Joi.array().items(
         Joi.object().keys({
           name: Joi.string().required(),
@@ -193,7 +199,10 @@ router.post("/ticket/form", async (req, res) => {
     })
       .unknown()
       .validate(obj);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files } = value;
 
     const userAttributes = [
@@ -231,7 +240,10 @@ router.post("/ticket/form", async (req, res) => {
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { errorBody, value } = Joi.object({
       status: Joi.string().required(),
@@ -257,7 +269,10 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const { errorBody, value } = Joi.object({
       message: Joi.string().allow(null, ""),
@@ -343,7 +358,6 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
         try {
           const clamscan = await new NodeClam().init({
-            preference: "clamscan",
             removeInfected: true,
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);

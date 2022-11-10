@@ -5,8 +5,10 @@ import api from "../../../services/api";
 
 export default function SchoolEditor({ young, onChange, className }) {
   const [schoolInFrance, setSchoolInFrance] = useState(true);
+  const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
   const [schools, setSchools] = useState([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
 
   useEffect(() => {
     if (young) {
@@ -19,11 +21,33 @@ export default function SchoolEditor({ young, onChange, className }) {
 
   useEffect(() => {
     loadCities();
+    loadCountries();
   }, []);
 
   useEffect(() => {
-    loadSchools();
+    loadFrenchSchools();
   }, [young.schoolCity]);
+  useEffect(() => {
+    loadCountrySchools();
+  }, [young.schoolCountry]);
+
+  function changeSchoolInFrance(inFrance) {
+    let change = young.schoolCountry === "FRANCE" ? !inFrance : inFrance;
+    setSchoolInFrance(inFrance);
+    if (onChange && change) {
+      onChange({
+        schoolId: "",
+        schoolName: "",
+        schoolType: "",
+        schoolAddress: "",
+        schoolZip: "",
+        schoolDepartment: "",
+        schoolRegion: "",
+        schoolCity: "",
+        schoolCountry: inFrance ? "FRANCE" : "",
+      });
+    }
+  }
 
   function onLocalChange(field, value) {
     console.log("School Editor: Local Change = ", field, value);
@@ -31,14 +55,39 @@ export default function SchoolEditor({ young, onChange, className }) {
 
     if (field === "schoolCity" && value !== young.schoolCity) {
       if (onChange) {
-        changes.schoolName = "";
         changes.schoolId = "";
+        changes.schoolName = "";
+        changes.schoolType = "";
+        changes.schoolAddress = "";
+        changes.schoolZip = "";
+        changes.schoolDepartment = "";
+        changes.schoolRegion = "";
+        changes.schoolCountry = "FRANCE";
+      }
+    } else if (field === "schoolCountry" && value !== young.schoolCountry) {
+      if (onChange) {
+        changes.schoolId = "";
+        changes.schoolName = "";
+        changes.schoolType = "";
+        changes.schoolAddress = "";
+        changes.schoolZip = "";
+        changes.schoolDepartment = "";
+        changes.schoolRegion = "";
+        changes.schoolCity = "";
       }
     } else if (field === "schoolId") {
       const school = schools ? schools.find((s) => s.id === value) : null;
+      console.log("school = ", school);
       if (onChange) {
         if (school) {
           changes.schoolName = school.fullName;
+          changes.schoolType = school.type;
+          changes.schoolAddress = school.adresse;
+          changes.schoolZip = school.postcode ? school.postcode : school.codeCity;
+          changes.schoolDepartment = school.departementName ? school.departementName : school.departement;
+          changes.schoolRegion = school.region;
+          changes.schoolCity = school.city;
+          changes.schoolCountry = school.country;
         }
       }
     }
@@ -58,18 +107,59 @@ export default function SchoolEditor({ young, onChange, className }) {
     setCities(responses[0].aggregations ? responses[0].aggregations.cities.buckets.map((e) => e.key).sort() : []);
   }
 
-  async function loadSchools() {
-    console.log("load schools: ", young.schoolCity);
+  async function loadCountries() {
+    const body = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      size: 0,
+      aggs: {
+        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
+      },
+    };
+    const { responses } = await api.esQuery("schoolramses", body);
+    if (responses && responses.length > 0) {
+      setCountries(
+        responses[0].aggregations.countries.buckets
+          .filter((e) => e.key !== "FRANCE")
+          .map((e) => e.key)
+          .sort(),
+      );
+    }
+  }
+
+  async function loadFrenchSchools() {
+    setLoadingSchools(true);
     if (!young.schoolCity) {
       setSchools([]);
+    } else {
+      const body = {
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
+        size: ES_NO_LIMIT,
+      };
+      body.query.bool.filter.push({ term: { "city.keyword": young.schoolCity } });
+      const { responses } = await api.esQuery("schoolramses", body);
+      if (responses && responses.length > 0) {
+        setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+      }
     }
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-      size: ES_NO_LIMIT,
-    };
-    body.query.bool.filter.push({ term: { "city.keyword": young.schoolCity } });
-    const { responses } = await api.esQuery("schoolramses", body);
-    setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+    setLoadingSchools(false);
+  }
+
+  async function loadCountrySchools() {
+    setLoadingSchools(true);
+    if (!young.country) {
+      setSchools([]);
+    } else {
+      const body = {
+        query: { bool: { must: { match_all: {} }, filter: [] } },
+        size: ES_NO_LIMIT,
+      };
+      body.query.bool.filter.push({ term: { "country.keyword": young.schoolCountry } });
+      const { responses } = await api.esQuery("schoolramses", body);
+      if (responses && responses.length > 0) {
+        setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+      }
+    }
+    setLoadingSchools(false);
   }
 
   return (
@@ -81,42 +171,61 @@ export default function SchoolEditor({ young, onChange, className }) {
             className={`border-[#3B82F6] border-[1px] rounded-[100px_0_0_100px] text-[14px] px-[10px] py-[3px] ${
               schoolInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
             }`}
-            onClick={() => setSchoolInFrance(true)}>
+            onClick={() => changeSchoolInFrance(true)}>
             en France
           </div>
           <div
             className={`border-[#3B82F6] border-[1px] rounded-[0_100px_100px_0] text-[14px] px-[10px] py-[3px] ml-[-1px] ${
               !schoolInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
             }`}
-            onClick={() => setSchoolInFrance(false)}>
+            onClick={() => changeSchoolInFrance(false)}>
             à l&apos;étranger
           </div>
         </div>
       </div>
-      <Field
-        name="schoolCity"
-        label="Ville de l'établissement"
-        value={young.schoolCity}
-        mode="edition"
-        className="mb-[16px]"
-        type="select"
-        filterOnType
-        options={cities ? cities.map((c) => ({ value: c, label: c })) : []}
-        onChange={(val) => onLocalChange("schoolCity", val)}
-        young={young}
-      />
-      <Field
-        name="schoolName"
-        label="Nom de l'établissement"
-        value={young.schoolName}
-        mode="edition"
-        className="mb-[16px]"
-        type="select"
-        filterOnType
-        options={schools ? schools.map((s) => ({ value: s.id, label: s.fullName })) : []}
-        onChange={(value) => onLocalChange("schoolId", value)}
-        young={young}
-      />
+      {schoolInFrance ? (
+        <Field
+          name="schoolCity"
+          label="Ville de l'établissement"
+          value={young.schoolCity}
+          mode="edition"
+          className="mb-[16px]"
+          type="select"
+          filterOnType
+          options={cities ? cities.map((c) => ({ value: c, label: c })) : []}
+          onChange={(val) => onLocalChange("schoolCity", val)}
+          young={young}
+        />
+      ) : (
+        <Field
+          name="schoolCountry"
+          label="Pays de l'établissement"
+          value={young.schoolCountry}
+          mode="edition"
+          className="mb-[16px]"
+          type="select"
+          filterOnType
+          options={countries ? countries.map((c) => ({ value: c, label: c })) : []}
+          onChange={(val) => onLocalChange("schoolCountry", val)}
+          young={young}
+        />
+      )}
+      {loadingSchools ? (
+        <div className="text-[#738297] my-[8px]">Chargement...</div>
+      ) : (
+        <Field
+          name="schoolName"
+          label="Nom de l'établissement"
+          value={young.schoolName}
+          mode="edition"
+          className="mb-[16px]"
+          type="select"
+          filterOnType
+          options={schools ? schools.map((s) => ({ value: s.id, label: s.fullName })) : []}
+          onChange={(value) => onLocalChange("schoolId", value)}
+          young={young}
+        />
+      )}
     </div>
   );
 }

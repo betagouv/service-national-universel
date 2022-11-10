@@ -36,7 +36,7 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
 
   useEffect(() => {
     if (filterOnType) {
-      if (filter.trim().length > 0) {
+      if (filter?.trim().length > 0) {
         const filterLow = filter.toLowerCase();
         setFilteredOptions(
           options.filter((opt) => {

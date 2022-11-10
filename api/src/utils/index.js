@@ -450,6 +450,22 @@ async function cancelPendingApplications(pendingApplication, fromUser) {
   for (const application of pendingApplication) {
     application.set({ status: APPLICATION_STATUS.CANCEL });
     await application.save({ fromUser });
+    await sendNotificationApplicationClosedBecausePhase2Validated(application);
+  }
+}
+
+async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
+  if (application.tutorId) {
+    const responsible = await ReferentModel.findById(application.tutorId);
+    if (responsible)
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
+        emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+        params: {
+          missionName: application.missionName,
+          youngFirstName: application.youngFirstName,
+          youngLastName: application.youngLastName,
+        },
+      });
   }
 }
 
@@ -638,6 +654,21 @@ const getReferentManagerPhase2 = async (department) => {
   return toReferent;
 };
 
+const updateYoungApplicationFilesType = async (application, user) => {
+  const young = await YoungModel.findById(application.youngId);
+  const applications = await ApplicationModel.find({ youngId: application.youngId });
+
+  const listFiles = applications.reduce((prev, acc) => {
+    if (acc.contractAvenantFiles.length !== 0 && !prev.includes("contractAvenantFiles")) prev.push("contractAvenantFiles");
+    if (acc.justificatifsFiles.length !== 0 && !prev.includes("justificatifsFiles")) prev.push("justificatifsFiles");
+    if (acc.feedBackExperienceFiles.length !== 0 && !prev.includes("feedBackExperienceFiles")) prev.push("feedBackExperienceFiles");
+    if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
+    return prev;
+  }, []);
+  young.set({ phase2ApplicationFilesType: listFiles });
+  await young.save({ fromUser: user });
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -759,4 +790,6 @@ module.exports = {
   autoValidationSessionPhase1Young,
   getReferentManagerPhase2,
   SUPPORT_BUCKET_CONFIG,
+  cancelPendingApplications,
+  updateYoungApplicationFilesType,
 };

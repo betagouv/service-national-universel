@@ -190,6 +190,7 @@ export default function TicketView(props) {
             )}
           </ButtonContainer>
         </InputContainer>
+        {sending && files.length > 0 && <div className="text-gray-500 text-sm mt-1">{translate("UPLOAD_IN_PROGRESS")}</div>}
         <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       </div>
     </Container>

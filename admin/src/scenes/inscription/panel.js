@@ -91,9 +91,6 @@ export default function InscriptionPanel({ onChange, value }) {
           <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          <Link to={`/volontaire/${value._id}/edit`} onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
-            <PanelActionButton icon="pencil" title="Modifier" />
-          </Link>
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
@@ -130,26 +127,6 @@ export default function InscriptionPanel({ onChange, value }) {
           </div>
         ) : null}
       </Info>
-      {getAge(young?.birthdateAt) < 15 ? (
-        <Info title="Traitement des données personnelles" id={value._id}>
-          {(young?.files.dataProcessingConsentmentFiles || []).map((e, i) => (
-            <DownloadButton
-              key={i}
-              source={() => api.get(`/young/${value._id}/documents/dataProcessingConsentmentFiles/${e}`)}
-              title={`Télécharger le document (${i + 1}/${value.files.dataProcessingConsentmentFiles.length})`}
-            />
-          ))}
-          {isFromFranceConnect(young) && (
-            <div style={{ marginTop: "1rem" }}>
-              <img src={require("../../assets/fc_logo_v2.png")} height={60} />
-              <br />
-              <b>Consentement parental validé via FranceConnect.</b>
-              <br />
-              Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
-            </div>
-          )}
-        </Info>
-      ) : null}
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} copy />
         <Details title="Tel" value={formatPhoneNumberFR(value.phone)} />

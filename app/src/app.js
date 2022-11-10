@@ -51,9 +51,16 @@ import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
+import * as Sentry from "@sentry/react";
 
 initSentry();
 initApi();
+
+function FallbackComponent() {
+  return <></>;
+}
+
+const myFallback = <FallbackComponent />;
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -87,36 +94,38 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
-      <ScrollToTop />
-      <GoogleTags />
-      <div className="main">
-        {maintenance & !localStorage?.getItem("override_maintenance") ? (
-          <Switch>
-            <SentryRoute path="/" component={Maintenance} />
-          </Switch>
-        ) : (
-          <Switch>
-            <SentryRoute path="/bug" component={Bug} />
-            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-            <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-            <SentryRoute path="/validate-contract/done" component={ContractDone} />
-            <SentryRoute path="/validate-contract" component={Contract} />
-            <SentryRoute path="/inscription2023" component={Inscription2023} />
-            {/* @todo: clean this */}
-            <SentryRoute path="/noneligible" component={NonEligible} />
-            <SentryRoute path="/reinscription" component={ReInscription} />
-            <SentryRoute path="/preinscription" component={PreInscription} />
-            <SentryRoute path="/auth" component={AuthV2} />
-            <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
-            <SentryRoute path="/public-engagements" component={AllEngagements} />
-            <SentryRoute path="/" component={Espace} />
-          </Switch>
-        )}
-        <Footer />
-      </div>
-    </Router>
+    <Sentry.ErrorBoundary fallback={myFallback}>
+      <Router history={history}>
+        <ScrollToTop />
+        <GoogleTags />
+        <div className="main">
+          {maintenance & !localStorage?.getItem("override_maintenance") ? (
+            <Switch>
+              <SentryRoute path="/" component={Maintenance} />
+            </Switch>
+          ) : (
+            <Switch>
+              <SentryRoute path="/bug" component={Bug} />
+              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+              <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+              <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
+              <SentryRoute path="/validate-contract/done" component={ContractDone} />
+              <SentryRoute path="/validate-contract" component={Contract} />
+              <SentryRoute path="/inscription2023" component={Inscription2023} />
+              {/* @todo: clean this */}
+              <SentryRoute path="/noneligible" component={NonEligible} />
+              <SentryRoute path="/reinscription" component={ReInscription} />
+              <SentryRoute path="/preinscription" component={PreInscription} />
+              <SentryRoute path="/auth" component={AuthV2} />
+              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
+              <SentryRoute path="/public-engagements" component={AllEngagements} />
+              <SentryRoute path="/" component={Espace} />
+            </Switch>
+          )}
+          <Footer />
+        </div>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 

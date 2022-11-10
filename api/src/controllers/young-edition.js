@@ -3,6 +3,8 @@
  *
  * ROUTES
  *   PUT   /young-edition/:id/identite
+ *   PUT   /young-edition/:id/situationparents
+ *   PUT   /young-edition/:id/phasestatus
  */
 
 const express = require("express");
@@ -14,7 +16,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, canUpdateYoungStatus } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
@@ -29,7 +31,10 @@ const youngSchooledSituationOptions = [
 router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error_id) {
+      capture(error_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     // --- validate data
     const bodySchema = Joi.object().keys({
@@ -60,7 +65,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -87,7 +92,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       }
     }
     const isRegionRural = isInRuralArea({ ...young, ...value });
-    if (isRegionRural) {
+    if (isRegionRural !== null) {
       value.isRegionRural = isRegionRural;
     }
 
@@ -105,13 +110,23 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 router.put("/:id/situationparents", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error_id) {
+      capture(error_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     // --- validate data
     const bodySchema = Joi.object().keys({
       situation: Joi.string().valid(...Object.keys(YOUNG_SITUATIONS)),
-      schoolCity: Joi.string().trim().allow(""),
       schoolName: Joi.string().trim().allow(""),
+      schoolCity: Joi.string().trim().allow(""),
+      schoolCountry: Joi.string().trim().allow(""),
+      schoolType: Joi.string().trim().allow(""),
+      schoolAddress: Joi.string().trim().allow(""),
+      schoolComplementAdresse: Joi.string().trim().allow(""),
+      schoolZip: Joi.string().trim().allow(""),
+      schoolDepartment: Joi.string().trim().allow(""),
+      schoolRegion: Joi.string().trim().allow(""),
       grade: Joi.string().valid(...Object.keys(GRADES)),
 
       parent1Status: Joi.string().trim().allow(""),
@@ -145,11 +160,14 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       reducedMobilityAccess: Joi.string().trim().valid("true", "false").allow("", null),
       handicapInSameDepartment: Joi.string().trim().valid("true", "false").allow("", null),
       allergies: Joi.string().trim().valid("true", "false").allow("", null),
+
+      // old cohorts
+      imageRightFilesStatus: Joi.string().trim().valid("TO_UPLOAD", "WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED"),
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -176,4 +194,63 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
   }
 });
 
+router.put("/:id/phasestatus", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // --- validate data
+    const bodySchema = Joi.object().keys({
+      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"),
+      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"),
+      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"),
+    });
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("joi error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // --- get young
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // --- update dates
+    const now = new Date();
+
+    if (value.statusPhase2) {
+      value.statusPhase2UpdatedAt = now;
+      if (value.statusPhase2 === "VALIDATED") {
+        value.statusPhase2ValidatedAt = now;
+      }
+    }
+
+    if (value.statusPhase3) {
+      value.statusPhase3UpdatedAt = now;
+      if (value.statusPhase3 === "VALIDATED") {
+        value.statusPhase3ValidatedAt = now;
+      }
+    }
+
+    value.lastStatusAt = now;
+
+    // --- check rights
+    if (!canUpdateYoungStatus({ body: value, current: young })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- update young
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    // --- result
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 module.exports = router;

@@ -14,7 +14,7 @@ const contentSummary = (sectionChildren) => {
 
 const KnowledgeBaseSectionCard = ({ _id, imageSrc, position, title, group, icon, slug, sectionChildren, path, isRoot }) => {
   return (
-    <Link key={_id} href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=section" : ""}`} passHref>
+    <Link legacyBehavior key={_id} href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=section" : ""}`} passHref>
       <a href="#" data-position={position} data-id={_id} className="mx-2 my-4 flex w-72 min-w-1/4 flex-shrink grow-0">
         <article className="flex flex-grow flex-col overflow-hidden rounded-lg bg-white shadow-lg">
           {!!imageSrc ? (

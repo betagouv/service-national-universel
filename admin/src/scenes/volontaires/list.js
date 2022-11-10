@@ -45,7 +45,7 @@ import plausibleEvent from "../../services/plausible";
 import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import { youngExportFields } from "snu-lib";
+import { translateApplicationFileType, youngExportFields } from "snu-lib";
 import ModalExport from "../../components/modals/ModalExport";
 
 const FILTERS = [
@@ -78,6 +78,7 @@ const FILTERS = [
   "SITUATION",
   "PMR",
   "IMAGE_RIGHT",
+  "CNI_EXPIRED",
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
   "ALLERGIES",
@@ -85,6 +86,7 @@ const FILTERS = [
   "COHESION_JDM",
   "DEPART",
   "DEPART_MOTIF",
+  "APPLICATION_FILES_TYPE",
 ];
 
 export default function VolontaireList() {
@@ -712,7 +714,22 @@ export default function VolontaireList() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
                   showMissing
-                  missingLabel="Non renseigné"
+                  missingLabel="En attente"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Attestation - Pièce d’identité périmée"
+                  componentId="CNI_EXPIRED"
+                  dataField="CNIFileNotValidOnStart.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CNI_EXPIRED") }}
+                  renderItem={(e, count) => {
+                    if (e === "true") return `En attente (${count})`;
+                    return `Validée (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Attestation - Pièce d’identité périmée", "Attestation - Pièce d’identité périmée")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
@@ -900,6 +917,22 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Dossier d’éligibilité aux Préparations Militaires", "Dossier d’éligibilité aux Préparations Militaires")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="APPLICATION_FILES_TYPE"
+                  dataField="phase2ApplicationFilesType.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "APPLICATION_FILES_TYPE") }}
+                  renderItem={(e, count) => {
+                    return `${translateApplicationFileType(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Pièces jointes", "Pièces jointes")}
+                  showMissing={true}
+                  missingLabel="Aucune pièce jointe"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -1133,11 +1166,6 @@ const Action = ({ hit }) => {
           <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
             <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
           </Link>
-          {hit.status !== YOUNG_STATUS.DELETED ? (
-            <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-              <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
-            </Link>
-          ) : null}
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
             <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>

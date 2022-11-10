@@ -253,7 +253,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       const populationDensity = await getDensity(value.cityCode);
       young.set({ populationDensity });
       const isRegionRural = isInRuralArea(young);
-      young.set({ isRegionRural });
+      if (isRegionRural !== null) young.set({ isRegionRural });
     }
 
     await young.save({ fromUser: req.user });
@@ -446,8 +446,12 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
         young.set("inscriptionStep2023", STEPS2023.CONFIRM);
       } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       const { error, value } = Joi.object({ date: Joi.date().required() }).validate(req.body, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      young.set({ latestCNIFileExpirationDate: value.date });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      const CNIFileNotValidOnStart = value.date < START_DATE_SESSION_PHASE1[young.cohort];
+      young.set({ latestCNIFileExpirationDate: value.date, CNIFileNotValidOnStart });
     }
 
     if (type === "correction") {
@@ -456,11 +460,15 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
         latestCNIFileCategory: Joi.string().trim().required(),
       };
       const { error, value } = Joi.object(fileSchema).validate(req.body, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
 
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile"]) };
       if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      young.set(data);
+      const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
+      young.set({ ...data, CNIFileNotValidOnStart });
     }
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

@@ -637,6 +637,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  phase2ApplicationFilesType: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des type de fichier des candidatures de phase 2 pour le jeune",
+    },
+  },
+
   phase2NumberHoursDone: {
     type: String,
     documentation: {
@@ -1663,6 +1671,14 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  CNIFileNotValidOnStart: {
+    type: String,
+    enum: ["false", "true"],
+    documentation: {
+      description: "Date d'expiration de la CNI File non valide au début de la Cohorte",
     },
   },
 
