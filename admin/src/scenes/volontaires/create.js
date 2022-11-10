@@ -38,6 +38,8 @@ export default function Create() {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
+  const [uploadError, setUploadError] = React.useState("");
+  const [youngId, setYoungId] = React.useState(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -54,8 +56,7 @@ export default function Create() {
   const validate = (values, props /* only available when using withFormik */) => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
-    console.log(values);
-    const required = ["firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "parent1Email", "situation", "address", "city", "zip"]
+    const required = ["latestCNIFileExpirationDate", "firstName", "lastName", "birthdateAt", "birthCityZip", "birthCity", "gender", "birthCountry", "phone", "cohort", "parentStatementOfHonorInvalidId", "parent1Status", "parent1LastName", "parent1FirstName", "parent1Email", "situation", "address", "city", "zip"]
     if (!values.email) {
       errors.email = errorEmpty;
 
@@ -64,7 +65,6 @@ export default function Create() {
 
     }
     for (const key of required) {
-      console.log(key)
       if ((!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
         errors[key] = errorEmpty;
       }
@@ -80,29 +80,66 @@ export default function Create() {
     // permet de vérifier si l'adresse a été entièrement remplie mais pas vérifiée
     if (!(errors.address || errors.city || errors.zip)) {
       if (values.department === "" || values.region === "") {
-        toastr.error("Une erreur s'est produite : \n Vous devez vérifier l'adresse");
+        toastr.error("Vous devez vérifier l'adresse");
       }
     }
-    if (values.schooled) {
+    if (values.parent1OwnAddress === "true") {
+      const requiredParentAdress = ["parent1Address", "parent1Zip", "parent1City", "parent1Country"];
+      for (const key of requiredParentAdress) {
+        if ((!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null)) {
+          errors[key] = errorEmpty;
+        }
+      }
+    }
+    if (values.schooled === "true") {
       if (values.schoolCountry === "FRANCE") {
         if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
           errors.schooled = "missing";
-          toastr.error("Une erreur s'est produite : \n Des informations sont manquantes au niveau de l'établissement");
+          toastr.error("Des informations sont manquantes au niveau de l'établissement");
         }
       } else {
         if (validator.isEmpty(values.schoolCountry) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
           errors.schooled = "missing";
-          toastr.error("Une erreur s'est produite : \n Des informations sont manquantes au niveau de l'établissement");
+          toastr.error("Des informations sont manquantes au niveau de l'établissement");
         }
       }
+    }
+    if (values.filesToUpload.length === 0) {
+      toastr.error("Vous devez ajouter un papier d'identité");
+    }
+    if (validator.isEmpty(values.latestCNIFileCategory)) {
+      toastr.error("Vous devez spécifier une catégorie pour le document d'identité");
     }
     // il faut check le RP2 si rempli à moitié
     //
     if (Object.keys(errors).length > 0) {
-      toastr.error("Une erreur s'est produite : \n Le formulaire n'est pas complet");
+      toastr.error("Le formulaire n'est pas complet");
     }
     return errors;
   };
+
+  const getFirstCohortAvailable = () => {
+    for (const key in START_DATE_SESSION_PHASE1) {
+      if (START_DATE_SESSION_PHASE1[key].getTime() > new Date().getTime()) {
+        return key;
+      }
+    }
+  }
+
+  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate) => {
+    const res = await api.uploadFile(`/young/${id}/documents/cniFiles`, Array.from(filesToUpload), {}, latestCNIFileCategory, latestCNIFileExpirationDate);
+    if (res.code === "FILE_CORRUPTED") {
+      setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr");
+      return 'err';
+    }
+    if (!res.ok) {
+      capture(res.code);
+      setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
+      return 'err';
+    }
+    toastr.success("Volontaire créé !");
+    return history.push("/inscription");
+  }
 
   return (
     <Wrapper>
@@ -120,16 +157,10 @@ export default function Create() {
           filesToUpload: [],
           latestCNIFileExpirationDate: "",
           latestCNIFileCategory: "",
-          files: {
-            cniFiles: [],
-            highSkilledActivityProofFiles: [],
-            parentConsentmentFiles: [],
-            imageRightFiles: [],
-          },
           email: "",
           expirationDate: null,
           phone: "",
-          cohort: Object.keys(START_DATE_SESSION_PHASE1)[0],
+          cohort: getFirstCohortAvailable(),
           parentStatementOfHonorInvalidId: "false",
           addressVerified: false,
           zip: "",
@@ -183,10 +214,12 @@ export default function Create() {
         validate={validate}
         onSubmit={async (values) => {
           try {
-            const { ok, code } = await api.post("/young/invite", values);
+            const { ok, code, young } = await api.post("/young/invite", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            toastr.success("Volontaire créé !");
-            return history.push("/inscription");
+
+            const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
+            setYoungId(young._id);
+            if (res === "err") return toastr.error("Une erreur s'est produite avec le téléversement de vos fichiers");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
@@ -203,6 +236,7 @@ export default function Create() {
                     values={values}
                     handleChange={handleChange}
                     handleSubmit={handleSubmit}
+                    setFieldValue={setFieldValue}
                     errors={errors}
                     touched={touched}
                   />
@@ -249,25 +283,37 @@ export default function Create() {
               <div className="ml-[32px] text-[18px] font-[500]">Choisissez un séjour pour le volontaire</div>
               <div className="flex justify-start flex-row flex-wrap pl-[24px]">
                 {Object.keys(START_DATE_SESSION_PHASE1).map((key, value) => {
-                  return (
-                    <div onClick={() => setFieldValue("cohort", key)} className="cursor-pointer flex flex-row justify-start items-center w-[237px] h-[54px] border border-[#3B82F6] rounded-[6px] m-[16px]">
-                      <FieldFormik
-                        id="checkboxCGU"
-                        type="checkbox"
-                        value={key === values.cohort}
-                        onChange={() => setFieldValue("cohort", key)}
-                        name="cohort"
-                        checked={key === values.cohort}
-                        className="rounded-full ml-[13px] mr-[11px]"
-                      />
-                      <div>{key}</div>
-                    </div>
-                  )
+                  if (START_DATE_SESSION_PHASE1[key].getTime() > new Date().getTime()) {
+                    return (
+                      <div key={key} onClick={() => setFieldValue("cohort", key)} className="cursor-pointer flex flex-row justify-start items-center w-[237px] h-[54px] border border-[#3B82F6] rounded-[6px] m-[16px]">
+                        <FieldFormik
+                          id="checkboxCGU"
+                          type="checkbox"
+                          value={key === values.cohort}
+                          onChange={() => setFieldValue("cohort", key)}
+                          name="cohort"
+                          checked={key === values.cohort}
+                          className="rounded-full ml-[13px] mr-[11px]"
+                        />
+                        <div>{key}</div>
+                      </div>
+                    )
+                  }
+                  return <div key={key}></div>
                 })}
               </div>
             </div>
+
             <div className="flex items-center w-100 justify-center">
-              <div onClick={handleSubmit} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">Créer l'inscription</div>
+
+              {uploadError === "" ?
+                <div onClick={handleSubmit} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">Créer l'inscription</div>
+                :
+                <div className="flex flex-column">
+                  <div>{uploadError}</div>
+                  <div onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">Réessayer de téleverser les fichiers</div>
+                </div>
+              }
             </div>
           </>
         )}
@@ -449,10 +495,10 @@ function Representant1({ values, handleChange, required = {}, errors, touched, s
         <>
           <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
           <Field
-            name="parent1address"
+            name="parent1Address"
             label="Adresse"
             errors={errors}
-            value={values.parent1address}
+            value={values.parent1Address}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
@@ -496,7 +542,6 @@ function Situation({ values, handleChange, required = {}, errors, touched, setFi
   const onChange = (e) => {
     for (const key in e) {
       if (e[key] !== values[key]) {
-        console.log("CHANGE", key, e[key])
         setFieldValue(key, e[key])
       }
     }
@@ -665,7 +710,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
           verifyButtonText="Vérifier l'adresse"
-          verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postale et ville."
+          verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
           isVerified={values.addressVerified}
           buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
         />
@@ -696,7 +741,7 @@ function Coordonnees({ values, handleChange, setFieldValue, required = {}, error
   );
 }
 
-function Identite({ values, handleChange, required = {}, errors, touched }) {
+function Identite({ values, handleChange, required = {}, errors, touched, setFieldValue }) {
   const genderOptions = [
     { value: "male", label: "Homme" },
     { value: "female", label: "Femme" },
@@ -704,6 +749,11 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
   const handleChangeBool = (e, value) => {
     e.target.value = value;
     handleChange(e);
+  }
+  const handleCniChange = (young) => {
+    setFieldValue("filesToUpload", young.filesToUpload)
+    setFieldValue("latestCNIFileExpirationDate", young.latestCNIFileExpirationDate)
+    setFieldValue("latestCNIFileCategory", young.latestCNIFileCategory)
   }
   return (
     <Box>
@@ -768,20 +818,20 @@ function Identite({ values, handleChange, required = {}, errors, touched }) {
             currentRequest={null}
             correctionRequest={false}
             onCorrectionRequestChange={null}
-            onChange={handleChange}
+            onInscriptionChange={(young) => handleCniChange(young)}
           />
         </div>
         <Field
-          name="expirationDate"
+          name="latestCNIFileExpirationDate"
           label="Date d'expiration de la pièce d'identité"
           type="date"
           errors={errors}
-          value={values.expirationDate}
+          value={values.latestCNIFileExpirationDate}
           transformer={translate}
           className="mb-[16px]"
           handleChange={handleChange}
         />
-        {(values.expirationDate !== null && new Date(values.expirationDate).getTime() < START_DATE_SESSION_PHASE1[values.cohort].getTime()) &&
+        {(values.latestCNIFileExpirationDate !== null && new Date(values.latestCNIFileExpirationDate).getTime() < START_DATE_SESSION_PHASE1[values.cohort].getTime()) &&
           <div className="mt-[16px] w-100 flex flew-row justify-between">
             <div>Attestation sur l'honneur</div>
             {values.parentStatementOfHonorInvalidId === "true" ? (
