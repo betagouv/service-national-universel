@@ -18,6 +18,20 @@ async function isGoalReached(department, cohort) {
   return false;
 }
 
+async function isSessionFull(department, cohort) {
+  const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: cohort });
+  if (inscriptionGoal && inscriptionGoal.max) {
+    const placesTaken = await YoungModel.countDocuments({
+      $or: [{ schoolDepartment: department }, { schoolDepartment: { $exists: false }, department: department }],
+      cohort: cohort,
+      status: YOUNG_STATUS.VALIDATED,
+    });
+    if (placesTaken && placesTaken >= inscriptionGoal.max) return true;
+  }
+  return false;
+}
+
 module.exports = {
   isGoalReached,
+  isSessionFull,
 };

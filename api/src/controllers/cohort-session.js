@@ -3,7 +3,7 @@ const router = express.Router();
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { isGoalReached } = require("../utils/cohort");
+const { isGoalReached, isSessionFull } = require("../utils/cohort");
 const { getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.post("/eligibility/2023", async (req, res) => {
@@ -52,10 +52,10 @@ router.post("/eligibility/2023", async (req, res) => {
     );
     if (sessionsFiltered.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
 
-    // Check inscription goals
+    // Check inscription goals and available places
     for (let session of sessionsFiltered) {
-      if (isGoalReached(department, session.name) === true) session.goalReached = true;
-      else session.goalReached = false;
+      session.goalReached = await isGoalReached(department, session.name);
+      session.isFull = await isSessionFull(department, session.name);
     }
     return res.send({ ok: true, data: sessionsFiltered });
   } catch (error) {
