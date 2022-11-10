@@ -240,8 +240,8 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                       <>
                         <div className="3/4">
                           {Array.from(filesToUpload).map((file) => (
-                            <div key={file.name} className="text-[12px]0">
-                              <div>{file.name}</div>
+                            <div key={file.name} className="text-[12px]">
+                              {file.name}
                             </div>
                           ))}
                         </div>
