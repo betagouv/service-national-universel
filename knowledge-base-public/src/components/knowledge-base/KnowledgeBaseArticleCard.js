@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className = "", contentClassName = "" }) => {
   return (
-    <Link key={_id} href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=article" : ""}`} passHref>
+    <Link legacyBehavior key={_id} href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=article" : ""}`} passHref>
       <a href="#" data-position={position} data-id={_id} className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
         <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg ${contentClassName}`}>
           <div className="flex flex-grow flex-col">
