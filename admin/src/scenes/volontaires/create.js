@@ -83,7 +83,16 @@ export default function Create() {
         toastr.error("Une erreur s'est produite : \n Vous devez vérifier l'adresse");
       }
     }
-
+    if (values.schooled) {
+      if (values.schoolCountry === "FRANCE") {
+        if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
+          errors.schooled = "missing";
+          toastr.error("Une erreur s'est produite : \n Des informations sont manquantes au niveau de l'établissement");
+        }
+      }
+    }
+    // il faut check le RP2 si rempli à moitié
+    //
     if (Object.keys(errors).length > 0) {
       toastr.error("Une erreur s'est produite : \n Le formulaire n'est pas complet");
     }
