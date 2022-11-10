@@ -114,6 +114,7 @@ router.post("/signup", async (req, res) => {
       if (error.details.find((e) => e.path.find((p) => p === "email"))) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
     const { email, lastName, password, acceptCGU, phone } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
     const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
@@ -178,7 +179,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
-      phone: Joi.string().required(),
+      phone: Joi.string(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -187,6 +188,11 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    if (value.role === ROLES.RESPONSIBLE || value.role === ROLES.SUPERVISOR) {
+      if (!value.phone) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone } = value;
