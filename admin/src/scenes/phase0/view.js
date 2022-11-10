@@ -1486,6 +1486,13 @@ function SectionConsentements({ young }) {
           </div>
           <MiniSwitch value={young.parent1AllowImageRights === "true"} />
         </div>
+        <div className="mt-[16px] flex itemx-center justify-between">
+          <div className="grow text-[#374151] text-[14px] leading-[20px]">
+            <div className="font-bold">Consentement à la participation</div>
+            <div>Accord : {translate(young.parent1AllowSNU)}</div>
+          </div>
+          <MiniSwitch value={young.parent2AllowSNU === "true"} />
+        </div>
         {young.parent2Status && (
           <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
             <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
@@ -1507,9 +1514,10 @@ function SectionConsentements({ young }) {
             <div className="mt-[16px] flex itemx-center justify-between">
               <div className="grow text-[#374151] text-[14px] leading-[20px]">
                 <div className="font-bold">Consentement à la participation</div>
+                {(young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false") && <div>Accord : {translate(young.parent2AllowSNU)}</div>}
               </div>
               {}
-              <MiniSwitch value={young.parent2AllowImageRights === "true"} />
+              <MiniSwitch value={young.parent2AllowSNU === "true"} />
             </div>
           </div>
         )}
