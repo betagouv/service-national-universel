@@ -63,6 +63,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     setConfirmModal({
       isOpen: true,
       onConfirm: onConfirmDelete,
+      loadingText: "La suppresion peut prendre une minute...",
       title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
       message: "Cette action est irréversible.",
     });
@@ -268,6 +269,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           title={confirmModal.title}
           message={confirmModal.message}
           confirmText={confirmModal.confirmLabel || "Confirmer"}
+          loadingText={confirmModal.loadingText}
           confirmMode={confirmModal.confirmColor || "blue"}
           onCancel={() => setConfirmModal(null)}
           onConfirm={confirmModal.onConfirm}>

@@ -13,6 +13,7 @@ export default function ConfirmationModal({
   onCancel,
   onConfirm,
   loading = false,
+  loadingText = "Chargement...",
   confirmText = "Confirmer",
   confirmMode = "blue",
   cancelText = "Annuler",
@@ -20,7 +21,10 @@ export default function ConfirmationModal({
   return (
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel}>
       {loading ? (
-        <Loader />
+        <>
+          <div className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{loadingText}</div>
+          <Loader />
+        </>
       ) : (
         <div className="bg-white rounded-[8px]">
           <div className="px-[24px] pt-[24px]">
