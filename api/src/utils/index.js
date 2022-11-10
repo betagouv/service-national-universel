@@ -450,6 +450,22 @@ async function cancelPendingApplications(pendingApplication, fromUser) {
   for (const application of pendingApplication) {
     application.set({ status: APPLICATION_STATUS.CANCEL });
     await application.save({ fromUser });
+    await sendNotificationApplicationClosedBecausePhase2Validated(application);
+  }
+}
+
+async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
+  if (application.tutorId) {
+    const responsible = await ReferentModel.findById(application.tutorId);
+    if (responsible)
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
+        emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+        params: {
+          missionName: application.missionName,
+          youngFirstName: application.youngFirstName,
+          youngLastName: application.youngLastName,
+        },
+      });
   }
 }
 
@@ -774,5 +790,6 @@ module.exports = {
   autoValidationSessionPhase1Young,
   getReferentManagerPhase2,
   SUPPORT_BUCKET_CONFIG,
+  cancelPendingApplications,
   updateYoungApplicationFilesType,
 };
