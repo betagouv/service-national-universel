@@ -18,6 +18,7 @@ export default function Field({
   filterOnType = false,
   handleChange,
   transformer,
+  readyOnly = false,
   errors = {},
 }) {
   const [mouseIn, setMouseIn] = useState(false);
@@ -62,7 +63,7 @@ export default function Field({
         onMouseLeave={() => mouseOver(false)}>
         {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
         {type === "select" && <SimpleSelect value={value} name={name} transformer={transformer} options={options} onChange={handleChange} filterOnType={filterOnType} />}
-        {type === "text" && <input type="text" name={name} value={value} onChange={handleChange} className="block p-[5px] w-[100%]" />}
+        {type === "text" && <input readonly={readyOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block p-[5px] w-[100%]" />}
         {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
       </div>
     </div>
