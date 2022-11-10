@@ -20,6 +20,7 @@ const passport = require("passport");
 const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
+const { format } = require("date-fns");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -296,6 +297,9 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
         // body.parentAllowSNU = "true";
         // notification = "accepted";
       }
+    }
+    if (value.parent === 2 && value.allow === false) {
+      changes.parent2RejectSNUComment = `Renseigné par ${req.user.firstName} ${req.user.lastName} le ${format(new Date(), "dd/MM/yyyy à HH:mm")}`;
     }
 
     // --- update young

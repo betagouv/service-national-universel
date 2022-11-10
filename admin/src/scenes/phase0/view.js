@@ -1549,7 +1549,7 @@ function SectionConsentements({ young, onChange }) {
             <div className="mt-[16px] flex items-center justify-between">
               <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
                 <div className="font-bold">Consentement à la participation</div>
-                {(young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false") && <div>Accord : {translate(young.parent2AllowSNU)}</div>}
+                {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
               </div>
               {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
                 <MiniSwitch value={young.parent2AllowSNU === "true"} />

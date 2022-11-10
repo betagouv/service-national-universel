@@ -1352,6 +1352,12 @@ const Schema = new mongoose.Schema({
       description: "Le representant 2 autorise le jeune à participer au SNU",
     },
   },
+  parent2RejectSNUComment: {
+    type: String,
+    documentation: {
+      description: "Indique la personne, le jour et la date de notification du rejet",
+    },
+  },
   dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
