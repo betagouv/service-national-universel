@@ -15,7 +15,7 @@ import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 import Field from "./Field";
 
-export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange }) {
+export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange, blockUpload = false }) {
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
@@ -32,8 +32,7 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
 
   useEffect(() => {
     setRequestButtonClass(
-      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
-        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " + (mouseIn ? "visible" : "invisible")
+      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " + (mouseIn ? "visible" : "invisible")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);
@@ -90,12 +89,12 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
           messagePlaceholder="(Facultatif) Précisez les corrections à apporter ici"
         />
       )}
-      {cniModalOpened && <CniModal young={young} onClose={cniModalClose} mode={mode} />}
+      {cniModalOpened && <CniModal young={young} onClose={cniModalClose} mode={mode} blockUpload={blockUpload} />}
     </>
   );
 }
 
-function CniModal({ young, onClose, mode }) {
+function CniModal({ young, onClose, mode, blockUpload }) {
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(null);
   const [error, setError] = useState(null);
   const [changes, setChanges] = useState(false);
@@ -105,6 +104,14 @@ function CniModal({ young, onClose, mode }) {
   const [category, setCategory] = useState(young?.latestCNIFileCategory || null);
 
   useEffect(() => {
+    if (filesToUpload) {
+      young.filesToUpload = filesToUpload;
+    }
+  }, [filesToUpload])
+
+  useEffect(() => {
+    console.log("File to upload is : ", young.filesToUpload);
+    if (blockUpload) return setFilesToUpload(young.filesToUpload);
     if (young && young.files && young.files.cniFiles) {
       setCniFiles(young.files.cniFiles);
     } else {
@@ -171,6 +178,19 @@ function CniModal({ young, onClose, mode }) {
     setFilesToUpload(null);
   }
 
+  const removeFileInscription = (file) => {
+    console.log(file);
+    setFilesToUpload(oldFiles => {
+      const newArray = [];
+      oldFiles.map((oldFile) => {
+        if(oldFile !== file) {
+          newArray.push(oldFile);
+        }
+      })
+      return newArray;
+    })
+  }
+
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
       <div className="bg-white rounded-[8px]">
@@ -197,7 +217,14 @@ function CniModal({ young, onClose, mode }) {
                 id="file-upload"
                 name="file-upload"
                 accept=".png, .jpg, .jpeg, .pdf"
-                onChange={(e) => setFilesToUpload(e.target.files)}
+                onChange={(e) => {
+                  if (blockUpload) {
+                    setFilesToUpload([...filesToUpload, ...e.target.files])
+                    setChanges(true);
+                  } else {
+                    setFilesToUpload(e.target.files)
+                  }
+                }}
                 className="hidden"
               />
               <div className="flex items-center justify-between mt-4">
@@ -209,18 +236,32 @@ function CniModal({ young, onClose, mode }) {
               {filesToUpload && (
                 <>
                   <div className="w-full flex space-x-2 justify-between mt-2 items-center">
-                    <div className="3/4">
-                      {Array.from(filesToUpload).map((file) => (
-                        <div key={file.name} className="text-[12px]">
-                          {file.name}
+
+                    {!blockUpload ?
+                      <>
+                        <div className="3/4">
+                          {Array.from(filesToUpload).map((file) => (
+                            <div key={file.name} className="text-[12px]0">
+                              <div>{file.name}</div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                    <div className="1/4">
-                      <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date}>
-                        Téléverser
-                      </PlainButton>
-                    </div>
+                        <div className="1/4">
+                          <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date}>
+                            Téléverser
+                          </PlainButton>
+                        </div>
+                      </>
+                      :
+                      <div className="flex flex-column w-100">
+                        {Array.from(filesToUpload).map((file) => (
+                          <div key={file.name} className="text-[12px] flex flex-row justify-between">
+                            <div>{file.name}</div>
+                            <div className="cursor-pointer" onClick={() => removeFileInscription(file)}>X</div>
+                          </div>
+                        ))}
+                      </div>
+                    }
                   </div>
                   <div className="flex mt-4 w-full space-x-2">
                     <div className="relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] w-1/2">
