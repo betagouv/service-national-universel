@@ -17,7 +17,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
 const { format } = require("date-fns");
@@ -289,6 +289,7 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
     if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {
       if (young.parentAllowSNU !== "false") {
         changes.parentAllowSNU = "false";
+        changes.status = YOUNG_STATUS.NOT_AUTORISED;
         notification = "rejected";
       }
     } else if (futureYoung.parent1AllowSNU === "true" && futureYoung.parent2AllowSNU !== "false") {
