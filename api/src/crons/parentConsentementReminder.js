@@ -15,7 +15,7 @@ exports.handler = async () => {
       cohort: /2023/,
       status: { $in: ["IN_PROGRESS", "REINSCRIPTION"] },
       parent1AllowSNU: { $exists: false },
-      inscriptionDoneDate: { $exists: true, $lte: lessDays(now, 7) },
+      inscriptionDoneDate: { $exists: true, $lt: lessDays(now, 7), $gte: lessDays(now, 8) },
     }).cursor();
     await cursor.eachAsync(async function (young) {
       countNotice++;
