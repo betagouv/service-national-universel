@@ -36,7 +36,7 @@ export default function InscriptionPanel({ onChange, value }) {
       isOpen: true,
       onConfirm: onConfirmDelete,
       title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
-      message: "Cette action est irréversible.",
+      message: "Cette action est irréversible. La suppression prend jusqu'à 1 minute.",
     });
   };
 
