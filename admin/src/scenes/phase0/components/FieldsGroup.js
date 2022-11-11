@@ -54,7 +54,7 @@ export function FieldsGroup({
       {mode === "edition" && type === "date" ? (
         <div className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${className}`}>
           {title && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{title}</label>}
-          <DatePickerList value={new Date(value)} onChange={(date) => onChange(new Date(date))} />
+          <DatePickerList value={value ? new Date(value) : null} onChange={(date) => onChange(new Date(date))} />
           {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
         </div>
       ) : (

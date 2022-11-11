@@ -9,7 +9,7 @@ export default function DatePickerList({ value, label, onChange, error = "", cla
   const date = new Date();
   return (
     <div className={className}>
-      <label className={`my-2 whitespace-nowrap ${error ? "text-[#CE0500]" : "text-[#3A3A3A]"}`}>{label}</label>
+      {label ? <label className={`my-2 whitespace-nowrap ${error ? "text-[#CE0500]" : "text-[#3A3A3A]"}`}>{label}</label> : null}
       <div className={"flex justify-between items-center gap-3 w-full bg-gray-50 px-4 py-2"}>
         <DatePicker
           locale="fr"
