@@ -139,7 +139,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     youngPatches.handler();
   });
 
-  cron.schedule("25 1 * * *", () => {
+  cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
   });
 }
