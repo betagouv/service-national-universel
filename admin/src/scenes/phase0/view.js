@@ -949,6 +949,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         onCorrectionRequestChange={onCorrectionRequestChange}
         onChange={(value) => onChange("email", value)}
         young={young}
+        copy={true}
       />
       <Field
         name="phone"
@@ -1262,6 +1263,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
                 young={young}
+                copy={true}
               />
               <Field
                 name={`parent${currentParent}Phone`}
