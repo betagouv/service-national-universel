@@ -1,3 +1,19 @@
+# [1.165.0](https://github.com/betagouv/service-national-universel/compare/v1.164.0...v1.165.0) (2022-11-11)
+
+
+### Bug Fixes
+
+* **admin:** Repair delete button ([#2030](https://github.com/betagouv/service-national-universel/issues/2030)) ([5b24dab](https://github.com/betagouv/service-national-universel/commit/5b24daba94f0f4642f73166e6bd21714b6ae9bc1))
+* **api:** delete field phase 1 on change status (REINSCRIPTION) ([8aa975c](https://github.com/betagouv/service-national-universel/commit/8aa975c76bea9d102e47cd2c205d5b336fd466ab))
+
+
+### Features
+
+* **admin:** Changement DatePicker sur fiche du Jeune dans l'admin ([#2037](https://github.com/betagouv/service-national-universel/issues/2037)) ([82cdfc3](https://github.com/betagouv/service-national-universel/commit/82cdfc359ee53ea3ac05511fa9a6dac0eb89a072))
+* **admin:** copy to clipboard for email phase 0 ([e10def4](https://github.com/betagouv/service-national-universel/commit/e10def446bdaa83389f52a9cbfad7d7b33dc8428))
+* **admin/api:** Consentement désaccord du RL n°2 ([#2036](https://github.com/betagouv/service-national-universel/issues/2036)) ([12118cc](https://github.com/betagouv/service-national-universel/commit/12118ccae8ce78ca347659fd53df3670fdea22fe))
+* **api:** Brancher la notification de relance consentement représentant légal de l’inscription ([#2039](https://github.com/betagouv/service-national-universel/issues/2039)) ([b490ae5](https://github.com/betagouv/service-national-universel/commit/b490ae5dfc405030d6c7f10a0d10b9c70751ca74))
+
 # [1.164.0](https://github.com/betagouv/service-national-universel/compare/v1.163.0...v1.164.0) (2022-11-10)
 
 
