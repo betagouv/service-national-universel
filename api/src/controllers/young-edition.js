@@ -2,9 +2,10 @@
  * /young-edition
  *
  * ROUTES
- *   PUT   /young-edition/:id/identite
- *   PUT   /young-edition/:id/situationparents
- *   PUT   /young-edition/:id/phasestatus
+ *   PUT   /young-edition/:id/identite            -> Modifie les données du jeune qui se trouvent dans la première section de la page du jeune (informations générales).
+ *   PUT   /young-edition/:id/situationparents    -> Modifie les données du jeune qui se trouvent dans la deuxième section de la page du jeune (Détails).
+ *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune sur une phase.
+ *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
  */
 
 const express = require("express");
@@ -16,8 +17,10 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, canUserUpdateYoungStatus } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
+const { sendTemplate } = require("../sendinblue");
+const { format } = require("date-fns");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -253,4 +256,72 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // --- validate data
+    const bodySchema = Joi.object().keys({
+      parent: Joi.number().valid(1, 2).required(),
+      allow: Joi.boolean().required(),
+    });
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("joi error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // --- get young
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    let changes = {
+      [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
+    };
+
+    let notification = null;
+    const futureYoung = { ...young, ...changes };
+    if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {
+      if (young.parentAllowSNU !== "false") {
+        changes.parentAllowSNU = "false";
+        changes.status = YOUNG_STATUS.NOT_AUTORISED;
+        notification = "rejected";
+      }
+    } else if (futureYoung.parent1AllowSNU === "true" && futureYoung.parent2AllowSNU !== "false") {
+      if (young.parentAllowSNU !== "true") {
+        // TODO: on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
+        // body.parentAllowSNU = "true";
+        // notification = "accepted";
+      }
+    }
+    if (value.parent === 2 && value.allow === false) {
+      changes.parent2RejectSNUComment = `Renseigné par ${req.user.firstName} ${req.user.lastName} le ${format(new Date(), "dd/MM/yyyy à HH:mm")}`;
+    }
+
+    // --- update young
+    young.set(changes);
+    await young.save({ fromUser: req.user });
+
+    if (notification === "rejected") {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT2_DID_NOT_CONSENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      });
+    }
+    // else if (notification === "accepted") {
+    //   // on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
+    // }
+
+    // --- result
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

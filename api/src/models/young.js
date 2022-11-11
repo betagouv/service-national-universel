@@ -1338,6 +1338,26 @@ const Schema = new mongoose.Schema({
       description: "Les representants autorise le jeune à participer au SNU",
     },
   },
+  parent1AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 1 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 2 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2RejectSNUComment: {
+    type: String,
+    documentation: {
+      description: "Indique la personne, le jour et la date de notification du rejet",
+    },
+  },
   dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
