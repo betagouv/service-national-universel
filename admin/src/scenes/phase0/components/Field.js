@@ -111,7 +111,7 @@ export default function Field({
           </>
         ) : (
           <div className="flex items-center gap-2">
-            {copy && (
+            {copy && value && (
               <div
                 className="flex items-center justify-center cursor-pointer hover:scale-105"
                 onClick={() => {
