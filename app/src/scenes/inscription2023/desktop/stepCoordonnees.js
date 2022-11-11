@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
@@ -138,6 +138,7 @@ export default function StepCoordonnees() {
   const dispatch = useDispatch();
   const history = useHistory();
   const { step } = useParams();
+  const ref = useRef(null);
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -234,6 +235,18 @@ export default function StepCoordonnees() {
     setErrors(getErrors());
   }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setBirthCityZipSuggestions([]);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   const getErrors = () => {
     let errors = {};
 
@@ -297,23 +310,23 @@ export default function StepCoordonnees() {
       const response = await getAddress(value);
       const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
       setBirthCityZipSuggestions(suggestions);
-    }, 1000),
+    }, 500),
     [],
   );
 
   const updateBirthCity = async (value) => {
-    const result = value.match(/^\D+\s-\s(\d{5})$/);
-    if (result) {
-      const birthCityZip = result[1];
-      const birthCity = result[0].replace(` - ${birthCityZip}`, "");
-      setData({ ...data, birthCity, birthCityZip });
-      setBirthCityZipSuggestions([]);
+    setData({ ...data, birthCity: value });
+    const trimmedValue = value.trim();
+    if (trimmedValue && trimmedValue.length > 2) {
+      debouncedSuggestionsRequest(trimmedValue);
     } else {
-      setData({ ...data, birthCity: value });
-      if (value && value.length > 2) {
-        debouncedSuggestionsRequest(value);
-      }
+      setBirthCityZipSuggestions([]);
     }
+  };
+
+  const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
+    setData({ ...data, birthCity, birthCityZip });
+    setBirthCityZipSuggestions([]);
   };
 
   const onSubmit = async () => {
@@ -531,7 +544,7 @@ export default function StepCoordonnees() {
         />
       )}
       <div className="flex">
-        <div className="flex-1 mr-3">
+        <div className="flex-1 mr-3 relative">
           <Input
             list="suggestions"
             value={birthCity}
@@ -541,11 +554,16 @@ export default function StepCoordonnees() {
             correction={corrections.birthCity}
           />
           {isFrench && (
-            <datalist id="suggestions">
+            <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
-                <option key={`${index} - ${postcode}`} value={`${city} - ${postcode}`} />
+                <div
+                  onClick={() => {
+                    onClickBirthCitySuggestion(city, postcode);
+                  }}
+                  className="group flex justify-between items-center gap-2 p-2 px-3  hover:bg-gray-50 cursor-pointer"
+                  key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
               ))}
-            </datalist>
+            </div>
           )}
         </div>
 
