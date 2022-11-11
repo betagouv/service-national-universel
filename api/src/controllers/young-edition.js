@@ -310,7 +310,6 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
     if (notification === "rejected") {
       await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT2_DID_NOT_CONSENT, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {},
       });
     }
     // else if (notification === "accepted") {

@@ -1546,19 +1546,21 @@ function SectionConsentements({ young, onChange }) {
               </div>
               {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
             </div>
-            <div className="mt-[16px] flex items-center justify-between">
-              <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
-                <div className="font-bold">Consentement à la participation</div>
-                {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? (
+              <div className="mt-[16px] flex items-center justify-between">
+                <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
+                  <div className="font-bold">Consentement à la participation</div>
+                  {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
+                </div>
+                {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
+                  <MiniSwitch value={young.parent2AllowSNU === "true"} />
+                ) : (
+                  <BorderButton mode="red" onClick={parent2RejectSNU}>
+                    Déclarer un refus
+                  </BorderButton>
+                )}
               </div>
-              {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
-                <MiniSwitch value={young.parent2AllowSNU === "true"} />
-              ) : (
-                <BorderButton mode="red" onClick={parent2RejectSNU}>
-                  Déclarer un refus
-                </BorderButton>
-              )}
-            </div>
+            ) : null}
           </div>
         )}
       </div>
