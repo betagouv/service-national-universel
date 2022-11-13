@@ -1,3 +1,10 @@
+## [1.165.1](https://github.com/betagouv/service-national-universel/compare/v1.165.0...v1.165.1) (2022-11-13)
+
+
+### Bug Fixes
+
+* **api:** remove dont stringify errors ([1add8a0](https://github.com/betagouv/service-national-universel/commit/1add8a054c427132a7c37c34d2a9e02a6424d212))
+
 # [1.165.0](https://github.com/betagouv/service-national-universel/compare/v1.164.0...v1.165.0) (2022-11-11)
 
 
