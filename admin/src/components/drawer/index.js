@@ -134,11 +134,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <div className="">
-        <div className="flex items-center justify-between py-3 pl-3 text-base text-[#A0A0A0]">Plan de transport <ChevronDown className="mr-[16px]" /></div>
-        {environment !== "production" && <DrawerTab to="/plan-de-transport/tableau-repartition" title="Tableau de répartition" onClick={onClick} />}
-        {environment !== "production" && <DrawerTab to="/plan-de-transport/schema-repartition" title="Schéma de répartition" onClick={onClick} />}
-      </div>
+      {environment !== "production" && (
+        <div>
+          <div className="flex items-center justify-between py-3 pl-3 text-base text-[#A0A0A0]">
+            Plan de transport <ChevronDown className="mr-[16px]" />
+          </div>
+          <DrawerTab to="/plan-de-transport/tableau-repartition" title="Tableau de répartition" onClick={onClick} />
+          <DrawerTab to="/plan-de-transport/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+        </div>
+      )}
       {ssoSupportStorage === "sso-support" ? (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
