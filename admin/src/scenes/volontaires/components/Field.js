@@ -1,7 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import PencilAlt from "../../../assets/icons/PencilAlt";
+import React, { useEffect, useState } from "react";
 import SimpleSelect from "../components/SimpleSelect";
-import SectionContext from "../context/SectionContext";
 import dayjs from "dayjs";
 
 /**
@@ -52,7 +50,7 @@ export default function Field({
           {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
         </div>
       </div>
-    )
+    );
   }
   return (
     <div className={className}>
