@@ -284,7 +284,7 @@ export default function Create() {
         <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
         <div className="border-b mx-[37px] mb-[24px] mt-[29px]" />
         <div className="ml-[32px] text-[18px] font-[500] mb-[24px]">Informations générales</div>
-        <div className={`flex block`}>
+        <div className={`flex block pb-[56px]`}>
           <div className="flex-[1_0_50%] pr-[56px] pl-[32px]">
             <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
           </div>
@@ -296,7 +296,7 @@ export default function Create() {
       </div>
       <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
         <div className="ml-[32px] text-[18px] font-[500] mb-[24px]">Détails</div>
-        <div className={`flex block`}>
+        <div className={`flex block pb-[56px]`}>
           <div className="flex-[1_0_50%] pr-[56px] pl-[32px]">
             <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
           </div>
@@ -674,7 +674,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         isVerified={values.addressVerified}
         buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
       />
-      <div className="mb-[56px] flex items-start justify-between mt-[16px]">
+      <div className="flex items-start justify-between mt-[16px]">
         <Field
           name="department"
           label="Département"
