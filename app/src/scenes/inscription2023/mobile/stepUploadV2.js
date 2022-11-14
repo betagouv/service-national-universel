@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
@@ -24,21 +24,25 @@ export default function StepUpload() {
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
-  const correctionsFile = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "cniFile");
-  const correctionsDate = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
+  const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();
-  const [checked, setChecked] = useState({ coupe: false, lisible: false, nette: false });
+  const [checked, setChecked] = useState({
+    "Toutes les informations sont lisibles": false,
+    "Le document n'est pas coupé": false,
+    "La photo est nette": false,
+  });
+
   const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
   const [step, setStep] = useState(getStep());
 
   function getStep() {
-    if (correctionsFile?.some((e) => e.reason === "MISSING_BACK")) return "verso";
-    if (correctionsFile?.length) return "recto";
-    if (correctionsDate?.length) return "date";
+    if (corrections?.some(({ reason }) => reason === "MISSING_BACK")) return "verso";
+    if (corrections?.some(({ field }) => field === "cniFile")) return "recto";
+    if (corrections?.some(({ field }) => field === "latestCNIFileExpirationDate")) return "date";
     return "recto";
   }
 
@@ -48,7 +52,7 @@ export default function StepUpload() {
     if (step === "verify")
       return (
         <>
-          <Gallery />
+          <GalleryMemo recto={recto} verso={verso} />
           <Verify checked={checked} setChecked={setChecked} />
         </>
       );
@@ -77,8 +81,8 @@ export default function StepUpload() {
   async function onSubmit() {
     setLoading(true);
     if (recto) {
-      const { error } = await uploadFiles();
-      if (error) {
+      const res = await uploadFiles();
+      if (res?.error) {
         setError(error);
         setLoading(false);
         return;
@@ -98,8 +102,14 @@ export default function StepUpload() {
 
   async function onCorrect() {
     setLoading(true);
-    if (recto) await uploadFiles();
-    if (error.text) return setLoading(false);
+    if (recto) {
+      const res = await uploadFiles();
+      if (res?.error) {
+        setError(error);
+        setLoading(false);
+        return;
+      }
+    }
     const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
     if (!ok) {
@@ -129,13 +139,13 @@ export default function StepUpload() {
           onClickPrevious={() => {
             setRecto(null);
             setVerso(null);
-            setStep(correctionsFile?.some((e) => e.reason === "MISSING_BACK") ? "verso" : "recto");
+            setStep(corrections?.some(({ reason }) => reason === "MISSING_BACK") ? "verso" : "recto");
           }}
           disabled={Object.values(checked).some((e) => e === false)}
         />
       )}
       {step === "date" &&
-        (correctionsFile?.length || correctionsDate?.length ? (
+        (corrections ? (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!date || loading} />
         ) : (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
@@ -147,12 +157,14 @@ export default function StepUpload() {
     return (
       <>
         <div className="mb-4">
-          {correctionsFile?.map((e) => (
-            <ErrorMessage key={e._id} className="">
-              <strong>{translateCorrectionReason(e.reason)}</strong>
-              {e.message && ` : ${e.message}`}
-            </ErrorMessage>
-          ))}
+          {corrections
+            ?.filter(({ field }) => field == "cniFile")
+            ?.map((e) => (
+              <ErrorMessage key={e._id} className="">
+                <strong>{translateCorrectionReason(e.reason)}</strong>
+                {e.message && ` : ${e.message}`}
+              </ErrorMessage>
+            ))}
         </div>
         <div className="w-full flex items-center justify-center mb-4">
           <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
@@ -164,7 +176,7 @@ export default function StepUpload() {
           accept="image/*"
           onChange={(e) => {
             setRecto(e.target.files);
-            setStep(correctionsFile?.some((e) => e.reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
+            setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
           }}
           className="hidden"
         />
@@ -181,12 +193,14 @@ export default function StepUpload() {
     return (
       <>
         <div className="mb-4">
-          {correctionsFile?.map((e) => (
-            <ErrorMessage key={e._id}>
-              <strong>{translateCorrectionReason(e.reason)}</strong>
-              {e.message && ` : ${e.message}`}
-            </ErrorMessage>
-          ))}
+          {corrections
+            ?.filter(({ field }) => field == "cniFile")
+            ?.map((e) => (
+              <ErrorMessage key={e._id}>
+                <strong>{translateCorrectionReason(e.reason)}</strong>
+                {e.message && ` : ${e.message}`}
+              </ErrorMessage>
+            ))}
         </div>
         <div className="w-full flex items-center justify-center mb-4">
           <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
@@ -212,37 +226,21 @@ export default function StepUpload() {
   }
 
   function Verify({ checked, setChecked }) {
+    function handleChange(key) {
+      let newObj = { ...checked };
+      newObj[key] = !newObj[key];
+      setChecked(newObj);
+    }
     return (
       <>
         <p className="text-lg text-gray-800 font-semibold my-4">Vérifiez les points suivants</p>
-        <div className="flex items-center my-2">
-          <CheckBox type="checkbox" checked={checked.lisible} onChange={() => setChecked((prev) => ({ ...prev, lisible: !checked.lisible }))} />
-          <span className="ml-2 mr-2">
-            Toutes les informations sont <strong>lisibles</strong>
-          </span>
-        </div>
-        <div className="flex items-center my-4">
-          <CheckBox type="checkbox" checked={checked.coupe} onChange={() => setChecked((prev) => ({ ...prev, coupe: !checked.coupe }))} />
-          <span className="ml-2 mr-2">
-            Le document n&apos;est <strong>pas coupé</strong>
-          </span>
-        </div>
-        <div className="flex items-center my-4">
-          <CheckBox type="checkbox" checked={checked.nette} onChange={() => setChecked((prev) => ({ ...prev, nette: !checked.nette }))} />
-          <span className="ml-2 mr-2">
-            La photo est <strong>nette</strong>
-          </span>
-        </div>
+        {Object.entries(checked).map(([key, value]) => (
+          <div className="flex items-center my-2" key={key}>
+            <CheckBox type="checkbox" checked={value} onChange={() => handleChange(key)} />
+            <span className="ml-2 mr-2">{key}</span>
+          </div>
+        ))}
       </>
-    );
-  }
-
-  function Gallery() {
-    return (
-      <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
-        <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />
-        {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
-      </div>
     );
   }
 
@@ -250,12 +248,14 @@ export default function StepUpload() {
     return (
       <>
         <div className="mb-4">
-          {correctionsDate?.map((e) => (
-            <ErrorMessage key={e._id}>
-              <strong>Date d&apos;expiration incorrecte</strong>
-              {e.message && ` : ${e.message}`}
-            </ErrorMessage>
-          ))}
+          {corrections
+            ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
+            ?.map((e) => (
+              <ErrorMessage key={e._id}>
+                <strong>Date d&apos;expiration incorrecte</strong>
+                {e.message && ` : ${e.message}`}
+              </ErrorMessage>
+            ))}
         </div>
         <div className="text-xl font-medium">Renseignez la date d’expiration</div>
         <div className="text-gray-600 my-2">
@@ -270,3 +270,13 @@ export default function StepUpload() {
     );
   }
 }
+
+function Gallery({ recto, verso }) {
+  return (
+    <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
+      {recto && <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />}
+      {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
+    </div>
+  );
+}
+const GalleryMemo = memo(Gallery);
