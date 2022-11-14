@@ -1,7 +1,6 @@
 import queryString from "query-string";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
 import Eye from "../../../assets/icons/Eye";
@@ -26,9 +25,7 @@ export default function Signin() {
   const young = useSelector((state) => state.Auth.young);
 
   const params = queryString.parse(location.search);
-  const { redirect, disconnected } = params;
-
-  if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
+  const { redirect } = params;
 
   React.useEffect(() => {
     if (young) history.push("/" + (redirect || ""));
