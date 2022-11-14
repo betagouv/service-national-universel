@@ -29,6 +29,7 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
+import PlanDeTransport from "./scenes/plan-transport";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -192,6 +193,7 @@ const Home = () => {
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
+            <RestrictedRoute path="/plan-de-transport" component={PlanDeTransport} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>
