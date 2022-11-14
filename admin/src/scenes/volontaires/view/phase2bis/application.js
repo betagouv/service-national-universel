@@ -1,21 +1,24 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
-import { Link, useHistory, NavLink } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 import Wrapper from "../wrapper";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, copyToClipboard } from "../../../../utils";
 import IconDomain from "../../../../components/IconDomain";
-import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
+import { AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../../../assets/rubberStampNotValided.svg";
 import ReactTooltip from "react-tooltip";
 import { BsChevronDown } from "react-icons/bs";
-import { HiOutlineMail, HiPlus } from "react-icons/hi";
+import { HiPlus } from "react-icons/hi";
 import ModalPJ from "./components/ModalPJ";
+import Clock from "../../../../assets/Clock.svg";
+import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
+import ModalConfirm from "../../../../components/modals/ModalConfirm";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -117,50 +120,58 @@ export default function Phase2Application({ young, onChange }) {
             </button>
             <div className="flex items-center gap-3 text-2xl font-bold">
               <div>Espace&nbsp;candidature </div>
-              <div className="flex basis-[44%] items-center justify-end">
+              <div className="flex items-center justify-end">
                 <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-1.5 py-[5px] rounded-sm`}>
                   {translateApplication(application.status)}
                 </div>
               </div>
             </div>
             {/* TODO */}
-            <button className="flex items-center space-x-1 bg-gray-100 rounded py-[7px] pr-[11px] pl-[9px]" onClick={() => {}}>
-              {" "}
-              <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>{" "}
+            <button
+              className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
+              onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
+              <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
             </button>
           </div>
           <hr className="my-4" />
           <div className="flex relative w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
             {/* Choix*/}
             <div className="flex-1 flex justify-between basis-[60%] ">
-              <Link className="flex items-center" to={`/mission/${application.missionId}`}>
+              <Link className="flex items-center w-full px-2" to={`/mission/${application.missionId}`}>
                 {/* icon */}
                 <div className="flex items-center mr-4">
                   <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
                 </div>
                 {/* mission info */}
-                <div className="flex flex-col flex-1 justify-center">
-                  <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
-                  <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
-                  {/* tags */}
-                  {tags && (
-                    <div className=" inline-flex flex-wrap">
-                      {tags.map((tag, index) => {
-                        return (
-                          <div
-                            key={index}
-                            className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
-                            {tag}
+                <div className="flex flex-1 justify-between items-start">
+                  <div className="flex flex-col flex-1 justify-center">
+                    <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
+                    <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
+                    {/* tags */}
+                    {tags && (
+                      <div className=" inline-flex flex-wrap">
+                        {tags.map((tag, index) => {
+                          return (
+                            <div
+                              key={index}
+                              className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
+                              {tag}
+                            </div>
+                          );
+                        })}
+                        {mission.isMilitaryPreparation === "true" ? (
+                          <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
+                            Préparation militaire
                           </div>
-                        );
-                      })}
-                      {mission.isMilitaryPreparation === "true" ? (
-                        <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
-                          Préparation militaire
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
+                    onClick={() => history.push(`/mission/${mission._id.toString()}`)}>
+                    <div className="text-xs text-gray-800 ">Voir la mission</div>
+                  </button>
                 </div>
               </Link>
             </div>
@@ -168,7 +179,7 @@ export default function Phase2Application({ young, onChange }) {
               <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
-                <div className="font-bold text-2xl text-[#242526]">{application.missionDuration || "0"}h</div>
+                <div className="font-bold text-2xl text-[#242526]">{contract.missionDuration || "0"}h</div>
               </div>
               <div className="flex flex-col justify-center items-center p-4 m-0">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
@@ -330,7 +341,7 @@ export default function Phase2Application({ young, onChange }) {
   );
 }
 
-const StatusContractPeople = ({ value, description, firstName, lastName, token }) => (
+const StatusContractPeople = ({ value, description, firstName, lastName, token, contract, target }) => (
   <div className="flex flex-col justify-center items-start ">
     <div className="flex flex-col justify-center items-start " data-tip data-for={`${firstName}${lastName}-validation`}>
       <div className="mr-2">
@@ -349,16 +360,58 @@ const StatusContractPeople = ({ value, description, firstName, lastName, token }
         </ReactTooltip>
       ) : null}
     </div>
-    <div className="mt-4">
-      <div
-        className="text-xs text-blue-500 cursor-pointer hover:underline"
-        onClick={() => {
-          copyToClipboard(`${appURL}/validate-contract?token=${token}`);
-          toastr.success("Le lien a été copié dans le presse papier.");
-        }}>
-        Copier le lien de validation
+    {value !== "VALIDATED" ? (
+      <div className="mt-4">
+        <div
+          className="text-xs text-blue-500 cursor-pointer hover:underline"
+          onClick={() => {
+            copyToClipboard(`${appURL}/validate-contract?token=${token}`);
+            toastr.success("Le lien a été copié dans le presse papier.");
+          }}>
+          Copier le lien de validation
+        </div>
+        <SendContractLink contract={contract} target={target} />
       </div>
-      {/* <SendContractLink contract={contract} target={target} /> */}
-    </div>
+    ) : null}
   </div>
 );
+
+function SendContractLink({ contract, target }) {
+  const [modal, setModal] = React.useState({ isOpen: false, onConfirm: null });
+
+  return (
+    <>
+      <div
+        className="text-xs text-blue-500 cursor-pointer hover:underline"
+        onClick={async () => {
+          try {
+            const email = contract[target + "Email"];
+            setModal({
+              isOpen: true,
+              title: "Envoie de contrat par mail",
+              message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
+              onConfirm: async () => {
+                const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
+                if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
+                toastr.success("L'email a bien été envoyé", email);
+              },
+            });
+          } catch (e) {
+            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+          }
+        }}>
+        ✉️ Renvoyer le lien par email
+      </div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
+  );
+}
