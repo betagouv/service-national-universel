@@ -1,8 +1,11 @@
+/* eslint-disable prettier/prettier */
 import React from "react";
 import styled from "styled-components";
 import { Formik, Field as FieldFormik } from "formik";
 import validator from "validator";
 import "dayjs/locale/fr";
+import { Spinner } from "reactstrap";
+
 
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { translate } from "../../utils";
@@ -10,22 +13,14 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import SituationsParticulieres from "./edit/situations-particulieres";
-import Consentement from "./edit/consentement";
-import ConsentementImage from "./edit/consentement-image";
-import ChevronDown from "../../assets/icons/ChevronDown";
-import { BsCheck2 } from "react-icons/bs";
-
 import { START_DATE_SESSION_PHASE1, translateGrade, YOUNG_SITUATIONS, GRADES } from "snu-lib";
 import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
 
 
 
 //Identite
-import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
+import { Box, BoxContent } from "../../components/box";
 import Field from "./components/Field";
-import Documents from "./components/Documents";
-import DndFileInput from "../../components/dndFileInputV2";
 import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
@@ -40,6 +35,7 @@ export default function Create() {
   const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
   const [uploadError, setUploadError] = React.useState("");
   const [youngId, setYoungId] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -143,16 +139,20 @@ export default function Create() {
   }
 
   const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate) => {
+    setLoading(true);
     const res = await api.uploadFile(`/young/${id}/documents/cniFiles`, Array.from(filesToUpload), {}, latestCNIFileCategory, latestCNIFileExpirationDate);
     if (res.code === "FILE_CORRUPTED") {
       setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr");
+      setLoading(false);
       return 'err';
     }
     if (!res.ok) {
       capture(res.code);
+      setLoading(false);
       setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
       return 'err';
     }
+    setLoading(false);
     toastr.success("Volontaire créé !");
     return history.push("/inscription");
   }
@@ -230,13 +230,14 @@ export default function Create() {
         validate={validate}
         onSubmit={async (values) => {
           try {
+            setLoading(true);
             const { ok, code, young } = await api.post("/young/invite", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-
             const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
             setYoungId(young._id);
             if (res === "err") return toastr.error("Une erreur s'est produite avec le téléversement de vos fichiers");
           } catch (e) {
+            setLoading(false);
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
           }
@@ -246,7 +247,7 @@ export default function Create() {
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
               <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
               <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
-              <div className={`flex ${false ? "hidden" : "block"}`}>
+              <div className={`flex block`}>
                 <div className="flex-[1_0_50%] pr-[56px]">
                   <Identite
                     values={values}
@@ -272,7 +273,7 @@ export default function Create() {
             </div>
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
               <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
-              <div className={`flex ${false ? "hidden" : "block"}`}>
+              <div className={`flex block`}>
                 <div className="flex-[1_0_50%] pr-[56px]">
                   <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} touched={touched} />
                 </div>
@@ -298,7 +299,7 @@ export default function Create() {
             <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
               <div className="ml-[32px] text-[18px] font-[500]">Choisissez un séjour pour le volontaire</div>
               <div className="flex justify-start flex-row flex-wrap pl-[24px]">
-                {Object.keys(START_DATE_SESSION_PHASE1).map((key, value) => {
+                {Object.keys(START_DATE_SESSION_PHASE1).map((key) => {
                   if (START_DATE_SESSION_PHASE1[key].getTime() > new Date().getTime()) {
                     return (
                       <div key={key} onClick={() => setFieldValue("cohort", key)} className="cursor-pointer flex flex-row justify-start items-center w-[237px] h-[54px] border border-[#3B82F6] rounded-[6px] m-[16px]">
@@ -321,20 +322,25 @@ export default function Create() {
             </div>
 
             <div className="flex items-center w-100 justify-center">
-
-              {uploadError === "" ?
-                <div onClick={handleSubmit} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">Créer l'inscription</div>
-                :
+              {uploadError === "" ? (
+                <div onClick={handleSubmit} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">
+                  {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
+                </div>
+              ) : (
                 <div className="flex flex-column">
                   <div>{uploadError}</div>
-                  <div onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)} className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">Réessayer de téleverser les fichiers</div>
+                  <div
+                    onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)}
+                    className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">
+                    {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
+                  </div>
                 </div>
-              }
+              )}
             </div>
           </>
         )}
       </Formik>
-    </Wrapper >
+    </Wrapper>
   );
 }
 
