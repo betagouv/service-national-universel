@@ -390,14 +390,22 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
       // If latest ID proof has an invalid date, notify parent 1.
       if (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
+        if (young.parent1ContactPreference === "phone") {
+          await sendSMS(
+            young.parent1Phone,
+            SENDINBLUE_SMS.OUTDATED_ID_PROOF.template(young, `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`),
+            SENDINBLUE_SMS.OUTDATED_ID_PROOF.tag,
+          );
+        } else {
+          await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+            emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+            params: {
+              cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+              youngFirstName: young.firstName,
+              youngName: young.lastName,
+            },
+          });
+        }
       }
 
       if (young.parent1ContactPreference === "phone") {
@@ -514,14 +522,22 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
 
     if (notifyExpirationDate && needCniRelance) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
+      if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone,
+          SENDINBLUE_SMS.OUTDATED_ID_PROOF.template(young, `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`),
+          SENDINBLUE_SMS.OUTDATED_ID_PROOF.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
     }
     if (needParent1Relance) {
       if (young.parent1ContactPreference === "phone") {
