@@ -59,28 +59,31 @@ export default function StepUpload() {
     let files = [...recto];
     if (verso) files = [...files, ...verso];
     for (const file of files) {
-      if (file.size > 5000000)
-        return setError({
-          text: `Ce fichier ${files.name} est trop volumineux.`,
-        });
+      if (file.size > 5000000) return { error: { text: `Ce fichier ${files.name} est trop volumineux.` } };
     }
     const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, new Date(date));
     if (res.code === "FILE_CORRUPTED")
-      return setError({
-        text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      });
+      return {
+        error: {
+          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+        },
+      };
     if (!res.ok) {
       capture(res.code);
-      setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" });
-      setLoading(false);
-      return;
+      return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" } };
     }
   }
 
   async function onSubmit() {
     setLoading(true);
-    if (recto) await uploadFiles();
-    if (error.text) return setLoading(false);
+    if (recto) {
+      const { error } = await uploadFiles();
+      if (error) {
+        setError(error);
+        setLoading(false);
+        return;
+      }
+    }
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
