@@ -222,6 +222,11 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
+    let onWaitingList = false;
+    if (isGoalReached(obj.department, obj.cohort) === true) {
+      obj.status = YOUNG_STATUS.WAITING_LIST;
+      onWaitingList = true;
+    }
 
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
@@ -233,7 +238,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ young, ok: true });
+    return res.status(200).send({ young, ok: true, onWaitingList });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
