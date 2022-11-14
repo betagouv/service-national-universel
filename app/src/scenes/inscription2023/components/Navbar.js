@@ -33,12 +33,12 @@ const Navbar = ({ onSave }) => {
   const currentStep = getStepFromUrlParam(step, INSCRIPTION_STEPS_LIST, true);
 
   return (
-    <div className="bg-[#f9f6f2] text-[#161616] w-full md:w-[50rem] mx-auto p-4">
+    <div className="w-[50rem] mx-auto px-24 py-8">
       <div className="flex flex-col justify-center">
         <div className="flex justify-between">
           <div>
-            <div className="text-sm">Étape {index[currentStep]} sur 4</div>
-            <div className="text-lg font-bold mt-2">{wording[currentStep]}</div>
+            <div className="text-[#666666] text-xs">Étape {index[currentStep]} sur 4</div>
+            <div className="text-lg font-bold mt-1">{wording[currentStep]}</div>
           </div>
           {onSave && <img src={save} onClick={onSave} className="cursor-pointer" />}
         </div>
@@ -49,10 +49,9 @@ const Navbar = ({ onSave }) => {
           <div className={`basis-1/3  h-2 ${["REPRESENTANTS", "DOCUMENTS", "UPLOAD"].includes(currentStep) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
           <div className={`basis-1/3  h-2 ${["DOCUMENTS", "UPLOAD"].includes(currentStep) ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
         </div>
-        {desktop && (
-          <div className="flex space-x-1 text-xs mt-2 text-[#666666]">
-            <div className="font-bold">{["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS"].includes(currentStep) && "Étape suivante:"}</div>
-            <div>{next[currentStep]}</div>
+        {desktop && ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS"].includes(currentStep) && (
+          <div className="flex space-x-1 text-xs mt-3 text-[#666666]">
+            <strong>Etape suivante : </strong> {next[currentStep]}
           </div>
         )}
       </div>
