@@ -5,6 +5,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
+import { ID } from "../utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
@@ -31,7 +32,7 @@ export default function StepUpload() {
 
   async function onSubmit() {
     setLoading(true);
-    if (files) {
+    if (files?.length) {
       for (const file of files) {
         if (file.size > 5000000)
           return setError({
@@ -45,12 +46,12 @@ export default function StepUpload() {
         });
       if (!res.ok) {
         capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" });
         setLoading(false);
         return;
       }
     }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -82,7 +83,7 @@ export default function StepUpload() {
       }
       if (!res.ok) {
         capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" });
         setLoading(false);
         return;
       }
@@ -95,6 +96,7 @@ export default function StepUpload() {
         setLoading(false);
         return;
       }
+      plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
@@ -108,31 +110,6 @@ export default function StepUpload() {
   }
 
   const isDisabled = !young.files.cniFiles || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
-
-  const ID = {
-    cniNew: {
-      category: "cniNew",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Nouveau format (après août 2021)",
-      imgFront: "cniNewFront.png",
-      imgBack: "cniNewBack.png",
-      imgDate: "cniNewDate.png",
-    },
-    cniOld: {
-      category: "cniOld",
-      title: "Carte Nationale d'Identité",
-      subtitle: "Ancien format",
-      imgFront: "cniOldFront.png",
-      imgBack: "cniOldBack.png",
-      imgDate: "cniOldDate.png",
-    },
-    passport: {
-      category: "passport",
-      title: "Passeport",
-      imgFront: "passport.png",
-      imgDate: "passportDate.png",
-    },
-  };
 
   if (!category) return <div>Loading</div>;
   return (

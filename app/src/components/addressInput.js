@@ -4,7 +4,7 @@ import { Row, Col } from "reactstrap";
 import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
-import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 

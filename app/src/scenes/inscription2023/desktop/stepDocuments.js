@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate, translateCorrectionReason, YOUNG_STATUS } from "snu-lib";
+import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "snu-lib";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DesktopPageContainer from "../components/DesktopPageContainer";
@@ -21,7 +21,7 @@ export default function StepDocuments() {
   const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
 
   async function onSubmit() {
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -60,13 +60,12 @@ export default function StepDocuments() {
       disabled={!young?.files.cniFiles.length > 0 || corrections?.length > 0}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      {young?.status === YOUNG_STATUS.WAITING_CORRECTION &&
-        corrections.map((e) => (
-          <ErrorMessage key={e._id}>
-            <strong>{translateCorrectionReason(e.reason) || translate(e.field)}</strong>
-            {e.message && ` : ${e.message}`}
-          </ErrorMessage>
-        ))}
+      {corrections?.map((e) => (
+        <ErrorMessage key={e._id}>
+          <strong>{translateCorrectionReason(e.reason) || translateField(e.field)}</strong>
+          {e.message && ` : ${e.message}`}
+        </ErrorMessage>
+      ))}
       {docs.map((doc) => (
         <div key={doc.category} className="my-4 hover:bg-gray-50 cursor-pointer" onClick={() => history.push(`televersement/${doc.category}`)}>
           <div className="border p-4 my-3 flex justify-between items-center">

@@ -637,6 +637,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  phase2ApplicationFilesType: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des type de fichier des candidatures de phase 2 pour le jeune",
+    },
+  },
+
   phase2NumberHoursDone: {
     type: String,
     documentation: {
@@ -713,6 +721,13 @@ const Schema = new mongoose.Schema({
     enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "Densité de la ville  pendant le snu du volontaire",
+    },
+  },
+  isRegionRural: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Ruralité de la ville pendant le snu du volontaire",
     },
   },
   department: {
@@ -1323,6 +1338,26 @@ const Schema = new mongoose.Schema({
       description: "Les representants autorise le jeune à participer au SNU",
     },
   },
+  parent1AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 1 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 2 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2RejectSNUComment: {
+    type: String,
+    documentation: {
+      description: "Indique la personne, le jour et la date de notification du rejet",
+    },
+  },
   dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
@@ -1656,6 +1691,14 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  CNIFileNotValidOnStart: {
+    type: String,
+    enum: ["false", "true"],
+    documentation: {
+      description: "Date d'expiration de la CNI File non valide au début de la Cohorte",
     },
   },
 

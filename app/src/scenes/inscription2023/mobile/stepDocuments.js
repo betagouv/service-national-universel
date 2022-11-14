@@ -3,7 +3,7 @@ import { Link, Redirect, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate, translateCorrectionReason, YOUNG_STATUS } from "snu-lib";
+import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "snu-lib";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 
@@ -42,7 +42,7 @@ export default function StepDocuments() {
   ];
 
   async function onSubmit() {
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -69,7 +69,7 @@ export default function StepDocuments() {
         <div className="my-4">
           {corrections?.map((e) => (
             <ErrorMessage key={e._id}>
-              <strong>{translateCorrectionReason(e.reason) || translate(e.field)}</strong>
+              <strong>{translateCorrectionReason(e.reason) || translateField(e.field)}</strong>
               {e.message && ` : ${e.message}`}
             </ErrorMessage>
           ))}

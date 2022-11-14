@@ -88,7 +88,7 @@ class Auth {
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
-        schoolZip: Joi.string().trim(),
+        schoolZip: Joi.string().trim().allow(null, ""),
         schoolCity: Joi.string().trim(),
         schoolDepartment: Joi.string().trim(),
         schoolRegion: Joi.string().trim(),
@@ -264,6 +264,7 @@ class Auth {
       .validate(req.body);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
     const { password, verifyPassword, newPassword } = value;
 
     if (!validatePassword(newPassword)) {

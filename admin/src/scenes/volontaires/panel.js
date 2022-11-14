@@ -101,9 +101,6 @@ export default function VolontairePanel({ onChange, value }) {
             <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-              <PanelActionButton icon="pencil" title="Modifier" />
-            </Link>
             <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
             </a>
@@ -199,8 +196,6 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
             <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
             <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
-            <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-            <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
           </Info>
         )}
 

@@ -16,7 +16,12 @@ const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
-const youngPatches = require("./youngPatches");
+const deleteInactiveRefs = require("./deleteInactiveRefs");
+const applicationPatches = require("./patch/application");
+const missionPatches = require("./patch/mission");
+const structurePatches = require("./patch/structure");
+const youngPatches = require("./patch/young");
+const parentConsentementReminder = require("./parentConsentementReminder");
 
 // doubt ? -> https://crontab.guru/
 
@@ -73,6 +78,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     apiEngagement.handler();
   });
 
+  // everyday at 0200
+  cron.schedule("0 0 * * *", () => {
+    deleteInactiveRefs.handler();
+  });
+
   cron.schedule(everyHours(6), () => {
     jeVeuxAiderDaily.handler();
   });
@@ -113,7 +123,23 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     syncContactSupport.handler();
   });
 
+  cron.schedule("30 1 * * *", () => {
+    structurePatches.handler();
+  });
+
   cron.schedule("0 2 * * *", () => {
+    missionPatches.handler();
+  });
+
+  cron.schedule("30 2 * * *", () => {
+    applicationPatches.handler();
+  });
+
+  cron.schedule("0 3 * * *", () => {
     youngPatches.handler();
+  });
+
+  cron.schedule("27 8 * * *", () => {
+    parentConsentementReminder.handler();
   });
 }

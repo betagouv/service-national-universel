@@ -5,7 +5,7 @@ import { Field } from "formik";
 import FormRow from "./FormRow";
 import FormLabel from "./FormLabel";
 import FormRadioLabel from "./FormRadioLabel";
-import ErrorMessage, { requiredMessage } from "../../scenes/inscription/components/errorMessage";
+import ErrorMessage, { requiredMessage } from "../../scenes/inscription2023/components/ErrorMessageOld";
 import styled from "styled-components";
 
 export default function FormRadioLabelTrueFalse({ title, children, name, values, handleChange, errors, touched }) {

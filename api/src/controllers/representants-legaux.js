@@ -192,6 +192,15 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       if (value.parentAllowSNU === "true" && value.parent1AllowImageRights === "true") {
         shouldSendToParent2 = true;
       }
+      if (value.parent1AllowImageRights === "false") {
+        value.imageRight = "false";
+      }
+    }
+  } else {
+    if (value.parent2AllowImageRights === "true") {
+      value.imageRight = "true";
+    } else {
+      value.imageRight = "false";
     }
   }
 
@@ -206,7 +215,14 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
           youngName: young.lastName,
         },
       });
+    } else {
+      value.imageRight = "true";
     }
+  }
+
+  // --- Complete information for each parent.
+  if (value.parentAllowSNU === "true" || value.parentAllowSNU === "false") {
+    value[`parent${id}AllowSNU`] = value.parentAllowSNU;
   }
 
   // --- update young

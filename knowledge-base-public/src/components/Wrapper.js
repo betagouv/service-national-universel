@@ -56,21 +56,21 @@ const Wrapper = ({ children }) => {
             <>
               <ProfileButton showNameAndRole className={withSeeAs ? "lg:order-4" : " w-auto lg:w-1/3 lg:flex-1 "} onLogout={onLogout} user={user}>
                 {["admin"].includes(user?.role) && (
-                  <Link href={`${supportURL}/knowledge-base/${router?.query?.slug || ""}`} passHref>
+                  <Link legacyBehavior href={`${supportURL}/knowledge-base/${router?.query?.slug || ""}`} passHref>
                     <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
                       Espace d'édition
                     </a>
                   </Link>
                 )}
                 {!["young"].includes(user?.role) && (
-                  <Link href={adminURL}>
+                  <Link legacyBehavior href={adminURL}>
                     <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
                       Espace admin SNU
                     </a>
                   </Link>
                 )}
                 {["young"].includes(user?.role) && (
-                  <Link href={appURL}>
+                  <Link legacyBehavior href={appURL}>
                     <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
                       Mon compte SNU
                     </a>

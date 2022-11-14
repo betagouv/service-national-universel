@@ -11,7 +11,10 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 router.post("/", async (req, res) => {
   try {
     const { error, value } = validateWaitingList(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
     const data = await WaitingListModel.create(value);
     await sendTemplate(SENDINBLUE_TEMPLATES.young.WAITING_LIST, {
       emailTo: [{ email: data.mail }],

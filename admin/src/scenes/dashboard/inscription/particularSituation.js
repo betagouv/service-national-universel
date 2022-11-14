@@ -17,7 +17,6 @@ export default function ParticularSituation({ filter }) {
   const [specificAmenagment, setSpecificAmenagment] = useState(null);
   const [allergies, setAllergies] = useState(null);
   const [handicapInSameDepartment, setHandicapInSameDepartment] = useState(null);
-  const [highSkilledActivity, setHighSkilledActivity] = useState(null);
   const [reducedMobilityAccess, setReducedMobilityAccess] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -60,7 +59,6 @@ export default function ParticularSituation({ filter }) {
         setSpecificAmenagment(transform(responses[0].aggregations.specificAmenagment.buckets));
         setAllergies(transform(responses[0].aggregations.allergies.buckets));
         setHandicapInSameDepartment(transform(responses[0].aggregations.handicapInSameDepartment.buckets));
-        setHighSkilledActivity(transform(responses[0].aggregations.highSkilledActivity.buckets));
         setReducedMobilityAccess(transform(responses[0].aggregations.reducedMobilityAccess.buckets));
       }
     })();
@@ -103,7 +101,7 @@ export default function ParticularSituation({ filter }) {
           <Loader />
         )}
         {specificAmenagment ? (
-          <LinkItem disabled>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['SPECIFIC_AMENAGEMENT=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((specificAmenagment.true * 100) / total).toFixed(1)}
@@ -115,14 +113,14 @@ export default function ParticularSituation({ filter }) {
           <Loader />
         )}
         {allergies ? (
-          <LinkItem disabled>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['ALLERGIES=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress circleProgressColor="#1B7BBF" percentage={((allergies.true * 100) / total).toFixed(1)} title={allergies.true} subtitle="Allergie/intolérance" />
           </LinkItem>
         ) : (
           <Loader />
         )}
         {handicapInSameDepartment ? (
-          <LinkItem disabled>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['SAME_DEPARTMENT=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((handicapInSameDepartment.true * 100) / total).toFixed(1)}
@@ -133,20 +131,8 @@ export default function ParticularSituation({ filter }) {
         ) : (
           <Loader />
         )}
-        {highSkilledActivity ? (
-          <LinkItem disabled>
-            <CircularProgress
-              circleProgressColor="#1B7BBF"
-              percentage={((highSkilledActivity.true * 100) / total).toFixed(1)}
-              title={highSkilledActivity.true}
-              subtitle="Sportif de haut-niveau"
-            />
-          </LinkItem>
-        ) : (
-          <Loader />
-        )}
         {reducedMobilityAccess ? (
-          <LinkItem disabled>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['PMR=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((reducedMobilityAccess.true * 100) / total).toFixed(1)}

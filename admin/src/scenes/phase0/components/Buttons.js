@@ -7,6 +7,9 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
     case "blue":
       color = "bg-white text-[#1D4ED8] border-[#1D4ED8] hover:!bg-[#1D4ED8] hover:text-white";
       break;
+    case "red":
+      color = "bg-white text-[#EF4444] border-[#EF4444] hover:!bg-[#EF4444] hover:text-white";
+      break;
     default:
       color = "bg-white text-[#000091] border-[#000091] hover:!bg-[#000091] hover:text-white";
   }
@@ -84,11 +87,22 @@ export function Button({ children, className = "", onClick = () => {}, spinner =
   }
 }
 
-export function RoundButton({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel }) {
+export function RoundButton({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel, mode = "blue" }) {
+  let color;
+
+  switch (mode) {
+    case "grey":
+      color = "bg-[#F3F4F6] text-[#374151] hover:border-[#374151]";
+      break;
+    default:
+      color = "bg-[#DBEAFE] text-[#2563EB] hover:border-[#2563EB]";
+      break;
+  }
+
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[transparent] border-[1px] border-solid rounded-[6px] ${color} ${className}`}
         href={href}
         target={target}
         rel={rel}
@@ -100,7 +114,7 @@ export function RoundButton({ children, className = "", onClick = () => {}, spin
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-[17px] py-[8px] cursor-pointer bg-[#DBEAFE] text-[#2563EB] border-[transparent] border-[1px] border-solid rounded-[100px] hover:border-[#2563EB] ${className}`}
+        className={`flex items-center justify-center whitespace-nowrap px-[17px] py-[8px] cursor-pointer border-[transparent] border-[1px] border-solid rounded-[100px] ${color} ${className}`}
         onClick={onClick}>
         {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
         {icon && <icon.type {...icon.props} className={`mr-[7px] ${icon.props.className}`} />}

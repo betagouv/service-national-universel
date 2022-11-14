@@ -34,7 +34,7 @@ export default function StepUpload() {
   const correctionsDate = young?.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && e.field === "latestCNIFileExpirationDate");
 
   async function onSubmit() {
-    if (files) {
+    if (files?.length) {
       setLoading(true);
       for (const file of files) {
         if (file.size > 5000000)
@@ -49,12 +49,12 @@ export default function StepUpload() {
         });
       if (!res.ok) {
         capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" });
         setLoading(false);
         return;
       }
     }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next");
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -86,7 +86,7 @@ export default function StepUpload() {
       }
       if (!res.ok) {
         capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" });
         setLoading(false);
         return;
       }
@@ -99,6 +99,7 @@ export default function StepUpload() {
         setLoading(false);
         return;
       }
+      plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
@@ -136,7 +137,7 @@ export default function StepUpload() {
     },
   };
 
-  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && !hasDateChanged) || (correctionsFile?.length && !files?.length);
+  const isDisabled = !young.files.cniFiles.length || !date || loading || (correctionsDate?.length && hasDateChanged == false) || (correctionsFile?.length && !files?.length);
 
   return (
     <>
