@@ -11,6 +11,7 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/plausible";
 import { environment } from "../../config";
 import ModalInfo from "../modals/ModalInfo";
+import ChevronDown from "../../assets/icons/ChevronDown";
 
 const DrawerTab = ({ title, to, onClick, beta, exact }) => {
   if (environment === "production" && beta) return null;
@@ -133,7 +134,11 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      {environment !== "production" && <DrawerTab to="/plan-de-transport" title="Plan de transport" onClick={onClick} />}
+      <div className="">
+        <div className="flex items-center justify-between py-3 pl-3 text-base text-[#A0A0A0]">Plan de transport <ChevronDown className="mr-[16px]" /></div>
+        {environment !== "production" && <DrawerTab to="/plan-de-transport/tableau-repartition" title="Tableau de répartition" onClick={onClick} />}
+        {environment !== "production" && <DrawerTab to="/plan-de-transport/schema-repartition" title="Schéma de répartition" onClick={onClick} />}
+      </div>
       {ssoSupportStorage === "sso-support" ? (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (

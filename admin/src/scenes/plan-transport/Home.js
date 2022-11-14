@@ -1,6 +1,6 @@
 import React from "react";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import Title from "./components/commons";
+import { Title } from "./components/commons";
 import { BorderButton } from "./components/Buttons";
 
 export default function Home() {

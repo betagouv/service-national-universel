@@ -1,5 +1,5 @@
 import React from "react";
-import Title from "../components/commons";
+import { Title } from "../components/commons";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export default function TableauRepartition() {
