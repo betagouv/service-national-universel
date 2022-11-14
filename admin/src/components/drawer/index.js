@@ -133,6 +133,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
+      {environment !== "production" && <DrawerTab to="/plan-de-transport" title="Plan de transport" onClick={onClick} />}
       {ssoSupportStorage === "sso-support" ? (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
