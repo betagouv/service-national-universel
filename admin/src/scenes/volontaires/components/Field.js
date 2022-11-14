@@ -45,7 +45,7 @@ export default function Field({
             onClick={(e) => {
               if (e.target?.showPicker) e.target.showPicker();
             }}
-            className="block p-[5px] w-[100%] cursor-pointer"
+            className="block w-[100%] cursor-pointer"
           />
           {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
         </div>

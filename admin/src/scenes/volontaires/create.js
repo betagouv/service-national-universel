@@ -1,11 +1,9 @@
 /* eslint-disable prettier/prettier */
 import React from "react";
-import styled from "styled-components";
 import validator from "validator";
 import "dayjs/locale/fr";
 import { Spinner } from "reactstrap";
 
-import LoadingButton from "../../components/buttons/LoadingButton";
 import { translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
@@ -15,7 +13,6 @@ import { useHistory } from "react-router-dom";
 import { translateGrade, YOUNG_SITUATIONS, GRADES, inscriptionModificationOpenForYoungs, sessions2023 } from "snu-lib";
 import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
 //Identite
-import { Box, BoxContent } from "../../components/box";
 import Field from "./components/Field";
 import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
@@ -285,46 +282,43 @@ export default function Create() {
     <div className="py-[20px] px-[40px]">
       <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
         <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
-        <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
+        <div className="border-b mx-[37px] mb-[24px] mt-[29px]" />
+        <div className="ml-[32px] text-[18px] font-[500] mb-[24px]">Informations générales</div>
         <div className={`flex block`}>
-          <div className="flex-[1_0_50%] pr-[56px]">
+          <div className="flex-[1_0_50%] pr-[56px] pl-[32px]">
             <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
           </div>
           <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
-          <div className="flex-[1_0_50%] pl-[56px]">
+          <div className="flex-[1_0_50%] pl-[56px] pr-[32px]">
             <Coordonnees values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
           </div>
         </div>
       </div>
       <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
-        <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
+        <div className="ml-[32px] text-[18px] font-[500] mb-[24px]">Détails</div>
         <div className={`flex block`}>
-          <div className="flex-[1_0_50%] pr-[56px]">
+          <div className="flex-[1_0_50%] pr-[56px] pl-[32px]">
             <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
           </div>
           <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
-          <div className="flex-[1_0_50%] pl-[56px]">
-            <Box>
-              <BoxContent direction="column">
-                <div className="ml-[32px] mb-[24px] flex items-start justify-start">
-                  <div
-                    onClick={() => setSelectedRepresentant(1)}
-                    className={`cursor-pointer pb-[18px] ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-[36px]`}>
-                    Représentant légal 1
-                  </div>
-                  <div
-                    onClick={() => setSelectedRepresentant(2)}
-                    className={`cursor-pointer pb-[18px] ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-[36px]`}>
-                    Représentant légal 2
-                  </div>
-                </div>
-                {selectedRepresentant === 1 ? (
-                  <Representant1 values={values} errors={errors} handleChange={handleChange} />
-                ) : (
-                  <Representant2 values={values} errors={errors} handleChange={handleChange} />
-                )}
-              </BoxContent>
-            </Box>
+          <div className="flex-[1_0_50%] pl-[56px] pr-[32px]">
+            <div className="ml-[32px] mb-[24px] flex items-start justify-start">
+              <div
+                onClick={() => setSelectedRepresentant(1)}
+                className={`cursor-pointer pb-[18px] ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-[36px]`}>
+                Représentant légal 1
+              </div>
+              <div
+                onClick={() => setSelectedRepresentant(2)}
+                className={`cursor-pointer pb-[18px] ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-[36px]`}>
+                Représentant légal 2
+              </div>
+            </div>
+            {selectedRepresentant === 1 ? (
+              <Representant1 values={values} errors={errors} handleChange={handleChange} />
+            ) : (
+              <Representant2 values={values} errors={errors} handleChange={handleChange} />
+            )}
           </div>
         </div>
       </div>
@@ -558,53 +552,51 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
     setFieldValue(key, value);
   };
   return (
-    <Box>
-      <BoxContent direction="column">
-        <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Situation</div>
-        <Field
-          name="situation"
-          label="Statut"
-          type="select"
-          errors={errors}
-          value={values.situation}
-          transformer={translate}
-          className="flex-[1_1_50%]"
-          options={situationOptions}
-          handleChange={onChangeSituation}
-        />
-        {values.schooled === "true" && (
-          <div className="mt-[16px]">
-            <SchoolEditor young={values} onChange={onChange} />
-            <Field
-              name="grade"
-              label="Classe"
-              type="select"
-              errors={errors}
-              value={values.grade}
-              transformer={translate}
-              className="flex-[1_1_50%]"
-              options={gradeOptions}
-              handleChange={handleChange}
-            />
-          </div>
-        )}
-        <div className="mt-[32px]">
-          <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Situations particulières</div>
-          <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={onParticuliereChange} />
-          {values.specificAmenagment === "true" && (
-            <Field
-              name="specificAmenagmentType"
-              label="Nature de l'aménagement spécifique"
-              errors={errors}
-              value={values.specificAmenagmentType}
-              mode="edition"
-              onChange={handleChange}
-              young={values}
-            />
-          )}
+    <>
+      <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Situation</div>
+      <Field
+        name="situation"
+        label="Statut"
+        type="select"
+        errors={errors}
+        value={values.situation}
+        transformer={translate}
+        className="flex-[1_1_50%]"
+        options={situationOptions}
+        handleChange={onChangeSituation}
+      />
+      {values.schooled === "true" && (
+        <div className="mt-[16px]">
+          <SchoolEditor young={values} onChange={onChange} />
+          <Field
+            name="grade"
+            label="Classe"
+            type="select"
+            errors={errors}
+            value={values.grade}
+            transformer={translate}
+            className="flex-[1_1_50%]"
+            options={gradeOptions}
+            handleChange={handleChange}
+          />
         </div>
-      </BoxContent>
-    </Box>
+      )}
+      <div className="mt-[32px]">
+        <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Situations particulières</div>
+        <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={onParticuliereChange} />
+        {values.specificAmenagment === "true" && (
+          <Field
+            name="specificAmenagmentType"
+            label="Nature de l'aménagement spécifique"
+            errors={errors}
+            value={values.specificAmenagmentType}
+            mode="edition"
+            onChange={handleChange}
+            young={values}
+          />
+        )}
+      </div>
+    </>
   );
 }
 function Coordonnees({ values, handleChange, setFieldValue, errors }) {
@@ -623,81 +615,79 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
     }
   };
   return (
-    <Box>
-      <BoxContent direction="column">
-        <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Date et lieu de naissance</div>
-        <Field name="birthdateAt" type="date" errors={errors} value={values.birthdateAt} transformer={translate} className="mb-[16px]" handleChange={handleChange} />
-        <div className="mb-[16px] flex items-start justify-between">
-          <Field
-            name="birthCity"
-            label="Ville de naissance"
-            errors={errors}
-            value={values.birthCity}
-            transformer={translate}
-            className="mr-[8px] flex-[1_1_50%]"
-            handleChange={handleChange}
-          />
-          <Field
-            name="birthCityZip"
-            label="Code postal de naissance"
-            errors={errors}
-            value={values.birthCityZip}
-            transformer={translate}
-            className="flex-[1_1_50%]"
-            handleChange={handleChange}
-          />
-        </div>
+    <>
+      <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Date et lieu de naissance</div>
+      <Field
+        name="birthdateAt"
+        label="Date de naissance"
+        type="date"
+        errors={errors}
+        value={values.birthdateAt}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      <div className="mb-[16px] flex items-start justify-between">
         <Field
-          name="birthCountry"
-          label="Pays de naissance"
+          name="birthCity"
+          label="Ville de naissance"
           errors={errors}
-          value={values.birthCountry}
+          value={values.birthCity}
+          transformer={translate}
+          className="mr-[8px] flex-[1_1_50%]"
+          handleChange={handleChange}
+        />
+        <Field
+          name="birthCityZip"
+          label="Code postal de naissance"
+          errors={errors}
+          value={values.birthCityZip}
           transformer={translate}
           className="flex-[1_1_50%]"
           handleChange={handleChange}
         />
+      </div>
+      <Field
+        name="birthCountry"
+        label="Pays de naissance"
+        errors={errors}
+        value={values.birthCountry}
+        transformer={translate}
+        className="flex-[1_1_50%]"
+        handleChange={handleChange}
+      />
 
-        <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
-        <Field name="address" label="Adresse" errors={errors} value={values.address} transformer={translate} className="mb-[16px]" handleChange={handleChange} />
-        <div className="mb-[16px] flex items-start justify-between">
-          <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-[8px] flex-[1_1_50%]" handleChange={handleChange} />
-          <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
-        </div>
-        <VerifyAddress
-          address={values.address}
-          zip={values.zip}
-          city={values.city}
-          onSuccess={onVerifyAddress(true)}
-          onFail={onVerifyAddress()}
-          verifyButtonText="Vérifier l'adresse"
-          verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
-          isVerified={values.addressVerified}
-          buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+      <div className="font-medium text-[12px] mt-[32px] text-[#242526] leading-snug mb-[8px]">Adresse</div>
+      <Field name="address" label="Adresse" errors={errors} value={values.address} transformer={translate} className="mb-[16px]" handleChange={handleChange} />
+      <div className="mb-[16px] flex items-start justify-between">
+        <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-[8px] flex-[1_1_50%]" handleChange={handleChange} />
+        <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+      </div>
+      <VerifyAddress
+        address={values.address}
+        zip={values.zip}
+        city={values.city}
+        onSuccess={onVerifyAddress(true)}
+        onFail={onVerifyAddress()}
+        verifyButtonText="Vérifier l'adresse"
+        verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
+        isVerified={values.addressVerified}
+        buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+      />
+      <div className="mb-[56px] flex items-start justify-between mt-[16px]">
+        <Field
+          name="department"
+          label="Département"
+          errors={errors}
+          readyOnly={true}
+          value={values.department}
+          transformer={translate}
+          className="mr-[8px] flex-[1_1_50%]"
+          handleChange={handleChange}
         />
-        <div className="mb-[16px] flex items-start justify-between mt-[16px]">
-          <Field
-            name="department"
-            label="Département"
-            errors={errors}
-            readyOnly={true}
-            value={values.department}
-            transformer={translate}
-            className="mr-[8px] flex-[1_1_50%]"
-            handleChange={handleChange}
-          />
-          <Field
-            name="region"
-            label="Région"
-            errors={errors}
-            readyOnly={true}
-            value={values.region}
-            transformer={translate}
-            className="flex-[1_1_50%]"
-            handleChange={handleChange}
-          />
-        </div>
-      </BoxContent>
-    </Box>
+        <Field name="region" label="Région" errors={errors} readyOnly={true} value={values.region} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+      </div>
+    </>
   );
 }
 
@@ -716,72 +706,70 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
     setFieldValue("latestCNIFileCategory", young.latestCNIFileCategory);
   };
   return (
-    <Box>
-      <BoxContent direction="column">
-        <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Identité et contact</div>
-        <div className="mb-[16px] flex items-start justify-between">
-          <Field name="lastName" label="Nom" errors={errors} value={values.lastName} transformer={translate} className="mr-[8px] flex-[1_1_50%]" handleChange={handleChange} />
-          <Field name="firstName" label="Prénom" errors={errors} value={values.firstName} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
-        </div>
-        <Field
-          name="gender"
-          label="Sexe"
-          errors={errors}
-          value={values.gender}
-          className="mb-[16px]"
-          type="select"
-          options={genderOptions}
-          transformer={translate}
-          handleChange={handleChange}
+    <>
+      <div className="font-medium text-[12px] text-[#242526] leading-snug mb-[8px]">Identité et contact</div>
+      <div className="mb-[16px] flex items-start justify-between">
+        <Field name="lastName" label="Nom" errors={errors} value={values.lastName} transformer={translate} className="mr-[8px] flex-[1_1_50%]" handleChange={handleChange} />
+        <Field name="firstName" label="Prénom" errors={errors} value={values.firstName} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+      </div>
+      <Field
+        name="gender"
+        label="Sexe"
+        errors={errors}
+        value={values.gender}
+        className="mb-[16px]"
+        type="select"
+        options={genderOptions}
+        transformer={translate}
+        handleChange={handleChange}
+      />
+      <Field name="email" label="Email" errors={errors} value={values.email} className="mb-[16px]" transformer={translate} handleChange={handleChange} />
+      <Field name="phone" label="Téléphone" errors={errors} value={values.phone} transformer={translate} handleChange={handleChange} />
+      <div className="mt-[32px]">
+        <CniField
+          name="cniFile"
+          label="Pièce d'identité"
+          young={values}
+          mode="edition"
+          blockUpload={true}
+          onStartRequest={null}
+          currentRequest={null}
+          correctionRequest={false}
+          onCorrectionRequestChange={null}
+          onInscriptionChange={(young) => handleCniChange(young)}
         />
-        <Field name="email" label="Email" errors={errors} value={values.email} className="mb-[16px]" transformer={translate} handleChange={handleChange} />
-        <Field name="phone" label="Téléphone" errors={errors} value={values.phone} transformer={translate} handleChange={handleChange} />
-        <div className="mt-[32px]">
-          <CniField
-            name="cniFile"
-            label="Pièce d'identité"
-            young={values}
-            mode="edition"
-            blockUpload={true}
-            onStartRequest={null}
-            currentRequest={null}
-            correctionRequest={false}
-            onCorrectionRequestChange={null}
-            onInscriptionChange={(young) => handleCniChange(young)}
-          />
-        </div>
-        <Field
-          name="latestCNIFileExpirationDate"
-          label="Date d'expiration de la pièce d'identité"
-          type="date"
-          errors={errors}
-          value={values.latestCNIFileExpirationDate}
-          transformer={translate}
-          className="mb-[16px]"
-          handleChange={handleChange}
-        />
-        {values.latestCNIFileExpirationDate !== null &&
-          new Date(values.latestCNIFileExpirationDate).getTime() < sessions2023.find((session) => session.name === values.cohort).dateStart.getTime() && (
-            <div className="mt-[16px] w-100 flex flew-row justify-between">
-              <div>Attestation sur l&apos;honneur</div>
-              {values.parentStatementOfHonorInvalidId === "true" ? (
-                <a
-                  onClick={(e) => handleChangeBool(e, "false")}
-                  name="parentStatementOfHonorInvalidId"
-                  className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">
-                  Validée
-                </a>
-              ) : (
-                <a
-                  onClick={(e) => handleChangeBool(e, "true")}
-                  name="parentStatementOfHonorInvalidId"
-                  className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">
-                  Non validée
-                </a>
-              )}
-            </div>
-          )}
-      </BoxContent>
-    </Box>
+      </div>
+      <Field
+        name="latestCNIFileExpirationDate"
+        label="Date d'expiration de la pièce d'identité"
+        type="date"
+        errors={errors}
+        value={values.latestCNIFileExpirationDate}
+        transformer={translate}
+        className="mb-[16px]"
+        handleChange={handleChange}
+      />
+      {values.latestCNIFileExpirationDate !== null &&
+        new Date(values.latestCNIFileExpirationDate).getTime() < sessions2023.find((session) => session.name === values.cohort).dateStart.getTime() && (
+          <div className="mt-[16px] w-100 flex flew-row justify-between">
+            <div>Attestation sur l&apos;honneur</div>
+            {values.parentStatementOfHonorInvalidId === "true" ? (
+              <a
+                onClick={(e) => handleChangeBool(e, "false")}
+                name="parentStatementOfHonorInvalidId"
+                className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] border rounded-[30px]">
+                Validée
+              </a>
+            ) : (
+              <a
+                onClick={(e) => handleChangeBool(e, "true")}
+                name="parentStatementOfHonorInvalidId"
+                className="p-[10px] text-center leading-[22px] pt-[1px] pb-[1px] border-[0.5px] cursor-pointer border-[#D1D5DB] border rounded-[30px]">
+                Non validée
+              </a>
+            )}
+          </div>
+        )}
+    </>
   );
 }
