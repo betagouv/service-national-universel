@@ -1,3 +1,20 @@
+# [1.166.0](https://github.com/betagouv/service-national-universel/compare/v1.165.1...v1.166.0) (2022-11-14)
+
+
+### Bug Fixes
+
+* **admin:** fix grade ([#2042](https://github.com/betagouv/service-national-universel/issues/2042)) ([b3b3a91](https://github.com/betagouv/service-national-universel/commit/b3b3a91e7501b5a9eccb50a8bf42a929ec6ea2c2))
+* **api:** No parent 2 fix ([d0b7ed0](https://github.com/betagouv/service-national-universel/commit/d0b7ed0d8db00e7153892415715fea3d7ef0ecc7))
+* **app:** error handling in mobile upload step + opti render ([#2046](https://github.com/betagouv/service-national-universel/issues/2046)) ([5a0b7ce](https://github.com/betagouv/service-national-universel/commit/5a0b7ce130d60542391aad887b3235d7e1ce0fec))
+* **app:** fix filter list in export modal ([66567fa](https://github.com/betagouv/service-national-universel/commit/66567fa41981ce2f30663b28da1c27565d3dbfdb))
+
+
+### Features
+
+* **admin/api:** table de repartition back ([#1984](https://github.com/betagouv/service-national-universel/issues/1984)) ([7dc71e4](https://github.com/betagouv/service-national-universel/commit/7dc71e472a5d7cb8d56c62416c5a7f77ead79455))
+* **app:** birth city zip suggestions ([#2038](https://github.com/betagouv/service-national-universel/issues/2038)) ([69c5635](https://github.com/betagouv/service-national-universel/commit/69c5635b60145acb9d3d2facb764ac87f3e0179e))
+* **app/api:** add contact preference + branch SMS inscriptions ([#2033](https://github.com/betagouv/service-national-universel/issues/2033)) ([e8bc88c](https://github.com/betagouv/service-national-universel/commit/e8bc88c78d0b41380a1952760054d2abad369c80))
+
 ## [1.165.1](https://github.com/betagouv/service-national-universel/compare/v1.165.0...v1.165.1) (2022-11-13)
 
 
