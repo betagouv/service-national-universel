@@ -363,7 +363,7 @@ const FormRepresentant = ({ i, data, setData, errors, corrections, young }) => {
       <RadioButton
         label="Moyen de contact favori"
         options={contactTypes}
-        onChange={(e) => setData({ ...data, [`parent${i}ContactPreference`]: e, [`parent${i}Email`]: "", [`parent${i}Phone`]: "" })}
+        onChange={(e) => setData({ ...data, [`parent${i}ContactPreference`]: e })}
         value={data[`parent${i}ContactPreference`]}
         error={errors[`parent${i}ContactPreference`]}
         correction={corrections[`parent${i}ContactPreference`]}
