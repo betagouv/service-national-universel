@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
@@ -17,6 +17,7 @@ import {
   frenchNationalityOptions,
   genderOptions,
   booleanOptions,
+  debounce,
 } from "../utils";
 
 import api from "../../../services/api";
@@ -32,6 +33,7 @@ import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
+import { getAddress } from "../api";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -129,12 +131,14 @@ export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
+  const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
   const [situationOptions, setSituationOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
   const { step } = useParams();
+  const ref = useRef(null);
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -231,6 +235,18 @@ export default function StepCoordonnees() {
     setErrors(getErrors());
   }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setBirthCityZipSuggestions([]);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   const getErrors = () => {
     let errors = {};
 
@@ -287,6 +303,30 @@ export default function StepCoordonnees() {
 
   const updateAddressToVerify = (key) => (value) => {
     setData({ ...data, [key]: value, addressVerified: "false" });
+  };
+
+  const debouncedSuggestionsRequest = useCallback(
+    debounce(async (value) => {
+      const response = await getAddress(value);
+      const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
+      setBirthCityZipSuggestions(suggestions);
+    }, 500),
+    [],
+  );
+
+  const updateBirthCity = async (value) => {
+    setData({ ...data, birthCity: value });
+    const trimmedValue = value.trim();
+    if (trimmedValue && trimmedValue.length > 2) {
+      debouncedSuggestionsRequest(trimmedValue);
+    } else {
+      setBirthCityZipSuggestions([]);
+    }
+  };
+
+  const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
+    setData({ ...data, birthCity, birthCityZip });
+    setBirthCityZipSuggestions([]);
   };
 
   const onSubmit = async () => {
@@ -472,6 +512,7 @@ export default function StepCoordonnees() {
     });
     setErrors({ addressVerified: undefined });
   };
+
   return (
     <DesktopPageContainer
       title="Mon profil volontaire"
@@ -503,22 +544,36 @@ export default function StepCoordonnees() {
         />
       )}
       <div className="flex">
+        <div className="flex-1 mr-3 relative">
+          <Input
+            list="suggestions"
+            value={birthCity}
+            label="Commune de naissance"
+            onChange={isFrench ? updateBirthCity : updateData("birthCity")}
+            error={errors.birthCity}
+            correction={corrections.birthCity}
+          />
+          {isFrench && (
+            <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
+              {birthCityZipSuggestions.map(({ city, postcode }, index) => (
+                <div
+                  onClick={() => {
+                    onClickBirthCitySuggestion(city, postcode);
+                  }}
+                  className="group flex justify-between items-center gap-2 p-2 px-3  hover:bg-gray-50 cursor-pointer"
+                  key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <Input
-          className="flex-1 mr-3"
+          className="flex-1 ml-3"
           value={birthCityZip}
           label="Code postal de naissance"
           onChange={updateData("birthCityZip")}
           error={errors.birthCityZip}
           correction={corrections.birthCityZip}
-        />
-
-        <Input
-          className="flex-1 ml-3"
-          value={birthCity}
-          label="Commune de naissance"
-          onChange={updateData("birthCity")}
-          error={errors.birthCity}
-          correction={corrections.birthCity}
         />
       </div>
       <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} correction={corrections.gender} error={errors?.gender} />

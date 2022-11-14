@@ -1025,6 +1025,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  parent1ContactPreference: {
+    type: String,
+    enum: ["email", "phone"],
+    documentation: {
+      description: "Préférence de contact du parent 1",
+    },
+  },
+
   parent2Status: {
     type: String,
     documentation: {
@@ -1133,6 +1141,14 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false"],
     documentation: {
       description: "Le parent 2 donne les droits à l'image de son enfant.",
+    },
+  },
+
+  parent2ContactPreference: {
+    type: String,
+    enum: ["email", "phone"],
+    documentation: {
+      description: "Préférence de contact du parent 2",
     },
   },
 

@@ -1,0 +1,143 @@
+const express = require("express");
+const router = express.Router();
+const passport = require("passport");
+const { canViewPlanDeRepartition, canEditPlanDeRepartitionDepartment, canEditPlanDeRepartitionRegion } = require("snu-lib/roles");
+const { ERRORS } = require("../../utils");
+const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
+const { capture } = require("../../sentry");
+const Joi = require("joi");
+
+router.post("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      fromRegion: Joi.string().required(),
+      toRegion: Joi.string().required(),
+    }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canEditPlanDeRepartitionRegion(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort, fromRegion, toRegion } = value;
+    await tableDeRepartition.create({ cohort, fromRegion, toRegion });
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      fromRegion: Joi.string().required(),
+      toRegion: Joi.string().required(),
+    }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canEditPlanDeRepartitionRegion(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const toRemove = await tableDeRepartition.find({ ...value });
+    await tableDeRepartition.deleteMany({ _id: { $in: toRemove.map((e) => e._id) } });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      fromRegion: Joi.string().required(),
+      toRegion: Joi.string().required(),
+      fromDepartment: Joi.string().required(),
+      toDepartment: Joi.string().required(),
+    }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canEditPlanDeRepartitionDepartment(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort, fromRegion, toRegion, fromDepartment, toDepartment } = value;
+
+    const existing = await tableDeRepartition.find({ cohort, fromRegion, toRegion });
+
+    //si pas de fromRegion, toRegion, operation interdite
+    if (existing.length === 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    //si on a une seul entrée et ques les deux départements sont a null, on update
+    if (existing.length === 1 && !existing[0].toDepartment && !existing[0].fromDepartment) {
+      await tableDeRepartition.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment, toDepartment } });
+    } else {
+      //sinon on crée une nouvelle entrée avec check des doublons
+      const doublon = await tableDeRepartition.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
+      if (doublon) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      tableDeRepartition.create({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
+    }
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      fromRegion: Joi.string().required(),
+      toRegion: Joi.string().required(),
+      fromDepartment: Joi.string().required(),
+      toDepartment: Joi.string().required(),
+    }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canEditPlanDeRepartitionDepartment(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort, fromRegion, toRegion, fromDepartment, toDepartment } = value;
+
+    const toDelete = await tableDeRepartition.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
+    const existing = await tableDeRepartition.find({ cohort, fromRegion, toRegion });
+
+    //si rien a supprimer, on renvoie une erreur
+    if (!toDelete) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    //si on a une seul entrée dans la table, on update cette derniere
+    if (existing.length === 1) {
+      //check si toDelete === existing[0] pour eviter de supprimer la mauvaise donnée
+      if (toDelete._id.toString() === existing[0]._id.toString()) {
+        await tableDeRepartition.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment: undefined, toDepartment: undefined } });
+      } else {
+        return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    } else {
+      //sinon on supprime l'entrée
+      toDelete.remove();
+    }
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/all/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canViewPlanDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort } = value;
+    const data = await tableDeRepartition.find({ cohort });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+module.exports = router;
