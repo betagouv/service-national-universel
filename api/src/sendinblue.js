@@ -28,9 +28,12 @@ const api = async (path, options = {}) => {
 // https://developers.sendinblue.com/reference/sendtransacsms
 async function sendSMS(phoneNumber, content, tag) {
   try {
+    // format phone number for Sendinblue
+    const formattedPhoneNumber = phoneNumber.replace(/[^0-9]/g, "").replace(/0([6,7])/, "33$1");
+
     const body = {};
     body.sender = SENDER_NAME_SMS;
-    body.recipient = phoneNumber;
+    body.recipient = formattedPhoneNumber;
     body.content = content;
     body.type = "transactional";
     body.tag = tag;

@@ -400,7 +400,13 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
         });
       }
 
-      if (young.parent1ContactPreference === "email") {
+      if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone,
+          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+        );
+      } else {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
           emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
           params: {
@@ -409,13 +415,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
             youngName: young.lastName,
           },
         });
-      } else if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone.replace(/0([6,7])/, "33$1"),
-          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-        );
-      } else throw new Error("Invalid parent 1 contact preference");
+      }
 
       value.inscriptionDoneDate = new Date();
     }
@@ -524,7 +524,13 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       });
     }
     if (needParent1Relance) {
-      if (young.parent1ContactPreference === "email") {
+      if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone,
+          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+        );
+      } else {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
           emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
           params: {
@@ -533,13 +539,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
             youngName: young.lastName,
           },
         });
-      } else if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone.replace(/0([6,7])/, "33$1"),
-          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-        );
-      } else throw new Error("Invalid parent 1 contact preference");
+      }
     }
 
     young.set({ inscriptionDoneDate: new Date() });
