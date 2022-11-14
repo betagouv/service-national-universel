@@ -18,7 +18,9 @@ import { HiPlus } from "react-icons/hi";
 import ModalPJ from "./components/ModalPJ";
 import Clock from "../../../../assets/Clock.svg";
 import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
+import Pencil from "../../../../assets/icons/Pencil";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
+import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -27,6 +29,7 @@ export default function Phase2Application({ young, onChange }) {
   const [contract, setContract] = React.useState(null);
   const [openAttachments, setOpenAttachments] = React.useState(false);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
+  const [modalDurationOpen, setModalDurationOpen] = React.useState(false);
 
   let { applicationId } = useParams();
   const history = useHistory();
@@ -183,7 +186,14 @@ export default function Phase2Application({ young, onChange }) {
               </div>
               <div className="flex flex-col justify-center items-center p-4 m-0">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
-                <div className="font-bold text-2xl text-[#242526]">{application.missionDuration || "0"}h</div>
+                <div className="flex items-center gap-2 font-bold text-2xl text-[#242526]">
+                  <div>{application.missionDuration || "0"}h</div>
+                  <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
+                    <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
+                      <Pencil width={16} height={16} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -332,6 +342,30 @@ export default function Phase2Application({ young, onChange }) {
                 await getMission();
               }}
               typeChose={modalDocument?.stepOne}
+            />
+            <ModalConfirmWithMessage
+              isOpen={modalDurationOpen}
+              title="Validation de réalisation de mission"
+              message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
+              type="number"
+              onChange={() => setModalDurationOpen(false)}
+              defaultInput={application.missionDuration}
+              placeholder="Nombre d'heures"
+              onConfirm={async (duration) => {
+                try {
+                  const { ok, code, data } = await api.put("/application", { _id: application._id, missionDuration: duration });
+                  if (!ok) {
+                    toastr.error("Une erreur s'est produite :", translate(code));
+                  } else {
+                    // onChangeApplication();
+                    setApplication(data);
+                    toastr.success("Mis à jour!");
+                  }
+                } catch (e) {
+                  toastr.error("Une erreur s'est produite :", translate(e?.code));
+                }
+                setModalDurationOpen(false);
+              }}
             />
           </div>
         </div>
