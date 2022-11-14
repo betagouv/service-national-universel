@@ -2,9 +2,9 @@ require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate, sendSMS } = require("../sendinblue");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, SENDINBLUE_SMS } = require("snu-lib");
 const { APP_URL } = require("../config");
 
 exports.handler = async () => {
@@ -19,14 +19,22 @@ exports.handler = async () => {
     }).cursor();
     await cursor.eachAsync(async function (young) {
       countNotice++;
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT_REMINDER, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
+      if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone,
+          SENDINBLUE_SMS.PARENT1_CONSENT_REMINDER.template(young, `${APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`),
+          SENDINBLUE_SMS.PARENT1_CONSENT_REMINDER.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT_REMINDER, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
     });
     slack.success({ title: "1 week notice pending parent consentement", text: `${countNotice} parent has been noticed !` });
   } catch (e) {
