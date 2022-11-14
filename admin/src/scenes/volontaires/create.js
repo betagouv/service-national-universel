@@ -29,6 +29,7 @@ export default function Create() {
   const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
   const [uploadError, setUploadError] = React.useState("");
   const [youngId, setYoungId] = React.useState(null);
+  const [onWaitingList, setOnWaitingList] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const [errors, setErrors] = React.useState({});
@@ -222,7 +223,7 @@ export default function Create() {
     return errors;
   };
 
-  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate) => {
+  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate, onWaitingList) => {
     setLoading(true);
     const res = await api.uploadFile(`/young/${id}/documents/cniFiles`, Array.from(filesToUpload), {}, latestCNIFileCategory, latestCNIFileExpirationDate);
     if (res.code === "FILE_CORRUPTED") {
@@ -239,7 +240,11 @@ export default function Create() {
       return "err";
     }
     setLoading(false);
-    toastr.success("Volontaire créé !");
+    if (onWaitingList) {
+      toastr.success("Volontaire créé et ajouté à la liste d'attente !");
+    } else {
+      toastr.success("Volontaire créé !");
+    }
     return history.push("/inscription");
   };
 
@@ -263,10 +268,11 @@ export default function Create() {
     if (Object.keys(receivedErrors).length !== 0) return;
     try {
       setLoading(true);
-      const { ok, code, young } = await api.post("/young/invite", values);
+      const { ok, code, young, onWaitingList } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-      const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
+      const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList);
       setYoungId(young._id);
+      setOnWaitingList(onWaitingList);
       if (res === "err") return toastr.error("Une erreur s'est produite avec le téléversement de vos fichiers");
     } catch (e) {
       setLoading(false);
