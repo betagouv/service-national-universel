@@ -276,7 +276,7 @@ export default function Create() {
   };
 
   return (
-    <Wrapper>
+    <div className="py-[20px] px-[40px]">
       <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[27px]">
         <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
         <div className="ml-[32px] text-[18px] font-[500]">Informations générales</div>
@@ -352,14 +352,14 @@ export default function Create() {
           <div className="flex flex-column">
             <div>{uploadError}</div>
             <div
-              onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)}
+              onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList)}
               className="cursor-pointer w-[365px] bg-[#2563EB] text-white py-[9px] px-[17px] text-center rounded-[6px] self-center">
               {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
             </div>
           </div>
         )}
       </div>
-    </Wrapper>
+    </div>
   );
 }
 
@@ -779,67 +779,3 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
     </Box>
   );
 }
-
-const Wrapper = styled.div`
-  padding: 20px 40px;
-`;
-
-const TitleWrapper = styled.div`
-  margin: 32px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
-`;
-const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 28px;
-`;
-
-const Alert = styled.h3`
-  border: 1px solid #fc8181;
-  border-radius: 0.25em;
-  background-color: #fff5f5;
-  color: #c53030;
-  font-weight: 400;
-  font-size: 12px;
-  padding: 1em;
-  text-align: center;
-`;
-
-const SaveBtn = styled(LoadingButton)`
-  background-color: #5245cc;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    background: #372f78;
-  }
-  &.outlined {
-    :hover {
-      background: #fff;
-    }
-    background-color: transparent;
-    border: solid 1px #5245cc;
-    color: #5245cc;
-    font-size: 13px;
-    padding: 4px 20px;
-  }
-`;
