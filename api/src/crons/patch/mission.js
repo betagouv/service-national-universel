@@ -113,7 +113,7 @@ exports.handler = async () => {
       text: `${result.missionPatchScanned} missions were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    capture("Error during creation of mission patch logs", JSON.stringify(e));
-    slack.error({ title: "❌ Mission Logs", text: JSON.stringify(e) });
+    capture("Error during creation of mission patch logs", e);
+    slack.error({ title: "❌ Mission Logs", text: e });
   }
 };

@@ -16,6 +16,18 @@ export function ChangeCohortPen({ young, onChange }) {
   const [changeCohortModal, setChangeCohortModal] = useState(false);
   const [options, setOptions] = useState(null);
 
+  let unmounted = false;
+
+  useEffect(() => {
+    if (young) {
+      getEligibleCohorts();
+    }
+
+    return () => {
+      unmounted = true;
+    };
+  }, [young]);
+
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   const getEligibleCohorts = async () => {
@@ -28,17 +40,15 @@ export function ChangeCohortPen({ young, onChange }) {
     const isArray = Array.isArray(data);
     if (isArray) {
       const options = data.map((c) => ({ name: c.name, goal: c.goalReached })).filter((c) => c.name !== young.cohort);
-      setOptions(options);
+      if (!unmounted) {
+        setOptions(options);
+      }
     } else {
-      setOptions([]);
+      if (!unmounted) {
+        setOptions([]);
+      }
     }
   };
-
-  useEffect(() => {
-    if (young) {
-      getEligibleCohorts();
-    }
-  }, [young]);
 
   if (disabled) return null;
   if (options === null || options.length === 0) return null;
@@ -71,6 +81,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
 
   async function handleChangeCohort() {
     try {
+      if (!message) return toastr.error("Veuillez indiquer un message");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       await onChange();
       toastr.success("Cohorte modifiée avec succès");
@@ -96,7 +107,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
           close();
           setModalConfirmWithMessage(true);
         }}
-        disableConfirm={!motif}
+        disableConfirm={!motif || !newCohort.name}
         showHeaderIcon={true}
         showHeaderText={false}>
         <>

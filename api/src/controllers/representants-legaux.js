@@ -227,6 +227,11 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     value.imageRight = "true";
   }
 
+  // --- Complete information for each parent.
+  if (value.parentAllowSNU === "true" || value.parentAllowSNU === "false") {
+    value[`parent${id}AllowSNU`] = value.parentAllowSNU;
+  }
+
   // --- update young
   young.set(value);
   await young.save(fromUser(young, id));

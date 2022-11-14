@@ -4,6 +4,9 @@ import CorrectionRequest from "./CorrectionRequest";
 import CorrectedRequest from "./CorrectedRequest";
 import SimpleSelect from "./SimpleSelect";
 import SectionContext from "../context/SectionContext";
+import { copyToClipboard } from "../../../utils";
+import { HiCheckCircle } from "react-icons/hi";
+import { BiCopy } from "react-icons/bi";
 
 /**
  * mode  could be "correction|edition|readonly" (default readonly)
@@ -25,12 +28,14 @@ export default function Field({
   onChange = () => {},
   transformer,
   young,
+  copy = false,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
   const [editable, setEditable] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { errors } = useContext(SectionContext);
 
@@ -71,6 +76,12 @@ export default function Field({
     setEditable(edit);
   }, [options, mode, type]);
 
+  useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
+
   function startRequest() {
     if (group === null || group === undefined) {
       setOpened(true);
@@ -99,14 +110,24 @@ export default function Field({
             {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
           </>
         ) : (
-          <>
+          <div className="flex items-center gap-2">
+            {copy && value && (
+              <div
+                className="flex items-center justify-center cursor-pointer hover:scale-105"
+                onClick={() => {
+                  copyToClipboard(value);
+                  setCopied(true);
+                }}>
+                {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
+              </div>
+            )}
             <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
             {mode === "correction" && (
               <div className={requestButtonClass} onClick={startRequest}>
                 <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
       {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}

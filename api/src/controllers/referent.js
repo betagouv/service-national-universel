@@ -380,6 +380,15 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (newYoung.status === "REINSCRIPTION") {
       newYoung.reinscriptionStep2023 = STEPS2023REINSCRIPTION.ELIGIBILITE;
+      newYoung.cohesionStayPresence = undefined;
+      newYoung.presenceJDM = undefined;
+      newYoung.departSejourAt = undefined;
+      newYoung.departSejourMotif = undefined;
+      newYoung.departSejourMotifComment = undefined;
+      newYoung.meetingPointId = undefined;
+      newYoung.cohesionCenterId = undefined;
+      newYoung.sessionPhase1Id = undefined;
+      newYoung.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
     }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
