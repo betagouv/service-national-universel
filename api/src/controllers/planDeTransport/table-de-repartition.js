@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const { canViewPlanDeRepartition, canEditPlanDeRepartitionDepartment, canEditPlanDeRepartitionRegion } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
-const tableDeRepartition = require("../../models/tableDeRepartition");
+const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 
