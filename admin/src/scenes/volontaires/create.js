@@ -284,7 +284,7 @@ export default function Create() {
         <div className="text-[25px] font-[700] flex items-center justify-center">Créer une inscription manuellement</div>
         <div className="border-b mx-[37px] mb-[24px] mt-[29px]" />
         <div className="ml-[32px] text-[18px] font-[500] mb-[24px]">Informations générales</div>
-        <div className={`flex block pb-[56px]`}>
+        <div className={"flex pb-[56px]"}>
           <div className="flex-[1_0_50%] pr-[56px] pl-[32px]">
             <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
           </div>
@@ -296,7 +296,7 @@ export default function Create() {
       </div>
       <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px] pt-[24px]">
         <div className="ml-[32px] text-[18px] font-[500] mb-[24px]">Détails</div>
-        <div className={`flex block pb-[56px]`}>
+        <div className={"flex pb-[56px]"}>
           <div className="flex-[1_0_50%] pr-[56px] pl-[32px]">
             <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
           </div>
