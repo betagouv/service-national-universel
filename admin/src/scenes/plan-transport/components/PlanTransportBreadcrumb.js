@@ -32,9 +32,11 @@ export default function PlanTransportBreadcrumb({ className = "", region = null,
 function Crumb({ color, children, className = "", contentClassName = "", onClick = () => {} }) {
   return (
     <div className={`h-[54px] pr-[12px] relative overflow-hidden ${className}`} onClick={onClick}>
-      <div className={`bg-[${color}] absolute w-[54px] h-[54px] right-[0px] top-[-27px] origin-bottom-right rotate-[-20deg]`} />
-      <div className={`bg-[${color}] absolute w-[54px] h-[54px] right-[0px] bottom-[-27px] origin-top-right rotate-[20deg]`} />
-      <div className={`relative bg-[${color}] h-[100%] flex pl-[22px] pr-[10px] items-center ${contentClassName}`}>{children}</div>
+      <div className={`absolute w-[54px] h-[54px] right-[0px] top-[-27px] origin-bottom-right rotate-[-20deg]`} style={{ backgroundColor: color }} />
+      <div className={`absolute w-[54px] h-[54px] right-[0px] bottom-[-27px] origin-top-right rotate-[20deg]`} style={{ backgroundColor: color }} />
+      <div className={`relative h-[100%] flex pl-[22px] pr-[10px] items-center ${contentClassName}`} style={{ backgroundColor: color }}>
+        {children}
+      </div>
     </div>
   );
 }
