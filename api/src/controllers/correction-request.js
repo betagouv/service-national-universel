@@ -189,13 +189,13 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
 });
 
 router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
-  if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
-
-  const young = await YoungModel.findById(youngId);
-  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
   try {
+    const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
+    if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
+
+    const young = await YoungModel.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (young.parent1ContactPreference === "phone") {
       await sendSMS(
         young.parent1Phone,
