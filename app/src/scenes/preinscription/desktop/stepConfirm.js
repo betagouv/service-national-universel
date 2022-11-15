@@ -26,13 +26,18 @@ export default function StepDone() {
   );
 
   const onSubmit = async () => {
+    const hoursDelay = new Date().getTimezoneOffset() / 60;
+    const transformedDate = data.birthDate;
+    transformedDate.setTime(transformedDate.getTime() + hoursDelay * 60 * 60 * 1000);
+    const newDate = new Date(Date.UTC(transformedDate.getFullYear(), transformedDate.getMonth(), transformedDate.getDate() + 1, 0, 0, 0));
+
     const values = {
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
       frenchNationality: data.frenchNationality,
       password: data.password,
-      birthdateAt: data.birthDate,
+      birthdateAt: newDate,
       schooled: data.school ? "true" : "false",
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,
