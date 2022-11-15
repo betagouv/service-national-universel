@@ -3,13 +3,21 @@ import { toastr } from "react-redux-toastr";
 import { ES_NO_LIMIT } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import Select from "../components/Select";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
 
 export default function TableauRepartition() {
-  const [cohort, setCohort] = React.useState("Juillet 2022");
-  const [cohortList, setCohortList] = React.useState(["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"]);
+  const [cohort, setCohort] = React.useState("Février 2023 - C");
+  const cohortList = [
+    { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
+    { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
+    { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
+    { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
+    { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
+  ];
+
   const [youngsByRegion, setYoungsByRegion] = React.useState([]);
   const [placesCenterByRegion, setPlacesCenterByRegion] = React.useState({});
   const [loadingQuery, setLoadingQuery] = React.useState(false);
@@ -81,7 +89,7 @@ export default function TableauRepartition() {
         toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       }
     })();
-  }, []);
+  }, [cohort]);
 
   React.useEffect(() => {
     let regions = regionList.filter((e) => {
@@ -100,7 +108,6 @@ export default function TableauRepartition() {
       await getRepartitionRegion();
     } catch (e) {
       capture(e);
-      console.log(e);
       toastr.error("Oups, une erreur est survenue lors de l'ajout de la region d'accueil");
       await getRepartitionRegion();
     }
@@ -116,7 +123,6 @@ export default function TableauRepartition() {
       await getRepartitionRegion();
     } catch (e) {
       capture(e);
-      console.log(e);
       toastr.error("Oups, une erreur est survenue lors de la suppression de la region d'accueil");
       await getRepartitionRegion();
     }
@@ -131,6 +137,7 @@ export default function TableauRepartition() {
             <Title>Tableau de répartition</Title>
             <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>
           </div>
+          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
         <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
           <div className="flex px-4 py-3 items-center justify-between w-full">
