@@ -591,8 +591,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
             errors={errors}
             value={values.specificAmenagmentType}
             mode="edition"
-            onChange={handleChange}
-            young={values}
+            handleChange={handleChange}
           />
         )}
       </div>
