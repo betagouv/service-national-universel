@@ -206,25 +206,27 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
 
   if (shouldSendToParent2) {
     if (young.parent2ContactPreference === "phone") {
-      if (!young.parent2Phone) throw new Error("No phone number for parent 2");
-      await sendSMS(
-        young.parent2Phone,
-        SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
-        SENDINBLUE_SMS.PARENT2_CONSENT.tag,
-      );
+      if (!young.parent2Phone) value.imageRight = "true";
+      else {
+        await sendSMS(
+          young.parent2Phone,
+          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
+          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
+        );
+      }
     } else {
-      if (young.parent2Email == null || young.parent2Email.trim().length === 0) throw new Error("No email for parent 2");
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
+      if (young.parent2Email == null || young.parent2Email.trim().length === 0) value.imageRight = "true";
+      else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
     }
-  } else {
-    value.imageRight = "true";
   }
 
   // --- Complete information for each parent.
