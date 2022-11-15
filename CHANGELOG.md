@@ -1,3 +1,23 @@
+# [1.167.0](https://github.com/betagouv/service-national-universel/compare/v1.166.0...v1.167.0) (2022-11-15)
+
+
+### Bug Fixes
+
+* **app:** corrections et optimisations sur téléversement documents ([#2052](https://github.com/betagouv/service-national-universel/issues/2052)) ([75dedc9](https://github.com/betagouv/service-national-universel/commit/75dedc957eae414bfad562dec78710490acdb65b))
+* **app:** error when no correction ([02f76a8](https://github.com/betagouv/service-national-universel/commit/02f76a812e9542c26a87650ed92d90909044f17d))
+* **app:** remove capture propagation ([48c8187](https://github.com/betagouv/service-national-universel/commit/48c8187279ffb35f44b944fd0c2b0237fbea5551))
+
+
+### Features
+
+* **app:** birth city zip suggestions ([#2038](https://github.com/betagouv/service-national-universel/issues/2038))"" ([270198e](https://github.com/betagouv/service-national-universel/commit/270198e3b6a04303ad39f242214d5ccabfd49d51))
+* **app:** switch to camera scan for ID upload ([2f6cdb6](https://github.com/betagouv/service-national-universel/commit/2f6cdb63bcccd1dd7e224048d9db7b758ffb38ae))
+
+
+### Reverts
+
+* Revert "feat(app): birth city zip suggestions (#2038)" ([c89d3d8](https://github.com/betagouv/service-national-universel/commit/c89d3d83eb18ab0e0340d5f2c53814d522cf5841)), closes [#2038](https://github.com/betagouv/service-national-universel/issues/2038)
+
 # [1.166.0](https://github.com/betagouv/service-national-universel/compare/v1.165.1...v1.166.0) (2022-11-14)
 
 
