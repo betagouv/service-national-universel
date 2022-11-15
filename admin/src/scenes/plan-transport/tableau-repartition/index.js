@@ -263,7 +263,7 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
     else onCreate(fromRegion, toRegion);
   };
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2">
+    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2 h-60 overflow-y-auto">
       {regionList
         .filter((e) => e !== region)
         .map((r, i) => {
