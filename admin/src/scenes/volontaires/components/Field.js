@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import SimpleSelect from "../components/SimpleSelect";
 import dayjs from "dayjs";
 
-/**
- * mode  could be "correction|edition|readonly" (default readonly)
- */
 export default function Field({
   group = null,
   name,
