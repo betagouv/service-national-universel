@@ -18,6 +18,42 @@ export function Box({ children, className = "" }) {
   );
 }
 
+export function Loading({ width }) {
+  return (
+    <div className={`animate-pulse flex space-x-4 ${width}`}>
+      <div className="flex-1 space-y-6">
+        <div className="grid grid-cols-3 gap-4 ">
+          <div className="h-2 bg-gray-300 rounded col-span-2"></div>
+          <div className="h-2 bg-gray-300 rounded col-span-1"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const regionList = [
+  "Auvergne-Rhône-Alpes",
+  "Bourgogne-Franche-Comté",
+  "Bretagne",
+  "Centre-Val de Loire",
+  "Corse",
+  "Grand Est",
+  "Hauts-de-France",
+  "Île-de-France",
+  "Normandie",
+  "Nouvelle-Aquitaine",
+  "Occitanie",
+  "Pays de la Loire",
+  "Provence-Alpes-Côte d'Azur",
+  "Guadeloupe",
+  "Martinique",
+  "Guyane",
+  "La Réunion",
+  "Mayotte",
+  "Polynésie française",
+  "Nouvelle-Calédonie",
+];
+
 export function BoxHeader({ children, title, className = "" }) {
   return (
     <div className={`flex items-center justify-between pb-[24px] border-b-[##E5E7EB] border-b-[1px] ${className}`}>
