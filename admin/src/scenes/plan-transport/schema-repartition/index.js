@@ -4,6 +4,24 @@ import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
 import { Box } from "../components/commons";
 
 export default function SchemaRepartition() {
+  const data = {
+    volontaires: {
+      total: 482,
+      assigned: 187,
+      intradepartmental: 9,
+    },
+    detail: [
+      {
+        name: "Auvergne-Rhône-Alpes",
+        capacity: 170,
+        total: 128,
+        assigned: 49,
+        intradepartmental: 3,
+        intradepartmentalAssigned: 2,
+      },
+    ]
+  };
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Schéma de répartition" }]} />
