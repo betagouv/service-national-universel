@@ -2,21 +2,20 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
-
+const { COHORTS } = require("snu-lib");
 const MODELNAME = "tablederepartition";
 
 const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     required: true,
-    enum: ["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"],
+    enum: COHORTS,
     documentation: {
       description: "Cohorte",
     },
   },
   fromDepartement: {
     type: String,
-    required: true,
     documentation: {
       description: "Département d'origine",
     },
