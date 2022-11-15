@@ -31,7 +31,7 @@ export default function StepDone() {
     const hoursDelay = new Date().getTimezoneOffset() / 60;
     const transformedDate = data.birthDate;
     transformedDate.setTime(transformedDate.getTime() + hoursDelay * 60 * 60 * 1000);
-    const newDate = new Date(Date.UTC(transformedDate.getFullYear(), transformedDate.getMonth(), transformedDate.getDate() + 1, 0, 0, 0));
+    const newDate = new Date(Date.UTC(transformedDate.getFullYear(), transformedDate.getMonth(), transformedDate.getDate(), 0, 0, 0));
 
     const values = {
       email: data.email,
