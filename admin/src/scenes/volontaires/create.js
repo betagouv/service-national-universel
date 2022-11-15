@@ -565,7 +565,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
         options={situationOptions}
         handleChange={onChangeSituation}
       />
-      {values.schooled === "true" && (
+      {values.situation !== "" && values.schooled === "true" && (
         <div className="mt-[16px]">
           <SchoolEditor young={values} onChange={onChange} />
           <Field
