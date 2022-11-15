@@ -268,7 +268,7 @@ export default function Phase2Application({ young, onChange }) {
           </div>
           <div className="mx-8 mt-8 pb-8">
             <div className="flex justify-between">
-              <div className="text-lg leading-6 font-semibold">Pièces jointes</div>
+              <div className="text-lg leading-6 font-semibold">Documents</div>
               <div className="flex space-x-4 items-center">
                 {optionsType.reduce((nmb, option) => nmb + application[option].length, 0) !== 0 && (
                   <div
@@ -279,7 +279,7 @@ export default function Phase2Application({ young, onChange }) {
                   </div>
                 )}
                 <div
-                  className="text-white bg-blue-600  rounded-full p-2 "
+                  className="text-white bg-blue-600 rounded-full p-2 hover:bg-blue-500 cursor-pointer"
                   onClick={() => {
                     setModalDocument({
                       isOpen: true,
