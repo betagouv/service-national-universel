@@ -173,8 +173,8 @@ export default function StepUpload() {
                 ).
               </div>
               {corrections
-                .filter(({ field }) => field === "latestCNIFileExpirationDate")
-                ?.map((e) => (
+                ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
+                .map((e) => (
                   <ErrorMessage key={e._id}>
                     <strong>Date d&apos;expiration incorrecte</strong>
                     {e.message && ` : ${e.message}`}
