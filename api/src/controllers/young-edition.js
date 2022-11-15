@@ -99,6 +99,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       value.isRegionRural = isRegionRural;
     }
 
+    value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
