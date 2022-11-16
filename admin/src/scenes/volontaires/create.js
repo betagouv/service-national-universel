@@ -117,6 +117,7 @@ export default function Create() {
   const validate = () => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
+    const errorEmail = "Adresse email invalide";
     const required = [
       "latestCNIFileExpirationDate",
       "firstName",
@@ -145,7 +146,7 @@ export default function Create() {
 
     // check email volontaire
     if (!validator.isEmail(values.email)) {
-      errors.email = "Adresse email invalide";
+      errors.email = errorEmail;
     }
     // check birtDate
     const selectedSession = sessions2023.find((session) => session.name === values.cohort);
@@ -153,17 +154,28 @@ export default function Create() {
       errors.birthdateAt = "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU.";
     }
     if (!validator.isEmail(values.parent1Email)) {
-      errors.parent1Email = "Adresse email invalide";
+      errors.parent1Email = errorEmail;
     }
-    //check email parent2 if exist
-    if (values.parent2Email !== "") {
+    //check parent2 if exist
+    const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName);
+    const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName);
+    // if 1 of 3 is not empty --> ask for the 3
+    if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty) {
       if (!validator.isEmail(values.parent2Email)) {
         setSelectedRepresentant(2);
-        errors.parent2Email = "Adresse email invalide";
-      } else {
-        setSelectedRepresentant(1);
+        errors.parent2Email = errorEmail;
       }
+      console.log(parent2FirstNameEmpty, parent2LastNameEmpty);
+      if (parent2FirstNameEmpty) {
+        errors.parent2FirstName = errorEmpty;
+      }
+      if (parent2LastNameEmpty) {
+        errors.parent2LastName = errorEmpty;
+      }
+    } else {
+      setSelectedRepresentant(1);
     }
+
     if (values.country === "FRANCE") {
       if (values.schoolCity === "") {
         errors.schoolCity = errorEmpty;
@@ -403,7 +415,7 @@ function Representant2({ values, handleChange, errors }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        handleChange={setFieldValue}
       />
       {values.parent2OwnAddress === "true" && (
         <>
