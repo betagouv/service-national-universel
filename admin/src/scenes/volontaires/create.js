@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import React from "react";
 import validator from "validator";
 import "dayjs/locale/fr";
@@ -145,9 +144,7 @@ export default function Create() {
     }
 
     // check email volontaire
-    if (!values.email) {
-      errors.email = errorEmpty;
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+    if (!validator.isEmail(values.email)) {
       errors.email = "Adresse email invalide";
     }
     // check birtDate
@@ -155,16 +152,12 @@ export default function Create() {
     if (values?.birthdateAt && !(selectedSession.eligibility.bornBefore > new Date(values.birthdateAt) && selectedSession.eligibility.bornAfter < new Date(values.birthdateAt))) {
       errors.birthdateAt = "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU.";
     }
-    //if (values.birthdateAt < session)
-    if (!values.parent1Email) {
-      // check email parent1
-      errors.parent1Email = errorEmpty;
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.parent1Email)) {
+    if (!validator.isEmail(values.parent1Email)) {
       errors.parent1Email = "Adresse email invalide";
     }
     //check email parent2 if exist
     if (values.parent2Email !== "") {
-      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.parent2Email)) {
+      if (!validator.isEmail(values.parent2Email)) {
         setSelectedRepresentant(2);
         errors.parent2Email = "Adresse email invalide";
       } else {
