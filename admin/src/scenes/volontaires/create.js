@@ -299,7 +299,7 @@ export default function Create() {
               </div>
             </div>
             {selectedRepresentant === 1 ? (
-              <Representant parent="1" errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
+              <Representant parent="1" values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
             ) : (
               <Representant parent="2" values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
             )}
