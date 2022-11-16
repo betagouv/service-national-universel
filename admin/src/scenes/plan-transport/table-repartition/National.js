@@ -7,10 +7,12 @@ import Select from "../components/Select";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
+import { useHistory } from "react-router-dom";
 
-export default function TableauRepartition() {
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
+export default function National() {
+  const [cohort, setCohort] = React.useState("Juillet 2022");
   const cohortList = [
+    { label: "Juillet 2022", value: "Juillet 2022" },
     { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
     { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
     { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
@@ -134,7 +136,7 @@ export default function TableauRepartition() {
       <div className="flex flex-col w-full px-12 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">
-            <Title>Tableau de répartition</Title>
+            <Title>Table de répartition</Title>
             <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
@@ -157,7 +159,7 @@ export default function TableauRepartition() {
           <div className="flex px-4 py-2 items-center">
             <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Région</div>
             <div className="w-[60%] uppercase text-[#7E858C] text-xs leading-3">Région d&apos;accueil</div>
-            <div className="w-[10%] uppercase text-[#7E858C] text-xs leading-3">Avancement</div>
+            <div className="w-[10%] uppercase text-[#7E858C] text-xs leading-3 text-center">Avancement</div>
           </div>
 
           {regions?.length ? (
@@ -171,6 +173,7 @@ export default function TableauRepartition() {
                 onDelete={onDelete}
                 data={data}
                 loadingQuery={loadingQuery}
+                cohort={cohort}
               />
             ))
           ) : (
@@ -187,9 +190,10 @@ export default function TableauRepartition() {
   );
 }
 
-const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete }) => {
+const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete, cohort }) => {
   const [open, setOpen] = React.useState(false);
   const [assignRegion, setAssignRegion] = React.useState([]);
+  const history = useHistory();
 
   React.useEffect(() => {
     let assignRegion = data.filter((e) => e.fromRegion === region) || [];
@@ -200,7 +204,7 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
     <>
       <hr />
       <div className="flex px-4 py-2 items-center">
-        <div className="w-[30%] flex flex-col gap-1">
+        <div className="w-[30%] flex flex-col gap-1 cursor-pointer" onClick={() => history.push(`/plan-de-transport/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
           <div className="text-base text-[#242526] font-bold leading-6">{region}</div>
           <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
         </div>
@@ -208,7 +212,7 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
           {loadingQuery ? (
             <Loading width="w-1/3" />
           ) : (
-            <div className="relative flex flex-row gap-2 items-center">
+            <div className="relative flex flex-row gap-2 items-center flex-wrap">
               {assignRegion.map((assign) => (
                 <div key={assign._id} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
                   {assign.toRegion}
@@ -236,7 +240,7 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
             </div>
           )}
         </div>
-        <div className="w-[10%]">{loadingQuery ? <Loading width="w-2/3" /> : <div>coucou</div>}</div>
+        <div className="w-[10%] text-center">{loadingQuery ? <Loading width="w-2/3" /> : <div>coucou</div>}</div>
       </div>
     </>
   );
@@ -259,14 +263,13 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
 
   const onChange = (fromRegion, toRegion) => {
     if (assignRegion.filter((e) => e.toRegion === toRegion)?.length !== 0) onDelete(fromRegion, toRegion);
-    else if (assignRegion.length > 2) return toastr.info("Vous ne pouvez pas assigner plus de 3 régions d'accueil");
     else onCreate(fromRegion, toRegion);
   };
   return (
     <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2 h-60 overflow-y-auto">
       {regionList
         .filter((e) => e !== region)
-        .map((r, i) => {
+        .map((r) => {
           return (
             <div key={r} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
               <div className="flex items-center gap-2 text-gray-700 text-sm">

@@ -14,7 +14,7 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
-  fromDepartement: {
+  fromDepartment: {
     type: String,
     documentation: {
       description: "Département d'origine",
