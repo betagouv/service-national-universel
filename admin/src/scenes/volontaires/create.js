@@ -105,11 +105,9 @@ export default function Create() {
     const errorEmpty = "Ne peut être vide";
     const errorEmail = "Adresse email invalide";
     const required = [
-      "latestCNIFileExpirationDate",
       "firstName",
       "lastName",
       "birthCityZip",
-      "birthdateAt",
       "birthCity",
       "gender",
       "birthCountry",
@@ -130,6 +128,12 @@ export default function Create() {
       }
     }
 
+    if (values.birthdateAt === null) {
+      errors.birthdateAt = errorEmpty;
+    }
+    if (values.latestCNIFileExpirationDate === null) {
+      errors.birthdateAt = errorEmpty;
+    }
     // check email volontaire
     if (!validator.isEmail(values.email)) {
       errors.email = errorEmail;
