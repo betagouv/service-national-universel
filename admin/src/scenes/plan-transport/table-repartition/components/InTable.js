@@ -1,6 +1,7 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { ES_NO_LIMIT, region2department } from "snu-lib";
+import Profil from "../../../../assets/icons/Profil";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import { Loading } from "../../components/commons";
@@ -105,7 +106,7 @@ export function InTable({ region, cohort }) {
         </div>
         {departments?.length ? (
           departments.map((department) => (
-            <ReverseDepartment key={"reverse" + department} department={department} data={data} loadingQuery={loadingQuery} objectifByDepartment={objectifByDepartment} />
+            <Department key={"reverse" + department} department={department} data={data} loadingQuery={loadingQuery} objectifByDepartment={objectifByDepartment} />
           ))
         ) : (
           <>
@@ -120,7 +121,7 @@ export function InTable({ region, cohort }) {
   );
 }
 
-const ReverseDepartment = ({ department, loadingQuery, data, objectifByDepartment }) => {
+const Department = ({ department, loadingQuery, data, objectifByDepartment }) => {
   const [open, setOpen] = React.useState({ open: false, region: null });
   const [listRegion, setListRegion] = React.useState([]);
   const [departmentByRegion, setDepartmentByRegion] = React.useState([]);
@@ -151,23 +152,21 @@ const ReverseDepartment = ({ department, loadingQuery, data, objectifByDepartmen
           ) : (
             <div className="relative flex flex-row gap-2 items-center flex-wrap">
               {listRegion.map((assign, i) => (
-                <>
+                <div key={i + "assignRegion"}>
                   <div
-                    key={i + "assign"}
                     className="relative text-xs text-gray-700 bg-gray-100 rounded-full p-2 cursor-pointer hover:scale-105"
                     onClick={() => setOpen({ open: true, region: assign.fromRegion })}>
                     {assign.fromRegion}
                   </div>
                   {open.open && open.region === assign.fromRegion && (
                     <InfoDepartment
-                      key={i + "absolute"}
                       region={assign.fromRegion}
                       setOpen={setOpen}
                       assignDepartment={departmentByRegion[assign.fromRegion]}
                       objectifByDepartment={objectifByDepartment}
                     />
                   )}
-                </>
+                </div>
               ))}
             </div>
           )}
@@ -197,10 +196,13 @@ const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartmen
       <div className="flex flex-col gap-2 px-2">
         <div className="text-gray-500 text-xs font-medium leading-4">{region}</div>
         {assignDepartment.map((assign, i) => (
-          <div key={i + "assign"} className="flex flex-row justify-between relative">
-            <div className=" text-sm leading-5 text-gray-700 ">{assign}</div>
-            <div className="text-sm leading-5 text-gray-700 font-bold">
-              {objectifByDepartment.find((e) => e.department === assign) ? objectifByDepartment.find((e) => e.department === assign).max || 0 : 0}
+          <div key={i + "assignDepartment"} className="flex flex-row justify-between relative">
+            <div className="text-sm leading-5 text-gray-700 ">{assign}</div>
+            <div className="flex items-center gap-2 pr-2">
+              <Profil className="text-gray-400" />
+              <div className="text-sm leading-5 text-gray-500 font-normal">
+                {objectifByDepartment.find((e) => e.department === assign) ? objectifByDepartment.find((e) => e.department === assign).max || 0 : 0}
+              </div>
             </div>
           </div>
         ))}
