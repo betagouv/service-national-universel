@@ -55,8 +55,6 @@ export default function Create() {
     addressVerified: false,
     zip: "",
     city: "",
-    region: "",
-    department: "",
     address: "",
     situation: "",
     schoolId: "",
@@ -111,6 +109,8 @@ export default function Create() {
       "birthCity",
       "gender",
       "birthCountry",
+      "department",
+      "region",
       "phone",
       "cohort",
       "parentStatementOfHonorInvalidId",
@@ -131,8 +131,8 @@ export default function Create() {
     if (values.birthdateAt === null) {
       errors.birthdateAt = errorEmpty;
     }
-    if (values.latestCNIFileExpirationDate === null) {
-      errors.birthdateAt = errorEmpty;
+    if (values.latestCNIFileExpirationDate === "" || values.latestCNIFileExpirationDate === null) {
+      errors.latestCNIFileExpirationDate = errorEmpty;
     }
     // check email volontaire
     if (!validator.isEmail(values.email)) {
@@ -527,17 +527,15 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
 }
 function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    if (isConfirmed) {
-      setFieldValue("addressVerified", isConfirmed);
-      for (const key in suggestion) {
-        if (suggestion[key] !== values[key]) {
-          if (key === "address" || key === "zip" || key === "city") {
-            if (isConfirmed) {
-              setFieldValue(key, suggestion[key]);
-            }
-          } else {
+    setFieldValue("addressVerified", isConfirmed);
+    for (const key in suggestion) {
+      if (suggestion[key] !== values[key]) {
+        if (key === "address" || key === "zip" || key === "city") {
+          if (isConfirmed) {
             setFieldValue(key, suggestion[key]);
           }
+        } else {
+          setFieldValue(key, suggestion[key]);
         }
       }
     }
@@ -610,23 +608,14 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         <Field
           name="department"
           label="Département"
-          readOnly={values.addressVerified}
+          readOnly
           errors={errors}
           value={values.department}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
           handleChange={handleChange}
         />
-        <Field
-          name="region"
-          label="Région"
-          readOnly={values.addressVerified}
-          errors={errors}
-          value={values.region}
-          transformer={translate}
-          className="flex-[1_1_50%]"
-          handleChange={handleChange}
-        />
+        <Field name="region" label="Région" readOnly errors={errors} value={values.region} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
       </div>
     </>
   );
@@ -705,7 +694,7 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
               <a
                 onClick={(e) => handleChangeBool(e, "true")}
                 name="parentStatementOfHonorInvalidId"
-                className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] rounded-3xl">
+                className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-whit rounded-3xl">
                 Non validée
               </a>
             )}
