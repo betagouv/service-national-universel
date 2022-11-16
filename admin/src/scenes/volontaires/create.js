@@ -523,7 +523,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
 }
 function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setFieldValue("addressVerified", "true");
+    setFieldValue("addressVerified", isConfirmed);
     for (const key in suggestion) {
       if (suggestion[key] !== values[key]) {
         if (key === "address" || key === "zip" || key === "city") {
