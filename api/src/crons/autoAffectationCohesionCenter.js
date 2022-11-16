@@ -58,7 +58,6 @@ exports.handler = async () => {
   try {
     clean();
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
   }
 };
