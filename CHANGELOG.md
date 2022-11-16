@@ -1,3 +1,16 @@
+# [1.168.0](https://github.com/betagouv/service-national-universel/compare/v1.167.0...v1.168.0) (2022-11-16)
+
+
+### Bug Fixes
+
+* **app:** Change restriction reinscription critary ([#2058](https://github.com/betagouv/service-national-universel/issues/2058)) ([87b9ca1](https://github.com/betagouv/service-national-universel/commit/87b9ca13eaa22ac388f35ae611d68e01da49cb25))
+* **app/api:** date preinscription ([#2051](https://github.com/betagouv/service-national-universel/issues/2051)) ([12b4e67](https://github.com/betagouv/service-national-universel/commit/12b4e67092165205c9dd11e10acde84ba763dc42))
+
+
+### Features
+
+* **admin/app:** update link footer ([5064eef](https://github.com/betagouv/service-national-universel/commit/5064eefa38a784c3a32e44303366744e9745cbd4))
+
 # [1.167.0](https://github.com/betagouv/service-national-universel/compare/v1.166.0...v1.167.0) (2022-11-15)
 
 
