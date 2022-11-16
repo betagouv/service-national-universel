@@ -5,7 +5,7 @@ export default function ProgressBar({ total, value, className = "" }) {
 
   return (
     <div className={`rounded-[5px] bg-[#E5E7EB] h-[4px] ${className}`}>
-      <div className={`h-[100%] w-[${rate}%] bg-[#303958]`} />
+      <div className={`h-[100%] bg-[#303958]`} style={{ width: rate + "%" }} />
     </div>
   );
 }
