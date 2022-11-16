@@ -47,6 +47,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       email: Joi.string().lowercase().trim(),
       phone: Joi.string().trim(),
       latestCNIFileExpirationDate: Joi.date(),
+      latestCNIFileCategory: Joi.string().trim(),
       birthdateAt: Joi.date(),
       birthCity: Joi.string().trim(),
       birthCityZip: Joi.string().trim(),
@@ -98,6 +99,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (isRegionRural !== null) {
       value.isRegionRural = isRegionRural;
     }
+
+    value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
 
     young.set(value);
     await young.save({ fromUser: req.user });

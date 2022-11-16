@@ -11,7 +11,7 @@ export default function Home() {
         <Title>Plan de transport</Title>
         <ul className="mt-[30px] list-none">
           <li>
-            <BorderButton to="/plan-de-transport/tableau-repartition" className="mb-[8px]">
+            <BorderButton to="/plan-de-transport/table-repartition" className="mb-[8px]">
               Tableau de répartition
             </BorderButton>
           </li>

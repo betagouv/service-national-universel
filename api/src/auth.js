@@ -134,12 +134,14 @@ class Auth {
       const dep = schoolDepartment || getDepartmentByZip(zip);
       if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+      const formatedDate = birthdateAt;
+      formatedDate.setUTCHours(11, 0, 0);
       const user = await this.model.create({
         email,
         firstName,
         lastName,
         password,
-        birthdateAt,
+        birthdateAt: formatedDate,
         frenchNationality,
         schooled,
         schoolName,

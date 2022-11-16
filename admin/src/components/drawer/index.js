@@ -139,7 +139,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           <div className="flex items-center justify-between py-3 pl-3 text-base text-[#A0A0A0]">
             Plan de transport <ChevronDown className="mr-[16px]" />
           </div>
-          <DrawerTab to="/plan-de-transport/tableau-repartition" title="Tableau de répartition" onClick={onClick} />
+          <DrawerTab to="/plan-de-transport/table-repartition" title="Tableau de répartition" onClick={onClick} />
           <DrawerTab to="/plan-de-transport/schema-repartition" title="Schéma de répartition" onClick={onClick} />
         </div>
       )}

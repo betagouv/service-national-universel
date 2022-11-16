@@ -1,16 +1,20 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { ES_NO_LIMIT } from "snu-lib";
+import { ES_NO_LIMIT, ROLES } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Select from "../components/Select";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
+import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-export default function TableauRepartition() {
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
+export default function National() {
+  const user = useSelector((state) => state.Auth.user);
+  const [cohort, setCohort] = React.useState("Juillet 2022");
   const cohortList = [
+    { label: "Juillet 2022", value: "Juillet 2022" },
     { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
     { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
     { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
@@ -134,7 +138,7 @@ export default function TableauRepartition() {
       <div className="flex flex-col w-full px-12 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">
-            <Title>Tableau de répartition</Title>
+            <Title>Table de répartition</Title>
             <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
@@ -148,22 +152,22 @@ export default function TableauRepartition() {
               placeholder="Rechercher une region"
               onChange={(e) => setSearchRegion(e.target.value)}
             />
-            <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">
+            {/* <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">
               Exporter
-            </button>
+            </button> */}
           </div>
 
           <hr />
           <div className="flex px-4 py-2 items-center">
             <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Région</div>
             <div className="w-[60%] uppercase text-[#7E858C] text-xs leading-3">Région d&apos;accueil</div>
-            <div className="w-[10%] uppercase text-[#7E858C] text-xs leading-3">Avancement</div>
+            <div className="w-[10%] uppercase text-[#7E858C] text-xs leading-3 text-center">Avancement</div>
           </div>
 
           {regions?.length ? (
             regions.map((region) => (
               <Region
-                key={region}
+                key={"region" + region}
                 region={region}
                 youngsInRegion={youngsByRegion.find((r) => r.key === region)?.doc_count || 0}
                 placesCenterByRegion={placesCenterByRegion}
@@ -171,6 +175,8 @@ export default function TableauRepartition() {
                 onDelete={onDelete}
                 data={data}
                 loadingQuery={loadingQuery}
+                cohort={cohort}
+                user={user}
               />
             ))
           ) : (
@@ -187,20 +193,26 @@ export default function TableauRepartition() {
   );
 }
 
-const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete }) => {
+const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete, cohort, user }) => {
   const [open, setOpen] = React.useState(false);
   const [assignRegion, setAssignRegion] = React.useState([]);
+  const [avancement, setAvancement] = React.useState(0);
+  const editDisabled = user.role !== ROLES.ADMIN;
+  const history = useHistory();
 
   React.useEffect(() => {
     let assignRegion = data.filter((e) => e.fromRegion === region) || [];
     setAssignRegion(assignRegion);
+    setAvancement(assignRegion.length ? assignRegion[0].avancement : 0);
   }, [data]);
 
   return (
     <>
       <hr />
       <div className="flex px-4 py-2 items-center">
-        <div className="w-[30%] flex flex-col gap-1">
+        <div
+          className={`w-[30%] flex flex-col gap-1 ${assignRegion.length ? "cursor-pointer" : ""}`}
+          onClick={() => assignRegion.length && history.push(`/plan-de-transport/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
           <div className="text-base text-[#242526] font-bold leading-6">{region}</div>
           <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
         </div>
@@ -208,35 +220,49 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
           {loadingQuery ? (
             <Loading width="w-1/3" />
           ) : (
-            <div className="relative flex flex-row gap-2 items-center">
-              {assignRegion.map((assign) => (
-                <div key={assign._id} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
+            <div className="relative flex flex-row gap-2 items-center flex-wrap">
+              {assignRegion.map((assign, i) => (
+                <div key={i + "assign"} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
                   {assign.toRegion}
                 </div>
               ))}
-              {assignRegion.length === 0 ? (
-                <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
-                  À assigner
-                </button>
-              ) : (
-                <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
-                  <Pencil className="w-4 h-4 text-white" />
-                </div>
+              {!editDisabled && (
+                <>
+                  {assignRegion.length === 0 ? (
+                    <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
+                      À assigner
+                    </button>
+                  ) : (
+                    <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
+                      <Pencil className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  {open ? (
+                    <SelectHostRegion
+                      region={region}
+                      setOpen={setOpen}
+                      placesCenterByRegion={placesCenterByRegion}
+                      onCreate={onCreate}
+                      assignRegion={assignRegion}
+                      onDelete={onDelete}
+                    />
+                  ) : null}
+                </>
               )}
-              {open ? (
-                <SelectHostRegion
-                  region={region}
-                  setOpen={setOpen}
-                  placesCenterByRegion={placesCenterByRegion}
-                  onCreate={onCreate}
-                  assignRegion={assignRegion}
-                  onDelete={onDelete}
-                />
-              ) : null}
             </div>
           )}
         </div>
-        <div className="w-[10%]">{loadingQuery ? <Loading width="w-2/3" /> : <div>coucou</div>}</div>
+        <div className="w-[10%] text-center">
+          {loadingQuery ? (
+            <Loading width="w-2/3" />
+          ) : (
+            <div className="flex justify-center">
+              <div className={`px-2 py-1 rounded-lg text-xs font-bold uppercase leading-5 ${avancement === 100 ? "text-green-600 bg-[#E4F3EC]" : "text-blue-600 bg-[#E8EDFF]"}`}>
+                {avancement} %
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
@@ -257,20 +283,23 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
     };
   }, []);
 
+  //Because Dom Tom can assign young to the same region
+  const DOMTOM = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Mayotte", "Polynésie française", "Nouvelle-Calédonie"];
+  const isDomTom = DOMTOM.includes(region);
+
   const onChange = (fromRegion, toRegion) => {
     if (assignRegion.filter((e) => e.toRegion === toRegion)?.length !== 0) onDelete(fromRegion, toRegion);
-    else if (assignRegion.length > 2) return toastr.info("Vous ne pouvez pas assigner plus de 3 régions d'accueil");
     else onCreate(fromRegion, toRegion);
   };
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2">
+    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2 h-60 overflow-y-auto">
       {regionList
-        .filter((e) => e !== region)
+        .filter((e) => isDomTom || e !== region)
         .map((r, i) => {
           return (
-            <div key={r} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
+            <div key={r + i} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
               <div className="flex items-center gap-2 text-gray-700 text-sm">
-                <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} />
+                <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} readOnly />
                 {r}
               </div>
               <div className="text-sm text-gray-500 uppercase">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>
