@@ -124,7 +124,6 @@ exports.handlerNotice1Week = async () => {
   try {
     notify1Week();
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "1 week notice outdated mission", text: JSON.stringify(e) });
   }

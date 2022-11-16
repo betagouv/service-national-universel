@@ -300,8 +300,8 @@ const cleanData = async () => {
     }
     await slack.success({ title: "sync with JVA missions" });
   } catch (error) {
+    capture(error);
     slack.error({ title: "sync with JVA missions", text: "Error while deleting outdated missions !" });
-    capture("ERROR WHILE DELETING OUTDATED", error);
   }
 };
 
@@ -315,7 +315,6 @@ exports.handler = async () => {
   try {
     fetchMission();
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
   }
 };

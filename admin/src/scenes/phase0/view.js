@@ -7,7 +7,18 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { COHESION_STAY_LIMIT_DATE, COHESION_STAY_START, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, YOUNG_SITUATIONS, GRADES, getAge } from "snu-lib";
+import {
+  COHESION_STAY_LIMIT_DATE,
+  COHESION_STAY_START,
+  START_DATE_SESSION_PHASE1,
+  translate,
+  translateGrade,
+  YOUNG_STATUS,
+  YOUNG_SITUATIONS,
+  GRADES,
+  getAge,
+  ROLES,
+} from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -29,6 +40,7 @@ import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
 import Warning from "../../assets/icons/Warning";
+import { useSelector } from "react-redux";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -838,6 +850,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 }
 
 function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
+  const user = useSelector((state) => state.Auth.user);
+  const categoryOptions = ["cniNew", "cniOld", "passport"].map((s) => ({ value: s, label: translate(s) }));
   let cniDay = "";
   let cniMonth = "";
   let cniYear = "";
@@ -879,6 +893,25 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
         <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
       </FieldsGroup>
+
+      {user.role === ROLES.ADMIN && (
+        <Field
+          name="latestCNIFileCategory"
+          label="Type de pièce d'identité"
+          value={young.latestCNIFileCategory}
+          transformer={translate}
+          mode={globalMode}
+          className="my-[16px]"
+          onStartRequest={onStartRequest}
+          currentRequest={currentRequest}
+          correctionRequest={getCorrectionRequest(requests, "latestCNIFileCategory")}
+          onCorrectionRequestChange={onCorrectionRequestChange}
+          type="select"
+          options={categoryOptions}
+          onChange={(cat) => onChange("latestCNIFileCategory", cat)}
+          young={young}
+        />
+      )}
       <HonorCertificate young={young} />
     </div>
   );
