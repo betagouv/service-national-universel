@@ -20,8 +20,6 @@ import FieldSituationsParticulieres from "../phase0/components/FieldSituationsPa
 
 export default function Create() {
   const history = useHistory();
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef(null);
   const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
   const [uploadError, setUploadError] = React.useState("");
   const [youngId, setYoungId] = React.useState(null);
@@ -101,18 +99,6 @@ export default function Create() {
     parent2City: "",
     parent2Country: "",
   });
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
 
   const validate = () => {
     const errors = {};
@@ -313,9 +299,9 @@ export default function Create() {
               </div>
             </div>
             {selectedRepresentant === 1 ? (
-              <Representant1 values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
+              <Representant parent="1" errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
             ) : (
-              <Representant2 values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
+              <Representant parent="2" values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
             )}
           </div>
         </div>
@@ -360,16 +346,15 @@ export default function Create() {
     </div>
   );
 }
-
-function Representant2({ values, handleChange, errors, setFieldValue }) {
+function Representant({ values, handleChange, errors, setFieldValue, parent }) {
   return (
     <>
       <Field
-        name="parent2Status"
+        name={parent === "1" ? "parent1Status" : "parent2Status"}
         label="Statut"
         errors={errors}
         type="select"
-        value={values.parent2Status}
+        value={parent === "1" ? values.parent1Status : values.parent2Status}
         options={[
           { value: "mother", label: "Mère" },
           { value: "father", label: "Père" },
@@ -377,152 +362,92 @@ function Representant2({ values, handleChange, errors, setFieldValue }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        handleChange={setFieldValue}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
-          name="parent2LastName"
+          name={parent === "1" ? "parent1LastName" : "parent2LastName"}
           label="Nom"
           errors={errors}
-          value={values.parent2LastName}
+          value={parent === "1" ? values.parent1LastName : values.parent2LastName}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
           handleChange={handleChange}
         />
         <Field
-          name="parent2FirstName"
+          name={parent === "1" ? "parent1FirstName" : "parent2FirstName"}
           label="Prénom"
           errors={errors}
-          value={values.parent2FirstName}
+          value={parent === "1" ? values.parent1FirstName : values.parent2FirstName}
           transformer={translate}
           className="flex-[1_1_50%]"
           handleChange={handleChange}
         />
       </div>
-      <Field name="parent2Email" label="Email" errors={errors} value={values.parent2Email} transformer={translate} className="mb-4" handleChange={handleChange} />
       <Field
-        name="parent2OwnAddress"
+        name={parent === "1" ? "parent1Email" : "parent2Email"}
+        label="Email"
+        errors={errors}
+        value={parent === "1" ? values.parent1Email : values.parent2Email}
+        transformer={translate}
+        className="mb-4"
+        handleChange={handleChange}
+      />
+      <Field
+        name={parent === "1" ? "parent1OwnAddress" : "parent2OwnAddress"}
         label="Adresse différente de celle du volontaire"
         errors={errors}
         type="select"
-        value={values.parent2OwnAddress}
+        value={parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress}
         options={[
           { value: "true", label: "Oui" },
           { value: "false", label: "Non" },
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        handleChange={setFieldValue}
       />
-      {values.parent2OwnAddress === "true" && (
+      {(parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress) === "true" && (
         <>
           <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Adresse</div>
           <Field
-            name="parent2Address"
+            name={parent === "1" ? "parent1Address" : "parent2Address"}
             label="Adresse"
             errors={errors}
-            value={values.parent2Address}
+            value={parent === "1" ? values.parent1Address : values.parent2Address}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
           />
           <div className="my-4 flex items-start justify-between">
             <Field
-              name="parent2Zip"
+              name={parent === "1" ? "parent1Zip" : "parent2Zip"}
               label="Code postal"
               errors={errors}
-              value={values.parent2Zip}
+              value={parent === "1" ? values.parent1Zip : values.parent2Zip}
               transformer={translate}
               className="mr-2 flex-[1_1_50%]"
               handleChange={handleChange}
             />
-            <Field name="parent2City" label="Ville" errors={errors} value={values.parent2City} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+            <Field
+              name={parent === "1" ? "parent1City" : "parent2City"}
+              label="Ville"
+              errors={errors}
+              value={parent === "1" ? values.parent1City : values.parent2City}
+              transformer={translate}
+              className="flex-[1_1_50%]"
+              handleChange={handleChange}
+            />
           </div>
-          <Field name="parent2Country" label="Pays" errors={errors} value={values.parent2Country} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
-        </>
-      )}
-    </>
-  );
-}
-
-function Representant1({ values, handleChange, errors, setFieldValue }) {
-  return (
-    <>
-      <Field
-        name="parent1Status"
-        label="Statut"
-        errors={errors}
-        type="select"
-        value={values.parent1Status}
-        options={[
-          { value: "mother", label: "Mère" },
-          { value: "father", label: "Père" },
-          { value: "representant", label: "Représentant légal" },
-        ]}
-        transformer={translate}
-        className="mb-4"
-        handleChange={setFieldValue}
-      />
-      <div className="mb-4 flex items-start justify-between">
-        <Field
-          name="parent1LastName"
-          label="Nom"
-          errors={errors}
-          value={values.parent1LastName}
-          transformer={translate}
-          className="mr-2 flex-[1_1_50%]"
-          handleChange={handleChange}
-        />
-        <Field
-          name="parent1FirstName"
-          label="Prénom"
-          errors={errors}
-          value={values.parent1FirstName}
-          transformer={translate}
-          className="flex-[1_1_50%]"
-          handleChange={handleChange}
-        />
-      </div>
-      <Field name="parent1Email" label="Email" errors={errors} value={values.parent1Email} transformer={translate} className="mb-4" handleChange={handleChange} />
-      <Field
-        name="parent1OwnAddress"
-        label="Adresse différente de celle du volontaire"
-        errors={errors}
-        type="select"
-        value={values.parent1OwnAddress}
-        options={[
-          { value: "true", label: "Oui" },
-          { value: "false", label: "Non" },
-        ]}
-        transformer={translate}
-        className="mb-4"
-        handleChange={setFieldValue}
-      />
-      {values.parent1OwnAddress === "true" && (
-        <>
-          <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Adresse</div>
           <Field
-            name="parent1Address"
-            label="Adresse"
+            name={parent === "1" ? "parent1Country" : "parent2Country"}
+            label="Pays"
             errors={errors}
-            value={values.parent1Address}
+            value={parent === "1" ? values.parent1Country : values.parent2Country}
             transformer={translate}
             className="flex-[1_1_50%]"
             handleChange={handleChange}
           />
-          <div className="mb-4 flex items-start justify-between mt-4">
-            <Field
-              name="parent1Zip"
-              label="Code postal"
-              errors={errors}
-              value={values.parent1Zip}
-              transformer={translate}
-              className="mr-2 flex-[1_1_50%]"
-              handleChange={handleChange}
-            />
-            <Field name="parent1City" label="Ville" errors={errors} value={values.parent1City} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
-          </div>
-          <Field name="parent1Country" label="Pays" errors={errors} value={values.parent1Country} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
         </>
       )}
     </>
