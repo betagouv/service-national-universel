@@ -10,8 +10,8 @@ import ExternalLink from "../../../assets/icons/ExternalLink";
 import People from "../../../assets/icons/People";
 import ProgressBar from "../components/ProgressBar";
 import ProgressArc from "../components/ProgressArc";
-import IllustrationFrance from "../../../assets/illustrations/France";
 import Select from "../components/Select";
+import FrenchMap from "../../../assets/icons/FrenchMap";
 
 export default function SchemaRepartition() {
   const [cohort, setCohort] = React.useState(cohortList[0].value);
@@ -73,7 +73,7 @@ export default function SchemaRepartition() {
   );
 }
 
-function BoxVolontaires({ summary, className= "" }) {
+function BoxVolontaires({ summary, className = "" }) {
   return (
     <Box>
       <div className={`flex items-center mb-[6px] ${className}`}>
@@ -137,7 +137,7 @@ function BoxDisponibilite({ summary, className = "" }) {
 function BoxCentres({ summary, className = "" }) {
   return (
     <Box className={`overflow-hidden ${className}`}>
-      <IllustrationFrance className="absolute right-[-40px] top-[30px] z-[0]" />
+      <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />
       <MiniTitle>Centres</MiniTitle>
       <BigDigits>{summary.centers}</BigDigits>
       <Link to="/plan-de-transport/tableau-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
