@@ -29,6 +29,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
           frenchNationality: young.frenchNationality,
+          status: young.status,
         });
         if (res.data.msg) return setError({ text: res.data.msg });
         setCohorts(res.data);

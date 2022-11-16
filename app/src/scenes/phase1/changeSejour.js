@@ -45,6 +45,7 @@ export default function changeSejour() {
           schoolLevel: young.grade,
           department: young.schoolDepartment || young.department,
           frenchNationality: young.frenchNationality,
+          status: young.status,
         });
         const isArray = Array.isArray(data);
         if (isArray) {
