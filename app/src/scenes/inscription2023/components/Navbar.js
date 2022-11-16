@@ -33,7 +33,7 @@ const Navbar = ({ onSave }) => {
   const currentStep = getStepFromUrlParam(step, INSCRIPTION_STEPS_LIST, true);
 
   return (
-    <div className="w-[50rem] mx-auto px-24 py-8">
+    <div className="w-full md:w-[50rem] mx-auto px-[1rem] md:px-[6rem] py-8">
       <div className="flex flex-col justify-center">
         <div className="flex justify-between">
           <div>
