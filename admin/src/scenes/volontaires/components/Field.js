@@ -29,11 +29,15 @@ export default function Field({
       setMouseIn(mousein);
     }
   }
-  if (type === "date") {
-    return (
-      <div className={className}>
-        <div className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${errors[name] ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}>
-          <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>
+  return (
+    <div className={className}>
+      <div
+        className={`relative bg-white py-2 px-3 border-[#D1D5DB] border rounded-md ${errors[name] ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
+        key={name}
+        onMouseEnter={() => mouseOver(true)}
+        onMouseLeave={() => mouseOver(false)}>
+        {label && <label className="font-normal text-xs leading-4 text-[#6B7280]">{label}</label>}
+        {type === "date" && (
           <input
             type="date"
             name={name}
@@ -44,19 +48,7 @@ export default function Field({
             }}
             className="block w-[100%] cursor-pointer"
           />
-          {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className={className}>
-      <div
-        className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${errors[name] ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
-        key={name}
-        onMouseEnter={() => mouseOver(true)}
-        onMouseLeave={() => mouseOver(false)}>
-        {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
+        )}
         {type === "select" && <SimpleSelect value={value} name={name} transformer={transformer} options={options} onChange={handleChange} filterOnType={filterOnType} />}
         {type === "text" && <input readOnly={readyOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block p-[5px] w-[100%]" />}
         {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
