@@ -2,12 +2,16 @@ import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { department2region, ES_NO_LIMIT, region2department } from "snu-lib";
+import ChevronRight from "../../../assets/icons/ChevronRight";
 import Pencil from "../../../assets/icons/Pencil";
+import Profil from "../../../assets/icons/Profil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import { Loading, SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
+import { BsChevronRight } from "react-icons/bs";
+import FrenchMap from "../../../assets/icons/FrenchMap";
 
 export default function Regional() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -187,6 +191,39 @@ export default function Regional() {
             <SubTitle>Assignez les départements d’accueil des volontaires de {region}</SubTitle>
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+        </div>
+        <div className="flex flex-row gap-4 items-stretch mb-4">
+          <div className="flex flex-col gap-4 w-3/12">
+            <div className="flex flex-col gap-2 bg-white rounded-lg shadow-sm p-4">
+              <div className="text-sm text-gray-800 font-bold leading-5">Avancement</div>
+              <div className="text-2xl text-gray-800 font-bold leading-7">87%</div>
+            </div>
+            <div className="flex flex-col gap-2 bg-white rounded-lg shadow-sm p-4">
+              <div className="text-sm text-gray-800 font-bold leading-5">Volontaires de la région</div>
+              <div className="flex items-center gap-2 ">
+                <Profil className="text-gray-400" />
+                <div className="text-2xl text-gray-800 font-bold leading-7">{youngsTotal}</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4 w-5/12 rounded-lg shadow-sm bg-white p-4 relative">
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-800 font-bold leading-5">Région(s) d’accueil</div>
+              <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{regionAccueil.length} Centre(s)</div>
+            </div>
+            {regionAccueil.map((r) => (
+              <div key={r} className="text-gray-800 font-bold text-lg leading-5">
+                {r}
+              </div>
+            ))}
+            <div className="flex items-center gap-2 absolute bottom-4 right-6">
+              <div className="text-xs text-blue-600 leading-5">Table de répartition</div>
+              <BsChevronRight className="text-blue-600 " />
+            </div>
+            <div className="absolute  bottom-4 right-0">
+              <FrenchMap />
+            </div>
+          </div>
         </div>
         <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
           <div className="flex px-4 py-3 items-center justify-between w-full">
