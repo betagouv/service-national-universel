@@ -523,18 +523,24 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
 }
 function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setFieldValue("addressVerified", isConfirmed);
-    for (const key in suggestion) {
-      if (suggestion[key] !== values[key]) {
-        if (key === "address" || key === "zip" || key === "city") {
-          if (isConfirmed) {
+    if (isConfirmed) {
+      setFieldValue("addressVerified", isConfirmed);
+      for (const key in suggestion) {
+        if (suggestion[key] !== values[key]) {
+          if (key === "address" || key === "zip" || key === "city") {
+            if (isConfirmed) {
+              setFieldValue(key, suggestion[key]);
+            }
+          } else {
             setFieldValue(key, suggestion[key]);
           }
-        } else {
-          setFieldValue(key, suggestion[key]);
         }
       }
     }
+  };
+  const handleAdressChange = (e) => {
+    setFieldValue("addressVerified", false);
+    handleChange(e);
   };
   return (
     <>
@@ -580,10 +586,10 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
       />
 
       <div className="font-medium text-xs mt-8 text-[#242526] leading-snug mb-2">Adresse</div>
-      <Field name="address" label="Adresse" errors={errors} value={values.address} transformer={translate} className="mb-4" handleChange={handleChange} />
+      <Field name="address" label="Adresse" errors={errors} value={values.address} transformer={translate} className="mb-4" handleChange={handleAdressChange} />
       <div className="mb-4 flex items-start justify-between">
-        <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleChange} />
-        <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+        <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleAdressChange} />
+        <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleAdressChange} />
       </div>
       <VerifyAddress
         address={values.address}
@@ -600,14 +606,23 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         <Field
           name="department"
           label="Département"
+          readOnly={values.addressVerified}
           errors={errors}
-          readyOnly={true}
           value={values.department}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
           handleChange={handleChange}
         />
-        <Field name="region" label="Région" errors={errors} readyOnly={true} value={values.region} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+        <Field
+          name="region"
+          label="Région"
+          readOnly={values.addressVerified}
+          errors={errors}
+          value={values.region}
+          transformer={translate}
+          className="flex-[1_1_50%]"
+          handleChange={handleChange}
+        />
       </div>
     </>
   );
