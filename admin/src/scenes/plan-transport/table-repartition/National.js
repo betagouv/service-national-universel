@@ -152,9 +152,9 @@ export default function National() {
               placeholder="Rechercher une region"
               onChange={(e) => setSearchRegion(e.target.value)}
             />
-            <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">
+            {/* <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">
               Exporter
-            </button>
+            </button> */}
           </div>
 
           <hr />

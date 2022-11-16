@@ -1,8 +1,9 @@
 import React from "react";
 import { BsChevronRight } from "react-icons/bs";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { department2region, ES_NO_LIMIT, region2department } from "snu-lib";
+import { department2region, ES_NO_LIMIT, region2department, ROLES } from "snu-lib";
 import FrenchMap from "../../../assets/icons/FrenchMap";
 import Pencil from "../../../assets/icons/Pencil";
 import Profil from "../../../assets/icons/Profil";
@@ -13,6 +14,7 @@ import { Loading, SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
 
 export default function Regional() {
+  const user = useSelector((state) => state.Auth.user);
   const urlParams = new URLSearchParams(window.location.search);
   const history = useHistory();
   const region = urlParams.get("region");
@@ -247,9 +249,9 @@ export default function Regional() {
               placeholder="Rechercher un département"
               onChange={(e) => setSearchDepartment(e.target.value)}
             />
-            <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">
+            {/* <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">
               Exporter
-            </button>
+            </button> */}
           </div>
           <hr />
           <div className="flex px-4 py-2 items-center">
@@ -269,6 +271,7 @@ export default function Regional() {
                 onDelete={onDelete}
                 regionAccueil={regionAccueil}
                 selectAll={selectAll}
+                user={user}
               />
             ))
           ) : (
@@ -285,9 +288,10 @@ export default function Regional() {
   );
 }
 
-const Department = ({ department, loadingQuery, data, youngInDepartment, placesCenterByDepartment, onCreate, onDelete, regionAccueil, selectAll }) => {
+const Department = ({ department, loadingQuery, data, youngInDepartment, placesCenterByDepartment, onCreate, onDelete, regionAccueil, selectAll, user }) => {
   const [open, setOpen] = React.useState(false);
   const [assignDepartment, setAssignDepartment] = React.useState([]);
+  const editDisabled = ![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role);
 
   React.useEffect(() => {
     let assignDepartment = data.filter((e) => e.fromDepartment === department) || [];
@@ -312,27 +316,31 @@ const Department = ({ department, loadingQuery, data, youngInDepartment, placesC
                   {assign.toDepartment}
                 </div>
               ))}
-              {assignDepartment.length === 0 ? (
-                <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
-                  À assigner
-                </button>
-              ) : (
-                <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
-                  <Pencil className="w-4 h-4 text-white" />
-                </div>
+              {!editDisabled && (
+                <>
+                  {assignDepartment.length === 0 ? (
+                    <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
+                      À assigner
+                    </button>
+                  ) : (
+                    <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
+                      <Pencil className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  {open ? (
+                    <SelectHostDepartment
+                      department={department}
+                      setOpen={setOpen}
+                      placesCenterByDepartment={placesCenterByDepartment}
+                      onCreate={onCreate}
+                      assignDepartment={assignDepartment}
+                      onDelete={onDelete}
+                      regionAccueil={regionAccueil}
+                      selectAll={selectAll}
+                    />
+                  ) : null}
+                </>
               )}
-              {open ? (
-                <SelectHostDepartment
-                  department={department}
-                  setOpen={setOpen}
-                  placesCenterByDepartment={placesCenterByDepartment}
-                  onCreate={onCreate}
-                  assignDepartment={assignDepartment}
-                  onDelete={onDelete}
-                  regionAccueil={regionAccueil}
-                  selectAll={selectAll}
-                />
-              ) : null}
             </div>
           )}
         </div>
