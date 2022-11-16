@@ -157,7 +157,7 @@ export default function StepProfil() {
               <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" })} />
               <span className="text-sm text-[#3A3A3A] flex-1 inline leading-5">
                 J&apos;ai pris connaissance des{" "}
-                <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank" rel="noreferrer">
+                <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
                   modalités de traitement de mes données personnelles
                 </a>
               </span>

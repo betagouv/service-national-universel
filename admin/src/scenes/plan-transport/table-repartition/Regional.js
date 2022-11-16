@@ -206,7 +206,7 @@ export default function Regional() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-4 w-5/12 rounded-lg shadow-sm bg-white p-4 relative">
+          <div className="flex flex-col gap-4 w-4/12 rounded-lg shadow-sm bg-white p-4 relative">
             <div className="flex items-center gap-3">
               <div className="text-sm text-gray-800 font-bold leading-5">Région(s) d’accueil</div>
               <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{regionAccueil.length} Centre(s)</div>
@@ -216,12 +216,12 @@ export default function Regional() {
                 {r}
               </div>
             ))}
-            <div className="flex items-center gap-2 absolute bottom-4 right-6">
-              <div className="text-xs text-blue-600 leading-5">Table de répartition</div>
-              <BsChevronRight className="text-blue-600 " />
-            </div>
             <div className="absolute  bottom-4 right-0">
               <FrenchMap />
+            </div>
+            <div className="flex items-center gap-1 absolute bottom-4 right-6 cursor-pointer hover:underline" onClick={() => history.push("/plan-de-transport/table-repartition")}>
+              <div className="text-xs text-blue-600 leading-5 ">Table de répartition</div>
+              <BsChevronRight className="text-blue-600 " />
             </div>
           </div>
         </div>
