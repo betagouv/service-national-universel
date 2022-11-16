@@ -30,7 +30,6 @@ export default function SimpleSelect({ value, name, transformer, options, onChan
   }, []);
 
   useEffect(() => {
-    console.log("value change: ", value);
     setFilter(transformer ? transformer(value) : value);
   }, [value]);
 
@@ -63,12 +62,10 @@ export default function SimpleSelect({ value, name, transformer, options, onChan
     e.target.value = value;
     e.target.name = name;
     setSelectOptionsOpened(false);
-    console.log(e);
     onChange && onChange(e);
   }
 
   function changeFilter(e) {
-    console.log("new filter = ", e.target.value);
     setFilter(e.target.value);
   }
 
