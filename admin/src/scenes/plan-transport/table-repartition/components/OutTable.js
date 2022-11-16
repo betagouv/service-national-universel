@@ -342,7 +342,7 @@ const SelectHostDepartment = ({ department, setOpen, onCreate, assignDepartment,
   };
 
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[70%] py-2 max-h-60 overflow-y-auto">
+    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[70%] h-60 overflow-y-auto">
       {regionAccueil.map((region, index) => (
         <div key={region} className="flex flex-col ">
           <div className="flex flex-row items-center justify-between px-3 py-2">
