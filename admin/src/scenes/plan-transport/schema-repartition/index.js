@@ -5,18 +5,21 @@ import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits } from "../comp
 import { Link } from "react-router-dom";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 import { PlainButton } from "../components/Buttons";
-import { formatRate } from "../util";
+import { cohortList, formatRate } from "../util";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import People from "../../../assets/icons/People";
 import ProgressBar from "../components/ProgressBar";
 import ProgressArc from "../components/ProgressArc";
 import IllustrationFrance from "../../../assets/illustrations/France";
+import Select from "../components/Select";
 
 export default function SchemaRepartition() {
+  const [cohort, setCohort] = React.useState(cohortList[0].value);
+
   const summary = {
-    capacity: 669,
-    total: 506,
-    assigned: 315,
+    capacity: 1000,
+    total: 750,
+    assigned: 609,
     intradepartmental: 9,
     centers: 538,
   };
@@ -58,13 +61,11 @@ export default function SchemaRepartition() {
       <div className="p-[30px]">
         <div className="flex items-center justify-between">
           <PlanTransportBreadcrumb region={{ label: "Bourgogne-Franche-Comté" }} department={{ label: "Côte d'Or" }} />
-          <Box>
-            Séjour du <b>3 au 15 juillet 2022</b>
-          </Box>
+          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
         <div className="flex my-[40px]">
           <div className="flex flex-col grow">
-            <Box className="grow-[1_1_50%] mb-[8px]">
+            <Box className="grow mb-[8px]">
               <div className="flex items-center mb-[6px]">
                 <MiniTitle>Volontaires</MiniTitle>
                 {summary.intradepartmental > 0 && <Badge className="mx-[8px]">{formatRate(summary.assigned, summary.total)} affectés</Badge>}
@@ -82,7 +83,7 @@ export default function SchemaRepartition() {
                 )}
               </div>
             </Box>
-            <Box className="grow-[1_1_50%] mt-[8px]">
+            <Box className="grow mt-[8px]">
               <MiniTitle>Affectation des volontaires</MiniTitle>
               <ProgressBar total={summary.total} value={summary.assigned} className="my-[10px]" />
               <div className="flex items-center">
@@ -99,7 +100,7 @@ export default function SchemaRepartition() {
               </div>
             </Box>
           </div>
-          <Box className="grow mx-[16px] flex flex-column justify-between">
+          <Box className="grow mx-[16px] flex flex-column justify-between pb-[0px]">
             <div>
               <MiniTitle>Disponibilité des places</MiniTitle>
               <div className="text-[13px] leading-[1.3em] text-[#6B7280] mb-[10px]">Centre-Val de Loire, Bretagne, Occitanie</div>
@@ -107,9 +108,11 @@ export default function SchemaRepartition() {
                 <Badge className="">{summary.capacity} places</Badge>
               </div>
             </div>
-            <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={summary.capacity - summary.assigned} />
+            <div className="mt-[30px] h-[130px]">
+              <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={summary.capacity - summary.assigned} />
+            </div>
           </Box>
-          <Box className="grow">
+          <Box className="grow overflow-hidden">
             <IllustrationFrance className="absolute right-[-40px] top-[30px] z-[0]" />
             <MiniTitle>Centres</MiniTitle>
             <BigDigits>{summary.centers}</BigDigits>

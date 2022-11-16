@@ -1,15 +1,34 @@
 import React from "react";
 import { BigDigits } from "./commons";
 
-export default function ProgressArc({ total, value, legend = null, hilight = null, className = "" }) {
-  const rate = typeof total === "number" && total !== 0 ? Math.round((value / total) * 100) : 0;
+export default function ProgressArc({ total, value, legend = null, hilight = null, className = "", mode = "green", strokeWidth = 160 }) {
+  let backColor, valueColor;
+  switch (mode) {
+    case "red":
+      backColor = "#E38760";
+      valueColor = "#DC5318";
+      break;
+    case "green":
+    default:
+      backColor = "#63B59A";
+      valueColor = "#6EC898";
+  }
+  const angle = typeof total === "number" && total !== 0 ? (value / total) * Math.PI : 0;
+  const radius = (1000 - strokeWidth) / 2;
+
+  const dx = Math.cos(Math.PI - angle) * radius + radius;
+  const dy = Math.sin(Math.PI - angle) * -radius;
 
   return (
-    <div className={`${className}`}>
-      <div className={`rounded-[5px] bg-[#E5E7EB] h-[4px] mb-[8px] ${className}`}>
-        <div className={`h-[100%] bg-[#303958]`} style={{ width: rate + "%" }} />
+    <div className={`relative rounded-t-full h-[100%] overflow-hidden ${className}`}>
+      <div className="w-[100%] h-[200%]">
+        <svg viewBox="0 0 1000 1000" width="100%" height="100%">
+          <path d={`M ${strokeWidth / 2} 500 a ${radius} ${radius} 180 0 1 ${1000 - strokeWidth} 0`} fill="#F2F5FC" stroke="none" />
+          <path d={`M ${strokeWidth / 2} 500 a ${radius} ${radius} 180 0 1 ${1000 - strokeWidth} 0`} fill="none" stroke={backColor} strokeWidth={strokeWidth} />
+          <path d={`M ${strokeWidth / 2} 500 a ${radius} ${radius} 180 0 1 ${dx} ${dy}`} fill="none" stroke={valueColor} strokeWidth={strokeWidth} />
+        </svg>
       </div>
-      <div className="">
+      <div className="absolute bottom-[14px] left-[50%] translate-x-[-50%]">
         <div className="text-[11px] leading-[14px] text-[#1F2937] mb-[2px] text-center">{legend}</div>
         <BigDigits className="text-center">{hilight}</BigDigits>
       </div>

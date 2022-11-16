@@ -88,5 +88,5 @@ export function AlertPoint({ threshold, value, className = "" }) {
 }
 
 export function BigDigits({ children, className = "" }) {
-  return <div className={`text-[24px] leading-[28px] text-[#171725] ${className}`}>{children}</div>;
+  return <div className={`text-[24px] leading-[28px] text-[#171725] font-bold ${className}`}>{children}</div>;
 }
