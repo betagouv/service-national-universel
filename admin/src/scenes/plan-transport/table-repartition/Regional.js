@@ -49,7 +49,7 @@ export default function Regional() {
           <div className="text-lg font-medium text-gray-800 leading-7">
             {openReverseView ? "Masquer" : "Voir"} les territoires accueillis en {region}
           </div>
-          <div className="p-3 shadow bg-white rounded-full">
+          <div className="p-2.5 shadow bg-white rounded-full">
             <BsChevronDown
               className={`text-gray-700 font-bold h-4 w-4 cursor-pointer ${openReverseView ? "rotate-180" : ""}`}
               onClick={() => setOpenReverseView(!openReverseView)}
