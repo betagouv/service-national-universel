@@ -125,7 +125,7 @@ export default function Create() {
       "zip",
     ];
     for (const key of required) {
-      if (!values[key] || validator.isEmpty(values[key], { ignore_whitespace: true }) || values[key] === null) {
+      if (values[key] === null || !values[key] || validator.isEmpty(values[key], { ignore_whitespace: true })) {
         errors[key] = errorEmpty;
       }
     }
