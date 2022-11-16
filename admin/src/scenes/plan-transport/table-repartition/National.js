@@ -167,7 +167,7 @@ export default function National() {
           {regions?.length ? (
             regions.map((region) => (
               <Region
-                key={region}
+                key={"region" + region}
                 region={region}
                 youngsInRegion={youngsByRegion.find((r) => r.key === region)?.doc_count || 0}
                 placesCenterByRegion={placesCenterByRegion}
@@ -196,12 +196,14 @@ export default function National() {
 const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete, cohort, user }) => {
   const [open, setOpen] = React.useState(false);
   const [assignRegion, setAssignRegion] = React.useState([]);
+  const [avancement, setAvancement] = React.useState(0);
   const editDisabled = user.role !== ROLES.ADMIN;
   const history = useHistory();
 
   React.useEffect(() => {
     let assignRegion = data.filter((e) => e.fromRegion === region) || [];
     setAssignRegion(assignRegion);
+    setAvancement(assignRegion.length ? assignRegion[0].avancement : 0);
   }, [data]);
 
   return (
@@ -219,8 +221,8 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
             <Loading width="w-1/3" />
           ) : (
             <div className="relative flex flex-row gap-2 items-center flex-wrap">
-              {assignRegion.map((assign) => (
-                <div key={assign._id} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
+              {assignRegion.map((assign, i) => (
+                <div key={i + "assign"} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
                   {assign.toRegion}
                 </div>
               ))}
@@ -250,7 +252,17 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
             </div>
           )}
         </div>
-        <div className="w-[10%] text-center">{loadingQuery ? <Loading width="w-2/3" /> : <div>coucou</div>}</div>
+        <div className="w-[10%] text-center">
+          {loadingQuery ? (
+            <Loading width="w-2/3" />
+          ) : (
+            <div className="flex justify-center">
+              <div className={`px-2 py-1 rounded-lg text-xs font-bold uppercase leading-5 ${avancement === 100 ? "text-green-600 bg-[#E4F3EC]" : "text-blue-600 bg-[#E8EDFF]"}`}>
+                {avancement} %
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
@@ -271,6 +283,10 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
     };
   }, []);
 
+  //Because Dom Tom can assign young to the same region
+  const DOMTOM = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Mayotte", "Polynésie française", "Nouvelle-Calédonie"];
+  const isDomTom = DOMTOM.includes(region);
+
   const onChange = (fromRegion, toRegion) => {
     if (assignRegion.filter((e) => e.toRegion === toRegion)?.length !== 0) onDelete(fromRegion, toRegion);
     else onCreate(fromRegion, toRegion);
@@ -278,12 +294,12 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
   return (
     <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2 h-60 overflow-y-auto">
       {regionList
-        .filter((e) => e !== region)
-        .map((r) => {
+        .filter((e) => isDomTom || e !== region)
+        .map((r, i) => {
           return (
-            <div key={r} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
+            <div key={r + i} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
               <div className="flex items-center gap-2 text-gray-700 text-sm">
-                <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} />
+                <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} readOnly />
                 {r}
               </div>
               <div className="text-sm text-gray-500 uppercase">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>

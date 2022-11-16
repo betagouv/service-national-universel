@@ -1,8 +1,9 @@
 import React from "react";
+import { BsChevronRight } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { department2region, ES_NO_LIMIT, region2department } from "snu-lib";
-import ChevronRight from "../../../assets/icons/ChevronRight";
+import FrenchMap from "../../../assets/icons/FrenchMap";
 import Pencil from "../../../assets/icons/Pencil";
 import Profil from "../../../assets/icons/Profil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
@@ -10,8 +11,6 @@ import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import { Loading, SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
-import { BsChevronRight } from "react-icons/bs";
-import FrenchMap from "../../../assets/icons/FrenchMap";
 
 export default function Regional() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -32,6 +31,7 @@ export default function Regional() {
   const [youngsTotal, setYoungsTotal] = React.useState(0);
   const [centerTotal, setCenterTotal] = React.useState(0);
   const [regionAccueil, setRegionAccueil] = React.useState([]);
+  const [avancement, setAvancement] = React.useState(0);
 
   //precess
   const [data, setData] = React.useState([]);
@@ -48,8 +48,21 @@ export default function Regional() {
       const filteredData = data.filter((e, i) => {
         return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
       });
-      setRegionAccueil(filteredData.map((e) => e.toRegion));
-      return filteredData.map((e) => e.toRegion);
+      const regionAccueil = filteredData.map((e) => e.toRegion);
+      setRegionAccueil(regionAccueil);
+
+      //get percentage repartition
+      const avancement =
+        (region2department[region].reduce((acc, department) => {
+          if (!data.find((e) => e.fromDepartment === department)) return acc;
+          return (acc += 1);
+        }, 0) /
+          region2department[region].length) *
+          100 || 0;
+
+      setAvancement(Math.trunc(avancement));
+
+      return regionAccueil;
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des données");
@@ -196,7 +209,7 @@ export default function Regional() {
           <div className="flex flex-col gap-4 w-3/12">
             <div className="flex flex-col gap-2 bg-white rounded-lg shadow-sm p-4">
               <div className="text-sm text-gray-800 font-bold leading-5">Avancement</div>
-              <div className="text-2xl text-gray-800 font-bold leading-7">87%</div>
+              <div className="text-2xl text-gray-800 font-bold leading-7">{avancement} %</div>
             </div>
             <div className="flex flex-col gap-2 bg-white rounded-lg shadow-sm p-4">
               <div className="text-sm text-gray-800 font-bold leading-5">Volontaires de la région</div>
@@ -209,7 +222,7 @@ export default function Regional() {
           <div className="flex flex-col gap-4 w-4/12 rounded-lg shadow-sm bg-white p-4 relative">
             <div className="flex items-center gap-3">
               <div className="text-sm text-gray-800 font-bold leading-5">Région(s) d’accueil</div>
-              <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{regionAccueil.length} Centre(s)</div>
+              <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{centerTotal} Centre(s)</div>
             </div>
             {regionAccueil.map((r) => (
               <div key={r} className="text-gray-800 font-bold text-lg leading-5">
@@ -294,8 +307,8 @@ const Department = ({ department, loadingQuery, data, youngInDepartment, placesC
             <Loading width="w-1/3" />
           ) : (
             <div className="relative flex flex-row gap-2 items-center flex-wrap">
-              {assignDepartment.map((assign) => (
-                <div key={assign._id} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
+              {assignDepartment.map((assign, i) => (
+                <div key={i + "assign"} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
                   {assign.toDepartment}
                 </div>
               ))}
@@ -349,7 +362,7 @@ const SelectHostDepartment = ({ department, setOpen, onCreate, assignDepartment,
   };
 
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[70%] py-2 h-60 overflow-y-auto">
+    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[70%] py-2 max-h-60 overflow-y-auto">
       {regionAccueil.map((region, index) => (
         <div key={region} className="flex flex-col ">
           <div className="flex flex-row items-center justify-between px-3 py-2">
@@ -363,7 +376,7 @@ const SelectHostDepartment = ({ department, setOpen, onCreate, assignDepartment,
           {region2department[region].map((d) => (
             <div key={d} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(department, d)}>
               <div className="flex items-center gap-2 text-gray-700 text-sm">
-                <input type={"checkbox"} checked={assignDepartment.find((e) => e.toDepartment === d) || false} />
+                <input type={"checkbox"} checked={assignDepartment.find((e) => e.toDepartment === d) || false} readOnly />
                 {d}
               </div>
               <div className="text-sm text-gray-500 uppercase">{placesCenterByDepartment[d] ? placesCenterByDepartment[d] : 0} places</div>

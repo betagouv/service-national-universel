@@ -6,6 +6,7 @@ const { ERRORS } = require("../../utils");
 const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
+const { region2department } = require("snu-lib");
 
 router.post("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -140,6 +141,17 @@ router.get("/region/:cohort", passport.authenticate("referent", { session: false
     const filteredData = data.filter((e, i) => {
       return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
     });
+
+    for (const dataToEdit of filteredData) {
+      let avancement =
+        (region2department[dataToEdit.fromRegion].reduce((acc, department) => {
+          if (!data.find((e) => e.fromDepartment === department)) return acc;
+          return (acc += 1);
+        }, 0) /
+          region2department[dataToEdit.fromRegion].length) *
+          100 || 0;
+      dataToEdit._doc.avancement = Math.trunc(avancement);
+    }
 
     return res.status(200).send({ ok: true, data: filteredData });
   } catch (error) {
