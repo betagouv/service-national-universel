@@ -17,10 +17,11 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_SMS } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate, sendSMS } = require("../sendinblue");
 const { format } = require("date-fns");
+const config = require("../config");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -321,6 +322,83 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) {
+      capture(error_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { error: error_parent_id, value: parentId } = Joi.number().valid(1, 2).required().validate(req.params.idParent, { stripUnknown: true });
+    if (error_parent_id) {
+      capture(error_parent_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // parent 1
+    if (parentId === 1) {
+      if (young.parent1AllowSNU || young.parentAllowSNU) {
+        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      }
+      if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone,
+          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+      // parent 2
+    } else {
+      if (
+        !young.parent2Status ||
+        !young.parent1AllowSNU ||
+        young.parent1AllowSNU === "false" ||
+        young.parentAllowSNU === "false" ||
+        young.parent1AllowImageRights === "false" ||
+        young.parent2AllowImageRights
+      ) {
+        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      }
+      if (young.parent2ContactPreference === "phone") {
+        await sendSMS(
+          young.parent2Phone,
+          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
+          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+    }
+
+    return res.status(200).send({ ok: true });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

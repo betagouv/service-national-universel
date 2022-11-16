@@ -41,6 +41,8 @@ import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
+import { copyToClipboard } from "../../utils";
+import { appURL } from "../../config";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -58,6 +60,8 @@ const parentStatusOptions = [
   { label: "Père", value: "father" },
   { label: "Autre", value: "representant" },
 ];
+
+const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
@@ -1509,7 +1513,9 @@ function SectionConsentements({ young, onChange }) {
               {young.parent1FirstName} {young.parent1LastName}
             </span>
           </div>
-          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          {young.parent1ValidationDate && (
+            <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          )}
         </div>
         <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
@@ -1550,17 +1556,44 @@ function SectionConsentements({ young, onChange }) {
         <div className="mt-[16px] flex itemx-center justify-between">
           <div className="grow text-[#374151] text-[14px] leading-[20px]">
             <div className="font-bold">Droit à l&apos;image</div>
-            <div>Accord : {translate(young.parent1AllowImageRights)}</div>
+            <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
-        {(young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && (
+        {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
           <div className="mt-[16px] flex itemx-center justify-between">
             <div className="grow text-[#374151] text-[14px] leading-[20px]">
               <div className="font-bold">Consentement à la participation</div>
-              <div>Accord : {translate(young.parent1AllowSNU)}</div>
+              <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
             </div>
             <MiniSwitch value={young.parent1AllowSNU === "true"} />
+          </div>
+        ) : (
+          <div className="mt-2 flex items-center justify-between">
+            <div
+              className="cursor-pointer italic text-[#1D4ED8]"
+              onClick={() => {
+                copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
+                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+              }}>
+              Copier le lien du formulaire
+            </div>
+            <BorderButton
+              mode="blue"
+              onClick={async () => {
+                try {
+                  const response = await api.get(`/young-edition/${young._id}/remider/1`);
+                  if (response.ok) {
+                    toastr.success(translate("REMINDER_SENT"), "");
+                  } else {
+                    toastr.error(translate(response.code), "");
+                  }
+                } catch (error) {
+                  toastr.error(translate(error.code), "");
+                }
+              }}>
+              Relancer
+            </BorderButton>
           </div>
         )}
         {young.parent2Status && (
@@ -1572,16 +1605,50 @@ function SectionConsentements({ young, onChange }) {
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
               </div>
-              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              {young.parent2ValidationDate && (
+                <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              )}
             </div>
-            <div className="mt-[16px] flex items-center justify-between">
-              <div className="grow text-[#374151] text-[14px] leading-[20px]">
-                <div className="font-bold">Droit à l&apos;image</div>
-                <div>Accord : {translate(young.parent2AllowImageRights)}</div>
+            {young.parent1AllowImageRights === "true" && (
+              <div className="mt-[16px] flex items-center justify-between">
+                <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                  <div className="font-bold">Droit à l&apos;image</div>
+                  <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                </div>
+                {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
               </div>
-              {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
-            </div>
-            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? (
+            )}
+            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && !young.parent2AllowImageRights && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                  }}>
+                  Copier le lien du formulaire
+                </div>
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
+                    }
+                  }}>
+                  Relancer
+                </BorderButton>
+              </div>
+            )}
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
+              young.status,
+            ) ? (
               <div className="mt-[16px] flex items-center justify-between">
                 <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
                   <div className="font-bold">Consentement à la participation</div>
