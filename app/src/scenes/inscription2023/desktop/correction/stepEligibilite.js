@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import validator from "validator";
+import dayjs from "dayjs";
 import IconFrance from "../../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import CheckBox from "../../../../components/inscription/checkbox";
@@ -140,13 +141,13 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,
       zip: data.zip,
-      birthdateAt: new Date(data.birthDate),
+      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
     };
 
     try {
       const res = await api.post("/cohort-session/eligibility/2023", {
         department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
-        birthDate: data.birthDate,
+        birthDate: updates.birthdateAt,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
       });
