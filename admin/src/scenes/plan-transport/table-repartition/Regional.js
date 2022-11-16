@@ -1,5 +1,6 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 import { department2region, ES_NO_LIMIT, region2department } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
@@ -10,6 +11,7 @@ import Select from "../components/Select";
 
 export default function Regional() {
   const urlParams = new URLSearchParams(window.location.search);
+  const history = useHistory();
   const region = urlParams.get("region");
   const [cohort, setCohort] = React.useState("Juillet 2022"); //React.useState(urlParams.get("cohort"));
   const cohortList = [
@@ -55,7 +57,11 @@ export default function Regional() {
       try {
         setLoadingQuery(true);
 
-        let regionAccueil = await getRepartitionDepartment();
+        const regionAccueil = await getRepartitionDepartment();
+        if (regionAccueil.length === 0) {
+          toastr.error(`Aucune région d'accueil définie pour la région ${region}`);
+          return history.push("/plan-de-transport/table-repartition");
+        }
 
         //get youngs by department
         const bodyYoung = {

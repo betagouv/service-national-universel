@@ -204,7 +204,9 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
     <>
       <hr />
       <div className="flex px-4 py-2 items-center">
-        <div className="w-[30%] flex flex-col gap-1 cursor-pointer" onClick={() => history.push(`/plan-de-transport/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
+        <div
+          className={`w-[30%] flex flex-col gap-1 ${assignRegion.length ? "cursor-pointer" : ""}`}
+          onClick={() => assignRegion.length && history.push(`/plan-de-transport/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
           <div className="text-base text-[#242526] font-bold leading-6">{region}</div>
           <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
         </div>
