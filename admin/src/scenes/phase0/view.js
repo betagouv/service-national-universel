@@ -1609,7 +1609,7 @@ function SectionConsentements({ young, onChange }) {
                 <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
               )}
             </div>
-            {young.parent1AllowImageRights === "true" && (
+            {young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && (
               <div className="mt-[16px] flex items-center justify-between">
                 <div className="grow text-[#374151] text-[14px] leading-[20px]">
                   <div className="font-bold">Droit à l&apos;image</div>
@@ -1618,7 +1618,7 @@ function SectionConsentements({ young, onChange }) {
                 {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
               </div>
             )}
-            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && !young.parent2AllowImageRights && (
+            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && !young.parent2AllowImageRights && (
               <div className="mt-2 flex items-center justify-between">
                 <div
                   className="cursor-pointer italic text-[#1D4ED8]"

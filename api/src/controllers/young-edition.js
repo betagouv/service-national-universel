@@ -374,6 +374,7 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
         !young.parent2Status ||
         !young.parent1AllowSNU ||
         young.parent1AllowSNU === "false" ||
+        young.parent2AllowSNU === "false" ||
         young.parentAllowSNU === "false" ||
         young.parent1AllowImageRights === "false" ||
         young.parent2AllowImageRights
