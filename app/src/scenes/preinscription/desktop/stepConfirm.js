@@ -52,7 +52,7 @@ export default function StepDone() {
 
     try {
       // eslint-disable-next-line no-unused-vars
-      const { user, code, ok } = await api.post("/young/signup2023", values);
+      const { user, code, ok } = await api.post("/young/signup", values);
 
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
 
