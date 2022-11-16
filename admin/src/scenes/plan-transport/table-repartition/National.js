@@ -1,6 +1,6 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { ES_NO_LIMIT } from "snu-lib";
+import { ES_NO_LIMIT, ROLES } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Select from "../components/Select";
@@ -8,8 +8,10 @@ import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function National() {
+  const user = useSelector((state) => state.Auth.user);
   const [cohort, setCohort] = React.useState("Juillet 2022");
   const cohortList = [
     { label: "Juillet 2022", value: "Juillet 2022" },
@@ -174,6 +176,7 @@ export default function National() {
                 data={data}
                 loadingQuery={loadingQuery}
                 cohort={cohort}
+                user={user}
               />
             ))
           ) : (
@@ -190,9 +193,10 @@ export default function National() {
   );
 }
 
-const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete, cohort }) => {
+const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete, cohort, user }) => {
   const [open, setOpen] = React.useState(false);
   const [assignRegion, setAssignRegion] = React.useState([]);
+  const editDisabled = user.role !== ROLES.ADMIN;
   const history = useHistory();
 
   React.useEffect(() => {
@@ -220,25 +224,29 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
                   {assign.toRegion}
                 </div>
               ))}
-              {assignRegion.length === 0 ? (
-                <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
-                  À assigner
-                </button>
-              ) : (
-                <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
-                  <Pencil className="w-4 h-4 text-white" />
-                </div>
+              {!editDisabled && (
+                <>
+                  {assignRegion.length === 0 ? (
+                    <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
+                      À assigner
+                    </button>
+                  ) : (
+                    <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
+                      <Pencil className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  {open ? (
+                    <SelectHostRegion
+                      region={region}
+                      setOpen={setOpen}
+                      placesCenterByRegion={placesCenterByRegion}
+                      onCreate={onCreate}
+                      assignRegion={assignRegion}
+                      onDelete={onDelete}
+                    />
+                  ) : null}
+                </>
               )}
-              {open ? (
-                <SelectHostRegion
-                  region={region}
-                  setOpen={setOpen}
-                  placesCenterByRegion={placesCenterByRegion}
-                  onCreate={onCreate}
-                  assignRegion={assignRegion}
-                  onDelete={onDelete}
-                />
-              ) : null}
             </div>
           )}
         </div>
