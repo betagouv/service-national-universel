@@ -3,7 +3,7 @@ import Field from "./Field";
 import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../services/api";
 
-export default function SchoolEditor({ young, onChange, className }) {
+export default function SchoolEditor({ young, onChange, className, showBackgroundColor = true }) {
   const [schoolInFrance, setSchoolInFrance] = useState(true);
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
@@ -188,6 +188,7 @@ export default function SchoolEditor({ young, onChange, className }) {
           name="schoolCity"
           label="Ville de l'établissement"
           value={young.schoolCity}
+          showBackgroundColor={showBackgroundColor}
           mode="edition"
           className="mb-[16px]"
           type="select"
@@ -200,6 +201,7 @@ export default function SchoolEditor({ young, onChange, className }) {
         <Field
           name="schoolCountry"
           label="Pays de l'établissement"
+          showBackgroundColor={showBackgroundColor}
           value={young.schoolCountry}
           mode="edition"
           className="mb-[16px]"
@@ -217,6 +219,7 @@ export default function SchoolEditor({ young, onChange, className }) {
           name="schoolName"
           label="Nom de l'établissement"
           value={young.schoolName}
+          showBackgroundColor={showBackgroundColor}
           mode="edition"
           className="mb-[16px]"
           type="select"

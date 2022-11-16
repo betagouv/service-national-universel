@@ -1,5 +1,5 @@
 import React from "react";
-import SimpleSelect from "../components/SimpleSelect";
+import SimpleSelect from "../../phase0/components/SimpleSelect";
 import dayjs from "dayjs";
 
 export default function Field({
@@ -31,9 +31,19 @@ export default function Field({
             className="block w-[100%] cursor-pointer"
           />
         )}
-        {type === "select" && <SimpleSelect value={value} name={name} transformer={transformer} options={options} onChange={handleChange} filterOnType={filterOnType} />}
-        {type === "text" && <input readOnly={readyOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block p-[5px] w-[100%]" />}
-        {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
+        {type === "select" && (
+          <SimpleSelect
+            value={value}
+            name={name}
+            showBackgroundColor={false}
+            transformer={transformer}
+            options={options}
+            onChange={(value) => handleChange(name, value)}
+            filterOnType={filterOnType}
+          />
+        )}
+        {type === "text" && <input readOnly={readyOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block p-1 w-[100%]" />}
+        {errors[name] && <div className="text-[#EF4444] mt-2">{errors[name]}</div>}
       </div>
     </div>
   );

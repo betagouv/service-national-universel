@@ -165,7 +165,6 @@ export default function Create() {
         setSelectedRepresentant(2);
         errors.parent2Email = errorEmail;
       }
-      console.log(parent2FirstNameEmpty, parent2LastNameEmpty);
       if (parent2FirstNameEmpty) {
         errors.parent2FirstName = errorEmpty;
       }
@@ -217,8 +216,6 @@ export default function Create() {
     if (validator.isEmpty(values.latestCNIFileCategory)) {
       toastr.error("Vous devez spécifier une catégorie pour le document d'identité");
     }
-    // il faut check le RP2 si rempli à moitié
-    //
     if (Object.keys(errors).length > 0) {
       toastr.error("Le formulaire n'est pas complet");
     }
@@ -316,9 +313,9 @@ export default function Create() {
               </div>
             </div>
             {selectedRepresentant === 1 ? (
-              <Representant1 values={values} errors={errors} handleChange={handleChange} />
+              <Representant1 values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
             ) : (
-              <Representant2 values={values} errors={errors} handleChange={handleChange} />
+              <Representant2 values={values} errors={errors} handleChange={handleChange} setFieldValue={setFieldValue} />
             )}
           </div>
         </div>
@@ -364,7 +361,7 @@ export default function Create() {
   );
 }
 
-function Representant2({ values, handleChange, errors }) {
+function Representant2({ values, handleChange, errors, setFieldValue }) {
   return (
     <>
       <Field
@@ -415,7 +412,7 @@ function Representant2({ values, handleChange, errors }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={setFieldValue}
+        handleChange={handleChange}
       />
       {values.parent2OwnAddress === "true" && (
         <>
@@ -448,7 +445,7 @@ function Representant2({ values, handleChange, errors }) {
   );
 }
 
-function Representant1({ values, handleChange, errors }) {
+function Representant1({ values, handleChange, errors, setFieldValue }) {
   return (
     <>
       <Field
@@ -464,7 +461,7 @@ function Representant1({ values, handleChange, errors }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        handleChange={setFieldValue}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
@@ -499,7 +496,7 @@ function Representant1({ values, handleChange, errors }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        handleChange={setFieldValue}
       />
       {values.parent1OwnAddress === "true" && (
         <>
@@ -540,10 +537,10 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
       }
     }
   };
-  const onChangeSituation = (e) => {
-    setFieldValue("employed", youngEmployedSituationOptions.includes(e.target.value) ? "true" : "false");
-    setFieldValue("schooled", youngSchooledSituationOptions.includes(e.target.value) ? "true" : "false");
-    setFieldValue("situation", e.target.value);
+  const onChangeSituation = (key, value) => {
+    setFieldValue("employed", youngEmployedSituationOptions.includes(value) ? "true" : "false");
+    setFieldValue("schooled", youngSchooledSituationOptions.includes(value) ? "true" : "false");
+    setFieldValue("situation", value);
   };
   const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
   const gradeOptions = Object.keys(GRADES)
@@ -568,7 +565,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
       />
       {values.situation !== "" && values.schooled === "true" && (
         <div className="mt-4">
-          <SchoolEditor young={values} onChange={onChange} />
+          <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
           <Field
             name="grade"
             label="Classe"
@@ -578,7 +575,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
             transformer={translate}
             className="flex-[1_1_50%]"
             options={gradeOptions}
-            handleChange={handleChange}
+            handleChange={setFieldValue}
           />
         </div>
       )}
@@ -721,7 +718,7 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
         type="select"
         options={genderOptions}
         transformer={translate}
-        handleChange={handleChange}
+        handleChange={setFieldValue}
       />
       <Field name="email" label="Email" errors={errors} value={values.email} className="mb-4" transformer={translate} handleChange={handleChange} />
       <Field name="phone" label="Téléphone" errors={errors} value={values.phone} transformer={translate} handleChange={handleChange} />
