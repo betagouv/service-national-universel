@@ -97,6 +97,10 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
 
     if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    const formatedDate = new Date(update.birthdateAt);
+    formatedDate.setUTCHours(11, 0, 0, 0);
+    update.birthdateAt = formatedDate;
+
     young.set(update);
 
     await young.save({ fromUser: req.user });
