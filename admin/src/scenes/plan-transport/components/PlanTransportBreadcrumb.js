@@ -1,22 +1,14 @@
 import React from "react";
 import FlagFr from "../../../assets/flags/FlagFr";
 
-export default function PlanTransportBreadcrumb({ className = "", region = null, department = null }) {
-  function goToNational() {
-    console.log("go to national");
-  }
-
-  function goToRegion() {
-    console.log("go to region");
-  }
-
+export default function PlanTransportBreadcrumb({ className = "", region = null, department = null, onGoToRegion = () => {}, onGoToNational = () => {} }) {
   return (
     <div className={`flex ${className}`}>
-      <Crumb color="#E5E7EB" onClick={goToNational} className="z-20" key="national">
+      <Crumb color="#E5E7EB" onClick={onGoToNational} className="z-20" key="national">
         <FlagFr />
       </Crumb>
       {region && (
-        <Crumb color="#D1D5DB" onClick={goToRegion} className="ml-[-12px] z-10" key="region">
+        <Crumb color="#D1D5DB" onClick={onGoToRegion} className="ml-[-12px] z-10" key="region">
           {region.label}
         </Crumb>
       )}
