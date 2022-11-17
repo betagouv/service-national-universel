@@ -17,6 +17,7 @@ const Schema = new mongoose.Schema({
 
   cohort: {
     type: [String],
+    required: true,
     enum: COHORTS,
     documentation: {
       description: "Cohorte du point de rassemblement",
@@ -25,6 +26,7 @@ const Schema = new mongoose.Schema({
 
   name: {
     type: String,
+    required: true,
     documentation: {
       description: "Nom du point de rassemblement",
     },
@@ -32,6 +34,7 @@ const Schema = new mongoose.Schema({
 
   address: {
     type: String,
+    required: true,
     documentation: {
       description: "Adresse du point de rassemblement",
     },
@@ -62,6 +65,7 @@ const Schema = new mongoose.Schema({
 
   city: {
     type: String,
+    required: true,
     documentation: {
       description: "Ville du point de rassemblement",
     },
@@ -69,6 +73,7 @@ const Schema = new mongoose.Schema({
 
   zip: {
     type: String,
+    required: true,
     documentation: {
       description: "Code postal du point de rassemblement",
     },
@@ -76,6 +81,7 @@ const Schema = new mongoose.Schema({
 
   department: {
     type: String,
+    required: true,
     documentation: {
       description: "Département du point de rassemblement",
     },
@@ -83,6 +89,7 @@ const Schema = new mongoose.Schema({
 
   region: {
     type: String,
+    required: true,
     documentation: {
       description: "Région du point de rassemblement",
     },
