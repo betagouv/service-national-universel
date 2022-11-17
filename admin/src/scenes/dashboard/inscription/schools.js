@@ -47,7 +47,6 @@ export default function Schools({ filter }) {
 
   return (
     <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      {/* <Missions> */}
       <ReactiveList
         defaultQuery={getDefaultQuery}
         componentId="result"
@@ -56,76 +55,45 @@ export default function Schools({ filter }) {
         paginationAt="bottom"
         size={10}
         showLoader={true}
+        renderResultStats={({ numberOfResults, displayedResults }) => {
+          return (
+            <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${displayedResults}  établissement${numberOfResults > 1 ? "s" : ""} affichés sur ${numberOfResults}`}</div>
+          );
+        }}
         loader="Chargement..."
         // innerClass={{ pagination: "pagination" }}
         // dataField="created_at"
-        renderResultStats={({ numberOfResults }) => {
-          return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} établissement${numberOfResults > 1 ? "s" : ""}`}</div>;
-        }}
         // sortOptions={[
         //   { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
         // ]}
         // defaultSortOption="La plus proche"
-        render={(body) => {
-          console.log("🚀 ~ file: schools.js ~ line 80 ~ data", body);
+        render={({ rawData }) => {
+          console.log("🚀 ~ file: schools.js ~ line 80 ~ data", rawData);
+
+          const totalHits = rawData?.hits?.total.value;
 
           return (
-            <table className="w-full">
-              <thead className="">
-                <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-10">
-                  <th className="py-3 pl-2 text-left">Établissements</th>
-                  <th className="py-3 pl-2 text-left">Volontaires au sein du département</th>
-                  <th className="py-3 pl-2 text-left">Volontaires hors du département</th>
-                  <th className="py-3 pl-2 text-left">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">{}</tbody>
-            </table>
+            <div className="rounded-xl bg-white border">
+              <table className="w-full py-2 border-spacing-x-2 ">
+                <thead className="">
+                  <tr className="text-xs uppercase text-[#73737D] border-b">
+                    <th className="py-3 pl-2 text-left">Établissements</th>
+                    <th className="py-3 pl-2 text-left">Volontaires au sein du département</th>
+                    <th className="py-3 pl-2 text-left">Volontaires hors du département</th>
+                    <th className="py-3 pl-2 text-left">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {rawData?.aggregations?.names.buckets.map((e) => (
+                    <CardSchool key={e._id} school={e} totalHits={totalHits} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           );
-          // {data.map((mission, index) => {
-
-          //   return data.map((e) => {
-          //     const tags = [];
-
-          //     const totalHits = responses[0].hits.total.value;
-          // console.log("🚀 ~ file: schools.js ~ line 42 ~ totalHits", totalHits);
-          // const arr = responses[0].aggregations.names.buckets.map((e) => {
-          //   const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
-          //   const total = e.doc_count;
-          //   const isThereDep = e.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
-          //   const inDepartment = isThereDep.doc_count || 0;
-
-          //   return {
-          //     id: e.key,
-          //     count: {
-          //       total,
-          //       department: inDepartment,
-          //       outOfDepartment: total - inDepartment,
-          //     },
-          //     percent: {
-          //       total: round1Decimal((total / totalHits) * 100),
-          //       department: round1Decimal((inDepartment / total) * 100),
-          //       outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
-          //     },
-          //     name: schoolInfo.schoolName,
-          //     city: schoolInfo.schoolCity,
-          //     zip: schoolInfo.schoolZip,
-          //     department: schoolInfo.schoolDepartment,
-          //     type: schoolInfo.schoolType,
-          //   };
-          // });
-          // setSchools(arr);
-
-          // e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-          // // tags.push(e.remote ? "À distance" : "En présentiel");
-          // e.domains.forEach((d) => tags.push(translate(d)));
-          // return <CardSchool key={e._id} school={e} />;
-          //   return null;
-          // });
         }}
         renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucuns établissements ne correspondent à ces filtres.</div>}
       />
-      {/* </Missions> */}
     </ReactiveBase>
     // <TableWrapper>
     //   <Table>
@@ -179,27 +147,36 @@ export default function Schools({ filter }) {
   );
 }
 
-const CardSchool = ({ school }) => {
+const CardSchool = ({ school, totalHits }) => {
   console.log("🚀 ~ file: schools.js ~ line 183 ~ CardSchool ~ school", school);
+
+  const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
+  const total = school.doc_count;
+  const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
+  const inDepartment = isThereDep.doc_count || 0;
+  const outDepartment = total - inDepartment;
+
   return (
-    <tr className={`"hover:!bg-gray-100"}`}>
-      <td className={`px-4 rounded-l-lg`}></td>
+    <tr className={`hover:bg-gray-300 border-y border-gray-100`}>
+      <td className={`px-4 rounded-l-lg`}>{`${schoolInfo.schoolName}`}</td>
       <td className={`py-3 text-left`}>
         <div>
-          <div className={`font-bold text-[15px]`}>{`${hit.name}`}</div>
-          <div className={`font-normal text-xs`}>{`${hit.structureName}`}</div>
-          <div className={`font-normal text-xs`}>{`${hit.city || ""} • (${hit.department || ""})`}</div>
+          <div className={`font-bold text-[15px]`}>{inDepartment}</div>
+          <div className={`font-normal text-xs`}>{`${round1Decimal((inDepartment / total) * 100)} %`}</div>
         </div>
       </td>
       <td className={`py-3 text-left`}>
         <div>
-          <span className={"text-[#cbd5e0] mr-1"}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
-        </div>
-        <div>
-          <span className={"text-[#cbd5e0] mr-1"}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
+          <div className={`font-bold text-[15px]`}>{outDepartment}</div>
+          <div className={`font-normal text-xs`}>{`${round1Decimal((outDepartment / total) * 100)} %`}</div>
         </div>
       </td>
-      <td className={`rounded-r-lg text-left`}></td>
+      <td className={`rounded-r-lg text-left`}>
+        <div>
+          <div className={`font-bold text-[15px]`}>{total}</div>
+          <div className={`font-normal text-xs`}>{`${round1Decimal((total / totalHits) * 100)} %`}</div>
+        </div>
+      </td>
     </tr>
   );
   // const tags = [];
@@ -267,7 +244,6 @@ const Table = styled.table`
   border-collapse: separate;
   border-spacing: 0 2px;
 `;
-const TableHeaderRow = styled.tr``;
 const TableHeaderCell = styled.td`
   padding: 18px 20px;
   color: #696974;
