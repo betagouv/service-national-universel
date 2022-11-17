@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ROLES, translate, translateCohort } from "snu-lib";
+import { ROLES, translate, translateCohort, YOUNG_STATUS } from "snu-lib";
 import IconChangementCohorte from "../../../assets/IconChangementCohorte";
 import Pencil from "../../../assets/icons/Pencil";
 import Badge from "../../../components/Badge";
 import Chevron from "../../../components/Chevron";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
+import { getEligibleSessions } from "../../../utils";
 import { BorderButton, PlainButton } from "./Buttons";
 
 export function ChangeCohortPen({ young, onChange }) {
@@ -18,26 +20,15 @@ export function ChangeCohortPen({ young, onChange }) {
 
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
-  const getEligibleCohorts = async () => {
-    const { data } = await api.post("/cohort-session/eligibility/2023", {
-      birthDate: young.birthdateAt,
-      schoolLevel: young.grade,
-      department: young?.schoolDepartment || young?.department,
-      frenchNationality: young.frenchNationality,
-      status: young.status,
-    });
-    const isArray = Array.isArray(data);
-    if (isArray) {
-      const options = data.map((c) => ({ name: c.name, goal: c.goalReached })).filter((c) => c.name !== young.cohort);
-      setOptions(options);
-    } else {
-      setOptions([]);
-    }
-  };
-
   useEffect(() => {
     if (young) {
-      getEligibleCohorts();
+      (async function getSessions() {
+        const data = await getEligibleSessions(young);
+        if (Array.isArray(data)) {
+          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull })).filter((c) => c.name !== young.cohort);
+          setOptions(cohorts);
+        } else setOptions([]);
+      })();
     }
   }, [young]);
 
@@ -61,6 +52,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   const [newCohort, setNewCohort] = useState({});
   const [motif, setMotif] = useState("");
   const [message, setMessage] = useState("");
+  const [action, setAction] = useState("");
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -70,10 +62,14 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
     "Autre",
   ];
 
+  const actions = ["Placer le volontaire sur liste complémentaire.", "L'inscrire sur cette session."];
+
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
+      if (action === "Placer le volontaire sur liste complémentaire.") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
+      if (young.status === YOUNG_STATUS.WAITING_LIST && !newCohort.isFull) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_VALIDATION });
       await onChange();
       toastr.success("Cohorte modifiée avec succès");
       setModalConfirmWithMessage(false);
@@ -145,17 +141,33 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
         <div className="bg-white rounded-[8px]">
           <div className="px-[24px] pt-[24px]">
             <h1 className="text-[20px] leading-[28px] text-red-500 mt-[24px] text-center">ALERTE</h1>
-            {/* {newCohort.goal === true ? (
+            {newCohort.isFull && (
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
                 <div className="flex gap-2 items-center">
                   <IoWarningOutline className="h-6 w-6" />
                   <p className="font-bold">Attention</p>
                 </div>
                 <p className="text-sm">
-                  Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Le volontaire va être positionné(e) sur liste complémentaire.
+                  Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Merci de placer le candidat sur liste complémentaire ou de vous rapprocher de
+                  votre coordinateur régional avant de valider la candidature.
                 </p>
+                <UncontrolledDropdown isActiveFromChild className="mt-2">
+                  <DropdownToggle tag="button">
+                    <div className="border-[#D1D5DB] border-[1px] rounded-[100px] bg-white flex items-center justify-between w-[375px] py-[4px] px-[15px]">
+                      {action || "Que souhaitez-vous faire ?"}
+                      <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
+                    </div>
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    {actions.map((e) => (
+                      <DropdownItem key={e} className="dropdown-item" onClick={() => setAction(e)}>
+                        {e}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </UncontrolledDropdown>
               </div>
-            ) : null} */}
+            )}
             <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">
               Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer :
             </p>

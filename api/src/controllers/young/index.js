@@ -49,7 +49,7 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
-const { isSessionFull } = require("../../utils/cohort");
+const { getAvailableSessions } = require("../../utils/cohort");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -536,7 +536,6 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     }
 
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
-    console.log("🚀 ~ file: index.js ~ line 510 ~ router.put ~ cohort", cohort);
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
@@ -552,27 +551,19 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     }
 
     const dep = young.schoolDepartment || young.department;
-    if (isSessionFull(dep, cohort) === true) {
-      young.set({
-        cohort,
-        cohortChangeReason,
-        cohortDetailedChangeReason,
-        status: YOUNG_STATUS.WAITING_LIST,
-        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-        cohesionStayPresence: undefined,
-        cohesionStayMedicalFileReceived: undefined,
-      });
-    } else {
-      young.set({
-        cohort,
-        cohortChangeReason,
-        cohortDetailedChangeReason,
-        status: YOUNG_STATUS.VALIDATED,
-        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-        cohesionStayPresence: undefined,
-        cohesionStayMedicalFileReceived: undefined,
-      });
-    }
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthDateAt, young.status);
+    const session = sessions.find(({ name }) => name === cohort);
+    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    young.set({
+      cohort,
+      cohortChangeReason,
+      cohortDetailedChangeReason,
+      status: session.isFull ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED,
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+      cohesionStayPresence: undefined,
+      cohesionStayMedicalFileReceived: undefined,
+    });
 
     await young.save({ fromUser: req.user });
 

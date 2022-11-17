@@ -73,6 +73,7 @@ const {
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
+const { getAvailableSessions } = require("../utils/cohort");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -477,6 +478,10 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     const { cohort, cohortChangeReason } = validatedBody.value;
+
+    const dep = young.schoolDepartment || young.department;
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthdateAt, young.status);
+    if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
