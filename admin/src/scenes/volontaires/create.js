@@ -563,7 +563,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         value={values.birthdateAt}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        setFielValue={setFieldValue}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
@@ -685,7 +685,7 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
         value={values.latestCNIFileExpirationDate}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        setFielValue={setFieldValue}
       />
       {values.latestCNIFileExpirationDate !== null &&
         new Date(values.latestCNIFileExpirationDate).getTime() < sessions2023.find((session) => session.name === values.cohort).dateStart.getTime() && (
