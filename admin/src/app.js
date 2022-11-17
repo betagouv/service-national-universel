@@ -66,10 +66,14 @@ export default function App() {
         const res = await api.get("/referent/signin_token");
         if (!res.ok || !res.user) {
           dispatch(setUser(null));
+          Sentry.setUser(null);
           return setLoading(false);
         }
         if (res.token) api.setToken(res.token);
-        if (res.user) dispatch(setUser(res.user));
+        if (res.user) {
+          dispatch(setUser(res.user));
+          Sentry.setUser({ id: res.user._id, email: res.user.email, segment: res.user.role });
+        }
       } catch (e) {
         console.log(e);
       }
