@@ -548,7 +548,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     let result = true;
     let errors = {};
 
-    if (!validator.isEmail(data.email)) {
+    if (!data.email || !validator.isEmail(data.email)) {
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
