@@ -69,7 +69,7 @@ export default function App() {
           return setLoading(false);
         }
         if (res.token) api.setToken(res.token);
-        if (res.user) Sentry.setUser({ id: res.user._id, email: res.user.email, segment: res.user.role });
+        if (res.user) dispatch(setUser(res.user));
       } catch (e) {
         console.log(e);
       }

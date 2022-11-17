@@ -80,7 +80,9 @@ export default function App() {
           return setLoading(false);
         }
         if (token) api.setToken(token);
-        if (ok && user) dispatch(setYoung(user));
+        if (ok && user) {
+          dispatch(setYoung(user));
+        }
       } catch (e) {
         console.log(e);
       }
