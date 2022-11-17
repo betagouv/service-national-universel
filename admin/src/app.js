@@ -21,6 +21,7 @@ import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
 import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
+import CenterV2 from "./scenes/centersV2";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
 import SupportCenter from "./scenes/support-center";
@@ -186,6 +187,7 @@ const Home = () => {
             <RestrictedRoute path="/contenu" component={Content} />
             <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
             <RestrictedRoute path="/centre" component={Center} />
+            <RestrictedRoute path="/centreV2" component={CenterV2} />
             <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
