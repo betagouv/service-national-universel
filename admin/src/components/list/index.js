@@ -1,6 +1,29 @@
 import styled from "styled-components";
 import { colors } from "../../utils";
 
+export const SearchStyle = styled.div`
+  width: 33%;
+  margin-right: 10px;
+  height: 42px;
+  overflow: hidden;
+  box-shadow: none;
+  align-items: center;
+  background-color: white;
+  border-radius: 7px;
+  border: 1px solid #d1d5db;
+  padding: 0;
+  .searchfield {
+    overflow: hidden;
+    box-shadow: none;
+    background-color: white;
+  }
+  .searchbox {
+    overflow: hidden;
+    height: 42px;
+    background-color: white;
+    border: none;
+  }
+`;
 export const Help = styled.div`
   margin-left: auto;
   color: ${colors.darkPurple};
