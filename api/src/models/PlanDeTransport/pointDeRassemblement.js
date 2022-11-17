@@ -6,6 +6,15 @@ const { COHORTS } = require("snu-lib");
 const MODELNAME = "pointderassemblement";
 
 const Schema = new mongoose.Schema({
+  code: {
+    type: String,
+    required: true,
+    unique: true,
+    documentation: {
+      description: "Code du point de rassemblement",
+    },
+  },
+
   cohort: {
     type: [String],
     enum: COHORTS,
