@@ -57,68 +57,73 @@ export default function Schools({ filter }) {
         size={10}
         showLoader={true}
         loader="Chargement..."
-        innerClass={{ pagination: "pagination" }}
-        dataField="created_at"
+        // innerClass={{ pagination: "pagination" }}
+        // dataField="created_at"
         renderResultStats={({ numberOfResults }) => {
           return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} établissement${numberOfResults > 1 ? "s" : ""}`}</div>;
         }}
         // sortOptions={[
         //   { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
-        //   { label: "La plus proche", dataField: "sort.keyword", sortBy: "asc" },
-        //   { label: "La plus longue", dataField: "duration.keyword", sortBy: "desc" },
-        //   { label: "La plus courte", dataField: "duration.keyword", sortBy: "asc" },
         // ]}
         // defaultSortOption="La plus proche"
-        render={({ data }) => {
-          console.log("🚀 ~ file: schools.js ~ line 80 ~ data", data);
-          return data.map((e) => {
-            const tags = [];
+        render={(body) => {
+          console.log("🚀 ~ file: schools.js ~ line 80 ~ data", body);
 
-            //     const totalHits = responses[0].hits.total.value;
-            // console.log("🚀 ~ file: schools.js ~ line 42 ~ totalHits", totalHits);
-            // const arr = responses[0].aggregations.names.buckets.map((e) => {
-            //   const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
-            //   const total = e.doc_count;
-            //   const isThereDep = e.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
-            //   const inDepartment = isThereDep.doc_count || 0;
+          return (
+            <table className="w-full">
+              <thead className="">
+                <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-10">
+                  <th className="py-3 pl-2 text-left">Établissements</th>
+                  <th className="py-3 pl-2 text-left">Volontaires au sein du département</th>
+                  <th className="py-3 pl-2 text-left">Volontaires hors du département</th>
+                  <th className="py-3 pl-2 text-left">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">{}</tbody>
+            </table>
+          );
+          // {data.map((mission, index) => {
 
-            //   return {
-            //     id: e.key,
-            //     count: {
-            //       total,
-            //       department: inDepartment,
-            //       outOfDepartment: total - inDepartment,
-            //     },
-            //     percent: {
-            //       total: round1Decimal((total / totalHits) * 100),
-            //       department: round1Decimal((inDepartment / total) * 100),
-            //       outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
-            //     },
-            //     name: schoolInfo.schoolName,
-            //     city: schoolInfo.schoolCity,
-            //     zip: schoolInfo.schoolZip,
-            //     department: schoolInfo.schoolDepartment,
-            //     type: schoolInfo.schoolType,
-            //   };
-            // });
-            // setSchools(arr);
+          //   return data.map((e) => {
+          //     const tags = [];
 
-            // e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-            // // tags.push(e.remote ? "À distance" : "En présentiel");
-            // e.domains.forEach((d) => tags.push(translate(d)));
-            // return <CardSchool key={e._id} school={e} />;
-            return null;
-          });
+          //     const totalHits = responses[0].hits.total.value;
+          // console.log("🚀 ~ file: schools.js ~ line 42 ~ totalHits", totalHits);
+          // const arr = responses[0].aggregations.names.buckets.map((e) => {
+          //   const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
+          //   const total = e.doc_count;
+          //   const isThereDep = e.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
+          //   const inDepartment = isThereDep.doc_count || 0;
+
+          //   return {
+          //     id: e.key,
+          //     count: {
+          //       total,
+          //       department: inDepartment,
+          //       outOfDepartment: total - inDepartment,
+          //     },
+          //     percent: {
+          //       total: round1Decimal((total / totalHits) * 100),
+          //       department: round1Decimal((inDepartment / total) * 100),
+          //       outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
+          //     },
+          //     name: schoolInfo.schoolName,
+          //     city: schoolInfo.schoolCity,
+          //     zip: schoolInfo.schoolZip,
+          //     department: schoolInfo.schoolDepartment,
+          //     type: schoolInfo.schoolType,
+          //   };
+          // });
+          // setSchools(arr);
+
+          // e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
+          // // tags.push(e.remote ? "À distance" : "En présentiel");
+          // e.domains.forEach((d) => tags.push(translate(d)));
+          // return <CardSchool key={e._id} school={e} />;
+          //   return null;
+          // });
         }}
-        renderNoResults={() => (
-          <div className="text-gray-700 mb-3 text-sm">
-            Aucune mission ne correspond à votre recherche. Merci de{" "}
-            <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
-              vérifier votre adresse
-            </a>
-            .
-          </div>
-        )}
+        renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucuns établissements ne correspondent à ces filtres.</div>}
       />
       {/* </Missions> */}
     </ReactiveBase>
@@ -175,7 +180,28 @@ export default function Schools({ filter }) {
 }
 
 const CardSchool = ({ school }) => {
-  return null;
+  console.log("🚀 ~ file: schools.js ~ line 183 ~ CardSchool ~ school", school);
+  return (
+    <tr className={`"hover:!bg-gray-100"}`}>
+      <td className={`px-4 rounded-l-lg`}></td>
+      <td className={`py-3 text-left`}>
+        <div>
+          <div className={`font-bold text-[15px]`}>{`${hit.name}`}</div>
+          <div className={`font-normal text-xs`}>{`${hit.structureName}`}</div>
+          <div className={`font-normal text-xs`}>{`${hit.city || ""} • (${hit.department || ""})`}</div>
+        </div>
+      </td>
+      <td className={`py-3 text-left`}>
+        <div>
+          <span className={"text-[#cbd5e0] mr-1"}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
+        </div>
+        <div>
+          <span className={"text-[#cbd5e0] mr-1"}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
+        </div>
+      </td>
+      <td className={`rounded-r-lg text-left`}></td>
+    </tr>
+  );
   // const tags = [];
   // school.city && tags.push(school.city + (school.zip ? ` - ${school.zip}` : ""));
   // school.domains.forEach((d) => tags.push(translate(d)));
