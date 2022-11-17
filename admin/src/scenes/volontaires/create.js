@@ -9,14 +9,19 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, YOUNG_SITUATIONS, GRADES, inscriptionModificationOpenForYoungs, sessions2023 } from "snu-lib";
+import { translateGrade, YOUNG_SITUATIONS, GRADES, inscriptionModificationOpenForYoungs, sessions2023, getAge, COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
+import dayjs from "dayjs";
+import MiniSwitch from "../phase0/components/MiniSwitch";
+import RadioButton from "../phase0/components/RadioButton";
+
 //Identite
 import Field from "./components/Field";
 import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
+import Check from "../../assets/icons/Check";
 
 export default function Create() {
   const history = useHistory();
@@ -76,7 +81,11 @@ export default function Create() {
     ppsBeneficiary: "false",
     paiBeneficiary: "false",
     allergies: "false",
+    consentment: "false",
+    parentAllowSNU: "",
     parent1Status: "",
+    parent1AllowImageRights: "false",
+    parent1AllowSNU: "true",
     parent1FirstName: "",
     parent1LastName: "",
     parent1Email: "",
@@ -87,6 +96,7 @@ export default function Create() {
     parent1City: "",
     parent1Country: "",
     parent2Status: "",
+    parent2AllowImageRights: "false",
     parent2FirstName: "",
     parent2LastName: "",
     parent2Email: "",
@@ -258,6 +268,7 @@ export default function Create() {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
+      console.log(values);
       const { ok, code, young, onWaitingList } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList);
@@ -338,6 +349,21 @@ export default function Create() {
           })}
         </div>
       </div>
+
+      {values.firstName !== "" &&
+        values.lastName !== "" &&
+        values.parent1FirstName !== "" &&
+        values.parent1LastName !== "" &&
+        values.parent1Email !== "" &&
+        values.parent1Status !== "" &&
+        values.birthdateAt !== null && (
+          <div className="relative bg-white shadow rounded mb-4 pt-4">
+            <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
+            <div className={"flex pb-14 px-8"}>
+              <SectionConsentements young={values} setFieldValue={setFieldValue} />
+            </div>
+          </div>
+        )}
 
       <div className="flex items-center w-100 justify-center">
         {uploadError === "" ? (
@@ -709,5 +735,238 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
           </div>
         )}
     </>
+  );
+}
+const PARENT_STATUS_NAME = {
+  father: "Le père",
+  mother: "La mère",
+  representant: "Le représentant légal",
+};
+function SectionConsentements({ young, setFieldValue }) {
+  const [youngAge, setYoungAge] = React.useState("?");
+  const [volontaireConsentement, setVolontaireConsentement] = React.useState({
+    acceptCGU1: false,
+    acceptCGU2: false,
+    consentment1: false,
+    consentment2: false,
+    inscriptionDoneDate: false,
+  });
+  const [parent1Consentement, setParent1Consentement] = React.useState({
+    allow1: false,
+    allow2: false,
+    allow3: false,
+    allow4: false,
+    allow5: false,
+    allowGeneral: false,
+  });
+
+  React.useEffect(() => {
+    console.log(young);
+    if (young) {
+      setYoungAge(getAge(young.birthdateAt));
+    } else {
+      setYoungAge("?");
+    }
+  }, [young]);
+
+  React.useEffect(() => {
+    if (volontaireConsentement.acceptCGU1 && volontaireConsentement.acceptCGU2) {
+      setFieldValue("acceptCGU", "true");
+    } else {
+      setFieldValue("acceptCGU", "false");
+    }
+    if (volontaireConsentement.consentment1 && volontaireConsentement.consentment2) {
+      setFieldValue("consentment", "true");
+    } else {
+      setFieldValue("consentment", "false");
+    }
+  }, [volontaireConsentement]);
+
+  React.useEffect(() => {
+    if (youngAge < 15) {
+      if (
+        parent1Consentement.allow1 &&
+        parent1Consentement.allow2 &&
+        parent1Consentement.allow3 &&
+        parent1Consentement.allow4 &&
+        parent1Consentement.allow5 &&
+        parent1Consentement.allowGeneral
+      ) {
+        setFieldValue("parent1AllowSNU", "true");
+      } else {
+        setFieldValue("parent1AllowSNU", "false");
+      }
+    } else {
+      if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow4 && parent1Consentement.allow5 && parent1Consentement.allowGeneral) {
+        setFieldValue("parent1AllowSNU", "true");
+      } else {
+        setFieldValue("parent1AllowSNU", "false");
+      }
+    }
+  }, [parent1Consentement]);
+
+  const authorizationOptions = [
+    { value: "true", label: "Autorise" },
+    { value: "false", label: "N'autorise pas" },
+  ];
+
+  const handleVolontaireChange = (name, value) => {
+    setVolontaireConsentement((prevState) => {
+      return {
+        ...prevState,
+        [name]: value ? value : !prevState[name],
+      };
+    });
+  };
+
+  const handleParent1Change = (name) => {
+    setParent1Consentement((prevState) => {
+      return {
+        ...prevState,
+        [name]: !prevState[name],
+      };
+    });
+  };
+
+  const handleConsentementChange = (name) => {
+    if (young[name] === "true") {
+      setFieldValue(name, "false");
+    } else {
+      setFieldValue(name, "true");
+    }
+  };
+
+  return (
+    <div className="flex">
+      <div className="flex-[1_0_50%] pr-[56px]">
+        <div className="text-[16px] leading-[24px] font-bold text-[#242526]">
+          Le volontaire{" "}
+          <span className="font-normal text-[#6B7280]">
+            {young.firstName} {young.lastName}
+          </span>
+        </div>
+        <div>
+          <CheckRead onClick={() => handleVolontaireChange("acceptCGU1")} value={volontaireConsentement.acceptCGU1}>
+            A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
+          </CheckRead>
+          <CheckRead onClick={() => handleVolontaireChange("acceptCGU2")} value={volontaireConsentement.acceptCGU2}>
+            A pris connaissance des modalités de traitement de mes données personnelles.
+          </CheckRead>
+          <CheckRead onClick={() => handleVolontaireChange("consentment1")} value={volontaireConsentement.consentment1}>
+            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
+            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+          </CheckRead>
+          <CheckRead onClick={() => handleVolontaireChange("consentment2")} value={volontaireConsentement.consentment2}>
+            S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.
+          </CheckRead>
+          <CheckRead onClick={() => handleVolontaireChange("inscriptionDoneDate")} value={volontaireConsentement.inscriptionDoneDate}>
+            Certifie l&apos;exactitude des renseignements fournis
+          </CheckRead>
+        </div>
+      </div>
+      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+      <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
+        <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+          <div className="grow">
+            {PARENT_STATUS_NAME[young.parent1Status]}{" "}
+            <span className="font-normal text-[#6B7280]">
+              {young.parent1FirstName} {young.parent1LastName}
+            </span>
+          </div>
+          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+        </div>
+        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} onChange={() => handleConsentementChange("parentAllowSNU")} />
+        <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
+          <b>
+            {young.firstName} {young.lastName}
+          </b>{" "}
+          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
+          réalisation d&apos;une mission d&apos;intérêt général.
+        </div>
+        <div>
+          <CheckRead onClick={() => handleParent1Change("allow1")} value={parent1Consentement.allow1}>
+            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
+          {youngAge < 15 && (
+            <CheckRead onClick={() => handleParent1Change("allow2")} value={parent1Consentement.allow2}>
+              Accepte la collecte et le traitement des données personnelles de{" "}
+              <b>
+                {young.firstName} {young.lastName}
+              </b>
+            </CheckRead>
+          )}
+          <CheckRead onClick={() => handleParent1Change("allow3")} value={parent1Consentement.allow3}>
+            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+          </CheckRead>
+          <CheckRead onClick={() => handleParent1Change("allow4")} value={parent1Consentement.allow4}>
+            S&apos;engage à ce que{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
+            jaune.
+          </CheckRead>
+          <CheckRead onClick={() => handleParent1Change("allow5")} value={parent1Consentement.allow5}>
+            Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
+          </CheckRead>
+        </div>
+        <div className="mt-[16px] flex itemx-center justify-between">
+          <div className="grow text-[#374151] text-[14px] leading-[20px]">
+            <div className="font-bold">Droit à l&apos;image</div>
+            <div>Accord : {translate(young.parent1AllowImageRights)}</div>
+          </div>
+          {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
+            <div className="cursor-pointer" onClick={() => handleConsentementChange("parent1AllowImageRights")}>
+              <MiniSwitch value={young.parent1AllowImageRights === "true"} />
+            </div>
+          )}
+        </div>
+        {(young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && (
+          <div className="mt-[16px] flex itemx-center justify-between">
+            <div className="grow text-[#374151] text-[14px] leading-[20px]">
+              <div className="font-bold">Consentement à la participation</div>
+              <div>Accord : {translate(young.parent1AllowSNU)}</div>
+            </div>
+            <div className="cursor-pointer" onClick={() => handleParent1Change("allowGeneral")}>
+              <MiniSwitch value={parent1Consentement.allowGeneral} />
+            </div>
+          </div>
+        )}
+        {young.parent2Status && (
+          <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
+            <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+              <div className="grow">
+                {PARENT_STATUS_NAME[young.parent2Status]}{" "}
+                <span className="font-normal text-[#6B7280]">
+                  {young.parent2FirstName} {young.parent2LastName}
+                </span>
+              </div>
+              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+            </div>
+            <div className="mt-[16px] flex items-center justify-between">
+              <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                <div className="font-bold">Droit à l&apos;image</div>
+                <div>Accord : {translate(young.parent2AllowImageRights)}</div>
+              </div>
+              {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CheckRead({ value, children, onClick }) {
+  return (
+    <div onClick={onClick} className="cursor-pointer flex items-center mt-[16px]">
+      <div className="flex-[0_0_14px] mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px]">
+        {value && <Check className="w-[11px] h-[8px]" />}
+      </div>
+      <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
+    </div>
   );
 }
