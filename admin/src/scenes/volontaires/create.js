@@ -321,7 +321,14 @@ export default function Create() {
                   key={session.name}
                   onClick={() => setFieldValue("cohort", session.name)}
                   className="cursor-pointer flex flex-row justify-start items-center w-60 h-14 border border-[#3B82F6] rounded-md m-3">
-                  <input className="rounded-full mx-3" type="checkbox" id="checkboxCohort" name="cohort" checked={session.name === values.cohort} onChange={null} />
+                  <input
+                    className="rounded-full mx-3"
+                    type="checkbox"
+                    id="checkboxCohort"
+                    name="cohort"
+                    checked={session.name === values.cohort}
+                    onChange={() => setFieldValue("cohort", session.name)}
+                  />
                   <div>{session.name}</div>
                 </div>
               );
