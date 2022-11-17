@@ -171,8 +171,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   }
 
   async function processRegistration(state, data) {
-    console.log("🚀 ~ file: view.js ~ line 174 ~ processRegistration ~ data", data);
-    console.log("🚀 ~ file: view.js ~ line 174 ~ processRegistration ~ state", state);
     setProcessing(true);
     try {
       if (state === "SESSION_FULL") state = action;
