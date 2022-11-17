@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/react";
+
 export const authActions = {
   SETUSER: "SETUSER",
   SETSTRUCTURE: "SETSTRUCTURE",
@@ -6,6 +8,7 @@ export const authActions = {
 };
 
 export function setUser(user) {
+  if (user) Sentry.setUser({ id: user._id, email: user.email, segment: user.role });
   return { type: authActions.SETUSER, user };
 }
 

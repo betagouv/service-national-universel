@@ -77,14 +77,10 @@ export default function App() {
         const { ok, user, token } = await api.get("/young/signin_token");
         if (!ok) {
           dispatch(setYoung(null));
-          Sentry.setUser(null);
           return setLoading(false);
         }
         if (token) api.setToken(token);
-        if (ok && user) {
-          dispatch(setYoung(user));
-          Sentry.setUser({ id: user._id, email: user.email });
-        }
+        if (ok && user) dispatch(setYoung(user));
       } catch (e) {
         console.log(e);
       }
