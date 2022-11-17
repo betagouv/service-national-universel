@@ -7,7 +7,7 @@ import MultiSelect from "../components/MultiSelect";
 
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
-//import Schools from "./schools";
+import Schools from "./schools";
 import Gender from "./gender";
 
 import Status from "./status";
@@ -20,7 +20,6 @@ import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
 import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
-import UnavailableFeature from "../../../components/unavailableFeature";
 
 export default function Index({ onChangeFilter = () => {} }) {
   const [filter, setFilter] = useState();
@@ -104,7 +103,7 @@ export default function Index({ onChangeFilter = () => {} }) {
       </Row>
       {filter && (
         <>
-          <Row>
+          {/* <Row>
             <Col md={12}>
               <h3 className="mt-4 mb-2 text-xl">Pilotage</h3>
             </Col>
@@ -116,9 +115,9 @@ export default function Index({ onChangeFilter = () => {} }) {
             </Col>
           </Row>
           <Status filter={filter} />
-          <h3 className="mt-4 mb-2 text-xl">Dans le détail</h3>
+          <h3 className="mt-4 mb-2 text-xl">Dans le détail</h3> */}
           <Row>
-            <Col md={12} lg={6}>
+            {/* <Col md={12} lg={6}>
               <BirthDate filter={filter} />
             </Col>
             <Col md={12} lg={6}>
@@ -138,15 +137,9 @@ export default function Index({ onChangeFilter = () => {} }) {
             </Col>
             <Col md={12} lg={4}>
               <RuralArea filter={filter} />
-            </Col>
+            </Col> */}
             <Col md={12}>
-              <UnavailableFeature
-                functionality="Tableau des établissements"
-                text="Pour consulter les établissements de vos volontaires et des volontaires scolarisés dans votre département, rendez-vous sur les exports volontaires :"
-                link="https://admin.snu.gouv.fr/volontaire"
-                textLink="Cliquez ici"
-              />
-              {/* <Schools filter={filter} /> */}
+              <Schools filter={filter} />
             </Col>
           </Row>
         </>
