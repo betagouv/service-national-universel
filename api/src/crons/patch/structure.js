@@ -106,7 +106,7 @@ exports.handler = async () => {
       text: `${result.structurePatchScanned} structure patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    capture("Error during creation of young structure logs", JSON.stringify(e));
-    slack.error({ title: "❌ Structure Logs", text: JSON.stringify(e) });
+    capture("Error during creation of young structure logs", e);
+    slack.error({ title: "❌ Structure Logs", text: e });
   }
 };

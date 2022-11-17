@@ -140,7 +140,7 @@ exports.handler = async () => {
       text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    capture("Error during creation of young patch logs", JSON.stringify(e));
-    slack.error({ title: "❌ Young Logs", text: JSON.stringify(e) });
+    capture("Error during creation of young patch logs", e);
+    slack.error({ title: "❌ Young Logs", text: e });
   }
 };

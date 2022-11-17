@@ -1025,6 +1025,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  parent1ContactPreference: {
+    type: String,
+    enum: ["email", "phone"],
+    documentation: {
+      description: "Préférence de contact du parent 1",
+    },
+  },
+
   parent2Status: {
     type: String,
     documentation: {
@@ -1133,6 +1141,14 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false"],
     documentation: {
       description: "Le parent 2 donne les droits à l'image de son enfant.",
+    },
+  },
+
+  parent2ContactPreference: {
+    type: String,
+    enum: ["email", "phone"],
+    documentation: {
+      description: "Préférence de contact du parent 2",
     },
   },
 
@@ -1336,6 +1352,26 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false"],
     documentation: {
       description: "Les representants autorise le jeune à participer au SNU",
+    },
+  },
+  parent1AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 1 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 2 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2RejectSNUComment: {
+    type: String,
+    documentation: {
+      description: "Indique la personne, le jour et la date de notification du rejet",
     },
   },
   dataProcessingConsentmentFiles: {

@@ -219,6 +219,10 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     if (!canInviteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const obj = { ...value };
+
+    const formatedDate = new Date(obj.birthdateAt).setUTCHours(11, 0, 0);
+    obj.birthdateAt = formatedDate;
+
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
@@ -872,6 +876,9 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
       "statusPhase2",
       "phase2ApplicationStatus",
       "statusPhase3",
+      "inscriptionStep2023",
+      "inscriptionDoneDate",
+      "reinscriptionStep2023",
       "department",
       "region",
       "zip",

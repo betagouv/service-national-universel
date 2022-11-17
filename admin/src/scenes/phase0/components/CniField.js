@@ -44,11 +44,11 @@ export function CniField({ young, name, label, mode, onStartRequest, className =
   }
 
   const reasons = [
-    { value: "UNREADABLE", label: "Pièce illisible (supprimer le fichier)" },
+    { value: "UNREADABLE", label: "Pièce illisible (supprimer le(s) fichier(s))" },
     { value: "MISSING_FRONT", label: "Recto à fournir" },
     { value: "MISSING_BACK", label: "Verso à fournir" },
-    { value: "NOT_SUITABLE", label: "Pièce ne convenant pas... (supprimer le fichier)", defaultMessage: "Passeport ou carte nationale d'identité requis." },
-    { value: "OTHER", label: "Autre (supprimer le fichier)" },
+    { value: "NOT_SUITABLE", label: "Pièce ne convenant pas... (supprimer le(s) fichier(s))", defaultMessage: "Passeport ou carte nationale d'identité requis." },
+    { value: "OTHER", label: "Autre (supprimer le(s) fichier(s))" },
   ];
 
   function cniModalClose(changes) {

@@ -66,22 +66,34 @@ export const ID = {
     category: "cniNew",
     title: "Carte Nationale d'Identité",
     subtitle: "Nouveau format (après août 2021)",
-    imgFront: "cniNewFront.png",
-    imgBack: "cniNewBack.png",
-    imgDate: "cniNewDate.png",
+    imgFront: "cniNewFront.jpg",
+    imgBack: "cniNewBack.jpg",
+    imgDate: "cniNewDate.jpg",
   },
   cniOld: {
     category: "cniOld",
     title: "Carte Nationale d'Identité",
     subtitle: "Ancien format",
-    imgFront: "cniOldFront.png",
-    imgBack: "cniOldBack.png",
-    imgDate: "cniOldDate.png",
+    imgFront: "cniOldFront.jpg",
+    imgBack: "cniOldBack.jpg",
+    imgDate: "cniOldDate.jpg",
   },
   passport: {
     category: "passport",
     title: "Passeport",
-    imgFront: "passport.png",
-    imgDate: "passportDate.png",
+    imgFront: "passport.jpg",
+    imgDate: "passportDate.jpg",
   },
+};
+
+export const debounce = (fn, delay) => {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
 };

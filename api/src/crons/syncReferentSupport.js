@@ -10,7 +10,6 @@ exports.handler = async () => {
     const response = await zammood.api(`/v0/referent`, { method: "POST", credentials: "include", body: JSON.stringify({ referents }) });
     if (!response.ok) slack.error({ title: "Fail sync referent to Zammood", text: JSON.stringify(response.code) });
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
   }
 };
