@@ -1609,7 +1609,7 @@ function SectionConsentements({ young, onChange }) {
                 <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
               )}
             </div>
-            {young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && (
+            {young.parent1AllowImageRights === "true" && (
               <div className="mt-[16px] flex items-center justify-between">
                 <div className="grow text-[#374151] text-[14px] leading-[20px]">
                   <div className="font-bold">Droit à l&apos;image</div>
