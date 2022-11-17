@@ -9,6 +9,7 @@ import Badge from "../../../components/Badge";
 import Chevron from "../../../components/Chevron";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
+import { getDepartmentForEligibility } from "../../../utils";
 import { BorderButton, PlainButton } from "./Buttons";
 
 export function ChangeCohortPen({ young, onChange }) {
@@ -30,11 +31,13 @@ export function ChangeCohortPen({ young, onChange }) {
 
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
+  const department = getDepartmentForEligibility(young);
+
   const getEligibleCohorts = async () => {
     const { data } = await api.post("/cohort-session/eligibility/2023", {
       birthDate: young.birthdateAt,
       schoolLevel: young.grade,
-      department: young?.schoolDepartment || young?.department,
+      department,
       frenchNationality: young.frenchNationality,
     });
     const isArray = Array.isArray(data);
