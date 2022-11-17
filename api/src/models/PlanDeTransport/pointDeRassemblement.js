@@ -15,7 +15,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  cohort: {
+  cohorts: {
     type: [String],
     required: true,
     enum: COHORTS,
