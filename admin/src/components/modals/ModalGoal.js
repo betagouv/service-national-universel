@@ -16,7 +16,7 @@ export default function ModalGoal({ isOpen, onChange, onValidate, callback }) {
           <h1>Jauge de candidats atteinte</h1>
           <p>
             Attention, vous avez atteint la jauge, merci de placer le candidat sur <b>liste complémentaire</b> ou de vous rapprocher de votre coordinateur régional avant de valider
-            son inscription.
+            la candidature.
           </p>
         </Content>
         <Footer>
