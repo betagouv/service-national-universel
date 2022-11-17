@@ -552,7 +552,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
-    if (!validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (!data.phone || !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
       errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide.";
       result = false;
     }
