@@ -5,6 +5,6 @@ export const authActions = {
 };
 
 export function setYoung(young) {
-  if (young) Sentry.setUser({ id: young._id, email: young.email, segment: young.phase });
+  if (young) Sentry.setUser({ id: young._id, email: young.email, username: `${young.firstName} ${young.lastName}` });
   return { type: authActions.SETYOUNG, young };
 }
