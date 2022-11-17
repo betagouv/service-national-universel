@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
 import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 import { PlainButton } from "../components/Buttons";
-import { cohortList, formatRate } from "../util";
+import { cohortList, formatRate, parseQuery } from "../util";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import People from "../../../assets/icons/People";
 import ProgressBar from "../components/ProgressBar";
@@ -15,13 +15,16 @@ import FrenchMap from "../../../assets/icons/FrenchMap";
 import { capture } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
+import { region2department } from "snu-lib";
+import SchemaEditor from "./SchemaEditor";
 
 export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
+  const location = useLocation();
   const [isNational, setIsNational] = useState(!region && !department);
   const [isRegional, setIsRegional] = useState(region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
-  const [cohort, setCohort] = useState(cohortList[0].value);
+  const [cohort, setCohort] = useState(getDefaultCohort());
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
     capacity: 0,
@@ -29,8 +32,20 @@ export default function SchemaRepartition({ region, department }) {
     assigned: 0,
     intradepartmental: 0,
     centers: 0,
+    toRegions: [],
   });
-  const [rows, setRows] = useState(getDefaultRows());
+  const [data, setData] = useState({ rows: getDefaultRows() });
+
+  function getDefaultCohort() {
+    const { cohort } = parseQuery(location.search);
+    if (cohort) {
+      console.log("default cohort = ", cohort);
+      return cohort;
+    } else {
+      console.log("default cohort = ", cohortList[0].value);
+      return cohortList[0].value;
+    }
+  }
 
   useEffect(() => {
     loadData();
@@ -42,21 +57,36 @@ export default function SchemaRepartition({ region, department }) {
     let assigned = 0;
     let intradepartmental = 0;
     let centers = 0;
-    for (const row of rows) {
-      capacity += row.capacity ? row.capacity : 0;
-      total += row.total ? row.total : 0;
-      assigned += row.assigned ? row.assigned : 0;
-      intradepartmental += row.intradepartmental ? row.intradepartmental : 0;
-      centers += row.centers ? row.centers : 0;
+    let toRegions = [];
+
+    if (data.toCenters) {
+      for (const row of data.toCenters) {
+        toRegions.push({ name: row.name, departments: row.departments });
+        capacity += row.capacity ? row.capacity : 0;
+        centers += row.centers ? row.centers : 0;
+      }
+      for (const row of data.rows) {
+        total += row.total ? row.total : 0;
+        assigned += row.assigned ? row.assigned : 0;
+        intradepartmental += row.intradepartmental ? row.intradepartmental : 0;
+      }
+    } else {
+      for (const row of data.rows) {
+        capacity += row.capacity ? row.capacity : 0;
+        total += row.total ? row.total : 0;
+        assigned += row.assigned ? row.assigned : 0;
+        intradepartmental += row.intradepartmental ? row.intradepartmental : 0;
+        centers += row.centers ? row.centers : 0;
+      }
     }
-    setSummary({ capacity, total, assigned, intradepartmental, centers });
-  }, [rows]);
+    setSummary({ capacity, total, assigned, intradepartmental, centers, toRegions });
+  }, [data]);
 
   function getDefaultRows() {
     if (department) {
       return [];
     } else if (region) {
-      return []; // TODO: liste des départements.
+      return region2department[region].map(createEmptyRow);
     } else {
       return regionList.map(createEmptyRow);
     }
@@ -85,7 +115,7 @@ export default function SchemaRepartition({ region, department }) {
       }
       const { data, ok } = await API.get(url + "/" + cohort);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-      setRows(data);
+      setData(data);
       setLoading(false);
     } catch (e) {
       capture(e);
@@ -95,19 +125,31 @@ export default function SchemaRepartition({ region, department }) {
 
   function goToNational() {
     console.log("goTo national...");
-    history.push("/plan-de-transport/schema-repartition");
+    history.push("/plan-de-transport/schema-repartition?cohort=" + cohort);
   }
 
   function goToRegion() {
     if (region) {
-      history.push(`/plan-de-transport/schema-repartition/${region}`);
+      history.push(`/plan-de-transport/schema-repartition/${region}?cohort=${cohort}`);
     }
   }
 
   function goToDepartment() {
     if (region && department) {
-      history.push(`/plan-de-transport/schema-repartition/${region}/${department}`);
+      history.push(`/plan-de-transport/schema-repartition/${region}/${department}?cohort=${cohort}`);
     }
+  }
+
+  function goToRow(row) {
+    if (region) {
+      history.push(`/plan-de-transport/schema-repartition/${region}/${row.name}?cohort=${cohort}`);
+    } else {
+      history.push(`/plan-de-transport/schema-repartition/${row.name}?cohort=${cohort}`);
+    }
+  }
+
+  async function exportDetail() {
+    console.log("TODO: export detail");
   }
 
   return (
@@ -128,10 +170,14 @@ export default function SchemaRepartition({ region, department }) {
             <BoxVolontaires className="grow mb-[8px]" summary={summary} loading={loading} />
             <BoxAffectation className="grow mt-[8px]" summary={summary} loading={loading} />
           </div>
-          <BoxDisponibilite className="grow mx-[16px]" summary={summary} loading={loading} />
-          <BoxCentres className="grow" summary={summary} loading={loading} />
+          <BoxDisponibilite className="grow mx-[16px]" summary={summary} loading={loading} isNational={isNational} />
+          <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} />
         </div>
-        <DetailTable rows={rows} loading={loading} isNational={isNational} />
+        {isDepartmental ? (
+          <SchemaEditor onExportDetail={exportDetail} region={region} department={department} cohort={cohort} />
+        ) : (
+          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} />
+        )}
       </div>
     </div>
   );
@@ -195,7 +241,8 @@ function BoxAffectation({ summary, className = "", loading }) {
   );
 }
 
-function BoxDisponibilite({ summary, className = "", loading }) {
+function BoxDisponibilite({ summary, className = "", loading, isNational }) {
+  console.log("summary: ", summary);
   return (
     <Box className={`flex flex-column justify-between pb-[0px] ${className}`}>
       <div>
@@ -204,7 +251,7 @@ function BoxDisponibilite({ summary, className = "", loading }) {
           <Loading />
         ) : (
           <>
-            <div className="text-[13px] leading-[1.3em] text-[#6B7280] mb-[10px]">Centre-Val de Loire, Bretagne, Occitanie</div>
+            {!isNational && summary.toRegions && <div className="text-[13px] leading-[1.3em] text-[#6B7280] mb-[10px]">{summary.toRegions.map((r) => r.name).join(", ")}</div>}
             <div className="flex">
               <Badge className="">{summary.capacity} places</Badge>
             </div>
@@ -218,12 +265,35 @@ function BoxDisponibilite({ summary, className = "", loading }) {
   );
 }
 
-function BoxCentres({ summary, className = "", loading }) {
+function BoxCentres({ summary, className = "", loading, isNational, isDepartmental }) {
   return (
     <Box className={`overflow-hidden ${className}`}>
       <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />
-      <MiniTitle className="mb-[10px]">Centres</MiniTitle>
-      {loading ? <Loading width="w-1/3" /> : <BigDigits>{summary.centers}</BigDigits>}
+      <MiniTitle className="mb-[10px] flex items-center">
+        {isDepartmental ? (
+          <>
+            <span className="mr-[8px]">Régions d&apos;accueil</span>
+            {loading ? <Loading width="w-1/3" /> : <Badge>{summary.centers} CENTRES</Badge>}
+          </>
+        ) : (
+          "Centres"
+        )}
+      </MiniTitle>
+      {!isDepartmental && <>{loading ? <Loading width="w-1/3" /> : <BigDigits>{summary.centers}</BigDigits>}</>}
+      {!isNational && loading ? (
+        <Loading width="w-1/3" />
+      ) : (
+        <ul className="list-none">
+          {summary.toRegions.map((region) => (
+            <>
+              <li key={region.name} className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">
+                {region.name}
+              </li>
+              {isDepartmental && <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">{region.departments.join(", ")}</li>}
+            </>
+          ))}
+        </ul>
+      )}
       <Link to="/plan-de-transport/tableau-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
         Table de répartition <ChevronRight className="ml-[5px]" />
       </Link>
@@ -231,21 +301,15 @@ function BoxCentres({ summary, className = "", loading }) {
   );
 }
 
-function DetailTable({ rows, className = "", loading, isNational }) {
-  const history = useHistory();
-
-  async function exportData() {
-    console.log("TODO: export data");
-  }
-
+function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail }) {
   function goToRow(row) {
-    history.push(`/plan-de-transport/schema-repartition/${row.name}`);
+    onGoToRow && onGoToRow(row);
   }
 
   return (
     <Box className={className}>
       <BoxHeader title="">
-        <PlainButton onClick={exportData}>Exporter</PlainButton>
+        <PlainButton onClick={onExportDetail}>Exporter</PlainButton>
       </BoxHeader>
       <div className="">
         <table className="w-[100%]">
@@ -261,7 +325,10 @@ function DetailTable({ rows, className = "", loading, isNational }) {
           <tbody className="font-medium text-[14px] leading-[16px] text-[#1F2937]">
             {rows.map((row) => (
               <tr key={row.name} className="border-b-[1px] border-b-[#F4F5FA] hover:bg-[#F2F5FC]" onClick={() => goToRow(row)}>
-                <td className="py-[17px] px-[9px] font-bold text-[15px] text-[#242526] whitespace-nowrap">{row.name}</td>
+                <td className="py-[17px] px-[9px] font-bold text-[15px] text-[#242526] whitespace-nowrap">
+                  {row.name}
+                  {row.code ? " (" + row.code + ")" : ""}
+                </td>
                 <td className="py-[17px] px-[8px]">
                   {loading ? (
                     <Loading />
