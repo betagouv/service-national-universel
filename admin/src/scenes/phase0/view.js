@@ -1655,7 +1655,10 @@ function SectionConsentements({ young, onChange }) {
                   {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
                 </div>
                 {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
-                  <MiniSwitch value={young.parent2AllowSNU === "true"} />
+                  <div className="flex items-center gap-2 text-red-500 text-sm ">
+                    <XCircle className="w-4 h-4 text-red-500" />
+                    Refusé
+                  </div>
                 ) : (
                   <BorderButton mode="red" onClick={parent2RejectSNU}>
                     Déclarer un refus
