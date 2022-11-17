@@ -257,6 +257,7 @@ export default function Create() {
     if (Object.keys(receivedErrors).length !== 0) return;
     try {
       setLoading(true);
+      values.addressVerified = values.addressVerified.toString();
       const { ok, code, young, onWaitingList } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList);
