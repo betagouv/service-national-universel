@@ -53,6 +53,18 @@ const Schema = new mongoose.Schema({
       description: "Identifiant du centre",
     },
   },
+  centerName: {
+    type: String,
+    documentation: {
+      description: "Nom du centre",
+    },
+  },
+  centerCity: {
+    type: String,
+    documentation: {
+      description: "Ville du centre",
+    },
+  },
   sessionId: {
     type: String,
     documentation: {

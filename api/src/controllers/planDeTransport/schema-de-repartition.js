@@ -1,8 +1,10 @@
 /**
  * ROUTES:
- *  GET /schema-de-repartition/:cohort                      => get National data
- *  GET /schema-de-repartition/:region/:cohort              => get Regional data
- *  GET /schema-de-repartition/:region/:department/:cohort  => get Department data
+ *  GET    /schema-de-repartition/:cohort                      => get National data
+ *  GET    /schema-de-repartition/:region/:cohort              => get Regional data
+ *  GET    /schema-de-repartition/:region/:department/:cohort  => get Department data
+ *  POST   /schema-de-repartition                             => création d'un groupe du schéma de répartition
+ *  DELETE /schema-de-repartition/:id                       => suppression d'un group de schéma de répartition
  */
 
 const express = require("express");
@@ -10,7 +12,17 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
-const { canViewSchemaDeRepartition, YOUNG_STATUS, regionList, region2department, getDepartmentNumber } = require("snu-lib");
+const {
+  canViewSchemaDeRepartition,
+  YOUNG_STATUS,
+  regionList,
+  region2department,
+  getDepartmentNumber,
+  COHORTS,
+  canCreateSchemaDeRepartition,
+  canDeleteSchemaDeRepartition,
+  canEditSchemaDeRepartition,
+} = require("snu-lib");
 const Joi = require("joi");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const youngModel = require("../../models/young");
@@ -381,31 +393,22 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     let youngValues = youngResult[0];
 
     // --- assigned
-    const repartitionResult = await schemaRepartitionModel
-      .aggregate([
-        { $match: { cohort, fromDepartment: department } },
-        {
-          $group: {
-            _id: null,
-            assigned: { $sum: "$youngsVolume" },
-            intradepartmentalAssigned: {
-              $sum: {
-                $switch: {
-                  branches: [
-                    {
-                      case: { $eq: ["$intradepartmental", "true"] },
-                      then: 1,
-                    },
-                  ],
-                  default: 0,
-                },
-              },
-            },
-          },
-        },
-      ])
-      .exec();
-    const repartitionValues = repartitionResult[0];
+    const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department });
+    let groups = {
+      intra: [],
+      extra: [],
+    };
+    let assigned = 0;
+    let intradepartmentalAssigned = 0;
+    for (const schema of schemas) {
+      if (schema.intradepartmental === "true") {
+        intradepartmentalAssigned++;
+        groups.intra.push(schema);
+      } else {
+        groups.extra.push(schema);
+      }
+      assigned++;
+    }
 
     // --- Format result
     let data = {
@@ -422,30 +425,133 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         {
           name: department,
           ...youngValues,
-          ...repartitionValues,
+          assigned,
+          intradepartmentalAssigned,
         },
       ],
-      // rows: fromDepartments.map((dep) => {
-      //   console.log(dep, " => ", youngSet[dep]);
-      //   return {
-      //     name: dep.name,
-      //     code: dep.code,
-      //     centers: 0,
-      //     capacity: 0,
-      //     ...fromCenterSet[dep.name],
-      //     total: 0,
-      //     intradepartmental: 0,
-      //     ...youngSet[dep.name],
-      //     assigned: 0,
-      //     intradepartmentalAssigned: 0,
-      //     ...repartitionSet[dep.name],
-      //   };
-      // }),
+      groups,
     };
 
     // console.log("DATA: ", data);
 
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- vérification
+    const bodySchema = Joi.object({
+      cohort: Joi.string()
+        .valid(...COHORTS)
+        .required(),
+      intradepartmental: Joi.string().valid("true", "false"),
+      fromDepartment: Joi.string().trim().required(),
+      fromRegion: Joi.string().trim().required(),
+      toDepartment: Joi.string().trim().valid(null),
+      toRegion: Joi.string().trim().valid(null),
+      centerId: Joi.string().trim().valid(null),
+      centerName: Joi.string().trim().valid(null),
+      centerCity: Joi.string().trim().valid(null),
+      sessionId: Joi.string().trim().valid(null),
+      youngsVolume: Joi.number().greater(0),
+      gatheringPlaces: Joi.array().items(Joi.string()),
+    });
+    const { error, value } = bodySchema.validate(req.body, { stripUnknown: true });
+    if (error) {
+      console.log("JOI ERROR: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canCreateSchemaDeRepartition(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- création
+    const data = await schemaRepartitionModel.create(value);
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- vérification
+    const { error, value } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id } = value;
+
+    if (!canDeleteSchemaDeRepartition(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- delete schema
+    const schema = await schemaRepartitionModel.findById(id);
+    if (!schema) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await schemaRepartitionModel.deleteOne({ _id: schema._id });
+
+    // --- résultat
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id } = valueParams;
+
+    const bodySchema = Joi.object({
+      cohort: Joi.string()
+        .valid(...COHORTS)
+        .required(),
+      intradepartmental: Joi.string().valid("true", "false"),
+      fromDepartment: Joi.string().trim().required(),
+      fromRegion: Joi.string().trim().required(),
+      toDepartment: Joi.string().trim().valid(null),
+      toRegion: Joi.string().trim().valid(null),
+      centerId: Joi.string().trim().valid(null),
+      centerName: Joi.string().trim().valid(null),
+      centerCity: Joi.string().trim().valid(null),
+      sessionId: Joi.string().trim().valid(null),
+      youngsVolume: Joi.number().greater(0),
+      gatheringPlaces: Joi.array().items(Joi.string()),
+    });
+    const { error: errorBody, value } = bodySchema.validate(req.body, { stripUnknown: true });
+    if (errorBody) {
+      console.log("JOI ERROR: ", errorBody);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canEditSchemaDeRepartition(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- update
+    const schema = await schemaRepartitionModel.findById(id);
+    if (!schema) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    schema.set(value);
+    await schema.save();
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data: schema });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

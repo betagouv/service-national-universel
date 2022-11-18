@@ -31,6 +31,7 @@ export default function SchemaRepartition({ region, department }) {
     total: 0,
     assigned: 0,
     intradepartmental: 0,
+    intradepartmentalAssigned: 0,
     centers: 0,
     toRegions: [],
   });
@@ -56,6 +57,7 @@ export default function SchemaRepartition({ region, department }) {
     let total = 0;
     let assigned = 0;
     let intradepartmental = 0;
+    let intradepartmentalAssigned = 0;
     let centers = 0;
     let toRegions = [];
 
@@ -69,6 +71,7 @@ export default function SchemaRepartition({ region, department }) {
         total += row.total ? row.total : 0;
         assigned += row.assigned ? row.assigned : 0;
         intradepartmental += row.intradepartmental ? row.intradepartmental : 0;
+        intradepartmentalAssigned += row.intradepartmentalAssigned ? row.intradepartmentalAssigned : 0;
       }
     } else {
       for (const row of data.rows) {
@@ -76,10 +79,11 @@ export default function SchemaRepartition({ region, department }) {
         total += row.total ? row.total : 0;
         assigned += row.assigned ? row.assigned : 0;
         intradepartmental += row.intradepartmental ? row.intradepartmental : 0;
+        intradepartmentalAssigned += row.intradepartmentalAssigned ? row.intradepartmentalAssigned : 0;
         centers += row.centers ? row.centers : 0;
       }
     }
-    setSummary({ capacity, total, assigned, intradepartmental, centers, toRegions });
+    setSummary({ capacity, total, assigned, intradepartmental, intradepartmentalAssigned, centers, toRegions });
   }, [data]);
 
   function getDefaultRows() {
@@ -174,7 +178,15 @@ export default function SchemaRepartition({ region, department }) {
           <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} />
         </div>
         {isDepartmental ? (
-          <SchemaEditor onExportDetail={exportDetail} region={region} department={department} cohort={cohort} />
+          <SchemaEditor
+            onExportDetail={exportDetail}
+            region={region}
+            department={department}
+            cohort={cohort}
+            groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
+            summary={summary}
+            onChange={loadData}
+          />
         ) : (
           <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} />
         )}
@@ -289,7 +301,11 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
               <li key={region.name} className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">
                 {region.name}
               </li>
-              {isDepartmental && <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">{region.departments.join(", ")}</li>}
+              {isDepartmental && (
+                <li key={region.name + "-deps"} className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">
+                  {region.departments.join(", ")}
+                </li>
+              )}
             </>
           ))}
         </ul>
