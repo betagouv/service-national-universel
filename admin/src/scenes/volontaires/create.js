@@ -419,7 +419,9 @@ export default function Create() {
         values.parent1LastName !== "" &&
         values.parent1Email !== "" &&
         values.parent1Status !== "" &&
-        values.birthdateAt !== null && (
+        values.birthdateAt !== null &&
+        cohorts.length > 0 &&
+        egibilityError === "" && (
           <div className="relative bg-white shadow rounded mb-4 pt-4">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex pb-14 px-8"}>
