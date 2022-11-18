@@ -32,6 +32,7 @@ export default function StepDocuments() {
     dispatch(setYoung(responseData));
     history.push("/inscription2023/confirm");
   }
+
   function handleClick(doc) {
     if (!disabledUpload) history.push(`televersement/${doc.category}`);
   }
