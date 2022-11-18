@@ -114,32 +114,6 @@ export default function Create() {
   const [cohorts, setCohorts] = React.useState([]);
   const [egibilityError, setEgibilityError] = React.useState("");
 
-  React.useEffect(() => {
-    if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && values.schoolDepartment !== "") {
-      (async () => {
-        try {
-          const res = await api.post("/cohort-session/eligibility/2023", {
-            department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
-            birthDate: values.birthdateAt,
-            schoolLevel: values.grade,
-            frenchNationality: "true",
-          });
-          if (res.data.msg) return setEgibilityError(res.data.msg);
-          const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
-          if (sessionsFiltered.length === 0) {
-            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
-          } else {
-            setEgibilityError("");
-          }
-          setCohorts(sessionsFiltered);
-        } catch (e) {
-          capture(e);
-          setCohorts([]);
-        }
-        setLoading(false);
-      })();
-    }
-  }, [values.birthdateAt, values.department, values.situation, values.grade, values.schoolDepartment]);
   const validate = () => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
@@ -338,6 +312,34 @@ export default function Create() {
       toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
     }
   };
+
+  React.useEffect(() => {
+    if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && values.schoolDepartment !== "") {
+      (async () => {
+        try {
+          const res = await api.post("/cohort-session/eligibility/2023", {
+            department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
+            birthDate: values.birthdateAt,
+            schoolLevel: values.grade,
+            frenchNationality: "true",
+          });
+          if (res.data.msg) return setEgibilityError(res.data.msg);
+          const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+          if (sessionsFiltered.length === 0) {
+            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+          } else {
+            setEgibilityError("");
+          }
+          setCohorts(sessionsFiltered);
+          setFieldValue("cohort", sessionsFiltered[0].name);
+        } catch (e) {
+          capture(e);
+          setCohorts([]);
+        }
+        setLoading(false);
+      })();
+    }
+  }, [values.birthdateAt, values.department, values.situation, values.grade, values.schoolDepartment]);
 
   return (
     <div className="py-4 px-8">
