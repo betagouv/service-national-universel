@@ -82,6 +82,7 @@ export default function Create() {
     paiBeneficiary: "false",
     allergies: "false",
     consentment: "false",
+    certifyData: "false",
     parentAllowSNU: "",
     parent1Status: "",
     parent1AllowImageRights: "false",
@@ -159,8 +160,9 @@ export default function Create() {
     //check parent2 if exist
     const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName);
     const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName);
+    const parent2StatusEmpty = validator.isEmpty(values.parent2Status);
     // if 1 of 3 is not empty --> ask for the 3
-    if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty) {
+    if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty || !parent2StatusEmpty) {
       if (!validator.isEmail(values.parent2Email)) {
         setSelectedRepresentant(2);
         errors.parent2Email = errorEmail;
@@ -170,6 +172,9 @@ export default function Create() {
       }
       if (parent2LastNameEmpty) {
         errors.parent2LastName = errorEmpty;
+      }
+      if (parent2StatusEmpty) {
+        errors.parent2Status = errorEmpty;
       }
     } else {
       setSelectedRepresentant(1);
@@ -210,6 +215,23 @@ export default function Create() {
         }
       }
     }
+    // consentement check
+    if (values.parent1AllowSNU === "false") {
+      errors.parent1AllowSNU = errorEmpty;
+    }
+    if (values.acceptCGU === "false") {
+      errors.acceptCGU = errorEmpty;
+    }
+    if (values.consentment === "false") {
+      errors.consentment = errorEmpty;
+    }
+    if (values.certifyData === "false") {
+      errors.certifyData = errorEmpty;
+    }
+    if (values.parentAllowSNU === "false" || values.parentAllowSNU === "") {
+      errors.parentAllowSNU = errorEmpty;
+    }
+
     if (values.filesToUpload.length === 0) {
       toastr.error("Vous devez ajouter un papier d'identité");
     }
@@ -268,7 +290,8 @@ export default function Create() {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
-      console.log(values);
+      // necessaire ?
+      delete values.certifyData;
       const { ok, code, young, onWaitingList } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList);
@@ -360,7 +383,7 @@ export default function Create() {
           <div className="relative bg-white shadow rounded mb-4 pt-4">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex pb-14 px-8"}>
-              <SectionConsentements young={values} setFieldValue={setFieldValue} />
+              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} />
             </div>
           </div>
         )}
@@ -742,7 +765,7 @@ const PARENT_STATUS_NAME = {
   mother: "La mère",
   representant: "Le représentant légal",
 };
-function SectionConsentements({ young, setFieldValue }) {
+function SectionConsentements({ young, setFieldValue, errors }) {
   const [youngAge, setYoungAge] = React.useState("?");
   const [volontaireConsentement, setVolontaireConsentement] = React.useState({
     acceptCGU1: false,
@@ -761,7 +784,6 @@ function SectionConsentements({ young, setFieldValue }) {
   });
 
   React.useEffect(() => {
-    console.log(young);
     if (young) {
       setYoungAge(getAge(young.birthdateAt));
     } else {
@@ -783,7 +805,7 @@ function SectionConsentements({ young, setFieldValue }) {
   }, [volontaireConsentement]);
 
   React.useEffect(() => {
-    if (youngAge < 15) {
+    if (youngAge !== "?" && youngAge < 15) {
       if (
         parent1Consentement.allow1 &&
         parent1Consentement.allow2 &&
@@ -797,7 +819,7 @@ function SectionConsentements({ young, setFieldValue }) {
         setFieldValue("parent1AllowSNU", "false");
       }
     } else {
-      if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow4 && parent1Consentement.allow5 && parent1Consentement.allowGeneral) {
+      if (parent1Consentement.allow1 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allow5 && parent1Consentement.allowGeneral) {
         setFieldValue("parent1AllowSNU", "true");
       } else {
         setFieldValue("parent1AllowSNU", "false");
@@ -846,20 +868,20 @@ function SectionConsentements({ young, setFieldValue }) {
           </span>
         </div>
         <div>
-          <CheckRead onClick={() => handleVolontaireChange("acceptCGU1")} value={volontaireConsentement.acceptCGU1}>
-            A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
+          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
+            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
           </CheckRead>
-          <CheckRead onClick={() => handleVolontaireChange("acceptCGU2")} value={volontaireConsentement.acceptCGU2}>
+          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU2")} errors={errors} value={volontaireConsentement.acceptCGU2}>
             A pris connaissance des modalités de traitement de mes données personnelles.
           </CheckRead>
-          <CheckRead onClick={() => handleVolontaireChange("consentment1")} value={volontaireConsentement.consentment1}>
+          <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment1")} errors={errors} value={volontaireConsentement.consentment1}>
             Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
             <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead onClick={() => handleVolontaireChange("consentment2")} value={volontaireConsentement.consentment2}>
+          <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment2")} errors={errors} value={volontaireConsentement.consentment2}>
             S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.
           </CheckRead>
-          <CheckRead onClick={() => handleVolontaireChange("inscriptionDoneDate")} value={volontaireConsentement.inscriptionDoneDate}>
+          <CheckRead name="certifyData" onClick={() => handleConsentementChange("certifyData")} errors={errors} value={young.certifyData === "true"}>
             Certifie l&apos;exactitude des renseignements fournis
           </CheckRead>
         </div>
@@ -875,7 +897,18 @@ function SectionConsentements({ young, setFieldValue }) {
           </div>
           <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
         </div>
-        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} onChange={() => handleConsentementChange("parentAllowSNU")} />
+        <div className="flex flex-column">
+          <RadioButton value={young.parentAllowSNU} options={authorizationOptions} onChange={() => handleConsentementChange("parentAllowSNU")} />
+          {errors.parentAllowSNU && (
+            <div className="text-red-500">
+              Le répresentant doit autoriser{" "}
+              <b>
+                {young.firstName} {young.lastName}
+              </b>{" "}
+              à participer
+            </div>
+          )}
+        </div>
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
           <b>
             {young.firstName} {young.lastName}
@@ -884,24 +917,24 @@ function SectionConsentements({ young, setFieldValue }) {
           réalisation d&apos;une mission d&apos;intérêt général.
         </div>
         <div>
-          <CheckRead onClick={() => handleParent1Change("allow1")} value={parent1Consentement.allow1}>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
             Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
           </CheckRead>
           {youngAge < 15 && (
-            <CheckRead onClick={() => handleParent1Change("allow2")} value={parent1Consentement.allow2}>
+            <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
               Accepte la collecte et le traitement des données personnelles de{" "}
               <b>
                 {young.firstName} {young.lastName}
               </b>
             </CheckRead>
           )}
-          <CheckRead onClick={() => handleParent1Change("allow3")} value={parent1Consentement.allow3}>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow3")} errors={errors} value={parent1Consentement.allow3}>
             S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
           </CheckRead>
-          <CheckRead onClick={() => handleParent1Change("allow4")} value={parent1Consentement.allow4}>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow4")} errors={errors} value={parent1Consentement.allow4}>
             S&apos;engage à ce que{" "}
             <b>
               {young.firstName} {young.lastName}
@@ -909,7 +942,7 @@ function SectionConsentements({ young, setFieldValue }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead onClick={() => handleParent1Change("allow5")} value={parent1Consentement.allow5}>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow5")} errors={errors} value={parent1Consentement.allow5}>
             Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
           </CheckRead>
         </div>
@@ -951,7 +984,11 @@ function SectionConsentements({ young, setFieldValue }) {
                 <div className="font-bold">Droit à l&apos;image</div>
                 <div>Accord : {translate(young.parent2AllowImageRights)}</div>
               </div>
-              {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
+              {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                <div className="cursor-pointer" onClick={() => handleConsentementChange("parent2AllowImageRights")}>
+                  <MiniSwitch value={young.parent2AllowImageRights === "true"} />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -960,10 +997,13 @@ function SectionConsentements({ young, setFieldValue }) {
   );
 }
 
-function CheckRead({ value, children, onClick }) {
+function CheckRead({ name, errors, value, children, onClick }) {
   return (
     <div onClick={onClick} className="cursor-pointer flex items-center mt-[16px]">
-      <div className="flex-[0_0_14px] mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px]">
+      <div
+        className={`flex-[0_0_14px]  mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px] ${
+          errors[name] && !value ? "border-2 border-red-500" : ""
+        } `}>
         {value && <Check className="w-[11px] h-[8px]" />}
       </div>
       <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
