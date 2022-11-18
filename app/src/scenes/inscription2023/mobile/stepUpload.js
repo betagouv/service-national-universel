@@ -83,7 +83,7 @@ export default function StepUpload() {
     if (recto) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -105,7 +105,7 @@ export default function StepUpload() {
     if (recto) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }

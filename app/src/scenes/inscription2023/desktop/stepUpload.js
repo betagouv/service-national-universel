@@ -49,7 +49,7 @@ export default function StepUpload() {
     if (files) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -71,7 +71,7 @@ export default function StepUpload() {
     if (files) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -108,7 +108,6 @@ export default function StepUpload() {
       disabled={!young.files.cniFiles || !date || loading}
       loading={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {corrections
         ?.filter(({ field }) => field === "cniFile")
         .map((e) => (
@@ -126,7 +125,8 @@ export default function StepUpload() {
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
       <hr className="my-8 h-px bg-gray-200 border-0" />
-      <div>Ajouter un fichier</div>
+      <div className="my-4">Ajouter un fichier</div>
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Plusieurs fichiers possibles.</div>
       <input
         type="file"
