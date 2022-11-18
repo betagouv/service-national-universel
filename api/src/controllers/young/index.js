@@ -232,6 +232,9 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       onWaitingList = true;
     }
 
+    obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
