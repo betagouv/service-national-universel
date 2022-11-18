@@ -314,7 +314,7 @@ export default function Create() {
   };
 
   React.useEffect(() => {
-    if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && values.schoolDepartment !== "") {
+    if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && (values.schoolDepartment !== "" || getDepartmentByZip(values.zip))) {
       (async () => {
         try {
           const res = await api.post("/cohort-session/eligibility/2023", {
@@ -429,23 +429,24 @@ export default function Create() {
             </div>
           </div>
         )}
-
-      <div className="flex items-center w-100 justify-center">
-        {uploadError === "" ? (
-          <div onClick={handleSubmit} className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
-            {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
-          </div>
-        ) : (
-          <div className="flex flex-column">
-            <div>{uploadError}</div>
-            <div
-              onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList)}
-              className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
-              {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
+      {egibilityError === "" && (
+        <div className="flex items-center w-100 justify-center">
+          {uploadError === "" ? (
+            <div onClick={handleSubmit} className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
+              {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="flex flex-column">
+              <div>{uploadError}</div>
+              <div
+                onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList)}
+                className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
+                {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
