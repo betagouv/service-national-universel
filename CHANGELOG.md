@@ -1,3 +1,17 @@
+# [1.170.0](https://github.com/betagouv/service-national-universel/compare/v1.169.0...v1.170.0) (2022-11-18)
+
+
+### Bug Fixes
+
+* **admin:** add function to get department for eligibility ([2bdb991](https://github.com/betagouv/service-national-universel/commit/2bdb991363941adaf14ee08a737e3345dba9cf55))
+* **app:** bug when no correction on upload ([9473e72](https://github.com/betagouv/service-national-universel/commit/9473e7283dd92b690b8211fa13f752ba0462225d))
+* **app:** fix error display on upload page ([2ca04c2](https://github.com/betagouv/service-national-universel/commit/2ca04c2c2e83729ad3a716e7f47c8a9f5a037d4e))
+
+
+### Features
+
+* **api/admin:** paramétrage clôture des propositions de séjour ([#2003](https://github.com/betagouv/service-national-universel/issues/2003)) ([9cfe2b2](https://github.com/betagouv/service-national-universel/commit/9cfe2b25f813067e176bfa7c9ee376aa8f646984))
+
 # [1.169.0](https://github.com/betagouv/service-national-universel/compare/v1.168.0...v1.169.0) (2022-11-17)
 
 
