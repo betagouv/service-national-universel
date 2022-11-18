@@ -15,7 +15,20 @@ import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 import Field from "./Field";
 
-export function CniField({ young, name, label, mode, onStartRequest, className = "", currentRequest, correctionRequest, onCorrectionRequestChange, onChange, blockUpload = false, onInscriptionChange = null }) {
+export function CniField({
+  young,
+  name,
+  label,
+  mode,
+  onStartRequest,
+  className = "",
+  currentRequest,
+  correctionRequest,
+  onCorrectionRequestChange,
+  onChange,
+  blockUpload = false,
+  onInscriptionChange = null,
+}) {
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
@@ -110,7 +123,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     if (category !== null) young.latestCNIFileCategory = category;
     if (date !== null) young.latestCNIFileExpirationDate = date;
     setChanges(true);
-  }, [filesToUpload, category, date])
+  }, [filesToUpload, category, date]);
 
   useEffect(() => {
     if (blockUpload) return setFilesToUpload(young.filesToUpload);
@@ -158,8 +171,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
 
   async function upload(files) {
     for (const file of files) {
-      if (file.size > 5000000)
-        return setError(`Le fichier ${file.name} est trop volumineux.`);
+      if (file.size > 5000000) return setError(`Le fichier ${file.name} est trop volumineux.`);
     }
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
     const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), {}, category, date);
@@ -179,16 +191,16 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }
 
   const removeFileInscription = (file) => {
-    setFilesToUpload(oldFiles => {
+    setFilesToUpload((oldFiles) => {
       const newArray = [];
       oldFiles.map((oldFile) => {
         if (oldFile !== file) {
           newArray.push(oldFile);
         }
-      })
+      });
       return newArray;
-    })
-  }
+    });
+  };
 
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
@@ -222,17 +234,16 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                     let error = "";
                     for (const file of e.target.files) {
                       if (file.size > 5000000) {
-                        error += `Le fichier ${file.name} est trop volumineux.`
+                        error += `Le fichier ${file.name} est trop volumineux.`;
                       } else {
-                        array.push(file)
+                        array.push(file);
                       }
                     }
                     setError(error);
-                    console.log(array)
-                    setFilesToUpload([...filesToUpload, ...array])
-
+                    console.log(array);
+                    setFilesToUpload([...filesToUpload, ...array]);
                   } else {
-                    setFilesToUpload(e.target.files)
+                    setFilesToUpload(e.target.files);
                   }
                 }}
                 className="hidden"
@@ -246,8 +257,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
               {filesToUpload && (
                 <>
                   <div className="w-full flex space-x-2 justify-between mt-2 items-center">
-
-                    {!blockUpload ?
+                    {!blockUpload ? (
                       <>
                         <div className="3/4">
                           {Array.from(filesToUpload).map((file) => (
@@ -262,16 +272,18 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                           </PlainButton>
                         </div>
                       </>
-                      :
+                    ) : (
                       <div className="flex flex-column w-100">
                         {Array.from(filesToUpload).map((file) => (
                           <div key={file.name} className="text-[12px] flex flex-row justify-between">
                             <div>{file.name}</div>
-                            <div className="cursor-pointer" onClick={() => removeFileInscription(file)}>X</div>
+                            <div className="cursor-pointer" onClick={() => removeFileInscription(file)}>
+                              X
+                            </div>
                           </div>
                         ))}
                       </div>
-                    }
+                    )}
                   </div>
                   <div className="flex mt-4 w-full space-x-2">
                     <div className="relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] w-1/2">

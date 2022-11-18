@@ -241,9 +241,11 @@ export default function Create() {
     }
 
     if (values.filesToUpload.length === 0) {
+      errors.filesToUpload = errorEmpty;
       toastr.error("Vous devez ajouter un papier d'identité");
     }
     if (validator.isEmpty(values.latestCNIFileCategory)) {
+      errors.latestCNIFileCategory = errorEmpty;
       toastr.error("Vous devez spécifier une catégorie pour le document d'identité");
     }
     if (Object.keys(errors).length > 0) {
@@ -757,12 +759,13 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
       />
       <Field name="email" label="Email" errors={errors} value={values.email} className="mb-4" transformer={translate} handleChange={handleChange} />
       <Field name="phone" label="Téléphone" errors={errors} value={values.phone} transformer={translate} handleChange={handleChange} />
-      <div className="mt-8">
+      <div className="mt-8 ">
         <CniField
           name="cniFile"
           label="Pièce d'identité"
           young={values}
           mode="edition"
+          className={(errors.filesToUpload || errors.latestCNIFileCategory) && "border-[1px] border-red-500"}
           blockUpload={true}
           onStartRequest={null}
           currentRequest={null}
