@@ -77,7 +77,7 @@ export default function Signin() {
           <RightArrow />
           <div className="text-[#161616] text-[17px] font-bold">Mon espace volontaire</div>
         </div>
-        <div className="flex flex-col gap-1 py-4">
+        <div className="flex flex-col gap-1 pt-1 pb-4">
           <label className="text-[#161616] text-base">E-mail</label>
           <Input value={email} onChange={(e) => setEmail(e)} />
         </div>
