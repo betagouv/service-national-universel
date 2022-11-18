@@ -9,11 +9,11 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES, getDepartmentByZip, sessions2023, SENDINBLUE_SMS } = require("snu-lib");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES, getDepartmentByZip, SENDINBLUE_SMS } = require("snu-lib");
 const { sendTemplate, sendSMS } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
-const { isGoalReached } = require("../../utils/cohort");
+const { getAvailableSessions } = require("../../utils/cohort");
 const { isInRuralArea } = require("snu-lib");
 
 const youngSchooledSituationOptions = [
@@ -458,8 +458,9 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
 
     // Check inscription goals
     const dep = young.schoolDepartment || getDepartmentByZip(young.zip);
-    const cohort = sessions2023.filter((e) => e.name === young.cohort)[0];
-    if (isGoalReached(dep, cohort.name) === true) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthdateAt, young.status);
+    const session = sessions.find(({ name }) => name === value.cohort);
+    if (!session || session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set(value);
     await young.save({ fromUser: req.user });

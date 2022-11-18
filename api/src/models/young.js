@@ -1368,6 +1368,18 @@ const Schema = new mongoose.Schema({
       description: "Le representant 2 autorise le jeune à participer au SNU",
     },
   },
+  parent1ValidationDate: {
+    type: Date,
+    documentation: {
+      description: "La date à laquelle le representant 1 autorise ou pas le jeune à participer au SNU",
+    },
+  },
+  parent2ValidationDate: {
+    type: Date,
+    documentation: {
+      description: "La date à laquelle le representant 2 autorise ou pas le droit à l'image",
+    },
+  },
   parent2RejectSNUComment: {
     type: String,
     documentation: {

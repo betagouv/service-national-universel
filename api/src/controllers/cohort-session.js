@@ -3,30 +3,25 @@ const router = express.Router();
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const {  isGoalReached } = require("../utils/cohort");
-const {  getZoneByDepartment, sessions2023 } = require("snu-lib");
+const { getAvailableSessions } = require("../utils/cohort");
+const { getZoneByDepartment, sessions2023 } = require("snu-lib");
 
 router.post("/eligibility/2023", async (req, res) => {
   try {
-    const eligibilityObject = {
-      department: req.body.department,
-      birthDate: req.body.birthDate,
-      schoolLevel: req.body.schoolLevel,
-      frenchNationality: req.body.frenchNationality,
-    };
     const { error, value } = Joi.object({
       department: Joi.string().allow(null, ""),
       birthDate: Joi.date().required(),
       schoolLevel: Joi.string().allow(null, ""),
       frenchNationality: Joi.string().allow(null, ""),
+      status: Joi.string().allow(null, ""),
     })
       .unknown()
-      .validate(eligibilityObject);
+      .validate(req.body);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { department, birthDate, schoolLevel, frenchNationality } = value;
+    const { department, birthDate, schoolLevel, frenchNationality, status } = value;
 
     if (!frenchNationality) return res.send({ ok: true, data: { msg: "Pour participer au SNU, vous devez être de nationalité française." } });
 
@@ -42,21 +37,9 @@ router.post("/eligibility/2023", async (req, res) => {
     )
       return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
 
-    let sessionsFiltered = sessions2023.filter(
-      (session) =>
-        session.eligibility.zones.includes(zone) &&
-        session.eligibility.schoolLevels.includes(schoolLevel) &&
-        session.eligibility.bornAfter < birthDate &&
-        session.eligibility.bornBefore > birthDate,
-    );
-    if (sessionsFiltered.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
-
-    // Check inscription goals
-    for (let session of sessionsFiltered) {
-      if (isGoalReached(department, session.name) === true) session.goalReached = true;
-      else session.goalReached = false;
-    }
-    return res.send({ ok: true, data: sessionsFiltered });
+    const sessions = await getAvailableSessions(department, schoolLevel, birthDate, status);
+    if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Aucune session correspondant à vos critères n'a pu être trouvée." } });
+    return res.send({ ok: true, data: sessions });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

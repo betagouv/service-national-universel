@@ -260,6 +260,7 @@ router.post(
 
       if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (body.category === "cniFiles" && young.files.cniFiles.length >= 3) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
       // Upload files
 

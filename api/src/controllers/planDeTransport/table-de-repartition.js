@@ -128,7 +128,7 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
   }
 });
 
-router.get("/region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/national/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -160,7 +160,7 @@ router.get("/region/:cohort", passport.authenticate("referent", { session: false
   }
 });
 
-router.get("/department/:cohort/:region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/fromRegion/:cohort/:region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -172,6 +172,26 @@ router.get("/department/:cohort/:region", passport.authenticate("referent", { se
 
     const { cohort, region } = value;
     const data = await tableDeRepartition.find({ cohort, fromRegion: region });
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/toRegion/:cohort/:region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      region: Joi.string().required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort, region } = value;
+    const data = await tableDeRepartition.find({ cohort, toRegion: region });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {

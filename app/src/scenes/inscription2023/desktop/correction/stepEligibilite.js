@@ -150,6 +150,7 @@ export default function StepEligibilite() {
         birthDate: updates.birthdateAt,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
+        status: young.status,
       });
       if (!res.ok) throw new Error(translate(res.code));
 

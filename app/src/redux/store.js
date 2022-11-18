@@ -1,4 +1,7 @@
 import { createStore, combineReducers } from "redux";
 import reducers from "./reducers";
+import * as Sentry from "@sentry/react";
 
-export default createStore(combineReducers({ ...reducers }));
+const sentryReduxEnhancer = Sentry.createReduxEnhancer();
+
+export default createStore(combineReducers({ ...reducers }), sentryReduxEnhancer);

@@ -43,18 +43,13 @@ export default function changeSejour() {
         const { data } = await api.post("/cohort-session/eligibility/2023", {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
-          department: young.department,
+          department: young.schoolDepartment || young.department,
           frenchNationality: young.frenchNationality,
+          status: young.status,
         });
         const isArray = Array.isArray(data);
         if (isArray) {
-          const sejourGoal = data.map((e) => {
-            // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
-            //var date = new Date();
-            //console.log(date.toISOString());
-            //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer
-            return { sejour: e.name, goal: e.goalReached };
-          });
+          const sejourGoal = data.map((e) => ({ sejour: e.name, goal: e.isFull }));
           const sejour = sejourGoal.map((e) => e.sejour);
 
           setSejours(sejour);
