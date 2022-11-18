@@ -15,7 +15,9 @@ import Footer from "../../../components/footerV2";
 export default function Signin() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
@@ -33,6 +35,7 @@ export default function Signin() {
 
   const onSubmit = async () => {
     if (loading || disabled) return;
+    if (password !== confirmPassword) return setError({ text: "Les mots de passe ne correspondent pas" });
     setLoading(true);
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -61,9 +64,9 @@ export default function Signin() {
   };
 
   React.useEffect(() => {
-    if (email && password) setDisabled(false);
+    if (email && password && confirmPassword) setDisabled(false);
     else setDisabled(true);
-  }, [email, password]);
+  }, [email, password, confirmPassword]);
 
   return (
     <>
@@ -83,6 +86,17 @@ export default function Signin() {
           <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
             <input className="w-full bg-inherit" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1 pb-7">
+          <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>
+          <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+            <input className="w-full bg-inherit" type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            {showConfirmPassword ? (
+              <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
+            ) : (
+              <Eye className="cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
+            )}
           </div>
         </div>
         <button
