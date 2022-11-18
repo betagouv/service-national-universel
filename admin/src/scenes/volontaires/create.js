@@ -85,6 +85,7 @@ export default function Create() {
     certifyData: "false",
     parentAllowSNU: "",
     parent1Status: "",
+    rulesParent1: "false",
     parent1AllowImageRights: "false",
     parent1AllowSNU: "true",
     parent1FirstName: "",
@@ -230,6 +231,9 @@ export default function Create() {
     }
     if (values.parentAllowSNU === "false" || values.parentAllowSNU === "") {
       errors.parentAllowSNU = errorEmpty;
+    }
+    if (values.rulesParent1 === "false") {
+      errors.rulesParent1 = errorEmpty;
     }
 
     if (values.filesToUpload.length === 0) {
@@ -779,7 +783,6 @@ function SectionConsentements({ young, setFieldValue, errors }) {
     allow2: false,
     allow3: false,
     allow4: false,
-    allow5: false,
     allowGeneral: false,
   });
 
@@ -806,20 +809,13 @@ function SectionConsentements({ young, setFieldValue, errors }) {
 
   React.useEffect(() => {
     if (youngAge !== "?" && youngAge < 15) {
-      if (
-        parent1Consentement.allow1 &&
-        parent1Consentement.allow2 &&
-        parent1Consentement.allow3 &&
-        parent1Consentement.allow4 &&
-        parent1Consentement.allow5 &&
-        parent1Consentement.allowGeneral
-      ) {
+      if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
         setFieldValue("parent1AllowSNU", "true");
       } else {
         setFieldValue("parent1AllowSNU", "false");
       }
     } else {
-      if (parent1Consentement.allow1 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allow5 && parent1Consentement.allowGeneral) {
+      if (parent1Consentement.allow1 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
         setFieldValue("parent1AllowSNU", "true");
       } else {
         setFieldValue("parent1AllowSNU", "false");
@@ -942,7 +938,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow5")} errors={errors} value={parent1Consentement.allow5}>
+          <CheckRead name="rulesParent1" onClick={() => handleConsentementChange("rulesParent1")} errors={errors} value={young.rulesParent1 === "true"}>
             Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
           </CheckRead>
         </div>
