@@ -52,7 +52,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   const [newCohort, setNewCohort] = useState({});
   const [motif, setMotif] = useState("");
   const [message, setMessage] = useState("");
-  const [action, setAction] = useState("");
+  const [status, setStatus] = useState(null);
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -62,14 +62,17 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
     "Autre",
   ];
 
-  const actions = ["Placer le volontaire sur liste complémentaire.", "L'inscrire sur cette session."];
+  const statusOptions = [
+    { value: YOUNG_STATUS.WAITING_LIST, label: "Placer sur liste complémentaire" },
+    { value: YOUNG_STATUS.VALIDATED, label: "Valider l'inscription" },
+  ];
 
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
-      if (action === "Placer le volontaire sur liste complémentaire.") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
-      if (young.status === YOUNG_STATUS.WAITING_LIST && !newCohort.isFull) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_VALIDATION });
+      if (status) await api.put(`/referent/young/${young._id}`, { status: status.value });
+      if (young.status === YOUNG_STATUS.WAITING_LIST && !newCohort.isFull) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
       await onChange();
       toastr.success("Cohorte modifiée avec succès");
       setModalConfirmWithMessage(false);
@@ -141,7 +144,18 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
         <div className="bg-white rounded-[8px]">
           <div className="px-[24px] pt-[24px]">
             <h1 className="text-[20px] leading-[28px] text-red-500 mt-[24px] text-center">ALERTE</h1>
-            {newCohort.isFull && (
+            {newCohort.isFull && young.status !== YOUNG_STATUS.VALIDATED && (
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
+                <div className="flex gap-2 items-center">
+                  <IoWarningOutline className="h-6 w-6" />
+                  <p className="font-bold">Attention</p>
+                </div>
+                <p className="text-sm">
+                  Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Le volontaire va être positionné(e) sur liste complémentaire.
+                </p>
+              </div>
+            )}
+            {newCohort.isFull && young.status === YOUNG_STATUS.VALIDATED && (
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
                 <div className="flex gap-2 items-center">
                   <IoWarningOutline className="h-6 w-6" />
@@ -154,14 +168,14 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
                 <UncontrolledDropdown isActiveFromChild className="mt-2">
                   <DropdownToggle tag="button">
                     <div className="border-[#D1D5DB] border-[1px] rounded-[100px] bg-white flex items-center justify-between w-[375px] py-[4px] px-[15px]">
-                      {action || "Que souhaitez-vous faire ?"}
+                      {status?.label || "Que souhaitez-vous faire ?"}
                       <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
                     </div>
                   </DropdownToggle>
                   <DropdownMenu>
-                    {actions.map((e) => (
-                      <DropdownItem key={e} className="dropdown-item" onClick={() => setAction(e)}>
-                        {e}
+                    {statusOptions.map((e) => (
+                      <DropdownItem key={e.label} className="dropdown-item" onClick={() => setStatus(e)}>
+                        {e.label}
                       </DropdownItem>
                     ))}
                   </DropdownMenu>
