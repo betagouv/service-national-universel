@@ -39,9 +39,9 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
+import { copyToClipboard, getEligibleSessions } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
-import { copyToClipboard } from "../../utils";
 import { appURL } from "../../config";
 
 const REJECTION_REASONS = {
@@ -69,6 +69,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [oldCohort, setOldCohort] = useState(false);
+  const [action, setAction] = useState("");
 
   useEffect(() => {
     console.log("VolontairePhase0View: ", young);
@@ -188,6 +189,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   async function processRegistration(state, data) {
     setProcessing(true);
     try {
+      if (state === "SESSION_FULL") state = action;
+
       let body = {
         lastStatusAt: Date.now(),
         phase: "INSCRIPTION",
@@ -203,6 +206,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       }
 
       await api.put(`/referent/young/${young._id}`, body);
+      if (action === "WAITING_LIST") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
       toastr.success("Votre action a été enregistrée.");
       onChange && onChange();
     } catch (err) {
@@ -252,7 +256,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
             <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
           )}
           {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} action={action} setAction={setAction} />}
         </>
       )}
     </>
@@ -285,7 +289,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
               <span className="py-[4px] px-[10px] bg-[#F97316] text-[#FFFFFF] text-[12px] ml-[12px] rounded-[100px]">
                 {pendingRequestsCount} {pendingRequestsCount > 1 ? "corrections demandées" : "correction demandée"}
               </span>
-              <button className=" ml-[12px] text-[12px] text-[#F87171] ml-[6px] flex items-center" onClick={onDeletePending}>
+              <button className="ml-[12px] text-[12px] text-[#F87171] flex items-center" onClick={onDeletePending}>
                 <Bin fill="#F87171" />
                 <span className="ml-[5px]">Supprimer {pendingRequestsCount > 1 ? "les demandes" : "la demande"}</span>
               </button>
@@ -350,14 +354,25 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young }) {
+function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
   const [error, setError] = useState(null);
 
-  function validate() {
-    setConfirmModal({
+  async function validate() {
+    const sessions = await getEligibleSessions(young);
+    const session = sessions.find(({ name }) => name === young.cohort);
+    if (session.isFull) {
+      return setConfirmModal({
+        icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+        title: "Jauge de candidats atteinte",
+        message:
+          "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
+        type: "SESSION_FULL",
+      });
+    }
+    return setConfirmModal({
       icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
       title: "Valider le dossier",
       message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
@@ -386,6 +401,18 @@ function FooterNoRequest({ processing, onProcess, young }) {
     </option>,
     <option value="OTHER" key="OTHER">
       {REJECTION_REASONS.OTHER}
+    </option>,
+  ];
+
+  const actions = [
+    <option value="" key="none">
+      Que voulez-vous faire ?
+    </option>,
+    <option value="WAITING_LIST" key="WAITING_LIST">
+      Placer sur liste complémentaire
+    </option>,
+    <option value="VALIDATED" key="VALIDATED">
+      Inscrire le volontaire
     </option>,
   ];
 
@@ -476,6 +503,16 @@ function FooterNoRequest({ processing, onProcess, young }) {
                 />
               )}
               {error && <div className="text-[#EF4444]">{error}</div>}
+            </div>
+          )}
+          {confirmModal.type === "SESSION_FULL" && (
+            <div className="mt-[24px]">
+              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+                <select value={action} onChange={(e) => setAction(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
+                  {actions}
+                </select>
+                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+              </div>
             </div>
           )}
         </ConfirmationModal>

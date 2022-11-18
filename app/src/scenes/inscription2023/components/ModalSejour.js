@@ -29,9 +29,10 @@ export default function ModalSejour({ isOpen, onCancel }) {
           birthDate: young.birthdateAt,
           schoolLevel: young.grade,
           frenchNationality: young.frenchNationality,
+          status: young.status,
         });
         if (res.data.msg) return setError({ text: res.data.msg });
-        const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+        const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
         if (sessionsFiltered.length === 0) {
           setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
         }

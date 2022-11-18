@@ -141,6 +141,7 @@ export default function StepEligibilite() {
         birthDate: data.birthDate,
         schoolLevel: data.scolarity,
         frenchNationality: data.frenchNationality,
+        status: young.status,
       });
       if (!res.ok) {
         capture(res.code);
@@ -159,7 +160,12 @@ export default function StepEligibilite() {
         return history.push("/reinscription/noneligible");
       }
 
-      updates.sessions = res.data;
+      const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
+      if (sessionsFiltered.length === 0) {
+        setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
+        setLoading(false);
+      }
+      updates.sessions = sessionsFiltered;
     } catch (e) {
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
