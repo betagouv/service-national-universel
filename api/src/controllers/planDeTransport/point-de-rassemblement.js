@@ -96,6 +96,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
 
+    //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
+
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
     capture(error);
@@ -135,6 +137,8 @@ router.put("cohort/:id", passport.authenticate("referent", { session: false, fai
 
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
+
+    //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
