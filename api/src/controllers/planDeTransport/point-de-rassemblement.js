@@ -105,7 +105,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.put("cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
