@@ -9,7 +9,7 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, YOUNG_SITUATIONS, GRADES, inscriptionModificationOpenForYoungs, sessions2023, getAge, COHESION_STAY_LIMIT_DATE } from "snu-lib";
+import { translateGrade, YOUNG_SITUATIONS, GRADES, inscriptionModificationOpenForYoungs, sessions2023, getAge, COHESION_STAY_LIMIT_DATE, getDepartmentByZip } from "snu-lib";
 import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
 import dayjs from "dayjs";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -60,6 +60,8 @@ export default function Create() {
     addressVerified: false,
     zip: "",
     city: "",
+    department: "",
+    region: "",
     address: "",
     situation: "",
     schoolId: "",
@@ -109,7 +111,35 @@ export default function Create() {
     parent2City: "",
     parent2Country: "",
   });
+  const [cohorts, setCohorts] = React.useState([]);
+  const [egibilityError, setEgibilityError] = React.useState("");
 
+  React.useEffect(() => {
+    if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && values.schoolDepartment !== "") {
+      (async () => {
+        try {
+          const res = await api.post("/cohort-session/eligibility/2023", {
+            department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
+            birthDate: values.birthdateAt,
+            schoolLevel: values.grade,
+            frenchNationality: "true",
+          });
+          if (res.data.msg) return setEgibilityError(res.data.msg);
+          const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+          if (sessionsFiltered.length === 0) {
+            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+          } else {
+            setEgibilityError("");
+          }
+          setCohorts(sessionsFiltered);
+        } catch (e) {
+          capture(e);
+          setCohorts([]);
+        }
+        setLoading(false);
+      })();
+    }
+  }, [values.birthdateAt, values.department, values.situation, values.grade, values.schoolDepartment]);
   const validate = () => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
@@ -350,32 +380,36 @@ export default function Create() {
         </div>
       </div>
 
-      <div className="relative bg-white shadow rounded mb-4 pt-4">
-        <div className="ml-8 mb-6 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
-        <div className="flex justify-start flex-row flex-wrap px-4">
-          {sessions2023.map((session) => {
-            if (session.dateStart.getTime() > new Date().getTime() && session.name) {
-              return (
-                <div
-                  key={session.name}
-                  onClick={() => setFieldValue("cohort", session.name)}
-                  className="cursor-pointer flex flex-row justify-start items-center w-60 h-14 border border-[#3B82F6] rounded-md m-3">
-                  <input
-                    className="rounded-full mx-3"
-                    type="checkbox"
-                    id="checkboxCohort"
-                    name="cohort"
-                    checked={session.name === values.cohort}
-                    onChange={() => setFieldValue("cohort", session.name)}
-                  />
-                  <div>{session.name}</div>
-                </div>
-              );
-            }
-            return <div key={session.name}></div>;
-          })}
+      {(cohorts.length > 0 || egibilityError !== "") && (
+        <div className="relative bg-white shadow rounded mb-4 pt-4">
+          <div className="ml-8 mb-6 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
+          {egibilityError !== "" && <div className="ml-8 pb-4">{egibilityError}</div>}
+          <div className="flex justify-start flex-row flex-wrap px-4">
+            {egibilityError === "" &&
+              cohorts.map((session) => {
+                if (new Date(session.dateStart).getTime() > new Date().getTime() && session.name) {
+                  return (
+                    <div
+                      key={session.name}
+                      onClick={() => setFieldValue("cohort", session.name)}
+                      className="cursor-pointer flex flex-row justify-start items-center w-60 h-14 border border-[#3B82F6] rounded-md m-3">
+                      <input
+                        className="rounded-full mx-3"
+                        type="checkbox"
+                        id="checkboxCohort"
+                        name="cohort"
+                        checked={session.name === values.cohort}
+                        onChange={() => setFieldValue("cohort", session.name)}
+                      />
+                      <div>{session.name}</div>
+                    </div>
+                  );
+                }
+                return <div key={session.name}></div>;
+              })}
+          </div>
         </div>
-      </div>
+      )}
 
       {values.firstName !== "" &&
         values.lastName !== "" &&
@@ -529,7 +563,9 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
   };
   const onChangeSituation = (key, value) => {
     setFieldValue("employed", youngEmployedSituationOptions.includes(value) ? "true" : "false");
-    setFieldValue("schooled", youngSchooledSituationOptions.includes(value) ? "true" : "false");
+    const isSchooled = youngSchooledSituationOptions.includes(value);
+    if (!isSchooled) setFieldValue("grade", "");
+    setFieldValue("schooled", isSchooled ? "true" : "false");
     setFieldValue("situation", value);
   };
   const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
