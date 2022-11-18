@@ -226,11 +226,6 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
-    let onWaitingList = false;
-    if (isGoalReached(obj.department, obj.cohort) === true) {
-      obj.status = YOUNG_STATUS.WAITING_LIST;
-      onWaitingList = true;
-    }
 
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -245,7 +240,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ young, ok: true, onWaitingList });
+    return res.status(200).send({ young, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);

@@ -28,7 +28,6 @@ export default function Create() {
   const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
   const [uploadError, setUploadError] = React.useState("");
   const [youngId, setYoungId] = React.useState(null);
-  const [onWaitingList, setOnWaitingList] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const [errors, setErrors] = React.useState({});
@@ -254,7 +253,7 @@ export default function Create() {
     return errors;
   };
 
-  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate, onWaitingList) => {
+  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate) => {
     setLoading(true);
     const res = await api.uploadFile(`/young/${id}/documents/cniFiles`, Array.from(filesToUpload), {}, latestCNIFileCategory, latestCNIFileExpirationDate);
     if (res.code === "FILE_CORRUPTED") {
@@ -271,11 +270,7 @@ export default function Create() {
       return "err";
     }
     setLoading(false);
-    if (onWaitingList) {
-      toastr.success("Volontaire créé et ajouté à la liste d'attente !");
-    } else {
-      toastr.success("Volontaire créé !");
-    }
+    toastr.success("Volontaire créé !");
     return history.push("/inscription");
   };
 
@@ -302,11 +297,10 @@ export default function Create() {
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       delete values.certifyData;
-      const { ok, code, young, onWaitingList } = await api.post("/young/invite", values);
+      const { ok, code, young } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-      const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList);
+      const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
       setYoungId(young._id);
-      setOnWaitingList(onWaitingList);
       if (res === "err") return toastr.error("Une erreur s'est produite avec le téléversement de vos fichiers");
     } catch (e) {
       setLoading(false);
@@ -441,7 +435,7 @@ export default function Create() {
             <div className="flex flex-column">
               <div>{uploadError}</div>
               <div
-                onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate, onWaitingList)}
+                onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)}
                 className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
                 {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
               </div>
