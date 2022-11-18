@@ -8,6 +8,7 @@ const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
+const nanoid = require("nanoid");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -43,6 +44,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { cohort, name, address, complementAddress, city, zip, department, region, location } = value;
 
     const pointDeRassemblement = await PointDeRassemblementModel.create({
+      code: nanoid(),
       cohorts: [cohort],
       name,
       address,
