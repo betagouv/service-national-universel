@@ -197,7 +197,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const mission = await MissionObject.findById(value.missionId);
+    const mission = await MissionObject.findById(application.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const young = await YoungObject.findById(application.youngId);
