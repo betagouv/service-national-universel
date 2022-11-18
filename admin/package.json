@@ -74,6 +74,7 @@
     "react": "16.14.0",
     "react-autosuggest": "10.1.0",
     "react-beautiful-dnd": "13.1.1",
+    "react-datepicker": "^4.8.0",
     "react-dom": "16.14.0",
     "react-icons": "^4.6.0",
     "react-loading": "2.0.3",

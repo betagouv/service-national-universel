@@ -31,6 +31,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const history = useHistory();
   const [statusOptions, setStatusOptions] = useState([]);
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (young) {
@@ -62,6 +63,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     setConfirmModal({
       isOpen: true,
       onConfirm: onConfirmDelete,
+      loadingText: "La suppresion peut prendre une minute...",
       title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
       message: "Cette action est irréversible.",
     });
@@ -69,9 +71,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 
   const onConfirmDelete = async () => {
     try {
+      setLoading(true);
       const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      setLoading(false);
       toastr.success("Ce volontaire a été supprimé.");
       return history.push("/inscription");
     } catch (e) {
@@ -88,6 +92,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       title: "Modification de statut",
       message: `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utlisateur.`,
       type: status,
+      onConfirm: () => onConfirmStatus(status),
     });
   }
 
@@ -102,8 +107,8 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     )),
   ];
 
-  async function onConfirm() {
-    if (confirmModal.type === YOUNG_STATUS.WITHDRAWN) {
+  const onConfirmStatus = async (type) => {
+    if (type === YOUNG_STATUS.WITHDRAWN) {
       if (withdrawn.reason === "") {
         setWithdrawn({ ...withdrawn, error: "Vous devez obligatoirement sélectionner un motif." });
         return;
@@ -113,11 +118,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         setWithdrawn({ ...withdrawn, error: null });
       }
-      await changeStatus(confirmModal.type, { withdrawnReason: withdrawn.reason, withdrawnMessage: withdrawn.message });
+      await changeStatus(type, { withdrawnReason: withdrawn.reason, withdrawnMessage: withdrawn.message });
     } else {
-      await changeStatus(confirmModal.type);
+      await changeStatus(type);
     }
-  }
+  };
 
   async function changeStatus(status, values = {}) {
     const prevStatus = young.status;
@@ -259,13 +264,15 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       {confirmModal && (
         <ConfirmationModal
           isOpen={true}
+          loading={loading}
           icon={confirmModal.icon}
           title={confirmModal.title}
           message={confirmModal.message}
           confirmText={confirmModal.confirmLabel || "Confirmer"}
+          loadingText={confirmModal.loadingText}
           confirmMode={confirmModal.confirmColor || "blue"}
           onCancel={() => setConfirmModal(null)}
-          onConfirm={onConfirm}>
+          onConfirm={confirmModal.onConfirm}>
           {confirmModal.type === YOUNG_STATUS.WITHDRAWN && (
             <div className="mt-[24px]">
               <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">

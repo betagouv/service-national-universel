@@ -136,12 +136,14 @@ class Auth {
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session || session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+      const formatedDate = birthdateAt;
+      formatedDate.setUTCHours(11, 0, 0);
       const user = await this.model.create({
         email,
         firstName,
         lastName,
         password,
-        birthdateAt,
+        birthdateAt: formatedDate,
         frenchNationality,
         schooled,
         schoolName,

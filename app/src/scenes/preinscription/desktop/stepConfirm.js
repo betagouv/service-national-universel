@@ -8,6 +8,7 @@ import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { capture } from "../../../sentry";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
+import dayjs from "dayjs";
 
 export default function StepDone() {
   const [error, setError] = useState({});
@@ -32,7 +33,7 @@ export default function StepDone() {
       lastName: data.lastName,
       frenchNationality: data.frenchNationality,
       password: data.password,
-      birthdateAt: data.birthDate,
+      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       schooled: data.school ? "true" : "false",
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,

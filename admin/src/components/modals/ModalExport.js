@@ -20,26 +20,20 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
           <SelectedFilters
             showClearAll={false}
             render={(props) => {
-              const { selectedValues } = props;
-              let areAllFiltersEmpty = true;
-              for (const item of Object.keys(selectedValues)) {
-                if (selectedValues[item].value.length > 0) areAllFiltersEmpty = false;
-              }
-              if (!areAllFiltersEmpty) {
+              const values = Object.values(props.selectedValues);
+              if (values.some((e) => e.value?.length))
                 return (
                   <div className="rounded-xl bg-gray-50 py-3">
                     <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
                     <div className="mt-2 mx-auto text-center text-base text-gray-600">
-                      {Object.values(selectedValues)
-                        .filter((e) => e.value.length > 0)
+                      {values
+                        .filter((e) => e.value?.length)
                         .map((e) => getSelectedFilterLabel(e.value, translateFilter(e.label)))
                         .join(" • ")}
                     </div>
                   </div>
                 );
-              } else {
-                return <div></div>;
-              }
+              return <div></div>;
             }}
           />
 

@@ -16,8 +16,8 @@ const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 const { ERRORS, deleteFile } = require("../utils");
 const passport = require("passport");
-const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../sendinblue");
+const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, SENDINBLUE_SMS } = require("snu-lib");
+const { sendTemplate, sendSMS } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const config = require("../config");
 
@@ -189,21 +189,29 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
 });
 
 router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
-  if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
-
-  const young = await YoungModel.findById(youngId);
-  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
   try {
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
+    const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
+    if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
+
+    const young = await YoungModel.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (young.parent1ContactPreference === "phone") {
+      await sendSMS(
+        young.parent1Phone,
+        SENDINBLUE_SMS.OUTDATED_ID_PROOF.template(young, `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`),
+        SENDINBLUE_SMS.OUTDATED_ID_PROOF.tag,
+      );
+    } else {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
+    }
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

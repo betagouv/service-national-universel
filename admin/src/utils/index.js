@@ -2,6 +2,7 @@ import passwordValidator from "password-validator";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
+import { departmentLookUp } from "snu-lib";
 import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
@@ -213,3 +214,12 @@ export const getEligibleSessions = async (young) => {
   });
   return data;
 };
+
+export function getDepartmentForEligibility(young) {
+  let dep = young?.schoolDepartment || young?.department;
+  if (!isNaN(dep) || ["2A", "2B"].includes(dep)) {
+    if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
+    else dep = departmentLookUp[dep];
+  }
+  return dep;
+}

@@ -348,6 +348,12 @@ export default function List() {
                 cliquez-ici
               </a>
               .
+              <br />
+              Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
+              <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+                vérifier votre adresse
+              </a>
+              .
             </div>
           </div>
           <Link to="/preferences">
@@ -690,7 +696,15 @@ export default function List() {
                     return <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />;
                   });
                 }}
-                renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
+                renderNoResults={() => (
+                  <div className="text-gray-700 mb-3 text-sm">
+                    Aucune mission ne correspond à votre recherche. Merci de{" "}
+                    <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+                      vérifier votre adresse
+                    </a>
+                    .
+                  </div>
+                )}
               />
             </Missions>
           </ReactiveBase>

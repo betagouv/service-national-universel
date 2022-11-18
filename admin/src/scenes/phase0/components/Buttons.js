@@ -7,6 +7,9 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
     case "blue":
       color = "bg-white text-[#1D4ED8] border-[#1D4ED8] hover:!bg-[#1D4ED8] hover:text-white";
       break;
+    case "red":
+      color = "bg-white text-[#EF4444] border-[#EF4444] hover:!bg-[#EF4444] hover:text-white";
+      break;
     default:
       color = "bg-white text-[#000091] border-[#000091] hover:!bg-[#000091] hover:text-white";
   }

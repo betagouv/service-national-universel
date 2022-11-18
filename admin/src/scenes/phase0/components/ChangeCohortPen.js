@@ -19,6 +19,7 @@ export function ChangeCohortPen({ young, onChange }) {
   const [options, setOptions] = useState(null);
 
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+  let unmounted = false;
 
   useEffect(() => {
     if (young) {
@@ -26,10 +27,13 @@ export function ChangeCohortPen({ young, onChange }) {
         const data = await getEligibleSessions(young);
         if (Array.isArray(data)) {
           const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull })).filter((c) => c.name !== young.cohort);
-          setOptions(cohorts);
-        } else setOptions([]);
+          if (!unmounted) setOptions(cohorts);
+        } else if (!unmounted) setOptions([]);
       })();
     }
+    return () => {
+      unmounted = true;
+    };
   }, [young]);
 
   if (disabled) return null;

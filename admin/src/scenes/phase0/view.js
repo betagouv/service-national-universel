@@ -7,7 +7,18 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "dayjs";
-import { COHESION_STAY_LIMIT_DATE, COHESION_STAY_START, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, YOUNG_SITUATIONS, GRADES, getAge } from "snu-lib";
+import {
+  COHESION_STAY_LIMIT_DATE,
+  COHESION_STAY_START,
+  START_DATE_SESSION_PHASE1,
+  translate,
+  translateGrade,
+  YOUNG_STATUS,
+  YOUNG_SITUATIONS,
+  GRADES,
+  getAge,
+  ROLES,
+} from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -28,7 +39,10 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { getEligibleSessions } from "../../utils";
+import { copyToClipboard, getEligibleSessions } from "../../utils";
+import Warning from "../../assets/icons/Warning";
+import { useSelector } from "react-redux";
+import { appURL } from "../../config";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -46,6 +60,8 @@ const parentStatusOptions = [
   { label: "Père", value: "father" },
   { label: "Autre", value: "representant" },
 ];
+
+const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
@@ -232,7 +248,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onChange={onChange}
           oldCohort={oldCohort}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} />}
+        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} />}
       </div>
       {globalMode === "correction" && (
         <>
@@ -569,11 +585,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     let result = true;
     let errors = {};
 
-    if (!validator.isEmail(data.email)) {
+    if (!data.email || !validator.isEmail(data.email)) {
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
-    if (!validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (!data.phone || !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
       errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide.";
       result = false;
     }
@@ -875,6 +891,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 }
 
 function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
+  const user = useSelector((state) => state.Auth.user);
+  const categoryOptions = ["cniNew", "cniOld", "passport"].map((s) => ({ value: s, label: translate(s) }));
   let cniDay = "";
   let cniMonth = "";
   let cniYear = "";
@@ -916,6 +934,25 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
         <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
       </FieldsGroup>
+
+      {user.role === ROLES.ADMIN && (
+        <Field
+          name="latestCNIFileCategory"
+          label="Type de pièce d'identité"
+          value={young.latestCNIFileCategory}
+          transformer={translate}
+          mode={globalMode}
+          className="my-[16px]"
+          onStartRequest={onStartRequest}
+          currentRequest={currentRequest}
+          correctionRequest={getCorrectionRequest(requests, "latestCNIFileCategory")}
+          onCorrectionRequestChange={onCorrectionRequestChange}
+          type="select"
+          options={categoryOptions}
+          onChange={(cat) => onChange("latestCNIFileCategory", cat)}
+          young={young}
+        />
+      )}
       <HonorCertificate young={young} />
     </div>
   );
@@ -986,6 +1023,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         onCorrectionRequestChange={onCorrectionRequestChange}
         onChange={(value) => onChange("email", value)}
         young={young}
+        copy={true}
       />
       <Field
         name="phone"
@@ -1299,6 +1337,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
                 young={young}
+                copy={true}
               />
               <Field
                 name={`parent${currentParent}Phone`}
@@ -1434,8 +1473,9 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young }) {
+function SectionConsentements({ young, onChange }) {
   const [youngAge, setYoungAge] = useState("?");
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     if (young) {
@@ -1450,6 +1490,37 @@ function SectionConsentements({ young }) {
     { value: "false", label: "Je n'autorise pas" },
   ];
 
+  function parent2RejectSNU() {
+    setConfirmModal({
+      icon: <Warning />,
+      title: "Consentement refusé",
+      message: (
+        <div>
+          Vous vous apprêtez à passer le dossier d&apos;inscription de {young.firstName} {young.lastName} en statut &laquo;non autorisé&raquo;.
+          <br />
+          {young.firstName} ne pourra pas participer au SNU.
+          <br />
+          Un email lui sera automatiquement envoyé.
+        </div>
+      ),
+      confirm: confirmParent2Rejection,
+    });
+  }
+
+  async function confirmParent2Rejection() {
+    try {
+      setConfirmModal(null);
+      await api.put(`/young-edition/${young._id}/parent-allow-snu`, {
+        parent: 2,
+        allow: false,
+      });
+      toastr.success("Le refus a été pris en compte. Le jeune a été notifié.");
+      onChange && onChange();
+    } catch (err) {
+      toastr.error("Nous n'avons pas pu enregistrer le refus. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -1460,14 +1531,14 @@ function SectionConsentements({ young }) {
           </span>
         </div>
         <div>
-          <CheckRead>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
-          <CheckRead>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
-          <CheckRead>
+          <CheckRead value={young.acceptCGU === "true"}>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
+          <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
+          <CheckRead value={young.consentment === "true"}>
             Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
             <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
+          <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
+          <CheckRead value={young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null}>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
         </div>
       </div>
       <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
@@ -1479,7 +1550,9 @@ function SectionConsentements({ young }) {
               {young.parent1FirstName} {young.parent1LastName}
             </span>
           </div>
-          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          {young.parent1ValidationDate && (
+            <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          )}
         </div>
         <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
@@ -1490,24 +1563,24 @@ function SectionConsentements({ young }) {
           réalisation d&apos;une mission d&apos;intérêt général.
         </div>
         <div>
-          <CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
             Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
           </CheckRead>
           {youngAge < 15 && (
-            <CheckRead>
+            <CheckRead value={young.parent1AllowSNU === "true"}>
               Accepte la collecte et le traitement des données personnelles de{" "}
               <b>
                 {young.firstName} {young.lastName}
               </b>
             </CheckRead>
           )}
-          <CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
           </CheckRead>
-          <CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à ce que{" "}
             <b>
               {young.firstName} {young.lastName}
@@ -1515,15 +1588,51 @@ function SectionConsentements({ young }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
         </div>
         <div className="mt-[16px] flex itemx-center justify-between">
           <div className="grow text-[#374151] text-[14px] leading-[20px]">
             <div className="font-bold">Droit à l&apos;image</div>
-            <div>Accord : {translate(young.parent1AllowImageRights)}</div>
+            <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
           </div>
-          <MiniSwitch value={young.parent1AllowImageRights === "true"} />
+          {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
+        {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
+          <div className="mt-[16px] flex itemx-center justify-between">
+            <div className="grow text-[#374151] text-[14px] leading-[20px]">
+              <div className="font-bold">Consentement à la participation</div>
+              <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
+            </div>
+            <MiniSwitch value={young.parent1AllowSNU === "true"} />
+          </div>
+        ) : (
+          <div className="mt-2 flex items-center justify-between">
+            <div
+              className="cursor-pointer italic text-[#1D4ED8]"
+              onClick={() => {
+                copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
+                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+              }}>
+              Copier le lien du formulaire
+            </div>
+            <BorderButton
+              mode="blue"
+              onClick={async () => {
+                try {
+                  const response = await api.get(`/young-edition/${young._id}/remider/1`);
+                  if (response.ok) {
+                    toastr.success(translate("REMINDER_SENT"), "");
+                  } else {
+                    toastr.error(translate(response.code), "");
+                  }
+                } catch (error) {
+                  toastr.error(translate(error.code), "");
+                }
+              }}>
+              Relancer
+            </BorderButton>
+          </div>
+        )}
         {young.parent2Status && (
           <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
             <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
@@ -1533,18 +1642,82 @@ function SectionConsentements({ young }) {
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
               </div>
-              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              {young.parent2ValidationDate && (
+                <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              )}
             </div>
-            <div className="mt-[16px] flex itemx-center justify-between">
-              <div className="grow text-[#374151] text-[14px] leading-[20px]">
-                <div className="font-bold">Droit à l&apos;image</div>
-                <div>Accord : {translate(young.parent2AllowImageRights)}</div>
+            {young.parent1AllowImageRights === "true" && (
+              <div className="mt-[16px] flex items-center justify-between">
+                <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                  <div className="font-bold">Droit à l&apos;image</div>
+                  <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                </div>
+                {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
               </div>
-              <MiniSwitch value={young.parent2AllowImageRights === "true"} />
-            </div>
+            )}
+            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && !young.parent2AllowImageRights && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                  }}>
+                  Copier le lien du formulaire
+                </div>
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
+                    }
+                  }}>
+                  Relancer
+                </BorderButton>
+              </div>
+            )}
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
+              young.status,
+            ) ? (
+              <div className="mt-[16px] flex items-center justify-between">
+                <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
+                  <div className="font-bold">Consentement à la participation</div>
+                  {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
+                </div>
+                {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
+                  <div className="flex items-center gap-2 text-red-500 text-sm ">
+                    <XCircle className="w-4 h-4 text-red-500" />
+                    Refusé
+                  </div>
+                ) : (
+                  <BorderButton mode="red" onClick={parent2RejectSNU}>
+                    Déclarer un refus
+                  </BorderButton>
+                )}
+              </div>
+            ) : null}
           </div>
         )}
       </div>
+      {confirmModal && (
+        <ConfirmationModal
+          isOpen={true}
+          icon={confirmModal.icon}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmLabel || "Confirmer"}
+          confirmMode={confirmModal.confirmColor || "blue"}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={confirmModal.confirm}
+        />
+      )}
     </Section>
   );
 }
@@ -1600,11 +1773,11 @@ function SectionOldConsentements({ young }) {
   );
 }
 
-function CheckRead({ children }) {
+function CheckRead({ value, children }) {
   return (
     <div className="flex items-center mt-[16px]">
       <div className="flex-[0_0_14px] mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px]">
-        <Check className="w-[11px] h-[8px]" />
+        {value && <Check className="w-[11px] h-[8px]" />}
       </div>
       <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
     </div>
@@ -1670,7 +1843,13 @@ function getCorrectionRequest(requests, field) {
 }
 
 function HonorCertificate({ young }) {
-  const cniExpired = young?.latestCNIFileExpirationDate > START_DATE_SESSION_PHASE1[young.cohort];
+  let cniExpired = false;
+  if (young && young.cohort && young.latestCNIFileExpirationDate) {
+    const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
+    if (cohortDate) {
+      cniExpired = new Date(young.latestCNIFileExpirationDate).valueOf() < cohortDate.valueOf();
+    }
+  }
 
   async function remind() {
     try {

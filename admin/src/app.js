@@ -23,12 +23,14 @@ import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
+import PointDeRassemblement from "./scenes/pointDeRassemblement";
 import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
+import PlanDeTransport from "./scenes/plan-transport";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -38,7 +40,7 @@ import Loader from "./components/Loader";
 import api, { initApi } from "./services/api";
 import { initSentry, SentryRoute, history } from "./sentry";
 
-import { adminURL } from "./config";
+import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
@@ -185,13 +187,18 @@ const Home = () => {
             <RestrictedRoute path="/contenu" component={Content} />
             <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
             <RestrictedRoute path="/centre" component={Center} />
-            <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            {environment === "production" ? (
+              <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            ) : (
+              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+            )}
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
+            <RestrictedRoute path="/plan-de-transport" component={PlanDeTransport} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>

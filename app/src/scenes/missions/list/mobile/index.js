@@ -344,6 +344,13 @@ export default function List() {
                 rel="noreferrer">
                 En savoir plus
               </a>
+              .
+              <br />
+              Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
+              <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+                vérifier votre adresse
+              </a>
+              .
             </div>
           </div>
         </div>
@@ -557,7 +564,7 @@ export default function List() {
                         setKeyWordOpen(false);
                       }}>
                       <div className="font-bold">Période</div>
-                      <div className="text-gray-500 text-md">N'importe quand</div>
+                      <div className="text-gray-500 text-md">N&apos;importe quand</div>
                     </div>
                   )}
                   {dropdownControlWhenOpen && (
@@ -725,7 +732,15 @@ export default function List() {
               render={({ data }) => {
                 return data.map((e) => <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />);
               }}
-              renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
+              renderNoResults={() => (
+                <div className="text-gray-700 my-3 p-2 text-sm">
+                  Aucune mission ne correspond à votre recherche. Merci de{" "}
+                  <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+                    vérifier votre adresse
+                  </a>
+                  .
+                </div>
+              )}
             />
           </Missions>
         </ReactiveBase>

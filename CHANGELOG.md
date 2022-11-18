@@ -1,3 +1,107 @@
+# [1.169.0](https://github.com/betagouv/service-national-universel/compare/v1.168.0...v1.169.0) (2022-11-17)
+
+
+### Bug Fixes
+
+* **admin:** Can't have email empty as well ([3426de5](https://github.com/betagouv/service-national-universel/commit/3426de5a8b7949780a8842dc98c7bccf6849cf1c))
+* **admin:** Can't have phone number undefined ([0863f2b](https://github.com/betagouv/service-national-universel/commit/0863f2bfbb4e8ec8d68118241a5299bfb858f642))
+* **admin:** phase 0 parent2 refused style ([a654253](https://github.com/betagouv/service-national-universel/commit/a654253c69026ab6ee0acf3f5cde56c283a67308))
+* **admin:** phase 0 parent2 view consent ([06b57d6](https://github.com/betagouv/service-national-universel/commit/06b57d6c06e855e015a72c6c433f220cb1fc3dda))
+* **api:** allow ref deps to access reinscription ([d80dbd4](https://github.com/betagouv/service-national-universel/commit/d80dbd435871f559917c1e64488f6994a34d52f5))
+
+
+### Features
+
+* **admin:** table de repartition fini ([#2060](https://github.com/betagouv/service-national-universel/issues/2060)) ([fb0ef30](https://github.com/betagouv/service-national-universel/commit/fb0ef30ec2c322b19f80aa95cb5be7161c34a32f))
+* **admin/api:** send parent reminder ([#2056](https://github.com/betagouv/service-national-universel/issues/2056)) ([f6d9287](https://github.com/betagouv/service-national-universel/commit/f6d92876ddae035dbde0d66f6c6b8155d3468b61))
+
+# [1.168.0](https://github.com/betagouv/service-national-universel/compare/v1.167.0...v1.168.0) (2022-11-16)
+
+
+### Bug Fixes
+
+* **app:** Change restriction reinscription critary ([#2058](https://github.com/betagouv/service-national-universel/issues/2058)) ([87b9ca1](https://github.com/betagouv/service-national-universel/commit/87b9ca13eaa22ac388f35ae611d68e01da49cb25))
+* **app/api:** date preinscription ([#2051](https://github.com/betagouv/service-national-universel/issues/2051)) ([12b4e67](https://github.com/betagouv/service-national-universel/commit/12b4e67092165205c9dd11e10acde84ba763dc42))
+
+
+### Features
+
+* **admin/app:** update link footer ([5064eef](https://github.com/betagouv/service-national-universel/commit/5064eefa38a784c3a32e44303366744e9745cbd4))
+
+# [1.167.0](https://github.com/betagouv/service-national-universel/compare/v1.166.0...v1.167.0) (2022-11-15)
+
+
+### Bug Fixes
+
+* **app:** corrections et optimisations sur téléversement documents ([#2052](https://github.com/betagouv/service-national-universel/issues/2052)) ([75dedc9](https://github.com/betagouv/service-national-universel/commit/75dedc957eae414bfad562dec78710490acdb65b))
+* **app:** error when no correction ([02f76a8](https://github.com/betagouv/service-national-universel/commit/02f76a812e9542c26a87650ed92d90909044f17d))
+* **app:** remove capture propagation ([48c8187](https://github.com/betagouv/service-national-universel/commit/48c8187279ffb35f44b944fd0c2b0237fbea5551))
+
+
+### Features
+
+* **app:** birth city zip suggestions ([#2038](https://github.com/betagouv/service-national-universel/issues/2038))"" ([270198e](https://github.com/betagouv/service-national-universel/commit/270198e3b6a04303ad39f242214d5ccabfd49d51))
+* **app:** switch to camera scan for ID upload ([2f6cdb6](https://github.com/betagouv/service-national-universel/commit/2f6cdb63bcccd1dd7e224048d9db7b758ffb38ae))
+
+
+### Reverts
+
+* Revert "feat(app): birth city zip suggestions (#2038)" ([c89d3d8](https://github.com/betagouv/service-national-universel/commit/c89d3d83eb18ab0e0340d5f2c53814d522cf5841)), closes [#2038](https://github.com/betagouv/service-national-universel/issues/2038)
+
+# [1.166.0](https://github.com/betagouv/service-national-universel/compare/v1.165.1...v1.166.0) (2022-11-14)
+
+
+### Bug Fixes
+
+* **admin:** fix grade ([#2042](https://github.com/betagouv/service-national-universel/issues/2042)) ([b3b3a91](https://github.com/betagouv/service-national-universel/commit/b3b3a91e7501b5a9eccb50a8bf42a929ec6ea2c2))
+* **api:** No parent 2 fix ([d0b7ed0](https://github.com/betagouv/service-national-universel/commit/d0b7ed0d8db00e7153892415715fea3d7ef0ecc7))
+* **app:** error handling in mobile upload step + opti render ([#2046](https://github.com/betagouv/service-national-universel/issues/2046)) ([5a0b7ce](https://github.com/betagouv/service-national-universel/commit/5a0b7ce130d60542391aad887b3235d7e1ce0fec))
+* **app:** fix filter list in export modal ([66567fa](https://github.com/betagouv/service-national-universel/commit/66567fa41981ce2f30663b28da1c27565d3dbfdb))
+
+
+### Features
+
+* **admin/api:** table de repartition back ([#1984](https://github.com/betagouv/service-national-universel/issues/1984)) ([7dc71e4](https://github.com/betagouv/service-national-universel/commit/7dc71e472a5d7cb8d56c62416c5a7f77ead79455))
+* **app:** birth city zip suggestions ([#2038](https://github.com/betagouv/service-national-universel/issues/2038)) ([69c5635](https://github.com/betagouv/service-national-universel/commit/69c5635b60145acb9d3d2facb764ac87f3e0179e))
+* **app/api:** add contact preference + branch SMS inscriptions ([#2033](https://github.com/betagouv/service-national-universel/issues/2033)) ([e8bc88c](https://github.com/betagouv/service-national-universel/commit/e8bc88c78d0b41380a1952760054d2abad369c80))
+
+## [1.165.1](https://github.com/betagouv/service-national-universel/compare/v1.165.0...v1.165.1) (2022-11-13)
+
+
+### Bug Fixes
+
+* **api:** remove dont stringify errors ([1add8a0](https://github.com/betagouv/service-national-universel/commit/1add8a054c427132a7c37c34d2a9e02a6424d212))
+
+# [1.165.0](https://github.com/betagouv/service-national-universel/compare/v1.164.0...v1.165.0) (2022-11-11)
+
+
+### Bug Fixes
+
+* **admin:** Repair delete button ([#2030](https://github.com/betagouv/service-national-universel/issues/2030)) ([5b24dab](https://github.com/betagouv/service-national-universel/commit/5b24daba94f0f4642f73166e6bd21714b6ae9bc1))
+* **api:** delete field phase 1 on change status (REINSCRIPTION) ([8aa975c](https://github.com/betagouv/service-national-universel/commit/8aa975c76bea9d102e47cd2c205d5b336fd466ab))
+
+
+### Features
+
+* **admin:** Changement DatePicker sur fiche du Jeune dans l'admin ([#2037](https://github.com/betagouv/service-national-universel/issues/2037)) ([82cdfc3](https://github.com/betagouv/service-national-universel/commit/82cdfc359ee53ea3ac05511fa9a6dac0eb89a072))
+* **admin:** copy to clipboard for email phase 0 ([e10def4](https://github.com/betagouv/service-national-universel/commit/e10def446bdaa83389f52a9cbfad7d7b33dc8428))
+* **admin/api:** Consentement désaccord du RL n°2 ([#2036](https://github.com/betagouv/service-national-universel/issues/2036)) ([12118cc](https://github.com/betagouv/service-national-universel/commit/12118ccae8ce78ca347659fd53df3670fdea22fe))
+* **api:** Brancher la notification de relance consentement représentant légal de l’inscription ([#2039](https://github.com/betagouv/service-national-universel/issues/2039)) ([b490ae5](https://github.com/betagouv/service-national-universel/commit/b490ae5dfc405030d6c7f10a0d10b9c70751ca74))
+
+# [1.164.0](https://github.com/betagouv/service-national-universel/compare/v1.163.0...v1.164.0) (2022-11-10)
+
+
+### Bug Fixes
+
+* **api:** Allow no phone if different from resp or supervisor ([aece7c7](https://github.com/betagouv/service-national-universel/commit/aece7c7245d523202201d0c1b6cfc05dd0390c3c))
+* **app/admin:**  toastr.success upload + dispatch young PM ([#1813](https://github.com/betagouv/service-national-universel/issues/1813)) ([2318f37](https://github.com/betagouv/service-national-universel/commit/2318f37cbe5f0e72c4918f32d8e0b02e8b839982))
+* **kb:** broken link design ([f28c8fd](https://github.com/betagouv/service-national-universel/commit/f28c8fddf00fc15d9950a42124e875fba549ca52))
+
+
+### Features
+
+* **api:** Delete pending applications when validating phase 2 ([#2018](https://github.com/betagouv/service-national-universel/issues/2018)) ([049e382](https://github.com/betagouv/service-national-universel/commit/049e3825c56cec7462b3869c9ef6bf380693b894))
+
 # [1.163.0](https://github.com/betagouv/service-national-universel/compare/v1.162.0...v1.163.0) (2022-11-09)
 
 

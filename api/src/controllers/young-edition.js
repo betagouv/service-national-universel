@@ -2,9 +2,10 @@
  * /young-edition
  *
  * ROUTES
- *   PUT   /young-edition/:id/identite
- *   PUT   /young-edition/:id/situationparents
- *   PUT   /young-edition/:id/phasestatus
+ *   PUT   /young-edition/:id/identite            -> Modifie les données du jeune qui se trouvent dans la première section de la page du jeune (informations générales).
+ *   PUT   /young-edition/:id/situationparents    -> Modifie les données du jeune qui se trouvent dans la deuxième section de la page du jeune (Détails).
+ *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune sur une phase.
+ *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
  */
 
 const express = require("express");
@@ -16,8 +17,11 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, canUpdateYoungStatus } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_SMS } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
+const { sendTemplate, sendSMS } = require("../sendinblue");
+const { format } = require("date-fns");
+const config = require("../config");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -44,6 +48,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       email: Joi.string().lowercase().trim(),
       phone: Joi.string().trim(),
       latestCNIFileExpirationDate: Joi.date(),
+      latestCNIFileCategory: Joi.string().trim(),
       birthdateAt: Joi.date(),
       birthCity: Joi.string().trim(),
       birthCityZip: Joi.string().trim(),
@@ -95,6 +100,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (isRegionRural !== null) {
       value.isRegionRural = isRegionRural;
     }
+
+    value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -238,7 +245,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     value.lastStatusAt = now;
 
     // --- check rights
-    if (!canUpdateYoungStatus({ body: value, current: young })) {
+    if (!canUserUpdateYoungStatus(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -253,4 +260,150 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // --- validate data
+    const bodySchema = Joi.object().keys({
+      parent: Joi.number().valid(1, 2).required(),
+      allow: Joi.boolean().required(),
+    });
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("joi error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // --- get young
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    let changes = {
+      [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
+    };
+
+    let notification = null;
+    const futureYoung = { ...young, ...changes };
+    if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {
+      if (young.parentAllowSNU !== "false") {
+        changes.parentAllowSNU = "false";
+        changes.status = YOUNG_STATUS.NOT_AUTORISED;
+        notification = "rejected";
+      }
+    } else if (futureYoung.parent1AllowSNU === "true" && futureYoung.parent2AllowSNU !== "false") {
+      if (young.parentAllowSNU !== "true") {
+        // TODO: on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
+        // body.parentAllowSNU = "true";
+        // notification = "accepted";
+      }
+    }
+    if (value.parent === 2 && value.allow === false) {
+      changes.parent2RejectSNUComment = `Renseigné par ${req.user.firstName} ${req.user.lastName} le ${format(new Date(), "dd/MM/yyyy à HH:mm")}`;
+    }
+
+    // --- update young
+    young.set(changes);
+    await young.save({ fromUser: req.user });
+
+    if (notification === "rejected") {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT2_DID_NOT_CONSENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      });
+    }
+    // else if (notification === "accepted") {
+    //   // on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
+    // }
+
+    // --- result
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) {
+      capture(error_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { error: error_parent_id, value: parentId } = Joi.number().valid(1, 2).required().validate(req.params.idParent, { stripUnknown: true });
+    if (error_parent_id) {
+      capture(error_parent_id);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // parent 1
+    if (parentId === 1) {
+      if (young.parent1AllowSNU || young.parentAllowSNU) {
+        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      }
+      if (young.parent1ContactPreference === "phone") {
+        await sendSMS(
+          young.parent1Phone,
+          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+      // parent 2
+    } else {
+      if (
+        !young.parent2Status ||
+        !young.parent1AllowSNU ||
+        young.parent1AllowSNU === "false" ||
+        young.parent2AllowSNU === "false" ||
+        young.parentAllowSNU === "false" ||
+        young.parent1AllowImageRights === "false" ||
+        young.parent2AllowImageRights
+      ) {
+        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      }
+      if (young.parent2ContactPreference === "phone") {
+        await sendSMS(
+          young.parent2Phone,
+          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
+          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+    }
+
+    return res.status(200).send({ ok: true });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
