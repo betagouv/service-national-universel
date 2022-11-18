@@ -74,7 +74,7 @@ export default function Schools({ filter }) {
             <table className="w-full p-2 border-separate border rounded-xl">
               <thead className="">
                 <tr className="text-xs uppercase text-[#73737D]">
-                  <th className="text-left ">Établissements</th>
+                  <th className="text-left pl-3">Établissements</th>
                   <th className="text-center">Volontaires au sein du département</th>
                   <th className="text-center">Volontaires hors du département</th>
                   <th className="text-center w-[120px]">Total</th>
