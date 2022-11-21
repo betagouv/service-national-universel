@@ -9,7 +9,17 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, YOUNG_SITUATIONS, GRADES, inscriptionModificationOpenForYoungs, sessions2023, getAge, COHESION_STAY_LIMIT_DATE, getDepartmentByZip } from "snu-lib";
+import {
+  translateGrade,
+  YOUNG_SITUATIONS,
+  GRADES,
+  inscriptionModificationOpenForYoungs,
+  sessions2023,
+  getAge,
+  COHESION_STAY_LIMIT_DATE,
+  getDepartmentByZip,
+  ES_NO_LIMIT,
+} from "snu-lib";
 import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
 import dayjs from "dayjs";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -50,7 +60,7 @@ export default function Create() {
     grade: "",
     birthCountry: "",
     filesToUpload: [],
-    latestCNIFileExpirationDate: "",
+    latestCNIFileExpirationDate: new Date(),
     latestCNIFileCategory: "",
     email: "",
     expirationDate: null,
@@ -96,6 +106,9 @@ export default function Create() {
     parent1AllowImageRights: "false",
     parent1AllowSNU: "true",
     parent1FirstName: "",
+    hostLastName: "",
+    hostFirstName: "",
+    hostRelationship: "",
     parent1LastName: "",
     parent1Email: "",
     parent1Phone: "",
@@ -150,8 +163,8 @@ export default function Create() {
       }
     }
 
-    if (values.birthdateAt === null) {
-      errors.birthdateAt = errorEmpty;
+    if (values.temporaryDate === null) {
+      errors.temporaryDate = errorEmpty;
     }
     if (values.latestCNIFileExpirationDate === "" || values.latestCNIFileExpirationDate === null) {
       errors.latestCNIFileExpirationDate = errorEmpty;
@@ -165,14 +178,17 @@ export default function Create() {
     }
     // check birtDate
     const selectedSession = sessions2023.find((session) => session.name === values.cohort);
-    if (values?.birthdateAt && !(selectedSession.eligibility.bornBefore > new Date(values.birthdateAt) && selectedSession.eligibility.bornAfter < new Date(values.birthdateAt))) {
-      errors.birthdateAt = "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU.";
+    if (
+      values?.temporaryDate &&
+      !(selectedSession.eligibility.bornBefore > new Date(values.temporaryDate) && selectedSession.eligibility.bornAfter < new Date(values.temporaryDate))
+    ) {
+      errors.temporaryDate = "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU.";
     }
     // Check parent 1
     if (!validator.isEmail(values.parent1Email)) {
       errors.parent1Email = errorEmail;
     }
-    if (!validator.isEmail(values.parent1Phone)) {
+    if (!validator.isMobilePhone(values.parent1Phone)) {
       errors.parent1Phone = errorPhone;
     }
     //check parent2 if exist
@@ -182,30 +198,34 @@ export default function Create() {
     const parent2Phone = validator.isEmpty(values.parent2Phone);
     // if 1 of 3 is not empty --> ask for the 3
     if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty || !parent2StatusEmpty || !parent2Phone) {
+      let foundError = false;
       if (!validator.isEmail(values.parent2Email)) {
-        setSelectedRepresentant(2);
         errors.parent2Email = errorEmail;
+        foundError = true;
       }
       if (!validator.isMobilePhone(values.parent2Phone)) {
         errors.parent2Phone = errorPhone;
+        foundError = true;
       }
       if (parent2FirstNameEmpty) {
         errors.parent2FirstName = errorEmpty;
+        foundError = true;
       }
       if (parent2LastNameEmpty) {
         errors.parent2LastName = errorEmpty;
+        foundError = true;
       }
       if (parent2StatusEmpty) {
         errors.parent2Status = errorEmpty;
+        foundError = true;
+      }
+      if (foundError) {
+        setSelectedRepresentant(2);
+      } else {
+        setSelectedRepresentant(1);
       }
     } else {
       setSelectedRepresentant(1);
-    }
-
-    if (values.country === "FRANCE") {
-      if (values.schoolCity === "") {
-        errors.schoolCity = errorEmpty;
-      }
     }
     if (values.specificAmenagment === "true" && values.specificAmenagmentType === "") {
       errors.specificAmenagmentType = errorEmpty;
@@ -224,6 +244,17 @@ export default function Create() {
         }
       }
     }
+    //Check foreignCountry / host
+    if (values.country !== "FRANCE") {
+      const foreignRequired = ["foreignAddress", "foreignCountry", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+      for (const key of foreignRequired) {
+        if (values[key] === null || !values[key] || validator.isEmpty(values[key], { ignore_whitespace: true })) {
+          errors[key] = errorEmpty;
+        }
+      }
+    }
+
+    //
     if (values.schooled === "true") {
       if (values.schoolCountry === "FRANCE") {
         if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
@@ -266,6 +297,7 @@ export default function Create() {
       toastr.error("Vous devez spécifier une catégorie pour le document d'identité");
     }
     if (Object.keys(errors).length > 0) {
+      console.log(errors);
       toastr.error("Le formulaire n'est pas complet");
     }
     return errors;
@@ -315,6 +347,9 @@ export default function Create() {
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       delete values.certifyData;
+      if (values.country !== "FRANCE") {
+        values.country = values.foreignCountry;
+      }
       const { ok, code, young } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
@@ -328,7 +363,8 @@ export default function Create() {
   };
 
   React.useEffect(() => {
-    setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("DD/MM/YYYY"));
+    if (!values.temporaryDate) return;
+    setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("YYYY-MM-DD"));
   }, [values.temporaryDate]);
   React.useEffect(() => {
     if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && (values.schoolDepartment !== "" || getDepartmentByZip(values.zip))) {
@@ -436,7 +472,7 @@ export default function Create() {
         values.parent1LastName !== "" &&
         values.parent1Email !== "" &&
         values.parent1Status !== "" &&
-        values.birthdateAt !== null &&
+        values.temporaryDate !== null &&
         cohorts.length > 0 &&
         egibilityError === "" && (
           <div className="relative bg-white shadow rounded mb-4 pt-4">
@@ -655,6 +691,19 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
 }
 function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   const [liveInFrance, setLiveInFrance] = React.useState(true);
+
+  React.useEffect(() => {
+    loadCountries();
+  }, []);
+
+  const hostRelationshipOptions = [
+    { label: "Parent", value: "Parent" },
+    { label: "Frère/Soeur", value: "Frere/Soeur" },
+    { label: "Grand-parent", value: "Grand-parent" },
+    { label: "Oncle/Tante", value: "Oncle/Tante" },
+    { label: "Ami de la famille", value: "Ami de la famille" },
+    { label: "Autre", value: "Autre" },
+  ];
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setFieldValue("addressVerified", isConfirmed);
     for (const key in suggestion) {
@@ -675,8 +724,31 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   };
   const handleCountryChange = (e) => {
     setLiveInFrance(e);
-    if (e) setFieldValue("country", "FRANCE");
+    if (e) {
+      setFieldValue("country", "FRANCE");
+    } else {
+      setFieldValue("country", "");
+    }
   };
+  const [countries, setCountries] = React.useState([]);
+  async function loadCountries() {
+    const body = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      size: 0,
+      aggs: {
+        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
+      },
+    };
+    const { responses } = await api.esQuery("schoolramses", body);
+    if (responses && responses.length > 0) {
+      setCountries(
+        responses[0].aggregations.countries.buckets
+          .filter((e) => e.key !== "FRANCE")
+          .map((e) => e.key)
+          .sort(),
+      );
+    }
+  }
   return (
     <>
       <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Date et lieu de naissance</div>
@@ -738,15 +810,50 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
           </div>
         </div>
       </div>
-      <Field name="address" label="Adresse" errors={errors} value={values.address} transformer={translate} className="mb-4" handleChange={handleAdressChange} />
+      <Field
+        name={liveInFrance ? "address" : "foreignAddress"}
+        label="Adresse"
+        errors={errors}
+        value={liveInFrance ? values.address : values.foreignAddress}
+        transformer={translate}
+        className="mb-4"
+        handleChange={handleAdressChange}
+      />
       {!liveInFrance && (
-        <Field name="foreignCountry" label="Pays" errors={errors} value={values.foreignCountry} transformer={translate} className="mb-4" handleChange={handleAdressChange} />
+        <Field
+          name="foreignCountry"
+          type="select"
+          options={countries ? countries.map((c) => ({ value: c, label: c })) : []}
+          label="Pays"
+          errors={errors}
+          filterOnType
+          value={values.foreignCountry}
+          transformer={translate}
+          className="mb-4"
+          handleChange={setFieldValue}
+        />
       )}
       <div className="mb-4 flex items-start justify-between">
-        <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleAdressChange} />
-        <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleAdressChange} />
+        <Field
+          name={liveInFrance ? "zip" : "foreignZip"}
+          label="Code postal"
+          errors={errors}
+          value={liveInFrance ? values.zip : values.foreignZip}
+          transformer={translate}
+          className="mr-2 flex-[1_1_50%]"
+          handleChange={handleAdressChange}
+        />
+        <Field
+          name={liveInFrance ? "city" : "foreignCity"}
+          label="Ville"
+          errors={errors}
+          value={liveInFrance ? values.city : values.foreignCity}
+          transformer={translate}
+          className="flex-[1_1_50%]"
+          handleChange={handleAdressChange}
+        />
       </div>
-      {liveInFrance && (
+      {liveInFrance ? (
         <VerifyAddress
           address={values.address}
           zip={values.zip}
@@ -759,6 +866,57 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
           isVerified={values.addressVerified}
           buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
         />
+      ) : (
+        <>
+          <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
+          <div className="flex my-3">
+            <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M17.5 0.499512H2.5C1.39543 0.499512 0.5 1.39494 0.5 2.49951V17.4995C0.5 18.6041 1.39543 19.4995 2.5 19.4995H17.5C18.6046 19.4995 19.5 18.6041 19.5 17.4995V2.49951C19.5 1.39494 18.6046 0.499512 17.5 0.499512ZM11 4.99951H9V6.99951H11V4.99951ZM11 8.99951H9V14.9995H11V8.99951Z"
+                  fill="white"
+                />
+              </svg>
+            </div>
+            <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
+              Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
+            </div>
+          </div>
+          <p className="text-[14px] text-[#666666] leading-tight text-justify">
+            À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+          </p>
+          <div className="my-4 flex items-start justify-between">
+            <Field className="mr-2 flex-[1_1_50%]" name="hostFirstName" value={values.hostFirstName} label="Prénom de l’hébergeur" handleChange={handleChange} errors={errors} />
+            <Field className="flex-[1_1_50%]" name="hostLastName" value={values.hostLastName} label="Nom de l’hébergeur" handleChange={handleChange} errors={errors} />
+          </div>
+          <Field
+            options={hostRelationshipOptions}
+            name="hostRelationship"
+            value={values.hostRelationship}
+            type="select"
+            label="Précisez votre lien avec l’hébergeur"
+            className="mb-4"
+            handleChange={setFieldValue}
+            errors={errors}
+          />
+          <Field value={values.address} name="address" label="Son adresse" handleChange={handleAdressChange} errors={errors} />
+          <div className="my-4 flex items-start justify-between">
+            <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleAdressChange} />
+            <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleAdressChange} />
+          </div>
+          <VerifyAddress
+            address={values.address}
+            zip={values.zip}
+            city={values.city}
+            onSuccess={onVerifyAddress(true)}
+            onFail={onVerifyAddress()}
+            fromInscription
+            verifyButtonText="Vérifier l'adresse"
+            verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
+            isVerified={values.addressVerified}
+            buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+          />
+        </>
       )}
     </>
   );
@@ -774,8 +932,8 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
     handleChange(e);
   };
   const handleCniChange = (young) => {
-    setFieldValue("filesToUpload", young.filesToUpload);
     setFieldValue("latestCNIFileExpirationDate", young.latestCNIFileExpirationDate);
+    setFieldValue("filesToUpload", young.filesToUpload);
     setFieldValue("latestCNIFileCategory", young.latestCNIFileCategory);
   };
   return (
@@ -813,37 +971,41 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
           onInscriptionChange={(young) => handleCniChange(young)}
         />
       </div>
-      <Field
-        name="latestCNIFileExpirationDate"
-        label="Date d'expiration de la pièce d'identité"
-        type="date"
-        errors={errors}
-        value={values.latestCNIFileExpirationDate}
-        transformer={translate}
-        className="mb-4"
-        setFielValue={setFieldValue}
-      />
-      {values.latestCNIFileExpirationDate !== null &&
-        new Date(values.latestCNIFileExpirationDate).getTime() < sessions2023.find((session) => session.name === values.cohort).dateStart.getTime() && (
-          <div className="mt-4 w-100 flex flew-row justify-between items-center">
-            <div>Attestation sur l&apos;honneur</div>
-            {values.parentStatementOfHonorInvalidId === "true" ? (
-              <a
-                onClick={(e) => handleChangeBool(e, "false")}
-                name="parentStatementOfHonorInvalidId"
-                className="p-2 py text-center leading-5 border cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] rounded-3xl">
-                Validée
-              </a>
-            ) : (
-              <a
-                onClick={(e) => handleChangeBool(e, "true")}
-                name="parentStatementOfHonorInvalidId"
-                className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-whit rounded-3xl">
-                Non validée
-              </a>
+      {values.filesToUpload.length > 0 && (
+        <>
+          <Field
+            name="latestCNIFileExpirationDate"
+            label="Date d'expiration de la pièce d'identité"
+            type="date"
+            errors={errors}
+            value={values.latestCNIFileExpirationDate}
+            transformer={translate}
+            className="mb-4"
+            setFielValue={setFieldValue}
+          />
+          {values.latestCNIFileExpirationDate !== null &&
+            new Date(values.latestCNIFileExpirationDate).getTime() < sessions2023.find((session) => session.name === values.cohort).dateStart.getTime() && (
+              <div className="mt-4 w-100 flex flew-row justify-between items-center">
+                <div>Attestation sur l&apos;honneur</div>
+                {values.parentStatementOfHonorInvalidId === "true" ? (
+                  <a
+                    onClick={(e) => handleChangeBool(e, "false")}
+                    name="parentStatementOfHonorInvalidId"
+                    className="p-2 py text-center leading-5 border cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] rounded-3xl">
+                    Validée
+                  </a>
+                ) : (
+                  <a
+                    onClick={(e) => handleChangeBool(e, "true")}
+                    name="parentStatementOfHonorInvalidId"
+                    className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-whit rounded-3xl">
+                    Non validée
+                  </a>
+                )}
+              </div>
             )}
-          </div>
-        )}
+        </>
+      )}
     </>
   );
 }
@@ -871,7 +1033,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
 
   React.useEffect(() => {
     if (young) {
-      setYoungAge(getAge(young.birthdateAt));
+      setYoungAge(getAge(young.temporaryDate));
     } else {
       setYoungAge("?");
     }
