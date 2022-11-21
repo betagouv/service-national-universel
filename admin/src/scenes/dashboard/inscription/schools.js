@@ -24,7 +24,7 @@ export default function Schools({ filter }) {
       query: { bool: { must: { match_all: {} }, filter: [] } },
       aggs: {
         names: {
-          terms: { field: "schoolId.keyword" },
+          terms: { field: "schoolId.keyword", size: 300 },
           aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
         },
       },
@@ -51,9 +51,7 @@ export default function Schools({ filter }) {
         defaultQuery={getDefaultQuery}
         componentId="result"
         react={{ and: filter }}
-        pagination={true}
-        paginationAt="bottom"
-        size={10}
+        size={300}
         showLoader={true}
         renderResultStats={({ numberOfResults, displayedResults }) => {
           return (
@@ -63,8 +61,6 @@ export default function Schools({ filter }) {
         loader="Chargement..."
         // innerClass={{ pagination: "pagination" }}
         dataField="schoolName"
-        sortOptions={[{ label: "A > Z", dataField: "schoolName.keyword", sortBy: "asc" }]}
-        defaultSortOption="A > Z"
         render={({ rawData }) => {
           console.log("🚀 ~ file: schools.js ~ line 80 ~ data", rawData);
 
