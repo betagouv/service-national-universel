@@ -244,7 +244,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           )}
           <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
             <div className="flex items-center">
-              <History className="block flex-[0_0_18px] mr-[4px]" fill="#9CA3AF" />
+              <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
               Historique
             </div>
           </Tab>
