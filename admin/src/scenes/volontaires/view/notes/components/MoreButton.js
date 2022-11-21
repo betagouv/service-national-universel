@@ -27,8 +27,8 @@ const MoreButton = ({ className, actions = [] }) => {
     <div className="relative" ref={ref}>
       <button
         onClick={toggleMenu}
-        className={`w-[40px] h-[40px] p-[3px] ${circleStyle} bg-white border-2 border-[#F3F4F6] hover:border-[#3B82F6] ${isMenuOpen && "!border-[#3B82F6]"} ${className}`}>
-        <div className={`w-[32px] h-[32px] ${circleStyle} bg-[#E5E7EB]`}>
+        className={`w-[40px] h-[40px] p-[3px] ${circleStyle} border-2 bg-[#E5E7EB] hover:bg-[#D1D5DB] active:border-[#3B82F6] ${isMenuOpen && "!border-[#3B82F6]"} ${className}`}>
+        <div className={`w-[32px] h-[32px] ${circleStyle}`}>
           <img src={dots} alt="icon button" />
         </div>
       </button>
