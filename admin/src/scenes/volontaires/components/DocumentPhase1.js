@@ -43,7 +43,7 @@ export default function DocumentPhase1(props) {
       setLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de l'envoie de la relance :", translate(e.code));
+      toastr.error("Oups, une erreur est survenue lors de l'envoi de la relance :", translate(e.code));
       setLoading(false);
     }
   };
@@ -87,11 +87,11 @@ export default function DocumentPhase1(props) {
 
       const { code, ok } = await api.put(`/referent/young/${young._id}/phase1Status/${name}`, params);
       if (!ok) throw new Error(translate(code));
-      toastr.success("Statut mis à jour!");
+      toastr.success("Statut mis à jour !");
       updateYoung();
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue pendant la mise à jour des status : ", e.message);
+      toastr.error("Oups, une erreur est survenue pendant la mise à jour des statuts : ", e.message);
     }
   };
 
