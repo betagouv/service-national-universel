@@ -23,8 +23,8 @@ export default function Applications() {
         size: 0,
       };
       const { responses } = await api.esQuery("application", body);
-      if (responses.length) setStats(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      else toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures", translate(responses.code));
+      if (responses?.length) setStats(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      else toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures", translate(responses?.code));
     })();
   }, []);
 

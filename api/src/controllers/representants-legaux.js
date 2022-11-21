@@ -180,6 +180,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     let shouldSendToParent2 = false;
     let statusChanged = false;
     if (id === 1) {
+      value.parent1ValidationDate = new Date();
       if (young.parentAllowSNU !== value.parentAllowSNU) {
         if (value.parentAllowSNU === "true") {
           if (young.status === YOUNG_STATUS.REINSCRIPTION) {
@@ -203,6 +204,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
         }
       }
     } else {
+      value.parent2ValidationDate = new Date();
       if (value.parent2AllowImageRights === "true") {
         value.imageRight = "true";
       } else {

@@ -39,8 +39,10 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
+import { copyToClipboard, getEligibleSessions } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
+import { appURL } from "../../config";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -59,12 +61,15 @@ const parentStatusOptions = [
   { label: "Autre", value: "representant" },
 ];
 
+const PENDING_ACCORD = "en attente";
+
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [oldCohort, setOldCohort] = useState(false);
+  const [action, setAction] = useState("");
 
   useEffect(() => {
     console.log("VolontairePhase0View: ", young);
@@ -184,6 +189,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   async function processRegistration(state, data) {
     setProcessing(true);
     try {
+      if (state === "SESSION_FULL") state = action;
+
       let body = {
         lastStatusAt: Date.now(),
         phase: "INSCRIPTION",
@@ -199,6 +206,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       }
 
       await api.put(`/referent/young/${young._id}`, body);
+      if (action === "WAITING_LIST") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
       toastr.success("Votre action a été enregistrée.");
       onChange && onChange();
     } catch (err) {
@@ -248,7 +256,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
             <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
           )}
           {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} action={action} setAction={setAction} />}
         </>
       )}
     </>
@@ -281,7 +289,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
               <span className="py-[4px] px-[10px] bg-[#F97316] text-[#FFFFFF] text-[12px] ml-[12px] rounded-[100px]">
                 {pendingRequestsCount} {pendingRequestsCount > 1 ? "corrections demandées" : "correction demandée"}
               </span>
-              <button className=" ml-[12px] text-[12px] text-[#F87171] ml-[6px] flex items-center" onClick={onDeletePending}>
+              <button className="ml-[12px] text-[12px] text-[#F87171] flex items-center" onClick={onDeletePending}>
                 <Bin fill="#F87171" />
                 <span className="ml-[5px]">Supprimer {pendingRequestsCount > 1 ? "les demandes" : "la demande"}</span>
               </button>
@@ -346,14 +354,25 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young }) {
+function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
   const [error, setError] = useState(null);
 
-  function validate() {
-    setConfirmModal({
+  async function validate() {
+    const sessions = await getEligibleSessions(young);
+    const session = sessions.find(({ name }) => name === young.cohort);
+    if (session.isFull) {
+      return setConfirmModal({
+        icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+        title: "Jauge de candidats atteinte",
+        message:
+          "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
+        type: "SESSION_FULL",
+      });
+    }
+    return setConfirmModal({
       icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
       title: "Valider le dossier",
       message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
@@ -382,6 +401,18 @@ function FooterNoRequest({ processing, onProcess, young }) {
     </option>,
     <option value="OTHER" key="OTHER">
       {REJECTION_REASONS.OTHER}
+    </option>,
+  ];
+
+  const actions = [
+    <option value="" key="none">
+      Que voulez-vous faire ?
+    </option>,
+    <option value="WAITING_LIST" key="WAITING_LIST">
+      Placer sur liste complémentaire
+    </option>,
+    <option value="VALIDATED" key="VALIDATED">
+      Inscrire le volontaire
     </option>,
   ];
 
@@ -474,6 +505,16 @@ function FooterNoRequest({ processing, onProcess, young }) {
               {error && <div className="text-[#EF4444]">{error}</div>}
             </div>
           )}
+          {confirmModal.type === "SESSION_FULL" && (
+            <div className="mt-[24px]">
+              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+                <select value={action} onChange={(e) => setAction(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
+                  {actions}
+                </select>
+                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+              </div>
+            </div>
+          )}
         </ConfirmationModal>
       )}
     </div>
@@ -544,11 +585,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     let result = true;
     let errors = {};
 
-    if (!validator.isEmail(data.email)) {
+    if (!data.email || !validator.isEmail(data.email)) {
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
-    if (!validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (!data.phone || !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
       errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide.";
       result = false;
     }
@@ -1511,7 +1552,9 @@ function SectionConsentements({ young, onChange }) {
               {young.parent1FirstName} {young.parent1LastName}
             </span>
           </div>
-          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          {young.parent1ValidationDate && (
+            <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          )}
         </div>
         <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
@@ -1552,17 +1595,44 @@ function SectionConsentements({ young, onChange }) {
         <div className="mt-[16px] flex itemx-center justify-between">
           <div className="grow text-[#374151] text-[14px] leading-[20px]">
             <div className="font-bold">Droit à l&apos;image</div>
-            <div>Accord : {translate(young.parent1AllowImageRights)}</div>
+            <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
-        {(young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && (
+        {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
           <div className="mt-[16px] flex itemx-center justify-between">
             <div className="grow text-[#374151] text-[14px] leading-[20px]">
               <div className="font-bold">Consentement à la participation</div>
-              <div>Accord : {translate(young.parent1AllowSNU)}</div>
+              <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
             </div>
             <MiniSwitch value={young.parent1AllowSNU === "true"} />
+          </div>
+        ) : (
+          <div className="mt-2 flex items-center justify-between">
+            <div
+              className="cursor-pointer italic text-[#1D4ED8]"
+              onClick={() => {
+                copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
+                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+              }}>
+              Copier le lien du formulaire
+            </div>
+            <BorderButton
+              mode="blue"
+              onClick={async () => {
+                try {
+                  const response = await api.get(`/young-edition/${young._id}/remider/1`);
+                  if (response.ok) {
+                    toastr.success(translate("REMINDER_SENT"), "");
+                  } else {
+                    toastr.error(translate(response.code), "");
+                  }
+                } catch (error) {
+                  toastr.error(translate(error.code), "");
+                }
+              }}>
+              Relancer
+            </BorderButton>
           </div>
         )}
         {young.parent2Status && (
@@ -1574,23 +1644,60 @@ function SectionConsentements({ young, onChange }) {
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
               </div>
-              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              {young.parent2ValidationDate && (
+                <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              )}
             </div>
-            <div className="mt-[16px] flex items-center justify-between">
-              <div className="grow text-[#374151] text-[14px] leading-[20px]">
-                <div className="font-bold">Droit à l&apos;image</div>
-                <div>Accord : {translate(young.parent2AllowImageRights)}</div>
+            {young.parent1AllowImageRights === "true" && (
+              <div className="mt-[16px] flex items-center justify-between">
+                <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                  <div className="font-bold">Droit à l&apos;image</div>
+                  <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                </div>
+                {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
               </div>
-              {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
-            </div>
-            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? (
+            )}
+            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && !young.parent2AllowImageRights && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                  }}>
+                  Copier le lien du formulaire
+                </div>
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
+                    }
+                  }}>
+                  Relancer
+                </BorderButton>
+              </div>
+            )}
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
+              young.status,
+            ) ? (
               <div className="mt-[16px] flex items-center justify-between">
                 <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
                   <div className="font-bold">Consentement à la participation</div>
                   {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
                 </div>
                 {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
-                  <MiniSwitch value={young.parent2AllowSNU === "true"} />
+                  <div className="flex items-center gap-2 text-red-500 text-sm ">
+                    <XCircle className="w-4 h-4 text-red-500" />
+                    Refusé
+                  </div>
                 ) : (
                   <BorderButton mode="red" onClick={parent2RejectSNU}>
                     Déclarer un refus

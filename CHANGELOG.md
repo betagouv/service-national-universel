@@ -1,3 +1,34 @@
+# [1.170.0](https://github.com/betagouv/service-national-universel/compare/v1.169.0...v1.170.0) (2022-11-18)
+
+
+### Bug Fixes
+
+* **admin:** add function to get department for eligibility ([2bdb991](https://github.com/betagouv/service-national-universel/commit/2bdb991363941adaf14ee08a737e3345dba9cf55))
+* **app:** bug when no correction on upload ([9473e72](https://github.com/betagouv/service-national-universel/commit/9473e7283dd92b690b8211fa13f752ba0462225d))
+* **app:** fix error display on upload page ([2ca04c2](https://github.com/betagouv/service-national-universel/commit/2ca04c2c2e83729ad3a716e7f47c8a9f5a037d4e))
+
+
+### Features
+
+* **api/admin:** paramétrage clôture des propositions de séjour ([#2003](https://github.com/betagouv/service-national-universel/issues/2003)) ([9cfe2b2](https://github.com/betagouv/service-national-universel/commit/9cfe2b25f813067e176bfa7c9ee376aa8f646984))
+
+# [1.169.0](https://github.com/betagouv/service-national-universel/compare/v1.168.0...v1.169.0) (2022-11-17)
+
+
+### Bug Fixes
+
+* **admin:** Can't have email empty as well ([3426de5](https://github.com/betagouv/service-national-universel/commit/3426de5a8b7949780a8842dc98c7bccf6849cf1c))
+* **admin:** Can't have phone number undefined ([0863f2b](https://github.com/betagouv/service-national-universel/commit/0863f2bfbb4e8ec8d68118241a5299bfb858f642))
+* **admin:** phase 0 parent2 refused style ([a654253](https://github.com/betagouv/service-national-universel/commit/a654253c69026ab6ee0acf3f5cde56c283a67308))
+* **admin:** phase 0 parent2 view consent ([06b57d6](https://github.com/betagouv/service-national-universel/commit/06b57d6c06e855e015a72c6c433f220cb1fc3dda))
+* **api:** allow ref deps to access reinscription ([d80dbd4](https://github.com/betagouv/service-national-universel/commit/d80dbd435871f559917c1e64488f6994a34d52f5))
+
+
+### Features
+
+* **admin:** table de repartition fini ([#2060](https://github.com/betagouv/service-national-universel/issues/2060)) ([fb0ef30](https://github.com/betagouv/service-national-universel/commit/fb0ef30ec2c322b19f80aa95cb5be7161c34a32f))
+* **admin/api:** send parent reminder ([#2056](https://github.com/betagouv/service-national-universel/issues/2056)) ([f6d9287](https://github.com/betagouv/service-national-universel/commit/f6d92876ddae035dbde0d66f6c6b8155d3468b61))
+
 # [1.168.0](https://github.com/betagouv/service-national-universel/compare/v1.167.0...v1.168.0) (2022-11-16)
 
 

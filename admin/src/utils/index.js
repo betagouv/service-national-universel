@@ -2,6 +2,7 @@ import passwordValidator from "password-validator";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
+import { departmentLookUp } from "snu-lib";
 import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
@@ -202,3 +203,23 @@ export function capitalizeFirstLetter(string) {
 }
 
 export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07|02)(?:\\W*\\d){8}$`;
+
+export const getEligibleSessions = async (young) => {
+  const { data } = await api.post("/cohort-session/eligibility/2023", {
+    birthDate: young.birthdateAt,
+    schoolLevel: young.grade,
+    department: young?.schoolDepartment || young?.department,
+    frenchNationality: young.frenchNationality,
+    status: young.status,
+  });
+  return data;
+};
+
+export function getDepartmentForEligibility(young) {
+  let dep = young?.schoolDepartment || young?.department;
+  if (!isNaN(dep) || ["2A", "2B"].includes(dep)) {
+    if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
+    else dep = departmentLookUp[dep];
+  }
+  return dep;
+}

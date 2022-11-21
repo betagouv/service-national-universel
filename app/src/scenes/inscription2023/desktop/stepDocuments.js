@@ -12,6 +12,7 @@ import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import MyDocs from "../components/MyDocs";
 import ErrorMessage from "../components/ErrorMessage";
+import Info from "../../../components/info";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -19,6 +20,7 @@ export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
   const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
+  const disabledUpload = young?.files.cniFiles.length > 2;
 
   async function onSubmit() {
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate });
@@ -29,6 +31,10 @@ export default function StepDocuments() {
     }
     dispatch(setYoung(responseData));
     history.push("/inscription2023/confirm");
+  }
+
+  function handleClick(doc) {
+    if (!disabledUpload) history.push(`televersement/${doc.category}`);
   }
 
   const docs = [
@@ -67,16 +73,22 @@ export default function StepDocuments() {
         </ErrorMessage>
       ))}
       {docs.map((doc) => (
-        <div key={doc.category} className="my-4 hover:bg-gray-50 cursor-pointer" onClick={() => history.push(`televersement/${doc.category}`)}>
+        <div
+          key={doc.category}
+          className={`my-4 bg-[#FFFFFF] hover:bg-[#FAFAFA] cursor-pointer ${disabledUpload && "bg-[#FAFAFA] cursor-default"}`}
+          onClick={() => handleClick(doc)}>
           <div className="border p-4 my-3 flex justify-between items-center">
             <div>
               <div>{doc.title}</div>
               {doc.subtitle && <div className="text-gray-500 text-sm">{doc.subtitle}</div>}
             </div>
-            <ArrowRightBlueSquare />
+            <ArrowRightBlueSquare fill={disabledUpload ? "gray" : "#000091"} />
           </div>
         </div>
       ))}
+      {disabledUpload && (
+        <Info text="Vous ne pouvez téléverser que trois fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
+      )}
       <MyDocs />
     </DesktopPageContainer>
   );

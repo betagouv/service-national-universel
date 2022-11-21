@@ -110,7 +110,9 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
         return res.status(200).send(response.body);
       }
     }
-    const filter = [{ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST", "ABANDONED"] } }];
+    const filter = [
+      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST", "ABANDONED", "REINSCRIPTION"] } },
+    ];
 
     // Open in progress inscription to referent
     if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) filter[0].terms["status.keyword"].push("IN_PROGRESS");

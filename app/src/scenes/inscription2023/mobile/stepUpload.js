@@ -83,7 +83,7 @@ export default function StepUpload() {
     if (recto) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -105,7 +105,7 @@ export default function StepUpload() {
     if (recto) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -145,7 +145,7 @@ export default function StepUpload() {
         />
       )}
       {step === "date" &&
-        (corrections ? (
+        (corrections?.length ? (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!date || loading} />
         ) : (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
