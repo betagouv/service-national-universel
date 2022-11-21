@@ -220,24 +220,24 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
             <div className="flex items-center">
               Dossier d&apos;inscription
-              {getNotesByPhase(PHASE_INSCRIPTION).length > 0 && <NoteIcon className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />}
+              {getNotesByPhase(PHASE_INSCRIPTION).length > 0 && <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />}
             </div>
           </Tab>
           {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
             <>
               <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
                 <div className="flex items-center">
-                  Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
+                  Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
                 </div>
               </Tab>
               <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
                 <div className="flex items-center">
-                  Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                  Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
                 </div>
               </Tab>
               <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
                 <div className="flex items-center">
-                  Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                  Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
                 </div>
               </Tab>
             </>

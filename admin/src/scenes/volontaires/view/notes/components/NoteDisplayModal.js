@@ -10,7 +10,7 @@ const NoteDisplayModal = ({ notes, isOpen, onClose, user }) => {
   return (
     <Modal isOpen={isOpen} toggle={onClose} centered>
       <div className="p-6 w-[512px]">
-        <div className="max-h-[500px] overflow-scroll flex flex-col items-center px-6">
+        <div className="max-h-[500px] overflow-y-auto flex flex-col items-center px-6">
           <div className="text-xl font-medium mb-3">{`Notes internes${notes[0]?.phase ? ` - ${getPhaseLabel(notes[0].phase)}` : ""}`}</div>
           {notes.map(({ referent, createdAt, note, _id }) => {
             const isAuthor = referent._id === user._id;
