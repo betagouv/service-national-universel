@@ -81,11 +81,10 @@ export default function DocumentPhase1(props) {
   const handleChange = async ({ value, name }) => {
     let params = {};
     console.log(value, name);
-    if (name === "cohesionStayMedical") {
-      params = medicalFileValue[value];
-    }
-
     try {
+      if (name !== "cohesionStayMedical") throw new Error("name not possible : " + name);
+      params = medicalFileValue[value];
+
       const { code, ok } = await api.put(`/referent/young/${young._id}/phase1Status/${name}`, params);
       if (!ok) throw new Error(translate(code));
       toastr.success("Statut mis à jour!");
