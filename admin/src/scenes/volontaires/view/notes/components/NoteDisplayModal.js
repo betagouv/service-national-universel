@@ -27,7 +27,7 @@ const NoteDisplayModal = ({ notes, isOpen, onClose, user }) => {
                     <img src={quotation} />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[#374151] my-3">{note}</div>
+                    <div className="text-[#374151] my-3 whitespace-pre-wrap">{note}</div>
                   </div>
                   <div className="flex rotate-180 ml-2 self-end">
                     <img src={quotation} />

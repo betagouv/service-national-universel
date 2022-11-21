@@ -101,10 +101,10 @@ const Notes = ({ young, onChange }) => {
       <ConfirmationModal title="Êtes-vous sûr(e) de vouloir supprimer la note ?" isOpen={isDeleteConfirmModalOpen} onCancel={closeDeleteConfirmModal} onConfirm={deleteNote} />
       <NoteEditModal isOpen={isNoteModalOpen} onClose={toggleNoteModal} onSave={saveNote} isLoading={isLoading} note={note} updateNote={updateNote} />
       <YoungHeader young={young} tab="notes" onChange={onChange} />
-      <div className="p-8 h-full box-border">
+      <div className="p-8 box-border">
         <Box className="p-8">
           {young.notes?.length === 0 ? (
-            <div className="flex flex-column justify-center items-center pt-[15%]">
+            <div className="flex flex-column justify-center items-center py-[10%]">
               <div className="font-bold mb-4">Aucune note interne n’a été ajoutée sur ce profil.</div>
               <PlainButton onClick={toggleNoteModal}>Ajouter une note interne</PlainButton>
             </div>
