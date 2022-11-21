@@ -53,7 +53,7 @@ const Notes = ({ young, onChange }) => {
     setDeleteConfirmModalOpen(true);
   };
 
-  const closeDeleteConfirmModal = (noteId) => () => {
+  const closeDeleteConfirmModal = () => {
     setDeletedNoteId(undefined);
     setDeleteConfirmModalOpen(false);
   };
