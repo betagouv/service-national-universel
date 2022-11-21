@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
-const sendinblue = require("../sendinblue");
-const { ENVIRONMENT } = require("../config");
-
+const esClient = require("../../es");
+const sendinblue = require("../../sendinblue");
+const { ENVIRONMENT } = require("../../config");
+const Note = require("./note");
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -1770,6 +1770,12 @@ const Schema = new mongoose.Schema({
   correctionRequests: {
     type: [CorrectionRequest],
     default: undefined,
+    documentation: {
+      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
+    },
+  },
+  notes: {
+    type: [Note],
     documentation: {
       description: "Liste des demandes de corrections faites sur le dossier du jeune.",
     },
