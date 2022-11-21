@@ -702,19 +702,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         isVerified={values.addressVerified}
         buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
       />
-      <div className="flex items-start justify-between mt-4">
-        <Field
-          name="department"
-          label="Département"
-          readOnly
-          errors={errors}
-          value={values.department}
-          transformer={translate}
-          className="mr-2 flex-[1_1_50%]"
-          handleChange={handleChange}
         />
-        <Field name="region" label="Région" readOnly errors={errors} value={values.region} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
-      </div>
     </>
   );
 }
