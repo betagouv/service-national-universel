@@ -43,6 +43,7 @@ export default function Create() {
     firstName: "",
     lastName: "",
     birthdateAt: null,
+    temporaryDate: null,
     birthCityZip: "",
     birthCity: "",
     gender: "",
@@ -326,6 +327,9 @@ export default function Create() {
     }
   };
 
+  React.useEffect(() => {
+    setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("DD/MM/YYYY"));
+  }, [values.temporaryDate]);
   React.useEffect(() => {
     if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && (values.schoolDepartment !== "" || getDepartmentByZip(values.zip))) {
       (async () => {
@@ -677,11 +681,11 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
     <>
       <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Date et lieu de naissance</div>
       <Field
-        name="birthdateAt"
+        name="temporaryDate"
         label="Date de naissance"
         type="date"
         errors={errors}
-        value={values.birthdateAt}
+        value={values.temporaryDate}
         transformer={translate}
         className="mb-4"
         setFielValue={setFieldValue}
