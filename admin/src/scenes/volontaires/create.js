@@ -57,11 +57,16 @@ export default function Create() {
     cohort: getFirstCohortAvailable(),
     parentStatementOfHonorInvalidId: "false",
     addressVerified: false,
+    country: "FRANCE",
     zip: "",
     city: "",
     department: "",
     region: "",
     address: "",
+    foreignCountry: "",
+    foreignZip: "",
+    foreignCity: "",
+    foreignAddress: "",
     situation: "",
     schoolId: "",
     schoolName: "",
@@ -117,6 +122,7 @@ export default function Create() {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
     const errorEmail = "Adresse email invalide";
+    const errorPhone = "Numéro de téléphone invalide";
     const required = [
       "firstName",
       "lastName",
@@ -153,23 +159,34 @@ export default function Create() {
     if (!validator.isEmail(values.email)) {
       errors.email = errorEmail;
     }
+    if (!validator.isMobilePhone(values.phone)) {
+      errors.phone = errorPhone;
+    }
     // check birtDate
     const selectedSession = sessions2023.find((session) => session.name === values.cohort);
     if (values?.birthdateAt && !(selectedSession.eligibility.bornBefore > new Date(values.birthdateAt) && selectedSession.eligibility.bornAfter < new Date(values.birthdateAt))) {
       errors.birthdateAt = "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU.";
     }
+    // Check parent 1
     if (!validator.isEmail(values.parent1Email)) {
       errors.parent1Email = errorEmail;
+    }
+    if (!validator.isEmail(values.parent1Phone)) {
+      errors.parent1Phone = errorPhone;
     }
     //check parent2 if exist
     const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName);
     const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName);
     const parent2StatusEmpty = validator.isEmpty(values.parent2Status);
+    const parent2Phone = validator.isEmpty(values.parent2Phone);
     // if 1 of 3 is not empty --> ask for the 3
-    if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty || !parent2StatusEmpty) {
+    if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty || !parent2StatusEmpty || !parent2Phone) {
       if (!validator.isEmail(values.parent2Email)) {
         setSelectedRepresentant(2);
         errors.parent2Email = errorEmail;
+      }
+      if (!validator.isMobilePhone(values.parent2Phone)) {
+        errors.parent2Phone = errorPhone;
       }
       if (parent2FirstNameEmpty) {
         errors.parent2FirstName = errorEmpty;
@@ -494,6 +511,15 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         handleChange={handleChange}
       />
       <Field
+        name={parent === "1" ? "parent1Phone" : "parent2Phone"}
+        label="Téléphone"
+        errors={errors}
+        value={parent === "1" ? values.parent1Phone : values.parent2Phone}
+        transformer={translate}
+        className="mb-4"
+        handleChange={handleChange}
+      />
+      <Field
         name={parent === "1" ? "parent1OwnAddress" : "parent2OwnAddress"}
         label="Adresse différente de celle du volontaire"
         errors={errors}
@@ -624,6 +650,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
   );
 }
 function Coordonnees({ values, handleChange, setFieldValue, errors }) {
+  const [liveInFrance, setLiveInFrance] = React.useState(true);
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setFieldValue("addressVerified", isConfirmed);
     for (const key in suggestion) {
@@ -641,6 +668,10 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   const handleAdressChange = (e) => {
     setFieldValue("addressVerified", false);
     handleChange(e);
+  };
+  const handleCountryChange = (e) => {
+    setLiveInFrance(e);
+    if (e) setFieldValue("country", "FRANCE");
   };
   return (
     <>
@@ -684,25 +715,47 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         className="flex-[1_1_50%]"
         handleChange={handleChange}
       />
-
-      <div className="font-medium text-xs mt-8 text-[#242526] leading-snug mb-2">Adresse</div>
+      <div className="flex justify-between items-center mt-8 mb-2">
+        <div className="font-medium text-xs text-[#242526] leading-snug">Adresse</div>
+        <div className="inline-flex">
+          <div
+            className={`border-[#3B82F6] border-[1px] rounded-[100px_0_0_100px] text-[14px] px-[10px] py-[3px] ${
+              liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
+            }`}
+            onClick={() => handleCountryChange(true)}>
+            en France
+          </div>
+          <div
+            className={`border-[#3B82F6] border-[1px] rounded-[0_100px_100px_0] text-[14px] px-[10px] py-[3px] ml-[-1px] ${
+              !liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
+            }`}
+            onClick={() => handleCountryChange(false)}>
+            à l&apos;étranger
+          </div>
+        </div>
+      </div>
       <Field name="address" label="Adresse" errors={errors} value={values.address} transformer={translate} className="mb-4" handleChange={handleAdressChange} />
+      {!liveInFrance && (
+        <Field name="foreignCountry" label="Pays" errors={errors} value={values.foreignCountry} transformer={translate} className="mb-4" handleChange={handleAdressChange} />
+      )}
       <div className="mb-4 flex items-start justify-between">
         <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleAdressChange} />
         <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleAdressChange} />
       </div>
-      <VerifyAddress
-        address={values.address}
-        zip={values.zip}
-        city={values.city}
-        onSuccess={onVerifyAddress(true)}
-        onFail={onVerifyAddress()}
-        verifyButtonText="Vérifier l'adresse"
-        verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
-        isVerified={values.addressVerified}
-        buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-      />
+      {liveInFrance && (
+        <VerifyAddress
+          address={values.address}
+          zip={values.zip}
+          city={values.city}
+          onSuccess={onVerifyAddress(true)}
+          onFail={onVerifyAddress()}
+          fromInscription
+          verifyButtonText="Vérifier l'adresse"
+          verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
+          isVerified={values.addressVerified}
+          buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
         />
+      )}
     </>
   );
 }
