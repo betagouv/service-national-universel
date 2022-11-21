@@ -184,7 +184,7 @@ export default function StepUpload() {
               <DatePickerList
                 value={date}
                 onChange={(date) => {
-                  setDate(date);
+                  setDate(date.setUTCHours(11, 0, 0));
                 }}
               />
             </div>
