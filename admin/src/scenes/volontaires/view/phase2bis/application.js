@@ -24,6 +24,7 @@ import Download from "../../../../assets/icons/Download";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import FileCard from "../../../../components/FileCard";
+import YoungHeader from "../../../phase0/components/YoungHeader";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -116,12 +117,13 @@ export default function Phase2Application({ young, onChange }) {
   if (!application || !mission) return "chargement";
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <Wrapper young={young} tab="phase2" onChange={onChange}>
+    <>
+      <YoungHeader young={young} tab="phase2" onChange={onChange} />
+      <div className="p-7">
         {/* <Contract young={young} admin={true} /> */}
         <div className="bg-white w-full h-full rounded-lg px-4">
           <div className="flex justify-between py-6">
-            <button onClick={history.goBack} className="flex items-center space-x-1 bg-gray-100 rounded-full p-[9px]">
+            <button onClick={history.goBack} className="flex items-center space-x-1 bg-gray-100 rounded-full p-[9px] border-[1px] border-gray-100 hover:border-gray-300">
               <LeftArrow stroke={"#374151"} width={15} />
             </button>
             <div className="flex items-center gap-3 text-2xl font-bold">
@@ -357,9 +359,8 @@ export default function Phase2Application({ young, onChange }) {
             />
           </div>
         </div>
-        {/* {JSON.stringify(application)} */}
-      </Wrapper>
-    </div>
+      </div>
+    </>
   );
 }
 
