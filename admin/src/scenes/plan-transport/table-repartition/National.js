@@ -134,7 +134,7 @@ export default function National() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Table de répartition" }]} />
-      <div className="flex flex-col w-full px-12 pb-8 ">
+      <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">
             <Title>Table de répartition</Title>

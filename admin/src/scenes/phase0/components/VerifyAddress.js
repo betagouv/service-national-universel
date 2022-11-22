@@ -4,7 +4,19 @@ import { department2region, departmentLookUp } from "snu-lib/region-and-departme
 import InfoIcon from "../../../components/InfoIcon";
 import { BorderButton } from "./Buttons";
 
-export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "", verifyButtonText = "Vérifier mon adresse", verifyText = "Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postal et ville." }) {
+export default function VerifyAddress({
+  address,
+  zip,
+  city,
+  onSuccess,
+  onFail,
+  disabled = false,
+  isVerified = false,
+  buttonClassName = "",
+  buttonContainerClassName = "",
+  verifyButtonText = "Vérifier mon adresse",
+  verifyText = "Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postal et ville.",
+}) {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
 
