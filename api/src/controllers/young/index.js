@@ -227,7 +227,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
 
-    obj.country = "FRANCE";
+    obj.country = "France";
 
     obj.parent1ContactPreference = "email";
     obj.parent2ContactPreference = "email";
