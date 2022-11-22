@@ -27,7 +27,7 @@ export default function Regional() {
       <Breadcrumbs
         items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Table de répartition", to: "/plan-de-transport/table-repartition" }, { label: region }]}
       />
-      <div className="flex flex-col w-full px-12 pb-8 ">
+      <div className="flex flex-col w-full px-8 pb-8 ">
         {/* HEADER */}
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">

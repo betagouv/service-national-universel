@@ -201,3 +201,113 @@ h4 {
     @apply text-brand-grey transition-colors hover:text-snu-purple-300;
   }
 }
+
+/* Filtre Reactive Base */
+.datasearch-searchfield {
+  font-family: "Marianne";
+  margin-right: 10px;
+  height: 42px;
+  overflow: hidden;
+  box-shadow: none;
+  align-items: center;
+  background-color: white;
+  border-radius: 7px;
+  border: 1px solid #d1d5db;
+  padding: 0;
+  justify-content: center;
+}
+
+.datasearch-searchfield .searchbox {
+  height: 42px;
+  font-size: 12px;
+  display: block;
+  width: 25rem;
+  background-color: #fff;
+  color: #4b5563;
+  outline: 0;
+  padding: 15px 20px;
+  border-radius: 6px;
+  margin-right: 15px;
+  border: none;
+}
+
+.dropdown-filter button {
+  font-family: "Marianne";
+  height: 2.5rem;
+  background-color: #fff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #242526;
+  min-width: 150px;
+  cursor: pointer;
+}
+
+.dropdown-filter button div {
+  width: 100%;
+  overflow: visible;
+}
+
+/* Result table reactive base */
+.reactive-result {
+  font-family: "Marianne";
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.reactive-result .pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 25px;
+  background: #fff;
+  margin: 0;
+}
+.reactive-result .pagination a {
+  background: #f7fafc;
+  color: #242526;
+  padding: 3px 10px;
+  font-size: 12px;
+  margin: 0 5px;
+}
+.reactive-result .pagination a.active {
+  font-weight: 700;
+}
+.reactive-result .pagination a:first-child {
+  background-image: url("/src/assets/left.svg");
+}
+.reactive-result .pagination a:last-child {
+  background-image: url("/src/assets/right.svg");
+}
+.reactive-result .pagination a:first-child,
+.reactive-result .pagination a:last-child {
+  font-size: 0;
+  height: 24px;
+  width: 30px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 8px;
+}
+
+.reactive-result .pagination select.sort-options {
+  background: transparent;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position-x: 100%;
+  background-position-y: 5px;
+  margin-right: 2rem;
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  outline: 0;
+  background-color: #f7fafc;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  border: 0;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  color: #242526;
+  min-width: 215px;
+  cursor: pointer;
+}
