@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 
@@ -9,14 +9,11 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
 
-import VioletButton from "../../components/buttons/VioletButton";
-import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { SearchStyle, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
 import { FilterButton, TabItem } from "./components/commons";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
@@ -35,11 +32,7 @@ export default function List() {
   const [filterCohorts, setFilterConhorts] = useState([]);
   const [filterSessionStatus, setfilterSessionStatus] = useState([]);
 
-  const [sessionIds, setSessionIds] = useState([]);
-  const [filterSessions, setFilterSessions] = useState([]);
-
   const user = useSelector((state) => state.Auth.user);
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
   };
@@ -72,56 +65,9 @@ export default function List() {
               <div className="flex gap-2">
                 {canCreateOrUpdateCohesionCenter(user) ? (
                   <Link to={`/centre/nouveau`} onClick={() => plausibleEvent("Centres/CTA - Créer centre")}>
-                    <VioletButton>
-                      <p>Créer un nouveau centre</p>
-                    </VioletButton>
+                    <div className="bg-blue-600 text-white font-500 text-sm w-60 h-9 text-center rounded leading-9">Rattacher un centre à un séjour</div>
                   </Link>
                 ) : null}
-                <ExportComponent
-                  handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
-                  title="Exporter les centres"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Centres_de_cohesion"
-                  index="cohesioncenter"
-                  react={{ and: FILTERS }}
-                  transform={(all) => {
-                    return all.map((data) => {
-                      let statutExport = {};
-                      COHORTS.forEach((cohort) => {
-                        statutExport[`${cohort} statut`] = "";
-                        data.cohorts.map((e, index) => {
-                          if (e === cohort) {
-                            if (data.sessionStatus !== undefined) {
-                              statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
-                            }
-                          }
-                        });
-                      });
-                      return {
-                        Nom: data.name,
-                        id: data._id,
-                        "Code (2021)": data.code,
-                        "Code (2022)": data.code2022,
-                        "Cohorte(s)": data.cohorts?.join(", "),
-                        COR: data.COR,
-                        "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
-                        Adresse: data.address,
-                        Ville: data.city,
-                        "Code Postal": data.zip,
-                        "N˚ Département": data.departmentCode,
-                        Département: data.department,
-                        Région: data.region,
-                        "Places total": data.placesTotal,
-                        "Places disponibles": data.placesLeft,
-                        "Tenues livrées": data.outfitDelivered,
-                        Observations: data.observations,
-                        "Créé lé": formatLongDateFR(data.createdAt),
-                        "Mis à jour le": formatLongDateFR(data.updatedAt),
-                        ...statutExport,
-                      };
-                    });
-                  }}
-                />
               </div>
             </Header>
             <div className=" flex flex-1 mx-[10px] z-0 mt-2">
@@ -131,30 +77,77 @@ export default function List() {
               </nav>
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg mx-[10px] z-10`}>
-              <div className="flex flex-column bg-white mx-8">
+              <div className="flex flex-column bg-white mx-8 flex-wrap">
                 <div className="flex flex-row pt-4 justify-between items-center">
-                  <div className="flex flex-row w-full">
-                    <SearchStyle>
-                      <DataSearch
-                        defaultQuery={getDefaultQuery}
-                        showIcon={false}
-                        placeholder="Rechercher par mots clés, ville, code postal..."
-                        componentId="SEARCH"
-                        dataField={["name", "city", "zip", "code", "code2022"]}
-                        react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                        style={{ marginRight: "1rem", flex: 1 }}
-                        innerClass={{ input: "searchbox" }}
-                        className="searchfield"
-                        URLParams={true}
-                        autosuggest={false}
-                      />
-                    </SearchStyle>
+                  <div className="flex flex-row w-96">
+                    <DataSearch
+                      defaultQuery={getDefaultQuery}
+                      showIcon={false}
+                      placeholder="Rechercher par mots clés, ville, code postal..."
+                      componentId="SEARCH"
+                      dataField={["name", "city", "zip", "code", "code2022"]}
+                      react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                      style={{ marginRight: "1rem", flex: 1 }}
+                      innerClass={{ input: "searchbox" }}
+                      className="datasearch-searchfield "
+                      URLParams={true}
+                      autosuggest={false}
+                    />
                     <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                   </div>
-                  <div>Exporter</div>
+                  <ExportComponent
+                    handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
+                    title="Exporter"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Centres_de_cohesion"
+                    index="cohesioncenter"
+                    react={{ and: FILTERS }}
+                    css={{
+                      override: true,
+                      button: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md`,
+                      loadingButton: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md w-full`,
+                    }}
+                    transform={(all) => {
+                      return all.map((data) => {
+                        let statutExport = {};
+                        COHORTS.forEach((cohort) => {
+                          statutExport[`${cohort} statut`] = "";
+                          data.cohorts.map((e, index) => {
+                            if (e === cohort) {
+                              if (data.sessionStatus !== undefined) {
+                                statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
+                              }
+                            }
+                          });
+                        });
+                        return {
+                          Nom: data.name,
+                          id: data._id,
+                          "Code (2021)": data.code,
+                          "Code (2022)": data.code2022,
+                          "Cohorte(s)": data.cohorts?.join(", "),
+                          COR: data.COR,
+                          "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
+                          Adresse: data.address,
+                          Ville: data.city,
+                          "Code Postal": data.zip,
+                          "N˚ Département": data.departmentCode,
+                          Département: data.department,
+                          Région: data.region,
+                          "Places total": data.placesTotal,
+                          "Places disponibles": data.placesLeft,
+                          "Tenues livrées": data.outfitDelivered,
+                          Observations: data.observations,
+                          "Créé lé": formatLongDateFR(data.createdAt),
+                          "Mis à jour le": formatLongDateFR(data.updatedAt),
+                          ...statutExport,
+                        };
+                      });
+                    }}
+                  />
                 </div>
                 {filterVisible && (
-                  <div>
+                  <div className="mt-3 gap-2 flew-wrap border-8">
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -172,7 +165,6 @@ export default function List() {
                     />
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
                     <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-                    <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
                     {user.role === ROLES.ADMIN ? (
                       <MultiDropdownList
                         defaultQuery={getDefaultQuery}
@@ -219,7 +211,7 @@ export default function List() {
                       renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
                       onValueChange={setfilterSessionStatus}
                     />
-                    <DeleteFilters />
+                    {/*<DeleteFilters />*/}
                   </div>
                 )}
               </div>
@@ -323,12 +315,12 @@ export default function List() {
   );
 }
 
-const Badge = ({ cohort, status }) => {
-  console.log(cohort);
+const Badge = ({ cohort, status, onClick }) => {
   return (
     <div
       key={cohort}
-      className={`z-10 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit ${
+      onClick={onClick}
+      className={`hover:bg-red-500 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit ${
         status === "VALIDATED" ? "border-[1px] border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100"
       }`}>
       {cohort}
@@ -353,7 +345,7 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
             <div className="flex items-center">
-              <Badge cohort={sessionPhase1._source.cohort} status={sessionPhase1._source.status} />
+              <Badge onClick={() => console.log(sessionPhase1._source.cohort)} cohort={sessionPhase1._source.cohort} status={sessionPhase1._source.status} />
             </div>
           </SubTd>
         ))}
@@ -376,7 +368,7 @@ const HitSession = ({ hit, onClick, selected, center }) => {
         </MultiLine>
       </td>
       <td>
-        <Badge cohort={hit._source.cohort} status={hit._source.status} />
+        <Badge onClick={() => console.log(hit._source.cohort)} cohort={hit._source.cohort} status={hit._source.status} />
       </td>
       <td>
         <div>
@@ -388,7 +380,7 @@ const HitSession = ({ hit, onClick, selected, center }) => {
         </div>
         <div className="text-xs flex flex-row">
           <div className="text-grey-500">sur</div>
-          <div>{hit.placesTotal}</div>
+          <div>&nbsp;{hit._source.placesTotal}</div>
         </div>
       </td>
       <td>
