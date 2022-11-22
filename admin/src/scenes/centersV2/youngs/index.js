@@ -3,7 +3,7 @@ import * as FileSaver from "file-saver";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, NavLink, useHistory, useParams } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
@@ -16,6 +16,7 @@ import Template from "../../../assets/icons/Template.js";
 import SelectAction from "../../../components/SelectAction";
 import WithTooltip from "../../../components/WithTooltip";
 import api from "../../../services/api";
+import { TabItem } from "../components/commons.js";
 import {
   canSearchInElasticSearch,
   departmentLookUp,
@@ -484,17 +485,6 @@ export default function CenterYoungIndex() {
     </>
   );
 }
-
-const TabItem = ({ to, title, icon }) => (
-  <NavLink
-    to={to}
-    activeClassName="!text-snu-purple-800 bg-white border-none"
-    className="text-[13px] px-3 py-2 cursor-pointer text-gray-600 rounded-t-lg bg-gray-50 border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 hover:text-snu-purple-800">
-    <div className="flex items-center gap-2">
-      {icon} {title}
-    </div>
-  </NavLink>
-);
 
 const transformData = async ({ data, centerId }) => {
   let all = data;

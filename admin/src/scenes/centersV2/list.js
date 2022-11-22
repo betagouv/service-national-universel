@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams, useHistory } from "react-router-dom";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 
@@ -12,12 +12,15 @@ import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCre
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, SearchStyle, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
+import { SearchStyle, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
+import { FilterButton, TabItem } from "./components/commons";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import Menu from "../../assets/icons/Menu";
+import Calendar from "../../assets/icons/Calendar";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
@@ -33,13 +36,16 @@ export default function List() {
   const [filterCohorts, setFilterConhorts] = useState([]);
   const [filterSessionStatus, setfilterSessionStatus] = useState([]);
 
+  const [sessionIds, setSessionIds] = useState([]);
+  const [filterSessions, setFilterSessions] = useState([]);
+
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-
+  const [currentTab, setCurrentTab] = useState("liste-centre");
   useEffect(() => {
     (async () => {
       if (cohesionCenterIds?.length) {
@@ -119,132 +125,197 @@ export default function List() {
                 />
               </div>
             </Header>
-            <div className="flex flex-column bg-white mx-[10px] rounded-t-lg">
-              <div className="flex flex-row px-6 pt-5">
-                <SearchStyle>
-                  <DataSearch
-                    defaultQuery={getDefaultQuery}
-                    showIcon={false}
-                    placeholder="Rechercher par mots clés, ville, code postal..."
-                    componentId="SEARCH"
-                    dataField={["name", "city", "zip", "code", "code2022"]}
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    style={{ marginRight: "1rem", flex: 1 }}
-                    innerClass={{ input: "searchbox" }}
-                    className="searchfield"
-                    URLParams={true}
-                    autosuggest={false}
-                  />
-                </SearchStyle>
-                <div>Filtres</div>
-              </div>
-              {filterVisible && (
-                <div>
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    componentId="COHORT"
-                    dataField="cohorts.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                    renderItem={(e, count) => {
-                      return `${translate(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
-                    onValueChange={setFilterConhorts}
-                  />
-                  <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                  <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-                  <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
-                  {user.role === ROLES.ADMIN ? (
+            <div className=" flex flex-1 mx-[10px] z-0 mt-2">
+              <nav className="flex flex-1 gap-1">
+                <TabItem icon={<Menu />} title="Liste des centres" onClick={() => setCurrentTab("liste-centre")} active={currentTab === "liste-centre"} />
+                <TabItem icon={<Calendar />} title="Sessions" onClick={() => setCurrentTab("session")} active={currentTab === "session"} />
+              </nav>
+            </div>
+            <div className={`bg-white rounded-b-lg rounded-tr-lg mx-[10px] z-10`}>
+              <div className="flex flex-column bg-white mx-8">
+                <div className="flex flex-row pt-4 justify-between items-center">
+                  <div className="flex flex-row w-full">
+                    <SearchStyle>
+                      <DataSearch
+                        defaultQuery={getDefaultQuery}
+                        showIcon={false}
+                        placeholder="Rechercher par mots clés, ville, code postal..."
+                        componentId="SEARCH"
+                        dataField={["name", "city", "zip", "code", "code2022"]}
+                        react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                        style={{ marginRight: "1rem", flex: 1 }}
+                        innerClass={{ input: "searchbox" }}
+                        className="searchfield"
+                        URLParams={true}
+                        autosuggest={false}
+                      />
+                    </SearchStyle>
+                    <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
+                  </div>
+                  <div>Exporter</div>
+                </div>
+                {filterVisible && (
+                  <div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
-                      placeholder="Code 2022"
-                      componentId="CODE2022"
-                      dataField="code2022.keyword"
-                      react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
+                      componentId="COHORT"
+                      dataField="cohorts.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
+                      onValueChange={setFilterConhorts}
+                    />
+                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+                    <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                    {user.role === ROLES.ADMIN ? (
+                      <MultiDropdownList
+                        defaultQuery={getDefaultQuery}
+                        className="dropdown-filter"
+                        placeholder="Code 2022"
+                        componentId="CODE2022"
+                        dataField="code2022.keyword"
+                        react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
+                        title=""
+                        URLParams={true}
+                        sortBy="asc"
+                        showSearch={true}
+                        searchPlaceholder="Rechercher..."
+                        renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
+                        showMissing
+                        missingLabel="Non renseigné"
+                      />
+                    ) : null}
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Places restantes"
+                      componentId="PLACES"
+                      dataField="placesLeft"
+                      react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
                       title=""
                       URLParams={true}
                       sortBy="asc"
-                      showSearch={true}
-                      searchPlaceholder="Rechercher..."
-                      renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
-                      showMissing
-                      missingLabel="Non renseigné"
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                     />
-                  ) : null}
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Places restantes"
-                    componentId="PLACES"
-                    dataField="placesLeft"
-                    react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
-                    title=""
-                    URLParams={true}
-                    sortBy="asc"
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
-                  />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    componentId="STATUS"
-                    dataField="sessionStatus.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                    renderItem={(e, count) => {
-                      return `${translate(e)}`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
-                    onValueChange={setfilterSessionStatus}
-                  />
-                  <DeleteFilters />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="STATUS"
+                      dataField="sessionStatus.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                      renderItem={(e) => {
+                        return `${translate(e)}`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
+                      onValueChange={setfilterSessionStatus}
+                    />
+                    <DeleteFilters />
+                  </div>
+                )}
+              </div>
+              {currentTab === "liste-centre" && (
+                <div>
+                  <ResultTable className="mt-0 mx-0 rounded-b-lg">
+                    <ReactiveListComponent
+                      defaultQuery={getDefaultQuery}
+                      paginationAt="bottom"
+                      showTopResultStats={false}
+                      react={{ and: FILTERS }}
+                      onData={({ rawData }) => {
+                        if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
+                      }}
+                      render={({ data }) => (
+                        <Table>
+                          <thead>
+                            <tr>
+                              <th style={{ width: "40%", color: "#7E858C", fontSize: 11 }}>Centre</th>
+                              <th style={{ width: "60%", color: "#7E858C", fontSize: 11 }}>Cohortes à venir</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {data.map((hit) => (
+                              <Hit
+                                key={hit._id}
+                                hit={hit}
+                                sessionsPhase1={sessionsPhase1
+                                  .filter(
+                                    (e) =>
+                                      e?._source?.cohesionCenterId === hit._id &&
+                                      (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
+                                      (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
+                                  )
+                                  .map((e) => e)}
+                                onClick={() => setCenter(hit)}
+                                selected={center?._id === hit._id}
+                              />
+                            ))}
+                          </tbody>
+                        </Table>
+                      )}
+                    />
+                  </ResultTable>
+                </div>
+              )}
+              {currentTab === "session" && (
+                <div>
+                  <div>
+                    <ResultTable className="mt-0 mx-0 rounded-b-lg">
+                      <ReactiveListComponent
+                        defaultQuery={getDefaultQuery}
+                        paginationAt="bottom"
+                        showTopResultStats={false}
+                        react={{ and: FILTERS }}
+                        onData={({ rawData }) => {
+                          if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
+                        }}
+                        render={({ data }) => (
+                          <Table>
+                            <thead>
+                              <tr>
+                                <th style={{ width: "30%", color: "#7E858C", fontSize: 11 }}>Centre</th>
+                                <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Cohortes</th>
+                                <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Places</th>
+                                <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Disponibilités</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sessionsPhase1.map((hit) => (
+                                <HitSession
+                                  key={hit._id}
+                                  hit={hit}
+                                  center={data.find((center) => center._id === hit._source.cohesionCenterId)}
+                                  sessionsPhase1={sessionsPhase1
+                                    .filter(
+                                      (e) =>
+                                        e?._source?.cohesionCenterId === hit._id &&
+                                        (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
+                                        (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
+                                    )
+                                    .map((e) => e)}
+                                  onClick={() => setCenter(hit)}
+                                  selected={center?._id === hit._id}
+                                />
+                              ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      />
+                    </ResultTable>
+                  </div>
                 </div>
               )}
             </div>
-            <ResultTable className="mt-0 rounded-b-lg">
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                react={{ and: FILTERS }}
-                onData={({ rawData }) => {
-                  if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
-                }}
-                render={({ data }) => (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th style={{ width: "40%", color: "#7E858C", fontSize: 11 }}>Centre</th>
-                        <th style={{ width: "60%", color: "#7E858C", fontSize: 11 }}>Cohortes à venir</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.map((hit) => (
-                        <Hit
-                          key={hit._id}
-                          hit={hit}
-                          sessionsPhase1={sessionsPhase1
-                            .filter(
-                              (e) =>
-                                e?._source?.cohesionCenterId === hit._id &&
-                                (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
-                                (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
-                            )
-                            .map((e) => e)}
-                          onClick={() => setCenter(hit)}
-                          selected={center?._id === hit._id}
-                        />
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              />
-            </ResultTable>
           </div>
           <Panel center={center} onChange={() => setCenter(null)} />
         </div>
@@ -269,12 +340,51 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
       <td className="flex flex-row items-center">
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
-            {console.log(sessionPhase1)}
             <div className="flex items-center">
               <Badge text={sessionPhase1._source.cohort} backgroundColor={"#F9FCFF"} color={sessionPhase1._source.status === "VALIDATED" ? "#0C7CFF" : "#6B7280"} />
             </div>
           </SubTd>
         ))}
+      </td>
+    </tr>
+  );
+};
+
+const HitSession = ({ hit, onClick, selected, center }) => {
+  return (
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
+      <td>
+        <MultiLine>
+          <span className="font-bold text-black">
+            {center?.name}
+            {/* <span style={{ fontSize: ".7rem", color: "#9C9C9C" }}> #{hit?._id}</span> */}
+          </span>
+
+          <p>{`${center?.city || ""} • ${center?.department || ""}`}</p>
+        </MultiLine>
+      </td>
+      <td>
+        <Badge text={hit._source.cohort} backgroundColor={"#F9FCFF"} color={hit._source.status === "VALIDATED" ? "#0C7CFF" : "#6B7280"} />
+      </td>
+      <td>
+        <div>
+          {hit._source.placesLeft === 0 ? (
+            <div className="text-xs text-grey-500">0 place</div>
+          ) : (
+            <div className="text-xs text-400">{hit._source.placesLeft > 1 ? hit._source.placesLeft + " places" : hit._source.placesLeft + " place"}</div>
+          )}
+        </div>
+        <div className="text-xs flex flex-row">
+          <div className="text-grey-500">sur</div>
+          <div>{hit.placesTotal}</div>
+        </div>
+      </td>
+      <td>
+        {hit._source.placesLeft === 0 ? (
+          <div className="text-gray-700 font-bold bg-gray-200 rounded w-fit px-1">COMPLET</div>
+        ) : (
+          <div className="text-[#0063CB] font-bold bg-[#E8EDFF] rounded w-fit px-1">PLACES DISPONIBLES</div>
+        )}
       </td>
     </tr>
   );
