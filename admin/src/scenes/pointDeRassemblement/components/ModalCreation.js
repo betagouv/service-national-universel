@@ -8,11 +8,13 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
 
-export default function ModalCreation({ isOpen, onCancel }) {
+export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, editable = true }) {
   const history = useHistory();
-  const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1).reduce((acc, cohort) => {
-    return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
-  }, []);
+  const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1)
+    .reduce((acc, cohort) => {
+      return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
+    }, [])
+    .filter((cohort) => !defaultPDR || !defaultPDR.cohorts.includes(cohort));
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
@@ -30,7 +32,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
 
   const [listPDR, setListPDR] = React.useState([]);
   const [selectedCohort, setSelectedCohort] = React.useState();
-  const [selectedPDR, setSelectedPDR] = React.useState();
+  const [selectedPDR, setSelectedPDR] = React.useState(defaultPDR);
   const [complementAddress, setComplementAddress] = React.useState("");
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -115,6 +117,8 @@ export default function ModalCreation({ isOpen, onCancel }) {
         toastr.error("Oups, une erreur est survenue lors de l'ajout du séjour", code);
         return setIsLoading(false);
       }
+      setIsLoading(false);
+      onCancel();
       history.push(`/point-de-rassemblement/${PDR._id}`);
     } catch (e) {
       capture(e);
@@ -142,6 +146,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
                 {cohort}
               </div>
             ))}
+            {availableCohorts.length === 0 && <div className="text-xs font-medium leading-5 text-gray-500">Aucun séjour disponible</div>}
           </div>
           {selectedCohort ? (
             <>
@@ -149,7 +154,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
               <div className="relative">
                 <div
                   onClick={() => {
-                    setOpen(!open);
+                    editable && setOpen(!open);
                   }}
                   className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between shadow-sm rounded-lg bg-white ${
                     open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
@@ -158,7 +163,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
                     <div className="text-xs leading-6 font-normal text-gray-500">Choisir un point de rassemblement</div>
                     {!selectedPDR ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedPDR.name}</div>}
                   </div>
-                  <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
+                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />}
                 </div>
 
                 <div

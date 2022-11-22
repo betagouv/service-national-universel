@@ -114,7 +114,7 @@ export default function List() {
                 paginationAt="bottom"
                 showTopResultStats={false}
                 render={({ data }) => (
-                  <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+                  <div className="flex w-full flex-col  mt-6 mb-2">
                     <hr />
                     <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
                       <div className="w-[40%]">Points de rassemblements</div>
@@ -140,7 +140,7 @@ const Hit = ({ hit }) => {
   return (
     <>
       <hr />
-      <div className="flex py-2 items-center px-4 hover:bg-gray-50 cursor-pointer">
+      <div className="flex py-2 items-center px-4 hover:bg-gray-100 cursor-pointer">
         <div className="flex flex-col gap-1 w-[40%]">
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
           <div className="font-medium text-sm leading-4 text-gray-500">
