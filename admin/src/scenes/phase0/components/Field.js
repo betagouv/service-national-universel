@@ -26,8 +26,11 @@ export default function Field({
   options = [],
   filterOnType = false,
   onChange = () => {},
+  showBackgroundColor = true,
   transformer,
   young,
+  rows,
+  maxLength,
   copy = false,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
@@ -105,8 +108,15 @@ export default function Field({
         {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
         {mode === "edition" && editable ? (
           <>
-            {type === "select" && <SimpleSelect value={value} transformer={transformer} options={options} onChange={onChange} filterOnType={filterOnType} />}
-            {type === "text" && <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />}
+            {type === "select" && (
+              <SimpleSelect value={value} transformer={transformer} showBackgroundColor={showBackgroundColor} options={options} onChange={onChange} filterOnType={filterOnType} />
+            )}
+            {type === "text" && (
+              <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={`block p-[5px] ${showBackgroundColor && "bg-gray-50"}  w-[100%]`} />
+            )}
+            {type === "textarea" && (
+              <textarea maxLength={maxLength} rows={rows || 4} value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />
+            )}
             {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
           </>
         ) : (

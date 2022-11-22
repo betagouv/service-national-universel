@@ -28,6 +28,15 @@ export default function StepUpload() {
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
   async function uploadFiles() {
+    if (files.length > 3 || young.files.cniFiles.length + files.length > 3) {
+      setFiles([]);
+      return {
+        error: {
+          text: "Vous ne pouvez téleverser plus de 3 fichiers.",
+          subText: young?.files?.cniFiles?.length ? `Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` : null,
+        },
+      };
+    }
     for (const file of files) {
       if (file.size > 5000000) return { error: { text: `Ce fichier ${files.name} est trop volumineux.` } };
     }
@@ -127,7 +136,7 @@ export default function StepUpload() {
       <hr className="my-8 h-px bg-gray-200 border-0" />
       <div className="my-4">Ajouter un fichier</div>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Plusieurs fichiers possibles.</div>
+      <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
         multiple
@@ -184,7 +193,7 @@ export default function StepUpload() {
               <DatePickerList
                 value={date}
                 onChange={(date) => {
-                  setDate(date);
+                  setDate(date?.setUTCHours(11, 0, 0));
                 }}
               />
             </div>

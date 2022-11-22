@@ -28,7 +28,7 @@ router.post("/eligibility/2023", async (req, res) => {
     const zone = getZoneByDepartment(department);
 
     if (
-      birthDate >= sessions2023[4].eligibility.bornBefore ||
+      birthDate > sessions2023[4].eligibility.bornBefore ||
       (zone === "C" && birthDate <= sessions2023[0].eligibility.bornAfter) ||
       (zone === "A" && birthDate <= sessions2023[1].eligibility.bornAfter) ||
       (["B", "Corse"].includes(zone) && birthDate <= sessions2023[2].eligibility.bornAfter) ||

@@ -227,6 +227,14 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
 
+    obj.country = "France";
+
+    obj.parent1ContactPreference = "email";
+    obj.parent2ContactPreference = "email";
+
+    obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    obj.inscriptionDoneDate = new Date();
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
@@ -1127,5 +1135,6 @@ router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
+router.use("/note", require("./note"));
 
 module.exports = router;

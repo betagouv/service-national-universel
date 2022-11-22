@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
+const { ROLES_LIST } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
-
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -92,6 +92,26 @@ const CorrectionRequest = new mongoose.Schema({
       description: "Date d'annulation de la demande",
     },
   },
+});
+
+const Note = new mongoose.Schema({
+  phase: {
+    type: String,
+    enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
+  },
+  note: { type: String, required: true, maxLength: 500 },
+  referent: new mongoose.Schema({
+    _id: { type: mongoose.Types.ObjectId, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ROLES_LIST,
+      required: true,
+    },
+  }),
+  createdAt: { type: Date, required: true },
+  updatedAt: { type: Date, required: true },
 });
 
 const Schema = new mongoose.Schema({
@@ -1770,6 +1790,12 @@ const Schema = new mongoose.Schema({
   correctionRequests: {
     type: [CorrectionRequest],
     default: undefined,
+    documentation: {
+      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
+    },
+  },
+  notes: {
+    type: [Note],
     documentation: {
       description: "Liste des demandes de corrections faites sur le dossier du jeune.",
     },
