@@ -29,6 +29,8 @@ export default function Field({
   showBackgroundColor,
   transformer,
   young,
+  rows,
+  maxLength,
   copy = false,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
@@ -111,6 +113,9 @@ export default function Field({
             )}
             {type === "text" && (
               <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={`block p-[5px] ${showBackgroundColor && "bg-gray-50"}  w-[100%]`} />
+            )}
+            {type === "textarea" && (
+              <textarea maxLength={maxLength} rows={rows || 4} value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />
             )}
             {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
           </>

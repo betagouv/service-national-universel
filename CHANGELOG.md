@@ -1,3 +1,21 @@
+# [1.171.0](https://github.com/betagouv/service-national-universel/compare/v1.170.0...v1.171.0) (2022-11-21)
+
+
+### Bug Fixes
+
+* **admin:** delete note cancel ([750894d](https://github.com/betagouv/service-national-universel/commit/750894da7781d9c7727321f1390e7c83f2a02218))
+* **admin:** Documents phase 1 ([#2070](https://github.com/betagouv/service-national-universel/issues/2070)) ([6c2a95c](https://github.com/betagouv/service-national-universel/commit/6c2a95c28aec96229f1bc894c3afb952fe205c18))
+* **admin:** fix error when no application found on responsible dashboard ([677efca](https://github.com/betagouv/service-national-universel/commit/677efca8c011aac6f0d7b544b165e2e2874f7f3e))
+* **admin:** more button style ([26be89f](https://github.com/betagouv/service-national-universel/commit/26be89f647bbdd158b338a1fd5d5aa9a0d3e6a88))
+* **admin:** Use new ramses base by default ([#2059](https://github.com/betagouv/service-national-universel/issues/2059)) ([274f509](https://github.com/betagouv/service-national-universel/commit/274f50915c5b430a959afdb90a66d4cddd9c4a9b))
+* **app:** correctly set birthdate for eligibility ([#2071](https://github.com/betagouv/service-national-universel/issues/2071)) ([35abfab](https://github.com/betagouv/service-national-universel/commit/35abfab1ab478bb1ffc9782c10f32eb7a57a383a))
+* **pdf:** Pb with cache puppeteer v19 ([02fbe96](https://github.com/betagouv/service-national-universel/commit/02fbe9645b9c852ce61fcf5e73d1cb496f221d3d))
+
+
+### Features
+
+* **admin/api:** Note interne ([#2068](https://github.com/betagouv/service-national-universel/issues/2068)) ([74990b7](https://github.com/betagouv/service-national-universel/commit/74990b7c0668caae824bf1984cdf63a5d7236236))
+
 # [1.170.0](https://github.com/betagouv/service-national-universel/compare/v1.169.0...v1.170.0) (2022-11-18)
 
 

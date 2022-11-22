@@ -1137,38 +1137,6 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
   }
 });
 
-router.put("/young/:id/phase1Files/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const keys = ["autoTestPCR", "imageRight", "rules"];
-    const { error: documentError, value: document } = Joi.string()
-      .required()
-      .valid(...keys)
-      .validate(req.params.document);
-    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(req.params.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const { error: bodyError, value } = Joi.object({
-      [`${document}`]: Joi.string().trim().valid("true", "false"),
-      [`${document}Files`]: Joi.array().items(Joi.string()),
-    }).validate(req.body);
-    if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-
-    if (!canCreateOrUpdateSessionPhase1(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
