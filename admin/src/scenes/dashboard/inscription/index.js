@@ -103,7 +103,7 @@ export default function Index({ onChangeFilter = () => {} }) {
       </Row>
       {filter && (
         <>
-          {/* <Row>
+          <Row>
             <Col md={12}>
               <h3 className="mt-4 mb-2 text-xl">Pilotage</h3>
             </Col>
@@ -115,9 +115,9 @@ export default function Index({ onChangeFilter = () => {} }) {
             </Col>
           </Row>
           <Status filter={filter} />
-          <h3 className="mt-4 mb-2 text-xl">Dans le détail</h3> */}
+          <h3 className="mt-4 mb-2 text-xl">Dans le détail</h3>
           <Row>
-            {/* <Col md={12} lg={6}>
+            <Col md={12} lg={6}>
               <BirthDate filter={filter} />
             </Col>
             <Col md={12} lg={6}>
@@ -137,7 +137,7 @@ export default function Index({ onChangeFilter = () => {} }) {
             </Col>
             <Col md={12} lg={4}>
               <RuralArea filter={filter} />
-            </Col> */}
+            </Col>
             {user.role === ROLES.REFERENT_DEPARTMENT ? (
               <Col md={12}>
                 <Schools filter={filter} />

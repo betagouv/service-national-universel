@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
@@ -10,8 +9,6 @@ function round1Decimal(num) {
 }
 
 export default function Schools({ filter }) {
-  const history = useHistory();
-
   const getDefaultQuery = () => {
     let body = {
       query: { bool: { must: { match_all: {} }, filter: [] } },
@@ -55,6 +52,7 @@ export default function Schools({ filter }) {
         }}
         loader="Chargement..."
         dataField="schoolName"
+        renderNoResults={() => <></>} // ! Hide no results
         render={({ rawData }) => {
           const totalHits = rawData?.hits?.total.value;
 
