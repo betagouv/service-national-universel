@@ -321,7 +321,7 @@ export default function Create() {
     }
     setLoading(false);
     toastr.success("Volontaire créé !");
-    return history.push("/inscription");
+    return history.push(`/volontaire/${id}`);
   };
 
   const handleChange = (event) => {
