@@ -2,8 +2,8 @@ import React from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { Modal } from "reactstrap";
 import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
@@ -124,9 +124,10 @@ export default function ModalCreation({ isOpen, onCancel }) {
   };
 
   return (
-    <Modal centered isOpen={isOpen} onCancel={onCancel}>
-      <div className="flex flex-col w-full p-8 h-[600px] justify-between">
-        <div className="flex flex-col w-full ">
+    // <Modal centered isOpen={isOpen} onCancel={onCancel}>
+    <ModalTailwind isOpen={isOpen} setIsOpen={onCancel} size="w-[600px]">
+      <div className="flex flex-col p-8 h-[600px] w-full justify-between">
+        <div className="flex flex-col w-full">
           <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
           <hr className="my-8" />
           <div className="text-gray-800 text-sm font-medium leading-6">Choisissez un séjour</div>
@@ -229,6 +230,6 @@ export default function ModalCreation({ isOpen, onCancel }) {
           </button>
         </div>
       </div>
-    </Modal>
+    </ModalTailwind>
   );
 }
