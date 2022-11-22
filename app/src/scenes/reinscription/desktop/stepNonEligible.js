@@ -5,7 +5,6 @@ import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import { getDepartmentByZip } from "snu-lib";
 import { capture } from "../../../sentry";
 import { useDispatch, useSelector } from "react-redux";
 import API from "../../../services/api";
@@ -56,13 +55,7 @@ export default function NonEligible() {
   };
 
   const getMessageNonEligible = async (young) => {
-    const res = await API.post("/cohort-session/eligibility/2023", {
-      department: young.school?.departmentName || young.school?.department || getDepartmentByZip(young.zip) || null,
-      birthDate: young.birthdateAt,
-      schoolLevel: young.grade,
-      frenchNationality: young.frenchNationality,
-      status: young.status,
-    });
+    const res = await API.post("/cohort-session/eligibility/2023", young);
     if (!res.ok) {
       capture(res.code);
     }

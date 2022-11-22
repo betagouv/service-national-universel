@@ -39,7 +39,7 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { copyToClipboard, getEligibleSessions } from "../../utils";
+import { copyToClipboard } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
@@ -361,7 +361,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   const [error, setError] = useState(null);
 
   async function validate() {
-    const sessions = await getEligibleSessions(young);
+    const sessions = await api.post("/cohort-session/eligibility/2023", young);
     const session = sessions.find(({ name }) => name === young.cohort);
     if (session.isFull) {
       return setConfirmModal({
