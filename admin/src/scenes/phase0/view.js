@@ -1531,7 +1531,9 @@ function SectionConsentements({ young, onChange }) {
           </span>
         </div>
         <div>
-          <CheckRead value={young.acceptCGU === "true"}>A et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.</CheckRead>
+          <CheckRead value={young.acceptCGU === "true"}>
+            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
+          </CheckRead>
           <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
             Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}

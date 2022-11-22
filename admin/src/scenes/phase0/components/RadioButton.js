@@ -13,7 +13,7 @@ const RadioButton = ({ options, label, onChange, value: currentValue, readonly =
         {options.map(({ label, value }, idx) => (
           <React.Fragment key={value}>
             {idx > 0 && <div className="w-[1px] bg-[#E5E5E5] mx-4" />}
-            <Option label={label} value={value === currentValue} onChange={() => change(value)} readonly />
+            <Option label={label} value={value === currentValue} onChange={() => change(value)} readonly={readonly} />
           </React.Fragment>
         ))}
       </div>
