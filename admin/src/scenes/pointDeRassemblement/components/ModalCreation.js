@@ -225,7 +225,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
           <button
             onClick={onSubmit}
             disabled={disabled || isLoading}
-            className={`border-[1px] border-blue-600 text-white bg-blue-600 py-2 w-1/2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed`}>
+            className="border-[1px] border-blue-600 text-white bg-blue-600 py-2 w-1/2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed">
             Enregistrer
           </button>
         </div>
