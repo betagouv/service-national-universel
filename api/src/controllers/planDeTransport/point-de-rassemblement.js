@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const PointDeRassemblementModel = require("../../models/pointDeRassemblement");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const YoungModel = require("../../models/young");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
@@ -16,12 +16,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cohort: Joi.string().required(),
       name: Joi.string().required(),
       address: Joi.string().required(),
-      complementAddress: Joi.array().items(
-        Joi.object({
-          cohort: Joi.string().required(),
-          complement: Joi.string().required(),
-        }),
-      ),
+      complementAddress: Joi.string().allow(null, ""),
       city: Joi.string().required(),
       zip: Joi.string().required(),
       department: Joi.string().required(),
@@ -36,7 +31,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         })
         .allow({}, null),
     }).validate(req.body);
-
+    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
@@ -48,7 +43,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cohorts: [cohort],
       name,
       address,
-      complementAddress,
+      complementAddress: {
+        complement: complementAddress,
+        cohort: cohort,
+      },
       city,
       zip,
       department,
@@ -56,7 +54,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       location,
     });
 
-    return res.status(200).send({ ok: true, pointDeRassemblement });
+    return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -110,10 +108,7 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       cohort: Joi.string().required(),
-      complementAddress: Joi.object({
-        cohort: Joi.string().required(),
-        complement: Joi.string().required(),
-      }),
+      complementAddress: Joi.string().allow(null, ""),
     }).validate({ ...req.body, id: req.params.id });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -129,11 +124,8 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     if (!cohortsToUpdate.includes(cohort)) cohortsToUpdate.push(cohort);
 
     let complementAddressToUpdate = pointDeRassemblement.complementAddress;
-
-    if (complementAddress) {
-      complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== cohort);
-      complementAddressToUpdate.push(complementAddress);
-    }
+    complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== cohort);
+    complementAddressToUpdate.push({ cohort, complement: complementAddress });
 
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
