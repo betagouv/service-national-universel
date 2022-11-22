@@ -1,10 +1,10 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 
-export default function ModalTailwind({ isOpen, setIsOpen, children, size }) {
+export default function ModalTailwind({ isOpen, onClose, children, size }) {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={setIsOpen}>
+      <Dialog as="div" className="relative z-20" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"

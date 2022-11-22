@@ -140,7 +140,7 @@ const Hit = ({ hit }) => {
   return (
     <>
       <hr />
-      <div className="flex py-2 items-center px-4">
+      <div className="flex py-2 items-center px-4 hover:bg-gray-50 cursor-pointer">
         <div className="flex flex-col gap-1 w-[40%]">
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
           <div className="font-medium text-sm leading-4 text-gray-500">

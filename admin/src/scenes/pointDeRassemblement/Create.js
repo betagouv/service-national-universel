@@ -99,22 +99,25 @@ export default function Create() {
                 <Field label="Code postal" onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })} value={data.zip} error={errors?.zip} />
                 <Field label="Ville" onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })} value={data.city} error={errors?.city} />
               </div>
-              <div className="flex items-center gap-3">
-                <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
-                <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+              {data.addressVerified && (
+                <div className="flex items-center gap-3">
+                  <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
+                  <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <VerifyAddress
+                  address={data.address}
+                  zip={data.zip}
+                  city={data.city}
+                  onSuccess={onVerifyAddress(true)}
+                  onFail={onVerifyAddress()}
+                  isVerified={data.addressVerified === true}
+                  buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+                  verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
+                />
+                {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
               </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <VerifyAddress
-                address={data.address}
-                zip={data.zip}
-                city={data.city}
-                onSuccess={onVerifyAddress(true)}
-                onFail={onVerifyAddress()}
-                isVerified={data.addressVerified === true}
-                buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-              />
-              {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
             </div>
           </div>
           <div className="flex w-[10%] justify-center items-center">
@@ -127,7 +130,7 @@ export default function Create() {
                 <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="text-xs font-medium leading-4 text-gray-900">Complément d’adresse</div>
+                <div className="text-xs font-medium leading-4 text-gray-900">Complément d’adresse (optionnel)</div>
                 <Field label="Complément d’adresse" onChange={(e) => setData({ ...data, complementAddress: e.target.value })} value={data.complementAddress} />
               </div>
             </div>
@@ -135,7 +138,7 @@ export default function Create() {
               onClick={onSubmit}
               className={`border-[1px] border-blue-600 text-white bg-blue-600 py-2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed`}
               disabled={isLoading}>
-              Rattacher
+              Enregistrer
             </button>
           </div>
         </div>

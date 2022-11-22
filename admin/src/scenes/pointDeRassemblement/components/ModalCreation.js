@@ -125,7 +125,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
 
   return (
     // <Modal centered isOpen={isOpen} onCancel={onCancel}>
-    <ModalTailwind isOpen={isOpen} setIsOpen={onCancel} size="w-[600px]">
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} size="w-[600px]">
       <div className="flex flex-col p-8 h-[600px] w-full justify-between">
         <div className="flex flex-col w-full">
           <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
@@ -226,7 +226,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
             onClick={onSubmit}
             disabled={disabled || isLoading}
             className={`border-[1px] border-blue-600 text-white bg-blue-600 py-2 w-1/2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed`}>
-            Rattacher
+            Enregistrer
           </button>
         </div>
       </div>
