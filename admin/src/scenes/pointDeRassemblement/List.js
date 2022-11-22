@@ -1,6 +1,7 @@
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React from "react";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { canCreateMeetingPoint, ROLES } from "snu-lib";
 import FilterSvg from "../../assets/icons/Filter";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -137,11 +138,12 @@ export default function List() {
 }
 
 const Hit = ({ hit }) => {
+  const history = useHistory();
   return (
     <>
       <hr />
-      <div className="flex py-2 items-center px-4 hover:bg-gray-100 cursor-pointer">
-        <div className="flex flex-col gap-1 w-[40%]">
+      <div className="flex py-2 items-center px-4 hover:bg-gray-100">
+        <div className="flex flex-col gap-1 w-[40%] cursor-pointer" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
           <div className="font-medium text-sm leading-4 text-gray-500">
             {hit.address}, {hit.zip}, {hit.city}
@@ -154,6 +156,7 @@ const Hit = ({ hit }) => {
           {hit.cohorts.map((cohort, index) => (
             <div
               key={cohort + hit.name + index}
+              onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohort}`)}
               className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">
               {cohort}
             </div>

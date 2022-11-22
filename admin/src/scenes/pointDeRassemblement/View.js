@@ -20,6 +20,7 @@ function classNames(...classes) {
 export default function View(props) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const urlParams = new URLSearchParams(window.location.search);
   const mount = React.useRef(false);
   const [data, setData] = React.useState(null);
   const [modal, setModal] = React.useState({ isOpen: false });
@@ -27,7 +28,7 @@ export default function View(props) {
   const [errors, setErrors] = React.useState({});
   const [editInfo, setEditInfo] = React.useState(false);
   const [editSession, setEditSession] = React.useState(false);
-  const [currentCohort, setCurrentCohort] = React.useState("Avril 2023 - A");
+  const [currentCohort, setCurrentCohort] = React.useState("");
 
   const getPDR = async () => {
     try {
@@ -39,6 +40,7 @@ export default function View(props) {
         return history.push("/point-de-rassemblement");
       }
       setData({ ...reponsePDR, addressVerified: true });
+      return reponsePDR.cohorts;
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement");
@@ -46,12 +48,25 @@ export default function View(props) {
   };
 
   React.useEffect(() => {
-    if (mount.current === false || editInfo === false) {
+    (async () => {
+      if (mount.current === false) {
+        const cohorts = await getPDR();
+        if (urlParams.get("cohort")) {
+          setCurrentCohort(urlParams.get("cohort"));
+        } else {
+          setCurrentCohort(cohorts[0]);
+        }
+        mount.current = true;
+      }
+    })();
+  }, [props.match.params.id]);
+
+  React.useEffect(() => {
+    if (editInfo === false) {
       getPDR();
       setErrors({});
-      mount.current = true;
     }
-  }, [props.match.params.id, editInfo]);
+  }, [currentCohort]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setData({
