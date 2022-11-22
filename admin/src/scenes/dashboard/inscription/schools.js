@@ -1,30 +1,23 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import React from "react";
 import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
-import { getLink, replaceSpaces, ROLES } from "../../../utils";
-import { useSelector } from "react-redux";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import { apiURL } from "../../../config";
-import { translate } from "snu-lib";
 
 function round1Decimal(num) {
   return Math.round((num + Number.EPSILON) * 10) / 10;
 }
 
 export default function Schools({ filter }) {
-  console.log("RENDER Schools");
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
 
   const getDefaultQuery = () => {
-    console.log("QUERY");
     let body = {
       query: { bool: { must: { match_all: {} }, filter: [] } },
       aggs: {
         names: {
-          terms: { field: "schoolId.keyword", size: 300 },
+          terms: { field: "schoolId.keyword", size: 500 },
           aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
         },
       },
@@ -34,19 +27,21 @@ export default function Schools({ filter }) {
 
     if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
     if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
-    if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-    if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-    if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
+    if (filter.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": filter.department } });
 
     return body;
   };
 
-  const handleClick = (link) => {
-    history.push(link);
-  };
+  // ! Handle school filter
+  // const handleClick = (link) => {
+  //   history.push(link);
+  // onClick={() =>
+  //   // ! Le filtre SCHOOL ne marche pas sur la page des inscriptions
+  //   user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
+  // };
 
   return (
-    <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+    <ReactiveBase url={`${apiURL}/es`} app="young-having-school-in-department/inscriptions" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <ReactiveList
         defaultQuery={getDefaultQuery}
         componentId="result"
@@ -59,11 +54,8 @@ export default function Schools({ filter }) {
           );
         }}
         loader="Chargement..."
-        // innerClass={{ pagination: "pagination" }}
         dataField="schoolName"
         render={({ rawData }) => {
-          console.log("🚀 ~ file: schools.js ~ line 80 ~ data", rawData);
-
           const totalHits = rawData?.hits?.total.value;
 
           return (
@@ -84,19 +76,12 @@ export default function Schools({ filter }) {
             </table>
           );
         }}
-        renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucuns établissements ne correspondent à ces filtres.</div>}
       />
     </ReactiveBase>
-
-    //             onClick={() =>
-    //               // ! Le filtre SCHOOL ne marche pas sur la page des inscriptions
-    //               user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
   );
 }
 
 const CardSchool = ({ school, totalHits }) => {
-  // console.log("🚀 ~ file: schools.js ~ line 183 ~ CardSchool ~ school", school);
-
   const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
   const total = school.doc_count;
   const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};

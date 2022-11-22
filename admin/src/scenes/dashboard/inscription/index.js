@@ -138,9 +138,11 @@ export default function Index({ onChangeFilter = () => {} }) {
             <Col md={12} lg={4}>
               <RuralArea filter={filter} />
             </Col> */}
-            <Col md={12}>
-              <Schools filter={filter} />
-            </Col>
+            {user.role === ROLES.REFERENT_DEPARTMENT ? (
+              <Col md={12}>
+                <Schools filter={filter} />
+              </Col>
+            ) : null}
           </Row>
         </>
       )}
