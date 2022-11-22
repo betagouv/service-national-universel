@@ -3,7 +3,6 @@ import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
 import { Link, useHistory } from "react-router-dom";
 
-import Wrapper from "../wrapper";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
@@ -13,14 +12,12 @@ import { AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../../../assets/rubberStampNotValided.svg";
 import ReactTooltip from "react-tooltip";
-import { BsChevronDown } from "react-icons/bs";
+
 import { HiPlus } from "react-icons/hi";
 import ModalPJ from "./components/ModalPJ";
 import Clock from "../../../../assets/Clock.svg";
 import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../../assets/icons/Pencil";
-import FileIcon from "../../../../assets/FileIcon";
-import Download from "../../../../assets/icons/Download";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import FileCard from "../../../../components/FileCard";
@@ -31,7 +28,6 @@ export default function Phase2Application({ young, onChange }) {
   const [mission, setMission] = React.useState();
   const [tags, setTags] = React.useState();
   const [contract, setContract] = React.useState(null);
-  const [openAttachments, setOpenAttachments] = React.useState(false);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalDurationOpen, setModalDurationOpen] = React.useState(false);
 
@@ -123,7 +119,9 @@ export default function Phase2Application({ young, onChange }) {
         {/* <Contract young={young} admin={true} /> */}
         <div className="bg-white w-full h-full rounded-lg px-4">
           <div className="flex justify-between py-6">
-            <button onClick={history.goBack} className="flex items-center space-x-1 bg-gray-100 rounded-full p-[9px] border-[1px] border-gray-100 hover:border-gray-300">
+            <button
+              onClick={history.goBack}
+              className="h-8 w-8 flex items-center justify-center space-x-1 bg-gray-100 rounded-full border-[1px] border-gray-100 hover:border-gray-300">
               <LeftArrow stroke={"#374151"} width={15} />
             </button>
             <div className="flex items-center gap-3 text-2xl font-bold">
@@ -134,12 +132,15 @@ export default function Phase2Application({ young, onChange }) {
                 </div>
               </div>
             </div>
-            {/* TODO */}
-            <button
-              className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
-              onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
-              <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
-            </button>
+            {application?.contractId ? (
+              <button
+                className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
+                onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
+                <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
+              </button>
+            ) : (
+              <div />
+            )}
           </div>
           <hr className="my-4" />
           <div className="flex relative w-full rounded-xl  border-[1px] border-white hover:border-gray-200">

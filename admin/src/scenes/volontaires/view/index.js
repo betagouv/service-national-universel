@@ -56,7 +56,6 @@ export default function Index({ ...props }) {
         <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/equivalence" component={() => <FormEquivalence young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
-        <SentryRoute path="/volontaire/:id/phase2/application/:applicationId" component={() => <Phase2Application young={young} onChange={getYoung} />} />
         {environment === "production" ? (
           <SentryRoute path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
         ) : (
