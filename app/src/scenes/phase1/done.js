@@ -16,6 +16,7 @@ import { COHESION_STAY_END, translate } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 import InfoConvocation from "./components/modals/InfoConvocation";
 import plausibleEvent from "../../services/plausible";
+import { capture } from "../../sentry";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -53,13 +54,19 @@ export default function Done() {
   };
 
   const sendAttestation = async ({ template, type }) => {
-    setLoading(true);
-    const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
-      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
-    });
-    setLoading(false);
-    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
-    else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+    try {
+      setLoading(true);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+      });
+      setLoading(false);
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      setLoading(false);
+      return toastr.error("Erreur lors de l'envoie du document : ", e.message);
+    }
   };
 
   return (

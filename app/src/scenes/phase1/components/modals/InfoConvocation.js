@@ -9,6 +9,8 @@ import Loader from "../../../../components/Loader";
 import api from "../../../../services/api";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
+import { translate } from "snu-lib";
+import { capture } from "../../../../sentry";
 
 const returnMeetingDate = {
   2021: "mardi 02 juillet, 14:00",
@@ -92,13 +94,19 @@ export default function InfoConvocation({ isOpen, onCancel }) {
   };
 
   const sendConvocation = async ({ template, type }) => {
-    setLoadingConvocation(true);
-    const { ok } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
-      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
-    });
-    setLoadingConvocation(false);
-    if (ok) toastr.success(`Document envoyé à ${young.email}`);
-    else toastr.error("Erreur lors de l'envoie du document");
+    try {
+      setLoadingConvocation(true);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+      });
+      setLoadingConvocation(false);
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      setLoadingConvocation(false);
+      toastr.error("Erreur lors de l'envoie du document : ", e.message);
+    }
   };
 
   const getReturnMeetingDate = () => {
