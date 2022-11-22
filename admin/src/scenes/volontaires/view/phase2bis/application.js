@@ -7,7 +7,7 @@ import Wrapper from "../wrapper";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard } from "../../../../utils";
 import IconDomain from "../../../../components/IconDomain";
 import { AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
@@ -21,6 +21,7 @@ import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../../assets/icons/Pencil";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
+import FileCard from "../../../../components/FileCard";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -61,19 +62,19 @@ export default function Phase2Application({ young, onChange }) {
     },
   };
 
+  const getApplication = async () => {
+    if (!young) return;
+    // todo : why not just
+    let { ok, data, code } = await api.get(`/application/${applicationId}`);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
+
+    setApplication(data);
+  };
+
   React.useEffect(() => {
-    const getApplication = async () => {
-      if (!young) return;
-      // todo : why not just
-      let { ok, data, code } = await api.get(`/application/${applicationId}`);
-      if (!ok) {
-        capture(code);
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-
-      setApplication(data);
-    };
-
     getApplication();
   }, []);
 
@@ -182,12 +183,12 @@ export default function Phase2Application({ young, onChange }) {
               <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
-                <div className="font-bold text-2xl text-[#242526]">{contract.missionDuration || "0"}h</div>
+                <div className="font-bold text-2xl text-[#242526]">{contract?.missionDuration || "0"}h</div>
               </div>
               <div className="flex flex-col justify-center items-center p-4 m-0">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
                 <div className="flex items-center gap-2 font-bold text-2xl text-[#242526]">
-                  <div>{application.missionDuration || "0"}h</div>
+                  <div>{application?.missionDuration || "0"}h</div>
                   <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
                     <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
                       <Pencil width={16} height={16} />
@@ -272,8 +273,8 @@ export default function Phase2Application({ young, onChange }) {
               <div className="flex space-x-4 items-center">
                 {optionsType.reduce((nmb, option) => nmb + application[option].length, 0) !== 0 && (
                   <div
-                    className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
-                    onClick={() => setOpenAttachments(!openAttachments)}>
+                    className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out cursor-pointer"
+                    onClick={() => setOpenAttachments((e) => !e)}>
                     Voir mes pièces jointes
                     <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
                   </div>
@@ -291,16 +292,16 @@ export default function Phase2Application({ young, onChange }) {
               </div>
             </div>
 
-            {/* {openAttachments && (
+            {openAttachments && (
               <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
                 {optionsType.map(
                   (option, index) =>
-                    mission.application[option].length > 0 && (
+                    application[option].length > 0 && (
                       <FileCard
                         key={index}
-                        name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                        name={translateAddFilePhase2(option).toUpperCase()}
                         icon="reglement"
-                        filled={mission.application[option].length}
+                        filled={application[option].length}
                         color="text-blue-600 bg-white"
                         status="Modifier"
                         onClick={() =>
@@ -314,7 +315,7 @@ export default function Phase2Application({ young, onChange }) {
                     ),
                 )}
               </div>
-            )} */}
+            )}
             <ModalPJ
               isOpen={modalDocument?.isOpen}
               name={modalDocument?.name}
@@ -340,6 +341,7 @@ export default function Phase2Application({ young, onChange }) {
               onSave={async () => {
                 setModalDocument({ isOpen: false });
                 await getMission();
+                await getApplication();
               }}
               typeChose={modalDocument?.stepOne}
             />
