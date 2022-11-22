@@ -31,7 +31,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         })
         .allow({}, null),
     }).validate(req.body);
-    console.log(error);
+
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
