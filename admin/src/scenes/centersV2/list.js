@@ -76,8 +76,8 @@ export default function List() {
                 <TabItem icon={<Calendar />} title="Sessions" onClick={() => setCurrentTab("session")} active={currentTab === "session"} />
               </nav>
             </div>
-            <div className={`bg-white rounded-b-lg rounded-tr-lg mx-[10px] z-10`}>
-              <div className="flex flex-column bg-white mx-8 flex-wrap">
+            <div className={`bg-white rounded-b-lg rounded-tr-lg mx-[10px] relative`}>
+              <div className="flex-1 flex-column bg-white mx-8 flex-wrap">
                 <div className="flex flex-row pt-4 justify-between items-center">
                   <div className="flex flex-row w-96">
                     <DataSearch
@@ -89,7 +89,7 @@ export default function List() {
                       react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                       style={{ marginRight: "1rem", flex: 1 }}
                       innerClass={{ input: "searchbox" }}
-                      className="datasearch-searchfield "
+                      className="datasearch-searchfield"
                       URLParams={true}
                       autosuggest={false}
                     />
@@ -147,7 +147,7 @@ export default function List() {
                   />
                 </div>
                 {filterVisible && (
-                  <div className="mt-3 gap-2 flew-wrap border-8">
+                  <div className="mt-3 gap-2 flex flex-wrap">
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"

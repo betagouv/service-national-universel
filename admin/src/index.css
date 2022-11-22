@@ -240,15 +240,14 @@ h4 {
   font-size: 14px;
   color: #242526;
   min-width: 150px;
+  max-width: 300px;
   cursor: pointer;
-  
 }
 .dropdown-filter button:first-child {
   margin-right: 10px;
 }
 .dropdown-filter button div {
-  width: 100%;
-  overflow: visible;
+  overflow: ellipsis;
 }
 /* Result table reactive base */
 .reactive-result {
