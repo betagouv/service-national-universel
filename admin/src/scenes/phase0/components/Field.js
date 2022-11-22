@@ -26,7 +26,7 @@ export default function Field({
   options = [],
   filterOnType = false,
   onChange = () => {},
-  showBackgroundColor,
+  showBackgroundColor = true,
   transformer,
   young,
   rows,
