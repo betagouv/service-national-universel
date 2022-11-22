@@ -130,7 +130,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <div>
             <NavLink
               to={`/volontaire/${young._id.toString()}/phase2/application/${hit._id.toString()}`}
-              className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer">
+              className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
               <Eye width={16} height={16} />
             </NavLink>
           </div>
