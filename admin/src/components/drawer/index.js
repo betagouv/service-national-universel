@@ -304,8 +304,12 @@ const Drawer = (props) => {
       else if (user.role === ROLES.REFERENT_REGION) query = { region: user.region, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
       const getTickets = async (query) => {
-        const { data } = await api.post(`/zammood/tickets`, query);
-        props.dispatchTickets(data);
+        try {
+          const { data } = await api.post(`/zammood/tickets`, query);
+          props.dispatchTickets(data);
+        } catch (error) {
+          console.log(error);
+        }
       };
       if (query) getTickets(query);
     } catch (e) {

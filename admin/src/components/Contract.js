@@ -904,21 +904,22 @@ function SendContractLink({ contract, target }) {
     <>
       <CopyLink
         onClick={async () => {
-          try {
-            const email = contract[target + "Email"];
-            setModal({
-              isOpen: true,
-              title: "Envoie de contrat par mail",
-              message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
-              onConfirm: async () => {
-                const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
-                if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
+          const email = contract[target + "Email"];
+          setModal({
+            isOpen: true,
+            title: "Envoie de contrat par mail",
+            message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
+            onConfirm: async () => {
+              try {
+                const { ok, code } = await api.post(`/contract/${contract._id}/send-email/${target}`);
+                if (!ok) throw new Error(translate(code));
                 toastr.success("L'email a bien été envoyé", email);
-              },
-            });
-          } catch (e) {
-            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-          }
+              } catch (e) {
+                capture(e);
+                toastr.error("Une erreur est survenue lors de l'envoi du mail : ", e.message);
+              }
+            },
+          });
         }}>
         ✉️ Renvoyer le lien par email
       </CopyLink>

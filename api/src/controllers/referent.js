@@ -73,6 +73,7 @@ const {
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
+const { getAvailableSessions } = require("../utils/cohort");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -487,6 +488,10 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
+    const dep = young.schoolDepartment || young.department;
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthdateAt, young.status);
+    if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
@@ -522,6 +527,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
+        cohort,
         motif: cohortChangeReason,
         message: validatedMessage.value,
         cohortPeriod: translateCohort(cohort),
@@ -1124,38 +1130,6 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
         });
       }
     }
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/young/:id/phase1Files/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const keys = ["autoTestPCR", "imageRight", "rules"];
-    const { error: documentError, value: document } = Joi.string()
-      .required()
-      .valid(...keys)
-      .validate(req.params.document);
-    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(req.params.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const { error: bodyError, value } = Joi.object({
-      [`${document}`]: Joi.string().trim().valid("true", "false"),
-      [`${document}Files`]: Joi.array().items(Joi.string()),
-    }).validate(req.body);
-    if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-
-    if (!canCreateOrUpdateSessionPhase1(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);

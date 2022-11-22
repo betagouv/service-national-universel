@@ -13,6 +13,7 @@ import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
 import History from "./history";
 import Notifications from "./notifications";
+import Notes from "./notes";
 import { YOUNG_STATUS } from "../../../utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import FormEquivalence from "./FormEquivalence";
@@ -63,6 +64,7 @@ export default function Index({ ...props }) {
         <SentryRoute path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/notes" component={() => <Notes young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id" component={getDetail} />
       </Switch>
     </>

@@ -89,11 +89,11 @@ export default function Inscription() {
             <Header>
               <Title>Inscriptions</Title>
               <div className="flex gap-2">
-                {/* <Link to="/volontaire/create">
+                <Link to="/volontaire/create">
                   <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
                     <p>Nouvelle inscription</p>
                   </VioletButton>
-                </Link> */}
+                </Link>
                 <ExportComponent
                   handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"
@@ -105,7 +105,7 @@ export default function Inscription() {
                     let all = data;
                     const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
                     if (schoolsId?.length) {
-                      const { responses } = await api.esQuery("school", {
+                      const { responses } = await api.esQuery("schoolramses", {
                         query: { bool: { must: { ids: { values: schoolsId } } } },
                         size: ES_NO_LIMIT,
                       });
@@ -216,7 +216,7 @@ export default function Inscription() {
                       let all = data;
                       const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
                       if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
+                        const { responses } = await api.esQuery("schoolramses", {
                           query: { bool: { must: { ids: { values: schoolsId } } } },
                           size: ES_NO_LIMIT,
                         });
@@ -258,7 +258,7 @@ export default function Inscription() {
                       let all = data;
                       const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
                       if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
+                        const { responses } = await api.esQuery("schoolramses", {
                           query: { bool: { must: { ids: { values: schoolsId } } } },
                           size: ES_NO_LIMIT,
                         });

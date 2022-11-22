@@ -83,6 +83,7 @@
     "react-redux-toastr": "7.6.10",
     "react-router-dom": "5.3.4",
     "react-select": "4.3.1",
+    "react-tooltip": "^4.5.0",
     "reactstrap": "8.10.1",
     "redux": "4.2.0",
     "regenerator-runtime": "0.13.9",

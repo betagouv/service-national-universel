@@ -45,7 +45,7 @@ export function BorderButton({ children, className = "", onClick = () => {}, to,
   }
 }
 
-export function PlainButton({ children, className = "", onClick = () => {}, spinner = false, mode = "blue" }) {
+export function PlainButton({ children, className = "", onClick = () => {}, spinner = false, mode = "blue", disabled = false }) {
   let color;
   switch (mode) {
     case "green":
@@ -58,12 +58,17 @@ export function PlainButton({ children, className = "", onClick = () => {}, spin
       color = "bg-[#FFFFFF] text-[#374151] hover:!text-[#FFFFFF] hover:border-[#374151] hover:bg-[#374151] shadow-[0px_4px_10px_3px_rgba(0,0,0,0.07)]";
       break;
     default:
-      color = "bg-[#2563EB] text-white hover:!text-[#2563EB] hover:border-[#2563EB] hover:bg-white shadow-[0px_1px_2px_rgba(0,0,0,0.05)]";
+      color = `shadow-[0px_1px_2px_rgba(0,0,0,0.05)] ${disabled ? "bg-[#E5E5E5] text-[#929292] !border-[#E5E5E5]" : "bg-[#2563EB] text-white"} ${
+        !disabled && "hover:!text-[#2563EB] hover:border-[#2563EB] hover:bg-white"
+      }`;
   }
   return (
     <button
-      className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[transparent] border-[1px] border-solid rounded-[6px] ${color} ${className}`}
-      onClick={onClick}>
+      className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[transparent] border-[1px] border-solid rounded-[6px] ${
+        disabled && "cursor-not-allowed"
+      } ${color} ${className}`}
+      onClick={onClick}
+      disabled={disabled}>
       {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
       {children}
     </button>

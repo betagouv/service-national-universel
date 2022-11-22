@@ -62,6 +62,17 @@ export default function StepUpload() {
   async function uploadFiles() {
     let files = [...recto];
     if (verso) files = [...files, ...verso];
+    if (files.length > 3 || young.files.cniFiles.length + files.length > 3) {
+      setRecto([]);
+      setVerso([]);
+      setStep(getStep());
+      return {
+        error: {
+          text: "Vous ne pouvez téleverser plus de 3 fichiers.",
+          subText: young?.files?.cniFiles?.length ? `Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` : null,
+        },
+      };
+    }
     for (const file of files) {
       if (file.size > 5000000) return { error: { text: `Ce fichier ${files.name} est trop volumineux.` } };
     }
@@ -83,7 +94,7 @@ export default function StepUpload() {
     if (recto) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -105,7 +116,7 @@ export default function StepUpload() {
     if (recto) {
       const res = await uploadFiles();
       if (res?.error) {
-        setError(error);
+        setError(res.error);
         setLoading(false);
         return;
       }
@@ -145,7 +156,7 @@ export default function StepUpload() {
         />
       )}
       {step === "date" &&
-        (corrections ? (
+        (corrections?.length ? (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!date || loading} />
         ) : (
           <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!date || loading} />
@@ -260,7 +271,7 @@ export default function StepUpload() {
         <div className="w-3/4 mx-auto">
           <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
         </div>
-        <DatePickerList value={date} onChange={(date) => setDate(date)} />
+        <DatePickerList value={date} onChange={(date) => setDate(date?.setUTCHours(11, 0, 0))} />
       </>
     );
   }

@@ -104,7 +104,7 @@ export default function StepEligibilite() {
       setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+    const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
     if (sessionsFiltered.length === 0) {
       setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
@@ -149,7 +149,7 @@ export default function StepEligibilite() {
             </div>
             <label className="flex flex-col flex-start text-base w-1/2 mt-2">
               Date de naissance
-              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date?.setUTCHours(11, 0, 0) })} />
               {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
             </label>
           </div>

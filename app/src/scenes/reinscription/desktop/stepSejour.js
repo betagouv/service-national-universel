@@ -31,6 +31,7 @@ export default function StepSejour() {
           birthDate: new Date(young.birthdateAt),
           schoolLevel: young.grade,
           frenchNationality: young.frenchNationality,
+          status: young.status,
         });
         if (!res.ok) {
           capture(res.code);

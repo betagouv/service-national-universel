@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { canViewEmailHistory, ROLES, SENDINBLUE_TEMPLATES, translate, WITHRAWN_REASONS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
+import { canViewEmailHistory, canViewNotes, ROLES, SENDINBLUE_TEMPLATES, translate, WITHRAWN_REASONS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
 import Bin from "../../../assets/Bin";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import History from "../../../assets/icons/History";
@@ -20,14 +20,17 @@ import ConfirmationModal from "./ConfirmationModal";
 import Field from "./Field";
 import Tab from "./Tab";
 import PhaseStatusSelector from "./PhaseStatusSelector";
+import NoteIcon from "../../volontaires/view/notes/components/NoteIcon";
+import { PHASE_1, PHASE_2, PHASE_3, PHASE_INSCRIPTION } from "../../volontaires/view/notes/utils";
+import NoteDisplayModal from "../../volontaires/view/notes/components/NoteDisplayModal";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
 
 export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION }) {
   const user = useSelector((state) => state.Auth.user);
-  // const [notesCount, setNotesCount] = useState(0); // TODO: pour l'instant c'est caché
   const [confirmModal, setConfirmModal] = useState(null);
+  const [viewedNotes, setVieweNotes] = useState([]);
   const history = useHistory();
   const [statusOptions, setStatusOptions] = useState([]);
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
@@ -58,6 +61,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       setStatusOptions([]);
     }
   }, [young]);
+
+  const setViewedNoteParPhase = (phase) => () => {
+    setVieweNotes(getNotesByPhase(phase));
+  };
 
   function onClickDelete() {
     setConfirmModal({
@@ -185,11 +192,22 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     }
   }
 
+  const getNotesByPhase = (phase) => {
+    if (!young.notes) return [];
+    return young.notes.filter((note) => note.phase === phase);
+  };
+
   return (
     <div className="px-[30px] pt-[15px] flex items-end border-b-[#E5E7EB] border-b-[1px]">
+      <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
       <div className="grow">
         <Title>
-          <div className="mr-[15px]">{young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}</div>
+          <div className="mr-[15px]">
+            <div className="flex items-center">
+              {getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
+              {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}
+            </div>
+          </div>
           <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
           {young.status !== YOUNG_STATUS.DELETED && (
             <>
@@ -200,24 +218,33 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
         </Title>
         <TabList className="mt-[30px]">
           <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
-            Dossier d&apos;inscription
+            <div className="flex items-center">
+              Dossier d&apos;inscription
+              {getNotesByPhase(PHASE_INSCRIPTION).length > 0 && <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />}
+            </div>
           </Tab>
           {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
             <>
               <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
-                Phase 1
+                <div className="flex items-center">
+                  Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
+                </div>
               </Tab>
               <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
-                Phase 2
+                <div className="flex items-center">
+                  Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                </div>
               </Tab>
               <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
-                Phase 3
+                <div className="flex items-center">
+                  Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                </div>
               </Tab>
             </>
           )}
           <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
             <div className="flex items-center">
-              <History className="block flex-[0_0_18px] mr-[8px]" fill="#9CA3AF" />
+              <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
               Historique
             </div>
           </Tab>
@@ -226,40 +253,42 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               Notifications
             </Tab>
           ) : null}
-          {/*<Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
-            ({notesCount}) Notes internes
-          </Tab>*/}
+          {canViewNotes(user) && (
+            <Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
+              {`(${young.notes?.length || 0}) Notes internes`}
+            </Tab>
+          )}
         </TabList>
       </div>
-      <div className="ml-[30px] flex">
-        <div className="mr-[16px]">{young.status === YOUNG_STATUS.VALIDATED && user.role === ROLES.ADMIN && <PhaseStatusSelector young={young} onChange={onChange} />}</div>
-        <div className="">
-          <Field
-            mode="edition"
-            name="status"
-            label={translate(phase)}
-            value={young.status}
-            transformer={translate}
-            type="select"
-            options={statusOptions}
-            onChange={onSelectStatus}
-            className={young.status === YOUNG_STATUS.DELETED ? "mb-[15px]" : ""}
-          />
-          {young.status !== YOUNG_STATUS.DELETED && (
-            <div className="flex items-center justify-between my-[15px]">
-              <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
-                Supprimer
-              </Button>
-              <Button
-                className="ml-[8px]"
-                icon={<TakePlace className="text-[#6B7280]" />}
-                href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
-                onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                Prendre sa place
-              </Button>
-            </div>
-          )}
-        </div>
+      <div className="relative top-[-99px] mr-[8px]">
+        {young.status === YOUNG_STATUS.VALIDATED && user.role === ROLES.ADMIN && <PhaseStatusSelector young={young} onChange={onChange} />}
+      </div>
+      <div className="">
+        <Field
+          mode="edition"
+          name="status"
+          label={translate(phase)}
+          value={young.status}
+          transformer={translate}
+          type="select"
+          options={statusOptions}
+          onChange={onSelectStatus}
+          className={young.status === YOUNG_STATUS.DELETED ? "mb-[15px]" : ""}
+        />
+        {young.status !== YOUNG_STATUS.DELETED && (
+          <div className="flex items-center justify-between my-[15px]">
+            <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+              Supprimer
+            </Button>
+            <Button
+              className="ml-[8px]"
+              icon={<TakePlace className="text-[#6B7280]" />}
+              href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
+              onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+              Prendre sa place
+            </Button>
+          </div>
+        )}
       </div>
       {confirmModal && (
         <ConfirmationModal

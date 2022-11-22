@@ -49,7 +49,7 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
-const { isGoalReached } = require("../../utils/cohort");
+const { getAvailableSessions } = require("../../utils/cohort");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -227,6 +227,14 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
 
+    obj.country = "France";
+
+    obj.parent1ContactPreference = "email";
+    obj.parent2ContactPreference = "email";
+
+    obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    obj.inscriptionDoneDate = new Date();
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
@@ -554,27 +562,20 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    if (isGoalReached(young.department, cohort) === true) {
-      young.set({
-        cohort,
-        cohortChangeReason,
-        cohortDetailedChangeReason,
-        status: YOUNG_STATUS.WAITING_LIST,
-        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-        cohesionStayPresence: undefined,
-        cohesionStayMedicalFileReceived: undefined,
-      });
-    } else {
-      young.set({
-        cohort,
-        cohortChangeReason,
-        cohortDetailedChangeReason,
-        status: YOUNG_STATUS.VALIDATED,
-        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-        cohesionStayPresence: undefined,
-        cohesionStayMedicalFileReceived: undefined,
-      });
-    }
+    const dep = young.schoolDepartment || young.department;
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthDateAt, young.status);
+    const session = sessions.find(({ name }) => name === cohort);
+    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    young.set({
+      cohort,
+      cohortChangeReason,
+      cohortDetailedChangeReason,
+      status: session.isFull ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED,
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+      cohesionStayPresence: undefined,
+      cohesionStayMedicalFileReceived: undefined,
+    });
 
     await young.save({ fromUser: req.user });
 
@@ -1134,5 +1135,6 @@ router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
+router.use("/note", require("./note"));
 
 module.exports = router;

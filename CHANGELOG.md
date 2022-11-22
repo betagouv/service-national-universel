@@ -1,3 +1,65 @@
+# [1.171.0](https://github.com/betagouv/service-national-universel/compare/v1.170.0...v1.171.0) (2022-11-21)
+
+
+### Bug Fixes
+
+* **admin:** delete note cancel ([750894d](https://github.com/betagouv/service-national-universel/commit/750894da7781d9c7727321f1390e7c83f2a02218))
+* **admin:** Documents phase 1 ([#2070](https://github.com/betagouv/service-national-universel/issues/2070)) ([6c2a95c](https://github.com/betagouv/service-national-universel/commit/6c2a95c28aec96229f1bc894c3afb952fe205c18))
+* **admin:** fix error when no application found on responsible dashboard ([677efca](https://github.com/betagouv/service-national-universel/commit/677efca8c011aac6f0d7b544b165e2e2874f7f3e))
+* **admin:** more button style ([26be89f](https://github.com/betagouv/service-national-universel/commit/26be89f647bbdd158b338a1fd5d5aa9a0d3e6a88))
+* **admin:** Use new ramses base by default ([#2059](https://github.com/betagouv/service-national-universel/issues/2059)) ([274f509](https://github.com/betagouv/service-national-universel/commit/274f50915c5b430a959afdb90a66d4cddd9c4a9b))
+* **app:** correctly set birthdate for eligibility ([#2071](https://github.com/betagouv/service-national-universel/issues/2071)) ([35abfab](https://github.com/betagouv/service-national-universel/commit/35abfab1ab478bb1ffc9782c10f32eb7a57a383a))
+* **pdf:** Pb with cache puppeteer v19 ([02fbe96](https://github.com/betagouv/service-national-universel/commit/02fbe9645b9c852ce61fcf5e73d1cb496f221d3d))
+
+
+### Features
+
+* **admin/api:** Note interne ([#2068](https://github.com/betagouv/service-national-universel/issues/2068)) ([74990b7](https://github.com/betagouv/service-national-universel/commit/74990b7c0668caae824bf1984cdf63a5d7236236))
+
+# [1.170.0](https://github.com/betagouv/service-national-universel/compare/v1.169.0...v1.170.0) (2022-11-18)
+
+
+### Bug Fixes
+
+* **admin:** add function to get department for eligibility ([2bdb991](https://github.com/betagouv/service-national-universel/commit/2bdb991363941adaf14ee08a737e3345dba9cf55))
+* **app:** bug when no correction on upload ([9473e72](https://github.com/betagouv/service-national-universel/commit/9473e7283dd92b690b8211fa13f752ba0462225d))
+* **app:** fix error display on upload page ([2ca04c2](https://github.com/betagouv/service-national-universel/commit/2ca04c2c2e83729ad3a716e7f47c8a9f5a037d4e))
+
+
+### Features
+
+* **api/admin:** paramétrage clôture des propositions de séjour ([#2003](https://github.com/betagouv/service-national-universel/issues/2003)) ([9cfe2b2](https://github.com/betagouv/service-national-universel/commit/9cfe2b25f813067e176bfa7c9ee376aa8f646984))
+
+# [1.169.0](https://github.com/betagouv/service-national-universel/compare/v1.168.0...v1.169.0) (2022-11-17)
+
+
+### Bug Fixes
+
+* **admin:** Can't have email empty as well ([3426de5](https://github.com/betagouv/service-national-universel/commit/3426de5a8b7949780a8842dc98c7bccf6849cf1c))
+* **admin:** Can't have phone number undefined ([0863f2b](https://github.com/betagouv/service-national-universel/commit/0863f2bfbb4e8ec8d68118241a5299bfb858f642))
+* **admin:** phase 0 parent2 refused style ([a654253](https://github.com/betagouv/service-national-universel/commit/a654253c69026ab6ee0acf3f5cde56c283a67308))
+* **admin:** phase 0 parent2 view consent ([06b57d6](https://github.com/betagouv/service-national-universel/commit/06b57d6c06e855e015a72c6c433f220cb1fc3dda))
+* **api:** allow ref deps to access reinscription ([d80dbd4](https://github.com/betagouv/service-national-universel/commit/d80dbd435871f559917c1e64488f6994a34d52f5))
+
+
+### Features
+
+* **admin:** table de repartition fini ([#2060](https://github.com/betagouv/service-national-universel/issues/2060)) ([fb0ef30](https://github.com/betagouv/service-national-universel/commit/fb0ef30ec2c322b19f80aa95cb5be7161c34a32f))
+* **admin/api:** send parent reminder ([#2056](https://github.com/betagouv/service-national-universel/issues/2056)) ([f6d9287](https://github.com/betagouv/service-national-universel/commit/f6d92876ddae035dbde0d66f6c6b8155d3468b61))
+
+# [1.168.0](https://github.com/betagouv/service-national-universel/compare/v1.167.0...v1.168.0) (2022-11-16)
+
+
+### Bug Fixes
+
+* **app:** Change restriction reinscription critary ([#2058](https://github.com/betagouv/service-national-universel/issues/2058)) ([87b9ca1](https://github.com/betagouv/service-national-universel/commit/87b9ca13eaa22ac388f35ae611d68e01da49cb25))
+* **app/api:** date preinscription ([#2051](https://github.com/betagouv/service-national-universel/issues/2051)) ([12b4e67](https://github.com/betagouv/service-national-universel/commit/12b4e67092165205c9dd11e10acde84ba763dc42))
+
+
+### Features
+
+* **admin/app:** update link footer ([5064eef](https://github.com/betagouv/service-national-universel/commit/5064eefa38a784c3a32e44303366744e9745cbd4))
+
 # [1.167.0](https://github.com/betagouv/service-national-universel/compare/v1.166.0...v1.167.0) (2022-11-15)
 
 

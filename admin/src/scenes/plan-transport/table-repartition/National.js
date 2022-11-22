@@ -12,9 +12,8 @@ import { useSelector } from "react-redux";
 
 export default function National() {
   const user = useSelector((state) => state.Auth.user);
-  const [cohort, setCohort] = React.useState("Juillet 2022");
+  const [cohort, setCohort] = React.useState("Février 2023 - C");
   const cohortList = [
-    { label: "Juillet 2022", value: "Juillet 2022" },
     { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
     { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
     { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
@@ -31,7 +30,7 @@ export default function National() {
 
   const getRepartitionRegion = async () => {
     try {
-      const { data, ok } = await API.get(`/table-de-repartition/region/${cohort}`);
+      const { data, ok } = await API.get(`/table-de-repartition/national/${cohort}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       setData(data);
     } catch (e) {

@@ -24,6 +24,7 @@ import Center from "./scenes/centers";
 import CenterV2 from "./scenes/centersV2";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
+import PointDeRassemblement from "./scenes/pointDeRassemblement";
 import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
@@ -40,7 +41,7 @@ import Loader from "./components/Loader";
 import api, { initApi } from "./services/api";
 import { initSentry, SentryRoute, history } from "./sentry";
 
-import { adminURL } from "./config";
+import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
@@ -189,6 +190,11 @@ const Home = () => {
             <RestrictedRoute path="/centre" component={Center} />
             <RestrictedRoute path="/centreV2" component={CenterV2} />
             <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            {environment === "production" ? (
+              <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            ) : (
+              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+            )}
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />

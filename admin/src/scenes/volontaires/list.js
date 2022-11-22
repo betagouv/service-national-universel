@@ -110,7 +110,7 @@ export default function VolontaireList() {
     if (values.includes("schoolSituation")) {
       const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
       if (schoolsId?.length) {
-        const { responses } = await api.esQuery("school", {
+        const { responses } = await api.esQuery("schoolramses", {
           query: { bool: { must: { ids: { values: schoolsId } } } },
           size: ES_NO_LIMIT,
         });
@@ -374,7 +374,7 @@ export default function VolontaireList() {
                       let all = data;
                       const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
                       if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
+                        const { responses } = await api.esQuery("schoolramses", {
                           query: { bool: { must: { ids: { values: schoolsId } } } },
                           size: ES_NO_LIMIT,
                         });
@@ -416,7 +416,7 @@ export default function VolontaireList() {
                       let all = data;
                       const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
                       if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
+                        const { responses } = await api.esQuery("schoolramses", {
                           query: { bool: { must: { ids: { values: schoolsId } } } },
                           size: ES_NO_LIMIT,
                         });

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Redirect, useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
@@ -16,6 +16,7 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import StickyButton from "../../../components/inscription/stickyButton";
 import MyDocs from "../components/MyDocs";
 import ErrorMessage from "../components/ErrorMessage";
+import Info from "../../../components/info";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -23,6 +24,7 @@ export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
   const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
+  const disabledUpload = young?.files.cniFiles.length > 2;
 
   const IDs = [
     {
@@ -52,6 +54,10 @@ export default function StepDocuments() {
     history.push("/inscription2023/confirm");
   }
 
+  function handleClick(doc) {
+    if (!disabledUpload) history.push(`televersement/${doc.category}`);
+  }
+
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
   if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
   if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
@@ -75,19 +81,23 @@ export default function StepDocuments() {
           ))}
         </div>
         <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
-        {IDs.map((id) => (
-          <Link key={id.category} to={`televersement/${id.category}`}>
-            <div className="my-4">
-              <div className="border p-4 my-3 flex justify-between items-center">
-                <div>
-                  <div>{id.title}</div>
-                  {id.subtitle && <div className="text-gray-500 text-sm">{id.subtitle}</div>}
-                </div>
-                <ArrowRightBlueSquare />
+        {IDs.map((doc) => (
+          <div
+            key={doc.category}
+            className={`my-4 bg-[#FFFFFF] hover:bg-[#FAFAFA] cursor-pointer ${disabledUpload && "bg-[#FAFAFA] cursor-default"}`}
+            onClick={() => handleClick(doc)}>
+            <div className="border p-4 my-3 flex justify-between items-center">
+              <div>
+                <div>{doc.title}</div>
+                {doc.subtitle && <div className="text-gray-500 text-sm">{doc.subtitle}</div>}
               </div>
+              <ArrowRightBlueSquare fill={disabledUpload ? "gray" : "#000091"} />
             </div>
-          </Link>
+          </div>
         ))}
+        {disabledUpload && (
+          <Info text="Vous ne pouvez téléverser que trois fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
+        )}
         <MyDocs />
       </div>
       <Help />

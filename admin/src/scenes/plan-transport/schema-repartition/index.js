@@ -1,29 +1,18 @@
 import React from "react";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
-import { Box } from "../components/commons";
+import { Switch } from "react-router-dom";
+import { SentryRoute } from "../../../sentry";
+import SchemaRepartition from "./SchemaRepartition";
 
-export default function SchemaRepartition() {
+export default function SchemaRepartitionIndex(props) {
+  const region = props.match && props.match.params && props.match.params.region;
+  const department = props.match && props.match.params && props.match.params.department;
+  console.log("PROPS MATCH: ", props.match);
+  // const cohort = props.match &&
   return (
-    <div>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Schéma de répartition" }]} />
-      <div className="p-[30px]">
-        <div className="flex items-center justify-between">
-          <PlanTransportBreadcrumb region={{ label: "Bourgogne-Franche-Comté" }} department={{ label: "Côte d'Or" }} />
-          <Box>
-            Séjour du <b>3 au 15 juillet 2022</b>
-          </Box>
-        </div>
-        <div className="flex my-[40px]">
-          <div className="flex flex-col grow">
-            <Box className="grow-[1_1_50%] mb-[8px]">Volontaires</Box>
-            <Box className="grow-[1_1_50%] mt-[8px]">Affectation des volontaires</Box>
-          </div>
-          <Box className="grow mx-[16px]">Disponibilité des places</Box>
-          <Box className="grow">Centres</Box>
-        </div>
-        <Box>Gérer les volontaires</Box>
-      </div>
-    </div>
+    <Switch>
+      <SentryRoute path="/plan-de-transport/schema-repartition/:region/:department" component={() => <SchemaRepartition region={region} department={department} />} />
+      <SentryRoute path="/plan-de-transport/schema-repartition/:region" component={() => <SchemaRepartition region={region} />} />
+      <SentryRoute path="/plan-de-transport/schema-repartition" component={() => <SchemaRepartition />} />
+    </Switch>
   );
 }
