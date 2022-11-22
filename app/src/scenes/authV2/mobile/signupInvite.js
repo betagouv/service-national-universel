@@ -11,6 +11,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
+import { getPasswordErrorMessage } from "../../../utils";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -58,20 +59,32 @@ export default function Signin() {
       } else if (!e.ok) {
         setError({ text: "Une erreur est survenue. Essayez de rafraîchir la page" });
       }
-      setPassword("");
     }
     setLoading(false);
   };
 
   React.useEffect(() => {
-    if (email && password && confirmPassword) setDisabled(false);
-    else setDisabled(true);
+    let errors = {};
+    if (password && getPasswordErrorMessage(password)) {
+      errors.password = getPasswordErrorMessage(password);
+    }
+    //Password confirm
+    if (password && confirmPassword && password !== confirmPassword) {
+      errors.passwordConfirm = "Les mots de passe ne correspondent pas";
+    }
+    setError(errors);
+    if (Object.keys(errors).length === 0 && password && confirmPassword && email) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
   }, [email, password, confirmPassword]);
 
   return (
     <>
       <div className="bg-white px-4 pt-4 pb-12">
-        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+        {error?.text && <Error {...error} onClose={() => setError({})} />}
+
         <div className="text-[#161616] text-[22px] font-bold">Activer mon compte</div>
         <div className="flex items-center py-4 gap-4">
           <RightArrow />
@@ -81,14 +94,17 @@ export default function Signin() {
           <label className="text-[#161616] text-base">E-mail</label>
           <Input value={email} onChange={(e) => setEmail(e)} />
         </div>
-        <div className="flex flex-col gap-1 pb-4">
+        <div className="flex flex-col gap-1">
           <label className="text-[#161616] text-base">Mot de passe</label>
           <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
             <input className="w-full bg-inherit" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
           </div>
         </div>
-        <div className="flex flex-col gap-1 pb-7">
+        <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} text-xs mt-1`}>
+          Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
+        </div>
+        <div className="flex flex-col gap-1">
           <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>
           <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
             <input className="w-full bg-inherit" type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
@@ -99,6 +115,7 @@ export default function Signin() {
             )}
           </div>
         </div>
+        <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} text-xs mt-1`}>{error?.passwordConfirm ? error.passwordConfirm : null}</div>
         <button
           className={`flex items-center justify-center p-2 w-full cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
           onClick={onSubmit}>
