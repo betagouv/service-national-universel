@@ -19,6 +19,8 @@ import ModalPJ from "./components/ModalPJ";
 import Clock from "../../../../assets/Clock.svg";
 import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../../assets/icons/Pencil";
+import FileIcon from "../../../../assets/FileIcon";
+import Download from "../../../../assets/icons/Download";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import FileCard from "../../../../components/FileCard";
@@ -270,52 +272,36 @@ export default function Phase2Application({ young, onChange }) {
           <div className="mx-8 mt-8 pb-8">
             <div className="flex justify-between">
               <div className="text-lg leading-6 font-semibold">Documents</div>
-              <div className="flex space-x-4 items-center">
-                {optionsType.reduce((nmb, option) => nmb + application[option].length, 0) !== 0 && (
-                  <div
-                    className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out cursor-pointer"
-                    onClick={() => setOpenAttachments((e) => !e)}>
-                    Voir mes pièces jointes
-                    <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
-                  </div>
-                )}
-                <div
-                  className="text-white bg-blue-600 rounded-full p-2 hover:bg-blue-500 cursor-pointer"
-                  onClick={() => {
-                    setModalDocument({
-                      isOpen: true,
-                      stepOne: true,
-                    });
-                  }}>
-                  <HiPlus />
-                </div>
-              </div>
             </div>
-
-            {openAttachments && (
-              <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
-                {optionsType.map(
-                  (option, index) =>
-                    application[option].length > 0 && (
-                      <FileCard
-                        key={index}
-                        name={translateAddFilePhase2(option).toUpperCase()}
-                        icon="reglement"
-                        filled={application[option].length}
-                        color="text-blue-600 bg-white"
-                        status="Modifier"
-                        onClick={() =>
-                          setModalDocument({
-                            isOpen: true,
-                            name: option,
-                            stepOne: false,
-                          })
-                        }
-                      />
-                    ),
-                )}
-              </div>
-            )}
+            <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+              {optionsType.map(
+                (option, index) =>
+                  application[option].length > 0 && (
+                    <FileCard
+                      key={index}
+                      name={translateAddFilePhase2(option).toUpperCase()}
+                      icon="reglement"
+                      filled={application[option].length}
+                      color="text-blue-600 bg-white"
+                      status="Modifier"
+                      onClick={() =>
+                        setModalDocument({
+                          isOpen: true,
+                          name: option,
+                          stepOne: false,
+                        })
+                      }
+                    />
+                  ),
+              )}
+              <section
+                className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
+                <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
+                  <HiPlus />
+                  Ajouter une pièce jointe
+                </div>
+              </section>
+            </div>
             <ModalPJ
               isOpen={modalDocument?.isOpen}
               name={modalDocument?.name}
