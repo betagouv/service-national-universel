@@ -23,7 +23,7 @@ export function ChangeCohortPen({ young, onChange }) {
   useEffect(() => {
     if (young) {
       (async function getSessions() {
-        const { data } = await api.post("/cohort-session/eligibility/2023", young);
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (Array.isArray(data)) {
           const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull })).filter((c) => c.name !== young.cohort);
           if (!unmounted) setOptions(cohorts);

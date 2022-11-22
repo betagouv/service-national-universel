@@ -134,7 +134,8 @@ export default function StepEligibilite() {
     };
 
     try {
-      const res = await api.post("/cohort-session/eligibility/2023", young);
+      const updatedYoung = { ...young, updates };
+      const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Impossible de vérifier votre éligibilité" });

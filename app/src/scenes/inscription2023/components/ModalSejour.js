@@ -24,7 +24,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await api.post("/cohort-session/eligibility/2023", young);
+        const { res } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (res.data.msg) return setError({ text: res.data.msg });
         const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
         if (sessionsFiltered.length === 0) {

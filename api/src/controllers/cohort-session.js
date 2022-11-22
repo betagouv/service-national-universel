@@ -5,21 +5,31 @@ const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
 const { getAvailableSessions } = require("../utils/cohort");
 const { getZoneByDepartment, sessions2023 } = require("snu-lib");
+const { validateId } = require("../utils/validator");
+const YoungModel = require("../models/young");
 
-router.post("/eligibility/2023", async (req, res) => {
+router.post("/eligibility/2023/:id?", async (req, res) => {
   try {
-    const { error, value: young } = Joi.object({
-      schoolDepartment: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
-      birthdateAt: Joi.date().required(),
-      grade: Joi.string().allow(null, ""),
-      status: Joi.string().allow(null, ""),
-    })
-      .unknown()
-      .validate(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    let young = {};
+    const { value } = validateId(req.params.id);
+    if (value?.id) young = YoungModel.findById(value.id);
+    else {
+      const { error: bodyError, value: body } = Joi.object({
+        schoolDepartment: Joi.string().allow(null, ""),
+        department: Joi.string().allow(null, ""),
+        schoolRegion: Joi.string().allow(null, ""),
+        region: Joi.string().allow(null, ""),
+        birthdateAt: Joi.date().required(),
+        grade: Joi.string().allow(null, ""),
+        status: Joi.string().allow(null, ""),
+      })
+        .unknown()
+        .validate(req.body);
+      if (bodyError) {
+        capture(bodyError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      young = body;
     }
 
     const zone = getZoneByDepartment(young.schoolDepartment || young.department);

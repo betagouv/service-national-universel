@@ -26,7 +26,7 @@ export default function StepSejour() {
   useEffect(() => {
     const checkEligibilite = async (young) => {
       try {
-        const res = await api.post("/cohort-session/eligibility/2023", young);
+        const { res } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (!res.ok) {
           capture(res.code);
         }

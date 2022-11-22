@@ -91,6 +91,8 @@ export default function StepEligibilite() {
     const res = await api.post("/cohort-session/eligibility/2023", {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
+      schoolRegion: data.school?.region,
+      region: data?.region,
       birthdateAt: data.birthDate,
       grade: data.scolarity,
     });
