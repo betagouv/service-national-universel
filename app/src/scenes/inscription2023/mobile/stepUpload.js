@@ -260,7 +260,7 @@ export default function StepUpload() {
         <div className="w-3/4 mx-auto">
           <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
         </div>
-        <DatePickerList value={date} onChange={(date) => setDate(date.setUTCHours(11, 0, 0))} />
+        <DatePickerList value={date} onChange={(date) => setDate(date?.setUTCHours(11, 0, 0))} />
       </>
     );
   }
