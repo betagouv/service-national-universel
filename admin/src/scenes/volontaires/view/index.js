@@ -8,7 +8,6 @@ import Details from "./details";
 import DeletedDetail from "./deletedDetail";
 import Phase1 from "./phase1";
 import Phase2Bis from "./phase2bis";
-import Phase2Application from "./phase2bis/application";
 import Phase2 from "./phase2";
 import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
