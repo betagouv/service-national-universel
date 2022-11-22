@@ -347,9 +347,6 @@ export default function Create() {
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       delete values.certifyData;
-      if (values.country !== "FRANCE") {
-        values.country = values.foreignCountry;
-      }
       const { ok, code, young } = await api.post("/young/invite", values);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
