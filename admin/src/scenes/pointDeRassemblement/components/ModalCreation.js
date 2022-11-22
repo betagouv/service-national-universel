@@ -124,8 +124,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
   };
 
   return (
-    // <Modal centered isOpen={isOpen} onCancel={onCancel}>
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} size="w-[600px]">
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
       <div className="flex flex-col p-8 h-[600px] w-full justify-between">
         <div className="flex flex-col w-full">
           <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
