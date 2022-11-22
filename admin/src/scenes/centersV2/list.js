@@ -14,7 +14,6 @@ import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { SearchStyle, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
 import { FilterButton, TabItem } from "./components/commons";
-import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
@@ -324,6 +323,19 @@ export default function List() {
   );
 }
 
+const Badge = ({ cohort, status }) => {
+  console.log(cohort);
+  return (
+    <div
+      key={cohort}
+      className={`z-10 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit ${
+        status === "VALIDATED" ? "border-[1px] border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100"
+      }`}>
+      {cohort}
+    </div>
+  );
+};
+
 const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
@@ -341,7 +353,7 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
             <div className="flex items-center">
-              <Badge text={sessionPhase1._source.cohort} backgroundColor={"#F9FCFF"} color={sessionPhase1._source.status === "VALIDATED" ? "#0C7CFF" : "#6B7280"} />
+              <Badge cohort={sessionPhase1._source.cohort} status={sessionPhase1._source.status} />
             </div>
           </SubTd>
         ))}
@@ -364,7 +376,7 @@ const HitSession = ({ hit, onClick, selected, center }) => {
         </MultiLine>
       </td>
       <td>
-        <Badge text={hit._source.cohort} backgroundColor={"#F9FCFF"} color={hit._source.status === "VALIDATED" ? "#0C7CFF" : "#6B7280"} />
+        <Badge cohort={hit._source.cohort} status={hit._source.status} />
       </td>
       <td>
         <div>
