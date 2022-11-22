@@ -1,206 +1,115 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { useHistory } from "react-router-dom";
+import React from "react";
 
 import api from "../../../services/api";
-import { getLink, replaceSpaces, ROLES } from "../../../utils";
-import { useSelector } from "react-redux";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
+import { apiURL } from "../../../config";
 
 function round1Decimal(num) {
   return Math.round((num + Number.EPSILON) * 10) / 10;
 }
 
 export default function Schools({ filter }) {
-  const [schools, setSchools] = useState([]);
-  const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
-
-  useEffect(() => {
-    (async () => {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
-        aggs: {
-          names: {
-            terms: { field: "schoolId.keyword" },
-            aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
-          },
+  const getDefaultQuery = () => {
+    let body = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      aggs: {
+        names: {
+          terms: { field: "schoolId.keyword", size: 500 },
+          aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
         },
-        size: 0,
-      };
+      },
+      size: 0,
+      track_total_hits: true,
+    };
 
-      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
-      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-      if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
+    if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+    if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+    if (filter.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": filter.department } });
 
-      const { responses } = await api.esQuery("young", body);
-
-      if (responses.length) {
-        const totalHits = responses[0].hits.total.value;
-        const arr = responses[0].aggregations.names.buckets.map((e) => {
-          const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
-          const total = e.doc_count;
-          const isThereDep = e.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
-          const inDepartment = isThereDep.doc_count || 0;
-
-          return {
-            id: e.key,
-            count: {
-              total,
-              department: inDepartment,
-              outOfDepartment: total - inDepartment,
-            },
-            percent: {
-              total: round1Decimal((total / totalHits) * 100),
-              department: round1Decimal((inDepartment / total) * 100),
-              outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
-            },
-            name: schoolInfo.schoolName,
-            city: schoolInfo.schoolCity,
-            zip: schoolInfo.schoolZip,
-            department: schoolInfo.schoolDepartment,
-            type: schoolInfo.schoolType,
-          };
-        });
-        setSchools(arr);
-      }
-    })();
-  }, [JSON.stringify(filter)]);
-
-  const handleClick = (link) => {
-    history.push(link);
+    return body;
   };
 
+  // ! Handle school filter
+  // const handleClick = (link) => {
+  //   history.push(link);
+  // onClick={() =>
+  //   // ! Le filtre SCHOOL ne marche pas sur la page des inscriptions
+  //   user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
+  // };
+
   return (
-    <TableWrapper>
-      <Table>
-        <thead>
-          <TableHeaderRow>
-            <TableHeaderCell>Établissements</TableHeaderCell>
-            <TableHeaderCell>Volontaires au sein du département</TableHeaderCell>
-            <TableHeaderCell>Volontaires hors du département</TableHeaderCell>
-            <TableHeaderCell>Total</TableHeaderCell>
-          </TableHeaderRow>
-        </thead>
-        <tbody>
-          {schools.map((e, i) => {
-            return (
-              <TableRow
-                key={i}
-                onClick={() =>
-                  user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
-                }>
-                <TableCell>
-                  {e.name}
-                  <div>
-                    {e.zip} {e.city}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <TableCellContent>
-                    <TableCellValue>{e.count.department}</TableCellValue>
-                    <TableCellPercentage>{e.percent.department} %</TableCellPercentage>
-                  </TableCellContent>
-                </TableCell>
-                <TableCell>
-                  <TableCellContent>
-                    <TableCellValue>{e.count.outOfDepartment}</TableCellValue>
-                    <TableCellPercentage>{e.percent.outOfDepartment} %</TableCellPercentage>
-                  </TableCellContent>
-                </TableCell>
-                <TableCell>
-                  <TableCellContent>
-                    <TableCellValue>{e.count.total}</TableCellValue>
-                    <TableCellPercentage>{e.percent.total} %</TableCellPercentage>
-                  </TableCellContent>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </tbody>
-      </Table>
-      {/* <TableLoadMoreWrapper>
-        <TableLoadMoreButton>EN VOIR PLUS</TableLoadMoreButton>
-      </TableLoadMoreWrapper> */}
-    </TableWrapper>
+    <ReactiveBase url={`${apiURL}/es`} app="young-having-school-in-department/inscriptions" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveList
+        defaultQuery={getDefaultQuery}
+        componentId="result"
+        react={{ and: filter }}
+        size={300}
+        showLoader={true}
+        renderResultStats={({ numberOfResults, displayedResults }) => {
+          return (
+            <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${displayedResults}  établissement${numberOfResults > 1 ? "s" : ""} affichés sur ${numberOfResults}`}</div>
+          );
+        }}
+        loader="Chargement..."
+        dataField="schoolName"
+        renderNoResults={() => <></>} // ! Hide no results
+        render={({ rawData }) => {
+          const totalHits = rawData?.hits?.total.value;
+
+          return (
+            <table className="w-full p-2 border-separate border rounded-xl">
+              <thead className="">
+                <tr className="text-xs uppercase text-[#73737D]">
+                  <th className="text-left pl-3">Établissements</th>
+                  <th className="text-center">Volontaires au sein du département</th>
+                  <th className="text-center">Volontaires hors du département</th>
+                  <th className="text-center w-[120px]">Total</th>
+                </tr>
+              </thead>
+              <tbody className="">
+                {rawData?.aggregations?.names.buckets.map((e) => (
+                  <CardSchool key={e.key} school={e} totalHits={totalHits} />
+                ))}
+              </tbody>
+            </table>
+          );
+        }}
+      />
+    </ReactiveBase>
   );
 }
 
-// Table
-const TableWrapper = styled.div`
-  padding: 0 10px;
-  border: 1px solid #e2e2ea;
-  border-radius: 10px;
-  border-spacing: 0 2px;
-`;
-const Table = styled.table`
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 2px;
-`;
-const TableHeaderRow = styled.tr``;
-const TableHeaderCell = styled.td`
-  padding: 18px 20px;
-  color: #696974;
-  font-size: 14px;
-  text-align: center;
+const CardSchool = ({ school, totalHits }) => {
+  const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
+  const total = school.doc_count;
+  const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
+  const inDepartment = isThereDep.doc_count || 0;
+  const outDepartment = total - inDepartment;
 
-  &:first-child {
-    font-size: 16px;
-    font-weight: bold;
-    text-align: left;
-  }
-`;
-const TableRow = styled.tr`
-  background-color: white;
-  border-radius: 8px;
-`;
-const TableCell = styled.td`
-  text-align: center;
-  padding: 18px 20px;
-
-  :first-child {
-    text-align: left;
-    font-size: 16px;
-    color: #171725;
-    font-weight: bold;
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-
-  :first-child > div {
-    font-size: 12px;
-    font-weight: normal;
-    color: gray;
-  }
-  :last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-  :last-child > div {
-    border-right: 0;
-  }
-`;
-const TableCellContent = styled.div`
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-right: 1px solid rgba(203, 203, 210, 0.6);
-`;
-const TableCellValue = styled.strong`
-  color: #171725;
-  font-weight: bold;
-  font-size: 18px;
-`;
-const TableCellPercentage = styled.span`
-  padding: 5px 7px;
-  margin-left: 10px;
-  display: block;
-  border: 1px solid #e0e0e4;
-  box-sizing: border-box;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #7c7c7c;
-`;
+  return (
+    <tr className={`bg-white group`}>
+      <td className={`group-hover:bg-gray-200 rounded-l-lg p-2`}>
+        <div className={`font-bold text-[15px]`}>{`${schoolInfo.schoolName}`}</div>
+        <div className={`font-normal text-xs`}>{`${schoolInfo.schoolCity} - ${schoolInfo.schoolZip}`}</div>
+      </td>
+      <td className={`group-hover:bg-gray-200 text-center align-center`}>
+        <div className="flex justify-center items-center">
+          <div className={`font-bold text-[15px]`}>{inDepartment}</div>
+          <div className={`font-normal text-xs ml-1 p-1 border border-[#e0e0e4] box-border rounded-sm text-[#7c7c7c]`}>{`${round1Decimal((inDepartment / total) * 100)} %`}</div>
+        </div>
+      </td>
+      <td className={`group-hover:bg-gray-200 text-center`}>
+        <div className="flex justify-center items-center">
+          <div className={`font-bold text-[15px]`}>{outDepartment}</div>
+          <div className={`font-normal text-xs ml-1 p-1 border border-[#e0e0e4] box-border rounded-sm text-[#7c7c7c]`}>{`${round1Decimal((outDepartment / total) * 100)} %`}</div>
+        </div>
+      </td>
+      <td className={`group-hover:bg-gray-200 rounded-r-lg text-center`}>
+        <div className="flex justify-center items-center">
+          <div className={`font-bold text-[15px]`}>{total}</div>
+          <div className={`font-normal text-xs ml-1 p-1 border border-[#e0e0e4] box-border rounded-sm text-[#7c7c7c]`}>{`${round1Decimal((total / totalHits) * 100)} %`}</div>
+        </div>
+      </td>
+    </tr>
+  );
+};
