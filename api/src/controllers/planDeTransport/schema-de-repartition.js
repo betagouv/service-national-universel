@@ -24,7 +24,7 @@ const {
   canEditSchemaDeRepartition,
 } = require("snu-lib");
 const Joi = require("joi");
-const cohesionCenterModel = require("../../models/cohesionCenter");
+const sessionPhase1Model = require("../../models/sessionPhase1");
 const youngModel = require("../../models/young");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const tableRepartitionModel = require("../../models/PlanDeTransport/tableDeRepartition");
@@ -40,15 +40,26 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     }
 
     // --- capacities & centers
-    const centerResult = await cohesionCenterModel
+    const centerResult = await sessionPhase1Model
       .aggregate([
-        // TODO: pour l'instant j'ai viré la relation sur les cohorts car sinon on n'a aucune données.
-        // {
-        //   $match: { cohorts: cohort },
-        // },
+        {
+          $match: { cohort },
+        },
+        {
+          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+        },
+        {
+          $lookup: {
+            from: "cohesioncenters",
+            localField: "centerId",
+            foreignField: "_id",
+            as: "center",
+          },
+        },
+        { $unwind: "$center" },
         {
           $group: {
-            _id: "$region",
+            _id: "$center.region",
             centers: { $sum: 1 },
             capacity: { $sum: "$placesTotal" },
           },
@@ -63,8 +74,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     // --- volontaires
     const youngResult = await youngModel
       .aggregate([
-        // TODO: véfifier la liste des jeunes
-        { $match: { cohort, status: { $in: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.IN_PROGRESS] } } },
+        { $match: { cohort, status: YOUNG_STATUS.VALIDATED } },
         {
           $group: {
             _id: "$region",
@@ -176,14 +186,28 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     });
 
     // --- capacities & centers
-    const fromCenterResult = await cohesionCenterModel
+    const fromCenterResult = await sessionPhase1Model
       .aggregate([
-        // TODO: pour l'instant j'ai viré la relation sur les cohorts car sinon on n'a aucune données.
-        // { $match: { cohorts: cohort, departmentCode: { $in: fromDepartmentCodes } } },
-        { $match: { departmentCode: { $in: fromDepartmentCodes } } },
+        {
+          $match: { cohort },
+        },
+        {
+          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+        },
+        {
+          $lookup: {
+            from: "cohesioncenters",
+            localField: "centerId",
+            foreignField: "_id",
+            as: "center",
+          },
+        },
+        { $unwind: "$center" },
+
+        { $match: { "center.departmentCode": { $in: fromDepartmentCodes } } },
         {
           $group: {
-            _id: "$department",
+            _id: "$center.department",
             centers: { $sum: 1 },
             capacity: { $sum: "$placesTotal" },
           },
@@ -195,14 +219,28 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
       fromCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
 
-    const toCenterResult = await cohesionCenterModel
+    const toCenterResult = await sessionPhase1Model
       .aggregate([
-        // TODO: pour l'instant j'ai viré la relation sur les cohorts car sinon on n'a aucune données.
-        // { $match: { cohorts: cohort, departmentCode: { $in: toDepartmentCodes } } },
-        { $match: { region: { $in: toRegions } } },
+        {
+          $match: { cohort },
+        },
+        {
+          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+        },
+        {
+          $lookup: {
+            from: "cohesioncenters",
+            localField: "centerId",
+            foreignField: "_id",
+            as: "center",
+          },
+        },
+        { $unwind: "$center" },
+
+        { $match: { "center.region": { $in: toRegions } } },
         {
           $group: {
-            _id: "$region",
+            _id: "$center.region",
             centers: { $sum: 1 },
             capacity: { $sum: "$placesTotal" },
           },
@@ -288,7 +326,6 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         };
       }),
       rows: fromDepartments.map((dep) => {
-        console.log(dep, " => ", youngSet[dep]);
         return {
           name: dep.name,
           code: dep.code,
@@ -345,14 +382,27 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     const toRegions = Object.values(toRegionsSet);
 
     // --- capacities & centers
-    const toCenterResult = await cohesionCenterModel
+    const toCenterResult = await sessionPhase1Model
       .aggregate([
-        // TODO: pour l'instant j'ai viré la relation sur les cohorts car sinon on n'a aucune données.
-        // { $match: { cohorst: cohort, departmentCode: { $in: toDepartmentCodes } } },
-        { $match: { departmentCode: { $in: toDepartmentCodes } } },
+        {
+          $match: { cohort },
+        },
+        {
+          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+        },
+        {
+          $lookup: {
+            from: "cohesioncenters",
+            localField: "centerId",
+            foreignField: "_id",
+            as: "center",
+          },
+        },
+        { $unwind: "$center" },
+        { $match: { "center.departmentCode": { $in: toDepartmentCodes } } },
         {
           $group: {
-            _id: "$region",
+            _id: "$center.region",
             centers: { $sum: 1 },
             capacity: { $sum: "$placesTotal" },
           },
