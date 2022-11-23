@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint } from "snu-lib";
+import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, START_DATE_SESSION_PHASE1 } from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -63,11 +63,11 @@ export default function View(props) {
   }, [props.match.params.id]);
 
   React.useEffect(() => {
-    if (editInfo === false) {
+    if (editInfo === false || editSession === false) {
       getPDR();
       setErrors({});
     }
-  }, [currentCohort]);
+  }, [editInfo, editSession]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setData({
@@ -85,7 +85,7 @@ export default function View(props) {
   const changeComplement = (e) => {
     let complementAddressToUpdate = data.complementAddress;
     complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== currentCohort);
-    complementAddressToUpdate.push({ cohort: currentCohort, complement: e });
+    complementAddressToUpdate.push({ cohort: currentCohort, complement: e, edit: true });
     setData({ ...data, complementAddress: complementAddressToUpdate });
   };
 
@@ -178,21 +178,24 @@ export default function View(props) {
   const onSubmitSession = async () => {
     try {
       setIsLoading(true);
-      for await (const infoToUpdate of data.complementAddress) {
-        const {
-          ok,
-          code,
-          data: PDR,
-        } = await api.put(`/point-de-rassemblement/cohort/${data._id}`, {
-          cohort: infoToUpdate.cohort,
-          complementAddress: infoToUpdate.complement,
-        });
+      const complementAddressToUpdate = data.complementAddress;
+      for await (const infoToUpdate of complementAddressToUpdate) {
+        if (infoToUpdate?.edit) {
+          const {
+            ok,
+            code,
+            data: PDR,
+          } = await api.put(`/point-de-rassemblement/cohort/${data._id}`, {
+            cohort: infoToUpdate.cohort,
+            complementAddress: infoToUpdate.complement,
+          });
 
-        if (!ok) {
-          toastr.error("Oups, une erreur est survenue lors de la modifications des compléments d'adresse", code);
-          return setIsLoading(false);
+          if (!ok) {
+            toastr.error("Oups, une erreur est survenue lors de la modifications des compléments d'adresse", code);
+            return setIsLoading(false);
+          }
+          setData(PDR);
         }
-        setData(PDR);
       }
 
       setEditSession(false);
@@ -333,17 +336,19 @@ export default function View(props) {
           <div className="flex flex-col rounded-lg pt-3 bg-white">
             <div className="flex items-center justify-between border-b border-gray-200 px-8">
               <nav className="-mb-px flex space-x-8 " aria-label="Tabs">
-                {data.cohorts.map((tab) => (
-                  <a
-                    key={tab}
-                    onClick={() => setCurrentCohort(tab)}
-                    className={classNames(
-                      tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-                      "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer",
-                    )}>
-                    {tab}
-                  </a>
-                ))}
+                {data?.cohorts
+                  ?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
+                  ?.map((tab) => (
+                    <a
+                      key={tab}
+                      onClick={() => setCurrentCohort(tab)}
+                      className={classNames(
+                        tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                        "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer",
+                      )}>
+                      {tab}
+                    </a>
+                  ))}
               </nav>
               {canUpdateMeetingPoint(user) ? (
                 <>
