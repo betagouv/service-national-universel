@@ -10,13 +10,15 @@ import Panel from "./panel";
 import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { SearchStyle, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
+import { Table, Header, Title, MultiLine, SubTd } from "../../components/list";
 import { FilterButton, TabItem } from "./components/commons";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
+
+import { useHistory } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
@@ -55,31 +57,27 @@ export default function List() {
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
-      <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-          <div style={{ flex: 2, position: "relative" }}>
-            <Header>
-              <div style={{ flex: 1 }}>
-                <Title>Centres</Title>
-              </div>
-              <div className="flex gap-2">
-                {canCreateOrUpdateCohesionCenter(user) ? (
-                  <Link to={`/centre/nouveau`} onClick={() => plausibleEvent("Centres/CTA - Créer centre")}>
-                    <div className="bg-blue-600 text-white font-500 text-sm w-60 h-9 text-center rounded leading-9">Rattacher un centre à un séjour</div>
-                  </Link>
-                ) : null}
-              </div>
-            </Header>
-            <div className=" flex flex-1 mx-[10px] z-0 mt-2">
-              <nav className="flex flex-1 gap-1">
-                <TabItem icon={<Menu />} title="Liste des centres" onClick={() => setCurrentTab("liste-centre")} active={currentTab === "liste-centre"} />
-                <TabItem icon={<Calendar />} title="Sessions" onClick={() => setCurrentTab("session")} active={currentTab === "session"} />
-              </nav>
-            </div>
-            <div className={`bg-white rounded-b-lg rounded-tr-lg mx-[10px] relative`}>
+      <div className="flex flex-col w-full px-8">
+        <div className="py-8 flex items-center justify-between">
+          <Title>Centres</Title>
+          {canCreateOrUpdateCohesionCenter(user) ? (
+            <button
+              className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
+              onClick={() => null}>
+              Rattacher un centre à un séjour
+            </button>
+          ) : null}
+        </div>
+        <div>
+          <div className="flex flex-1">
+            <TabItem icon={<Menu />} title="Liste des centres" onClick={() => setCurrentTab("liste-centre")} active={currentTab === "liste-centre"} />
+            <TabItem icon={<Calendar />} title="Sessions" onClick={() => setCurrentTab("session")} active={currentTab === "session"} />
+          </div>
+          <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+            <div className={`bg-white rounded-b-lg rounded-tr-lg relative`}>
               <div className="flex-1 flex-column bg-white mx-8 flex-wrap">
                 <div className="flex flex-row pt-4 justify-between items-center">
-                  <div className="flex flex-row w-96">
+                  <div className="flex flex-row">
                     <DataSearch
                       defaultQuery={getDefaultQuery}
                       showIcon={false}
@@ -202,8 +200,8 @@ export default function List() {
                       componentId="STATUS"
                       dataField="sessionStatus.keyword"
                       react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                      renderItem={(e) => {
-                        return `${translate(e)}`;
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
                       }}
                       title=""
                       URLParams={true}
@@ -216,145 +214,136 @@ export default function List() {
                 )}
               </div>
               {currentTab === "liste-centre" && (
-                <div>
-                  <ResultTable className="mt-0 mx-0 rounded-b-lg">
-                    <ReactiveListComponent
-                      defaultQuery={getDefaultQuery}
-                      paginationAt="bottom"
-                      showTopResultStats={false}
-                      react={{ and: FILTERS }}
-                      onData={({ rawData }) => {
-                        if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
-                      }}
-                      render={({ data }) => (
-                        <Table>
-                          <thead>
-                            <tr>
-                              <th style={{ width: "40%", color: "#7E858C", fontSize: 11 }}>Centre</th>
-                              <th style={{ width: "60%", color: "#7E858C", fontSize: 11 }}>Cohortes à venir</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {data.map((hit) => (
-                              <Hit
-                                key={hit._id}
-                                hit={hit}
-                                sessionsPhase1={sessionsPhase1
-                                  .filter(
-                                    (e) =>
-                                      e?._source?.cohesionCenterId === hit._id &&
-                                      (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
-                                      (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
-                                  )
-                                  .map((e) => e)}
-                                onClick={() => setCenter(hit)}
-                                selected={center?._id === hit._id}
-                              />
-                            ))}
-                          </tbody>
-                        </Table>
-                      )}
-                    />
-                  </ResultTable>
+                <div className="reactive-result">
+                  <ReactiveListComponent
+                    defaultQuery={getDefaultQuery}
+                    paginationAt="bottom"
+                    showTopResultStats={false}
+                    react={{ and: FILTERS }}
+                    onData={({ rawData }) => {
+                      if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
+                    }}
+                    render={({ data }) => (
+                      <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+                        <hr />
+                        <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+                          <div className="w-[40%]">Centre</div>
+                          <div className="w-[60%]">Cohortes à venir</div>
+                        </div>
+                        {data.map((hit) => (
+                          <Hit
+                            key={hit._id}
+                            hit={hit}
+                            sessionsPhase1={sessionsPhase1
+                              .filter(
+                                (e) =>
+                                  e?._source?.cohesionCenterId === hit._id &&
+                                  (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
+                                  (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
+                              )
+                              .map((e) => e)}
+                            onClick={() => setCenter(hit)}
+                            selected={center?._id === hit._id}
+                          />
+                        ))}
+                        <hr />
+                      </div>
+                    )}
+                  />
                 </div>
               )}
               {currentTab === "session" && (
-                <div>
-                  <div>
-                    <ResultTable className="mt-0 mx-0 rounded-b-lg">
-                      <ReactiveListComponent
-                        defaultQuery={getDefaultQuery}
-                        paginationAt="bottom"
-                        showTopResultStats={false}
-                        react={{ and: FILTERS }}
-                        onData={({ rawData }) => {
-                          if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
-                        }}
-                        render={({ data }) => (
-                          <Table>
-                            <thead>
-                              <tr>
-                                <th style={{ width: "30%", color: "#7E858C", fontSize: 11 }}>Centre</th>
-                                <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Cohortes</th>
-                                <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Places</th>
-                                <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Disponibilités</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {sessionsPhase1.map((hit) => (
-                                <HitSession
-                                  key={hit._id}
-                                  hit={hit}
-                                  center={data.find((center) => center._id === hit._source.cohesionCenterId)}
-                                  sessionsPhase1={sessionsPhase1
-                                    .filter(
-                                      (e) =>
-                                        e?._source?.cohesionCenterId === hit._id &&
-                                        (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
-                                        (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
-                                    )
-                                    .map((e) => e)}
-                                  onClick={() => setCenter(hit)}
-                                  selected={center?._id === hit._id}
-                                />
-                              ))}
-                            </tbody>
-                          </Table>
-                        )}
-                      />
-                    </ResultTable>
-                  </div>
+                <div className="reactive-result">
+                  <ReactiveListComponent
+                    defaultQuery={getDefaultQuery}
+                    paginationAt="bottom"
+                    showTopResultStats={false}
+                    react={{ and: FILTERS }}
+                    onData={({ rawData }) => {
+                      if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
+                    }}
+                    render={({ data }) => (
+                      <Table>
+                        <thead>
+                          <tr>
+                            <th style={{ width: "30%", color: "#7E858C", fontSize: 11 }}>Centre</th>
+                            <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Cohortes</th>
+                            <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Places</th>
+                            <th style={{ width: "20%", color: "#7E858C", fontSize: 11 }}>Disponibilités</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sessionsPhase1.map((hit) => (
+                            <HitSession
+                              key={hit._id}
+                              hit={hit}
+                              center={data.find((center) => center._id === hit._source.cohesionCenterId)}
+                              sessionsPhase1={sessionsPhase1
+                                .filter(
+                                  (e) =>
+                                    e?._source?.cohesionCenterId === hit._id &&
+                                    (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
+                                    (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
+                                )
+                                .map((e) => e)}
+                              onClick={() => setCenter(hit)}
+                              selected={center?._id === hit._id}
+                            />
+                          ))}
+                        </tbody>
+                      </Table>
+                    )}
+                  />
                 </div>
               )}
             </div>
-          </div>
-          <Panel center={center} onChange={() => setCenter(null)} />
+          </ReactiveBase>
         </div>
-      </ReactiveBase>
+      </div>
+      <Panel center={center} onChange={() => setCenter(null)} />
     </div>
   );
 }
 
-const Badge = ({ cohort, status, onClick }) => {
+const Badge = ({ cohort, onClick }) => {
   return (
     <div
       key={cohort}
       onClick={onClick}
-      className={`hover:bg-red-500 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit ${
-        status === "VALIDATED" ? "border-[1px] border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100"
+      className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit border-[1px] ${
+        cohort.status === "VALIDATED" ? "border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100 border-gray-100"
       }`}>
-      {cohort}
+      {cohort.cohort}
     </div>
   );
 };
 
-const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
+const Hit = ({ hit, sessionsPhase1, onClick }) => {
+  const history = useHistory();
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
-      <td>
-        <MultiLine>
-          <span className="font-bold text-black">
-            {hit?.name}
-            {/* <span style={{ fontSize: ".7rem", color: "#9C9C9C" }}> #{hit?._id}</span> */}
-          </span>
-
-          <p>{`${hit?.city || ""} • ${hit?.department || ""}`}</p>
-        </MultiLine>
-      </td>
-      <td className="flex flex-row items-center">
-        {sessionsPhase1.map((sessionPhase1) => (
-          <SubTd key={sessionPhase1._id}>
-            <div className="flex items-center">
-              <Badge onClick={() => console.log(sessionPhase1._source.cohort)} cohort={sessionPhase1._source.cohort} status={sessionPhase1._source.status} />
+    <>
+      <hr />
+      <div onClick={onClick} className="flex py-3 items-center px-4 hover:bg-gray-50 cursor-pointer">
+        <div className="flex flex-col gap-1 w-[40%]">
+          <div className="font-bold leading-6 text-gray-900">{hit?.name}</div>
+          <div className="font-normal text-sm leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
+        </div>
+        <div className="flex items-center flex-wrap w-[60%]">
+          {sessionsPhase1.map((sessionPhase1) => (
+            <div className="p-1" key={sessionPhase1._id}>
+              <div className="flex items-center">
+                <Badge onClick={() => history.push(`/centreV2/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
+              </div>
             </div>
-          </SubTd>
-        ))}
-      </td>
-    </tr>
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 
 const HitSession = ({ hit, onClick, selected, center }) => {
+  const history = useHistory();
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
@@ -368,7 +357,7 @@ const HitSession = ({ hit, onClick, selected, center }) => {
         </MultiLine>
       </td>
       <td>
-        <Badge onClick={() => console.log(hit._source.cohort)} cohort={hit._source.cohort} status={hit._source.status} />
+        <Badge onClick={() => history.push(`/centreV2/${hit._source.cohesionCenterId}`)} cohort={hit._source} />
       </td>
       <td>
         <div>
