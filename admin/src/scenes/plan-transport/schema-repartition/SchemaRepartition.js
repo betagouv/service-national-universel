@@ -335,7 +335,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
               <th className="font-medium py-[17px] pr-[16px]">Volontaires</th>
               <th className="font-medium py-[17px] pr-[16px]">Places restantes</th>
               <th className="font-medium py-[17px] pr-[16px]">Volontaires en intra-départemental</th>
-              {!isNational && <th className="font-medium py-[17px]">Places restantes dans le département</th>}
+              <th className="font-medium py-[17px]">Places restantes dans le département</th>
             </tr>
           </thead>
           <tbody className="font-medium text-[14px] leading-[16px] text-[#1F2937]">
@@ -380,18 +380,16 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                     </div>
                   )}
                 </td>
-                {!isNational && (
-                  <td className="py-[17px] px-[8px]">
-                    {loading ? (
-                      <Loading />
-                    ) : (
-                      <div className="flex items-center">
-                        <AlertPoint threshold={0} value={row.capacity - row.assigned} />
-                        {row.capacity - row.assigned}
-                      </div>
-                    )}
-                  </td>
-                )}
+                <td className="py-[17px] px-[8px]">
+                  {loading ? (
+                    <Loading />
+                  ) : (
+                    <div className="flex items-center">
+                      <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />
+                      {row.intraCapacity - row.intradepartmentalAssigned}
+                    </div>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -39,37 +39,27 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // --- capacities & centers
-    const centerResult = await sessionPhase1Model
-      .aggregate([
-        {
-          $match: { cohort },
-        },
-        {
-          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
-        },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "centerId",
-            foreignField: "_id",
-            as: "center",
-          },
-        },
-        { $unwind: "$center" },
-        {
-          $group: {
-            _id: "$center.region",
-            centers: { $sum: 1 },
-            capacity: { $sum: "$placesTotal" },
-          },
-        },
-      ])
-      .exec();
-    let centerSet = {};
-    for (const line of centerResult) {
-      centerSet[line._id] = { centers: line.centers, capacity: line.capacity };
-    }
+    // --- get stats for each departments
+    const departments = await getDepartmentCentersAndCapacities(cohort);
+    console.log("DEPARTEMENTS: ", departments);
+
+    // --- get table de repartition for each regions
+    const regions = await getRegionTableDeRepartition(cohort);
+    console.log("TABLE REGIONS: ", regions);
+
+    // --- get centers & capacity extra & intra for each regions
+    const filledRegions = regions.map((r) => {
+      const extra = computeCenterAndCapacity(departments, r.toDepartments);
+      const intra = computeCenterAndCapacity(departments, r.fromDepartments);
+      return {
+        ...r,
+        extraCapacity: extra.capacity,
+        extraCenters: extra.centers,
+        intraCapacity: intra.capacity,
+        intraCenters: intra.centers,
+      };
+    });
+    console.log("FILLED REGIONS: ", filledRegions);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -133,18 +123,18 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     }
 
     // --- Format result
-    const rows = regionList.map((region) => {
+    const rows = filledRegions.map((r) => {
       return {
-        name: region,
-        centers: 0,
-        capacity: 0,
-        ...centerSet[region],
+        name: r.fromRegion,
+        capacity: r.extraCapacity,
+        centers: r.extraCenters,
+        intraCapacity: r.intraCapacity,
         total: 0,
         intradepartmental: 0,
-        ...youngSet[region],
+        ...youngSet[r.FromRegion],
         assigned: 0,
         intradepartmentalAssigned: 0,
-        ...repartitionSet[region],
+        ...repartitionSet[r.FromRegion],
       };
     });
 
@@ -609,3 +599,96 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 module.exports = router;
+
+// ----------------------------------------
+// fonctions utilitaires
+
+/**
+ * Cette fonction :
+ * - prend toutes les sessions liées à une cohorte
+ * - popule le centre lié à la session
+ * - groupe les sessions par département pour récupérer la capacité et le nombre de centre.
+ *
+ * @param cohort
+ * @returns {Promise<any>}
+ */
+async function getDepartmentCentersAndCapacities(cohort) {
+  return await sessionPhase1Model
+    .aggregate([
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
+        },
+      },
+      { $unwind: "$center" },
+      {
+        $group: {
+          _id: "$center.department",
+          department: { $first: "$center.department" },
+          centers: { $sum: 1 },
+          capacity: { $sum: "$placesTotal" },
+          remainingCapacity: { $sum: "$placesLeft" },
+          departmentCode: { $first: "$center.departmentCode" },
+          region: { $first: "$center.region" },
+        },
+      },
+    ])
+    .exec();
+}
+
+async function getRegionTableDeRepartition(cohort) {
+  const repartitions = await tableRepartitionModel.find({ cohort });
+  let regions = {};
+  for (const repartition of repartitions) {
+    if (regions[repartition.fromRegion] === undefined) {
+      regions[repartition.fromRegion] = { regions: {}, departments: {} };
+    }
+    regions[repartition.fromRegion].regions[repartition.toRegion] = true;
+
+    let toDepartments = repartition.toDepartment ? [repartition.toDepartment] : region2department[repartition.toRegion];
+    for (const dep of toDepartments) {
+      regions[repartition.fromRegion].departments[dep] = true;
+    }
+  }
+
+  return regionList.map((region) => {
+    const regionData = regions[region];
+    if (regionData) {
+      return {
+        fromRegion: region,
+        fromDepartments: region2department[region],
+        toRegions: Object.keys(regionData.regions),
+        toDepartments: Object.keys(regionData.departments),
+      };
+    } else {
+      return {
+        fromRegion: region,
+        fromDepartments: region2department[region],
+        toRegions: [],
+        toDepartments: [],
+      };
+    }
+  });
+}
+
+function computeCenterAndCapacity(departmentsData, forDepartments) {
+  let capacity = 0;
+  let centers = 0;
+  for (const dep of departmentsData) {
+    if (forDepartments.includes(dep.department)) {
+      capacity += dep.capacity;
+      centers += dep.centers;
+    }
+  }
+
+  return { capacity, centers };
+}
