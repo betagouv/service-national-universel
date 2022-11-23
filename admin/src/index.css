@@ -247,6 +247,7 @@ h4 {
   margin-right: 10px;
 }
 .dropdown-filter button div {
+  width: 100%;
   overflow: ellipsis;
 }
 /* Result table reactive base */
