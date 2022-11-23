@@ -115,7 +115,7 @@ export default function View(props) {
         return setIsLoading(false);
       }
       toastr.success("Le séjour a bien été supprimé");
-      setCurrentCohort(PDR.cohorts[0]);
+      setCurrentCohort(PDR?.cohorts?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])[0]);
       setData(PDR);
       setIsLoading(false);
     } catch (e) {
@@ -394,12 +394,10 @@ export default function View(props) {
                 ) : null}
               </div>
               <div className="flex flex-col items-center justify-center w-1/3  border-r-[1px] border-gray-200">
-                <div className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full cursor-pointer hover:underline">
-                  Voir les volontaires (TODO)
+                <div className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full">
+                  Voir les volontaires (à venir)
                 </div>
-                <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full hover:underline cursor-pointer">
-                  Liste des lignes de transports (TODO)
-                </div>
+                <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full ">Liste des lignes de transports (à venir)</div>
               </div>
               <div className="flex items-center justify-center w-1/3 p-4">
                 <Field
@@ -415,11 +413,10 @@ export default function View(props) {
       </div>
       <ModalCreation
         isOpen={modal.isOpen}
-        onCancel={async () => {
+        onCancel={async (cohort) => {
           setModal({ isOpen: false });
-          const cohorts = await getPDR();
-          console.log(cohorts);
-          setCurrentCohort(cohorts[0]);
+          await getPDR();
+          setCurrentCohort(cohort);
         }}
         defaultPDR={data}
         editable={false}

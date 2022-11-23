@@ -118,8 +118,12 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
         return setIsLoading(false);
       }
       setIsLoading(false);
-      onCancel();
-      history.push(`/point-de-rassemblement/${PDR._id}`);
+      setSelectedCohort(null);
+      setComplementAddress("");
+      setSearch("");
+      !defaultPDR && setSelectedPDR(null);
+      !defaultPDR && history.push(`/point-de-rassemblement/${PDR._id}?cohort=${selectedCohort}`);
+      defaultPDR && onCancel(selectedCohort);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de l'ajout du séjour");

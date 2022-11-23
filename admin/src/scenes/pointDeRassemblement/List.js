@@ -63,7 +63,7 @@ export default function List() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Séjours"
+                  placeholder="Cohortes"
                   componentId="COHORT"
                   dataField="cohorts.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
@@ -119,7 +119,7 @@ export default function List() {
                     <hr />
                     <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
                       <div className="w-[40%]">Points de rassemblements</div>
-                      <div className="w-[60%]">Cohortes à venir</div>
+                      <div className="w-[60%]">Cohortes</div>
                     </div>
                     {data?.map((hit) => {
                       return <Hit key={hit._id} hit={hit} user={user} />;
