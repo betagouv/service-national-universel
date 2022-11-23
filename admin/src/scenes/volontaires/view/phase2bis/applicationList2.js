@@ -144,7 +144,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                     if (status === "VALIDATED") {
                       history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
                     }
-                    onChangeApplication();
+                    onChangeApplication && onChangeApplication();
                   }}
                 />
               </div>
