@@ -6,6 +6,7 @@ import { useHistory } from "react-router-dom";
 import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
 import FilterSvg from "../../assets/icons/Filter";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL } from "../../config";
@@ -97,7 +98,7 @@ export default function List() {
               />
             </div>
             {filterVisible && (
-              <div className="flex items-center gap-2 py-2 px-4">
+              <div className="flex items-center gap-3 py-2 px-4">
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -143,6 +144,7 @@ export default function List() {
                   size={1000}
                   defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
                 />
+                <DeleteFilters />
               </div>
             )}
             <div className="reactive-result">
