@@ -268,15 +268,12 @@ router.get("/:id/contract", passport.authenticate("referent", { session: false, 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const application = await ApplicationObject.findById(id);
-    console.log("✍️ ~ application", application);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const contract = await ContractObject.findById(application.contractId);
-    console.log("✍️ ~ contract", contract);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const young = await YoungObject.findById(application.youngId);
-    console.log("✍️ ~ young", young);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
