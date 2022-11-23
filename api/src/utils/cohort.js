@@ -18,46 +18,46 @@ async function getAvailableSessions(young) {
       (session.eligibility.inscriptionEndDate > Date.now() ||
         ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEnDate > Date.now())),
   );
+
+  const sessionNames = sessions.map(({ name }) => name);
+
+  const numberOfPlaces = await InscriptionGoalModel.aggregate([
+    { $match: { region: region, cohort: { $in: sessionNames } } },
+    { $group: { _id: "$cohort", total: { $sum: "$max" } } },
+  ]);
+
+  const numberOfCandidates = await YoungModel.aggregate([
+    {
+      $match: {
+        $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
+        cohort: { $in: sessionNames },
+        status: { $nin: [YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
+      },
+    },
+    { $group: { _id: "$cohort", total: { $sum: 1 } } },
+  ]);
+
+  const numberofRegistered = await YoungModel.aggregate([
+    {
+      $match: {
+        $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
+        cohort: { $in: sessionNames },
+        status: YOUNG_STATUS.VALIDATED,
+      },
+    },
+    { $group: { _id: "$cohort", total: { $sum: 1 } } },
+  ]);
+
   for (let session of sessions) {
-    session.goalReached = await isGoalReached(region, session.name);
-    session.isFull = await isSessionFull(region, session.name);
+    session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
+    session.numberOfRegistered = numberofRegistered.find(({ _id }) => _id === session.name)?.total;
+    session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
+    session.isFull = session.numberOfRegistered >= session.places;
+    session.goalReached = session.numberOfCandidates >= session.places * session.buffer;
   }
   return sessions;
 }
 
-async function isGoalReached(region, cohort) {
-  const numberOfCandidates = await YoungModel.countDocuments({
-    $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
-    cohort: cohort,
-    status: { $nin: [YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
-  });
-
-  const agg = await InscriptionGoalModel.aggregate([{ $match: { region: region, cohort: cohort } }, { $group: { _id: null, total: { $sum: "$max" } } }]);
-  const numberOfPlaces = agg[0]?.total;
-
-  if (numberOfPlaces) {
-    const fillingRatio = numberOfCandidates / Math.floor(numberOfPlaces * cohort.buffer);
-    if (fillingRatio >= 1) return true;
-  }
-  return false;
-}
-
-async function isSessionFull(region, cohort) {
-  const numberOfRegistered = await YoungModel.countDocuments({
-    $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
-    cohort: cohort,
-    status: YOUNG_STATUS.VALIDATED,
-  });
-
-  const agg = await InscriptionGoalModel.aggregate([{ $match: { region: region, cohort: cohort } }, { $group: { _id: null, total: { $sum: "$max" } } }]);
-  const numberOfPlaces = agg[0]?.total;
-
-  if (numberOfPlaces && numberOfRegistered >= numberOfPlaces) return true;
-  return false;
-}
-
 module.exports = {
   getAvailableSessions,
-  isGoalReached,
-  isSessionFull,
 };
