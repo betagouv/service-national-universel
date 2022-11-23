@@ -58,7 +58,7 @@ export default function NonEligible() {
   };
 
   const getMessageNonEligible = async (young) => {
-    const { res } = await API.post(`/cohort-session/eligibility/2023/${young._id}`);
+    const res = await API.post(`/cohort-session/eligibility/2023/${young._id}`);
     if (!res.ok) {
       capture(res.code);
     }

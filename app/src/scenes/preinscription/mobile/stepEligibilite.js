@@ -1,6 +1,7 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { getRegionByZip } from "snu-lib";
 import validator from "validator";
 import IconFrance from "../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -93,6 +94,8 @@ export default function StepEligibilite() {
     const res = await api.post("/cohort-session/eligibility/2023", {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
+      schoolRegion: data.school?.region,
+      region: getRegionByZip(data.zip),
       birthdateAt: data.birthDate,
       grade: data.scolarity,
     });

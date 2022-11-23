@@ -9,6 +9,7 @@ async function getAvailableSessions(young) {
     else dep = departmentLookUp[dep];
   }
   let region = young?.schoolRegion || young?.region;
+
   let sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(getZoneByDepartment(dep)) &&
@@ -52,8 +53,8 @@ async function getAvailableSessions(young) {
     session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
     session.numberOfRegistered = numberofRegistered.find(({ _id }) => _id === session.name)?.total;
     session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
-    session.isFull = session.numberOfRegistered >= session.places;
     session.goalReached = session.numberOfCandidates >= session.places * session.buffer;
+    session.isFull = session.numberOfRegistered >= session.places;
   }
   return sessions;
 }

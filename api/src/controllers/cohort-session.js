@@ -12,7 +12,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   try {
     let young = {};
     const { value } = validateId(req.params.id);
-    if (value?.id) young = YoungModel.findById(value.id);
+    if (value) young = await YoungModel.findById(value);
     else {
       const { error: bodyError, value: body } = Joi.object({
         schoolDepartment: Joi.string().allow(null, ""),
