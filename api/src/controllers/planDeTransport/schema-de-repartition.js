@@ -45,7 +45,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
     // --- get table de repartition for each regions
     const regions = await getRegionTableDeRepartition(cohort);
-    console.log("TABLE REGIONS: ", regions);
+    // console.log("TABLE REGIONS: ", regions);
 
     // --- get centers & capacity extra & intra for each regions
     const filledRegions = regions.map((r) => {
@@ -59,7 +59,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
         intraCenters: intra.centers,
       };
     });
-    console.log("FILLED REGIONS: ", filledRegions);
+    // console.log("FILLED REGIONS: ", filledRegions);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -155,60 +155,32 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // --- find to regions from region
-    const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
-    const toRegionsSet = {};
-    for (const repart of regionsResult) {
-      toRegionsSet[repart.toRegion] = true;
-    }
-    const toRegions = Object.keys(toRegionsSet);
+    // --- get stats for each departments
+    const departments = await getDepartmentCentersAndCapacities(cohort);
+    // console.log("DEPARTEMENTS: ", departments);
 
-    // --- get departments from toRegions
-    let fromDepartments = region2department[region];
-    let fromDepartmentCodes = [];
-    fromDepartments = fromDepartments.map((dep) => {
-      const code = getDepartmentNumber(dep);
-      fromDepartmentCodes.push(code);
+    // --- get table de repartition for each department
+    const departmentsTable = await getDepartmentTableDeRepartition(cohort, region);
+    // console.log("TABLE DEPARTMENTS: ", departmentsTable);
+
+    // --- get to regions from region
+    const toRegions = await getRegionsAndDepartmentsFromRegion(cohort, region);
+
+    // --- get centers & capacity extra & intra for each department
+    const filledDepartments = departmentsTable.map((r) => {
+      const extra = computeCenterAndCapacity(departments, r.toDepartments);
+      const intra = computeCenterAndCapacity(departments, [r.fromDepartment]);
       return {
-        name: dep,
-        code,
+        ...r,
+        extraCapacity: extra.capacity,
+        extraCenters: extra.centers,
+        intraCapacity: intra.capacity,
+        intraCenters: intra.centers,
       };
     });
+    // console.log("FILLED DEPARTMENTS: ", filledDepartments);
 
-    // --- capacities & centers
-    const fromCenterResult = await sessionPhase1Model
-      .aggregate([
-        {
-          $match: { cohort },
-        },
-        {
-          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
-        },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "centerId",
-            foreignField: "_id",
-            as: "center",
-          },
-        },
-        { $unwind: "$center" },
-
-        { $match: { "center.departmentCode": { $in: fromDepartmentCodes } } },
-        {
-          $group: {
-            _id: "$center.department",
-            centers: { $sum: 1 },
-            capacity: { $sum: "$placesTotal" },
-          },
-        },
-      ])
-      .exec();
-    let fromCenterSet = {};
-    for (const line of fromCenterResult) {
-      fromCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
-    }
-
+    // --- get centers by to regions
     const toCenterResult = await sessionPhase1Model
       .aggregate([
         {
@@ -227,7 +199,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         },
         { $unwind: "$center" },
 
-        { $match: { "center.region": { $in: toRegions } } },
+        { $match: { "center.region": { $in: toRegions.map((r) => r.name) } } },
         {
           $group: {
             _id: "$center.region",
@@ -241,12 +213,12 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
+    // console.log("CENTER SET: ", toCenterSet);
 
     // --- volontaires
     const youngResult = await youngModel
       .aggregate([
-        // TODO: véfifier la liste des jeunes
-        { $match: { cohort, region, status: { $in: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.IN_PROGRESS] } } },
+        { $match: { cohort, region, status: YOUNG_STATUS.VALIDATED } },
         {
           $group: {
             _id: "$department",
@@ -309,25 +281,24 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     let data = {
       toCenters: toRegions.map((region) => {
         return {
-          name: region,
+          name: region.name,
           centers: 0,
           capacity: 0,
-          ...toCenterSet[region],
+          ...toCenterSet[region.name],
         };
       }),
-      rows: fromDepartments.map((dep) => {
+      rows: filledDepartments.map((r) => {
         return {
-          name: dep.name,
-          code: dep.code,
-          centers: 0,
-          capacity: 0,
-          ...fromCenterSet[dep.name],
+          name: r.fromDepartment,
+          capacity: r.extraCapacity,
+          centers: r.extraCenters,
+          intraCapacity: r.intraCapacity,
           total: 0,
           intradepartmental: 0,
-          ...youngSet[dep.name],
+          ...youngSet[r.FromDepartment],
           assigned: 0,
           intradepartmentalAssigned: 0,
-          ...repartitionSet[dep.name],
+          ...repartitionSet[r.FromDepartment],
         };
       }),
     };
@@ -645,6 +616,20 @@ async function getDepartmentCentersAndCapacities(cohort) {
     .exec();
 }
 
+async function getRegionsAndDepartmentsFromRegion(cohort, region) {
+  const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
+  const toRegionsSet = {};
+  for (const repart of regionsResult) {
+    if (toRegionsSet[repart.toRegion] === undefined) {
+      toRegionsSet[repart.toRegion] = { name: repart.toRegion, departments: [] };
+    }
+    if (repart.toDepartment) {
+      toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+    }
+  }
+  return Object.values(toRegionsSet);
+}
+
 async function getRegionTableDeRepartition(cohort) {
   const repartitions = await tableRepartitionModel.find({ cohort });
   let regions = {};
@@ -673,6 +658,41 @@ async function getRegionTableDeRepartition(cohort) {
       return {
         fromRegion: region,
         fromDepartments: region2department[region],
+        toRegions: [],
+        toDepartments: [],
+      };
+    }
+  });
+}
+
+async function getDepartmentTableDeRepartition(cohort, region) {
+  const repartitions = await tableRepartitionModel.find({ cohort, fromRegion: region });
+  let departments = {};
+  for (const repartition of repartitions) {
+    if (departments[repartition.fromDepartment] === undefined) {
+      departments[repartition.fromDepartment] = { regions: {}, departments: {} };
+    }
+    departments[repartition.fromDepartment].regions[repartition.toRegion] = true;
+
+    let toDepartments = repartition.toDepartment ? [repartition.toDepartment] : region2department[repartition.toRegion];
+    for (const dep of toDepartments) {
+      departments[repartition.fromDepartment].departments[dep] = true;
+    }
+  }
+
+  return region2department[region].map((department) => {
+    const depData = departments[department];
+    if (depData) {
+      return {
+        fromRegion: region,
+        fromDepartment: department,
+        toRegions: Object.keys(depData.regions),
+        toDepartments: Object.keys(depData.departments),
+      };
+    } else {
+      return {
+        fromRegion: region,
+        fromDepartment: department,
         toRegions: [],
         toDepartments: [],
       };
