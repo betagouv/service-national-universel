@@ -298,6 +298,12 @@ export default function Phase2Application({ young, onChange }) {
                   ),
               )}
               <section
+                onClick={() => {
+                  setModalDocument({
+                    isOpen: true,
+                    stepOne: true,
+                  });
+                }}
                 className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
                 <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
                   <HiPlus />
