@@ -9,7 +9,6 @@ import Panel from "./panel";
 import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Table, MultiLine } from "../../components/list";
 import { Title } from "../pointDeRassemblement/components/common";
 import { FilterButton, TabItem } from "./components/commons";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
