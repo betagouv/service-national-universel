@@ -12,6 +12,7 @@ import api from "../../services/api";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import { Title } from "./components/common";
 import Field from "./components/Field";
+import ModalConfirmDelete from "./components/ModalConfirmDelete";
 import ModalCreation from "./components/ModalCreation";
 
 function classNames(...classes) {
@@ -24,7 +25,8 @@ export default function View(props) {
   const urlParams = new URLSearchParams(window.location.search);
   const mount = React.useRef(false);
   const [data, setData] = React.useState(null);
-  const [modal, setModal] = React.useState({ isOpen: false });
+  const [modalCreation, setModalCreation] = React.useState({ isOpen: false });
+  const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [editInfo, setEditInfo] = React.useState(false);
@@ -219,7 +221,14 @@ export default function View(props) {
             {canDeleteMeetingPoint(user) ? (
               <button
                 className="border-[1px] border-red-600 bg-red-600 shadow-sm px-4 py-2 text-white hover:!text-red-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={onDelete}
+                onClick={() =>
+                  setModalDelete({
+                    isOpen: true,
+                    title: "Supprimer le point de rassemblement",
+                    message: "Êtes-vous sûr de vouloir supprimer ce point de rassemblement ?",
+                    onDelete: onDelete,
+                  })
+                }
                 disabled={isLoading}>
                 Supprimer
               </button>
@@ -227,7 +236,7 @@ export default function View(props) {
             {canCreateMeetingPoint(user) ? (
               <button
                 className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => setModal({ isOpen: true })}
+                onClick={() => setModalCreation({ isOpen: true })}
                 disabled={isLoading}>
                 Rattacher un point à un séjour
               </button>
@@ -386,7 +395,9 @@ export default function View(props) {
                 {canDeleteMeetingPointSession(user) ? (
                   <button
                     className="absolute bottom-5 right-5 flex gap-2 items-center cursor-pointer px-2 py-1 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={onDeleteSession}
+                    onClick={() =>
+                      setModalDelete({ isOpen: true, onDelete: onDeleteSession, title: "Supprimer la session", message: "Êtes-vous sûr de vouloir supprimer cette session ?" })
+                    }
                     disabled={isLoading}>
                     <Trash className="text-red-400 h-4 w-4" />
                     <div className="text-xs font-medium leading-4 text-gray-800">Supprimer le séjour</div>
@@ -412,14 +423,24 @@ export default function View(props) {
         ) : null}
       </div>
       <ModalCreation
-        isOpen={modal.isOpen}
+        isOpen={modalCreation.isOpen}
         onCancel={async (cohort) => {
-          setModal({ isOpen: false });
+          setModalCreation({ isOpen: false });
           await getPDR();
           setCurrentCohort(cohort);
         }}
         defaultPDR={data}
         editable={false}
+      />
+      <ModalConfirmDelete
+        isOpen={modalDelete.isOpen}
+        title={modalDelete.title}
+        message={modalDelete.message}
+        onCancel={() => setModalDelete({ isOpen: false })}
+        onDelete={() => {
+          setModalDelete({ isOpen: false });
+          modalDelete.onDelete();
+        }}
       />
     </>
   );
