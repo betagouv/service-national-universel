@@ -319,8 +319,8 @@ export default function View(props) {
                   />
                 </div>
                 <div className="flex items-center gap-3">
-                  <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} />
-                  <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} />
+                  <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} readOnly={true} disabled={editInfo} />
+                  <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} readOnly={true} disabled={editInfo} />
                 </div>
                 {editInfo ? (
                   <div className="flex flex-col gap-2">
