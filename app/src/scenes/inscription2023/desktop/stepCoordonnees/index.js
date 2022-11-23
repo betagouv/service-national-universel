@@ -5,10 +5,10 @@ import { useHistory, useParams } from "react-router-dom";
 
 import validator from "validator";
 
-import RadioButton from "../components/RadioButton";
-import Input from "../components/Input";
-import Select from "../components/Select";
-import ErrorMessage from "../components/ErrorMessage";
+import RadioButton from "../../components/RadioButton";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
+import ErrorMessage from "../../components/ErrorMessage";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -18,121 +18,42 @@ import {
   genderOptions,
   booleanOptions,
   debounce,
-} from "../utils";
+} from "../../utils";
 
-import api from "../../../services/api";
-import VerifyAddress from "../components/VerifyAddress";
-import SearchableSelect from "../../../components/SearchableSelect";
-import Toggle from "../../../components/inscription/toggle";
-import CheckBox from "../../../components/inscription/checkbox";
-import { setYoung } from "../../../redux/auth/actions";
-import { translate, regexPhoneFrenchCountries } from "../../../utils";
-import { capture } from "../../../sentry";
-import DesktopPageContainer from "../components/DesktopPageContainer";
-import plausibleEvent from "../../../services/plausible";
-import { supportURL } from "../../../config";
+import api from "../../../../services/api";
+import VerifyAddress from "../../components/VerifyAddress";
+import SearchableSelect from "../../../../components/SearchableSelect";
+import Toggle from "../../../../components/inscription/toggle";
+import CheckBox from "../../../../components/inscription/checkbox";
+import { setYoung } from "../../../../redux/auth/actions";
+import { translate, regexPhoneFrenchCountries } from "../../../../utils";
+import { capture } from "../../../../sentry";
+import DesktopPageContainer from "../../components/DesktopPageContainer";
+import plausibleEvent from "../../../../services/plausible";
+import { supportURL } from "../../../../config";
 import { YOUNG_STATUS } from "snu-lib";
-import { getCorrectionByStep } from "../../../utils/navigation";
-import { getAddress } from "../api";
-
-const getObjectWithEmptyData = (fields) => {
-  const object = {};
-  fields.forEach((field) => {
-    object[field] = "";
-  });
-  return object;
-};
-
-const FRANCE = "France";
-const errorMessages = {
-  addressVerified: "Merci de vérifier l'adresse",
-  phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
-  zip: "Le code postal n'est pas valide",
-  hasSpecialSituation: "Merci de choisir au moins une option.",
-};
-
-const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
-const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
-const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
-const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
-
-const commonFields = [
-  "frenchNationality",
-  ...birthPlaceFields,
-  ...addressFields,
-  "gender",
-  "phone",
-  "situation",
-  "livesInFrance",
-  "handicap",
-  "allergies",
-  "ppsBeneficiary",
-  "paiBeneficiary",
-];
-
-const commonRequiredFields = [
-  "frenchNationality",
-  ...birthPlaceFields,
-  "gender",
-  "phone",
-  "situation",
-  "livesInFrance",
-  "address",
-  "zip",
-  "city",
-  "region",
-  "department",
-  "location",
-  "handicap",
-  "allergies",
-  "ppsBeneficiary",
-  "paiBeneficiary",
-];
-
-const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
-const requiredMoreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
-
-const defaultState = {
-  frenchNationality: "true",
-  birthCountry: FRANCE,
-  birthCityZip: "",
-  birthCity: "",
-  gender: genderOptions[0].value,
-  phone: "",
-  livesInFrance: frenchNationalityOptions[0].value,
-  addressVerified: "false",
-  address: "",
-  zip: "",
-  city: "",
-  region: "",
-  department: "",
-  location: {},
-  cityCode: "",
-  foreignCountry: "",
-  foreignAddress: "",
-  foreignCity: "",
-  foreignZip: "",
-  hostFirstName: "",
-  hostLastName: "",
-  hostRelationship: "",
-  situation: "",
-  schooled: "",
-  handicap: "false",
-  allergies: "false",
-  ppsBeneficiary: "false",
-  paiBeneficiary: "false",
-  specificAmenagment: "",
-  specificAmenagmentType: "",
-  reducedMobilityAccess: "",
-  handicapInSameDepartment: "",
-};
+import { getCorrectionByStep } from "../../../../utils/navigation";
+import { getAddress } from "../../api";
+import {
+  FRANCE,
+  getObjectWithEmptyData,
+  errorMessages,
+  birthPlaceFields,
+  addressFields,
+  foreignAddressFields,
+  moreInformationFields,
+  commonFields,
+  commonRequiredFields,
+  requiredFieldsForeigner,
+  requiredMoreInformationFields,
+  defaultState,
+} from "./utils";
 
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
   const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
-  const [situationOptions, setSituationOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -181,9 +102,6 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     if (young) {
-      const situationOptions = young.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions;
-      setSituationOptions(situationOptions);
-
       if (young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true") {
         setSpecialSituation(true);
       }
@@ -627,7 +545,7 @@ export default function StepCoordonnees() {
           <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
           <div className="flex my-3">
             <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
-              <img src={require("../../../assets/infoSquared.svg")} height={20} width={20} />
+              <img src={require("../../../../assets/infoSquared.svg")} height={20} width={20} />
             </div>
             <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
               Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
@@ -685,7 +603,7 @@ export default function StepCoordonnees() {
       </div>
       <Select
         label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
-        options={situationOptions}
+        options={young.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
         value={situation}
         onChange={updateData("situation")}
         error={errors.situation}
