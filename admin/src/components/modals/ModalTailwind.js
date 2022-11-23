@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 
-export default function ModalTailwind({ isOpen, onClose, children, size }) {
+export default function ModalTailwind({ isOpen, onClose, children, className = "" }) {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={onClose}>
@@ -25,7 +25,7 @@ export default function ModalTailwind({ isOpen, onClose, children, size }) {
               leave="ease-in duration-200"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className={`relative transform rounded-lg bg-white shadow-xl transition-all ${size ? size : ""}`}>{children}</Dialog.Panel>
+              <Dialog.Panel className={`relative transform transition-all ${className}`}>{children}</Dialog.Panel>
             </Transition.Child>
           </div>
         </div>
