@@ -874,11 +874,11 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
       const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`, {
         fileName: `contrat ${young.firstName} ${young.lastName} - ${missionName}.pdf`,
       });
-      if (ok) return toastr.success(`Document envoyé à ${young.email}`);
-      else return toastr.error("Erreur lors de l'envoi du document", translate(code));
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
-      toastr.error("Erreur lors de l'envoi du document");
-      console.log(e);
+      capture(e);
+      toastr.error("Erreur lors de l'envoi du document : ", e.message);
     }
   };
 

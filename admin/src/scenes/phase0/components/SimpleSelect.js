@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function SimpleSelect({ value, transformer, options, onChange, filterOnType }) {
+export default function SimpleSelect({ value, transformer, options, onChange, filterOnType, showBackgroundColor = true }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -30,7 +30,6 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
   }, []);
 
   useEffect(() => {
-    console.log("value change: ", value);
     setFilter(transformer ? transformer(value) : value);
   }, [value]);
 
@@ -65,13 +64,12 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
   }
 
   function changeFilter(e) {
-    console.log("new filter = ", e.target.value);
     setFilter(e.target.value);
   }
 
   return (
     <div ref={selectOptionsRef}>
-      <div className="flex items-center justify-between cursor-pointer p-[5px] bg-gray-50" onClick={toggleSelectOptions}>
+      <div className={`flex items-center justify-between cursor-pointer p-[5px] ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
         {filterOnType ? (
           <input
             type="text"
@@ -82,7 +80,13 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
             onBlur={() => setInputHasFocus(false)}
           />
         ) : (
-          <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
+          <>
+            {value ? (
+              <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
+            ) : (
+              <div className="font-normal text-[14px] leading-[20px] py-[10px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
+            )}
+          </>
         )}
         <ChevronDown className="text-[#1F2937] ml-[8px]" />
       </div>

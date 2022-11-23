@@ -14,6 +14,7 @@ import ChevronDown from "../../../assets/icons/ChevronDown";
 import Download from "../../../assets/icons/Download";
 import { FiMail } from "react-icons/fi";
 import Voiture from "../../../assets/Voiture";
+import { capture } from "../../../sentry";
 
 export default function ValidatedMobile() {
   const young = useSelector((state) => state.Auth.young);
@@ -72,13 +73,19 @@ export default function ValidatedMobile() {
   };
 
   const sendAttestation = async ({ template, type }) => {
-    setLoading(true);
-    const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
-      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
-    });
-    setLoading(false);
-    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
-    else return toastr.error("Erreur lors de l'envoi du document", translate(code));
+    try {
+      setLoading(true);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+      });
+      setLoading(false);
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      setLoading(false);
+      toastr.error("Erreur lors de l'envoi du document", translate(e.code));
+    }
   };
 
   if (!applications || !equivalences) return <Loader />;

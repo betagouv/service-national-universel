@@ -89,11 +89,11 @@ export default function Inscription() {
             <Header>
               <Title>Inscriptions</Title>
               <div className="flex gap-2">
-                {/* <Link to="/volontaire/create">
+                <Link to="/volontaire/create">
                   <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
                     <p>Nouvelle inscription</p>
                   </VioletButton>
-                </Link> */}
+                </Link>
                 <ExportComponent
                   handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"

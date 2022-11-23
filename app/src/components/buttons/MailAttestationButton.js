@@ -6,19 +6,26 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { colors, translate } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { capture } from "../../sentry";
 
 export default function MailAttestationButton({ young, children, type, template, placeholder, ...rest }) {
   const [loading, setLoading] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const onConfirm = async () => {
-    setLoading(true);
-    const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
-      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
-    });
-    setLoading(false);
-    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
-    else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+    try {
+      setLoading(true);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+      });
+      setLoading(false);
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      setLoading(false);
+      toastr.error("Erreur lors de l'envoie du document", e.message);
+    }
   };
   return (
     <>
