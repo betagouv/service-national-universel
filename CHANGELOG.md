@@ -1,3 +1,12 @@
+# [1.172.0](https://github.com/betagouv/service-national-universel/compare/v1.171.0...v1.172.0) (2022-11-22)
+
+
+### Features
+
+* **admin:** refonte inscription par référent ([#2035](https://github.com/betagouv/service-national-universel/issues/2035)) ([8f786e1](https://github.com/betagouv/service-national-universel/commit/8f786e18fa4972a1fcbb6f8d3521830233e9ad30))
+* **admin:** Tableau des établissement ([#2061](https://github.com/betagouv/service-national-universel/issues/2061)) ([868f3bf](https://github.com/betagouv/service-national-universel/commit/868f3bfb31793170848ddce270e17b7d396116cd))
+* **app:** formulaire invitation  ([#2044](https://github.com/betagouv/service-national-universel/issues/2044)) ([53f2f8b](https://github.com/betagouv/service-national-universel/commit/53f2f8bc2b940468f5466f8397499bf6d8d35413))
+
 # [1.171.0](https://github.com/betagouv/service-national-universel/compare/v1.170.0...v1.171.0) (2022-11-21)
 
 
