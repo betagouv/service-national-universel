@@ -38,7 +38,7 @@ async function getAvailableSessions(young) {
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
   ]);
 
-  const numberofRegistered = await YoungModel.aggregate([
+  const numberOfRegistered = await YoungModel.aggregate([
     {
       $match: {
         $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
@@ -51,10 +51,10 @@ async function getAvailableSessions(young) {
 
   for (let session of sessions) {
     session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
-    session.numberOfRegistered = numberofRegistered.find(({ _id }) => _id === session.name)?.total;
+    session.numberOfRegistered = numberOfRegistered.find(({ _id }) => _id === session.name)?.total;
     session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
-    session.goalReached = session.numberOfCandidates >= session.places * session.buffer;
-    session.isFull = session.numberOfRegistered >= session.places;
+    session.goalReached = session.numberOfCandidates >= session.numberOfPlaces * session.buffer;
+    session.isFull = session.numberOfRegistered >= session.numberOfPlaces;
   }
   return sessions;
 }
