@@ -206,7 +206,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
       <div className="bg-white rounded-[8px]">
         <div className="p-[24px]">
-          {cniFiles.length > 0 ? (
+          {cniFiles.length > 0 || (blockUpload && filesToUpload && filesToUpload.length > 0) ? (
             cniFiles.map((file) => (
               <div key={file._id} className="flex items-center justify-between text-[12px] mt-[8px] border-b-[#E5E7EB] border-b-[1px] last:border-b-[0px] py-[12px]">
                 <div className="text-right">{file.name}</div>
