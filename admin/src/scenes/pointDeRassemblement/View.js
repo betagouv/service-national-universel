@@ -2,8 +2,9 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canUpdateMeetingPoint } from "snu-lib";
+import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint } from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
+import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Loader from "../../components/Loader";
 import { capture } from "../../sentry";
@@ -101,6 +102,25 @@ export default function View(props) {
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la suppression du point de rassemblement");
+      setIsLoading(false);
+    }
+  };
+
+  const onDeleteSession = async () => {
+    try {
+      setIsLoading(true);
+      const { ok, code, data: PDR } = await api.put(`/point-de-rassemblement/delete/cohort/${data._id}`, { cohort: currentCohort });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la suppression du séjour", code);
+        return setIsLoading(false);
+      }
+      toastr.success("Le séjour a bien été supprimé");
+      setCurrentCohort(PDR.cohorts[0]);
+      setData(PDR);
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la suppression du séjour");
       setIsLoading(false);
     }
   };
@@ -309,80 +329,92 @@ export default function View(props) {
             </div>
           </div>
         </div>
-
-        <div className="flex flex-col rounded-lg pt-3 bg-white">
-          <div className="flex items-center justify-between border-b border-gray-200 px-8">
-            <nav className="-mb-px flex space-x-8 " aria-label="Tabs">
-              {data.cohorts.map((tab) => (
-                <a
-                  key={tab}
-                  onClick={() => setCurrentCohort(tab)}
-                  className={classNames(
-                    tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-                    "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer",
-                  )}>
-                  {tab}
-                </a>
-              ))}
-            </nav>
-            {canUpdateMeetingPoint(user) ? (
-              <>
-                {!editSession ? (
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => setEditSession(true)}
-                    disabled={isLoading}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                    Modifier
-                  </button>
-                ) : (
-                  <div className="flex itmes-center gap-2">
-                    <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => setEditSession(false)}
-                      disabled={isLoading}>
-                      Annuler
-                    </button>
+        {data?.cohorts?.length > 0 ? (
+          <div className="flex flex-col rounded-lg pt-3 bg-white">
+            <div className="flex items-center justify-between border-b border-gray-200 px-8">
+              <nav className="-mb-px flex space-x-8 " aria-label="Tabs">
+                {data.cohorts.map((tab) => (
+                  <a
+                    key={tab}
+                    onClick={() => setCurrentCohort(tab)}
+                    className={classNames(
+                      tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                      "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer",
+                    )}>
+                    {tab}
+                  </a>
+                ))}
+              </nav>
+              {canUpdateMeetingPoint(user) ? (
+                <>
+                  {!editSession ? (
                     <button
                       className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={onSubmitSession}
+                      onClick={() => setEditSession(true)}
                       disabled={isLoading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-                      Enregistrer les changements
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      Modifier
                     </button>
-                  </div>
-                )}
-              </>
-            ) : null}
-          </div>
-          <div className="flex px-8 w-full h-64">
-            <div className="flex items-center justify-center w-1/3  border-r-[1px] border-gray-200 p-4">
-              <Field label="ID" value={data.code} />
+                  ) : (
+                    <div className="flex itmes-center gap-2">
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => setEditSession(false)}
+                        disabled={isLoading}>
+                        Annuler
+                      </button>
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={onSubmitSession}
+                        disabled={isLoading}>
+                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        Enregistrer les changements
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : null}
             </div>
-            <div className="flex flex-col items-center justify-center w-1/3  border-r-[1px] border-gray-200">
-              <div className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full cursor-pointer hover:underline">
-                Voir les volontaires (TODO)
+            <div className="flex px-8 w-full h-64">
+              <div className="relative flex items-center justify-center w-1/3  border-r-[1px] border-gray-200 p-4">
+                <Field label="ID" value={data.code} copy={true} />
+                {canDeleteMeetingPointSession(user) ? (
+                  <button
+                    className="absolute bottom-5 right-5 flex gap-2 items-center cursor-pointer px-2 py-1 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={onDeleteSession}
+                    disabled={isLoading}>
+                    <Trash className="text-red-400 h-4 w-4" />
+                    <div className="text-xs font-medium leading-4 text-gray-800">Supprimer le séjour</div>
+                  </button>
+                ) : null}
               </div>
-              <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full hover:underline cursor-pointer">
-                Liste des lignes de transports (TODO)
+              <div className="flex flex-col items-center justify-center w-1/3  border-r-[1px] border-gray-200">
+                <div className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full cursor-pointer hover:underline">
+                  Voir les volontaires (TODO)
+                </div>
+                <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full hover:underline cursor-pointer">
+                  Liste des lignes de transports (TODO)
+                </div>
+              </div>
+              <div className="flex items-center justify-center w-1/3 p-4">
+                <Field
+                  label="Complément d’adresse"
+                  onChange={(e) => changeComplement(e.target.value)}
+                  value={data.complementAddress.find((c) => c.cohort === currentCohort)?.complement}
+                  readOnly={!editSession}
+                />
               </div>
             </div>
-            <div className="flex items-center justify-center w-1/3 p-4">
-              <Field
-                label="Complément d’adresse"
-                onChange={(e) => changeComplement(e.target.value)}
-                value={data.complementAddress.find((c) => c.cohort === currentCohort)?.complement}
-                readOnly={!editSession}
-              />
-            </div>
           </div>
-        </div>
+        ) : null}
       </div>
       <ModalCreation
         isOpen={modal.isOpen}
-        onCancel={() => {
+        onCancel={async () => {
           setModal({ isOpen: false });
-          getPDR();
+          const cohorts = await getPDR();
+          console.log(cohorts);
+          setCurrentCohort(cohorts[0]);
         }}
         defaultPDR={data}
         editable={false}

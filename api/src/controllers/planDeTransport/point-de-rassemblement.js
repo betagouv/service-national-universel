@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const YoungModel = require("../../models/young");
-const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint } = require("snu-lib/roles");
+const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -131,6 +131,38 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     await pointDeRassemblement.save({ fromUser: req.user });
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
+
+    return res.status(200).send({ ok: true, data: pointDeRassemblement });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/delete/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      cohort: Joi.string().required(),
+    }).validate({ ...req.body, id: req.params.id });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canDeleteMeetingPointSession(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { id, cohort } = value;
+
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
+    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const youngs = await YoungModel.find({ meetingPointId: id });
+    if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    let cohortsToUpdate = pointDeRassemblement.cohorts.filter((c) => c !== cohort);
+    let complementAddressToUpdate = pointDeRassemblement.complementAddress.filter((c) => c.cohort !== cohort);
+
+    pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
+    await pointDeRassemblement.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
