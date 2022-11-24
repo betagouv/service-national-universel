@@ -7,16 +7,18 @@ import api from "../../../services/api";
 import Details from "./details";
 import DeletedDetail from "./deletedDetail";
 import Phase1 from "./phase1";
-import Phase2Bis from "./phase2bis/phase2Bis";
+import Phase2Bis from "./phase2bis";
 import Phase2 from "./phase2";
 import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
 import History from "./history";
 import Notifications from "./notifications";
+import Notes from "./notes";
 import { YOUNG_STATUS } from "../../../utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import FormEquivalence from "./FormEquivalence";
 import { environment } from "../../../config";
+import VolontairePhase0View from "../../phase0/view";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
@@ -36,11 +38,8 @@ export default function Index({ ...props }) {
   };
 
   const getDetail = () => {
-    if (young.status === YOUNG_STATUS.DELETED) {
-      return <DeletedDetail young={young} onChange={getYoung} />;
-    } else {
-      return <Details young={young} onChange={getYoung} />;
-    }
+    const mode = [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? "correction" : "readonly";
+    return <VolontairePhase0View young={young} onChange={getYoung} globalMode={mode} />;
   };
 
   useEffect(() => {
@@ -61,10 +60,10 @@ export default function Index({ ...props }) {
         ) : (
           <SentryRoute path="/volontaire/:id/phase2" component={() => <Phase2Bis young={young} onChange={getYoung} />} />
         )}
-
         <SentryRoute path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/notes" component={() => <Notes young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id" component={getDetail} />
       </Switch>
     </>

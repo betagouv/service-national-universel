@@ -11,7 +11,16 @@ const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const SessionPhase1Object = require("../models/sessionPhase1");
-const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
+const {
+  serializeMissions,
+  serializeSchools,
+  serializeRamsesSchools,
+  serializeYoungs,
+  serializeStructures,
+  serializeReferents,
+  serializeApplications,
+  serializeHits,
+} = require("../utils/es-serializer");
 const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
 const Joi = require("joi");
@@ -41,7 +50,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
@@ -77,6 +86,17 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
   }
 });
 
+router.post("/schoolramses/_msearch", async (req, res) => {
+  try {
+    const { body } = req;
+    const response = await esClient.msearch({ index: "schoolramses", body });
+    return res.status(200).send(serializeRamsesSchools(response.body));
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 // Routes accessible by referents only
 router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -90,7 +110,9 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
         return res.status(200).send(response.body);
       }
     }
-    const filter = [{ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST", "ABANDONED"] } }];
+    const filter = [
+      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST", "ABANDONED", "REINSCRIPTION"] } },
+    ];
 
     // Open in progress inscription to referent
     if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) filter[0].terms["status.keyword"].push("IN_PROGRESS");
@@ -150,7 +172,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
 
 // young-having-school-in-department is a special index (that uses a young index)
 // used by REFERENT_DEPARTMENT to get youngs having a school in their department.
-router.post("/young-having-school-in-department/:view/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/young-having-school-in-department/:view/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const keys = ["volontaires", "inscriptions"];
     const { error: viewError, value: view } = Joi.string()
@@ -169,8 +191,13 @@ router.post("/young-having-school-in-department/:view/export", passport.authenti
       filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
     }
 
-    const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
-    return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    if (req.params.action === "export") {
+      const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(serializeYoungs(response.body));
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -331,7 +358,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("structure", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("structure", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeStructures(response) });
     } else {
       const response = await esClient.msearch({ index: "structure", body: withFilterForMSearch(body, filter) });
@@ -435,7 +462,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeApplications(response) });
     } else {
       const response = await esClient.msearch({ index: "application", body: withFilterForMSearch(body, filter) });
@@ -526,6 +553,35 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "meetingpoint", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/pointderassemblement/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
+    filter.push({
+      bool: {
+        must_not: {
+          exists: {
+            field: "deletedAt",
+          },
+        },
+      },
+    });
+
+    if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("pointderassemblement", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "pointderassemblement", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

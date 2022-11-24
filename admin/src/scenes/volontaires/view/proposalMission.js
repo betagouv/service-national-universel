@@ -9,7 +9,7 @@ import api from "../../../services/api";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
 import Loadingbutton from "../../../components/buttons/LoadingButton";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 
 export default function xxxxxxx({ young, onSend }) {
   const FILTERS = ["SEARCH"];

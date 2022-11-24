@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";

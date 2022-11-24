@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
+const { ROLES_LIST } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
-
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -13,6 +13,105 @@ const File = new mongoose.Schema({
   uploadedAt: Date,
   size: Number,
   mimetype: String,
+  category: String,
+  expirationDate: Date,
+});
+
+const CorrectionRequest = new mongoose.Schema({
+  moderatorId: {
+    type: mongoose.ObjectId,
+    required: true,
+    documentation: {
+      description: "Identifiant du demandeur",
+    },
+  },
+  cohort: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Cohorte du jeune au moment de la dernière action sur cette demande de correction",
+    },
+  },
+  field: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Champs concerné pour la demande de correction. (une seule demande par champs",
+    },
+  },
+  reason: {
+    type: String,
+    documentation: {
+      description: "Motif de la demande de correction",
+    },
+  },
+  message: {
+    type: String,
+    documentation: {
+      description: "Message complétementaire pour la demande de correction",
+    },
+  },
+  status: {
+    type: String,
+    required: true,
+    default: "PENDING",
+    enum: ["PENDING", "SENT", "REMINDED", "CORRECTED", "CANCELED"],
+    documentation: {
+      description: "Etat de la demande de correction",
+    },
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    documentation: {
+      description: "Date de création de la demande de correction",
+    },
+  },
+
+  sentAt: {
+    type: Date,
+    documentation: {
+      description: "Date de premier envoi de la demande de correction",
+    },
+  },
+  remindedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de la dernière relance envoyée au jeune",
+    },
+  },
+  correctedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de correction du jeune",
+    },
+  },
+  canceledAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'annulation de la demande",
+    },
+  },
+});
+
+const Note = new mongoose.Schema({
+  phase: {
+    type: String,
+    enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
+  },
+  note: { type: String, required: true, maxLength: 500 },
+  referent: new mongoose.Schema({
+    _id: { type: mongoose.Types.ObjectId, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ROLES_LIST,
+      required: true,
+    },
+  }),
+  createdAt: { type: Date, required: true },
+  updatedAt: { type: Date, required: true },
 });
 
 const Schema = new mongoose.Schema({
@@ -90,15 +189,42 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    default: "2022",
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
+    enum: [
+      "Juillet 2023",
+      "Juin 2023",
+      "Avril 2023 - B",
+      "Avril 2023 - A",
+      "Février 2023 - C",
+      "Juillet 2022",
+      "Juin 2022",
+      "Février 2022",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "à venir",
+    ],
     documentation: {
       description: "Cohorte",
     },
   },
   originalCohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
+    enum: [
+      "Juillet 2023",
+      "Juin 2023",
+      "Avril 2023 - B",
+      "Avril 2023 - A",
+      "Février 2023 - C",
+      "Juillet 2022",
+      "Juin 2022",
+      "Février 2022",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "à venir",
+    ],
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -126,7 +252,20 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE", "ABANDONED"],
+    enum: [
+      "IN_PROGRESS",
+      "WAITING_VALIDATION",
+      "WAITING_CORRECTION",
+      "REINSCRIPTION",
+      "VALIDATED",
+      "REFUSED",
+      "WITHDRAWN",
+      "DELETED",
+      "WAITING_LIST",
+      "NOT_ELIGIBLE",
+      "ABANDONED",
+      "NOT_AUTORISED",
+    ],
     documentation: {
       description: "Statut général du volontaire",
     },
@@ -228,6 +367,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  reinscriptionStep2023: {
+    type: String,
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
+    documentation: {
+      description: "Étape du tunnel de réinscription 2023",
+    },
+  },
+
+  inscriptionStep2023: {
+    type: String,
+    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    documentation: {
+      description: "Étape du tunnel d'inscription 2023",
+    },
+  },
+
   // keep track of the current inscription step
   inscriptionStep: {
     type: String,
@@ -235,6 +390,13 @@ const Schema = new mongoose.Schema({
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
+    },
+  },
+
+  inscriptionDoneDate: {
+    type: Date,
+    documentation: {
+      description: "Date de validation de l'inscription par le jeune",
     },
   },
 
@@ -495,6 +657,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  phase2ApplicationFilesType: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des type de fichier des candidatures de phase 2 pour le jeune",
+    },
+  },
+
   phase2NumberHoursDone: {
     type: String,
     documentation: {
@@ -571,6 +741,13 @@ const Schema = new mongoose.Schema({
     enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "Densité de la ville  pendant le snu du volontaire",
+    },
+  },
+  isRegionRural: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Ruralité de la ville pendant le snu du volontaire",
     },
   },
   department: {
@@ -797,6 +974,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 1",
     },
   },
+  parent1CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la Ville du parent 1",
+    },
+  },
   parent1Department: {
     type: String,
     documentation: {
@@ -825,6 +1008,48 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le parent 1 s'est identifié via France Connect",
+    },
+  },
+  parent1Inscription2023Token: {
+    type: String,
+    documentation: {
+      description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent1DataVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AddressVerified: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 a certifié l'exactitude des renseignements",
+    },
+  },
+  parent1AllowCovidAutotest: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 autorise les autotests Covid",
+    },
+  },
+  parent1AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 1 donne les droits à l'image de son enfant.",
+    },
+  },
+
+  parent1ContactPreference: {
+    type: String,
+    enum: ["email", "phone"],
+    documentation: {
+      description: "Préférence de contact du parent 1",
     },
   },
 
@@ -889,6 +1114,12 @@ const Schema = new mongoose.Schema({
       description: "Ville du parent 2",
     },
   },
+  parent2CityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la ville du parent 2",
+    },
+  },
   parent2Department: {
     type: String,
     documentation: {
@@ -917,6 +1148,27 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le parent 2 s'est identifié via France Connect",
+    },
+  },
+  parent2Inscription2023Token: {
+    type: String,
+    documentation: {
+      description: "Token d'inscription 2023 du parent 1",
+    },
+  },
+  parent2AllowImageRights: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le parent 2 donne les droits à l'image de son enfant.",
+    },
+  },
+
+  parent2ContactPreference: {
+    type: String,
+    enum: ["email", "phone"],
+    documentation: {
+      description: "Préférence de contact du parent 2",
     },
   },
 
@@ -1115,6 +1367,45 @@ const Schema = new mongoose.Schema({
   },
 
   // * Consentements
+  parentAllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Les representants autorise le jeune à participer au SNU",
+    },
+  },
+  parent1AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 1 autorise le jeune à participer au SNU",
+    },
+  },
+  parent2AllowSNU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant 2 autorise le jeune à participer au SNU",
+    },
+  },
+  parent1ValidationDate: {
+    type: Date,
+    documentation: {
+      description: "La date à laquelle le representant 1 autorise ou pas le jeune à participer au SNU",
+    },
+  },
+  parent2ValidationDate: {
+    type: Date,
+    documentation: {
+      description: "La date à laquelle le representant 2 autorise ou pas le droit à l'image",
+    },
+  },
+  parent2RejectSNUComment: {
+    type: String,
+    documentation: {
+      description: "Indique la personne, le jour et la date de notification du rejet",
+    },
+  },
   dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
@@ -1259,6 +1550,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac",
     },
   },
+  parentStatementOfHonorInvalidId: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant a fait une déclaration sur l'honneur qu'il allait mettre à jour la CNI du volontaire.",
+    },
+  },
 
   // * JDC
   jdc: {
@@ -1300,7 +1598,7 @@ const Schema = new mongoose.Schema({
   },
   period: {
     type: String,
-    enum: ["DURING_HOLIDAYS", "DURING_SCHOOL"],
+    enum: ["WHENEVER", "DURING_HOLIDAYS", "DURING_SCHOOL"],
     documentation: {
       description: "Période privilégiée pour réaliser des missions",
     },
@@ -1437,6 +1735,29 @@ const Schema = new mongoose.Schema({
     militaryPreparationFilesCertificate: [File],
   },
 
+  latestCNIFileExpirationDate: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
+  CNIFileNotValidOnStart: {
+    type: String,
+    enum: ["false", "true"],
+    documentation: {
+      description: "Date d'expiration de la CNI File non valide au début de la Cohorte",
+    },
+  },
+
+  latestCNIFileCategory: {
+    type: String,
+    enum: ["cniOld", "cniNew", "passport"],
+    documentation: {
+      description: "Catégorie du fichier le plus récent dans files.cniFiles",
+    },
+  },
+
   missionsInMail: {
     type: [
       {
@@ -1462,6 +1783,21 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Statut de la dernière demande d'équivalence phase 2",
+    },
+  },
+
+  // --- demandes de corrections : phase 0
+  correctionRequests: {
+    type: [CorrectionRequest],
+    default: undefined,
+    documentation: {
+      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
+    },
+  },
+  notes: {
+    type: [Note],
+    documentation: {
+      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
     },
   },
 
@@ -1562,6 +1898,8 @@ Schema.plugin(
       "invitationExpires",
       "phase3Token",
       "loginAttempts",
+      "parent1Inscription2023Token",
+      "parent2Inscription2023Token",
     ],
   }),
   MODELNAME,

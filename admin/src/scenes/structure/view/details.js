@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { Link, useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
 
-import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner, canDeleteReferent } from "../../../utils";
-import StructureView from "./wrapper";
-import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
-import SocialIcons from "../../../components/SocialIcons";
-import Invite from "../components/invite";
-import { Box, BoxTitle } from "../../../components/box";
 import Badge from "../../../components/Badge";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import DeleteBtnComponent from "../components/DeleteBtnComponent";
+import { Box, BoxTitle } from "../../../components/box";
 import ModalChangeTutor from "../../../components/modals/ModalChangeTutor";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../../components/modals/ModalReferentDeleted";
+import SocialIcons from "../../../components/SocialIcons";
+import api from "../../../services/api";
+import { canDeleteReferent, copyToClipboard, ES_NO_LIMIT, htmlCleaner, ROLES, translate } from "../../../utils";
+import DeleteBtnComponent from "../components/DeleteBtnComponent";
+import Invite from "../components/invite";
+import StructureView from "./wrapper";
 
 export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);

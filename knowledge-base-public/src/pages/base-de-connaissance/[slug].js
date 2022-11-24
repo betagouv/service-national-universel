@@ -6,7 +6,7 @@ import KnowledgeBasePublicContent from "../../components/knowledge-base/Knowledg
 import useUser from "../../hooks/useUser";
 import Modal from "../../components/Modal";
 import Link from "next/link";
-import { adminURL, appURL, supportURL } from "../../config";
+import { adminURL, appURL, baseDeConnaissanceURL } from "../../config";
 
 const Content = () => {
   const router = useRouter();
@@ -57,10 +57,10 @@ const Content = () => {
         </Link>
         <h2 className="ml-4 mb-16 mt-6 text-xl font-bold">Vous devez vous connecter pour accéder à cet article</h2>
         <div className="flex w-full flex-col items-center justify-center gap-3">
-          <Link href={`${adminURL}/auth?redirect=${supportURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
+          <Link href={`${adminURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
             <button>Espace professionnel</button>
           </Link>
-          <Link href={`${appURL}/auth?redirect=${supportURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
+          <Link href={`${appURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
             <button>Espace volontaire</button>
           </Link>
         </div>

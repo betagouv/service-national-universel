@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
 
-import { translate as t, isInRuralArea, getAge, YOUNG_STATUS, ROLES, formatPhoneNumberFR } from "../../utils";
-import DownloadButton from "../../components/buttons/DownloadButton";
-import Historic from "../../components/historic";
-import PatchHistoric from "../../components/views/PatchHistoric";
-import api from "../../services/api";
-import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel, { Info, Details } from "../../components/Panel";
-import { appURL } from "../../config";
+import { formatDateFR } from "snu-lib";
 import Badge from "../../components/Badge";
-import plausibleEvent from "../../services/pausible";
+import DownloadButton from "../../components/buttons/DownloadButton";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
+import Historic from "../../components/historic";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import Panel, { Details, Info } from "../../components/Panel";
+import PatchHistoric from "../../components/views/PatchHistoric";
+import { appURL } from "../../config";
+import api from "../../services/api";
+import plausibleEvent from "../../services/plausible";
+import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATUS } from "../../utils";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -35,7 +36,7 @@ export default function InscriptionPanel({ onChange, value }) {
       isOpen: true,
       onConfirm: onConfirmDelete,
       title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
-      message: "Cette action est irréversible.",
+      message: "Cette action est irréversible. La suppression prend jusqu'à 1 minute.",
     });
   };
 
@@ -90,9 +91,6 @@ export default function InscriptionPanel({ onChange, value }) {
           <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          <Link to={`/volontaire/${value._id}/edit`} onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
-            <PanelActionButton icon="pencil" title="Modifier" />
-          </Link>
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
@@ -119,49 +117,16 @@ export default function InscriptionPanel({ onChange, value }) {
         {(young?.files.cniFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
-            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e}`)}
+            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e._id}`)}
             title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
           />
         ))}
-      </Info>
-      <Info title="Consentements du ou des représentants légaux" id={value._id}>
-        {(young?.files.parentConsentmentFiles || []).map((e, i) => (
-          <DownloadButton
-            key={i}
-            source={() => api.get(`/young/${value._id}/documents/parentConsentmentFiles/${e}`)}
-            title={`Télécharger le formulaire (${i + 1}/${young.files.parentConsentmentFiles.length})`}
-          />
-        ))}
-        {isFromFranceConnect(young) && (
-          <div style={{ marginTop: "1rem" }}>
-            <img src={require("../../assets/fc_logo_v2.png")} height={60} />
-            <br />
-            <b>Consentement parental validé via FranceConnect.</b>
-            <br />
-            Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+        {young?.latestCNIFileExpirationDate ? (
+          <div className="mt-1">
+            <b>Date d&apos;expiration :</b> {formatDateFR(young.latestCNIFileExpirationDate)}{" "}
           </div>
-        )}
+        ) : null}
       </Info>
-      {getAge(young?.birthdateAt) < 15 ? (
-        <Info title="Traitement des données personnelles" id={value._id}>
-          {(young?.files.dataProcessingConsentmentFiles || []).map((e, i) => (
-            <DownloadButton
-              key={i}
-              source={() => api.get(`/young/${value._id}/documents/dataProcessingConsentmentFiles/${e}`)}
-              title={`Télécharger le document (${i + 1}/${value.files.dataProcessingConsentmentFiles.length})`}
-            />
-          ))}
-          {isFromFranceConnect(young) && (
-            <div style={{ marginTop: "1rem" }}>
-              <img src={require("../../assets/fc_logo_v2.png")} height={60} />
-              <br />
-              <b>Consentement parental validé via FranceConnect.</b>
-              <br />
-              Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
-            </div>
-          )}
-        </Info>
-      ) : null}
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} copy />
         <Details title="Tel" value={formatPhoneNumberFR(value.phone)} />
@@ -175,7 +140,7 @@ export default function InscriptionPanel({ onChange, value }) {
         <Details title="Classe" value={t(value.grade)} />
         <Details title="Type" value={value.schoolType} />
         <Details title="Nom" value={value.schoolName} />
-        <Details title="Adresse" value={value.schoolAdress} />
+        <Details title="Adresse" value={value.schoolAddress} />
         <Details title="Ville" value={value.schoolCity && value.schoolZip && `${value.schoolCity} (${value.schoolZip})`} />
         <Details title="Dép" value={value.schoolDepartment} />
         <Details title="Région" value={value.schoolRegion} />
@@ -192,7 +157,6 @@ export default function InscriptionPanel({ onChange, value }) {
         <Details title="Aménagement pour mobilité réduite" value={t(value.reducedMobilityAccess) || "Non"} />
         <Details title="Affecté dans son département de résidence" value={t(value.handicapInSameDepartment) || "Non"} />
         <Details title="Activités de haut niveau" value={t(value.highSkilledActivity)} />
-        <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(value.highSkilledActivityInSameDepartment) || "Non"} />
       </Info>
       <Info title="Représentant légal n°1" id={value._id}>
         <Details title="Statut" value={t(value.parent1Status)} />
@@ -218,10 +182,6 @@ export default function InscriptionPanel({ onChange, value }) {
           <Details title="Région" value={value.parent2Region} />
         </Info>
       )}
-      <Info title="Consentements">
-        <Details title={`Consentements validés par ${value.firstName} ${value.lastName}`} value={t(value.consentment || "false")} />
-        <Details title="Consentements validés par ses représentants légaux" value={t(value.parentConsentment || "false")} />
-      </Info>
       {value.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>

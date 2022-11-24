@@ -1,68 +1,64 @@
+const { YOUNG_STATUS, getZoneByDepartment, sessions2023, departmentLookUp } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
-const { capture } = require("../sentry");
 
-async function getCohortSessionsAvailability(young) {
-  let sessions = [
-    // {
-    //   month: "Juin",
-    //   excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
-    //   excludedZip: [],
-    //   includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
-    //   stringDate: "12 au 24 juin 2022",
-    //   buffer: 1.25,
-    //   id: "Juin 2022",
-    // },
-    {
-      month: "Juillet",
-      excludedGrade: [],
-      excludedZip: [],
-      includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
-      inscriptionLimitDate: "2022-06-21, 00:00:01",
-      stringDate: "3 au 15 juillet 2022",
-      buffer: 1.25,
-      id: "Juillet 2022",
-    },
-  ].filter((el) => {
-    if (Date.now() > new Date(el.inscriptionLimitDate).getTime()) return false;
-    if (el.excludedGrade.includes(young.grade)) return false;
-    else if (
-      new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
-      new Date(young.birthdateAt).getTime() <= new Date(el.includedBirthdate.end).getTime()
-    ) {
-      return true;
-    }
-    return false;
-  });
-
-  try {
-    for (let session of sessions) {
-      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: young.department, cohort: session.id });
-      if (!inscriptionGoal || !inscriptionGoal.max) {
-        session.goalReached = false;
-        continue;
-      }
-
-      const nbYoung = await YoungModel.find({
-        department: young.department,
-        cohort: session.id,
-        status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
-      }).count();
-      if (nbYoung === 0) {
-        session.goalReached = false;
-        continue;
-      }
-
-      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
-      if (fillingRatio >= 1) session.goalReached = true;
-      else session.goalReached = false;
-    }
-    return sessions;
-  } catch (error) {
-    capture(error);
+async function getAvailableSessions(young) {
+  let dep = young?.schoolDepartment || young?.department || null;
+  if (dep && (!isNaN(dep) || ["2A", "2B"].includes(dep))) {
+    if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
+    else dep = departmentLookUp[dep];
   }
+  let region = young?.schoolRegion || young?.region;
+
+  let sessions = sessions2023.filter(
+    (session) =>
+      session.eligibility.zones.includes(getZoneByDepartment(dep)) &&
+      session.eligibility.schoolLevels.includes(young.grade) &&
+      session.eligibility.bornAfter < young.birthdateAt &&
+      session.eligibility.bornBefore > young.birthdateAt &&
+      (session.eligibility.inscriptionEndDate > Date.now() ||
+        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEnDate > Date.now())),
+  );
+
+  const sessionNames = sessions.map(({ name }) => name);
+
+  const numberOfPlaces = await InscriptionGoalModel.aggregate([
+    { $match: { region: region, cohort: { $in: sessionNames } } },
+    { $group: { _id: "$cohort", total: { $sum: "$max" } } },
+  ]);
+
+  const numberOfCandidates = await YoungModel.aggregate([
+    {
+      $match: {
+        $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
+        cohort: { $in: sessionNames },
+        status: { $nin: [YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
+      },
+    },
+    { $group: { _id: "$cohort", total: { $sum: 1 } } },
+  ]);
+
+  const numberOfRegistered = await YoungModel.aggregate([
+    {
+      $match: {
+        $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
+        cohort: { $in: sessionNames },
+        status: YOUNG_STATUS.VALIDATED,
+      },
+    },
+    { $group: { _id: "$cohort", total: { $sum: 1 } } },
+  ]);
+
+  for (let session of sessions) {
+    session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
+    session.numberOfRegistered = numberOfRegistered.find(({ _id }) => _id === session.name)?.total;
+    session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
+    session.goalReached = session.numberOfCandidates >= session.numberOfPlaces * session.buffer;
+    session.isFull = session.numberOfRegistered >= session.numberOfPlaces;
+  }
+  return sessions;
 }
 
 module.exports = {
-  getCohortSessionsAvailability,
+  getAvailableSessions,
 };

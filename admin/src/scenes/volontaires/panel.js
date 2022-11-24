@@ -24,7 +24,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { ImQuotesLeft } from "react-icons/im";
 
@@ -100,9 +100,6 @@ export default function VolontairePanel({ onChange, value }) {
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
               <PanelActionButton icon="eye" title="Consulter" />
-            </Link>
-            <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-              <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
             <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
@@ -184,7 +181,7 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Région" value={young.schoolRegion} />
           <Details title="Dép" value={young.schoolDepartment} />
           <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-          <Details title="Adresse" value={young.schoolAdress} />
+          <Details title="Adresse" value={young.schoolAddress} />
         </Info>
 
         {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
@@ -199,8 +196,6 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
             <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
             <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
-            <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-            <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
           </Info>
         )}
 

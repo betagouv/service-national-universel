@@ -11,7 +11,6 @@ import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
@@ -25,7 +24,6 @@ import {
   translatePhase1,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS,
   YOUNG_STATUS_PHASE1_MOTIF,
   isTemporaryAffected,
 } from "../../../utils";
@@ -35,7 +33,8 @@ import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPoint
 import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
-import WrapperPhase1 from "./wrapper";
+import Select from "../../../components/Select2";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -184,8 +183,9 @@ export default function Phase1(props) {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase1 young={young} tab="phase1" onChange={props.onChange}>
+    <>
+      <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
+      <div className="p-[30px]">
         <Box>
           <article className="flex">
             <Bloc
@@ -196,55 +196,29 @@ export default function Phase1(props) {
               <section className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="text-gray-500">Présence à l&apos;arrivée</div>
-                  <select
-                    className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer min-w-1/4`}
-                    value={young.cohesionStayPresence || ""}
-                    onChange={(e) => {
-                      setModalPointagePresenceArrivee({
-                        isOpen: true,
-                        value: e.target.value,
-                      });
-                    }}
-                    style={{ fontFamily: "Marianne" }}>
-                    <option disabled label="Présence à l'arrivée">
-                      Présence à l&apos;arrivée
-                    </option>
-                    {[
+                  <Select
+                    options={[
                       { label: "Non renseigné", value: "", disabled: true, hidden: true },
                       { label: "Présent", value: "true" },
                       { label: "Absent", value: "false" },
-                    ].map((option, i) => (
-                      <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    ]}
+                    onChange={setModalPointagePresenceArrivee}
+                    value={young.cohesionStayPresence || ""}
+                    placeholder={young.cohesionStayPresence === "true" ? "Présent" : "Absent"}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-gray-500">Présence JDM</div>
-                  <select
-                    className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer min-w-1/4`}
-                    value={young.presenceJDM || ""}
-                    onChange={(e) => {
-                      setModalPointagePresenceJDM({
-                        isOpen: true,
-                        value: e.target.value,
-                      });
-                    }}
-                    style={{ fontFamily: "Marianne" }}>
-                    <option disabled label="Présence JDM">
-                      Présence JDM
-                    </option>
-                    {[
+                  <Select
+                    options={[
                       { label: "Non renseigné", value: "", disabled: true, hidden: true },
                       { label: "Présent", value: "true" },
                       { label: "Absent", value: "false" },
-                    ].map((option, i) => (
-                      <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    ]}
+                    onChange={setModalPointagePresenceJDM}
+                    value={young.presenceJDM || ""}
+                    placeholder={young.presenceJDM === "true" ? "Présent" : "Absent"}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-gray-500">Départ {young.departSejourMotif ? `(${young.departSejourMotif})` : ""}</div>
@@ -332,7 +306,7 @@ export default function Phase1(props) {
             </Row>
           ) : null}
         </Box>
-      </WrapperPhase1>
+      </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -365,7 +339,7 @@ export default function Phase1(props) {
         young={young}
       />
       <ModalAffectations isOpen={modalAffectations?.isOpen} onCancel={() => setModalAffectation({ isOpen: false })} young={young} />
-    </div>
+    </>
   );
 }
 

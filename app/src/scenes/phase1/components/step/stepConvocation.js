@@ -14,6 +14,8 @@ import { setYoung } from "../../../../redux/auth/actions";
 import api from "../../../../services/api";
 import Convocation from "../Convocation";
 import plausibleEvent from "../../../../services/plausible";
+import { capture } from "../../../../sentry";
+import { translate } from "snu-lib";
 
 export default function StepAgreement({ young }) {
   const [showConvocation, setShowConvocation] = useState(false);
@@ -38,15 +40,22 @@ export default function StepAgreement({ young }) {
   };
 
   const handleMail = async () => {
-    let template = "cohesion";
-    let type = "convocation";
-    const { ok } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
-      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
-    });
-    if (ok) toastr.success(`Document envoyé à ${young.email}`);
-    else toastr.error("Erreur lors de l'envoie du document");
-    setStateMobil(false);
-    setModal({ isOpen: false, onConfirm: null });
+    try {
+      let template = "cohesion";
+      let type = "convocation";
+      const { ok, code } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+      });
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+      setStateMobil(false);
+      setModal({ isOpen: false, onConfirm: null });
+    } catch (e) {
+      capture(e);
+      toastr.error("Erreur lors de l'envoie du document : ", e.message);
+      setStateMobil(false);
+      setModal({ isOpen: false, onConfirm: null });
+    }
   };
 
   return (

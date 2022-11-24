@@ -75,8 +75,9 @@ export default function List() {
         }
       }
     }
-    if (selectedFields.includes("structureInfo", "structureLocation")) {
+    if (["structureInfo", "structureLocation"].some((e) => selectedFields.includes(e))) {
       const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
+      console.log("🚀 ~ file: list.js ~ line 80 ~ transform ~ structureIds", structureIds);
       const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
       if (responses?.length) {
         const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
@@ -86,7 +87,7 @@ export default function List() {
     return all.map((data) => {
       if (!data.domains) data.domains = [];
       if (!data.structure) {
-        data.structure = [];
+        data.structure = {};
         data.structure.types = [];
       }
       const allFields = {
@@ -103,6 +104,7 @@ export default function List() {
           "Statut de la mission": translate(data.status),
           "Créée lé": formatLongDateFR(data.createdAt),
           "Mise à jour le": formatLongDateFR(data.updatedAt),
+          "Commentaire sur le statut": data.statusComment,
         },
         missionType: {
           "Domaine principal de la mission": translate(data.mainDomain) || "Non renseigné",

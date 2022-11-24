@@ -38,7 +38,6 @@ exports.handler = async () => {
       await getGoalAndComputeFillingRates({ department, values });
     }
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "computeGoalsInscription", text: JSON.stringify(e) });
   }

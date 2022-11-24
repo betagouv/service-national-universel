@@ -7,7 +7,7 @@ import MultiSelect from "../components/MultiSelect";
 
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
-//import Schools from "./schools";
+import Schools from "./schools";
 import Gender from "./gender";
 
 import Status from "./status";
@@ -20,7 +20,6 @@ import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
 import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
-import UnavailableFeature from "../../../components/unavailableFeature";
 
 export default function Index({ onChangeFilter = () => {} }) {
   const [filter, setFilter] = useState();
@@ -33,7 +32,7 @@ export default function Index({ onChangeFilter = () => {} }) {
         academy: [],
         region: [],
         department: [],
-        cohort: filter?.cohort || ["Juin 2022", "Juillet 2022", "2022"],
+        cohort: filter?.cohort || ["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"],
       }),
       ...n,
     });
@@ -88,6 +87,11 @@ export default function Index({ onChangeFilter = () => {} }) {
                   { value: "Février 2022", label: "Février 2022" },
                   { value: "Juin 2022", label: "Juin 2022" },
                   { value: "Juillet 2022", label: "Juillet 2022" },
+                  { value: "Février 2023 - C", label: "Février 2023 - C" },
+                  { value: "Avril 2023 - A", label: "Avril 2023 - A" },
+                  { value: "Avril 2023 - B", label: "Avril 2023 - B" },
+                  { value: "Juin 2023", label: "Juin 2023" },
+                  { value: "Juillet 2023", label: "Juillet 2023" },
                 ]}
                 onChange={(cohort) => updateFilter({ cohort })}
                 value={filter.cohort}
@@ -134,15 +138,11 @@ export default function Index({ onChangeFilter = () => {} }) {
             <Col md={12} lg={4}>
               <RuralArea filter={filter} />
             </Col>
-            <Col md={12}>
-              <UnavailableFeature
-                functionality="Tableau des établissements"
-                text="Pour consulter les établissements de vos volontaires et des volontaires scolarisés dans votre département, rendez-vous sur les exports volontaires :"
-                link="https://admin.snu.gouv.fr/volontaire"
-                textLink="Cliquez ici"
-              />
-              {/* <Schools filter={filter} /> */}
-            </Col>
+            {user.role === ROLES.REFERENT_DEPARTMENT ? (
+              <Col md={12}>
+                <Schools filter={filter} />
+              </Col>
+            ) : null}
           </Row>
         </>
       )}

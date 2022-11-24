@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 import {
   translate as t,
+  translateGrade,
   isInRuralArea,
   ROLES,
   copyToClipboard,
@@ -154,13 +155,13 @@ export default function VolontaireViewDetails({ young, onChange }) {
             <Col md={6}>
               <Bloc title="Situation">
                 <Details title="Statut" value={t(young.situation)} />
-                <Details title="Classe" value={t(young.grade)} />
+                <Details title="Classe" value={translateGrade(young.grade)} />
                 <Details title="Type" value={young.schoolType} />
                 <Details title="Nom" value={young.schoolName} />
                 <Details title="Région" value={young.schoolRegion} />
                 <Details title="Dép" value={young.schoolDepartment} />
                 <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-                <Details title="Adresse" value={young.schoolAdress} />
+                <Details title="Adresse" value={young.schoolAddress} />
               </Bloc>
               {young.jdc && young.cohort === "2020" && (
                 <Bloc title="Journée de Défense et Citoyenneté">

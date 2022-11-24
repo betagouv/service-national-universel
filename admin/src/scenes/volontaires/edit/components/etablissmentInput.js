@@ -211,7 +211,7 @@ function SchoolNameTypeahead({ onChange, country, city, initialValue, disabled =
           } else {
             filter.push({ term: { "country.keyword": country } });
           }
-          const { responses } = await api.esQuery("school", {
+          const { responses } = await api.esQuery("schoolramses", {
             query: {
               bool: {
                 must: { match_bool_prefix: { fullName: { operator: "and", query: (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "") } } },

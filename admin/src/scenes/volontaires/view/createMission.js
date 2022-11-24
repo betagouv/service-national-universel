@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import Select, { components } from "react-select";
 import { Col, Input, Row } from "reactstrap";
 import styled from "styled-components";
-import plausibleEvent from "../../../services/pausible";
+import plausibleEvent from "../../../services/plausible";
 
 import CrossSVG from "../../../assets/cross.svg";
 import PlusSVG from "../../../assets/plus.svg";

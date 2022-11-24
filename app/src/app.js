@@ -1,54 +1,66 @@
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Router, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
 import queryString from "query-string";
 import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
 
-import Account from "./scenes/account";
-import Auth from "./scenes/auth";
-import Home from "./scenes/home";
-import Inscription from "./scenes/inscription";
-import Phase1 from "./scenes/phase1";
-import Phase2 from "./scenes/phase2";
-import Phase3 from "./scenes/phase3";
-import Diagoriente from "./scenes/diagoriente";
-import SupportCenter from "./scenes/support-center";
-import Preferences from "./scenes/preferences";
-import Missions from "./scenes/missions";
-import Candidature from "./scenes/candidature";
-import Contract from "./scenes/contract";
-import ContractDone from "./scenes/contract/done";
-import Loader from "./components/Loader";
-import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import MilitaryPreparation from "./scenes/militaryPreparation";
-import Engagement from "./scenes/engagement";
+import Header from "./components/header/index";
+import Loader from "./components/Loader";
+import Account from "./scenes/account";
+import AllEngagements from "./scenes/all-engagements/index";
+import AuthV2 from "./scenes/authV2";
 import Bug from "./scenes/bug";
+import Candidature from "./scenes/candidature";
 import CGU from "./scenes/CGU";
-import PublicSupport from "./scenes/public-support-center";
+import Contract from "./scenes/contract";
+import ContractDone from "./scenes/contract/done";
 import Desistement from "./scenes/desistement";
-import changeSejour from "./scenes/phase1/changeSejour";
+import Diagoriente from "./scenes/diagoriente";
+import Engagement from "./scenes/engagement";
+import Home from "./scenes/home";
+import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
+import MilitaryPreparation from "./scenes/militaryPreparation";
+import Missions from "./scenes/missions";
+import Phase1 from "./scenes/phase1";
+import changeSejour from "./scenes/phase1/changeSejour";
+import Phase2 from "./scenes/phase2";
+import Phase3 from "./scenes/phase3";
+import Preferences from "./scenes/preferences";
+import PreInscription from "./scenes/preinscription";
+import NonEligible from "./scenes/noneligible";
+import PublicSupport from "./scenes/public-support-center";
+import ReInscription from "./scenes/reinscription";
+import RepresentantsLegaux from "./scenes/representants-legaux";
+import SupportCenter from "./scenes/support-center";
 
-import api, { initApi } from "./services/api";
-import { appURL, maintenance } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
+import { appURL, environment, maintenance } from "./config";
+import api, { initApi } from "./services/api";
 
-import "./index.css";
-import { YOUNG_STATUS, ENABLE_PM, inscriptionCreationOpenForYoungs } from "./utils";
-import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
+import GoogleTags from "./components/GoogleTags";
+import "./index.css";
+import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { youngCanChangeSession } from "snu-lib";
-import { initSentry, SentryRoute, history } from "./sentry";
+import { history, initSentry, SentryRoute } from "./sentry";
+import * as Sentry from "@sentry/react";
 
 initSentry();
 initApi();
+
+function FallbackComponent() {
+  return <></>;
+}
+
+const myFallback = <FallbackComponent />;
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -82,30 +94,38 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
-      <ScrollToTop />
-      <GoogleTags />
-      <div className="main">
-        {maintenance & !localStorage?.getItem("override_maintenance") ? (
-          <Switch>
-            <SentryRoute path="/" component={Maintenance} />
-          </Switch>
-        ) : (
-          <Switch>
-            <SentryRoute path="/bug" component={Bug} />
-            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-            <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-            <SentryRoute path="/validate-contract/done" component={ContractDone} />
-            <SentryRoute path="/validate-contract" component={Contract} />
-            <SentryRoute path="/inscription" component={Inscription} />
-            <SentryRoute path="/auth" component={Auth} />
-            <SentryRoute path="/" component={Espace} />
-          </Switch>
-        )}
-        <Footer />
-      </div>
-    </Router>
+    <Sentry.ErrorBoundary fallback={myFallback}>
+      <Router history={history}>
+        <ScrollToTop />
+        <GoogleTags />
+        <div className="main">
+          {maintenance & !localStorage?.getItem("override_maintenance") ? (
+            <Switch>
+              <SentryRoute path="/" component={Maintenance} />
+            </Switch>
+          ) : (
+            <Switch>
+              <SentryRoute path="/bug" component={Bug} />
+              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+              <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+              <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
+              <SentryRoute path="/validate-contract/done" component={ContractDone} />
+              <SentryRoute path="/validate-contract" component={Contract} />
+              <SentryRoute path="/inscription2023" component={Inscription2023} />
+              {/* @todo: clean this */}
+              <SentryRoute path="/noneligible" component={NonEligible} />
+              <SentryRoute path="/reinscription" component={ReInscription} />
+              <SentryRoute path="/preinscription" component={PreInscription} />
+              <SentryRoute path="/auth" component={AuthV2} />
+              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
+              <SentryRoute path="/public-engagements" component={AllEngagements} />
+              <SentryRoute path="/" component={Espace} />
+            </Switch>
+          )}
+          <Footer />
+        </div>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 
@@ -128,7 +148,6 @@ const Espace = () => {
           </>
         ),
         onConfirm: async () => {
-          // todo add field in young model
           const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
           if (!ok) return toastr.error(`Une erreur est survenue : ${code}`);
           return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
@@ -140,12 +159,18 @@ const Espace = () => {
 
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
+    if (redirect === "inscription") return <Redirect to="/preinscription" />;
+    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
-  const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
 
-  if (!inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
-  if (youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
+
+  const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
+  if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
+
+  const forceRedirectInscription =
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) || (young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
+  if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
     <>

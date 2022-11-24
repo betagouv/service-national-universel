@@ -5,7 +5,7 @@ import { YOUNG_SITUATIONS, translate as t, isInRuralArea, getAge, formatDateFRTi
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 
 export default function DeletedVolontairePanel({ onChange, value }) {
   const [young, setYoung] = useState(null);

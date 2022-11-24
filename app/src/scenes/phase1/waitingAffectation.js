@@ -13,7 +13,7 @@ export default function WaitingAffectation({ young }) {
   return (
     <>
       <Container>
-        <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
+        <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center mb-8 lg:mb-0">
           <article>
             <h1 className="text-3xl md:text-5xl mb-4">
               Mon séjour de cohésion
@@ -28,8 +28,8 @@ export default function WaitingAffectation({ young }) {
               </strong>
             </h1>
             <p className="text-gray-600 text-base md:text-xl">
-              Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
-              nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+              Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes pour créer ainsi des liens nouveaux et
+              développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
           </article>
           <img src={hero} />

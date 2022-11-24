@@ -318,6 +318,7 @@ function validateYoung(young, user) {
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
     cohort: Joi.string().allow(null, ""),
+    parentStatementOfHonorInvalidId: Joi.string().allow(null, ""),
     originalCohort: Joi.string().allow(null, ""),
     cohortChangeReason: Joi.string().allow(null, ""),
     cohortDetailedChangeReason: Joi.string().allow(null, ""),
@@ -383,6 +384,7 @@ function validateYoung(young, user) {
     city: Joi.string().allow(null, ""),
     cityCode: Joi.string().allow(null, ""),
     populationDensity: Joi.string().allow(null, ""),
+    isRegionRural: Joi.string().allow(null, ""),
     department: Joi.string().allow(null, ""),
     region: Joi.string().allow(null, ""),
     country: Joi.string().allow(null, ""),
@@ -427,14 +429,17 @@ function validateYoung(young, user) {
     schoolId: Joi.string().allow(null, ""),
     academy: Joi.string().allow(null, ""),
     employed: Joi.string().allow(null, ""),
+    parentAllowSNU: Joi.string().allow(null, ""),
     parent1Status: Joi.string().allow(null, ""),
     parent1FirstName: Joi.string().allow(null, ""),
     parent1LastName: Joi.string().allow(null, ""),
     parent1Email: Joi.string().allow(null, ""),
+    parent1AllowSNU: Joi.string().allow(null, ""),
     parent1Phone: Joi.string().allow(null, ""),
     parent1OwnAddress: Joi.string().allow(null, ""),
     parent1Address: Joi.string().allow(null, ""),
     parent1ComplementAddress: Joi.string().allow(null, ""),
+    parent1AllowImageRights: Joi.string().allow(null, ""),
     parent1Zip: Joi.string().allow(null, ""),
     parent1City: Joi.string().allow(null, ""),
     parent1Department: Joi.string().allow(null, ""),
@@ -448,6 +453,7 @@ function validateYoung(young, user) {
       .allow(null),
     parent1FromFranceConnect: Joi.string().allow(null, ""),
     parent2Status: Joi.string().allow(null, ""),
+    parent2AllowSNU: Joi.string().allow(null, ""),
     parent2FirstName: Joi.string().allow(null, ""),
     parent2LastName: Joi.string().allow(null, ""),
     parent2Email: Joi.string().allow(null, ""),
@@ -455,6 +461,7 @@ function validateYoung(young, user) {
     parent2OwnAddress: Joi.string().allow(null, ""),
     parent2Address: Joi.string().allow(null, ""),
     parent2ComplementAddress: Joi.string().allow(null, ""),
+    parent2AllowImageRights: Joi.string().allow(null, ""),
     parent2Zip: Joi.string().allow(null, ""),
     parent2City: Joi.string().allow(null, ""),
     parent2Department: Joi.string().allow(null, ""),
@@ -677,6 +684,31 @@ function validatePhase1Document(phase1document, key) {
   }
 }
 
+function validatePhase2Preference(preferences) {
+  return Joi.object()
+    .keys({
+      professionnalProject: Joi.string().allow(null, ""),
+      professionnalProjectPrecision: Joi.string().allow(null, ""),
+      engaged: Joi.string().allow(null, ""),
+      desiredLocation: Joi.string().allow(null, ""),
+      engagedDescription: Joi.string().allow(null, ""),
+      domains: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      missionFormat: Joi.string().allow(null, ""),
+      mobilityTransport: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      period: Joi.string().allow(null, ""),
+      mobilityTransportOther: Joi.string().allow(null, ""),
+      mobilityNearHome: Joi.string().allow(null, ""),
+      mobilityNearSchool: Joi.string().allow(null, ""),
+      mobilityNearRelative: Joi.string().allow(null, ""),
+      mobilityNearRelativeName: Joi.string().allow(null, ""),
+      mobilityNearRelativeAddress: Joi.string().allow(null, ""),
+      mobilityNearRelativeZip: Joi.string().allow(null, ""),
+      mobilityNearRelativeCity: Joi.string().allow(null, ""),
+      periodRanking: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+    })
+    .validate(preferences, { stripUnknown: true });
+}
+
 module.exports = {
   validateId,
   validateString,
@@ -699,4 +731,5 @@ module.exports = {
   validateEvent,
   validateSessionPhase1,
   validatePhase1Document,
+  validatePhase2Preference,
 };

@@ -21,14 +21,17 @@ import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
 import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
+import CenterV2 from "./scenes/centersV2";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
+import PointDeRassemblement from "./scenes/pointDeRassemblement";
 import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
+import PlanDeTransport from "./scenes/plan-transport";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -38,15 +41,22 @@ import Loader from "./components/Loader";
 import api, { initApi } from "./services/api";
 import { initSentry, SentryRoute, history } from "./sentry";
 
-import { adminURL } from "./config";
+import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
+import * as Sentry from "@sentry/react";
 
 initSentry();
 initApi();
+
+function FallbackComponent() {
+  return <></>;
+}
+
+const myFallback = <FallbackComponent />;
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -73,19 +83,21 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
-      <div className="main">
-        <Switch>
-          <SentryRoute path="/validate" component={Validate} />
-          <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-          <SentryRoute path="/auth" component={Auth} />
-          <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
-          <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-          <SentryRoute path="/" component={Home} />
-        </Switch>
-        <Footer />
-      </div>
-    </Router>
+    <Sentry.ErrorBoundary fallback={myFallback}>
+      <Router history={history}>
+        <div className="main">
+          <Switch>
+            <SentryRoute path="/validate" component={Validate} />
+            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+            <SentryRoute path="/auth" component={Auth} />
+            <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+            <SentryRoute path="/" component={Home} />
+          </Switch>
+          <Footer />
+        </div>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 
@@ -175,14 +187,19 @@ const Home = () => {
             <RestrictedRoute path="/user" component={Utilisateur} />
             <RestrictedRoute path="/contenu" component={Content} />
             <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-            <RestrictedRoute path="/centre" component={Center} />
-            <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            {environment === "production" ? <RestrictedRoute path="/centre" component={Center} /> : <RestrictedRoute path="/centre" component={CenterV2} />}
+            {environment === "production" ? (
+              <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            ) : (
+              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+            )}
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
+            <RestrictedRoute path="/plan-de-transport" component={PlanDeTransport} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>

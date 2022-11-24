@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors, department2region } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
-import plausibleEvent from "../../services/pausible";
+import plausibleEvent from "../../services/plausible";
 import { environment } from "../../config";
+import ModalInfo from "../modals/ModalInfo";
+import ChevronDown from "../../assets/icons/ChevronDown";
 
 const DrawerTab = ({ title, to, onClick, beta, exact }) => {
   if (environment === "production" && beta) return null;
@@ -19,6 +21,18 @@ const DrawerTab = ({ title, to, onClick, beta, exact }) => {
         {title}
         {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
       </NavLink>
+    </div>
+  );
+};
+
+const DrawerTabWithoutLink = ({ title, onClick, beta }) => {
+  if (environment === "production" && beta) return null;
+  return (
+    <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block cursor-pointer">
+      <div className="block py-3 pl-3 text-base hover:!text-white">
+        {title}
+        {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
+      </div>
     </div>
   );
 };
@@ -120,6 +134,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
+      {environment !== "production" && (
+        <div>
+          <div className="flex items-center justify-between py-3 pl-3 text-base text-[#A0A0A0]">
+            Plan de transport <ChevronDown className="mr-[16px]" />
+          </div>
+          <DrawerTab to="/plan-de-transport/table-repartition" title="Tableau de répartition" onClick={onClick} />
+          <DrawerTab to="/plan-de-transport/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+        </div>
+      )}
       {ssoSupportStorage === "sso-support" ? (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
@@ -127,15 +150,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           ) : (
             <>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{newTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{openedTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
                 <div>{closedTickets}</div>
               </div>
             </>
@@ -148,15 +171,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           ) : (
             <>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{newTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
                 <div>{openedTickets}</div>
               </div>
               <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
                 <div>{closedTickets}</div>
               </div>
             </>
@@ -168,7 +191,17 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
   );
 }
 
-function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
+function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history, info, setInfo }) {
+  // blocage de l'accès inscription pour les référents avec un message.
+  // Pour supprimer ce blocage, supprimer tout ce code et remettre tout simplement la ligne :
+  // <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+
+  function blockInscription(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setInfo({ ...info, isOpen: true });
+  }
+
   return (
     <>
       <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
@@ -188,15 +221,15 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
         ) : (
           <>
             <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{newTickets}</div>
             </div>
             <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{openedTickets}</div>
             </div>
             <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+              <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
               <div>{closedTickets}</div>
             </div>
           </>
@@ -204,6 +237,7 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
       </DrawerConnectToZammood>
 
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
+      <ModalInfo isOpen={info.isOpen} title={info.title} message={info.message} onClose={() => setInfo({ ...info, isOpen: false })} />
     </>
   );
 }
@@ -242,6 +276,12 @@ const Drawer = (props) => {
   const history = useHistory();
   const ssoSupportStorage = localStorage?.getItem("sso-support");
 
+  const [info, setInfo] = useState({
+    isOpen: false,
+    title: "Instruction fermée",
+    message: "L'instruction des dossiers sera ouverte à partir de début novembre, merci de votre patience.",
+  });
+
   useEffect(() => {
     setOpen(props.open);
     setIsOpen(props.open);
@@ -263,8 +303,12 @@ const Drawer = (props) => {
       else if (user.role === ROLES.REFERENT_REGION) query = { region: user.region, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
       const getTickets = async (query) => {
-        const { ok, data } = await api.post(`/zammood/tickets`, query);
-        props.dispatchTickets(data);
+        try {
+          const { data } = await api.post(`/zammood/tickets`, query);
+          props.dispatchTickets(data);
+        } catch (error) {
+          console.log(error);
+        }
       };
       if (query) getTickets(query);
     } catch (e) {
@@ -292,7 +336,7 @@ const Drawer = (props) => {
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>

@@ -317,7 +317,7 @@ export default function Contract({ young, admin }) {
                 token={contract?.youngContractToken}
                 lastName={contract?.youngLastName}
                 firstName={contract?.youngFirstName}
-                validationDate={contract?.youngValidationDate}
+                validationDate={contract?.youngContractValidationDate}
               />
             )}
           </div>
@@ -394,7 +394,7 @@ export default function Contract({ young, admin }) {
                             <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
                             <ContractField name="youngLastName" placeholder="Nom" context={context} />
                             <div>
-                              né le :
+                              né(e) le :
                               <ContractField name="youngBirthdate" context={context} type="date" placeholder="jj/mm/yyyy" />
                             </div>
                             <div>
@@ -461,7 +461,7 @@ export default function Contract({ young, admin }) {
                             <br />
                           </div>
                           <div>
-                            Les objectifs de la missions sont les suivants :
+                            Les objectifs de la mission sont les suivants :
                             <ContractField name="missionObjective" placeholder="Objectifs" as="textarea" context={context} />
                           </div>
                           <div>
@@ -617,7 +617,7 @@ export default function Contract({ young, admin }) {
                             <div>
                               Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
                               <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                              représenté par ses représentant légaux :
+                              représenté par ses représentants légaux :
                             </div>
                             <div>
                               <br />
@@ -904,21 +904,22 @@ function SendContractLink({ contract, target }) {
     <>
       <CopyLink
         onClick={async () => {
-          try {
-            const email = contract[target + "Email"];
-            setModal({
-              isOpen: true,
-              title: "Envoie de contrat par mail",
-              message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
-              onConfirm: async () => {
-                const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
-                if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
+          const email = contract[target + "Email"];
+          setModal({
+            isOpen: true,
+            title: "Envoie de contrat par mail",
+            message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
+            onConfirm: async () => {
+              try {
+                const { ok, code } = await api.post(`/contract/${contract._id}/send-email/${target}`);
+                if (!ok) throw new Error(translate(code));
                 toastr.success("L'email a bien été envoyé", email);
-              },
-            });
-          } catch (e) {
-            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-          }
+              } catch (e) {
+                capture(e);
+                toastr.error("Une erreur est survenue lors de l'envoi du mail : ", e.message);
+              }
+            },
+          });
         }}>
         ✉️ Renvoyer le lien par email
       </CopyLink>

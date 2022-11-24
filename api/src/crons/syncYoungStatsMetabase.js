@@ -54,6 +54,7 @@ const whiteListYoung = [
   "department",
   "region",
   "populationDensity",
+  "isRegionRural",
   "foreignAddress",
   "foreignCity",
   "foreignZip",
@@ -153,7 +154,6 @@ exports.handler = async () => {
       }
     });
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "Stats youngs + center Metabase", text: JSON.stringify(e) });
     console.log("ERROR 🚫", e);

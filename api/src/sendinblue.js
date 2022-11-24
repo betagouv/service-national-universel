@@ -4,6 +4,7 @@ const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
+const SENDER_NAME_SMS = "SNU";
 const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
@@ -19,16 +20,47 @@ const api = async (path, options = {}) => {
     ...options,
     headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
   });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(error);
+  }
   const contentType = res.headers.raw()["content-type"];
   if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
   return await res.text();
 };
+
+// https://developers.sendinblue.com/reference/sendtransacsms
+async function sendSMS(phoneNumber, content, tag) {
+  try {
+    // format phone number for Sendinblue
+    const formattedPhoneNumber = phoneNumber
+      .replace(/[^0-9]/g, "")
+      .replace(/^0([6,7])/, "33$1")
+      .replace(/330/, "33");
+
+    const body = {};
+    body.sender = SENDER_NAME_SMS;
+    body.recipient = formattedPhoneNumber;
+    body.content = content;
+    body.type = "transactional";
+    body.tag = tag;
+
+    const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
+    if (ENVIRONMENT !== "production") {
+      console.log(body, sms);
+    }
+  } catch (e) {
+    console.log("Erreur in sendSMS", e);
+    capture(e);
+  }
+}
 
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
     const body = {};
     if (ENVIRONMENT !== "production") {
+      console.log("to before filter:", to);
       const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       to = to.filter((e) => e.email.match(regexp));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
@@ -58,6 +90,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
   try {
     const body = { templateId: parseInt(id) };
     if (!force && ENVIRONMENT !== "production") {
+      console.log("emailTo before filter:", emailTo);
       const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       emailTo = emailTo.filter((e) => e.email.match(regexp));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
@@ -232,4 +265,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { api, sync, unsync, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = { api, sync, unsync, sendSMS, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };

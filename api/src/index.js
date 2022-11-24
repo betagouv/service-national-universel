@@ -81,6 +81,12 @@ app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
+app.use("/representants-legaux", require("./controllers/representants-legaux"));
+app.use("/correction-request", require("./controllers/correction-request"));
+app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
+app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
+app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
+app.use("/young-edition", require("./controllers/young-edition"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

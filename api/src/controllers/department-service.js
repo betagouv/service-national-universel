@@ -12,7 +12,10 @@ const { serializeDepartmentService, serializeArray } = require("../utils/seriali
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedDepartementService } = validateDepartmentService(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department }, checkedDepartementService, {
       new: true,
@@ -38,7 +41,10 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -80,7 +86,10 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
       cohort: Joi.string().required(),
       contactId: Joi.string().required(),
     }).validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -104,7 +113,10 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
 router.get("/:department", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: department } = Joi.string().required().validate(req.params.department);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     if (isYoung(req.user) && req.user.department !== department) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (isReferent(req.user) && !canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -138,7 +150,10 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
       email: Joi.string().required(),
       role: Joi.string().required(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
