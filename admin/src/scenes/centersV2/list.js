@@ -21,6 +21,8 @@ import Calendar from "../../assets/icons/Calendar";
 
 import { useHistory } from "react-router-dom";
 
+import ModalRattacherCentre from "./components/ModalRattacherCentre";
+
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
 export default function List() {
@@ -29,11 +31,13 @@ export default function List() {
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
   };
+  const [modalVisible, setModalVisible] = useState(false);
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [currentTab, setCurrentTab] = useState("liste-centre");
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
+      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} />
       <div className="flex flex-row">
         <div className="flex flex-1 flex-col w-full px-8">
           <div className="py-8 flex items-center justify-between">
@@ -41,7 +45,7 @@ export default function List() {
             {canCreateOrUpdateCohesionCenter(user) ? (
               <button
                 className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
-                onClick={() => null}>
+                onClick={() => setModalVisible(true)}>
                 Rattacher un centre à un séjour
               </button>
             ) : null}
