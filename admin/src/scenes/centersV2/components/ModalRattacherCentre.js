@@ -76,7 +76,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
                 {
                   multi_match: {
                     query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code"],
+                    fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
                     type: "cross_fields",
                     operator: "and",
                   },
@@ -84,7 +84,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
                 {
                   multi_match: {
                     query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code"],
+                    fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
                     type: "phrase",
                     operator: "and",
                   },
@@ -92,7 +92,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
                 {
                   multi_match: {
                     query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code"],
+                    fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
                     type: "phrase_prefix",
                     operator: "and",
                   },

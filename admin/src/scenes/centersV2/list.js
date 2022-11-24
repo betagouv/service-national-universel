@@ -8,7 +8,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 
-import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
+import { COHESION_STAY_START, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
@@ -41,7 +41,7 @@ export default function List() {
   }, []);
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
-      if (Object.prototype.hasOwnProperty.call(START_DATE_SESSION_PHASE1, session) && START_DATE_SESSION_PHASE1[session].getTime() > new Date().getTime()) {
+      if (COHESION_STAY_START[session].getTime() > new Date().getTime()) {
         return setFirstSession(session);
       }
     }
