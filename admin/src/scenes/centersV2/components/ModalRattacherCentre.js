@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -31,10 +31,11 @@ export default function ModalCreation({ isOpen, onCancel }) {
     };
   }, []);
 
-  const [listPDR, setListPDR] = React.useState([]);
+  const [listCentre, setListCentre] = React.useState([]);
   const [selectedCohort, setSelectedCohort] = React.useState();
-  const [selectedPDR, setSelectedPDR] = React.useState();
-  const [complementAddress, setComplementAddress] = React.useState("");
+  const [selectedCentre, setSelectedCentre] = React.useState();
+  const [placesTotal, setPlacesTotal] = React.useState("");
+  const [status, setStatus] = React.useState("");
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
@@ -47,8 +48,8 @@ export default function ModalCreation({ isOpen, onCancel }) {
   }, [open]);
 
   React.useEffect(() => {
-    setDisabled(!selectedCohort || !selectedPDR);
-  }, [selectedPDR, selectedCohort]);
+    setDisabled(!selectedCohort || !selectedCentre);
+  }, [selectedCentre, selectedCohort]);
 
   React.useEffect(() => {
     if (selectedCohort) {
@@ -91,8 +92,8 @@ export default function ModalCreation({ isOpen, onCancel }) {
             },
           });
         }
-        const { responses } = await api.esQuery("pointderassemblement", body);
-        setListPDR(
+        const { responses } = await api.esQuery("cohesioncenter", body);
+        setListCentre(
           responses[0].hits.hits.map((hit) => {
             return { ...hit._source, _id: hit._id };
           }),
@@ -108,17 +109,17 @@ export default function ModalCreation({ isOpen, onCancel }) {
       const {
         ok,
         code,
-        data: PDR,
-      } = await api.put(`/point-de-rassemblement/cohort/${selectedPDR._id}`, {
+        data: centre,
+      } = await api.put(`/point-de-rassemblement/cohort/${selectedCentre._id}`, {
         cohort: selectedCohort,
-        complementAddress,
+        placesTotal,
       });
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'ajout du séjour", code);
         return setIsLoading(false);
       }
-      history.push(`/point-de-rassemblement/${PDR._id}`);
+      history.push(`/point-de-rassemblement/${centre._id}`);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de l'ajout du séjour");
@@ -128,7 +129,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
 
   return (
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
-      <div className="flex flex-col p-8 h-[600px] w-full justify-between">
+      <div className="flex flex-col p-8 h-[650px] w-full justify-between">
         <div className="flex flex-col w-full">
           <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un centre à un séjour</div>
           <hr className="my-8" />
@@ -154,7 +155,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
                   className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between rounded-lg bg-white ${open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"}`}>
                   <div className="flex flex-col justify-center">
                     <div className="text-xs leading-6 font-normal text-gray-500">Choisir un centre</div>
-                    {!selectedPDR ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedPDR.name}</div>}
+                    {!selectedCentre ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedCentre.name}</div>}
                   </div>
                   <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
                 </div>
@@ -162,7 +163,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
                 <div
                   ref={refSelect}
                   className={`${!open ? "hidden" : ""} ${
-                    listPDR.length > 3 ? "h-[300px] overflow-y-auto" : ""
+                    listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
                   } absolute left-0 w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
                   <div className="sticky top-0 bg-white z-10 pt-3">
                     <div className="flex flex-row gap-2 items-center">
@@ -177,46 +178,51 @@ export default function ModalCreation({ isOpen, onCancel }) {
                     </div>
                     <hr className="my-2" />
                   </div>
-                  {listPDR.map((pdr) => (
+                  {listCentre.map((centre) => (
                     <div
-                      key={pdr._id}
+                      key={centre._id}
                       onClick={() => {
-                        setSelectedPDR(pdr);
+                        setSelectedCentre(centre);
                         setOpen(false);
                       }}
                       className="flex flex-col py-1 px-2 cursor-pointer hover:bg-gray-50 rounded-lg">
-                      <div className="text-sm leading-5 text-gray-900">{pdr.name}</div>
+                      <div className="text-sm leading-5 text-gray-900">{centre.name}</div>
                       <div className="text-sm leading-5 text-gray-500">
-                        {pdr.department} • {pdr.region}
+                        {centre.department} • {centre.region}
                       </div>
                     </div>
                   ))}
-                  {listPDR.length === 0 && (
+                  {listCentre.length === 0 && (
                     <div className="flex items-center gap-2 py-2 justify-center">
-                      <div className="text-xs leading-4 text-gray-900">Aucun point de rassemblement trouvé</div>
+                      <div className="text-xs leading-4 text-gray-900">Aucun centre trouvé</div>
                     </div>
                   )}
                   <hr className="my-2" />
                   <div className="flex flex-col items-center gap-2 justify-center pb-3">
-                    <div className="text-sm leading-5 text-gray-900">Le point de rassemblement n’est pas dans la liste ?</div>
+                    <div className="text-sm leading-5 text-gray-900">Le centre n’est pas dans la liste ?</div>
                     <div
                       className="text-xs leading-4 text-blue-600 py-1 px-2 rounded-lg hover:bg-blue-50 cursor-pointer"
                       onClick={() => history.push(`/point-de-rassemblement/nouveau?cohort=${selectedCohort}`)}>
-                      Créer un point de rassemblement
+                      Créer un centre
                     </div>
                   </div>
                 </div>
               </div>
-              {selectedPDR && (
-                <>
-                  <div className="text-gray-500 text-sm font-medium leading-6 mt-4 mb-2">Ajouter un complément d’adresse (optionnel)</div>
-                  <Field label="Complément d’adresse" onChange={(e) => setComplementAddress(e.target.value)} value={complementAddress} />
-                </>
+              {selectedCentre && (
+                <div className="text-gray-500 text-sm font-medium leading-6 mt-4">
+                  <Field label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} />
+                </div>
+              )}
+
+              {selectedCentre && (
+                <div className="text-gray-500 text-sm font-medium leading-6 mt-4">
+                  <Field label="Statut de la session" onChange={(e) => setStatus(e.target.value)} value={status} />
+                </div>
               )}
             </>
           ) : null}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mt-4">
           <button onClick={onCancel} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
             Annuler
           </button>
