@@ -9,8 +9,8 @@ import List from "./list";
 //import Youngs from "./youngs";
 //import Team from "./view/team";
 
-export default function CenterV2Index() {
-  useDocumentTitle("CentresV2");
+export default function Index() {
+  useDocumentTitle("Centres");
 
   return (
     <Switch>
@@ -19,7 +19,7 @@ export default function CenterV2Index() {
       {/*<SentryRoute path="/centreV2/:id/cohort/:cohortId" component={View} />*/}
       {/*<SentryRoute path="/centreV2/:id/:sessionId/equipe" component={Team} />*/}
       {/*<SentryRoute path="/centreV2/:id/:sessionId/:currentTab" component={Youngs} />*/}
-      <SentryRoute path="/centreV2" component={List} />
+      <SentryRoute path="/centre" component={List} />
     </Switch>
   );
 }
