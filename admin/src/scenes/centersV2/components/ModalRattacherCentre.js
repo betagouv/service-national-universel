@@ -127,7 +127,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
       <div className="flex flex-col p-8 h-[600px] w-full justify-between">
         <div className="flex flex-col w-full">
-          <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
+          <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un centre à un séjour</div>
           <hr className="my-8" />
           <div className="text-gray-800 text-sm font-medium leading-6">Choisissez un séjour</div>
           <div className="flex flex-row gap-2 flex-wrap py-2">
@@ -144,17 +144,15 @@ export default function ModalCreation({ isOpen, onCancel }) {
           </div>
           {selectedCohort ? (
             <>
-              <div className="text-gray-500 text-sm font-medium leading-6 mt-4">Sélectionnez un point de rassemblement</div>
+              <div className="text-gray-500 text-sm font-medium leading-6 mt-4">Sélectionnez un centre</div>
               <div className="relative">
                 <div
                   onClick={() => {
                     setOpen(!open);
                   }}
-                  className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between shadow-sm rounded-lg bg-white ${
-                    open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
-                  }`}>
+                  className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between rounded-lg bg-white ${open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"}`}>
                   <div className="flex flex-col justify-center">
-                    <div className="text-xs leading-6 font-normal text-gray-500">Choisir un point de rassemblement</div>
+                    <div className="text-xs leading-6 font-normal text-gray-500">Choisir un centre</div>
                     {!selectedPDR ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedPDR.name}</div>}
                   </div>
                   <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
@@ -171,7 +169,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
                       <input
                         ref={refInput}
                         type="text"
-                        placeholder="Rechercher un point de rassemblement"
+                        placeholder="Rechercher un centre"
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full text-gray-800 text-[13px] leading-3"
                       />
