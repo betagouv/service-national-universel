@@ -217,7 +217,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
                     <div className="text-sm leading-5 text-gray-900">Le centre n’est pas dans la liste ?</div>
                     <div
                       className="text-xs leading-4 text-blue-600 py-1 px-2 rounded-lg hover:bg-blue-50 cursor-pointer"
-                      onClick={() => history.push(`/point-de-rassemblement/nouveau?cohort=${selectedCohort}`)}>
+                      onClick={() => history.push(`/center/nouveau?cohort=${selectedCohort}`)}>
                       Créer un centre
                     </div>
                   </div>
