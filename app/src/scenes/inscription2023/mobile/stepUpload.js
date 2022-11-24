@@ -77,13 +77,10 @@ export default function StepUpload() {
       const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, new Date(date));
       if (res.code === "FILE_CORRUPTED")
         throw "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr";
-      if (!res.ok) {
-        capture(res.code);
-        throw translate(res.code);
-      }
+      if (!res.ok) throw res.code;
     } catch (e) {
       capture(e);
-      return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: e } };
+      return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: translate(e) } };
     }
   }
 
@@ -99,17 +96,14 @@ export default function StepUpload() {
         }
       }
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
-      if (!ok) {
-        capture(code);
-        throw translate(code);
-      }
+      if (!ok) throw code;
       plausibleEvent("Phase0/CTA inscription - CI mobile");
       dispatch(setYoung(responseData));
       history.push("/inscription2023/confirm");
     } catch (e) {
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: e });
+      capture(e);
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
       setLoading(false);
-      return;
     }
   }
 
@@ -126,15 +120,13 @@ export default function StepUpload() {
       }
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
-      if (!ok) {
-        capture(code);
-        throw translate(code);
-      }
+      if (!ok) throw code;
       plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: e });
+      capture(e);
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
       setLoading(false);
       return;
     }
