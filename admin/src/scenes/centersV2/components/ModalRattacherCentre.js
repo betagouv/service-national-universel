@@ -2,13 +2,13 @@ import React from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1, ROLES } from "snu-lib";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
 
-export default function ModalCreation({ isOpen, onCancel }) {
+export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
   const history = useHistory();
   const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1).reduce((acc, cohort) => {
     return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
@@ -229,7 +229,7 @@ export default function ModalCreation({ isOpen, onCancel }) {
                 </div>
               )}
 
-              {selectedCentre && (
+              {user.role === ROLES.ADMIN && selectedCentre && (
                 <div className="relative">
                   <div
                     ref={refStatus}

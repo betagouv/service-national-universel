@@ -49,7 +49,7 @@ export default function List() {
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
-      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} />
+      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
         <div className="flex flex-1 flex-col w-full px-8">
           <div className="py-8 flex items-center justify-between">
