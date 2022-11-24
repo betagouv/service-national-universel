@@ -1,7 +1,7 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { getDepartmentByZip } from "snu-lib";
+import { getRegionByZip } from "snu-lib";
 import validator from "validator";
 import IconFrance from "../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -92,10 +92,12 @@ export default function StepEligibilite() {
       return history.push("/preinscription/noneligible");
     }
     const res = await api.post("/cohort-session/eligibility/2023", {
-      department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
-      birthDate: data.birthDate,
-      schoolLevel: data.scolarity,
-      frenchNationality: data.frenchNationality,
+      schoolDepartment: data.school?.departmentName,
+      department: data.school?.department,
+      schoolRegion: data.school?.region,
+      region: getRegionByZip(data.zip),
+      birthdateAt: data.birthDate,
+      grade: data.scolarity,
     });
     if (!res.ok) {
       capture(res.code);

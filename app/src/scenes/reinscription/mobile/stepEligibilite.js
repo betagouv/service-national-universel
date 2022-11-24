@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { getDepartmentByZip } from "snu-lib";
 import validator from "validator";
 import IconFrance from "../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -136,13 +135,8 @@ export default function StepEligibilite() {
     };
 
     try {
-      const res = await api.post("/cohort-session/eligibility/2023", {
-        department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
-        birthDate: data.birthDate,
-        schoolLevel: data.scolarity,
-        frenchNationality: data.frenchNationality,
-        status: young.status,
-      });
+      const updatedYoung = { ...young, updates };
+      const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Impossible de vérifier votre éligibilité" });

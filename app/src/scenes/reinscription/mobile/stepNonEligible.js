@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { getDepartmentByZip } from "snu-lib";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
@@ -60,13 +58,7 @@ export default function NonEligible() {
   };
 
   const getMessageNonEligible = async (young) => {
-    const res = await API.post("/cohort-session/eligibility/2023", {
-      department: young.school?.departmentName || young.school?.department || getDepartmentByZip(young.zip) || null,
-      birthDate: young.birthdateAt,
-      schoolLevel: young.grade,
-      frenchNationality: young.frenchNationality,
-      status: young.status,
-    });
+    const res = await API.post(`/cohort-session/eligibility/2023/${young._id}`);
     if (!res.ok) {
       capture(res.code);
     }
