@@ -1,3 +1,4 @@
+// @todo: move to this utils
 import { frenchNationalityOptions, genderOptions } from "../../utils";
 
 export const getObjectWithEmptyData = (fields) => {
@@ -19,9 +20,6 @@ export const errorMessages = {
 
 export const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 export const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
-export const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
-export const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
-
 export const commonFields = [
   "frenchNationality",
   ...birthPlaceFields,
@@ -35,6 +33,9 @@ export const commonFields = [
   "ppsBeneficiary",
   "paiBeneficiary",
 ];
+
+export const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
+export const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
 export const commonRequiredFields = [
   "frenchNationality",
@@ -54,7 +55,6 @@ export const commonRequiredFields = [
   "ppsBeneficiary",
   "paiBeneficiary",
 ];
-
 export const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 export const requiredMoreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
@@ -91,4 +91,14 @@ export const defaultState = {
   specificAmenagmentType: "",
   reducedMobilityAccess: "",
   handicapInSameDepartment: "",
+};
+
+export const getDataFromYoung = (young, currentData) => {
+  const updatedData = {};
+  Object.keys(currentData).forEach((key) => {
+    updatedData[key] = young[key] || currentData[key];
+  });
+  updatedData["livesInFrance"] = young.foreignCountry ? "false" : currentData.livesInFrance;
+
+  return updatedData;
 };

@@ -21,7 +21,7 @@ import CheckBox from "../../../../components/inscription/checkbox";
 import { FRANCE, getObjectWithEmptyData, birthPlaceFields, addressFields, foreignAddressFields } from "./utils";
 import CityInput from "./components/CityInput";
 
-export default function Form({ data, setData, errors, corrections, young }) {
+export default function Form({ data, setData, errors, corrections }) {
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
   const {
@@ -118,7 +118,7 @@ export default function Form({ data, setData, errors, corrections, young }) {
   };
 
   return (
-    <form>
+    <>
       <RadioButton
         label="Je suis né(e)..."
         options={frenchNationalityOptions}
@@ -269,7 +269,7 @@ export default function Form({ data, setData, errors, corrections, young }) {
       </div>
       <Select
         label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
-        options={young.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
+        options={schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
         value={situation}
         onChange={updateData("situation")}
         error={errors.situation}
@@ -359,6 +359,6 @@ export default function Form({ data, setData, errors, corrections, young }) {
           )}
         </>
       )}
-    </form>
+    </>
   );
 }

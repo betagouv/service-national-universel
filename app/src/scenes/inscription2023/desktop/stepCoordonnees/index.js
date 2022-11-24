@@ -23,6 +23,7 @@ import {
   requiredFieldsForeigner,
   requiredMoreInformationFields,
   defaultState,
+  getDataFromYoung,
 } from "./utils";
 import Form from "./Form";
 
@@ -49,42 +50,7 @@ export default function StepCoordonnees() {
       if (young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true") {
         setSpecialSituation(true);
       }
-
-      setData({
-        ...data,
-        schooled: young.schooled || data.schooled,
-        situation: young.situation || data.situation,
-        frenchNationality: young.frenchNationality || data.frenchNationality,
-        birthCountry: young.birthCountry || data.birthCountry,
-        birthCity: young.birthCity || data.birthCity,
-        birthCityZip: young.birthCityZip || data.birthCityZip,
-        gender: young.gender || data.gender,
-        phone: young.phone || data.phone,
-        livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
-        addressVerified: young.addressVerified || data.addressVerified,
-        address: young.address || data.address,
-        city: young.city || data.city,
-        zip: young.zip || data.zip,
-        region: young.region || data.region,
-        department: young.department || data.department,
-        location: young.location || data.location,
-        cityCode: young.cityCode || data.cityCode,
-        foreignCountry: young.foreignCountry || data.foreignCountry,
-        foreignAddress: young.foreignAddress || data.foreignAddress,
-        foreignCity: young.foreignCity || data.foreignCity,
-        foreignZip: young.foreignZip || data.foreignZip,
-        hostFirstName: young.hostFirstName || data.hostFirstName,
-        hostLastName: young.hostLastName || data.hostLastName,
-        hostRelationship: young.hostRelationship || data.hostRelationship,
-        handicap: young.handicap || data.handicap,
-        allergies: young.allergies || data.allergies,
-        ppsBeneficiary: young.ppsBeneficiary || data.ppsBeneficiary,
-        paiBeneficiary: young.paiBeneficiary || data.paiBeneficiary,
-        specificAmenagment: young.specificAmenagment || data.specificAmenagment,
-        specificAmenagmentType: young.specificAmenagmentType || data.specificAmenagmentType,
-        reducedMobilityAccess: young.reducedMobilityAccess || data.reducedMobilityAccess,
-        handicapInSameDepartment: young.handicapInSameDepartment || data.handicapInSameDepartment,
-      });
+      setData(getDataFromYoung(young, data));
     }
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
       const corrections = getCorrectionByStep(young, step);
@@ -301,7 +267,7 @@ export default function StepCoordonnees() {
       onCorrection={onCorrection}
       disabled={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
-      <Form data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
+      <Form data={data} setData={setData} errors={errors} corrections={corrections} />
     </DesktopPageContainer>
   );
 }
