@@ -60,7 +60,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
           setStep(nextStep);
           onChange && onChange(changedGroup);
         } else {
-          onChange && onChange(null);
+          onChange && onChange(null, true);
         }
       } catch (err) {
         capture(err);
