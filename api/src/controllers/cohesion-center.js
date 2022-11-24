@@ -62,7 +62,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    //TODO: check si admin pour le status
     let status;
     if (req.user.role === ROLES.ADMIN) {
       status = value.status;
