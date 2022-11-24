@@ -22,6 +22,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
         birthdateAt: Joi.date().required(),
         grade: Joi.string().allow(null, ""),
         status: Joi.string().allow(null, ""),
+        zip: Joi.string().allow(null, ""),
       })
         .unknown()
         .validate(req.body);

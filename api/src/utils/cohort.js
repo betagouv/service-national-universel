@@ -1,14 +1,14 @@
-const { YOUNG_STATUS, getZoneByDepartment, sessions2023, departmentLookUp } = require("snu-lib");
+const { YOUNG_STATUS, getZoneByDepartment, sessions2023, departmentLookUp, getRegionByZip, getDepartmentByZip } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 
 async function getAvailableSessions(young) {
-  let dep = young?.schoolDepartment || young?.department || null;
+  let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young.zip);
   if (dep && (!isNaN(dep) || ["2A", "2B"].includes(dep))) {
     if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
     else dep = departmentLookUp[dep];
   }
-  let region = young?.schoolRegion || young?.region;
+  let region = young?.schoolRegion || young?.region || getRegionByZip(young?.zip);
 
   let sessions = sessions2023.filter(
     (session) =>
