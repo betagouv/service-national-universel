@@ -28,6 +28,185 @@ const sessionPhase1Model = require("../../models/sessionPhase1");
 const youngModel = require("../../models/young");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const tableRepartitionModel = require("../../models/PlanDeTransport/tableDeRepartition");
+const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const cohesionCenterModel = require("../../models/cohesionCenter");
+
+const schemaRepartitionBodySchema = Joi.object({
+  cohort: Joi.string()
+    .valid(...COHORTS)
+    .required(),
+  intradepartmental: Joi.string().valid("true", "false"),
+  fromDepartment: Joi.string().trim().required(),
+  fromRegion: Joi.string().trim().required(),
+  toDepartment: Joi.string().allow(null),
+  toRegion: Joi.string().allow(null),
+  centerId: Joi.string().allow(null),
+  centerName: Joi.string().allow(null),
+  centerCity: Joi.string().allow(null),
+  sessionId: Joi.string().allow(null),
+  youngsVolume: Joi.number().greater(0),
+  gatheringPlaces: Joi.array().items(Joi.string()),
+});
+
+// ------- get data
+
+router.get("/centers/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { department, cohort } = valueParams;
+
+    const { error: errorQuery, value: query } = Joi.object({
+      page: Joi.number().default(0),
+      limit: Joi.number().greater(0).default(10),
+      minPlacesCount: Joi.number().default(0),
+      filter: Joi.string().trim().allow("", null),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { page, limit, minPlacesCount, filter } = query;
+
+    // get the destination departments from table de repartition
+    const toDepartments = await getDepartmentsFromDepartment(cohort, department);
+    console.log("TO DEPARTMENTS: ", toDepartments);
+
+    // search centers & sessions
+    const pipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
+        },
+      },
+      { $unwind: "$center" },
+      { $match: { "center.department": { $in: toDepartments } } },
+    ];
+
+    if (minPlacesCount > 0) {
+      pipeline.push({ $match: { placesTotal: { $gte: minPlacesCount } } });
+    }
+
+    // --- pour l'instant on ne filtre le texte que dans le nom, la ville et le départment du centre.
+    if (filter && filter.length > 0) {
+      const regex = new RegExp(".*" + filter + ".*", "gi");
+      pipeline.push({ $match: { $or: [{ "center.name": regex }, { "center.city": regex }, { "center.department": regex }] } });
+    }
+
+    // --- sort and limit.
+    pipeline.push({ $sort: { "center.name": 1 } }, { $skip: page * limit }, { $limit: limit });
+
+    // QUERY
+    console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
+    const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
+
+    // format result
+    const data = {
+      centers: sessionResult.map((session) => {
+        return {
+          ...session.center,
+          placesTotal: session.placesTotal,
+          placesLeft: session.placesLeft,
+          sessionId: session._id,
+        };
+      }),
+      // TODO: Faire la pagination
+      pagesCount: 1,
+    };
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/pdr/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { department, cohort } = valueParams;
+
+    const { error: errorQuery, value: query } = Joi.object({
+      page: Joi.number().default(0),
+      limit: Joi.number().greater(0).default(10),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { page, limit } = query;
+
+    // search gathering places
+    const pipeline = [{ $match: { cohorts: cohort, department } }, { $sort: { name: 1 } }, { $skip: page * limit }, { $limit: limit }];
+    console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
+    const pdrResult = await pointRassemblementModel.aggregate(pipeline).exec();
+
+    // format result
+    const data = {
+      pdr: pdrResult,
+      // TODO: Faire la pagination
+      pagesCount: 1,
+    };
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/get-group-detail", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorBody, value: group } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
+    if (errorBody) {
+      console.log("JOI ERROR: ", errorBody);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canViewSchemaDeRepartition(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // get center detail
+    let center = null;
+    if (group.centerId) {
+      center = await cohesionCenterModel.findById(group.centerId);
+    }
+
+    // get gathering places
+    let gatheringPlaces = [];
+    if (group.gatheringPlaces && group.gatheringPlaces.length > 0) {
+      gatheringPlaces = await pointRassemblementModel.find({ _id: { $in: group.gatheringPlaces } });
+    }
+
+    // format result
+    const data = { center, gatheringPlaces };
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+// --- summaries
 
 router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -452,6 +631,8 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
   }
 });
 
+// ------- CRUD
+
 router.post("", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- vérification
@@ -528,23 +709,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id } = valueParams;
 
-    const bodySchema = Joi.object({
-      cohort: Joi.string()
-        .valid(...COHORTS)
-        .required(),
-      intradepartmental: Joi.string().valid("true", "false"),
-      fromDepartment: Joi.string().trim().required(),
-      fromRegion: Joi.string().trim().required(),
-      toDepartment: Joi.string().trim().valid(null),
-      toRegion: Joi.string().trim().valid(null),
-      centerId: Joi.string().trim().valid(null),
-      centerName: Joi.string().trim().valid(null),
-      centerCity: Joi.string().trim().valid(null),
-      sessionId: Joi.string().trim().valid(null),
-      youngsVolume: Joi.number().greater(0),
-      gatheringPlaces: Joi.array().items(Joi.string()),
-    });
-    const { error: errorBody, value } = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error: errorBody, value } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
     if (errorBody) {
       console.log("JOI ERROR: ", errorBody);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -698,6 +863,18 @@ async function getDepartmentTableDeRepartition(cohort, region) {
       };
     }
   });
+}
+
+async function getDepartmentsFromDepartment(cohort, department) {
+  const repartitions = await tableRepartitionModel.find({ cohort, fromDepartment: department });
+  let departments = {};
+  for (const repartition of repartitions) {
+    if (repartition.toDepartment) {
+      departments[repartition.toDepartment] = true;
+    }
+  }
+
+  return Object.keys(departments);
 }
 
 function computeCenterAndCapacity(departmentsData, forDepartments) {

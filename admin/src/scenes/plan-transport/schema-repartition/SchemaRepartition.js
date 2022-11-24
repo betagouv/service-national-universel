@@ -22,7 +22,6 @@ export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
   const location = useLocation();
   const [isNational, setIsNational] = useState(!region && !department);
-  const [isRegional, setIsRegional] = useState(region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
   const [cohort, setCohort] = useState(getDefaultCohort());
   const [loading, setLoading] = useState(true);
@@ -36,6 +35,11 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
+
+  useEffect(() => {
+    setIsNational(!region && !department);
+    setIsDepartmental(!!(region && department));
+  }, [region, department]);
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
@@ -138,11 +142,11 @@ export default function SchemaRepartition({ region, department }) {
     }
   }
 
-  function goToDepartment() {
-    if (region && department) {
-      history.push(`/plan-de-transport/schema-repartition/${region}/${department}?cohort=${cohort}`);
-    }
-  }
+  // function goToDepartment() {
+  //   if (region && department) {
+  //     history.push(`/plan-de-transport/schema-repartition/${region}/${department}?cohort=${cohort}`);
+  //   }
+  // }
 
   function goToRow(row) {
     if (region) {
@@ -297,16 +301,10 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
       ) : (
         <ul className="list-none">
           {summary.toRegions.map((region) => (
-            <>
-              <li key={region.name} className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">
-                {region.name}
-              </li>
-              {isDepartmental && (
-                <li key={region.name + "-deps"} className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">
-                  {region.departments.join(", ")}
-                </li>
-              )}
-            </>
+            <React.Fragment key={region.name}>
+              <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>
+              {isDepartmental && <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">{region.departments.join(", ")}</li>}
+            </React.Fragment>
           ))}
         </ul>
       )}
