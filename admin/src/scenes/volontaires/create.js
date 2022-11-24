@@ -374,7 +374,12 @@ export default function Create() {
       {
         (async () => {
           try {
-            const res = await api.post("/cohort-session/eligibility/2023", values);
+            const res = await api.post("/cohort-session/eligibility/2023", {
+              department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
+              birthDate: values.birthdateAt,
+              schoolLevel: values.grade,
+              frenchNationality: "true",
+            });
             if (res.data.msg) return setEgibilityError(res.data.msg);
             const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
             if (sessionsFiltered.length === 0) {
@@ -395,7 +400,7 @@ export default function Create() {
       setEgibilityError("");
       setCohorts([]);
     }
-  }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt, values.status]);
+  }, [values.birthdateAt, values.department, values.situation, values.grade, values.schoolDepartment]);
 
   return (
     <div className="py-4 px-8">

@@ -10,6 +10,7 @@ import { capture } from "../../../sentry";
 import { setYoung } from "../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
+import { getDepartmentByZip } from "snu-lib/region-and-departments";
 import { supportURL } from "../../../config";
 import Navbar from "../components/Navbar";
 
@@ -25,7 +26,13 @@ export default function StepSejour() {
   useEffect(() => {
     const checkEligibilite = async (young) => {
       try {
-        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        const res = await api.post("/cohort-session/eligibility/2023", {
+          department: young.schoolDepartment || getDepartmentByZip(young.zip) || null,
+          birthDate: new Date(young.birthdateAt),
+          schoolLevel: young.grade,
+          frenchNationality: young.frenchNationality,
+          status: young.status,
+        });
         if (!res.ok) {
           capture(res.code);
         }

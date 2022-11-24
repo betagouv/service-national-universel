@@ -13,6 +13,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import CheckBox from "../../../components/inscription/checkbox";
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../sentry";
+import { getDepartmentByZip } from "snu-lib";
 import api from "../../../services/api";
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import { setYoung } from "../../../redux/auth/actions";
@@ -134,8 +135,13 @@ export default function StepEligibilite() {
     };
 
     try {
-      const updatedYoung = { ...young, updates };
-      const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
+        birthDate: data.birthDate,
+        schoolLevel: data.scolarity,
+        frenchNationality: data.frenchNationality,
+        status: young.status,
+      });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Impossible de vérifier votre éligibilité" });

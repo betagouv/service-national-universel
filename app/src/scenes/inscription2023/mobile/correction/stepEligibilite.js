@@ -14,7 +14,7 @@ import Input from "../../components/Input";
 import Select from "../../components/Select";
 
 import { useDispatch, useSelector } from "react-redux";
-import { YOUNG_STATUS } from "snu-lib";
+import { getDepartmentByZip, YOUNG_STATUS } from "snu-lib";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
@@ -147,8 +147,13 @@ export default function StepEligibilite() {
     };
 
     try {
-      const updatedYoung = { ...young, updates };
-      const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        department: data.school?.departmentName || data.school?.department || getDepartmentByZip(data.zip) || null,
+        birthDate: data.birthDate,
+        schoolLevel: data.scolarity,
+        frenchNationality: data.frenchNationality,
+        status: young.status,
+      });
       if (!res.ok) throw new Error(translate(res.code));
 
       const cohorts = res.data.length > 0 ? res.data.filter((e) => e?.goalReached === false) : null;

@@ -9,7 +9,7 @@ const config = require("../../config");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023REINSCRIPTION } = require("../../utils");
-const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1, getDepartmentByZip } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { getAvailableSessions } = require("../../utils/cohort");
 
@@ -139,7 +139,8 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const sessions = await getAvailableSessions(young);
+    const dep = young.schoolDepartment || getDepartmentByZip(young.zip);
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthdateAt, young.status);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });

@@ -488,7 +488,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
-    const sessions = await getAvailableSessions(young);
+    const dep = young.schoolDepartment || young.department;
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthdateAt, young.status);
     if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
