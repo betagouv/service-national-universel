@@ -25,3 +25,15 @@ export const TabItem = ({ active, title, icon, onClick }) => (
     </div>
   </div>
 );
+export const Badge = ({ cohort, onClick }) => {
+  return (
+    <div
+      key={cohort}
+      onClick={onClick}
+      className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit border-[1px] ${
+        cohort.status === "VALIDATED" ? "border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100 border-gray-100"
+      }`}>
+      {cohort.cohort}
+    </div>
+  );
+};

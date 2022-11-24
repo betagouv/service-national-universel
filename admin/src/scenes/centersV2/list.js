@@ -11,7 +11,7 @@ import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
-import { FilterButton, TabItem } from "./components/commons";
+import { FilterButton, TabItem, Badge } from "./components/commons";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -75,18 +75,6 @@ export default function List() {
   );
 }
 
-const Badge = ({ cohort, onClick }) => {
-  return (
-    <div
-      key={cohort}
-      onClick={onClick}
-      className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit border-[1px] ${
-        cohort.status === "VALIDATED" ? "border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100 border-gray-100"
-      }`}>
-      {cohort.cohort}
-    </div>
-  );
-};
 const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
