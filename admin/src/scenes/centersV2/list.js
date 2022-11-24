@@ -5,9 +5,9 @@ import { useSelector } from "react-redux";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
+import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 
-import { sessions2023 } from "snu-lib";
+import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
@@ -18,6 +18,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
 
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { useHistory } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
@@ -32,6 +33,18 @@ export default function List() {
   const [modalVisible, setModalVisible] = useState(false);
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [currentTab, setCurrentTab] = useState("liste-centre");
+  const [firstSession, setFirstSession] = useState("");
+
+  React.useEffect(() => {
+    getFirstCohortAvailable();
+  }, []);
+  const getFirstCohortAvailable = () => {
+    for (const session of COHORTS) {
+      if (session in START_DATE_SESSION_PHASE1 && START_DATE_SESSION_PHASE1[session].getTime() > new Date().getTime()) {
+        setFirstSession(firstSession);
+      }
+    }
+  };
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
@@ -55,8 +68,8 @@ export default function List() {
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
               <div className="flex flex-col w-full">
-                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} />}
-                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} />}
+                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
+                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
               </div>
             </div>
           </div>
@@ -78,12 +91,11 @@ const Badge = ({ cohort, onClick }) => {
     </div>
   );
 };
-const ListSession = ({ getDefaultQuery, getExportQuery }) => {
+const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
-  const firstSession = sessions2023[0].name;
 
   useEffect(() => {
     (async () => {
@@ -108,7 +120,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
               showIcon={false}
               placeholder="Rechercher par mots clés, ville, code postal..."
               componentId="SEARCH"
-              dataField={["name", "city", "zip", "code", "code2022"]}
+              dataField={["nameCentre", "cityCentre", "zipCentre", "code", "code2022"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ marginRight: "1rem", flex: 1 }}
               innerClass={{ input: "searchbox" }}
@@ -170,11 +182,12 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
           />
         </div>
         {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap mx-8">
+          <div className="mt-3 gap-2 flex flex-wrap mx-8 items-center">
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
               componentId="COHORT"
+              placeholder="Cohortes"
               dataField="cohort.keyword"
               react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
               renderItem={(e, count) => {
@@ -183,8 +196,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
               title=""
               URLParams={true}
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
-              defaultValue={firstSession}
+              defaultValue={[firstSession]}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
@@ -192,7 +204,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
-                placeholder="Code 2022"
+                placeholder="Code"
                 componentId="CODE2022"
                 dataField="codeCentre.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
@@ -201,7 +213,6 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
                 sortBy="asc"
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
-                renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
                 showMissing
                 missingLabel="Non renseigné"
               />
@@ -217,7 +228,6 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
               URLParams={true}
               sortBy="asc"
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
             />
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
@@ -231,9 +241,8 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
               title=""
               URLParams={true}
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
             />
-            {/*<DeleteFilters />*/}
+            <DeleteFilters />
           </div>
         )}
         <div className="reactive-result">
@@ -266,7 +275,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
     </ReactiveBase>
   );
 };
-const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
+const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -277,7 +286,6 @@ const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
   const [filterCohorts, setFilterConhorts] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
-  const firstSession = sessions2023[0].name;
 
   useEffect(() => {
     (async () => {
@@ -365,11 +373,12 @@ const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
           />
         </div>
         {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap">
+          <div className="mt-3 gap-2 flex flex-wrap items-center">
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
               componentId="COHORT"
+              placeholder="Cohortes"
               dataField="cohorts.keyword"
               react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
               renderItem={(e, count) => {
@@ -378,9 +387,8 @@ const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
               title=""
               URLParams={true}
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
               onValueChange={setFilterConhorts}
-              defaultValue={firstSession}
+              defaultValue={[firstSession]}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
@@ -388,21 +396,20 @@ const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
-                placeholder="Code 2022"
+                placeholder="Code"
                 componentId="CODE2022"
-                dataField="code2022.keyword"
+                dataField="code.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
                 title=""
                 URLParams={true}
                 sortBy="asc"
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
-                renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
                 showMissing
                 missingLabel="Non renseigné"
               />
             ) : null}
-            {/*<DeleteFilters />*/}
+            <DeleteFilters />
           </div>
         )}
       </div>
