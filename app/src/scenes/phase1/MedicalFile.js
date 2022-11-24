@@ -47,7 +47,7 @@ export default function MedicalFile({ isOpen, onCancel }) {
                   </ul>
                   <a
                     className="link text-indigo-600 underline hover:text-indigo-800"
-                    href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche-sanitaire-2023.pdf"
+                    href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/note_relatives_aux_informations_d_ordre_sanitaire_2022.pdf"
                     target="blank">
                     Note relative aux informations d&apos;ordre sanitaire ›
                   </a>

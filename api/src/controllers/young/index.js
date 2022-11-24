@@ -563,7 +563,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     }
 
     const dep = young.schoolDepartment || young.department;
-    const sessions = await getAvailableSessions(dep, young.grade, young.birthDateAt, young.status);
+    const sessions = await getAvailableSessions(dep, young.grade, young.birthdateAt, young.status);
     const session = sessions.find(({ name }) => name === cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 

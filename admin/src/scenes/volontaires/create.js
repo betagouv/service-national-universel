@@ -364,30 +364,41 @@ export default function Create() {
     setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("YYYY-MM-DD"));
   }, [values.temporaryDate]);
   React.useEffect(() => {
-    if (values.department !== "" && values.birthdateAt !== null && values.situation !== "" && (values.schoolDepartment !== "" || getDepartmentByZip(values.zip))) {
-      (async () => {
-        try {
-          const res = await api.post("/cohort-session/eligibility/2023", {
-            department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
-            birthDate: values.birthdateAt,
-            schoolLevel: values.grade,
-            frenchNationality: "true",
-          });
-          if (res.data.msg) return setEgibilityError(res.data.msg);
-          const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
-          if (sessionsFiltered.length === 0) {
-            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
-          } else {
-            setEgibilityError("");
+    if (
+      (values.grade !== "" || values.schooled === "false") &&
+      values.department !== "" &&
+      values.birthdateAt !== null &&
+      values.situation !== "" &&
+      (values.schoolDepartment !== "" || getDepartmentByZip(values.zip))
+    ) {
+      {
+        (async () => {
+          try {
+            const res = await api.post("/cohort-session/eligibility/2023", {
+              department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
+              birthDate: values.birthdateAt,
+              schoolLevel: values.grade,
+              frenchNationality: "true",
+            });
+            if (res.data.msg) return setEgibilityError(res.data.msg);
+            const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+            if (sessionsFiltered.length === 0) {
+              setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+            } else {
+              setEgibilityError("");
+            }
+            setCohorts(sessionsFiltered);
+            setFieldValue("cohort", sessionsFiltered[0].name);
+          } catch (e) {
+            capture(e);
+            setCohorts([]);
           }
-          setCohorts(sessionsFiltered);
-          setFieldValue("cohort", sessionsFiltered[0].name);
-        } catch (e) {
-          capture(e);
-          setCohorts([]);
-        }
-        setLoading(false);
-      })();
+          setLoading(false);
+        })();
+      }
+    } else {
+      setEgibilityError("");
+      setCohorts([]);
     }
   }, [values.birthdateAt, values.department, values.situation, values.grade, values.schoolDepartment]);
 
