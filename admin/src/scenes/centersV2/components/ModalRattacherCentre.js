@@ -58,8 +58,8 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
   }, [open]);
 
   React.useEffect(() => {
-    setDisabled(!selectedCohort || !selectedCentre);
-  }, [selectedCentre, selectedCohort]);
+    setDisabled(!selectedCohort || !selectedCentre || placesTotal === "");
+  }, [selectedCentre, selectedCohort, placesTotal]);
 
   React.useEffect(() => {
     if (selectedCohort) {
@@ -120,9 +120,10 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
         ok,
         code,
         data: centre,
-      } = await api.put(`/point-de-rassemblement/cohort/${selectedCentre._id}`, {
+      } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
         cohort: selectedCohort,
         placesTotal,
+        status,
       });
 
       if (!ok) {
@@ -275,7 +276,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
             onClick={onSubmit}
             disabled={disabled || isLoading}
             className="border-[1px] border-blue-600 text-white bg-blue-600 py-2 w-1/2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed">
-            Enregistrer
+            Créer la session
           </button>
         </div>
       </div>

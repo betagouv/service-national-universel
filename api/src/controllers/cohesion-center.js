@@ -45,6 +45,54 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
+router.put("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: cohesionCenterId } = validateId(req.params.id);
+    console.log("ID OF CENTER", cohesionCenterId);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      placesTotal: Joi.number().required(),
+      status: Joi.string(),
+    }).validate({ ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    //TODO: check si admin pour le status
+    const center = await CohesionCenterModel.findById(cohesionCenterId);
+
+    // check if session doesnt already exist
+    if (center.cohorts.includes(value.cohort)) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    const newCohorts = center.cohorts;
+    newCohorts.push(value.cohort);
+
+    await SessionPhase1.create({
+      cohesionCenterId,
+      cohort: value.cohort,
+      placesTotal: value.placesTotal,
+      placesLeft: value.placesTotal,
+      status: value.status,
+      department: center.department,
+      region: center.region,
+      codeCentre: center.code,
+      nameCentre: center.name,
+      cityCentre: center.city,
+      zipCentre: center.zip,
+    });
+    center.set({ cohorts: newCohorts });
+    await center.save({ fromUser: "Ajout d'une nouvelle session" });
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 //To update for new affectation
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
