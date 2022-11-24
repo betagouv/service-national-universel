@@ -165,70 +165,70 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             }}
           />
         </div>
-        {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap mx-8 items-center">
+
+        <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="COHORT"
+            placeholder="Cohortes"
+            dataField="cohort.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            defaultValue={[firstSession]}
+          />
+          <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+          <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+          {user.role === ROLES.ADMIN ? (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              componentId="COHORT"
-              placeholder="Cohortes"
-              dataField="cohort.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-              defaultValue={[firstSession]}
-            />
-            <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-            <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-            {user.role === ROLES.ADMIN ? (
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Code"
-                componentId="CODE2022"
-                dataField="codeCentre.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                showMissing
-                missingLabel="Non renseigné"
-              />
-            ) : null}
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Places restantes"
-              componentId="PLACES"
-              dataField="placesLeft"
-              react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+              placeholder="Code"
+              componentId="CODE2022"
+              dataField="codeCentre.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
               title=""
               URLParams={true}
               sortBy="asc"
-              showSearch={false}
+              showSearch={true}
+              searchPlaceholder="Rechercher..."
+              showMissing
+              missingLabel="Non renseigné"
             />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              componentId="STATUS"
-              dataField="sessionStatus.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-            />
-            <DeleteFilters />
-          </div>
-        )}
+          ) : null}
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            placeholder="Places restantes"
+            componentId="PLACES"
+            dataField="placesLeft"
+            react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+            title=""
+            URLParams={true}
+            sortBy="asc"
+            showSearch={false}
+          />
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="STATUS"
+            dataField="sessionStatus.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+          />
+          <DeleteFilters />
+        </div>
+
         <div className="reactive-result">
           <ReactiveListComponent
             defaultQuery={getDefaultQuery}

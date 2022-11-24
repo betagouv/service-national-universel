@@ -57,55 +57,55 @@ export default function List() {
                 Filtres
               </div>
             </div>
-            {filterVisible && (
-              <div className="flex items-center gap-2 py-2 px-4">
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Séjours"
-                  componentId="COHORT"
-                  dataField="cohorts.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                  title=""
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  size={1000}
-                  defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Region"
-                  componentId="REGION"
-                  dataField="region.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-                  title=""
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  size={1000}
-                  defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Département"
-                  componentId="DEPARTMENT"
-                  dataField="department.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                  title=""
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  size={1000}
-                  defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
-                />
-              </div>
-            )}
+
+            <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Séjours"
+                componentId="COHORT"
+                dataField="cohorts.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Region"
+                componentId="REGION"
+                dataField="region.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Département"
+                componentId="DEPARTMENT"
+                dataField="department.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+              />
+            </div>
+
             <div className="reactive-result">
               <ReactiveListComponent
                 pageSize={50}
