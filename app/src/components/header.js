@@ -25,8 +25,8 @@ const Header = ({ setIsOpen }) => {
     <header className="flex px-3 w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:shadow-none top-0 z-50 bg-white h-[7rem]">
       <div className="flex justify-between w-full py-3 md:px-[7rem] items-center">
         <div className="flex space-x-6 items-center">
-          <img src={LogoFr} className="w-18 h-16" />
-          <img src={SNU} className="w-14" />
+          <img src={LogoFr} alt="Logo de la République française" className="w-18 h-16" />
+          <img src={SNU} alt="Logo du SNU" className="w-14" />
           <div className="hidden lg:block">
             <h1 className="font-bold text-xl">Service National Universel</h1>
             <div className="text-sm ">Inscription du volontaire</div>

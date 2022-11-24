@@ -36,20 +36,20 @@ export default function DesktopPageContainer({
           {subTitle && <div className="text-gray-800 mt-2 text-sm">{subTitle}</div>}
           <hr className="my-4 h-px bg-gray-200 border-0" />
           {children}
-        </div>
-        <div className="w-full md:w-[50rem] mx-auto fixed md:relative bottom-0 bg-white shadow-ninaInverted md:shadow- py-4 px-[1rem] md:px-[6rem] ">
-          <hr className="mb-8 h-px bg-gray-200 border-0 hidden md:block" />
-          <div className="flex justify-end gap-2">
-            {onClickPrevious && (
-              <button className="flex items-center justify-center w-10 border-[1px] border-[#000091]" onClick={onClickPrevious}>
-                <FiChevronLeft className="text-[#000091] font-bold" />
+          <div className="w-full mx-auto fixed bottom-0 bg-red-600 shadow-ninaInverted md:shadow-none py-4 px-[1rem] md:px-0 ">
+            <hr className="mb-8 h-px bg-gray-200 border-0 hidden md:block" />
+            <div className="flex justify-end gap-2">
+              {onClickPrevious && (
+                <button className="flex items-center justify-center w-10 border-[1px] border-[#000091]" onClick={onClickPrevious}>
+                  <FiChevronLeft className="text-[#000091] font-bold" />
+                </button>
+              )}
+              <button
+                className={`flex items-center justify-center py-2 px-4 w-full md:w-auto cursor-pointer ${disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+                onClick={() => !disabled && onSubmit()}>
+                {childrenContinueButton}
               </button>
-            )}
-            <button
-              className={`flex items-center justify-center py-2 px-4 w-full md:w-auto cursor-pointer ${disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-              onClick={() => !disabled && onSubmit()}>
-              {childrenContinueButton}
-            </button>
+            </div>
           </div>
         </div>
 
