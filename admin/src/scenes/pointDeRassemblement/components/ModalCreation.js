@@ -18,9 +18,13 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
+  const refContainer = React.useRef(null);
+
   React.useEffect(() => {
     const handleClickOutside = (event) => {
-      if (refSelect.current && !refSelect.current.contains(event.target)) {
+      if (refContainer.current && refContainer.current.contains(event.target)) {
+        setOpen((open) => !open);
+      } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
       }
     };
@@ -164,9 +168,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
               <div className="text-gray-500 text-sm font-medium leading-6 mt-4">Sélectionnez un point de rassemblement</div>
               <div className="relative">
                 <div
-                  onClick={() => {
-                    editable && setOpen(!open);
-                  }}
+                  ref={refContainer}
                   className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between shadow-sm rounded-lg bg-white ${
                     open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
                   }`}>
