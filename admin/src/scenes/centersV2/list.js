@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import Panel from "./panel";
 import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
 
 import { sessions2023 } from "snu-lib";
@@ -24,7 +23,6 @@ import { useHistory } from "react-router-dom";
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
 export default function List() {
-  const [center, setCenter] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
@@ -53,13 +51,12 @@ export default function List() {
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
               <div className="flex flex-col w-full">
-                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} setCenter={setCenter} />}
-                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} setCenter={setCenter} />}
+                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} />}
+                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} />}
               </div>
             </div>
           </div>
         </div>
-        <Panel center={center} onChange={() => setCenter(null)} />
       </div>
     </div>
   );
@@ -77,7 +74,7 @@ const Badge = ({ cohort, onClick }) => {
     </div>
   );
 };
-const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
+const ListSession = ({ getDefaultQuery, getExportQuery }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -254,7 +251,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
                   <div className="w-[20%]">Disponibilités</div>
                 </div>
                 {data.map((hit) => (
-                  <HitSession key={hit._id} center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]} hit={hit} onClick={() => setCenter(hit)} />
+                  <HitSession key={hit._id} center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]} hit={hit} />
                 ))}
                 <hr />
               </div>
@@ -265,7 +262,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
     </ReactiveBase>
   );
 };
-const ListCenter = ({ getDefaultQuery, getExportQuery, setCenter }) => {
+const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -428,7 +425,6 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, setCenter }) => {
                   sessionsPhase1={sessionsPhase1
                     .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
                     .map((e) => e)}
-                  onClick={() => setCenter(hit)}
                 />
               ))}
               <hr />
