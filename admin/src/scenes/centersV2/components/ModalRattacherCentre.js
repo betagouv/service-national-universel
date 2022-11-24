@@ -17,12 +17,20 @@ export default function ModalCreation({ isOpen, onCancel }) {
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
   const refContainer = React.useRef(null);
+
+  const refStatus = React.useRef(null);
+  const refStatusSelect = React.useRef(null);
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
         setOpen((open) => !open);
       } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
+      }
+      if (refStatus.current && refStatus.current.contains(event.target)) {
+        setStatusOpen((open) => !open);
+      } else if (refStatus.current && !refStatus.current.contains(event.target)) {
+        setStatusOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside, true);
@@ -38,10 +46,12 @@ export default function ModalCreation({ isOpen, onCancel }) {
   const [status, setStatus] = React.useState("");
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [statusOpen, setStatusOpen] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
+    if (!refInput.current) return;
     if (open) {
       refInput.current.focus();
     }
@@ -127,6 +137,11 @@ export default function ModalCreation({ isOpen, onCancel }) {
     }
   };
 
+  const statusOptions = [
+    { value: "VALIDATED", label: "Validée" },
+    { value: "WAITING_VALIDATION", label: "En attente de validation" },
+  ];
+
   return (
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
       <div className="flex flex-col p-8 h-[650px] w-full justify-between">
@@ -209,14 +224,44 @@ export default function ModalCreation({ isOpen, onCancel }) {
                 </div>
               </div>
               {selectedCentre && (
-                <div className="text-gray-500 text-sm font-medium leading-6 mt-4">
+                <div className="text-sm font-medium leading-6 mt-4">
                   <Field label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} />
                 </div>
               )}
 
               {selectedCentre && (
-                <div className="text-gray-500 text-sm font-medium leading-6 mt-4">
-                  <Field label="Statut de la session" onChange={(e) => setStatus(e.target.value)} value={status} />
+                <div className="relative">
+                  <div
+                    ref={refStatus}
+                    className={`mt-6 py-2 pl-2 pr-4 flex items-center justify-between rounded-lg bg-white ${
+                      statusOpen ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
+                    }`}>
+                    <div className="flex flex-col justify-center">
+                      <div className="text-xs leading-6 font-normal text-gray-500 ">Statut de la session</div>
+                      {status === "" ? (
+                        <div className="text-sm leading-6 text-gray-800 h-5" />
+                      ) : (
+                        <div className="text-sm leading-6 text-gray-800">{statusOptions.find((e) => e.value === status).label}</div>
+                      )}
+                    </div>
+                    <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
+                  </div>
+                  <div ref={refStatusSelect} className={`${!statusOpen ? "hidden" : ""} absolute w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
+                    {statusOptions.map((item) => {
+                      console.log(item);
+                      return (
+                        <div
+                          key={item.value}
+                          onClick={() => {
+                            setStatus(item.value);
+                            setStatusOpen(false);
+                          }}
+                          className="flex flex-col py-1 px-2 cursor-pointer hover:bg-gray-50 rounded-lg">
+                          <div className="text-sm leading-5 text-gray-900">{item.label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>
