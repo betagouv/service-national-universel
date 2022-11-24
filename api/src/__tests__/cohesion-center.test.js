@@ -127,37 +127,6 @@ describe("Cohesion Center", () => {
     });
   });
 
-  describe("POST cohesion-center/:centerId/assign-young-waiting-list/:youngId", () => {
-    it("should return 404 when center is not found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
-        .post("/cohesion-center/" + notExistingCohesionCenterId + "/assign-young-waiting-list/" + young._id)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 404 when young is not found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const res = await request(getAppHelper())
-        .post("/cohesion-center/" + cohesionCenter._id + "/assign-young-waiting-list/" + notExistingCohesionCenterId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-
-    it("should return 200 when young and cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
-        .post("/cohesion-center/" + cohesionCenter._id + "/assign-young-waiting-list/" + young._id)
-        .send();
-      expect(res.status).toBe(200);
-      expect(res.body.data.waitingList).toEqual(expect.arrayContaining([young._id.toString()]));
-
-      const updatedYoung = await getYoungByIdHelper(young._id);
-      expect(updatedYoung.cohesionCenterId).toBe(cohesionCenter._id.toString());
-      expect(updatedYoung.statusPhase1).toBe("WAITING_LIST");
-    });
-  });
-
   describe("GET /cohesion-center/:id", () => {
     it("should return 404 when cohesion center is not found", async () => {
       const res = await request(getAppHelper())
