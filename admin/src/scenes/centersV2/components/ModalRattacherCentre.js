@@ -41,11 +41,8 @@ export default function ModalCreation({ isOpen, onCancel }) {
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
-    if (!refInput.current) return;
     if (open) {
       refInput.current.focus();
-    } else {
-      refInput.current.blur();
     }
   }, [open]);
 
