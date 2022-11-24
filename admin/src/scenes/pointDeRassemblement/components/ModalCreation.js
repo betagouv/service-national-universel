@@ -131,8 +131,16 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
     }
   };
 
+  const onClose = () => {
+    setSelectedCohort(null);
+    setComplementAddress("");
+    setSearch("");
+    !defaultPDR && setSelectedPDR(null);
+    onCancel();
+  };
+
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
+    <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[600px] bg-white rounded-lg shadow-xl">
       <div className="flex flex-col p-8 h-[600px] w-full justify-between">
         <div className="flex flex-col w-full">
           <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
@@ -227,7 +235,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
           ) : null}
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={onCancel} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
+          <button onClick={onClose} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
             Annuler
           </button>
           <button
