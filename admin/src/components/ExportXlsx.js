@@ -82,7 +82,7 @@ export default function ExportComponent({
     <div className={setIsOpen && "w-full"}>
       {css?.override ? (
         <LoadingButtonV2 onClick={onClick} style={css.button}>
-          <div className="flex items-center gap-2">
+          <div className={icon && "flex items-center gap-2"}>
             {icon ? icon : null}
             {title}
           </div>

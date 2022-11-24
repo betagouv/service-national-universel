@@ -9,7 +9,7 @@ import ExportFieldCard from "../ExportFieldCard";
 import { translateIndexes } from "snu-lib";
 
 export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery }) {
-  const [selectedFields, setSelectedFields] = useState(exportFields.map((e) => e.id));
+  const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
   return (
@@ -41,30 +41,31 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
             <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
             <div className="w-1/2 text-right flex flex-row-reverse">
               {selectedFields == "" ? (
-                <div className="text-snu-purple-300 cursor-pointer" onClick={() => setSelectedFields(exportFields.map((e) => e.id))}>
+                <div className="text-blue-600 hover:text-blue-400 cursor-pointer" onClick={() => setSelectedFields(exportFields.map((e) => e.id))}>
                   Tout sélectionner
                 </div>
               ) : (
-                <div className="text-snu-purple-300 cursor-pointer" onClick={() => setSelectedFields([])}>
+                <div className="text-blue-600 hover:text-blue-400 cursor-pointer" onClick={() => setSelectedFields([])}>
                   Tout déselectionner
                 </div>
               )}
-              <StateProvider
-                render={({ searchState }) => {
-                  return <div className="mr-2">{searchState.result.hits?.total} résultats</div>;
-                }}
-              />
+              {filters && (
+                <StateProvider
+                  render={({ searchState }) => {
+                    return <div className="mr-2">{searchState.result.hits?.total} résultats</div>;
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
-
         <div className="h-[60vh] overflow-auto grid grid-cols-2 gap-4 w-full p-4">
           {exportFields.map((category) => (
             <ExportFieldCard key={category.id} category={category} selectedFields={selectedFields} setSelectedFields={setSelectedFields} />
           ))}
         </div>
         <div className="grid grid-cols-2 gap-4 w-full p-4 drop-shadow-[0_0_10px_rgb(220,220,220)] bg-white">
-          <button className="rounded-md border bg-white hover:drop-shadow text-gray-500 font-semibold" onClick={() => setIsOpen(false)}>
+          <button className="rounded-md border bg-white text-gray-500" onClick={() => setIsOpen(false)}>
             Annuler
           </button>
           <div className="flex w-full">
@@ -80,7 +81,7 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
               setIsOpen={setIsOpen}
               css={{
                 override: true,
-                button: `bg-brand-purple rounded-md px-4 py-2 text-sm text-white font-semibold w-full hover:bg-brand-darkPurple`,
+                button: `rounded-md px-4 py-2 text-sm w-full border-[1px] border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF] text-blue-100 hover:text-white`,
                 loadingButton: `bg-brand-transPurple rounded-md px-4 py-2 text-sm text-white font-semibold w-full`,
               }}
             />
