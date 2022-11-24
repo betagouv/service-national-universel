@@ -19,6 +19,24 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
+  department: {
+    type: String,
+    documentation: {
+      description: "Département du centre",
+    },
+  },
+  region: {
+    type: String,
+    documentation: {
+      description: "Région du centre",
+    },
+  },
+  codeCentre: {
+    type: String,
+    documentation: {
+      description: "Code du centre",
+    },
+  },
   headCenterId: {
     type: String,
     documentation: {
