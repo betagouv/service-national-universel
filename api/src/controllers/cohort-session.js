@@ -27,7 +27,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
         .validate(req.body);
       if (bodyError) {
         capture(bodyError);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
       young = body;
     }

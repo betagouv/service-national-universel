@@ -1,3 +1,16 @@
+## [1.172.1](https://github.com/betagouv/service-national-universel/compare/v1.172.0...v1.172.1) (2022-11-23)
+
+
+### Bug Fixes
+
+* **admin:** inscription par référent ([#2079](https://github.com/betagouv/service-national-universel/issues/2079)) ([69326eb](https://github.com/betagouv/service-national-universel/commit/69326eb6bcd70d8fa6505928380c0e24b5d3fd55))
+* **api:** eligibility function in young change cohort route ([8786e8f](https://github.com/betagouv/service-national-universel/commit/8786e8fb4628a22f5ff83c2412d8400750ce7458))
+* **api:** Let sender to SNU ([7cc7923](https://github.com/betagouv/service-national-universel/commit/7cc7923d36b81b7f001c4a1187b4af23fa504103))
+* **api:** SMS are not sent anymore ([09457ee](https://github.com/betagouv/service-national-universel/commit/09457ee4d738c5cb4cfca0e07f6bbe5591b95639))
+* **api:** throw error if pb with SIB ([b0979b2](https://github.com/betagouv/service-national-universel/commit/b0979b2798455f514e05c8643fdc81a602f40dab))
+* **app:** ecran phase 1 - modale fiche sanitaire ([7416318](https://github.com/betagouv/service-national-universel/commit/7416318191358c31a1c7b9276ab46e3713ca86a7))
+* **lib:** add "Côtes-d'Armor" (with a "-") to academic zones mapping ([49ffdf8](https://github.com/betagouv/service-national-universel/commit/49ffdf8750636be8867496cbbe42f622f24f2940))
+
 # [1.172.0](https://github.com/betagouv/service-national-universel/compare/v1.171.0...v1.172.0) (2022-11-22)
 
 

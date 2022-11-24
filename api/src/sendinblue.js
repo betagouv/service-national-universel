@@ -4,7 +4,7 @@ const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
-const SENDER_NAME_SMS = "Inscription SNU";
+const SENDER_NAME_SMS = "SNU";
 const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
@@ -20,6 +20,10 @@ const api = async (path, options = {}) => {
     ...options,
     headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
   });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(error);
+  }
   const contentType = res.headers.raw()["content-type"];
   if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
   return await res.text();

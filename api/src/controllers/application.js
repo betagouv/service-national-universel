@@ -5,6 +5,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
+const ContractObject = require("../models/contract");
 const MissionObject = require("../models/mission");
 const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
@@ -17,8 +18,8 @@ const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { ROLES, SENDINBLUE_TEMPLATES, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
-const { serializeApplication, serializeYoung } = require("../utils/serializer");
+const { ROLES, SENDINBLUE_TEMPLATES, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2, canViewContract } = require("snu-lib");
+const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const { config } = require("dotenv");
 const {
   uploadFile,
@@ -35,6 +36,7 @@ const {
 } = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
+const patches = require("./patches");
 
 async function updateMission(app, fromUser) {
   try {
@@ -254,6 +256,35 @@ router.put("/:id/visibilite", passport.authenticate(["young"], { session: false,
     await application.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/contract", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const application = await ApplicationObject.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const contract = await ContractObject.findById(application.contractId);
+    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    if (isReferent(req.user) && !canViewContract(req.user, contract)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -616,5 +647,7 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ApplicationObject));
 
 module.exports = router;
