@@ -126,6 +126,9 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
         toastr.error("Oups, une erreur est survenue lors de l'ajout de la session", translate(code));
         return setIsLoading(false);
       }
+      setIsLoading(false);
+      setSelectedCentre("");
+      setSelectedCohort("");
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
     } catch (e) {
       capture(e);
