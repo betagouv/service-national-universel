@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
+import { BsDownload } from "react-icons/bs";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
@@ -119,12 +120,13 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             title="Exporter"
             defaultQuery={getExportQuery}
             exportTitle="Session"
+            icon={<BsDownload className="text-gray-400" />}
             index="sessionphase1"
             react={{ and: FILTERS }}
             css={{
               override: true,
-              button: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md`,
-              loadingButton: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md w-full`,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
             transform={(all) => {
               return all.map((data) => {
@@ -314,9 +316,10 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             react={{ and: FILTERS }}
             css={{
               override: true,
-              button: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md`,
-              loadingButton: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md w-full`,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
+            icon={<BsDownload className="text-gray-400" />}
             transform={(all) => {
               return all.map((data) => {
                 let statutExport = {};
