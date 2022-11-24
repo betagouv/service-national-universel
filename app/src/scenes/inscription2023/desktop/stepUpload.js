@@ -14,7 +14,6 @@ import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 import ErrorMessage from "../components/ErrorMessage";
-import { set } from "core-js/core/dict";
 
 export default function StepUpload() {
   let { category } = useParams();
