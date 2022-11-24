@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
+import { BsDownload } from "react-icons/bs";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
@@ -11,7 +12,7 @@ import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
-import { FilterButton, TabItem } from "./components/commons";
+import { FilterButton, TabItem, Badge } from "./components/commons";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -79,18 +80,6 @@ export default function List() {
   );
 }
 
-const Badge = ({ cohort, onClick }) => {
-  return (
-    <div
-      key={cohort}
-      onClick={onClick}
-      className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 w-fit border-[1px] ${
-        cohort.status === "VALIDATED" ? "border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF] " : "text-gray-500 bg-gray-100 border-gray-100"
-      }`}>
-      {cohort.cohort}
-    </div>
-  );
-};
 const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -135,12 +124,13 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             title="Exporter"
             defaultQuery={getExportQuery}
             exportTitle="Session"
+            icon={<BsDownload className="text-gray-400" />}
             index="sessionphase1"
             react={{ and: FILTERS }}
             css={{
               override: true,
-              button: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md`,
-              loadingButton: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md w-full`,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
             transform={(all) => {
               return all.map((data) => {
@@ -181,70 +171,70 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             }}
           />
         </div>
-        {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap mx-8 items-center">
+
+        <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="COHORT"
+            placeholder="Cohortes"
+            dataField="cohort.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            defaultValue={[firstSession]}
+          />
+          <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+          <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+          {user.role === ROLES.ADMIN ? (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              componentId="COHORT"
-              placeholder="Cohortes"
-              dataField="cohort.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-              defaultValue={[firstSession]}
-            />
-            <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-            <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-            {user.role === ROLES.ADMIN ? (
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Code"
-                componentId="CODE2022"
-                dataField="codeCentre.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                showMissing
-                missingLabel="Non renseigné"
-              />
-            ) : null}
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Places restantes"
-              componentId="PLACES"
-              dataField="placesLeft"
-              react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+              placeholder="Code"
+              componentId="CODE2022"
+              dataField="codeCentre.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
               title=""
               URLParams={true}
               sortBy="asc"
-              showSearch={false}
+              showSearch={true}
+              searchPlaceholder="Rechercher..."
+              showMissing
+              missingLabel="Non renseigné"
             />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              componentId="STATUS"
-              dataField="sessionStatus.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-            />
-            <DeleteFilters />
-          </div>
-        )}
+          ) : null}
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            placeholder="Places restantes"
+            componentId="PLACES"
+            dataField="placesLeft"
+            react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+            title=""
+            URLParams={true}
+            sortBy="asc"
+            showSearch={false}
+          />
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="STATUS"
+            dataField="sessionStatus.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+          />
+          <DeleteFilters />
+        </div>
+
         <div className="reactive-result">
           <ReactiveListComponent
             defaultQuery={getDefaultQuery}
@@ -330,9 +320,10 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             react={{ and: FILTERS }}
             css={{
               override: true,
-              button: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md`,
-              loadingButton: `text-grey-700 cursor-pointer bg-white w-28 border border-gray-300 h-10 rounded-md w-full`,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
+            icon={<BsDownload className="text-gray-400" />}
             transform={(all) => {
               return all.map((data) => {
                 let statutExport = {};

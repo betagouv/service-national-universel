@@ -187,8 +187,7 @@ const Home = () => {
             <RestrictedRoute path="/user" component={Utilisateur} />
             <RestrictedRoute path="/contenu" component={Content} />
             <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-            <RestrictedRoute path="/centre" component={Center} />
-            {environment !== "production" && <RestrictedRoute path="/centreV2" component={CenterV2} />}
+            {environment === "production" ? <RestrictedRoute path="/centre" component={Center} /> : <RestrictedRoute path="/centre" component={CenterV2} />}
             {environment === "production" ? (
               <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
             ) : (
