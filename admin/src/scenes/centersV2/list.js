@@ -8,6 +8,8 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
 
+import { sessions2023 } from "snu-lib";
+
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
 import { FilterButton, TabItem } from "./components/commons";
@@ -23,30 +25,12 @@ const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS",
 
 export default function List() {
   const [center, setCenter] = useState(null);
-  // List of sessionPhase1 IDS currently displayed in results
-  const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
-
   const user = useSelector((state) => state.Auth.user);
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [currentTab, setCurrentTab] = useState("liste-centre");
-
-  useEffect(() => {
-    (async () => {
-      if (cohesionCenterIds?.length) {
-        const { responses } = await api.esQuery("sessionphase1", {
-          size: ES_NO_LIMIT,
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": cohesionCenterIds } }] } },
-        });
-        if (responses.length) {
-          setSessionsPhase1(responses[0]?.hits?.hits || []);
-        }
-      }
-    })();
-  }, [cohesionCenterIds]);
-
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
@@ -93,35 +77,12 @@ const Badge = ({ cohort, onClick }) => {
     </div>
   );
 };
-
-const Hit = ({ hit, sessionsPhase1, onClick }) => {
-  const history = useHistory();
-  return (
-    <>
-      <hr />
-      <div onClick={onClick} className="flex py-3 items-center px-4 hover:bg-gray-50 cursor-pointer">
-        <div className="flex flex-col gap-1 w-[40%]">
-          <div className="font-bold leading-6 text-gray-900">{hit?.name}</div>
-          <div className="font-normal text-sm leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
-        </div>
-        <div className="flex items-center flex-wrap w-[60%]">
-          {sessionsPhase1.map((sessionPhase1) => (
-            <div className="p-1" key={sessionPhase1._id}>
-              <div className="flex items-center">
-                <Badge onClick={() => history.push(`/centreV2/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-};
 const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
+  const firstSession = sessions2023[0].name;
 
   useEffect(() => {
     (async () => {
@@ -138,8 +99,8 @@ const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
   }, [cohesionCenterIds]);
   return (
     <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      <div className="flex-1 flex-column bg-white mx-8 flex-wrap">
-        <div className="flex flex-row pt-4 justify-between items-center">
+      <div className="flex-1 flex-column bg-white flex-wrap">
+        <div className="flex flex-row pt-4 justify-between items-center mx-8">
           <div className="flex flex-row">
             <DataSearch
               defaultQuery={getDefaultQuery}
@@ -208,7 +169,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
           />
         </div>
         {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap">
+          <div className="mt-3 gap-2 flex flex-wrap mx-8">
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
@@ -222,6 +183,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, setCenter }) => {
               URLParams={true}
               showSearch={false}
               renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
+              defaultValue={firstSession}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
@@ -314,6 +276,7 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, setCenter }) => {
   const [filterCohorts, setFilterConhorts] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
+  const firstSession = sessions2023[0].name;
 
   useEffect(() => {
     (async () => {
@@ -416,6 +379,7 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, setCenter }) => {
               showSearch={false}
               renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
               onValueChange={setFilterConhorts}
+              defaultValue={firstSession}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
@@ -475,7 +439,29 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, setCenter }) => {
     </ReactiveBase>
   );
 };
-
+const Hit = ({ hit, sessionsPhase1, onClick }) => {
+  const history = useHistory();
+  return (
+    <>
+      <hr />
+      <div onClick={onClick} className="flex py-3 items-center px-4 hover:bg-gray-50 cursor-pointer">
+        <div className="flex flex-col gap-1 w-[40%]">
+          <div className="font-bold leading-6 text-gray-900">{hit?.name}</div>
+          <div className="font-normal text-sm leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
+        </div>
+        <div className="flex items-center flex-wrap w-[60%]">
+          {sessionsPhase1.map((sessionPhase1) => (
+            <div className="p-1" key={sessionPhase1._id}>
+              <div className="flex items-center">
+                <Badge onClick={() => history.push(`/centreV2/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+};
 const HitSession = ({ center, hit, onClick }) => {
   const history = useHistory();
   return (
