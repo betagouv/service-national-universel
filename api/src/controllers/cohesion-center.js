@@ -9,7 +9,7 @@ const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, updateCenterDependencies, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
-const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
+const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
@@ -63,8 +63,13 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     //TODO: check si admin pour le status
+    let status;
+    if (req.user.role === ROLES.ADMIN) {
+      status = value.status;
+    } else {
+      status = "WAITING_VALIDATION";
+    }
     const center = await CohesionCenterModel.findById(cohesionCenterId);
-
     // check if session doesnt already exist
     if (center.cohorts.includes(value.cohort)) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
@@ -76,7 +81,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: value.status,
+      status: status,
       department: center.department,
       region: center.region,
       codeCentre: center.code,

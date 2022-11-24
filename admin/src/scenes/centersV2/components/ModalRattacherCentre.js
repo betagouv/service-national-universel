@@ -2,7 +2,7 @@ import React from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1, ROLES } from "snu-lib";
+import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1, ROLES, translate } from "snu-lib";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -43,7 +43,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
   const [selectedCohort, setSelectedCohort] = React.useState();
   const [selectedCentre, setSelectedCentre] = React.useState();
   const [placesTotal, setPlacesTotal] = React.useState("");
-  const [status, setStatus] = React.useState("");
+  const [status, setStatus] = React.useState("WAITING_VALIDATION");
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [statusOpen, setStatusOpen] = React.useState(false);
@@ -123,10 +123,9 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
       });
 
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de l'ajout de la session", code);
+        toastr.error("Oups, une erreur est survenue lors de l'ajout de la session", translate(code));
         return setIsLoading(false);
       }
-      //history.push(`/point-de-rassemblement/${centre._id}`);
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
     } catch (e) {
       capture(e);
@@ -246,7 +245,6 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
                   </div>
                   <div ref={refStatusSelect} className={`${!statusOpen ? "hidden" : ""} absolute w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
                     {statusOptions.map((item) => {
-                      console.log(item);
                       return (
                         <div
                           key={item.value}
