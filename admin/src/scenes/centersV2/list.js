@@ -5,9 +5,9 @@ import { useSelector } from "react-redux";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 
-import { sessions2023 } from "snu-lib";
+import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
@@ -29,6 +29,18 @@ export default function List() {
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [currentTab, setCurrentTab] = useState("liste-centre");
+  const [firstSession, setFirstSession] = useState("");
+
+  React.useEffect(() => {
+    getFirstCohortAvailable();
+  }, []);
+  const getFirstCohortAvailable = () => {
+    for (const session of COHORTS) {
+      if (session in START_DATE_SESSION_PHASE1 && START_DATE_SESSION_PHASE1[session].getTime() > new Date().getTime()) {
+        setFirstSession(firstSession);
+      }
+    }
+  };
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
@@ -51,8 +63,8 @@ export default function List() {
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
               <div className="flex flex-col w-full">
-                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} />}
-                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} />}
+                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
+                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
               </div>
             </div>
           </div>
@@ -74,12 +86,11 @@ const Badge = ({ cohort, onClick }) => {
     </div>
   );
 };
-const ListSession = ({ getDefaultQuery, getExportQuery }) => {
+const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
-  const firstSession = sessions2023[0].name;
 
   useEffect(() => {
     (async () => {
@@ -180,7 +191,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
               URLParams={true}
               showSearch={false}
               renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
-              defaultValue={firstSession}
+              defaultValue={[firstSession]}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
@@ -262,7 +273,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery }) => {
     </ReactiveBase>
   );
 };
-const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
+const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -273,7 +284,6 @@ const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
   const [filterCohorts, setFilterConhorts] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
-  const firstSession = sessions2023[0].name;
 
   useEffect(() => {
     (async () => {
@@ -376,7 +386,7 @@ const ListCenter = ({ getDefaultQuery, getExportQuery }) => {
               showSearch={false}
               renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
               onValueChange={setFilterConhorts}
-              defaultValue={firstSession}
+              defaultValue={[firstSession]}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
