@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
+import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 
 import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
 
@@ -18,6 +18,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
 
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { useHistory } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
@@ -177,11 +178,12 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
           />
         </div>
         {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap mx-8">
+          <div className="mt-3 gap-2 flex flex-wrap mx-8 items-center">
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
               componentId="COHORT"
+              placeholder="Cohortes"
               dataField="cohort.keyword"
               react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
               renderItem={(e, count) => {
@@ -190,7 +192,6 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
               title=""
               URLParams={true}
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
               defaultValue={[firstSession]}
             />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
@@ -199,7 +200,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
-                placeholder="Code 2022"
+                placeholder="Code"
                 componentId="CODE2022"
                 dataField="codeCentre.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
@@ -208,7 +209,6 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
                 sortBy="asc"
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
-                renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
                 showMissing
                 missingLabel="Non renseigné"
               />
@@ -224,7 +224,6 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
               URLParams={true}
               sortBy="asc"
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
             />
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
@@ -238,9 +237,8 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
               title=""
               URLParams={true}
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
             />
-            {/*<DeleteFilters />*/}
+            <DeleteFilters />
           </div>
         )}
         <div className="reactive-result">
@@ -371,11 +369,12 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
           />
         </div>
         {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap">
+          <div className="mt-3 gap-2 flex flex-wrap items-center">
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
               componentId="COHORT"
+              placeholder="Cohortes"
               dataField="cohorts.keyword"
               react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
               renderItem={(e, count) => {
@@ -384,7 +383,6 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
               title=""
               URLParams={true}
               showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
               onValueChange={setFilterConhorts}
               defaultValue={[firstSession]}
             />
@@ -394,21 +392,20 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
-                placeholder="Code 2022"
+                placeholder="Code"
                 componentId="CODE2022"
-                dataField="code2022.keyword"
+                dataField="code.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
                 title=""
                 URLParams={true}
                 sortBy="asc"
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
-                renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
                 showMissing
                 missingLabel="Non renseigné"
               />
             ) : null}
-            {/*<DeleteFilters />*/}
+            <DeleteFilters />
           </div>
         )}
       </div>
