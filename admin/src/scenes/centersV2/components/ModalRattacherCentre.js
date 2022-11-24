@@ -116,24 +116,21 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
     try {
       setIsLoading(true);
 
-      const {
-        ok,
-        code,
-        data: centre,
-      } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
+      const { ok, code } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
         cohort: selectedCohort,
         placesTotal,
         status,
       });
 
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de l'ajout du séjour", code);
+        toastr.error("Oups, une erreur est survenue lors de l'ajout de la session", code);
         return setIsLoading(false);
       }
-      history.push(`/point-de-rassemblement/${centre._id}`);
+      //history.push(`/point-de-rassemblement/${centre._id}`);
+      history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de l'ajout du séjour");
+      toastr.error("Oups, une erreur est survenue lors de l'ajout de la session");
       setIsLoading(false);
     }
   };

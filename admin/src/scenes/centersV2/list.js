@@ -451,7 +451,7 @@ const Hit = ({ hit, sessionsPhase1, onClick }) => {
           {sessionsPhase1.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
               <div className="flex items-center">
-                <Badge onClick={() => history.push(`/centreV2/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
+                <Badge onClick={() => history.push(`/centre/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
               </div>
             </div>
           ))}
@@ -461,6 +461,7 @@ const Hit = ({ hit, sessionsPhase1, onClick }) => {
   );
 };
 const HitSession = ({ center, hit, onClick }) => {
+  console.log(hit);
   const history = useHistory();
   return (
     <>
@@ -471,7 +472,7 @@ const HitSession = ({ center, hit, onClick }) => {
           <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
         <div className="flex items-center flex-wrap w-[20%]">
-          <Badge onClick={() => history.push(`/centreV2/${center?._source.cohesionCenterId}`)} cohort={hit} />
+          <Badge onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)} cohort={hit} />
         </div>
         <div className="flex flex-col w-[20%]">
           <div>
