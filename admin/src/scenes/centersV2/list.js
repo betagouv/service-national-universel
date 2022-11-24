@@ -41,8 +41,8 @@ export default function List() {
   }, []);
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
-      if (session in START_DATE_SESSION_PHASE1 && START_DATE_SESSION_PHASE1[session].getTime() > new Date().getTime()) {
-        setFirstSession(firstSession);
+      if (Object.prototype.hasOwnProperty.call(START_DATE_SESSION_PHASE1, session) && START_DATE_SESSION_PHASE1[session].getTime() > new Date().getTime()) {
+        return setFirstSession(session);
       }
     }
   };
