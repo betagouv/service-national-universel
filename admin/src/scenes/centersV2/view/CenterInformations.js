@@ -34,7 +34,6 @@ const optionsDomain = [
 export default function Details({ center, updateCenter }) {
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalDelete, setModalDelete] = useState({ isOpen: false });
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState({});
@@ -43,7 +42,6 @@ export default function Details({ center, updateCenter }) {
     setData(center);
   }, [center]);
 
-  const onDelete = () => {};
   const onVerifyAddress = (verify) => {
     console.log("on verify", verify);
   };
@@ -103,22 +101,6 @@ export default function Details({ center, updateCenter }) {
       <div className="flex items-center justify-between">
         <Title>{data.name}</Title>
         <div className="flex items-center gap-2">
-          {/* {canDeleteMeetingPoint(user) ? (
-            <button
-              className="border-[1px] border-red-600 bg-red-600 shadow-sm px-4 py-2 text-white hover:!text-red-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() =>
-                setModalDelete({
-                  isOpen: true,
-                  title: "Supprimer le point de rassemblement",
-                  message: "Êtes-vous sûr de vouloir supprimer ce point de rassemblement ?",
-                  onDelete: onDelete,
-                })
-              }
-              disabled={isLoading}>
-              Supprimer
-            </button>
-          ) : null}*/}
-
           {canCreateOrUpdateCohesionCenter(user) ? (
             <button
               className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"

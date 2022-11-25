@@ -171,7 +171,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
+    if (req.user.role !== ROLES.ADMIN) {
+      delete value.centerDesignation;
+      delete value.code2022;
+    }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
