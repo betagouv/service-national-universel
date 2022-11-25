@@ -168,7 +168,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
+    // check si le nombre de place > au nombre place pour chaque session
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user.role !== ROLES.ADMIN) {
