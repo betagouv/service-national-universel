@@ -6,15 +6,42 @@ function getNewCohesionCenterFixture() {
   const placesLeft = 15;
   return {
     name: faker.lorem.word(),
+    code: faker.lorem.word(),
+    departmentCode: "55",
+    address: faker.lorem.word(),
+    zip: faker.address.zipCode(),
+    city: faker.address.city(),
+    department: faker.address.state(),
+    region: faker.address.state(),
+    country: faker.address.country(),
+    placesTotal: placesLeft,
+    placesLeft: placesLeft,
+    outfitDelivered: faker.lorem.word(),
+    observations: faker.lorem.word(),
+    waitingList: [faker.lorem.word(), faker.lorem.word()],
+    COR: faker.lorem.word(),
+    cohorts: ["2020"],
+    2020: {
+      status: "VALIDATED",
+      placesLeft: placesLeft,
+      placesTotal: placesLeft,
+    },
+  };
+}
+
+function getNewCohesionCenterFixtureV2() {
+  const placesLeft = 15;
+  return {
+    name: faker.lorem.word(),
     code2022: faker.lorem.word(),
     address: faker.lorem.word(),
     city: faker.address.city(),
     zip: faker.address.zipCode(),
     department: faker.address.state(),
     region: faker.address.state(),
-    addressVerified: faker.boolean(),
+    addressVerified: true,
     placesTotal: placesLeft,
-    pmr: faker.boolean(),
+    pmr: false,
     academy: faker.address.city(),
     typology: "PUBLIC_ETAT",
     domain: "ETABLISSEMENT",
@@ -28,4 +55,5 @@ function getNewCohesionCenterFixture() {
 
 module.exports = {
   getNewCohesionCenterFixture,
+  getNewCohesionCenterFixtureV2,
 };
