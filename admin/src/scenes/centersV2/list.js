@@ -102,6 +102,7 @@ const ListSession = ({ firstSession }) => {
       }
     })();
   }, [cohesionCenterIds]);
+  const history = useHistory();
 
   if (!firstSession) return <div></div>;
   return (
@@ -259,7 +260,7 @@ const ListSession = ({ firstSession }) => {
                   <div className="w-[20%]">Disponibilités</div>
                 </div>
                 {data.map((hit) => (
-                  <HitSession key={hit._id} center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]} hit={hit} />
+                  <HitSession history={history} key={hit._id} center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]} hit={hit} />
                 ))}
                 <hr />
               </div>
@@ -300,6 +301,8 @@ const ListCenter = ({ firstSession }) => {
       }
     })();
   }, [cohesionCenterIds]);
+
+  const history = useHistory();
 
   if (!firstSession) return <div></div>;
   return (
@@ -433,6 +436,8 @@ const ListCenter = ({ firstSession }) => {
                 <Hit
                   key={hit._id}
                   hit={hit}
+                  history={history}
+                  onClick={() => history.push(`/centre/${hit._id}`)}
                   sessionsPhase1={sessionsPhase1
                     .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
                     .map((e) => e)}
@@ -446,8 +451,7 @@ const ListCenter = ({ firstSession }) => {
     </ReactiveBase>
   );
 };
-const Hit = ({ hit, sessionsPhase1, onClick }) => {
-  const history = useHistory();
+const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
   return (
     <>
       <hr />
@@ -459,8 +463,14 @@ const Hit = ({ hit, sessionsPhase1, onClick }) => {
         <div className="flex items-center flex-wrap w-[60%]">
           {sessionsPhase1.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
-              <div className="flex items-center">
-                <Badge onClick={() => history.push(`/centre/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
+              <div className="flex items-center z-10">
+                <Badge
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    history.push(`/centre/${sessionPhase1._source.cohesionCenterId}?cohorte=${sessionPhase1._source.cohort}`);
+                  }}
+                  cohort={sessionPhase1._source}
+                />
               </div>
             </div>
           ))}
@@ -469,8 +479,7 @@ const Hit = ({ hit, sessionsPhase1, onClick }) => {
     </>
   );
 };
-const HitSession = ({ center, hit, onClick }) => {
-  const history = useHistory();
+const HitSession = ({ center, hit, onClick, history }) => {
   return (
     <>
       <hr />
@@ -479,8 +488,14 @@ const HitSession = ({ center, hit, onClick }) => {
           <div className="font-bold leading-6 text-gray-900">{center?._source.name}</div>
           <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
-        <div className="flex items-center flex-wrap w-[20%]">
-          <Badge onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)} cohort={hit} />
+        <div className="flex items-center flex-wrap w-[20%] z-10">
+          <Badge
+            onClick={(e) => {
+              e.stopPropagation();
+              history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`);
+            }}
+            cohort={hit}
+          />
         </div>
         <div className="flex flex-col w-[20%]">
           <div>

@@ -5,7 +5,7 @@ import { SentryRoute } from "../../sentry";
 
 import List from "./list";
 //import Edit from "./edit";
-//import View from "./view";
+import View from "./view";
 //import Youngs from "./youngs";
 //import Team from "./view/team";
 
@@ -16,7 +16,7 @@ export default function Index() {
     <Switch>
       {/*<SentryRoute path="/centreV2/nouveau" component={Edit} />*/}
       {/*<SentryRoute path="/centreV2/:id/edit" component={Edit} />*/}
-      {/*<SentryRoute path="/centreV2/:id/cohort/:cohortId" component={View} />*/}
+      <SentryRoute path="/centre/:id" component={View} />
       {/*<SentryRoute path="/centreV2/:id/:sessionId/equipe" component={Team} />*/}
       {/*<SentryRoute path="/centreV2/:id/:sessionId/:currentTab" component={Youngs} />*/}
       <SentryRoute path="/centre" component={List} />
