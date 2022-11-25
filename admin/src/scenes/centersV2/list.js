@@ -8,7 +8,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 
-import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
+import { COHESION_STAY_START, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
@@ -22,30 +22,34 @@ import Calendar from "../../assets/icons/Calendar";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { useHistory } from "react-router-dom";
 
+import ModalRattacherCentre from "./components/ModalRattacherCentre";
+
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
-  const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-  const [currentTab, setCurrentTab] = useState("liste-centre");
-  const [firstSession, setFirstSession] = useState("");
 
-  React.useEffect(() => {
-    getFirstCohortAvailable();
-  }, []);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [currentTab, setCurrentTab] = useState("liste-centre");
+
+  const [firstSession, setFirstSession] = useState(null);
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
-      if (session in START_DATE_SESSION_PHASE1 && START_DATE_SESSION_PHASE1[session].getTime() > new Date().getTime()) {
-        setFirstSession(firstSession);
+      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
+        return setFirstSession(session);
       }
     }
   };
+
+  useEffect(() => {
+    getFirstCohortAvailable();
+  }, []);
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
+      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
         <div className="flex flex-1 flex-col w-full px-8">
           <div className="py-8 flex items-center justify-between">
@@ -53,7 +57,7 @@ export default function List() {
             {canCreateOrUpdateCohesionCenter(user) ? (
               <button
                 className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
-                onClick={() => null}>
+                onClick={() => setModalVisible(true)}>
                 Rattacher un centre à un séjour
               </button>
             ) : null}
@@ -65,8 +69,8 @@ export default function List() {
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
               <div className="flex flex-col w-full">
-                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
-                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
+                {currentTab === "liste-centre" && <ListCenter firstSession={firstSession} />}
+                {currentTab === "session" && <ListSession firstSession={firstSession} />}
               </div>
             </div>
           </div>
@@ -76,12 +80,15 @@ export default function List() {
   );
 }
 
-const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
+const ListSession = ({ firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
-
+  const getDefaultQuery = () => {
+    return { query: { match_all: {} }, track_total_hits: true };
+  };
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
     (async () => {
       if (cohesionCenterIds?.length) {
@@ -95,6 +102,8 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
       }
     })();
   }, [cohesionCenterIds]);
+
+  if (!firstSession) return <div></div>;
   return (
     <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="flex-1 flex-column bg-white flex-wrap">
@@ -261,7 +270,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
     </ReactiveBase>
   );
 };
-const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
+const ListCenter = ({ firstSession }) => {
   const [filterVisible, setFilterVisible] = useState(false);
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -272,6 +281,11 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   const [filterCohorts, setFilterConhorts] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
+
+  const getDefaultQuery = () => {
+    return { query: { match_all: {} }, track_total_hits: true };
+  };
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   useEffect(() => {
     (async () => {
@@ -287,6 +301,7 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
     })();
   }, [cohesionCenterIds]);
 
+  if (!firstSession) return <div></div>;
   return (
     <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="flex-1 flex-column bg-white mx-8 flex-wrap">
@@ -359,46 +374,44 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             }}
           />
         </div>
-        {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap items-center">
+        <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="COHORT"
+            placeholder="Cohortes"
+            dataField="cohorts.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            onValueChange={setFilterConhorts}
+            defaultValue={[firstSession]}
+          />
+          <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+          <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+          {user.role === ROLES.ADMIN ? (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              componentId="COHORT"
-              placeholder="Cohortes"
-              dataField="cohorts.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
+              placeholder="Code"
+              componentId="CODE2022"
+              dataField="code.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
               title=""
               URLParams={true}
-              showSearch={false}
-              onValueChange={setFilterConhorts}
-              defaultValue={[firstSession]}
+              sortBy="asc"
+              showSearch={true}
+              searchPlaceholder="Rechercher..."
+              showMissing
+              missingLabel="Non renseigné"
             />
-            <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-            <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-            {user.role === ROLES.ADMIN ? (
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Code"
-                componentId="CODE2022"
-                dataField="code.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                showMissing
-                missingLabel="Non renseigné"
-              />
-            ) : null}
-            <DeleteFilters />
-          </div>
-        )}
+          ) : null}
+          <DeleteFilters />
+        </div>
       </div>
       <div className="reactive-result">
         <ReactiveListComponent
@@ -447,7 +460,7 @@ const Hit = ({ hit, sessionsPhase1, onClick }) => {
           {sessionsPhase1.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
               <div className="flex items-center">
-                <Badge onClick={() => history.push(`/centreV2/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
+                <Badge onClick={() => history.push(`/centre/${sessionPhase1._source.cohesionCenterId}/cohort/${sessionPhase1._source.cohort}`)} cohort={sessionPhase1._source} />
               </div>
             </div>
           ))}
@@ -467,7 +480,7 @@ const HitSession = ({ center, hit, onClick }) => {
           <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
         <div className="flex items-center flex-wrap w-[20%]">
-          <Badge onClick={() => history.push(`/centreV2/${center?._source.cohesionCenterId}`)} cohort={hit} />
+          <Badge onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)} cohort={hit} />
         </div>
         <div className="flex flex-col w-[20%]">
           <div>

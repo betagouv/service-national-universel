@@ -84,6 +84,60 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
+router.put("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: cohesionCenterId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+      placesTotal: Joi.number().required(),
+      status: Joi.string(),
+    }).validate({ ...req.body }, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    let status;
+    if (req.user.role === ROLES.ADMIN) {
+      status = value.status;
+    } else {
+      status = "WAITING_VALIDATION";
+    }
+    const center = await CohesionCenterModel.findById(cohesionCenterId);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // check if session doesnt already exist
+    if (center.cohorts.includes(value.cohort)) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    const newCohorts = center.cohorts;
+    newCohorts.push(value.cohort);
+
+    await SessionPhase1.create({
+      cohesionCenterId,
+      cohort: value.cohort,
+      placesTotal: value.placesTotal,
+      placesLeft: value.placesTotal,
+      status: status,
+      department: center.department,
+      region: center.region,
+      codeCentre: center.code2022,
+      nameCentre: center.name,
+      cityCentre: center.city,
+      zipCentre: center.zip,
+    });
+    center.set({ cohorts: newCohorts });
+    await center.save({ fromUser: req.user });
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 //To update for new affectation
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
