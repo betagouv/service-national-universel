@@ -42,7 +42,6 @@ export default function List() {
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        console.log(session);
         return setFirstSession(session);
       }
     }
