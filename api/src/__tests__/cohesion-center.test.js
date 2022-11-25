@@ -1,7 +1,7 @@
 require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const getNewBusFixture = require("./fixtures/bus");
-const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+const { getNewCohesionCenterFixture, getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewYoungFixture = require("./fixtures/young");
@@ -32,14 +32,14 @@ afterAll(dbClose);
 describe("Cohesion Center", () => {
   describe("POST /cohesion-center", () => {
     it("should return 200", async () => {
-      const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
+      const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(200);
     });
     it("should only not be accessible by responsible", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
 
-      const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
+      const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(403);
 
       passport.user.role = ROLES.ADMIN;

@@ -12,12 +12,32 @@ const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, updateCenterDepende
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
-const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
+const { validateUpdateCohesionCenter, validateId } = require("../utils/validator");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateNewCohesionCenter(req.body);
+    const { error, value } = Joi.object({
+      name: Joi.string().required(),
+      code2022: Joi.string().allow(null, ""),
+      address: Joi.string().required(),
+      city: Joi.string().required(),
+      zip: Joi.string().required(),
+      department: Joi.string().required(),
+      region: Joi.string().required(),
+      addressVerified: Joi.boolean().required(),
+      placesTotal: Joi.string().required(),
+      pmr: Joi.boolean().required(),
+      academy: Joi.string().required(),
+      typology: Joi.string().trim().valid("PUBLIC_ETAT", "PUBLIC_COLLECTIVITE", "PRIVE_ASSOCIATION", "PRIVE_AUTRE").required(),
+      domain: Joi.string().trim().valid("ETABLISSEMENT", "VACANCES", "FORMATION", "AUTRE").required(),
+      complement: Joi.string().allow(null, ""),
+      centerDesignation: Joi.string().allow(null, ""),
+      placesSession: Joi.string().required(),
+      cohort: Joi.string().required(),
+      statusSession: Joi.string().trim().valid("VALIDATED", "WAITING_VALIDATION").allow(null, ""),
+    }).validate(req.body, { stripUnknown: true });
+
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -25,18 +45,38 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const cohesionCenter = await CohesionCenterModel.create(value);
+    const cohesionCenter = await CohesionCenterModel.create({
+      name: value.name,
+      code2022: value.code2022,
+      address: value.address,
+      city: value.city,
+      zip: value.zip,
+      department: value.department,
+      region: value.region,
+      addressVerified: value.addressVerified ? "true" : "false",
+      placesTotal: value.placesTotal,
+      pmr: value.pmr ? "true" : "false",
+      cohorts: [value.cohort],
+      academy: value.academy,
+      typology: value.typology,
+      domain: value.domain,
+      complement: value.complement,
+      centerDesignation: value.centerDesignation,
+    });
 
-    // create sessionPhase1 documents linked to this cohesion center
-    if (cohesionCenter.cohorts.length > 0) {
-      for (let cohort of cohesionCenter.cohorts) {
-        const cohesionCenterId = cohesionCenter._id;
-        const placesTotal = value[cohort].placesTotal;
-        const placesLeft = value[cohort].placesLeft;
-        const status = value[cohort].status;
-        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
-      }
-    }
+    await SessionPhase1.create({
+      cohesionCenterId: cohesionCenter._id,
+      cohort: value.cohort,
+      placesTotal: value.placesTotal,
+      placesLeft: value.placesTotal,
+      status: req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION",
+      department: value.department,
+      region: value.region,
+      codeCentre: value.code2022,
+      nameCentre: value.name,
+      cityCentre: value.city,
+      zipCentre: value.zip,
+    });
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
