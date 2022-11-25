@@ -105,7 +105,7 @@ export default function VolontaireList() {
     setInfosClick(!infosClick);
   };
 
-  async function transform(data, values) {
+  async function transformVolontaires(data, values) {
     let all = data;
     if (values.includes("schoolSituation")) {
       const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
@@ -357,7 +357,7 @@ export default function VolontaireList() {
                   isOpen={isExportOpen}
                   setIsOpen={setIsExportOpen}
                   index="young"
-                  transform={transform}
+                  transform={transformVolontaires}
                   exportFields={youngExportFields}
                   filters={FILTERS}
                   getExportQuery={getExportQuery}

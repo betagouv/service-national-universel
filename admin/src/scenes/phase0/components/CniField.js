@@ -14,6 +14,7 @@ import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 import Field from "./Field";
+import DatePickerList from "./DatePickerList";
 
 export function CniField({
   young,
@@ -288,15 +289,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                   <div className="flex mt-4 w-full space-x-2">
                     <div className="relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] w-1/2">
                       <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">Date d&apos;expiration</label>
-                      <input
-                        type="date"
-                        value={dayjs(date).locale("fr").format("YYYY-MM-DD")}
-                        onChange={(e) => setDate(e.target.value)}
-                        onClick={(e) => {
-                          if (e.target?.showPicker) e.target.showPicker();
-                        }}
-                        className="block bg-gray-50 w-[100%] cursor-pointer"
-                      />
+                      <DatePickerList fromEdition={false} value={new Date(date)} onChange={(val) => setDate(val)} />
                     </div>
                     <Field
                       label="Catégorie"

@@ -18,9 +18,13 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
+  const refContainer = React.useRef(null);
+
   React.useEffect(() => {
     const handleClickOutside = (event) => {
-      if (refSelect.current && !refSelect.current.contains(event.target)) {
+      if (refContainer.current && refContainer.current.contains(event.target)) {
+        setOpen((open) => !open);
+      } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
       }
     };
@@ -131,8 +135,16 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
     }
   };
 
+  const onClose = () => {
+    setSelectedCohort(null);
+    setComplementAddress("");
+    setSearch("");
+    !defaultPDR && setSelectedPDR(null);
+    onCancel();
+  };
+
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
+    <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[600px] bg-white rounded-lg shadow-xl">
       <div className="flex flex-col p-8 h-[600px] w-full justify-between">
         <div className="flex flex-col w-full">
           <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
@@ -156,9 +168,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
               <div className="text-gray-500 text-sm font-medium leading-6 mt-4">Sélectionnez un point de rassemblement</div>
               <div className="relative">
                 <div
-                  onClick={() => {
-                    editable && setOpen(!open);
-                  }}
+                  ref={refContainer}
                   className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between shadow-sm rounded-lg bg-white ${
                     open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
                   }`}>
@@ -227,7 +237,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
           ) : null}
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={onCancel} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
+          <button onClick={onClose} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
             Annuler
           </button>
           <button
