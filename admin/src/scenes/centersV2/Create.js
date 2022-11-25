@@ -94,6 +94,12 @@ export default function Create() {
       if (!data?.code2022 && user.role === ROLES.ADMIN) error.code2022 = "Le code est obligatoire";
       if (!data?.centerDesignation && user.role === ROLES.ADMIN) error.centerDesignation = "La désignation est obligatoire";
 
+      if (isNaN(data?.placesTotal)) error.placesTotal = "Le nombre de places doit être un nombre";
+      if (isNaN(data?.placesSession)) error.placesSession = "Le nombre de places pour la session doit être un nombre";
+
+      if (!isNaN(data?.placesTotal) && !isNaN(data?.placesSession) && data.placesTotal < data.placesSession)
+        error.placesSession = "Le nombre de places pour la session ne peut pas être supérieur à la capacité maximale du centre";
+
       setErrors(error);
       if (Object.keys(error).length > 0) return setIsLoading(false);
 

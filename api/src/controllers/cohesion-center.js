@@ -19,7 +19,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   try {
     const { error, value } = Joi.object({
       name: Joi.string().required(),
-      code2022: Joi.string(),
+      code2022: Joi.string().allow(null, ""),
       address: Joi.string().required(),
       city: Joi.string().required(),
       zip: Joi.string().required(),
@@ -29,12 +29,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       placesTotal: Joi.string().required(),
       pmr: Joi.boolean().required(),
       academy: Joi.string().required(),
-      typology: Joi.string().trim().valid().required(),
-      domain: Joi.string().trim().valid().required(),
-      complement: Joi.string(),
-      centerDesignation: Joi.string(),
+      typology: Joi.string().trim().valid("PUBLIC_ETAT", "PUBLIC_COLLECTIVITE", "PRIVE_ASSOCIATION", "PRIVE_AUTRE").required(),
+      domain: Joi.string().trim().valid("ETABLISSEMENT", "VACANCES", "FORMATION", "AUTRE").required(),
+      complement: Joi.string().allow(null, ""),
+      centerDesignation: Joi.string().allow(null, ""),
       placesSession: Joi.string().required(),
       cohort: Joi.string().required(),
+      statusSession: Joi.string().trim().valid("VALIDATED", "WAITING_VALIDATION").allow(null, ""),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -68,7 +69,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: req.user.role === ROLES.ADMIN ? "VALIDATED" : "WAITING_VALIDATION",
+      status: req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION",
       department: value.department,
       region: value.region,
       codeCentre: value.code2022,
