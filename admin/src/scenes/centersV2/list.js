@@ -42,6 +42,7 @@ export default function List() {
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
+        console.log(session);
         return setFirstSession(session);
       }
     }
@@ -363,46 +364,44 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
             }}
           />
         </div>
-        {filterVisible && (
-          <div className="mt-3 gap-2 flex flex-wrap items-center">
+        <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="COHORT"
+            placeholder="Cohortes"
+            dataField="cohorts.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            onValueChange={setFilterConhorts}
+            defaultValue={[firstSession]}
+          />
+          <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+          <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+          {user.role === ROLES.ADMIN ? (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              componentId="COHORT"
-              placeholder="Cohortes"
-              dataField="cohorts.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
+              placeholder="Code"
+              componentId="CODE2022"
+              dataField="code.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
               title=""
               URLParams={true}
-              showSearch={false}
-              onValueChange={setFilterConhorts}
-              defaultValue={[firstSession]}
+              sortBy="asc"
+              showSearch={true}
+              searchPlaceholder="Rechercher..."
+              showMissing
+              missingLabel="Non renseigné"
             />
-            <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-            <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-            {user.role === ROLES.ADMIN ? (
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Code"
-                componentId="CODE2022"
-                dataField="code.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                showMissing
-                missingLabel="Non renseigné"
-              />
-            ) : null}
-            <DeleteFilters />
-          </div>
-        )}
+          ) : null}
+          <DeleteFilters />
+        </div>
       </div>
       <div className="reactive-result">
         <ReactiveListComponent
