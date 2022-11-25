@@ -113,12 +113,9 @@ describe("Young", () => {
         lastName: "bar",
         password: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
         frenchNationality: fixture.frenchNationality,
-        rulesYoung: fixture.acceptCGU,
-        acceptCGU: fixture.rulesYoung,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
       });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
@@ -132,12 +129,9 @@ describe("Young", () => {
         lastName: "bar",
         password: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
         frenchNationality: fixture.frenchNationality,
-        rulesYoung: fixture.acceptCGU,
-        acceptCGU: fixture.rulesYoung,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
       });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
@@ -154,12 +148,9 @@ describe("Young", () => {
         lastName: "bar",
         password: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
         frenchNationality: fixture.frenchNationality,
-        rulesYoung: fixture.acceptCGU,
-        acceptCGU: fixture.rulesYoung,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
       });
       expect(res.status).toBe(409);
     });
