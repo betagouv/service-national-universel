@@ -84,6 +84,10 @@ export default function Details({ center, updateCenter }) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
         return setIsLoading(false);
       }
+      setIsLoading(false);
+      setData(center);
+      setErrors({});
+      toastr.success("Le centre a été modifié avec succès");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification du centre.");
@@ -144,6 +148,7 @@ export default function Details({ center, updateCenter }) {
                     onClick={() => {
                       setEditInfo(false);
                       setData(center);
+                      setErrors({});
                     }}
                     disabled={isLoading}>
                     Annuler

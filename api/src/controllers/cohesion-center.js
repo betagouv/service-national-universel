@@ -147,8 +147,23 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
-
+    const { error, value } = Joi.object({
+      academy: Joi.string().required(),
+      addressVerified: Joi.string().required(),
+      centerDesignation: Joi.string().required(),
+      city: Joi.string().required(),
+      code2022: Joi.string().required(),
+      complement: Joi.string(),
+      placesTotal: Joi.number().required(),
+      department: Joi.string().required(),
+      domain: Joi.string().required(),
+      name: Joi.string().required(),
+      pmr: Joi.string().required(),
+      region: Joi.string().required(),
+      typology: Joi.string().required(),
+      zip: Joi.string().required(),
+    }).validate({ ...req.body }, { stripUnknown: true });
+    console.log(value);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -157,46 +172,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const previousCohorts = center.cohorts || [];
-    center.set(newCenter);
+    center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
-
-    // if we change the cohorts, we need to update the sessionPhase1
-    if (newCenter?.cohorts?.length) {
-      const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
-      // add sessionPhase1 documents linked to this cohesion center
-
-      for (let cohort of center.cohorts) {
-        if (!deletedCohorts.includes(cohort)) {
-          const cohesionCenterId = center._id;
-          const placesTotal = newCenter[cohort].placesTotal;
-          const placesLeft = newCenter[cohort].placesLeft;
-          const status = newCenter[cohort].status;
-          const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
-          if (session) {
-            session.set({ placesTotal, placesLeft, status });
-            await session.save({ fromUser: req.user });
-          } else {
-            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
-          }
-        }
-      }
-
-      // ! MAYBE DANGEROUS ?
-      // delete sessionPhase1 documents linked to this cohesion center
-      if (deletedCohorts?.length > 0) {
-        for (let cohort of deletedCohorts) {
-          const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
-          const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id.toString() });
-          if (youngsInSessions.length === 0) {
-            await sessionPhase1?.remove();
-          }
-        }
-      }
-    }
-
-    await updateCenterDependencies(center, req.user);
-
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
