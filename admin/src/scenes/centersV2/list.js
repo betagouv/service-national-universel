@@ -41,7 +41,7 @@ export default function List() {
   }, []);
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
-      if (COHESION_STAY_START[session].getTime() > new Date().getTime()) {
+      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
         return setFirstSession(session);
       }
     }
@@ -461,7 +461,6 @@ const Hit = ({ hit, sessionsPhase1, onClick }) => {
   );
 };
 const HitSession = ({ center, hit, onClick }) => {
-  console.log(hit);
   const history = useHistory();
   return (
     <>
