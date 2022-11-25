@@ -1,3 +1,10 @@
+# [1.174.0](https://github.com/betagouv/service-national-universel/compare/v1.173.0...v1.174.0) (2022-11-25)
+
+
+### Features
+
+* **admin/api:** Modal ajout d'une session à un centre ([#2087](https://github.com/betagouv/service-national-universel/issues/2087)) ([b17daed](https://github.com/betagouv/service-national-universel/commit/b17daed2d3d462c23776fb4d3bca70323ccec2ba))
+
 # [1.173.0](https://github.com/betagouv/service-national-universel/compare/v1.172.1...v1.173.0) (2022-11-24)
 
 
