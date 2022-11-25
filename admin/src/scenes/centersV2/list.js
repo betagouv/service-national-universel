@@ -28,24 +28,11 @@ const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS",
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
-  const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
-  };
-  const [modalVisible, setModalVisible] = useState(false);
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-  const [currentTab, setCurrentTab] = useState("liste-centre");
-  const [firstSession, setFirstSession] = useState("");
 
-  React.useEffect(() => {
-    getFirstCohortAvailable();
-  }, []);
-  const getFirstCohortAvailable = () => {
-    for (const session of COHORTS) {
-      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        return setFirstSession(session);
-      }
-    }
-  };
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [currentTab, setCurrentTab] = useState("liste-centre");
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Centres" }]} />
@@ -69,8 +56,8 @@ export default function List() {
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
               <div className="flex flex-col w-full">
-                {currentTab === "liste-centre" && <ListCenter getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
-                {currentTab === "session" && <ListSession getDefaultQuery={getDefaultQuery} getExportQuery={getExportQuery} firstSession={firstSession} />}
+                {currentTab === "liste-centre" && <ListCenter />}
+                {currentTab === "session" && <ListSession />}
               </div>
             </div>
           </div>
@@ -80,12 +67,29 @@ export default function List() {
   );
 }
 
-const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
+const ListSession = () => {
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
 
+  const [firstSession, setFirstSession] = useState(null);
+  const getFirstCohortAvailable = () => {
+    for (const session of COHORTS) {
+      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
+        return setFirstSession(session);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getFirstCohortAvailable();
+  }, []);
+
+  const getDefaultQuery = () => {
+    return { query: { match_all: {} }, track_total_hits: true };
+  };
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
     (async () => {
       if (cohesionCenterIds?.length) {
@@ -99,6 +103,8 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
       }
     })();
   }, [cohesionCenterIds]);
+
+  if (!firstSession) return <div></div>;
   return (
     <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="flex-1 flex-column bg-white flex-wrap">
@@ -265,7 +271,7 @@ const ListSession = ({ getDefaultQuery, getExportQuery, firstSession }) => {
     </ReactiveBase>
   );
 };
-const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
+const ListCenter = () => {
   const [filterVisible, setFilterVisible] = useState(false);
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -275,7 +281,25 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
   // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
   const [filterCohorts, setFilterConhorts] = useState([]);
 
+  const [firstSession, setFirstSession] = useState(null);
+  const getFirstCohortAvailable = () => {
+    for (const session of COHORTS) {
+      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
+        return setFirstSession(session);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getFirstCohortAvailable();
+  }, []);
+
   const user = useSelector((state) => state.Auth.user);
+
+  const getDefaultQuery = () => {
+    return { query: { match_all: {} }, track_total_hits: true };
+  };
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   useEffect(() => {
     (async () => {
@@ -291,6 +315,7 @@ const ListCenter = ({ getDefaultQuery, getExportQuery, firstSession }) => {
     })();
   }, [cohesionCenterIds]);
 
+  if (!firstSession) return <div></div>;
   return (
     <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="flex-1 flex-column bg-white mx-8 flex-wrap">
