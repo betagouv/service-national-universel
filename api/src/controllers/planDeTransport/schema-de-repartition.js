@@ -1,10 +1,14 @@
 /**
  * ROUTES:
- *  GET    /schema-de-repartition/:cohort                      => get National data
- *  GET    /schema-de-repartition/:region/:cohort              => get Regional data
- *  GET    /schema-de-repartition/:region/:department/:cohort  => get Department data
- *  POST   /schema-de-repartition                             => création d'un groupe du schéma de répartition
- *  DELETE /schema-de-repartition/:id                       => suppression d'un group de schéma de répartition
+ *  GET    /schema-de-repartition/:cohort                       => get National data
+ *  GET    /schema-de-repartition/:region/:cohort               => get Regional data
+ *  GET    /schema-de-repartition/:region/:department/:cohort   => get Department data
+ *  POST   /schema-de-repartition                               => création d'un groupe du schéma de répartition
+ *  DELETE /schema-de-repartition/:id                           => suppression d'un group de schéma de répartition
+ *  GET    /schema-de-repartition/centers/:department/:cohort ?mainPlacesCount&filter
+ *                                                              => récupération des centres à partit d'un département pour le choix des centres
+ *  GET    /schema-de-repartition/pdr/:department/:cohort       => récupération des points de rassemblements d'un département
+ *  POST   /schema-de-repartition/get-group-detail              => Population du détail d'un groupe (centre et points de rassemblement)
  */
 
 const express = require("express");
@@ -60,15 +64,13 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     const { department, cohort } = valueParams;
 
     const { error: errorQuery, value: query } = Joi.object({
-      page: Joi.number().default(0),
-      limit: Joi.number().greater(0).default(10),
       minPlacesCount: Joi.number().default(0),
       filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { page, limit, minPlacesCount, filter } = query;
+    const { minPlacesCount, filter } = query;
 
     // get the destination departments from table de repartition
     const toDepartments = await getDepartmentsFromDepartment(cohort, department);
@@ -105,25 +107,21 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     }
 
     // --- sort and limit.
-    pipeline.push({ $sort: { "center.name": 1 } }, { $skip: page * limit }, { $limit: limit });
+    pipeline.push({ $sort: { "center.name": 1 } });
 
     // QUERY
     console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
     const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
 
     // format result
-    const data = {
-      centers: sessionResult.map((session) => {
-        return {
-          ...session.center,
-          placesTotal: session.placesTotal,
-          placesLeft: session.placesLeft,
-          sessionId: session._id,
-        };
-      }),
-      // TODO: Faire la pagination
-      pagesCount: 1,
-    };
+    const data = sessionResult.map((session) => {
+      return {
+        ...session.center,
+        placesTotal: session.placesTotal,
+        placesLeft: session.placesLeft,
+        sessionId: session._id,
+      };
+    });
 
     // --- résultat
     return res.status(200).send({ ok: true, data });
@@ -142,26 +140,9 @@ router.get("/pdr/:department/:cohort", passport.authenticate("referent", { sessi
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { department, cohort } = valueParams;
 
-    const { error: errorQuery, value: query } = Joi.object({
-      page: Joi.number().default(0),
-      limit: Joi.number().greater(0).default(10),
-    }).validate(req.query, {
-      stripUnknown: true,
-    });
-    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { page, limit } = query;
-
     // search gathering places
-    const pipeline = [{ $match: { cohorts: cohort, department } }, { $sort: { name: 1 } }, { $skip: page * limit }, { $limit: limit }];
-    console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
-    const pdrResult = await pointRassemblementModel.aggregate(pipeline).exec();
-
-    // format result
-    const data = {
-      pdr: pdrResult,
-      // TODO: Faire la pagination
-      pagesCount: 1,
-    };
+    const pipeline = [{ $match: { cohorts: cohort, department } }, { $sort: { name: 1 } }];
+    const data = await pointRassemblementModel.aggregate(pipeline).exec();
 
     // --- résultat
     return res.status(200).send({ ok: true, data });
@@ -206,6 +187,7 @@ router.post("/get-group-detail", passport.authenticate("referent", { session: fa
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
 // --- summaries
 
 router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

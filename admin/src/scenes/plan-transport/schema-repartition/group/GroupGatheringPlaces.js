@@ -5,36 +5,18 @@ import api from "../../../../services/api";
 import { capture } from "../../../../sentry";
 import { PlainButton } from "../../components/Buttons";
 
-const LIMIT_BY_PAGES = 10;
-
 export default function GroupGatheringPlaces({ group, className = "", onChangeStep, onChange }) {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [pagesCount, setPagesCount] = useState(0);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState(null);
   const [selection, setSelection] = useState(group.gatheringPlaces);
   const [pdrLines, setPdrLines] = useState([]);
 
   useEffect(() => {
-    const pagination = [];
-    for (let i = 0; i < pagesCount; ++i) {
-      pagination.push(
-        <div key={"page-" + i} className={`text-[14px] font-medium p-4 border-t ${i === page ? "border-t-[#2563EB] text-[#2563EB]" : "border-t-[transparent] text-[#6B7280]"}`}>
-          {i + 1}
-        </div>,
-      );
-    }
-    setPagination(pagination);
-  }, [page, pagesCount]);
-
-  useEffect(() => {
     loadList();
-  }, [page]);
+  }, []);
 
   useEffect(() => {
-    console.log("compute pdr lines");
     setPdrLines(
       list.map((pdr) => (
         <div key={pdr._id} className="group border-t border-t-gray-200 p-4 hover:bg-gray-200 flex items-center cursor-pointer" onClick={() => toggleSelection(pdr)}>
@@ -54,13 +36,9 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
     setLoading(true);
     setError(null);
     try {
-      const result = await api.get(`/schema-de-repartition/pdr/${group.fromDepartment}/${group.cohort}?page=${page}&limit=${LIMIT_BY_PAGES}`);
+      const result = await api.get(`/schema-de-repartition/pdr/${group.fromDepartment}/${group.cohort}`);
       if (result.ok) {
-        setList(result.data.pdr);
-        setPagesCount(result.data.pagesCount);
-        if (page >= result.data.pagesCount) {
-          setPage(Math.max(0, result.data.pagesCount - 1));
-        }
+        setList(result.data);
       } else {
         setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
       }
@@ -75,8 +53,6 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
     const index = selection.findIndex((gp) => {
       return gp === pdr._id;
     });
-
-    console.log("toggle selection: ", pdr, index);
 
     const newSelection = [...selection];
     if (index >= 0) {
@@ -115,7 +91,6 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
       ) : (
         <div className="grow flex flex-col">
           <div className="grow">{pdrLines}</div>
-          <div className="flex justify-center border-t border-t-gray-200">{pagination}</div>
           <div className="flex justify-end">
             <PlainButton onClick={validate}>Continuer</PlainButton>
           </div>

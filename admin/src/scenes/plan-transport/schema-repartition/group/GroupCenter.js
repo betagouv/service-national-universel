@@ -6,7 +6,6 @@ import ArrowNarrowLeft from "../../../../assets/icons/ArrowNarrowLeft";
 import api from "../../../../services/api";
 import { capture } from "../../../../sentry";
 
-const LIMIT_BY_PAGES = 10;
 const RELOAD_TIMEOUT = 300;
 
 export default function GroupCenter({ group, className = "", onChangeStep, onChange }) {
@@ -14,31 +13,16 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
   const [type, setType] = useState("all");
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [pagesCount, setPagesCount] = useState(0);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState(null);
   const [typeDropdownOpened, setTypeDropdownOpened] = useState(false);
   const [filterTimer, setFilterTimer] = useState(null);
-
-  useEffect(() => {
-    const pagination = [];
-    for (let i = 0; i < pagesCount; ++i) {
-      pagination.push(
-        <div key={"page-" + i} className={`text-[14px] font-medium p-4 border-t ${i === page ? "border-t-[#2563EB] text-[#2563EB]" : "border-t-[transparent] text-[#6B7280]"}`}>
-          {i + 1}
-        </div>,
-      );
-    }
-    setPagination(pagination);
-  }, [page, pagesCount]);
 
   useEffect(() => {
     if (filterTimer) {
       clearTimeout(filterTimer);
     }
     setFilterTimer(setTimeout(filterChanged, RELOAD_TIMEOUT));
-  }, [filter, type, page]);
+  }, [filter, type]);
 
   useEffect(() => {
     return () => {
@@ -58,16 +42,10 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
     setError(null);
     try {
       const result = await api.get(
-        `/schema-de-repartition/centers/${group.fromDepartment}/${group.cohort}?page=${page}&limit=${LIMIT_BY_PAGES}&minPlacesCount=${
-          type === "all" ? 0 : group.youngsVolume
-        }&filter=${encodeURIComponent(filter)}`,
+        `/schema-de-repartition/centers/${group.fromDepartment}/${group.cohort}?minPlacesCount=${type === "all" ? 0 : group.youngsVolume}&filter=${encodeURIComponent(filter)}`,
       );
       if (result.ok) {
-        setList(result.data.centers);
-        setPagesCount(result.data.pagesCount);
-        if (page >= result.data.pagesCount) {
-          setPage(Math.max(0, result.data.pagesCount - 1));
-        }
+        setList(result.data);
       } else {
         setError("Impossible de récupérer la liste des centres. Veuillez essayer dans quelques instants.");
       }
@@ -149,7 +127,6 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
               </div>
             ))}
           </div>
-          <div className="flex justify-center border-t border-t-gray-200">{pagination}</div>
         </>
       )}
     </GroupBox>

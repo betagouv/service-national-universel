@@ -17,6 +17,7 @@ import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
 import { region2department } from "snu-lib";
 import SchemaEditor from "./SchemaEditor";
+import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 
 export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
@@ -182,15 +183,18 @@ export default function SchemaRepartition({ region, department }) {
           <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} />
         </div>
         {isDepartmental ? (
-          <SchemaEditor
-            onExportDetail={exportDetail}
-            region={region}
-            department={department}
-            cohort={cohort}
-            groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
-            summary={summary}
-            onChange={loadData}
-          />
+          <>
+            <SchemaEditor
+              onExportDetail={exportDetail}
+              region={region}
+              department={department}
+              cohort={cohort}
+              groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
+              summary={summary}
+              onChange={loadData}
+            />
+            <SchemaDepartmentDetail department={department} region={region} />
+          </>
         ) : (
           <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} />
         )}
