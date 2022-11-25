@@ -17,12 +17,6 @@ const Schema = new mongoose.Schema({
       description: "Code du centre utilisé en 2022",
     },
   },
-  country: {
-    type: String,
-    documentation: {
-      description: "Pays du centre",
-    },
-  },
   address: {
     type: String,
     documentation: {
@@ -45,12 +39,6 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Départment du centre",
-    },
-  },
-  departmentCode: {
-    type: String,
-    documentation: {
-      description: "Numéro du départment du centre",
     },
   },
   region: {
@@ -160,6 +148,18 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Code du centre",
+    },
+  },
+  country: {
+    type: String,
+    documentation: {
+      description: "Pays du centre",
+    },
+  },
+  departmentCode: {
+    type: String,
+    documentation: {
+      description: "Numéro du départment du centre",
     },
   },
 
