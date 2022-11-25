@@ -30,7 +30,6 @@ function getNewCohesionCenterFixture() {
 }
 
 function getNewCohesionCenterFixtureV2() {
-  const placesLeft = 15;
   return {
     name: faker.lorem.word(),
     code2022: faker.lorem.word(),
@@ -40,14 +39,14 @@ function getNewCohesionCenterFixtureV2() {
     department: faker.address.state(),
     region: faker.address.state(),
     addressVerified: true,
-    placesTotal: placesLeft,
+    placesTotal: "10",
     pmr: false,
     academy: faker.address.city(),
     typology: "PUBLIC_ETAT",
     domain: "ETABLISSEMENT",
     complement: faker.lorem.word(),
     centerDesignation: faker.lorem.word(),
-    placesSession: placesLeft,
+    placesSession: "10",
     cohort: "Février 2023 - C",
     statusSession: "VALIDATED",
   };
