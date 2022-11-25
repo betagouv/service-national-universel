@@ -19,6 +19,7 @@ export default function Index({ ...props }) {
   const [sessions, setSessions] = useState([]);
   const [focusedCohort, setFocusedCohort] = useState();
   const [focusedSession, setFocusedSession] = useState();
+
   const [occupationPercentage, setOccupationPercentage] = useState();
   const [availableCohorts, setAvailableCohorts] = useState([]);
   const query = queryString.parse(location.search);
@@ -59,7 +60,6 @@ export default function Index({ ...props }) {
 
   useEffect(() => {
     setFocusedSession(sessions.find((e) => e.cohort === focusedCohort));
-    console.log("ici ?");
   }, [focusedCohort, sessions]);
 
   useEffect(() => {
@@ -83,12 +83,6 @@ export default function Index({ ...props }) {
     })();
   }, [center]);
 
-  const updateCenter = async () => {
-    console.log("DATA IS ", center);
-    const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
-    if (ok) setCenter(data);
-  };
-
   if (!center) return <div />;
   return (
     <>
@@ -105,7 +99,7 @@ export default function Index({ ...props }) {
         <ChevronRight className="" />
         <div className="text-xs">Fiche du centre</div>
       </div>
-      <CenterInformations data={center} setData={setCenter} sessions={sessions} updateCenter={updateCenter} />
+      <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
     </>
   );
 }

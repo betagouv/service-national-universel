@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
@@ -8,10 +8,14 @@ import { canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPo
 import Pencil from "../../../assets/icons/Pencil";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
+import api from "../../../services/api";
 
 import Field from "../components/Field";
 import Toggle from "../components/Toggle";
 import Select from "../components/Select";
+
+import { toastr } from "react-redux-toastr";
+import { capture } from "../../../sentry";
 
 const optionsTypology = [
   { label: "Public / État", value: "PUBLIC_ETAT" },
@@ -27,18 +31,66 @@ const optionsDomain = [
   { label: "Autres", value: "AUTRE" },
 ];
 
-export default function Details({ data, setData, updateCenter }) {
+export default function Details({ center, updateCenter }) {
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState({});
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    setData(center);
+  }, [center]);
 
   const onDelete = () => {};
   const onVerifyAddress = (verify) => {
     console.log("on verify", verify);
   };
+  const onSubmit = async () => {
+    try {
+      setIsLoading(true);
+      console.log(data);
+      const error = {};
+      if (!data?.name) {
+        error.name = "Le nom est obligatoire";
+      }
+      if (!data?.address) {
+        error.address = "L'adresse est obligatoire";
+      }
+      if (!data?.city) {
+        error.city = "La ville est obligatoire";
+      }
+      if (!data?.zip) {
+        error.zip = "Le code postal est obligatoire";
+      }
+      if (!data?.addressVerified) {
+        error.addressVerified = "L'adresse n'a pas été vérifiée";
+      }
+      if (!data?.placesTotal || isNaN(data?.placesTotal)) {
+        error.placesTotal = "Le nombre de places est incorrect";
+      }
+      if (!data?.centerDesignation) {
+        error.centerDesignation = "La désigniation est obligatoire";
+      }
+      if (!data?.code2022) {
+        error.code2022 = "Le code est obligatoire";
+      }
+      console.log(error);
+      setErrors(error);
+      if (Object.keys(error).length > 0) return setIsLoading(false);
+      const { ok, code } = await api.put(`/cohesion-center/${center._id}`, data);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        return setIsLoading(false);
+      }
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification du centre.");
+      setIsLoading(false);
+    }
+  };
+  if (!data) return <></>;
   return (
     <div className="flex flex-col m-8 gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
@@ -89,13 +141,16 @@ export default function Details({ data, setData, updateCenter }) {
                 <div className="flex itmes-center gap-2">
                   <button
                     className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => setEditInfo(false)}
+                    onClick={() => {
+                      setEditInfo(false);
+                      setData(center);
+                    }}
                     disabled={isLoading}>
                     Annuler
                   </button>
                   <button
                     className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={updateCenter}
+                    onClick={onSubmit}
                     disabled={isLoading}>
                     <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
                     Enregistrer les changements
