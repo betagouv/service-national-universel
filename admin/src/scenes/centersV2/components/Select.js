@@ -7,26 +7,30 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Select({ options, selected, setSelected, label }) {
+export default function Select({ options, selected, setSelected, label, readOnly = false }) {
   return (
     <div className="coucou">
       <Listbox value={selected} onChange={setSelected}>
         {({ open }) => (
           <>
-            <div className="relative mt-1">
+            <div className="relative">
               <Listbox.Button className="relative w-full text-left">
                 <div className="flex flex-col cursor-pointer rounded-lg border border-gray-300 bg-white py-2 px-2.5">
                   <label className="text-xs leading-4 text-gray-500">{label}</label>
                   <div className="flex items-center justify-between">
                     <span className="block truncate">{selected.label}</span>
                     <span className="pointer-events-none flex items-center pr-2">
-                      {open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}
+                      {open && !readOnly ? (
+                        <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      ) : (
+                        <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      )}
                     </span>
                   </div>
                 </div>
               </Listbox.Button>
 
-              <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+              <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
                 <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                   {options.map((option) => (
                     <Listbox.Option

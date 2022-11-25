@@ -10,11 +10,24 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 
 import Field from "../components/Field";
+import Toggle from "../components/Toggle";
+import Select from "../components/Select";
 
-import { Box } from "../../../components/box";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
+const optionsTypology = [
+  { label: "Public / État", value: "PUBLIC_ETAT" },
+  { label: "Public / Collectivité territoriale", value: "PUBLIC_COLLECTIVITE" },
+  { label: "Privé / Association ou fondation", value: "PRIVE_ASSOCIATION" },
+  { label: "Privé / Autre", value: "PRIVE_AUTRE" },
+];
 
-export default function Details({ data, setData }) {
+const optionsDomain = [
+  { label: "Etablissement d’enseignement", value: "ETABLISSEMENT" },
+  { label: "Centre de vacances", value: "VACANCES" },
+  { label: "Centre de formation", value: "FORMATION" },
+  { label: "Autres", value: "AUTRE" },
+];
+
+export default function Details({ data, setData, updateCenter }) {
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
@@ -23,8 +36,9 @@ export default function Details({ data, setData }) {
   const [errors, setErrors] = React.useState({});
 
   const onDelete = () => {};
-  const onSubmitInfo = () => {};
-  const onVerifyAddress = () => {};
+  const onVerifyAddress = (verify) => {
+    console.log("on verify", verify);
+  };
   return (
     <div className="flex flex-col m-8 gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
@@ -33,7 +47,7 @@ export default function Details({ data, setData }) {
       <div className="flex items-center justify-between">
         <Title>{data.name}</Title>
         <div className="flex items-center gap-2">
-          {canDeleteMeetingPoint(user) ? (
+          {/* {canDeleteMeetingPoint(user) ? (
             <button
               className="border-[1px] border-red-600 bg-red-600 shadow-sm px-4 py-2 text-white hover:!text-red-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() =>
@@ -47,7 +61,8 @@ export default function Details({ data, setData }) {
               disabled={isLoading}>
               Supprimer
             </button>
-          ) : null}
+          ) : null}*/}
+
           {canCreateOrUpdateCohesionCenter(user) ? (
             <button
               className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
@@ -80,7 +95,7 @@ export default function Details({ data, setData }) {
                   </button>
                   <button
                     className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={onSubmitInfo}
+                    onClick={updateCenter}
                     disabled={isLoading}>
                     <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
                     Enregistrer les changements
@@ -93,8 +108,78 @@ export default function Details({ data, setData }) {
         <div className="flex">
           <div className="flex flex-col w-[45%] gap-4 ">
             <div className="flex flex-col gap-2">
-              <div className="text-xs font-medium leading-4 text-gray-900">Nom</div>
-              <Field label={"Nom du centre"} onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} readOnly={!editInfo} />
+              <div className="text-xs font-medium leading-4 text-gray-900">Nom du centre</div>
+              <Field readOnly={!editInfo} label="Nom du centre" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} />
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex gap-2 items-center">
+                <div className="flex bg-gray-100 rounded-full items-center justify-center p-2 ">
+                  <BiHandicap className="text-gray-500 h-5 w-5" />
+                </div>
+                <div className="flex flex-col flex-1">
+                  <div className="text-sm leading-5 font-bold text-gray-700">Accessibilité PMR</div>
+                  <div className="text-sm leading-5 text-gray-700">{data.pmr ? "Oui" : "Non"}</div>
+                </div>
+              </div>
+              <Toggle disabled={!editInfo} value={data.pmr} onChange={(e) => setData({ ...data, pmr: e })} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
+
+              <Field
+                readOnly={!editInfo}
+                label="Adresse"
+                onChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
+                value={data.address}
+                error={errors?.address}
+              />
+              <div className="flex items-center gap-3">
+                <Field
+                  readOnly={!editInfo}
+                  label="Code postal"
+                  onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
+                  value={data.zip}
+                  error={errors?.zip}
+                />
+                <Field
+                  readOnly={!editInfo}
+                  label="Ville"
+                  onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
+                  value={data.city}
+                  error={errors?.city}
+                />
+              </div>
+              {data.addressVerified && (
+                <>
+                  <div className="flex items-center gap-3">
+                    <Field readOnly={!editInfo} label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
+                    <Field readOnly={!editInfo} label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+                  </div>
+                  <Field
+                    readOnly={!editInfo}
+                    label="Académie"
+                    onChange={(e) => setData({ ...data, academy: e.target.value })}
+                    value={"Académie de " + data.academy}
+                    disabled={true}
+                  />
+                </>
+              )}
+              {editInfo && (
+                <div className="flex flex-col gap-2 ">
+                  <VerifyAddress
+                    address={data.address}
+                    zip={data.zip}
+                    city={data.city}
+                    onSuccess={() => onVerifyAddress(true)}
+                    onFail={() => onVerifyAddress()}
+                    isVerified={data.addressVerified === true}
+                    buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+                    verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
+                    verifyButtonText="Vérifier l'adresse du centre"
+                  />
+                  {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex w-[10%] justify-center items-center">
@@ -102,102 +187,89 @@ export default function Details({ data, setData }) {
           </div>
           <div className="flex flex-col w-[45%]  justify-between">
             <div className="flex flex-col gap-3">
-              <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
-              <Field
-                label={"Adresse"}
-                onChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
-                value={data.address}
-                error={errors?.address}
-                readOnly={!editInfo}
-              />
-              <div className="flex items-center gap-3">
-                <Field
-                  label="Code postal"
-                  onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
-                  value={data.zip}
-                  error={errors?.zip}
-                  readOnly={!editInfo}
-                />
-                <Field
-                  label="Ville"
-                  onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
-                  value={data.city}
-                  error={errors?.city}
-                  readOnly={!editInfo}
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} readOnly={true} disabled={editInfo} />
-                <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} readOnly={true} disabled={editInfo} />
-              </div>
-              {editInfo ? (
+              <div className="flex flex-col gap-2">
+                <div className="text-xs font-medium text-gray-900">Détails</div>
                 <div className="flex flex-col gap-2">
-                  <VerifyAddress
-                    address={data.address}
-                    zip={data.zip}
-                    city={data.city}
-                    onSuccess={onVerifyAddress(true)}
-                    onFail={onVerifyAddress()}
-                    isVerified={data.addressVerified === true}
-                    buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-                    verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
+                  <Select
+                    label="Typologie"
+                    readOnly={!editInfo}
+                    options={optionsTypology}
+                    selected={optionsTypology.find((e) => e.value === data.typology)}
+                    setSelected={(e) => {
+                      console.log(e);
+                      setData({ ...data, typology: e.value });
+                    }}
                   />
-                  {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
                 </div>
-              ) : null}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Select
+                  label="Domaine"
+                  readOnly={!editInfo}
+                  options={optionsDomain}
+                  selected={optionsDomain.find((e) => e.value === data.domain)}
+                  setSelected={(e) => setData({ ...data, domain: e.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Field
+                  readOnly={!editInfo}
+                  label="Précisez le gestionnaire ou propriétaire"
+                  onChange={(e) => setData({ ...data, complement: e.target.value })}
+                  value={data.complement}
+                  error={errors?.complement}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Field
+                  readOnly={!editInfo}
+                  label="Capacité maximale d'accueil"
+                  onChange={(e) => setData({ ...data, placesTotal: e.target.value })}
+                  value={data.placesTotal}
+                  error={errors?.placesTotal}
+                />
+              </div>
+              {user.role !== ROLES.ADMIN && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
+                  </div>
+                  <Field
+                    readOnly={!editInfo}
+                    label="Places ouvertes sur le séjour"
+                    onChange={(e) => setData({ ...data, placesSession: e.target.value })}
+                    value={data.placesSession}
+                    error={errors?.placesSession}
+                  />
+                </div>
+              )}
+              {user.role === ROLES.ADMIN && (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <Field
+                      readOnly={!editInfo}
+                      label="Désignation du centre"
+                      onChange={(e) => setData({ ...data, centerDesignation: e.target.value })}
+                      value={data.centerDesignation}
+                      error={errors?.centerDesignation}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Field
+                      readOnly={!editInfo}
+                      label="Code du centre"
+                      onChange={(e) => setData({ ...data, code2022: e.target.value })}
+                      value={data.code2022}
+                      error={errors?.code2022}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-  return (
-    <div style={{ display: "flex", flexDirection: "column", padding: "2rem 3rem" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <h4 style={{ marginBottom: "2rem" }}>{center.name}</h4>
-        {canCreateOrUpdateCohesionCenter(user) ? (
-          <div style={{ flexBasis: "0" }}>
-            <Link to={`/centre/${center._id}/edit`}>
-              <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
-            </Link>
-          </div>
-        ) : null}
-      </div>
-      <div className="flex w-2/5">
-        <Box>
-          <div className="p-9">
-            <div className="flex justify-between ">
-              <h4>
-                <strong>Informations du centre</strong>
-              </h4>
-              {center.pmr === "true" ? (
-                <div className="flex bg-[#14B8A6] rounded-full px-3 py-1 items-center text-[#F0FDFA] text-md gap-1">
-                  <BiHandicap size={20} />
-                  <div>Accessible&nbsp;PMR</div>
-                </div>
-              ) : null}
-            </div>
-            <div>
-              {user.role === ROLES.ADMIN ? <Donnee title={"Code 2022 (modérateur)"} value={center.code2022} number={""} /> : null}
-              <Donnee title={"Région"} value={center.region} number={""} />
-              <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
-              <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />
-              <Donnee title={"Adresse"} value={center.address} number={""} />
-            </div>
-          </div>
-        </Box>
-      </div>
-    </div>
-  );
 }
-
-const Donnee = ({ title, value, number }) => {
-  return (
-    <div className="flex pt-4">
-      <div className="w-1/2 text-brand-detail_title "> {title} : </div>
-      <div className="w-1/2 font-medium">
-        {value} {number}
-      </div>
-    </div>
-  );
-};

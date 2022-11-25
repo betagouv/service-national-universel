@@ -84,53 +84,9 @@ export default function Index({ ...props }) {
   }, [center]);
 
   const updateCenter = async () => {
+    console.log("DATA IS ", center);
     const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
     if (ok) setCenter(data);
-  };
-
-  const OccupationCard = ({ occupationPercentage, placesLeft, placesTotal }) => {
-    let height = `h-0`;
-    if (occupationPercentage < 20) height = "h-[20%]";
-    else if (occupationPercentage < 30) height = "h-[30%]";
-    else if (occupationPercentage < 40) height = "h-[40%]";
-    else if (occupationPercentage < 50) height = "h-[50%]";
-    else if (occupationPercentage < 60) height = "h-[60%]";
-    else if (occupationPercentage < 70) height = "h-[70%]";
-    else if (occupationPercentage < 80) height = "h-[80%]";
-    else if (occupationPercentage < 100) height = "h-[90%]";
-    else if (occupationPercentage >= 100) height = "h-[100%]";
-
-    let bgColor = "bg-snu-purple-300";
-    if (occupationPercentage > 100) bgColor = "bg-red-500";
-
-    return occupationPercentage ? (
-      <div className="bg-white rounded-lg shadow-sm py-4 px-8 max-w-xl">
-        <div className="text-lg font-medium mb-1 text-gray-900">Taux d&apos;occupation</div>
-        <div className="flex gap-4">
-          {/* barre */}
-          <div className="flex flex-col justify-end w-9 h-[100px] bg-gray-200 rounded-lg overflow-hidden">
-            <div className={`flex justify-center items-center w-9 ${height} ${bgColor} rounded-lg text-white font-bold text-xs`}>{Math.floor(occupationPercentage)}%</div>
-          </div>
-          {/* nombres */}
-          <div className="flex flex-col justify-around">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-gray-200" />
-              <div>
-                <div className="text-xs font-normal">Place libres</div>
-                <div className="text-base font-bold">{placesLeft}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-snu-purple-300" />
-              <div>
-                <div className="text-xs font-normal">Place occupées</div>
-                <div className="text-base font-bold">{placesTotal - placesLeft}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    ) : null;
   };
 
   if (!center) return <div />;
@@ -149,7 +105,7 @@ export default function Index({ ...props }) {
         <ChevronRight className="" />
         <div className="text-xs">Fiche du centre</div>
       </div>
-      <CenterInformations data={center} setData={setCenter} sessions={sessions} />
+      <CenterInformations data={center} setData={setCenter} sessions={sessions} updateCenter={updateCenter} />
     </>
   );
 }
