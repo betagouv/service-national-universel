@@ -163,6 +163,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sessionStatus: {
+    type: [String],
+    enum: ["VALIDATED", "DRAFT"],
+    documentation: {
+      description: "Status de la globalite des cohortes d'un centre",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
