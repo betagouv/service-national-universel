@@ -13,11 +13,23 @@ import SendIcon from "../../../components/SendIcon";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
+import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import { capture } from "../../../sentry";
+import FileSaver from "file-saver";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
   e.style.height = `${e.scrollHeight}px`;
+};
+
+const download = async (file) => {
+  try {
+    const s3Id = file.path.split("/")[1];
+    const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
+    FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
+  } catch (e) {
+    toastr.error("Le fichier n'a pas pu être téléchargé");
+  }
 };
 
 export default function View(props) {
@@ -27,6 +39,14 @@ export default function View(props) {
   const [messages, setMessages] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const inputRef = React.useRef();
+
+  const { files, addFiles, deleteFile, resetFiles, error } = useFileUpload();
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   const getTicket = async () => {
     try {
@@ -44,6 +64,7 @@ export default function View(props) {
             date: formatStringLongDate(message.createdAt),
             content: htmlCleaner(message.text),
             createdAt: message.createdAt,
+            files: message.files,
           };
         })
         .filter((message) => message !== undefined);
@@ -58,18 +79,34 @@ export default function View(props) {
   }, []);
 
   const send = async () => {
-    setSending(true);
-    if (!message) return setSending(false);
-    const id = props.match?.params?.id;
-    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage });
-    if (!ok) {
-      capture(code);
-      toastr.error("Oups, une erreur est survenue", translate(code));
+    try {
+      setSending(true);
+      if (!message) return setSending(false);
+      let uploadedFiles;
+      if (files.length > 0) {
+        const filesResponse = await api.uploadFile("/zammood/upload", files);
+        if (!filesResponse.ok) {
+          setSending(false);
+          const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
+          return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
+        }
+        uploadedFiles = filesResponse.data;
+      }
+      const id = props.match?.params?.id;
+      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
+      if (!ok) {
+        capture(code);
+        toastr.error("Oups, une erreur est survenue", translate(code));
+      }
+      resetFiles();
+      setMessage("");
+      updateHeightElement(inputRef?.current);
+      getTicket();
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue", translate(error.code));
+    } finally {
+      setSending(false);
     }
-    setMessage("");
-    updateHeightElement(inputRef?.current);
-    getTicket();
-    setSending(false);
   };
 
   if (ticket === undefined) return <Loader />;
@@ -133,7 +170,7 @@ export default function View(props) {
             </Heading>
             <Messages>
               {messages?.map((message) => (
-                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
+                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} files={message?.files} />
               ))}
             </Messages>
           </>
@@ -156,18 +193,29 @@ export default function View(props) {
             </LoadingButton>
           </ButtonContainer>
         </InputContainer>
+        {sending && files.length > 0 && <div className="text-gray-500 text-sm mt-1">{translate("UPLOAD_IN_PROGRESS")}</div>}
+        <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       </div>
     </Container>
   );
 }
 
-const Message = ({ from, date, content, fromMe }) => {
+const Message = ({ from, date, content, fromMe, files = [] }) => {
   if (!content || !content.length) return null;
   return fromMe ? (
     <MessageContainer>
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
+        {files.map((file) => (
+          <File
+            onClick={() => {
+              download(file);
+            }}
+            color="white">
+            {file.name}
+          </File>
+        ))}
       </MessageBubble>
     </MessageContainer>
   ) : (
@@ -176,6 +224,15 @@ const Message = ({ from, date, content, fromMe }) => {
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
+        {files.map((file) => (
+          <File
+            onClick={() => {
+              download(file);
+            }}
+            color="white">
+            {file.name}
+          </File>
+        ))}
       </MessageBubble>
     </MessageContainer>
   );
@@ -269,6 +326,15 @@ const MessageDate = styled.div`
 const MessageContent = styled.div`
   font-weight: 400;
   color: ${({ color }) => color};
+`;
+
+const File = styled.div`
+  margin-top: 0.2rem;
+  color: ${({ color }) => color};
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-decoration: underline;
+  cursor: pointer;
 `;
 
 const Heading = styled(Container)`
