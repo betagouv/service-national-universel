@@ -7,6 +7,9 @@ import { canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
+import ModalConfirmDelete from "../components/ModalConfirmDelete";
+import ReactTooltip from "react-tooltip";
+
 import api from "../../../services/api";
 
 import Field from "../components/Field";
@@ -35,6 +38,8 @@ const optionsDomain = [
 export default function Details({ center, setCenter, sessions }) {
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
+
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState({});
@@ -107,15 +112,63 @@ export default function Details({ center, setCenter, sessions }) {
       setIsLoading(false);
     }
   };
+  const onDelete = async () => {
+    try {
+      setIsLoading(true);
+      const { ok, code } = await api.remove(`/cohesion-center/${data._id}`);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la suppression du centre", code);
+        return setIsLoading(false);
+      }
+      toastr.success("Le centre a bien été supprimé");
+      history.push("/centre");
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la suppression du centre");
+      setIsLoading(false);
+    }
+  };
   if (!data) return <></>;
   return (
     <div className="flex flex-col m-8 gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
       <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
-
+      <ModalConfirmDelete
+        isOpen={modalDelete.isOpen}
+        title={modalDelete.title}
+        message={modalDelete.message}
+        onCancel={() => setModalDelete({ isOpen: false })}
+        onDelete={() => {
+          setModalDelete({ isOpen: false });
+          modalDelete.onDelete();
+        }}
+      />
       <div className="flex items-center justify-between">
         <Title>{data.name}</Title>
         <div className="flex items-center gap-2">
+          {user.role === ROLES.ADMIN ? (
+            <div data-tip="" data-for="tooltip-delete">
+              {sessions.length !== 0 && (
+                <ReactTooltip id="tooltip-delete" disable={false}>
+                  Des sessions sont encore associées au centre
+                </ReactTooltip>
+              )}
+
+              <button
+                className="border-[1px] border-red-600 bg-red-600 shadow-sm px-4 py-2 text-white hover:!text-red-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() =>
+                  setModalDelete({
+                    isOpen: true,
+                    title: "Supprimer le centre",
+                    message: "Êtes-vous sûr de vouloir supprimer ce centre?",
+                    onDelete: onDelete,
+                  })
+                }
+                disabled={isLoading || sessions.length !== 0}>
+                Supprimer
+              </button>
+            </div>
+          ) : null}
           {canCreateOrUpdateCohesionCenter(user) ? (
             <button
               className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
