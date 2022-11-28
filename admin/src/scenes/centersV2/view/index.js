@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import queryString from "query-string";
 
 import api from "../../../services/api";
 import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, canSearchInElasticSearch } from "../../../utils";
-import ChevronRight from "../../../assets/icons/ChevronRight.js";
-import Template from "../../../assets/icons/Template.js";
+import { translate, ROLES } from "../../../utils";
+
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -84,19 +84,7 @@ export default function Index({ ...props }) {
   if (!center) return <div />;
   return (
     <>
-      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
-        <Template className="" />
-        <ChevronRight className="" />
-        {canSearchInElasticSearch(user, "cohesioncenter") ? (
-          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
-            Centres
-          </Link>
-        ) : (
-          <div className="text-xs">Centres</div>
-        )}
-        <ChevronRight className="" />
-        <div className="text-xs">Fiche du centre</div>
-      </div>
+      <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
     </>
   );
