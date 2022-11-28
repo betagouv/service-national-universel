@@ -139,7 +139,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
   }
 });
 
-//To update for new affectation
+// Modify existing center
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
@@ -163,7 +163,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       typology: Joi.string().required(),
       zip: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
-    console.log(value);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -175,6 +174,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       delete value.centerDesignation;
       delete value.code2022;
     }
+    console.log(center);
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
