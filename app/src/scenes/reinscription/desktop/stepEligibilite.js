@@ -130,7 +130,7 @@ export default function StepEligibilite() {
       schoolCountry: data.school?.country,
       schoolId: data.school?.id,
       zip: data.zip,
-      birthDate: data.birthDate,
+      birthdateAt: data.birthDate,
     };
 
     try {
