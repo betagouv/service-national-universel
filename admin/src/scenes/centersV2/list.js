@@ -261,7 +261,6 @@ const ListSession = ({ firstSession }) => {
                 </div>
                 {data.map((hit) => (
                   <HitSession
-                    history={history}
                     onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
                     key={hit._id}
                     center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
@@ -485,7 +484,7 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
     </>
   );
 };
-const HitSession = ({ center, hit, onClick, history }) => {
+const HitSession = ({ center, hit, onClick }) => {
   return (
     <>
       <hr />
