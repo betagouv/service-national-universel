@@ -245,11 +245,6 @@ const updateCenterDependencies = async (center, fromUser) => {
     referent.set({ cohesionCenterName: center.name });
     await referent.save({ fromUser });
   });
-  const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
-  meetingPoints.forEach(async (meetingPoint) => {
-    meetingPoint.set({ centerCode: center.code2022 });
-    await meetingPoint.save({ fromUser });
-  });
   const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
   sessions.forEach(async (session) => {
     session.set({
