@@ -178,7 +178,7 @@ export default function Details({ center, setCenter, sessions }) {
                   <div className="text-sm leading-5 text-gray-700">{data.pmr ? "Oui" : "Non"}</div>
                 </div>
               </div>
-              <Toggle disabled={!editInfo} value={data.pmr} onChange={(e) => setData({ ...data, pmr: e })} />
+              <Toggle disabled={!editInfo} value={data.pmr === "true"} onChange={(e) => setData({ ...data, pmr: e.toString() })} />
             </div>
             <div className="flex flex-col gap-3">
               <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>

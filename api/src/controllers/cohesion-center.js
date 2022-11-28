@@ -174,6 +174,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       delete value.centerDesignation;
       delete value.code2022;
     }
+    value.pmr = value.pmr ? "true" : "false";
     const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
     const canUpdateSession = sessions.filter((s) => s.placesTotal > value.placesTotal).length === 0;
     if (!canUpdateSession) {
