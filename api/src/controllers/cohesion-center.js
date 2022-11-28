@@ -149,7 +149,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error, value } = Joi.object({
       academy: Joi.string().required(),
-      addressVerified: Joi.string().required(),
+      addressVerified: Joi.boolean().required(),
       centerDesignation: Joi.string().required(),
       city: Joi.string().required(),
       code2022: Joi.string().required(),
@@ -158,7 +158,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       department: Joi.string().required(),
       domain: Joi.string().required(),
       name: Joi.string().required(),
-      pmr: Joi.string().required(),
+      pmr: Joi.boolean().required(),
       region: Joi.string().required(),
       typology: Joi.string().required(),
       zip: Joi.string().required(),

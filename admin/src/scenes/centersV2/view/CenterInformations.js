@@ -91,7 +91,6 @@ export default function Details({ center, setCenter, sessions }) {
       }
       setErrors(error);
       if (Object.keys(error).length > 0) return setIsLoading(false);
-      data.addressVerified = data.addressVerified.toString();
       const { ok, code } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
@@ -179,7 +178,7 @@ export default function Details({ center, setCenter, sessions }) {
                   <div className="text-sm leading-5 text-gray-700">{data.pmr ? "Oui" : "Non"}</div>
                 </div>
               </div>
-              <Toggle disabled={!editInfo} value={data.pmr === "true"} onChange={(e) => setData({ ...data, pmr: e.toString() })} />
+              <Toggle disabled={!editInfo} value={data.pmr} onChange={(e) => setData({ ...data, pmr: e })} />
             </div>
             <div className="flex flex-col gap-3">
               <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>

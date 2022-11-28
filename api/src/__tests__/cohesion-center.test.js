@@ -214,20 +214,20 @@ describe("Cohesion Center", () => {
     it("should return 404 when cohesion center is not found", async () => {
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + notExistingCohesionCenterId)
-        .send(getNewCohesionCenterFixture());
+        .send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(404);
     });
     it("should return 200 when cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
-        .send(getNewCohesionCenterFixture());
+        .send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(200);
     });
     it("should be only allowed to admin", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
         .send({
