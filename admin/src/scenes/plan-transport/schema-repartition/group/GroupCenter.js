@@ -42,7 +42,9 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
     setError(null);
     try {
       const result = await api.get(
-        `/schema-de-repartition/centers/${group.fromDepartment}/${group.cohort}?minPlacesCount=${type === "all" ? 0 : group.youngsVolume}&filter=${encodeURIComponent(filter)}`,
+        `/schema-de-repartition/centers/${group.fromDepartment}/${group.cohort}?minPlacesCount=${type === "all" ? 0 : group.youngsVolume}&filter=${encodeURIComponent(
+          filter,
+        )}&intra=${group.intradepartmental}`,
       );
       if (result.ok) {
         setList(result.data);
