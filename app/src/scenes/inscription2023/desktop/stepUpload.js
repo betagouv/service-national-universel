@@ -31,22 +31,26 @@ export default function StepUpload() {
   async function uploadFiles() {
     try {
       if (young.files.cniFiles.length + files.length > 3) {
-        throw young?.files?.cniFiles?.length
-          ? `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.`
-          : "Vous ne pouvez téléverser plus de 3 fichiers.";
+        return young?.files?.cniFiles?.length
+          ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
+          : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
       }
       for (const file of files) {
-        if (file.size > 10000000) throw `Ce fichier ${files.name} est trop volumineux.`;
+        if (file.size > 10000000) return { error: `Ce fichier ${files.name} est trop volumineux.` };
       }
       const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, new Date(date));
       if (res.code === "FILE_CORRUPTED")
-        throw "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr";
-      if (!res.ok) throw res.code;
+        return {
+          error:
+            "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support : inscription@snu.gouv.fr",
+        };
+      if (!res.ok) {
+        capture(res.code);
+        return { error: res.code };
+      }
     } catch (e) {
       capture(e);
-      setFiles([]);
-      setHasChanged(false);
-      return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: translate(e) } };
+      return { error: translate(e) };
     }
   }
 
@@ -56,13 +60,20 @@ export default function StepUpload() {
       if (files) {
         const res = await uploadFiles();
         if (res?.error) {
-          setError(res.error);
+          setFiles([]);
+          setHasChanged(false);
+          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
           setLoading(false);
           return;
         }
       }
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
-      if (!ok) throw code;
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
+        setLoading(false);
+        return;
+      }
       dispatch(setYoung(responseData));
       plausibleEvent("Phase0/CTA inscription - CI desktop");
       history.push("/inscription2023/confirm");
@@ -79,25 +90,33 @@ export default function StepUpload() {
       if (files) {
         const res = await uploadFiles();
         if (res?.error) {
-          setError(res.error);
+          setFiles([]);
+          setHasChanged(false);
+          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
           setLoading(false);
           return;
         }
       }
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
-      if (!ok) throw code;
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
+        setLoading(false);
+        return;
+      }
       plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
       capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: e });
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
       setLoading(false);
     }
   }
 
-  const isEnabled = (!corrections?.length && young.files.cniFiles != null && date != null && !loading) || (corrections?.length && hasChanged && !loading);
+  const isEnabled =
+    (!corrections?.length && young.files.cniFiles != null && date != null && !loading && !error.text) || (corrections?.length && hasChanged && !loading && !error.text);
 
   if (!category) return <div>Loading</div>;
   return (
