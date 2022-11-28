@@ -91,14 +91,14 @@ export default function Details({ center, setCenter, sessions }) {
       }
       setErrors(error);
       if (Object.keys(error).length > 0) return setIsLoading(false);
-      const { ok, code } = await api.put(`/cohesion-center/${center._id}`, data);
+      const { ok, code, data: returnedData } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
         return setIsLoading(false);
       }
       setIsLoading(false);
       setErrors({});
-      setCenter(data);
+      setCenter(returnedData);
       setEditInfo(false);
       toastr.success("Le centre a été modifié avec succès");
     } catch (e) {
