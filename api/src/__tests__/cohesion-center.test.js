@@ -214,41 +214,15 @@ describe("Cohesion Center", () => {
     it("should return 404 when cohesion center is not found", async () => {
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + notExistingCohesionCenterId)
-        .send({
-          name: "newname",
-        });
+        .send(getNewCohesionCenterFixture());
       expect(res.status).toBe(404);
     });
     it("should return 200 when cohesion center is found", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
-        .send({
-          name: "new name",
-        });
+        .send(getNewCohesionCenterFixture());
       expect(res.status).toBe(200);
-      expect(res.body.data.name).toBe("new name");
-    });
-    it("should updateCenterDependencies", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
-      const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
-      const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
-
-      const res = await request(getAppHelper())
-        .put("/cohesion-center/" + cohesionCenter._id)
-        .send({
-          name: "new name",
-          code2022: "new code",
-        });
-      expect(res.status).toBe(200);
-
-      const updatedReferent = await getReferentByIdHelper(referent._id);
-      const updatedYoung = await getYoungByIdHelper(young._id);
-      const updatedMeetingPoint = await getMeetingPointByIdHelper(meetingPoint._id);
-      expect(updatedReferent.cohesionCenterName).toBe("new name");
-      expect(updatedYoung.cohesionCenterName).toBe("new name");
-      expect(updatedMeetingPoint.centerCode).toBe("new code");
     });
     it("should be only allowed to admin", async () => {
       const passport = require("passport");
