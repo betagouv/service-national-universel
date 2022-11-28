@@ -87,7 +87,7 @@ export default function List() {
     return all.map((data) => {
       if (!data.domains) data.domains = [];
       if (!data.structure) {
-        data.structure = [];
+        data.structure = {};
         data.structure.types = [];
       }
       const allFields = {
@@ -104,6 +104,7 @@ export default function List() {
           "Statut de la mission": translate(data.status),
           "Créée lé": formatLongDateFR(data.createdAt),
           "Mise à jour le": formatLongDateFR(data.updatedAt),
+          "Commentaire sur le statut": data.statusComment,
         },
         missionType: {
           "Domaine principal de la mission": translate(data.mainDomain) || "Non renseigné",

@@ -29,6 +29,30 @@ function getNewCohesionCenterFixture() {
   };
 }
 
+function getNewCohesionCenterFixtureV2() {
+  return {
+    name: faker.lorem.word(),
+    code2022: faker.lorem.word(),
+    address: faker.lorem.word(),
+    city: faker.address.city(),
+    zip: faker.address.zipCode(),
+    department: faker.address.state(),
+    region: faker.address.state(),
+    addressVerified: true,
+    placesTotal: "20",
+    pmr: false,
+    academy: faker.address.city(),
+    typology: "PUBLIC_ETAT",
+    domain: "ETABLISSEMENT",
+    complement: faker.lorem.word(),
+    centerDesignation: faker.lorem.word(),
+    placesSession: "10",
+    cohort: "Février 2023 - C",
+    statusSession: "VALIDATED",
+  };
+}
+
 module.exports = {
   getNewCohesionCenterFixture,
+  getNewCohesionCenterFixtureV2,
 };

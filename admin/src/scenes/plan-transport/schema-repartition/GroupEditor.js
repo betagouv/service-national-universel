@@ -7,15 +7,30 @@ import api from "../../../services/api";
 import GroupModification from "./group/GroupModification";
 import GroupConfirmDelete from "./group/GroupConfirmDelete";
 import GroupUpdateYoungCounts from "./group/GroupUpdateYoungCounts";
+import GroupCenter from "./group/GroupCenter";
+import GroupGatheringPlaces from "./group/GroupGatheringPlaces";
+import GroupConfirmDeleteCenter from "./group/GroupConfirmDeleteCenter";
+import GroupAffectationSummary from "./group/GroupAffectationSummary";
 
 export default function GroupEditor({ group, className = "", onChange }) {
   const [step, setStep] = useState(group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+  const [reloadNextStep, setReloadNextStep] = useState(null);
+  const [tempGroup, setTempGroup] = useState(group);
 
   let oldGroup = null;
 
   useEffect(() => {
     if (oldGroup === null || group === null || oldGroup._id !== group._id) {
-      setStep(group && group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+      if (reloadNextStep) {
+        if (reloadNextStep === GROUPSTEPS.CANCEL) {
+          onChange(null);
+        } else {
+          setStep(reloadNextStep);
+          setReloadNextStep(null);
+        }
+      } else {
+        setStep(group && group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+      }
     }
   }, [group]);
 
@@ -45,7 +60,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
           setStep(nextStep);
           onChange && onChange(changedGroup);
         } else {
-          onChange && onChange(null);
+          onChange && onChange(null, true);
         }
       } catch (err) {
         capture(err);
@@ -69,13 +84,16 @@ export default function GroupEditor({ group, className = "", onChange }) {
     }
   }
 
-  async function onUpdate(group) {
+  async function onUpdate(group, nextStep) {
     try {
       let changedGroup = null;
       const result = await api.put("/schema-de-repartition/" + group._id, group);
       if (result.ok) {
         toastr.success("Vos modifications ont été enregistrées.");
         changedGroup = result.data;
+        if (nextStep) {
+          setReloadNextStep(nextStep);
+        }
       } else {
         toastr.error("Nous n'avons pas pu enregistrer vos modifications. Veuillez réessaye dans quelques instants.");
         return;
@@ -88,6 +106,11 @@ export default function GroupEditor({ group, className = "", onChange }) {
     }
   }
 
+  async function onUpdateTemp(group, nextStep) {
+    setTempGroup(group);
+    setStep(nextStep);
+  }
+
   switch (step) {
     case GROUPSTEPS.CREATION:
       return <GroupCreator className={className} group={group} onCreate={onCreate} onChangeStep={onChangeStep} />;
@@ -97,6 +120,14 @@ export default function GroupEditor({ group, className = "", onChange }) {
       return <GroupConfirmDelete className={className} group={group} onChangeStep={onChangeStep} onDelete={onDelete} />;
     case GROUPSTEPS.YOUNG_COUNTS:
       return <GroupUpdateYoungCounts className={className} group={group} onChangeStep={onChangeStep} onChange={onUpdate} />;
+    case GROUPSTEPS.CENTER:
+      return <GroupCenter className={className} group={group} onChangeStep={onChangeStep} onChange={onUpdateTemp} />;
+    case GROUPSTEPS.GATHERING_PLACES:
+      return <GroupGatheringPlaces className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdateTemp} />;
+    case GROUPSTEPS.AFFECTATION_SUMMARY:
+      return <GroupAffectationSummary className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdate} />;
+    case GROUPSTEPS.CONFIRM_DELETE_CENTER:
+      return <GroupConfirmDeleteCenter className={className} group={group} onChangeStep={onChangeStep} onChange={onUpdate} />;
     default:
       return <div>TODO STEP: {step}</div>;
   }

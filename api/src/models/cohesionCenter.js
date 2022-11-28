@@ -11,34 +11,10 @@ const Schema = new mongoose.Schema({
       description: "Nom du centre",
     },
   },
-  code: {
-    type: String,
-    documentation: {
-      description: "Code du centre",
-    },
-  },
   code2022: {
     type: String,
     documentation: {
       description: "Code du centre utilisé en 2022",
-    },
-  },
-  country: {
-    type: String,
-    documentation: {
-      description: "Pays du centre",
-    },
-  },
-  COR: {
-    type: String,
-    documentation: {
-      description: "",
-    },
-  },
-  departmentCode: {
-    type: String,
-    documentation: {
-      description: "Numéro du départment du centre",
     },
   },
   address: {
@@ -83,6 +59,60 @@ const Schema = new mongoose.Schema({
       description: "Nombre de places au total",
     },
   },
+  pmr: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Accessibilité aux personnes à mobilité réduite",
+    },
+  },
+
+  cohorts: {
+    type: [String],
+    documentation: {
+      description: "Liste des cohortes concernées par ce centre de cohésion",
+    },
+  },
+
+  academy: {
+    type: String,
+    documentation: {
+      description: "Académie du centre",
+    },
+  },
+
+  typology: {
+    type: String,
+    enum: ["PUBLIC_ETAT", "PUBLIC_COLLECTIVITE", "PRIVE_ASSOCIATION", "PRIVE_AUTRE"],
+    documentation: {
+      description: "Typologie du centre",
+    },
+  },
+
+  domain: {
+    type: String,
+    enum: ["ETABLISSEMENT", "VACANCES", "FORMATION", "AUTRE"],
+    documentation: {
+      description: "Domaine du centre",
+    },
+  },
+
+  complement: {
+    type: String,
+    documentation: {
+      description: "Complément",
+    },
+  },
+
+  centerDesignation: {
+    type: String,
+    documentation: {
+      description: "Désignation du centre",
+    },
+  },
+
+  //TODO : CLEAN AFTER MERGE NEW CENTER
+
   placesLeft: {
     type: Number,
     documentation: {
@@ -107,24 +137,37 @@ const Schema = new mongoose.Schema({
       description: "Liste ordonnée des jeunes en liste d'attente sur ce cente de cohésion",
     },
   },
-  pmr: {
+
+  COR: {
     type: String,
-    enum: ["true", "false", ""],
     documentation: {
-      description: "Accessibilité aux personnes à mobilité réduite",
+      description: "",
     },
   },
-  cohorts: {
-    type: [String],
+  code: {
+    type: String,
     documentation: {
-      description: "Liste des cohortes concernées par ce centre de cohésion",
+      description: "Code du centre",
     },
   },
+  country: {
+    type: String,
+    documentation: {
+      description: "Pays du centre",
+    },
+  },
+  departmentCode: {
+    type: String,
+    documentation: {
+      description: "Numéro du départment du centre",
+    },
+  },
+
   sessionStatus: {
     type: [String],
-    enum: ["VALIDATED", "DRAFT"],
+    enum: ["VALIDATED", "DRAFT", "WAITING_VALIDATION"],
     documentation: {
-      description: "Status de la globalite des cohortes d'un centre ",
+      description: "Status de la globalite des cohortes d'un centre",
     },
   },
 

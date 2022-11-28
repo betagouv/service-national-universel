@@ -1,3 +1,38 @@
+# [1.174.0](https://github.com/betagouv/service-national-universel/compare/v1.173.0...v1.174.0) (2022-11-25)
+
+
+### Features
+
+* **admin/api:** Modal ajout d'une session à un centre ([#2087](https://github.com/betagouv/service-national-universel/issues/2087)) ([b17daed](https://github.com/betagouv/service-national-universel/commit/b17daed2d3d462c23776fb4d3bca70323ccec2ba))
+
+# [1.173.0](https://github.com/betagouv/service-national-universel/compare/v1.172.1...v1.173.0) (2022-11-24)
+
+
+### Bug Fixes
+
+* **admin:** écran candidature ([#1845](https://github.com/betagouv/service-national-universel/issues/1845)) ([5eb3e85](https://github.com/betagouv/service-national-universel/commit/5eb3e854738392be2c82c75bab67d3b139c39f25))
+* **api:** eligibility check in signup ([3d20330](https://github.com/betagouv/service-national-universel/commit/3d20330c5786dbafe005cc6f0766e435234e2630))
+* **api:** revert eligibility fix ([7665faf](https://github.com/betagouv/service-national-universel/commit/7665faf05f39dcf41648124c148abce3851c48ca))
+
+
+### Features
+
+* **admin:** Export modal candidatures depuis volontaire ([#2082](https://github.com/betagouv/service-national-universel/issues/2082)) ([9c9b312](https://github.com/betagouv/service-national-universel/commit/9c9b312e7f6243c1336bfab331726100b9e0a83b))
+* **admin:** page centre V2 ([#2080](https://github.com/betagouv/service-national-universel/issues/2080)) ([cf4a1e0](https://github.com/betagouv/service-national-universel/commit/cf4a1e0427395f8147b9f46902ce494fc4c64ecd))
+
+## [1.172.1](https://github.com/betagouv/service-national-universel/compare/v1.172.0...v1.172.1) (2022-11-23)
+
+
+### Bug Fixes
+
+* **admin:** inscription par référent ([#2079](https://github.com/betagouv/service-national-universel/issues/2079)) ([69326eb](https://github.com/betagouv/service-national-universel/commit/69326eb6bcd70d8fa6505928380c0e24b5d3fd55))
+* **api:** eligibility function in young change cohort route ([8786e8f](https://github.com/betagouv/service-national-universel/commit/8786e8fb4628a22f5ff83c2412d8400750ce7458))
+* **api:** Let sender to SNU ([7cc7923](https://github.com/betagouv/service-national-universel/commit/7cc7923d36b81b7f001c4a1187b4af23fa504103))
+* **api:** SMS are not sent anymore ([09457ee](https://github.com/betagouv/service-national-universel/commit/09457ee4d738c5cb4cfca0e07f6bbe5591b95639))
+* **api:** throw error if pb with SIB ([b0979b2](https://github.com/betagouv/service-national-universel/commit/b0979b2798455f514e05c8643fdc81a602f40dab))
+* **app:** ecran phase 1 - modale fiche sanitaire ([7416318](https://github.com/betagouv/service-national-universel/commit/7416318191358c31a1c7b9276ab46e3713ca86a7))
+* **lib:** add "Côtes-d'Armor" (with a "-") to academic zones mapping ([49ffdf8](https://github.com/betagouv/service-national-universel/commit/49ffdf8750636be8867496cbbe42f622f24f2940))
+
 # [1.172.0](https://github.com/betagouv/service-national-universel/compare/v1.171.0...v1.172.0) (2022-11-22)
 
 

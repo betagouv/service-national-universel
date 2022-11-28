@@ -14,9 +14,45 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019"],
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019", "Juillet 2023", "Juin 2023", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A"],
     documentation: {
       description: "Cohorte",
+    },
+  },
+  department: {
+    type: String,
+    documentation: {
+      description: "Département du centre",
+    },
+  },
+  region: {
+    type: String,
+    documentation: {
+      description: "Région du centre",
+    },
+  },
+  codeCentre: {
+    type: String,
+    documentation: {
+      description: "Code du centre",
+    },
+  },
+  nameCentre: {
+    type: String,
+    documentation: {
+      description: "Nom du centre",
+    },
+  },
+  zipCentre: {
+    type: String,
+    documentation: {
+      description: "Zip du centre",
+    },
+  },
+  cityCentre: {
+    type: String,
+    documentation: {
+      description: "Ville du centre",
     },
   },
   headCenterId: {
@@ -75,8 +111,7 @@ const Schema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["VALIDATED", "DRAFT"],
-    default: "DRAFT",
+    enum: ["VALIDATED", "WAITING_VALIDATION"],
     documentation: {
       description: "Statut",
     },

@@ -113,7 +113,7 @@ export function GroupHeader({ className = "", children, onBack }) {
 export function GroupSummary({ group, className = "" }) {
   return (
     <div className={`flex items-center ${className}`}>
-      <div className={`text-[11px] leading-[1.3em] font-medium text-[#FFFFFF] rounded-full px-[10px] py-[1px] ${group.centerId ? "bg-[#9CA3AF]" : "bg-[#0C4A6E]"}`}>
+      <div className={`text-[11px] leading-[22px] font-medium text-[#FFFFFF] rounded-full px-[10px] ${group.centerId ? "bg-[#9CA3AF]" : "bg-[#0C4A6E]"}`}>
         {group.centerId ? "Affecté" : "En attente d'affectation"}
       </div>
       <div className="flex items-center">
