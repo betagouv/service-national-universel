@@ -3,6 +3,7 @@ const request = require("supertest");
 const getNewBusFixture = require("./fixtures/bus");
 const { getNewCohesionCenterFixture, getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
 
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const getNewReferentFixture = require("./fixtures/referent");
@@ -12,7 +13,6 @@ const { createBusHelper, getBusByIdHelper } = require("./helpers/bus");
 const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById, createCohesionCenterWithSession } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createMeetingPointHelper, getMeetingPointByIdHelper } = require("./helpers/meetingPoint");
-const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { ROLES } = require("snu-lib/roles");
 
@@ -226,6 +226,18 @@ describe("Cohesion Center", () => {
         .send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(200);
     });
+    it("should update session dependencies", async () => {
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
+      const newMixture = getNewCohesionCenterFixtureV2();
+      newMixture.name = "modified name";
+      const session = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
+      const res = await request(getAppHelper())
+        .put("/cohesion-center/" + cohesionCenter._id)
+        .send(newMixture);
+      expect(res.status).toBe(200);
+      const updatedSession = await getSessionPhase1ById(session._id);
+      expect(updatedSession.nameCentre).toBe("modified name");
+    });
     it("should be only allowed to admin", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
@@ -236,7 +248,6 @@ describe("Cohesion Center", () => {
           name: "nonono",
         });
       expect(res.status).toBe(403);
-      console.log(res.body);
       passport.user.role = ROLES.ADMIN;
     });
   });

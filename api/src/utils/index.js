@@ -246,8 +246,8 @@ const updateCenterDependencies = async (center, fromUser) => {
     await referent.save({ fromUser });
   });
   const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
-  sessions.forEach(async (session) => {
-    session.set({
+  for (let i = 0; i < sessions.length; i++) {
+    sessions[i].set({
       department: center.department,
       region: center.region,
       codeCentre: center.code2022,
@@ -255,8 +255,8 @@ const updateCenterDependencies = async (center, fromUser) => {
       zipCentre: center.zip,
       cityCentre: center.city,
     });
-    await session.save({ fromUser });
-  });
+    await sessions[i].save({ fromUser });
+  }
 };
 
 const deleteCenterDependencies = async (center, fromUser) => {
