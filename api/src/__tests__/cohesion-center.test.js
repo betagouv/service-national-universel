@@ -228,12 +228,10 @@ describe("Cohesion Center", () => {
     });
     it("should update session dependencies", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
-      const newMixture = getNewCohesionCenterFixtureV2();
-      newMixture.name = "modified name";
       const session = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
-        .send(newMixture);
+        .send({ ...getNewCohesionCenterFixtureV2(), name: "modified name" });
       expect(res.status).toBe(200);
       const updatedSession = await getSessionPhase1ById(session._id);
       expect(updatedSession.nameCentre).toBe("modified name");
