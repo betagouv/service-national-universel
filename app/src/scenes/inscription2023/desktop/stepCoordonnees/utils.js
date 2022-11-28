@@ -99,6 +99,7 @@ export const getDataFromYoung = (young, currentData) => {
     updatedData[key] = young[key] || currentData[key];
   });
   updatedData["livesInFrance"] = young.foreignCountry ? "false" : currentData.livesInFrance;
+  updatedData["_id"] = young._id;
 
   return updatedData;
 };

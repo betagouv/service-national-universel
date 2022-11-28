@@ -24,6 +24,9 @@ import {
   requiredMoreInformationFields,
   defaultState,
   getDataFromYoung,
+  birthPlaceFields,
+  getObjectWithEmptyData,
+  addressFields,
 } from "./utils";
 import Form from "./Form";
 
@@ -39,10 +42,13 @@ export default function StepCoordonnees() {
   const history = useHistory();
   const { step } = useParams();
 
-  const { frenchNationality, birthCityZip, phone, livesInFrance, addressVerified, zip, handicap, allergies, ppsBeneficiary, paiBeneficiary, specificAmenagment } = data;
+  const { frenchNationality, birthCityZip, phone, livesInFrance, addressVerified, address, city, zip, handicap, allergies, ppsBeneficiary, paiBeneficiary, specificAmenagment } =
+    data;
 
   const isFrench = frenchNationality === "true";
   const isFrenchResident = livesInFrance === "true";
+
+  const isVerifyAddressDisabled = !address || !city || !zip;
   const moreInformation = handicap === "true" || ppsBeneficiary === "true" || paiBeneficiary === "true";
 
   useEffect(() => {
@@ -62,6 +68,73 @@ export default function StepCoordonnees() {
   useEffect(() => {
     setErrors(getErrors());
   }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+
+  useEffect(() => {
+    if (data._id && !hasSpecialSituation) {
+      setData({
+        ...data,
+        handicap: "false",
+        allergies: "false",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        specificAmenagment: "",
+        specificAmenagmentType: "",
+        reducedMobilityAccess: "",
+        handicapInSameDepartment: "",
+      });
+    }
+  }, [hasSpecialSituation]);
+
+  useEffect(() => {
+    if (data._id && handicap === "false" && ppsBeneficiary === "false" && paiBeneficiary === "false") {
+      setData({
+        ...data,
+        specificAmenagment: "",
+        specificAmenagmentType: "",
+        reducedMobilityAccess: "",
+        handicapInSameDepartment: "",
+      });
+    }
+  }, [handicap, ppsBeneficiary, paiBeneficiary]);
+
+  const updateFrenchNationality = (frenchNationality) => {
+    if (frenchNationality === "true") {
+      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE, frenchNationality });
+    } else {
+      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), frenchNationality });
+    }
+  };
+
+  const updateLivesInFrance = (livesInFrance) => {
+    setData({ ...data, ...getObjectWithEmptyData(addressFields), ...getObjectWithEmptyData(foreignAddressFields), livesInFrance });
+  };
+
+  const updateData = (key) => (value) => {
+    setData({ ...data, [key]: value });
+  };
+
+  const updateAddressToVerify = (key) => (value) => {
+    setData({ ...data, [key]: value, addressVerified: "false" });
+  };
+
+  const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
+    setData({ ...data, birthCity, birthCityZip });
+  };
+
+  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+    setData({
+      ...data,
+      addressVerified: "true",
+      cityCode: suggestion.cityCode,
+      region: suggestion.region,
+      department: suggestion.department,
+      location: suggestion.location,
+      // if the suggestion is not confirmed we keep the address typed by the user
+      address: isConfirmed ? suggestion.address : address,
+      zip: isConfirmed ? suggestion.zip : zip,
+      city: isConfirmed ? suggestion.city : city,
+    });
+  };
 
   const getErrors = () => {
     let errors = {};
@@ -267,7 +340,14 @@ export default function StepCoordonnees() {
       onCorrection={onCorrection}
       disabled={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
-      <Form data={data} setData={setData} errors={errors} corrections={corrections} />
+      <Form
+        data={{ data, setData }}
+        errors={errors}
+        corrections={corrections}
+        specialSituation={{ hasSpecialSituation, setSpecialSituation }}
+        updates={{ updateData, updateFrenchNationality, updateLivesInFrance, updateAddressToVerify, onClickBirthCitySuggestion, onVerifyAddress }}
+        helpers={{ isFrench, isFrenchResident, isVerifyAddressDisabled, moreInformation }}
+      />
     </DesktopPageContainer>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import RadioButton from "../../components/RadioButton";
 import Input from "../../components/Input";
@@ -18,12 +18,16 @@ import VerifyAddress from "../../components/VerifyAddress";
 import SearchableSelect from "../../../../components/SearchableSelect";
 import Toggle from "../../../../components/inscription/toggle";
 import CheckBox from "../../../../components/inscription/checkbox";
-import { FRANCE, getObjectWithEmptyData, birthPlaceFields, addressFields, foreignAddressFields } from "./utils";
 import CityInput from "./components/CityInput";
 
-export default function Form({ data, setData, errors, corrections }) {
-  const [hasSpecialSituation, setSpecialSituation] = useState(false);
-
+export default function Form({
+  data: { data, setData },
+  errors,
+  corrections,
+  specialSituation: { hasSpecialSituation, setSpecialSituation },
+  updates: { updateFrenchNationality, updateLivesInFrance, updateData, updateAddressToVerify, onClickBirthCitySuggestion, onVerifyAddress },
+  helpers: { isFrench, isFrenchResident, isVerifyAddressDisabled, moreInformation },
+}) {
   const {
     frenchNationality,
     birthCountry,
@@ -55,74 +59,12 @@ export default function Form({ data, setData, errors, corrections }) {
     handicapInSameDepartment,
   } = data;
 
-  const isFrench = frenchNationality === "true";
-  const isFrenchResident = livesInFrance === "true";
-
-  const isVerifyAddressDisabled = !address || !city || !zip;
-  const moreInformation = handicap === "true" || ppsBeneficiary === "true" || paiBeneficiary === "true";
-
-  const setFrenchNationality = (frenchNationality) => {
-    if (frenchNationality === "true") {
-      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE, frenchNationality });
-    } else {
-      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), frenchNationality });
-    }
-  };
-
-  const setLivesInFrance = (livesInFrance) => {
-    setData({ ...data, ...getObjectWithEmptyData(addressFields), ...getObjectWithEmptyData(foreignAddressFields), livesInFrance });
-  };
-
-  const updateData = (key) => (value) => {
-    setData({ ...data, [key]: value });
-  };
-
-  const updateSpecialSituation = (value) => {
-    setSpecialSituation(value);
-    if (!value) {
-      setData({
-        ...data,
-        handicap: "false",
-        allergies: "false",
-        ppsBeneficiary: "false",
-        paiBeneficiary: "false",
-        specificAmenagment: "",
-        specificAmenagmentType: "",
-        reducedMobilityAccess: "",
-        handicapInSameDepartment: "",
-      });
-    }
-  };
-
-  const updateAddressToVerify = (key) => (value) => {
-    setData({ ...data, [key]: value, addressVerified: "false" });
-  };
-
-  const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
-    setData({ ...data, birthCity, birthCityZip });
-  };
-
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: "true",
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : address,
-      zip: isConfirmed ? suggestion.zip : zip,
-      city: isConfirmed ? suggestion.city : city,
-    });
-  };
-
   return (
     <>
       <RadioButton
         label="Je suis né(e)..."
         options={frenchNationalityOptions}
-        onChange={setFrenchNationality}
+        onChange={updateFrenchNationality}
         value={frenchNationality}
         error={errors.frenchNationality}
         correction={corrections?.frenchNationality}
@@ -165,7 +107,7 @@ export default function Form({ data, setData, errors, corrections }) {
       <RadioButton
         label="Je réside..."
         options={frenchNationalityOptions}
-        onChange={setLivesInFrance}
+        onChange={updateLivesInFrance}
         value={livesInFrance}
         correction={corrections.livesInFrance}
         error={errors?.livesInFrance}
@@ -283,7 +225,7 @@ export default function Form({ data, setData, errors, corrections }) {
           <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         </div>
         <div className="ml-3">
-          <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
+          <Toggle toggled={hasSpecialSituation} onClick={() => setSpecialSituation(!hasSpecialSituation)} />
         </div>
       </div>
       {hasSpecialSituation && (
