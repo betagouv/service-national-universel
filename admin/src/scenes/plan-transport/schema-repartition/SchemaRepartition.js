@@ -193,7 +193,7 @@ export default function SchemaRepartition({ region, department }) {
               summary={summary}
               onChange={loadData}
             />
-            <SchemaDepartmentDetail department={department} region={region} />
+            <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
           </>
         ) : (
           <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} />

@@ -24,7 +24,7 @@ export default function GroupUpdateYoungCounts({ group, className = "", onChange
       <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)}>Modifier le nombre de volontaires</GroupHeader>
       <GroupYoungVolumeEditor availableVolume={group.availableVolume} value={volume} onChange={changeVolume} />
       <div className="flex items-end justify-center pt-[67px]">
-        <PlainButton onClick={save}>Enregitrer</PlainButton>
+        <PlainButton onClick={save}>Enregistrer</PlainButton>
       </div>
     </GroupBox>
   );

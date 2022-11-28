@@ -11,6 +11,7 @@
  *  POST   /schema-de-repartition/get-group-detail              => Population du détail d'un groupe (centre et points de rassemblement)
  */
 
+const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -64,17 +65,22 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     const { department, cohort } = valueParams;
 
     const { error: errorQuery, value: query } = Joi.object({
+      intra: Joi.boolean().default(false),
       minPlacesCount: Joi.number().default(0),
       filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { minPlacesCount, filter } = query;
+    const { minPlacesCount, filter, intra } = query;
 
     // get the destination departments from table de repartition
-    const toDepartments = await getDepartmentsFromDepartment(cohort, department);
-    console.log("TO DEPARTMENTS: ", toDepartments);
+    let toDepartments;
+    if (intra) {
+      toDepartments = [department];
+    } else {
+      toDepartments = await getDepartmentsFromDepartment(cohort, department);
+    }
 
     // search centers & sessions
     const pipeline = [
@@ -110,7 +116,6 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     pipeline.push({ $sort: { "center.name": 1 } });
 
     // QUERY
-    console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
     const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
 
     // format result
@@ -157,7 +162,6 @@ router.post("/get-group-detail", passport.authenticate("referent", { session: fa
     // --- parameters & vérification
     const { error: errorBody, value: group } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
     if (errorBody) {
-      console.log("JOI ERROR: ", errorBody);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -188,6 +192,96 @@ router.post("/get-group-detail", passport.authenticate("referent", { session: fa
   }
 });
 
+router.get("/department-detail/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { department, cohort } = valueParams;
+
+    if (!canViewSchemaDeRepartition(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // get centers
+    const pipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
+        },
+      },
+      { $unwind: "$center" },
+      { $match: { "center.department": department } },
+      {
+        $lookup: {
+          from: "schemaderepartitions",
+          localField: "cohesionCenterId",
+          foreignField: "centerId",
+          as: "groups",
+        },
+      },
+      { $sort: { "center.name": 1 } },
+    ];
+    const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
+
+    let globalPlacesTotal = 0;
+    let globalAffectedYoungs = 0;
+
+    const centers = sessionResult.map((session) => {
+      globalPlacesTotal += session.placesTotal;
+
+      let affectedYoungs = 0;
+
+      const groups = session.groups.map((group) => {
+        affectedYoungs += group.youngsVolume;
+
+        return {
+          youngsVolume: group.youngsVolume,
+          department: group.fromDepartment,
+          region: group.fromRegion,
+        };
+      });
+
+      globalAffectedYoungs += affectedYoungs;
+
+      return {
+        _id: session.center._id,
+        name: session.center.name,
+        city: session.center.city,
+        department: session.center.department,
+        affectedYoungs,
+        placesTotal: session.placesTotal,
+        placesLeft: Math.max(0, session.placesTotal - affectedYoungs),
+        groups,
+      };
+    });
+
+    const data = {
+      affectedYoungs: globalAffectedYoungs,
+      placesLeft: Math.max(0, globalPlacesTotal - globalAffectedYoungs),
+      placesTotal: globalPlacesTotal,
+      centers,
+    };
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 // --- summaries
 
 router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -202,7 +296,6 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
     // --- get stats for each departments
     const departments = await getDepartmentCentersAndCapacities(cohort);
-    console.log("DEPARTEMENTS: ", departments);
 
     // --- get table de repartition for each regions
     const regions = await getRegionTableDeRepartition(cohort);
@@ -636,7 +729,6 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     });
     const { error, value } = bodySchema.validate(req.body, { stripUnknown: true });
     if (error) {
-      console.log("JOI ERROR: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -693,7 +785,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error: errorBody, value } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
     if (errorBody) {
-      console.log("JOI ERROR: ", errorBody);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -704,6 +795,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     // --- update
     const schema = await schemaRepartitionModel.findById(id);
     if (!schema) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (value.centerId && typeof value.centerId === "string") {
+      value.centerId = mongoose.Types.ObjectId(value.centerId);
+    }
+    if (value.gatheringPlaces) {
+      value.gatheringPlaces = value.gatheringPlaces.map((gp) => {
+        return typeof gp === "string" ? mongoose.Types.ObjectId(gp) : gp;
+      });
+    }
 
     schema.set(value);
     await schema.save();
