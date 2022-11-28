@@ -15,6 +15,7 @@ import Error from "../../../components/error";
 import ErrorMessage from "../components/ErrorMessage";
 import Footer from "../../../components/footerV2";
 import Help from "../components/Help";
+import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 
@@ -30,8 +31,8 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [hasChanged, setHasChanged] = useState(false);
   const [error, setError] = useState({});
-  const [recto, setRecto] = useState();
-  const [verso, setVerso] = useState();
+  const [recto, setRecto] = useState([]);
+  const [verso, setVerso] = useState([]);
   const [checked, setChecked] = useState({
     "Toutes les informations sont lisibles": false,
     "Le document n'est pas coupé": false,
@@ -61,13 +62,9 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     try {
-      let files = [...recto];
+      let files = [];
+      if (recto) files = [...files, ...recto];
       if (verso) files = [...files, ...verso];
-      if (young.files.cniFiles.length + files.length > 3) {
-        return young?.files?.cniFiles?.length
-          ? { error: `Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
-          : { error: "Vous ne pouvez téleverser plus de 3 fichiers." };
-      }
       for (const file of files) {
         if (file.size > 10000000) return { error: `Ce fichier ${files.name} est trop volumineux.` };
       }
@@ -122,7 +119,7 @@ export default function StepUpload() {
   async function onCorrect() {
     try {
       setLoading(true);
-      if (recto) {
+      if (recto || verso) {
         const res = await uploadFiles();
         if (res?.error) {
           setRecto([]);
@@ -160,6 +157,18 @@ export default function StepUpload() {
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+        {young?.files?.cniFiles?.length + recto?.length + verso?.length > 3 && (
+          <>
+            <Error
+              text={
+                young?.files?.cniFiles?.length
+                  ? `Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.`
+                  : "Vous ne pouvez téleverser plus de 3 fichiers."
+              }
+            />
+            <MyDocs />
+          </>
+        )}
         {renderStep(step)}
       </div>
       <Help />
@@ -309,8 +318,8 @@ export default function StepUpload() {
 function Gallery({ recto, verso }) {
   return (
     <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
-      {recto && <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />}
-      {verso && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
+      {recto.length > 0 && <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />}
+      {verso.length > 0 && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
     </div>
   );
 }

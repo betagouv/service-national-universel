@@ -14,6 +14,7 @@ import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 import ErrorMessage from "../components/ErrorMessage";
+import MyDocs from "../components/MyDocs";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -30,7 +31,7 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     try {
-      if (young.files.cniFiles.length + files.length > 3) {
+      if (young?.files?.cniFiles?.length + files?.length > 3) {
         return young?.files?.cniFiles?.length
           ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
           : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
@@ -186,6 +187,7 @@ export default function StepUpload() {
         </a>
         .
       </div>
+      {error?.text && young?.files?.cniFiles?.length + files?.length > 2 && <MyDocs />}
       {(files || date) && (
         <>
           <hr className="my-8 h-px bg-gray-200 border-0" />
