@@ -149,8 +149,8 @@ export default function Details({ center, setCenter, sessions }) {
           {user.role === ROLES.ADMIN ? (
             <div data-tip="" data-for="tooltip-delete">
               {sessions.length !== 0 && (
-                <ReactTooltip id="tooltip-delete" disable={false}>
-                  Des sessions sont encore associées au centre
+                <ReactTooltip id="tooltip-delete" className="bg-white shadow-xl text-black" arrowColor="white" disable={false}>
+                  <div className="text-[black]">Des sessions sont encore associées au centre</div>
                 </ReactTooltip>
               )}
 
