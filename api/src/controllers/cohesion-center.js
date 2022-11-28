@@ -405,10 +405,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
-    if (sessionsPhase1.length !== 0) res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (sessionsPhase1.length !== 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     await center.remove();
-    console.log(`Center ${id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

@@ -2,12 +2,14 @@ require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const getNewBusFixture = require("./fixtures/bus");
 const { getNewCohesionCenterFixture, getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewYoungFixture = require("./fixtures/young");
 const getAppHelper = require("./helpers/app");
 const { createBusHelper, getBusByIdHelper } = require("./helpers/bus");
-const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById, createCohesionCenterWithSession } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createMeetingPointHelper, getMeetingPointByIdHelper } = require("./helpers/meetingPoint");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
@@ -234,6 +236,7 @@ describe("Cohesion Center", () => {
           name: "nonono",
         });
       expect(res.status).toBe(403);
+      console.log(res.body);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -245,6 +248,13 @@ describe("Cohesion Center", () => {
         .send();
       expect(res.status).toBe(404);
     });
+    it("should return 404 when center has sessions", async () => {
+      const cohesionCenter = await createCohesionCenterWithSession(getNewCohesionCenterFixture(), getNewSessionPhase1Fixture());
+      const res = await request(getAppHelper())
+        .delete("/cohesion-center/" + cohesionCenter._id)
+        .send();
+      expect(res.status).toBe(400);
+    });
     it("should return 200 when cohesion center is found", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const res = await request(getAppHelper())
@@ -252,23 +262,6 @@ describe("Cohesion Center", () => {
         .send();
       expect(res.status).toBe(200);
     });
-  });
-  it("should deleteCenterDependencies", async () => {
-    const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
-    const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
-    const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
-
-    await request(getAppHelper())
-      .delete("/cohesion-center/" + cohesionCenter._id)
-      .send();
-
-    const updatedReferent = await getReferentByIdHelper(referent._id);
-    const updatedYoung = await getYoungByIdHelper(young._id);
-    const updatedMeetingPoint = await getMeetingPointByIdHelper(meetingPoint._id);
-    expect(updatedReferent.cohesionCenterName).toBeUndefined();
-    expect(updatedYoung.cohesionCenterName).toBeUndefined();
-    expect(updatedMeetingPoint.centerCode).toBeUndefined();
   });
   it("should be only allowed to admin", async () => {
     const passport = require("passport");
