@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
 import { Title } from "../components/commons";
 import { canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
-import { canUpdateMeetingPoint } from "snu-lib";
+import { canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
@@ -53,6 +53,7 @@ export default function Details({ center, setCenter, sessions }) {
       address: isConfirmed ? suggestion.address : data.address,
       zip: isConfirmed ? suggestion.zip : data.zip,
       city: isConfirmed ? suggestion.city : data.city,
+      academy: departmentToAcademy[suggestion.department],
     });
   };
   const onSubmit = async () => {
@@ -226,12 +227,8 @@ export default function Details({ center, setCenter, sessions }) {
                     address={data.address}
                     zip={data.zip}
                     city={data.city}
-                    onSuccess={() => {
-                      onVerifyAddress(true);
-                    }}
-                    onFail={() => {
-                      onVerifyAddress();
-                    }}
+                    onSuccess={onVerifyAddress(true)}
+                    onFail={onVerifyAddress()}
                     isVerified={data.addressVerified === true}
                     buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
                     verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
