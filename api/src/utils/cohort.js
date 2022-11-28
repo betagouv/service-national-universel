@@ -3,7 +3,7 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 
 async function getAvailableSessions(young) {
-  let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young.zip);
+  let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
   if (dep && (!isNaN(dep) || ["2A", "2B"].includes(dep))) {
     if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
     else dep = departmentLookUp[dep];

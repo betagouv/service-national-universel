@@ -132,7 +132,6 @@ class Auth {
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       const sessions = await getAvailableSessions(value);
-      console.log("🚀 ~ file: auth.js ~ line 135 ~ Auth ~ signUp2023 ~ value", value);
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session || session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 

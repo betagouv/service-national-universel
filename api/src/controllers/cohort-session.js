@@ -4,10 +4,14 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
 const { getAvailableSessions } = require("../utils/cohort");
-const { getZoneByDepartment, sessions2023 } = require("snu-lib");
+const { getZoneByDepartment, sessions2023, getDepartmentByZip } = require("snu-lib");
 const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
 
+// Takes either a young ID in route parameter or young data in request body (for edition or creation pages).
+// Minimum data required: birthdateAt, zip and (if schooled) grade.
+// Returns an array of session objects filtered by eligibility rules and inscription dates.
+// Provides updated numbers of places for the given region for frontend filtering and backend coherence checks.
 router.post("/eligibility/2023/:id?", async (req, res) => {
   try {
     let young = {};
@@ -33,8 +37,8 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       young = body;
     }
 
-    const zone = getZoneByDepartment(young.schoolDepartment || young.department);
-
+    // Remove ? (Only used to provide error message.)
+    const zone = getZoneByDepartment(young.schoolDepartment || young.department || getDepartmentByZip(young.zip));
     if (
       young.birthdateAt > sessions2023[4].eligibility.bornBefore ||
       (zone === "C" && young.birthdateAt <= sessions2023[0].eligibility.bornAfter) ||
