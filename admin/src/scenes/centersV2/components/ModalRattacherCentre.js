@@ -129,6 +129,8 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
       setIsLoading(false);
       setSelectedCentre("");
       setSelectedCohort("");
+      toastr.success("La centre a été rataché au séjour avec succès");
+      onCancel();
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
     } catch (e) {
       capture(e);

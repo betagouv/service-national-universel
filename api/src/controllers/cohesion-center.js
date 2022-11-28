@@ -8,7 +8,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
+const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, deleteCenterDependencies, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
@@ -182,6 +182,18 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
+    sessions.map(async (session) => {
+      session.set({
+        department: center.department,
+        region: center.region,
+        codeCentre: center.code2022,
+        nameCentre: center.name,
+        zipCentre: center.zip,
+        cityCentre: center.city,
+      });
+      await session.save({ fromUser: req.user });
+    });
+    await updateCenterDependencies(center, req.user);
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
