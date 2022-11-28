@@ -81,7 +81,6 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     } else {
       toDepartments = await getDepartmentsFromDepartment(cohort, department);
     }
-    console.log("TO DEPARTMENTS: ", toDepartments);
 
     // search centers & sessions
     const pipeline = [
@@ -117,7 +116,6 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     pipeline.push({ $sort: { "center.name": 1 } });
 
     // QUERY
-    console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
     const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
 
     // format result
@@ -164,7 +162,6 @@ router.post("/get-group-detail", passport.authenticate("referent", { session: fa
     // --- parameters & vérification
     const { error: errorBody, value: group } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
     if (errorBody) {
-      console.log("JOI ERROR: ", errorBody);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -236,10 +233,7 @@ router.get("/department-detail/:department/:cohort", passport.authenticate("refe
       },
       { $sort: { "center.name": 1 } },
     ];
-    console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
     const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
-
-    console.log("SESSION RESULT: ", sessionResult);
 
     let globalPlacesTotal = 0;
     let globalAffectedYoungs = 0;
@@ -302,7 +296,6 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
     // --- get stats for each departments
     const departments = await getDepartmentCentersAndCapacities(cohort);
-    console.log("DEPARTEMENTS: ", departments);
 
     // --- get table de repartition for each regions
     const regions = await getRegionTableDeRepartition(cohort);
@@ -736,7 +729,6 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     });
     const { error, value } = bodySchema.validate(req.body, { stripUnknown: true });
     if (error) {
-      console.log("JOI ERROR: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -793,7 +785,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error: errorBody, value } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
     if (errorBody) {
-      console.log("JOI ERROR: ", errorBody);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
