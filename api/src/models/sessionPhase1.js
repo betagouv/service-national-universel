@@ -111,7 +111,7 @@ const Schema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["VALIDATED", "WAITING_VALIDATION"],
+    enum: ["VALIDATED", "WAITING_VALIDATION", "DRAFT"],
     documentation: {
       description: "Statut",
     },

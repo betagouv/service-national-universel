@@ -182,8 +182,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
-    sessions.map(async (session) => {
-      session.set({
+    for (let i = 0; i < sessions.length; i++) {
+      sessions[i].set({
         department: center.department,
         region: center.region,
         codeCentre: center.code2022,
@@ -191,12 +191,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         zipCentre: center.zip,
         cityCentre: center.city,
       });
-      await session.save({ fromUser: req.user });
-    });
+      await sessions[i].save({ fromUser: req.user });
+    }
     await updateCenterDependencies(center, req.user);
+    console.log("dependencies updated");
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
+    console.log(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
