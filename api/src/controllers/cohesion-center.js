@@ -182,17 +182,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
-    for (let i = 0; i < sessions.length; i++) {
-      sessions[i].set({
-        department: center.department,
-        region: center.region,
-        codeCentre: center.code2022,
-        nameCentre: center.name,
-        zipCentre: center.zip,
-        cityCentre: center.city,
-      });
-      await sessions[i].save({ fromUser: req.user });
-    }
     await updateCenterDependencies(center, req.user);
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
