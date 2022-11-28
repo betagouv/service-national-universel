@@ -400,23 +400,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    if (req.user.role !== ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
-
-    const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionsPhase1.map((session) => session._id.toString()) });
-
-    if (youngsInSessions.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+    if (sessionsPhase1.length !== 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     await center.remove();
-    await deleteCenterDependencies({ _id: id });
-    for (let sessionPhase1 of sessionsPhase1) {
-      await sessionPhase1.remove();
-    }
-    console.log(`Center ${id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
