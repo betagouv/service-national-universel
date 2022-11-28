@@ -2,15 +2,17 @@ require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const getNewBusFixture = require("./fixtures/bus");
 const { getNewCohesionCenterFixture, getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
+
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewYoungFixture = require("./fixtures/young");
 const getAppHelper = require("./helpers/app");
 const { createBusHelper, getBusByIdHelper } = require("./helpers/bus");
-const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById, createCohesionCenterWithSession } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createMeetingPointHelper, getMeetingPointByIdHelper } = require("./helpers/meetingPoint");
-const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { ROLES } = require("snu-lib/roles");
 
@@ -214,46 +216,30 @@ describe("Cohesion Center", () => {
     it("should return 404 when cohesion center is not found", async () => {
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + notExistingCohesionCenterId)
-        .send({
-          name: "newname",
-        });
+        .send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(404);
     });
     it("should return 200 when cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
-        .send({
-          name: "new name",
-        });
+        .send(getNewCohesionCenterFixtureV2());
       expect(res.status).toBe(200);
-      expect(res.body.data.name).toBe("new name");
     });
-    it("should updateCenterDependencies", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
-      const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
-      const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
-
+    it("should update session dependencies", async () => {
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
+      const session = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
-        .send({
-          name: "new name",
-          code2022: "new code",
-        });
+        .send({ ...getNewCohesionCenterFixtureV2(), name: "modified name" });
       expect(res.status).toBe(200);
-
-      const updatedReferent = await getReferentByIdHelper(referent._id);
-      const updatedYoung = await getYoungByIdHelper(young._id);
-      const updatedMeetingPoint = await getMeetingPointByIdHelper(meetingPoint._id);
-      expect(updatedReferent.cohesionCenterName).toBe("new name");
-      expect(updatedYoung.cohesionCenterName).toBe("new name");
-      expect(updatedMeetingPoint.centerCode).toBe("new code");
+      const updatedSession = await getSessionPhase1ById(session._id);
+      expect(updatedSession.nameCentre).toBe("modified name");
     });
     it("should be only allowed to admin", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixtureV2());
       const res = await request(getAppHelper())
         .put("/cohesion-center/" + cohesionCenter._id)
         .send({
@@ -271,6 +257,13 @@ describe("Cohesion Center", () => {
         .send();
       expect(res.status).toBe(404);
     });
+    it("should return 404 when center has sessions", async () => {
+      const cohesionCenter = await createCohesionCenterWithSession(getNewCohesionCenterFixture(), getNewSessionPhase1Fixture());
+      const res = await request(getAppHelper())
+        .delete("/cohesion-center/" + cohesionCenter._id)
+        .send();
+      expect(res.status).toBe(400);
+    });
     it("should return 200 when cohesion center is found", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const res = await request(getAppHelper())
@@ -278,23 +271,6 @@ describe("Cohesion Center", () => {
         .send();
       expect(res.status).toBe(200);
     });
-  });
-  it("should deleteCenterDependencies", async () => {
-    const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
-    const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
-    const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
-
-    await request(getAppHelper())
-      .delete("/cohesion-center/" + cohesionCenter._id)
-      .send();
-
-    const updatedReferent = await getReferentByIdHelper(referent._id);
-    const updatedYoung = await getYoungByIdHelper(young._id);
-    const updatedMeetingPoint = await getMeetingPointByIdHelper(meetingPoint._id);
-    expect(updatedReferent.cohesionCenterName).toBeUndefined();
-    expect(updatedYoung.cohesionCenterName).toBeUndefined();
-    expect(updatedMeetingPoint.centerCode).toBeUndefined();
   });
   it("should be only allowed to admin", async () => {
     const passport = require("passport");

@@ -165,7 +165,7 @@ const Schema = new mongoose.Schema({
 
   sessionStatus: {
     type: [String],
-    enum: ["VALIDATED", "DRAFT"],
+    enum: ["VALIDATED", "DRAFT", "WAITING_VALIDATION"],
     documentation: {
       description: "Status de la globalite des cohortes d'un centre",
     },

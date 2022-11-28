@@ -39,7 +39,7 @@ function getNewCohesionCenterFixtureV2() {
     department: faker.address.state(),
     region: faker.address.state(),
     addressVerified: true,
-    placesTotal: "10",
+    placesTotal: "20",
     pmr: false,
     academy: faker.address.city(),
     typology: "PUBLIC_ETAT",

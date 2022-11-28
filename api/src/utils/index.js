@@ -8,6 +8,7 @@ const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
+const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -244,11 +245,18 @@ const updateCenterDependencies = async (center, fromUser) => {
     referent.set({ cohesionCenterName: center.name });
     await referent.save({ fromUser });
   });
-  const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
-  meetingPoints.forEach(async (meetingPoint) => {
-    meetingPoint.set({ centerCode: center.code2022 });
-    await meetingPoint.save({ fromUser });
-  });
+  const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
+  for (let i = 0; i < sessions.length; i++) {
+    sessions[i].set({
+      department: center.department,
+      region: center.region,
+      codeCentre: center.code2022,
+      nameCentre: center.name,
+      zipCentre: center.zip,
+      cityCentre: center.city,
+    });
+    await sessions[i].save({ fromUser });
+  }
 };
 
 const deleteCenterDependencies = async (center, fromUser) => {

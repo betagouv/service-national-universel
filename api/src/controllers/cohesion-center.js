@@ -8,11 +8,11 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, updateCenterDependencies, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
+const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, deleteCenterDependencies, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
-const { validateUpdateCohesionCenter, validateId } = require("../utils/validator");
+const { validateId } = require("../utils/validator");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -139,7 +139,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
   }
 });
 
-//To update for new affectation
+// Modify existing center
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
@@ -147,56 +147,42 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
-
+    const { error, value } = Joi.object({
+      academy: Joi.string().required(),
+      addressVerified: Joi.boolean().required(),
+      centerDesignation: Joi.string().required(),
+      city: Joi.string().required(),
+      code2022: Joi.string().required(),
+      complement: Joi.string(),
+      placesTotal: Joi.number().required(),
+      department: Joi.string().required(),
+      domain: Joi.string().required(),
+      name: Joi.string().required(),
+      pmr: Joi.boolean().required(),
+      region: Joi.string().required(),
+      typology: Joi.string().required(),
+      zip: Joi.string().required(),
+    }).validate({ ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
+    // check si le nombre de place > au nombre place pour chaque session
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const previousCohorts = center.cohorts || [];
-    center.set(newCenter);
-    await center.save({ fromUser: req.user });
-
-    // if we change the cohorts, we need to update the sessionPhase1
-    if (newCenter?.cohorts?.length) {
-      const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
-      // add sessionPhase1 documents linked to this cohesion center
-
-      for (let cohort of center.cohorts) {
-        if (!deletedCohorts.includes(cohort)) {
-          const cohesionCenterId = center._id;
-          const placesTotal = newCenter[cohort].placesTotal;
-          const placesLeft = newCenter[cohort].placesLeft;
-          const status = newCenter[cohort].status;
-          const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
-          if (session) {
-            session.set({ placesTotal, placesLeft, status });
-            await session.save({ fromUser: req.user });
-          } else {
-            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
-          }
-        }
-      }
-
-      // ! MAYBE DANGEROUS ?
-      // delete sessionPhase1 documents linked to this cohesion center
-      if (deletedCohorts?.length > 0) {
-        for (let cohort of deletedCohorts) {
-          const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
-          const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id.toString() });
-          if (youngsInSessions.length === 0) {
-            await sessionPhase1?.remove();
-          }
-        }
-      }
+    if (req.user.role !== ROLES.ADMIN) {
+      delete value.centerDesignation;
+      delete value.code2022;
     }
-
+    value.pmr = value.pmr ? "true" : "false";
+    const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
+    const canUpdateSession = sessions.filter((s) => s.placesTotal > value.placesTotal).length === 0;
+    if (!canUpdateSession) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    center.set({ ...center, ...value });
+    await center.save({ fromUser: req.user });
     await updateCenterDependencies(center, req.user);
-
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
@@ -414,23 +400,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    if (req.user.role !== ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
-
-    const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionsPhase1.map((session) => session._id.toString()) });
-
-    if (youngsInSessions.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+    if (sessionsPhase1.length !== 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     await center.remove();
-    await deleteCenterDependencies({ _id: id });
-    for (let sessionPhase1 of sessionsPhase1) {
-      await sessionPhase1.remove();
-    }
-    console.log(`Center ${id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

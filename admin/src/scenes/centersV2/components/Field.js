@@ -18,7 +18,7 @@ export default function Field({ onChange, value, label, disabled = false, error,
       <div className="flex items-center gap-2">
         {copy && value && (
           <div
-            className="flex items-center justify-center cursor-pointer hover:scale-105"
+            className={`flex items-center justify-center hover:scale-105`}
             onClick={() => {
               copyToClipboard(value);
               setCopied(true);
@@ -26,7 +26,7 @@ export default function Field({ onChange, value, label, disabled = false, error,
             {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
           </div>
         )}
-        <input className={`w-full ${disabled ? "bg-gray-100" : ""}`} value={value} onChange={onChange} disabled={disabled} readOnly={readOnly} />
+        <input className={`w-full ${disabled ? "bg-gray-100" : ""} ${readOnly && "cursor-default"}`} value={value} onChange={onChange} disabled={disabled} readOnly={readOnly} />
       </div>
       {error && <div className="text-[#EF4444]">{error}</div>}
     </div>
