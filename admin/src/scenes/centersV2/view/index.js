@@ -128,12 +128,11 @@ export default function Index({ ...props }) {
               <OccupationCard occupationPercentage={occupationPercentage} placesTotal={focusedSession.placesTotal} placesLeft={focusedSession.placesLeft} />
               {/* // liste des volontaires */}
               <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
-                <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
                   <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
                     Voir les volontaires
                   </button>
                 </div>
-                <div className="w-full border-b-[1px] border-gray-200"></div>
                 <div className="flex flex-1 items-center justify-center">
                   <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
                     Voir l&apos;équipe
