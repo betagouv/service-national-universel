@@ -194,11 +194,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       await sessions[i].save({ fromUser: req.user });
     }
     await updateCenterDependencies(center, req.user);
-    console.log("dependencies updated");
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
-    console.log(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
