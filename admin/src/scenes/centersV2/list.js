@@ -47,7 +47,7 @@ export default function List() {
   }, []);
 
   return (
-    <div>
+    <div className="mb-8">
       <Breadcrumbs items={[{ label: "Centres" }]} />
       <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
@@ -488,7 +488,7 @@ const HitSession = ({ center, hit, onClick, history }) => {
           <div className="font-bold leading-6 text-gray-900">{center?._source.name}</div>
           <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
-        <div className="flex items-center flex-wrap w-[20%] z-10">
+        <div className="flex items-center flex-wrap w-[20%]">
           <Badge
             onClick={(e) => {
               e.stopPropagation();
