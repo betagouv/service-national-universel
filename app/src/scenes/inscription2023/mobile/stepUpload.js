@@ -63,10 +63,7 @@ export default function StepUpload() {
     try {
       let files = [...recto];
       if (verso) files = [...files, ...verso];
-      if (files.length > 3 || young.files.cniFiles.length + files.length > 3) {
-        setRecto([]);
-        setVerso([]);
-        setStep(getStep());
+      if (young.files.cniFiles.length + files.length > 3) {
         throw young?.files?.cniFiles?.length
           ? `Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.`
           : "Vous ne pouvez téleverser plus de 3 fichiers.";
@@ -80,6 +77,10 @@ export default function StepUpload() {
       if (!res.ok) throw res.code;
     } catch (e) {
       capture(e);
+      setRecto([]);
+      setVerso([]);
+      setHasChanged(false);
+      setStep(getStep());
       return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: translate(e) } };
     }
   }
@@ -128,9 +129,10 @@ export default function StepUpload() {
       capture(e);
       setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
       setLoading(false);
-      return;
     }
   }
+
+  const isEnabled = (!corrections?.length && young.files.cniFiles != null && date != null && !loading) || (corrections?.length && hasChanged && !loading);
 
   return (
     <>
@@ -156,9 +158,9 @@ export default function StepUpload() {
       )}
       {step === "date" &&
         (corrections?.length ? (
-          <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!hasChanged} />
+          <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!isEnabled} />
         ) : (
-          <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!hasChanged} />
+          <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!isEnabled} />
         ))}
     </>
   );

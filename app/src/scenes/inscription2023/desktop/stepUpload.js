@@ -30,15 +30,13 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     try {
-      if (files.length > 3 || young.files.cniFiles.length + files.length > 3) {
-        setFiles([]);
-        setHasChanged(false);
+      if (young.files.cniFiles.length + files.length > 3) {
         throw young?.files?.cniFiles?.length
           ? `Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.`
           : "Vous ne pouvez téleverser plus de 3 fichiers.";
       }
       for (const file of files) {
-        if (file.size > 5000000) throw `Ce fichier ${files.name} est trop volumineux.`;
+        if (file.size > 10000000) throw `Ce fichier ${files.name} est trop volumineux.`;
       }
       const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, new Date(date));
       if (res.code === "FILE_CORRUPTED")
@@ -46,12 +44,9 @@ export default function StepUpload() {
       if (!res.ok) throw res.code;
     } catch (e) {
       capture(e);
-      return {
-        error: {
-          text: "Une erreur s'est produite lors du téléversement de votre fichier.",
-          subText: translate(e),
-        },
-      };
+      setFiles([]);
+      setHasChanged(false);
+      return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: translate(e) } };
     }
   }
 
@@ -100,12 +95,9 @@ export default function StepUpload() {
       setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: e });
       setLoading(false);
     }
-    setLoading(false);
   }
 
-  const isEnabled = (young.files.cniFiles != null && date != null && !loading) || (corrections?.length && !hasChanged);
-
-  !young.files.cniFiles || !date || loading;
+  const isEnabled = (!corrections?.length && young.files.cniFiles != null && date != null && !loading) || (corrections?.length && hasChanged && !loading);
 
   if (!category) return <div>Loading</div>;
   return (
