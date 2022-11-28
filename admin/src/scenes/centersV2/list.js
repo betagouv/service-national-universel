@@ -260,7 +260,13 @@ const ListSession = ({ firstSession }) => {
                   <div className="w-[20%]">Disponibilités</div>
                 </div>
                 {data.map((hit) => (
-                  <HitSession history={history} key={hit._id} center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]} hit={hit} />
+                  <HitSession
+                    history={history}
+                    onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
+                    key={hit._id}
+                    center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
+                    hit={hit}
+                  />
                 ))}
                 <hr />
               </div>
@@ -489,13 +495,7 @@ const HitSession = ({ center, hit, onClick, history }) => {
           <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
         <div className="flex items-center flex-wrap w-[20%]">
-          <Badge
-            onClick={(e) => {
-              e.stopPropagation();
-              history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`);
-            }}
-            cohort={hit}
-          />
+          <Badge cohort={hit} />
         </div>
         <div className="flex flex-col w-[20%]">
           <div>
