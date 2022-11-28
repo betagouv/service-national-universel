@@ -174,7 +174,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       delete value.centerDesignation;
       delete value.code2022;
     }
-    console.log(center);
+    const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
+    const canUpdateSession = sessions.filter((s) => s.placesTotal > value.placesTotal).length === 0;
+    if (!canUpdateSession) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });

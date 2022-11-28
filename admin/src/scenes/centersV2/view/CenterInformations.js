@@ -91,6 +91,7 @@ export default function Details({ center, setCenter, sessions }) {
       }
       setErrors(error);
       if (Object.keys(error).length > 0) return setIsLoading(false);
+      data.addressVerified = data.addressVerified.toString();
       const { ok, code } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
