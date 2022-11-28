@@ -8,11 +8,11 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, updateCenterDependencies, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
+const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
-const { validateUpdateCohesionCenter, validateId } = require("../utils/validator");
+const { validateId } = require("../utils/validator");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
