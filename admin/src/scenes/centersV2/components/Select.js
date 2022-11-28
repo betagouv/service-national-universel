@@ -18,7 +18,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                 <div className="flex flex-col cursor-pointer rounded-lg border border-gray-300 bg-white py-2 px-2.5">
                   <label className="text-xs leading-4 text-gray-500">{label}</label>
                   <div className="flex items-center justify-between">
-                    <span className="block truncate">{selected.label}</span>
+                    <span className="block truncate">{selected?.label}</span>
                     <span className="pointer-events-none flex items-center pr-2">
                       {open && !readOnly ? (
                         <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" />

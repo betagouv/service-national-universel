@@ -6,8 +6,7 @@ import queryString from "query-string";
 import api from "../../../services/api";
 import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, canCreateOrUpdateCohesionCenter, canSearchInElasticSearch } from "../../../utils";
-import Plus from "../../../assets/icons/Plus.js";
+import { translate, ROLES, canSearchInElasticSearch } from "../../../utils";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import Template from "../../../assets/icons/Template.js";
 
@@ -54,7 +53,6 @@ export default function Index({ ...props }) {
     // si on a une cohorte dans l'url , on la selectionne directement
     // -> sinon on a une session dans le redux, on la selectionne directement
     //    -> sinon on prend la première session du centre
-    console.log(center);
     setFocusedCohort(cohortQueryUrl || sessionPhase1Redux?.cohort || center.cohorts[0]);
   }, [center]);
 

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
 import { Title } from "../components/commons";
-import { getDepartmentNumber, canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
-import { canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import { canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
+import { canUpdateMeetingPoint } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
@@ -22,6 +21,7 @@ const optionsTypology = [
   { label: "Public / Collectivité territoriale", value: "PUBLIC_COLLECTIVITE" },
   { label: "Privé / Association ou fondation", value: "PRIVE_ASSOCIATION" },
   { label: "Privé / Autre", value: "PRIVE_AUTRE" },
+  { label: "", value: "" },
 ];
 
 const optionsDomain = [
@@ -29,9 +29,10 @@ const optionsDomain = [
   { label: "Centre de vacances", value: "VACANCES" },
   { label: "Centre de formation", value: "FORMATION" },
   { label: "Autres", value: "AUTRE" },
+  { label: "", value: "" },
 ];
 
-export default function Details({ center, updateCenter }) {
+export default function Details({ center, setCenter, sessions }) {
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,13 +43,21 @@ export default function Details({ center, updateCenter }) {
     setData(center);
   }, [center]);
 
-  const onVerifyAddress = (verify) => {
-    console.log("on verify", verify);
+  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+    setData({
+      ...data,
+      addressVerified: true,
+      region: suggestion.region,
+      department: suggestion.department,
+      location: suggestion.location,
+      address: isConfirmed ? suggestion.address : data.address,
+      zip: isConfirmed ? suggestion.zip : data.zip,
+      city: isConfirmed ? suggestion.city : data.city,
+    });
   };
   const onSubmit = async () => {
     try {
       setIsLoading(true);
-      console.log(data);
       const error = {};
       if (!data?.name) {
         error.name = "Le nom est obligatoire";
@@ -74,7 +83,11 @@ export default function Details({ center, updateCenter }) {
       if (!data?.code2022) {
         error.code2022 = "Le code est obligatoire";
       }
-      console.log(error);
+      // check session
+      const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
+      if (!canUpdateSession) {
+        error.placesTotal = "La capacité maximale est inférieur à la capacité de l'une des sessions";
+      }
       setErrors(error);
       if (Object.keys(error).length > 0) return setIsLoading(false);
       const { ok, code } = await api.put(`/cohesion-center/${center._id}`, data);
@@ -84,6 +97,7 @@ export default function Details({ center, updateCenter }) {
       }
       setIsLoading(false);
       setErrors({});
+      setCenter(data);
       setEditInfo(false);
       toastr.success("Le centre a été modifié avec succès");
     } catch (e) {
@@ -212,8 +226,12 @@ export default function Details({ center, updateCenter }) {
                     address={data.address}
                     zip={data.zip}
                     city={data.city}
-                    onSuccess={() => onVerifyAddress(true)}
-                    onFail={() => onVerifyAddress()}
+                    onSuccess={() => {
+                      onVerifyAddress(true);
+                    }}
+                    onFail={() => {
+                      onVerifyAddress();
+                    }}
                     isVerified={data.addressVerified === true}
                     buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
                     verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
@@ -238,7 +256,6 @@ export default function Details({ center, updateCenter }) {
                     options={optionsTypology}
                     selected={optionsTypology.find((e) => e.value === data.typology)}
                     setSelected={(e) => {
-                      console.log(e);
                       setData({ ...data, typology: e.value });
                     }}
                   />
@@ -274,9 +291,6 @@ export default function Details({ center, updateCenter }) {
               </div>
               {user.role !== ROLES.ADMIN && (
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
-                  </div>
                   <Field
                     readOnly={!editInfo}
                     label="Places ouvertes sur le séjour"
