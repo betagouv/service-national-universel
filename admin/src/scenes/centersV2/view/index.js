@@ -6,15 +6,12 @@ import queryString from "query-string";
 import api from "../../../services/api";
 import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, canSearchInElasticSearch, canCreateOrUpdateCohesionCenter } from "../../../utils";
-import ChevronRight from "../../../assets/icons/ChevronRight.js";
-import Template from "../../../assets/icons/Template.js";
+import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
 import Plus from "../../../assets/icons/Plus.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
 
 import Field from "../components/Field";
-import { translate, ROLES } from "../../../utils";
 
 import Breadcrumbs from "../../../components/Breadcrumbs";
 
@@ -113,14 +110,6 @@ export default function Index({ ...props }) {
                 {item.cohort}
               </div>
             ))}
-            {canCreateOrUpdateCohesionCenter(user) ? (
-              <Link to={`/centre/${center._id}/edit`}>
-                <div className={`group py-3 px-4 flex items-center cursor-pointer gap-1 text-sm`}>
-                  <Plus className="text-gray-600 group-hover:text-blue-700" />
-                  <div className="text-gray-600 group-hover:text-blue-700">Ajouter un séjour</div>
-                </div>
-              </Link>
-            ) : null}
           </div>
           <div>
             <button
