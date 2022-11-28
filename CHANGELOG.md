@@ -1,3 +1,11 @@
+# [1.175.0](https://github.com/betagouv/service-national-universel/compare/v1.174.0...v1.175.0) (2022-11-28)
+
+
+### Features
+
+* **admin/api:** modification d'un centre ([#2093](https://github.com/betagouv/service-national-universel/issues/2093)) ([200054d](https://github.com/betagouv/service-national-universel/commit/200054df54fcd8697c1cf566a8e4867f9beaad79))
+* **admin/api:** Schéma de répartition : Détail des départements ([#2092](https://github.com/betagouv/service-national-universel/issues/2092)) ([2650a19](https://github.com/betagouv/service-national-universel/commit/2650a191715a5cac87979efb5b744b10646d7885))
+
 # [1.174.0](https://github.com/betagouv/service-national-universel/compare/v1.173.0...v1.174.0) (2022-11-25)
 
 
