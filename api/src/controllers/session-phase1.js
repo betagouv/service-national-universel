@@ -165,8 +165,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
-    const cohesionCenter = await CohesionCenterModel.findById(value.cohesionCenterId);
+    console.log("values is ", value);
+    const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     sessionPhase1.set({ ...value });
@@ -176,7 +176,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error });
   }
 });
 
@@ -277,7 +277,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const sessionPhase1 = await SessionPhase1Model.findById(id);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canCreateOrUpdateSessionPhase1(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // check if youngs are registered to the session
+    if (sessionPhase1.placesTotal !== sessionPhase1.placesLeft) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    // check if a schema is linked to the session
+    const schema = await schemaRepartitionModel.find({ sessionId: sessionPhase1._id });
+    if (schema.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     await sessionPhase1.remove();
 
