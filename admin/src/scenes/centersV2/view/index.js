@@ -16,6 +16,7 @@ import Field from "../components/Field";
 import Select from "../components/Select";
 
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import ModalConfirmDelete from "../components/ModalConfirmDelete";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -23,8 +24,7 @@ export default function Index({ ...props }) {
 
   const [center, setCenter] = useState();
   const [sessions, setSessions] = useState([]);
-  const [focusedCohort, setFocusedCohort] = useState();
-  const [focusedSession, setFocusedSession] = useState();
+  const [focusedSession, setFocusedSession] = useState({});
 
   const query = queryString.parse(location.search);
   const { cohorte: cohortQueryUrl } = query;
@@ -50,18 +50,6 @@ export default function Index({ ...props }) {
   }, [props.match.params.id]);
 
   useEffect(() => {
-    if (!center) return;
-    // si on a une cohorte dans l'url , on la selectionne directement
-    // -> sinon on a une session dans le redux, on la selectionne directement
-    //    -> sinon on prend la première session du centre
-    setFocusedCohort(cohortQueryUrl || sessionPhase1Redux?.cohort || center.cohorts[0]);
-  }, [center]);
-
-  useEffect(() => {
-    setFocusedSession(sessions.find((e) => e.cohort === focusedCohort));
-  }, [focusedCohort, sessions]);
-
-  useEffect(() => {
     if (!focusedSession) return;
     setEditInfoSession(focusedSession);
   }, [focusedSession]);
@@ -73,10 +61,27 @@ export default function Index({ ...props }) {
       if (!allSessions.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
       }
+      console.log("all sessions", allSessions);
+      for (let i = 0; i < allSessions.data.length; i++) {
+        const { ok, schema } = await api.get(`/session-phase1/${allSessions.data[i]._id}/schema-repartition`);
+        console.log(schema);
+        console.log("PLACE PRISE", allSessions.data[i].placesTotal - allSessions.data[i].placesLeft);
+        if (schema?.length === 0 && allSessions.data[i].placesTotal - allSessions.data[i].placesLeft === 0) {
+          allSessions.data[i].canBeDeleted = true;
+        } else {
+          allSessions.data[i].canBeDeleted = false;
+        }
+      }
+      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0].cohort;
+      console.log("initial focusedCohort", focusedCohort);
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
         setSessions(allSessions.data);
+        console.log(allSessions.data.find((e) => e.cohort === focusedCohort));
+        setFocusedSession(allSessions.data.find((e) => e.cohort === focusedCohort));
       } else {
-        setSessions(allSessions.data.filter((session) => session.headCenterId === user._id));
+        const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
+        setSessions(sessionFiltered);
+        setFocusedSession(sessionFiltered.find((e) => e.cohort === focusedCohort));
       }
     })();
   }, [center]);
@@ -134,9 +139,9 @@ export default function Index({ ...props }) {
             {(sessions || []).map((item, index) => (
               <div
                 key={index}
-                className={`py-3 px-2 mx-3 flex items-center cursor-pointer  ${focusedCohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null}`}
+                className={`py-3 px-2 mx-3 flex items-center cursor-pointer  ${focusedSession.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null}`}
                 onClick={() => {
-                  setFocusedCohort(item.cohort);
+                  setFocusedSession(item);
                 }}>
                 {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5" fill="#2563eb" color="white" /> : null}
                 {item.cohort}
@@ -183,7 +188,13 @@ export default function Index({ ...props }) {
           {center?._id && focusedSession?._id ? (
             <div className="flex">
               {/* // Taux doccupation */}
-              <OccupationCard placesTotal={focusedSession.placesTotal} placesTotalModified={editInfoSession.placesTotal} placesLeft={focusedSession.placesLeft} />
+              <OccupationCard
+                canBeDeleted={focusedSession.canBeDeleted}
+                placesTotal={focusedSession.placesTotal}
+                placesTotalModified={editInfoSession.placesTotal}
+                placesLeft={focusedSession.placesLeft}
+                user={user}
+              />
               {/* // liste des volontaires */}
               <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
                 <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
@@ -227,18 +238,20 @@ export default function Index({ ...props }) {
   );
 }
 
-const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal }) => {
+const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDeleted, user }) => {
   let height = `h-0`;
-  const canDelete = false;
-
   const getOccupationPercentage = () => {
     if (isNaN(placesTotalModified) || placesTotalModified === "" || placesTotalModified < 0) return 0.1;
     const percentage = (((placesTotal - placesLeft) * 100) / placesTotalModified).toFixed(2);
     if (percentage < 0 || percentage === Number.NEGATIVE_INFINITY) return 0.1;
     return percentage;
   };
-  const occupationPercentage = getOccupationPercentage();
+  const [occupationPercentage, setOccupationPercentage] = useState(0);
   const placesLeftModified = !isNaN(placesLeft + parseInt(placesTotalModified) - placesTotal) ? placesLeft + parseInt(placesTotalModified) - placesTotal : 0;
+  const [modalDelete, setModalDelete] = useState({ isOpen: true });
+  useEffect(() => {
+    setOccupationPercentage(getOccupationPercentage());
+  }, [placesTotalModified]);
 
   if (occupationPercentage < 20) height = "h-[20%]";
   else if (occupationPercentage < 30) height = "h-[30%]";
@@ -252,9 +265,20 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal }) => {
 
   let bgColor = "bg-blue-800";
   if (occupationPercentage > 100) bgColor = "bg-red-500";
-
+  const handleDelete = () => {};
+  if (isNaN(occupationPercentage)) return <></>;
   return occupationPercentage ? (
     <div className="py-4 px-8 flex flex-1 flex-col items-center justify-center">
+      <ModalConfirmDelete
+        isOpen={modalDelete.isOpen}
+        title={modalDelete.title}
+        message={modalDelete.message}
+        onCancel={() => setModalDelete({ isOpen: false })}
+        onDelete={() => {
+          setModalDelete({ isOpen: false });
+          modalDelete.onDelete();
+        }}
+      />
       <div className="flex items-center justify-center gap-4">
         {/* barre */}
         {Math.floor(occupationPercentage) === 0 ? (
@@ -283,10 +307,21 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal }) => {
           </div>
         </div>
       </div>
-      <div className={`w-full flex flex-row gap-2 mt-3 justify-end items-center ${canDelete ? "cursor-pointer" : "cursor-default"}`}>
-        <Trash className={`${canDelete ? "text-red-400" : "text-gray-400"}`} width={14} height={14} />
-        <div className={`${canDelete ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
-      </div>
+      {canCreateOrUpdateCohesionCenter(user) && (
+        <div
+          onClick={() => {
+            setModalDelete({
+              isOpen: true,
+              title: "Supprimer la session",
+              message: "Êtes-vous sûr de vouloir supprimer cette session?",
+              onDelete: handleDelete,
+            });
+          }}
+          className={`w-full flex flex-row gap-2 mt-3 justify-end items-center ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
+          <Trash className={`${canBeDeleted ? "text-red-400" : "text-gray-400"}`} width={14} height={14} />
+          <div className={`${canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
+        </div>
+      )}
     </div>
   ) : null;
 };

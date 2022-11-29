@@ -10,6 +10,7 @@ const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
+const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
 const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent, YOUNG_STATUS } = require("../utils");
 const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
 
@@ -21,6 +22,7 @@ const {
   canDownloadYoungDocuments,
   canAssignCohesionCenter,
   canShareSessionPhase1,
+  canCreateOrUpdateCohesionCenter,
 } = require("snu-lib/roles");
 const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
@@ -70,6 +72,25 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
+router.get("/:id/schema-repartition", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const session = await SessionPhase1Model.findById(id);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const schema = await schemaRepartitionModel.find({ sessionId: id });
+    return res.status(200).send({ ok: true, schema: schema });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
