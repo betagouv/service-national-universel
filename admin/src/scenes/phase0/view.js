@@ -363,6 +363,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   async function validate() {
     const sessions = await getEligibleSessions(young);
     const session = sessions.find(({ name }) => name === young.cohort);
+    if (!session) return toastr.error("Erreur au niveau du choix de votre session", "Cette session n'est pas disponible.");
     if (session.isFull) {
       return setConfirmModal({
         icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,

@@ -1,8 +1,12 @@
-const { YOUNG_STATUS, getZoneByDepartment, sessions2023 } = require("snu-lib");
+const { YOUNG_STATUS, getZoneByDepartment, sessions2023, departmentLookUp } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 
 async function getAvailableSessions(department, schoolLevel, birthDate, status) {
+  if (!isNaN(department) || ["2A", "2B"].includes(department)) {
+    if (department.substring(0, 1) === "0" && department.length === 3) department = departmentLookUp[department.substring(1)];
+    else department = departmentLookUp[department];
+  }
   let sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(getZoneByDepartment(department)) &&
