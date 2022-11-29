@@ -15,7 +15,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
           <>
             <div className="relative">
               <Listbox.Button className="relative w-full text-left">
-                <div className="flex flex-col cursor-pointer rounded-lg border border-gray-300 bg-white py-2 px-2.5">
+                <div className={`flex flex-col ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border border-gray-300 bg-white py-2 px-2.5`}>
                   <label className="text-xs leading-4 text-gray-500">{label}</label>
                   <div className="flex items-center justify-between">
                     <span className="block truncate">{selected?.label}</span>
