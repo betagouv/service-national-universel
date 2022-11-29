@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
 import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
-import Plus from "../../../assets/icons/Plus.js";
+
 import Trash from "../../../assets/icons/Trash.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
@@ -26,7 +26,6 @@ export default function Index({ ...props }) {
   const [focusedCohort, setFocusedCohort] = useState();
   const [focusedSession, setFocusedSession] = useState();
 
-  const [availableCohorts, setAvailableCohorts] = useState([]);
   const query = queryString.parse(location.search);
   const { cohorte: cohortQueryUrl } = query;
 
@@ -47,16 +46,6 @@ export default function Index({ ...props }) {
         return history.push("/center");
       }
       setCenter(centerResponse.data);
-
-      if (!centerResponse.data || !centerResponse.data?.cohorts || !centerResponse.data?.cohorts?.length) return;
-
-      let sessionsAdded = [];
-      for (const cohort of centerResponse.data.cohorts) {
-        const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
-        if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
-        sessionsAdded.push(sessionPhase1Response.data);
-      }
-      setSessions(sessionsAdded);
     })();
   }, [props.match.params.id]);
 
@@ -85,9 +74,9 @@ export default function Index({ ...props }) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
       }
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-        setAvailableCohorts(allSessions.data);
+        setSessions(allSessions.data);
       } else {
-        setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id));
+        setSessions(allSessions.data.filter((session) => session.headCenterId === user._id));
       }
     })();
   }, [center]);
@@ -97,16 +86,40 @@ export default function Index({ ...props }) {
     { value: "WAITING_VALIDATION", label: "En attente de validation" },
   ];
 
-  const onSubmitBottom = () => {
+  const onSubmitBottom = async () => {
+    setLoading(true);
     const errorsObject = {};
     if (isNaN(editInfoSession.placesTotal) || editInfoSession.placesTotal === "") {
       errorsObject.placesTotal = "Le nombre de places est incorrect";
     } else if (editInfoSession.placesTotal > center.placesTotal) {
-      errorsObject.placesTotal = "Le nomre de places ne peut pas être supérieur à la capacité du centre";
-    } else if (editInfoSession.placesTotal < focusedSession.placesLeft) {
+      errorsObject.placesTotal = "Le nombre de places ne peut pas être supérieur à la capacité du centre";
+    } else if (editInfoSession.placesTotal < focusedSession.placesTotal - focusedSession.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
-    return setErrors(errorsObject);
+    setErrors(errorsObject);
+    if (Object.keys(errorsObject).length > 0) return setLoading(false);
+    const { ok, code, data: returnedData } = await api.put(`/session-phase1/${focusedSession._id}`, editInfoSession);
+    if (!ok) {
+      toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+      return setLoading(false);
+    }
+    toastr.success("La session a bien été modifiée avec succès");
+    setLoading(false);
+    setErrors({});
+    // faut aussi change le state sessions
+    setFocusedSession(returnedData);
+    setSessions((oldSessions) => {
+      const transformedArray = [];
+      oldSessions.map((session) => {
+        if (session._id !== returnedData._id) {
+          transformedArray.push(session);
+        } else {
+          transformedArray.push(returnedData);
+        }
+      });
+      return [...transformedArray];
+    });
+    setEditingBottom(false);
   };
 
   if (!center) return <div />;
@@ -118,14 +131,14 @@ export default function Index({ ...props }) {
       <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
         <div className="flex justify-between items-center border-bottom px-4">
           <div className="flex justify-left items-center">
-            {(availableCohorts || []).map((item, index) => (
+            {(sessions || []).map((item, index) => (
               <div
                 key={index}
                 className={`py-3 px-2 mx-3 flex items-center cursor-pointer  ${focusedCohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null}`}
                 onClick={() => {
                   setFocusedCohort(item.cohort);
                 }}>
-                {availableCohorts[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5" fill="#2563eb" color="white" /> : null}
+                {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5" fill="#2563eb" color="white" /> : null}
                 {item.cohort}
               </div>
             ))}
@@ -142,12 +155,13 @@ export default function Index({ ...props }) {
                     Modifier
                   </button>
                 ) : (
-                  <div className="flex itmes-center gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => {
                         setEditingBottom(false);
                         setEditInfoSession(focusedSession);
+                        setErrors({});
                       }}
                       disabled={loading}>
                       Annuler
@@ -238,10 +252,6 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal }) => {
 
   let bgColor = "bg-blue-800";
   if (occupationPercentage > 100) bgColor = "bg-red-500";
-
-  useEffect(() => {
-    console.log("OCCUPATION IS :", occupationPercentage);
-  }, [occupationPercentage]);
 
   return occupationPercentage ? (
     <div className="py-4 px-8 flex flex-1 flex-col items-center justify-center">

@@ -298,7 +298,7 @@ const sessionPhase1Keys = {
   waitingList: Joi.array().items(Joi.string().allow(null, "")),
   placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  status: Joi.string().allow(null, "").valid(SESSION_STATUS.DRAFT, SESSION_STATUS.VALIDATED),
+  status: Joi.string().allow(null, "").valid("VALIDATED", "WAITING_VALIDATION"),
 };
 
 function validateSessionPhase1(session) {

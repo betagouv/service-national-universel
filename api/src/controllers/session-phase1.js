@@ -145,7 +145,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    sessionPhase1.set(value);
+    const cohesionCenter = await CohesionCenterModel.findById(value.cohesionCenterId);
+    if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
 
     const data = await updatePlacesSessionPhase1(sessionPhase1, req.user);
