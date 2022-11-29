@@ -161,7 +161,7 @@ export default function StepCoordonnees() {
     return errors;
   };
 
-  const onSubmit = async () => {
+  const onSubmit = (isCorrection) => async () => {
     setLoading(true);
     let errors = {};
     const fieldToUpdate = [...commonFields];
@@ -206,79 +206,15 @@ export default function StepCoordonnees() {
       updates.moreInformation = moreInformation.toString();
 
       try {
-        const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
+        const { ok, code, data: responseData } = await api.put(`/young/inscription2023/coordinates/${isCorrection ? "correction" : "next"}`, updates);
         if (!ok) {
           setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
           setLoading(false);
           return;
         }
         dispatch(setYoung(responseData));
-        plausibleEvent("Phase0/CTA inscription - profil");
-        history.push("/inscription2023/consentement");
-      } catch (e) {
-        capture(e);
-        toastr.error("Une erreur s'est produite :", translate(e.code));
-      }
-    } else {
-      toastr.error("Merci de corriger les erreurs", "");
-    }
-    setLoading(false);
-  };
-
-  const onCorrection = async () => {
-    setLoading(true);
-    let errors = {};
-    const fieldToUpdate = [...commonFields];
-    const requiredFields = [...commonRequiredFields];
-
-    if (!isFrenchResident) {
-      fieldToUpdate.push(...foreignAddressFields);
-      requiredFields.push(...requiredFieldsForeigner);
-    }
-
-    if (addressVerified !== "true") {
-      errors.addressVerified = errorMessages.addressVerified;
-    }
-
-    if (moreInformation) {
-      fieldToUpdate.push(...moreInformationFields);
-      requiredFields.push(...requiredMoreInformationFields);
-    }
-
-    if (specificAmenagment === "true") {
-      fieldToUpdate.push("specificAmenagmentType");
-      requiredFields.push("specificAmenagmentType");
-    }
-
-    for (const key of requiredFields) {
-      if (data[key] === undefined || data[key] === "") {
-        errors[key] = "Ce champ est obligatoire";
-      }
-    }
-
-    errors = { ...errors, ...getErrors() };
-
-    setErrors(errors);
-
-    if (!Object.keys(errors).length) {
-      const updates = {};
-      fieldToUpdate.forEach((field) => {
-        updates[field] = data[field];
-      });
-
-      updates.country = FRANCE;
-      updates.moreInformation = moreInformation.toString();
-
-      try {
-        const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/correction", updates);
-        if (!ok) {
-          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-          setLoading(false);
-          return;
-        }
-        plausibleEvent("Phase0/CTA demande correction - Corriger Coordonnees");
-        dispatch(setYoung(responseData));
-        history.push("/");
+        plausibleEvent(isCorrection ? "Phase0/CTA demande correction - Corriger Coordonnees" : "Phase0/CTA inscription - profil");
+        history.push(isCorrection ? "/" : "/inscription2023/consentement");
       } catch (e) {
         capture(e);
         toastr.error("Une erreur s'est produite :", translate(e.code));
@@ -333,11 +269,11 @@ export default function StepCoordonnees() {
     <DesktopPageContainer
       title="Mon profil volontaire"
       onSave={onSave}
-      onSubmit={onSubmit}
+      onSubmit={onSubmit()}
       onClickPrevious={() => (young.status === YOUNG_STATUS.WAITING_CORRECTION ? history.push("/") : null)}
       modeCorrection={young.status === YOUNG_STATUS.WAITING_CORRECTION}
       childrenContinueButton={young.status === YOUNG_STATUS.WAITING_CORRECTION ? "Corriger" : "Continuer"}
-      onCorrection={onCorrection}
+      onCorrection={onSubmit(true)}
       disabled={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
       <Form
