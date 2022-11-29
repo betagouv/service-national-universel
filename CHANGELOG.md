@@ -1,3 +1,10 @@
+## [1.175.1](https://github.com/betagouv/service-national-universel/compare/v1.175.0...v1.175.1) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api/admin:** handle case of numeric department ([12c3804](https://github.com/betagouv/service-national-universel/commit/12c3804dc897fca67e76a9a10091b7e81a3a0c20))
+
 # [1.175.0](https://github.com/betagouv/service-national-universel/compare/v1.174.0...v1.175.0) (2022-11-28)
 
 
