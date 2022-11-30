@@ -282,7 +282,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!canCreateOrUpdateCohesionCenter(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // check if youngs are registered to the session
-    if (sessionPhase1.placesTotal !== sessionPhase1.placesLeft) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+    if (sessionPhase1.placesTotal !== sessionPhase1.placesLeft || youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // check if a schema is linked to the session
     const schema = await schemaRepartitionModel.find({ sessionId: sessionPhase1._id });
