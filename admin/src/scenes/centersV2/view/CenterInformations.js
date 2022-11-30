@@ -123,7 +123,6 @@ export default function Details({ center, setCenter, sessions }) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du centre", code);
         return setIsLoading(false);
       }
-      console.log(ok, code);
       toastr.success("Le centre a bien été supprimé");
       history.push("/centre");
     } catch (e) {

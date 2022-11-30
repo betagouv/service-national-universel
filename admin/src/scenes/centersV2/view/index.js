@@ -62,9 +62,8 @@ export default function Index({ ...props }) {
       if (!allSessions.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
       }
-      console.log("all sessions", allSessions);
       for (let i = 0; i < allSessions.data.length; i++) {
-        const { ok, schema } = await api.get(`/session-phase1/${allSessions.data[i]._id}/schema-repartition`);
+        const { schema } = await api.get(`/session-phase1/${allSessions.data[i]._id}/schema-repartition`);
         if (schema?.length === 0 && allSessions.data[i].placesTotal - allSessions.data[i].placesLeft === 0) {
           allSessions.data[i].canBeDeleted = true;
         } else {
@@ -74,7 +73,6 @@ export default function Index({ ...props }) {
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
         setSessions(allSessions.data);
-        console.log(allSessions.data.find((e) => e.cohort === focusedCohort));
         setFocusedSession(allSessions.data.find((e) => e.cohort === focusedCohort));
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
@@ -343,10 +341,7 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
               isOpen: true,
               title: "Supprimer la session",
               message: "Êtes-vous sûr de vouloir supprimer cette session?",
-              onDelete: () => {
-                console.log("on delte trigger");
-                handleSessionDelete();
-              },
+              onDelete: handleSessionDelete,
             });
           }}
           className={`w-full flex flex-row gap-2 mt-3 justify-end items-center ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
