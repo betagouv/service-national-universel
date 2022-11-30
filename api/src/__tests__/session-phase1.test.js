@@ -95,16 +95,23 @@ describe("Session Phase 1", () => {
         .send();
       expect(res.status).toBe(200);
     });
-  });
-
-  it("should be only allowed to admin and referents", async () => {
-    const passport = require("passport");
-    passport.user.role = ROLES.RESPONSIBLE;
-    const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-    const res = await request(getAppHelper())
-      .delete("/session-phase1/" + sessionPhase1._id)
-      .send();
-    expect(res.status).toBe(403);
-    passport.user.role = ROLES.ADMIN;
+    it("should be only allowed to admin and referents", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const res = await request(getAppHelper())
+        .delete("/session-phase1/" + sessionPhase1._id)
+        .send();
+      expect(res.status).toBe(403);
+      passport.user.role = ROLES.ADMIN;
+    });
+    it("should return 403 when youngs are registered to the session", async () => {
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture({ placesLeft: 0 }));
+      const res = await request(getAppHelper())
+        .delete("/session-phase1/" + sessionPhase1._id)
+        .send();
+      console.log(res.body);
+      expect(res.status).toBe(403);
+    });
   });
 });
