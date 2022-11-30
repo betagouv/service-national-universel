@@ -71,17 +71,13 @@ export default function Index({ ...props }) {
         }
       }
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
-      console.log(focusedCohort);
-      console.log(allSessions.data);
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
         setSessions(allSessions.data);
-        const focusedSession = allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0];
-        setFocusedSession(focusedSession);
+        setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
         setSessions(sessionFiltered);
-        const focusedSession = sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0];
-        setFocusedSession(focusedSession);
+        setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       }
     })();
   }, [center]);
