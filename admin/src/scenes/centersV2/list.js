@@ -468,7 +468,7 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
         <div className="flex items-center flex-wrap w-[60%]">
           {sessionsPhase1.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
-              <div className="flex items-center z-10">
+              <div className="flex items-center">
                 <Badge
                   onClick={(e) => {
                     e.stopPropagation();
