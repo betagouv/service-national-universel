@@ -14,7 +14,6 @@ async function createCohesionCenterWithSession(cohesionCenter, session) {
 async function createSessionWithCohesionCenter(cohesionCenter, session) {
   const center = await CohesionCenterObject.create(cohesionCenter);
   const returnedSession = await SessionPhase1.create({ ...session, cohesionCenterId: center._id });
-  console.log(center, returnedSession);
   return returnedSession;
 }
 

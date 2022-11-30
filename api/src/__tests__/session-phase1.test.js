@@ -60,12 +60,9 @@ describe("Session Phase 1", () => {
     });
     it("should return 200 when session-phase1 is found and updated", async () => {
       const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture());
-      sessionPhase1.cohort = "2020";
-      sessionPhase1.status = "WAITING_VALIDATION";
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)
-        .send(sessionPhase1);
-      console.log(res.body);
+        .send({ cohort: "2020", cohesionCenterId: sessionPhase1.cohesionCenterId, status: "WAITING_VALIDATION" });
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("WAITING_VALIDATION");
       expect(res.body.data.cohort).toBe("2020");
