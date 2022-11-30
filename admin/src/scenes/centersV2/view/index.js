@@ -56,7 +56,7 @@ export default function Index({ ...props }) {
     setEditInfoSession(focusedSession);
   }, [focusedSession]);
 
-  const getCenter = () => {
+  const getCenter = (blockFocus = false) => {
     (async () => {
       if (!center || !center?.cohorts || !center?.cohorts?.length) return;
       const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
@@ -74,11 +74,11 @@ export default function Index({ ...props }) {
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
         setSessions(allSessions.data);
-        setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
+        if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
         setSessions(sessionFiltered);
-        setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
+        if (!blockFocus) setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       }
     })();
   };
@@ -113,17 +113,7 @@ export default function Index({ ...props }) {
     setErrors({});
     // faut aussi change le state sessions
     setFocusedSession(returnedData);
-    setSessions((oldSessions) => {
-      const transformedArray = [];
-      oldSessions.map((session) => {
-        if (session._id !== returnedData._id) {
-          transformedArray.push(session);
-        } else {
-          transformedArray.push(returnedData);
-        }
-      });
-      return [...transformedArray];
-    });
+    getCenter(true);
     setEditingBottom(false);
   };
   const handleSessionDelete = async () => {
