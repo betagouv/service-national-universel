@@ -86,7 +86,27 @@ const ListSession = ({ firstSession }) => {
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
   const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
+    if (user.role === ROLES.ADMIN) {
+      return { query: { match_all: {} }, track_total_hits: true };
+    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      return {
+        query: {
+          terms: {
+            department: user.department,
+          },
+        },
+        track_total_hits: true,
+      };
+    } else if (user.role === ROLES.REFERENT_REGION) {
+      return {
+        query: {
+          bool: {
+            must: { match: { region: user.region } },
+          },
+        },
+        track_total_hits: true,
+      };
+    }
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
