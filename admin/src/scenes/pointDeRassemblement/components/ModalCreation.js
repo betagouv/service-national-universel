@@ -23,9 +23,9 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
-        setOpen((open) => !open);
+        editable && setOpen((open) => !open);
       } else if (refSelect.current && !refSelect.current.contains(event.target)) {
-        setOpen(false);
+        editable && setOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside, true);
