@@ -10,7 +10,7 @@ async function getAvailableSessions(young) {
   }
   let region = young?.schoolRegion || young?.region || getRegionByZip(young?.zip);
 
-  let sessions = sessions2023.filter(
+  const sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(getZoneByDepartment(dep)) &&
       session.eligibility.schoolLevels.includes(young.grade) &&
@@ -20,6 +20,17 @@ async function getAvailableSessions(young) {
         ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEnDate > Date.now())),
   );
 
+  const sessionsWithPlaces = await getPlaces(sessions, region);
+  return sessionsWithPlaces;
+}
+
+async function getAllSessions(young) {
+  let region = young?.schoolRegion || young?.region || getRegionByZip(young?.zip);
+  const sessionsWithPlaces = await getPlaces(sessions2023, region);
+  return sessionsWithPlaces;
+}
+
+async function getPlaces(sessions, region) {
   const sessionNames = sessions.map(({ name }) => name);
 
   const numberOfPlaces = await InscriptionGoalModel.aggregate([
@@ -32,13 +43,13 @@ async function getAvailableSessions(young) {
       $match: {
         $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
         cohort: { $in: sessionNames },
-        status: { $nin: [YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
+        status: { $nin: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
       },
     },
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
   ]);
 
-  const numberOfRegistered = await YoungModel.aggregate([
+  const numberOfValidated = await YoungModel.aggregate([
     {
       $match: {
         $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
@@ -51,14 +62,15 @@ async function getAvailableSessions(young) {
 
   for (let session of sessions) {
     session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
-    session.numberOfRegistered = numberOfRegistered.find(({ _id }) => _id === session.name)?.total;
+    session.numberOfValidated = numberOfValidated.find(({ _id }) => _id === session.name)?.total;
     session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
-    session.goalReached = session.numberOfCandidates >= session.numberOfPlaces * session.buffer;
-    session.isFull = session.numberOfRegistered >= session.numberOfPlaces;
+    session.goalReached = session.numberOfCandidates + session.numberOfValidated >= session.numberOfPlaces * session.buffer;
+    session.isFull = session.numberOfValidated >= session.numberOfPlaces;
   }
   return sessions;
 }
 
 module.exports = {
   getAvailableSessions,
+  getAllSessions,
 };
