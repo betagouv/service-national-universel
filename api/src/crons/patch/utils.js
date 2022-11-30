@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 
+const slack = require("../../slack");
 const { getMinusDate } = require("../utils");
 
 const getDateString = (date) => {
@@ -21,9 +22,9 @@ class HTTPResponseError extends Error {
 
 const checkResponseStatus = (response) => {
   if (response.ok) {
-    // response.status >= 200 && response.status < 300
     return response;
   } else {
+    slack.error({ title: "Error during log creation", text: response });
     throw new HTTPResponseError(response);
   }
 };
@@ -51,6 +52,10 @@ async function getAccessToken(endpoint, apiKey) {
 async function findAll(Model, where, cb) {
   let count = 0;
   const total = await Model.countDocuments(where);
+  slack.info({
+    title: "Log count",
+    text: `${total} logs found}`,
+  });
   await Model.find(where)
     .cursor()
     .addCursorFlag("noCursorTimeout", true)

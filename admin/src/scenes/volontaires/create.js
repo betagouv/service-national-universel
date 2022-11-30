@@ -1,7 +1,6 @@
 import React from "react";
 import validator from "validator";
 import "dayjs/locale/fr";
-import { Spinner } from "reactstrap";
 
 import { translate } from "../../utils";
 import api from "../../services/api";
@@ -9,21 +8,15 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import {
-  translateGrade,
-  YOUNG_SITUATIONS,
-  GRADES,
-  inscriptionModificationOpenForYoungs,
-  sessions2023,
-  getAge,
-  COHESION_STAY_LIMIT_DATE,
-  getDepartmentByZip,
-  ES_NO_LIMIT,
-} from "snu-lib";
+import { translateGrade, YOUNG_SITUATIONS, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
 import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
 import dayjs from "dayjs";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
+import { DropdownItem, DropdownMenu, DropdownToggle, Modal, Spinner, UncontrolledDropdown } from "reactstrap";
+import { IoWarningOutline } from "react-icons/io5";
+import { BorderButton, PlainButton } from "../phase0/components/Buttons";
+import Chevron from "../../components/Chevron";
 
 //Identite
 import Field from "./components/Field";
@@ -41,13 +34,6 @@ export default function Create() {
   const [loading, setLoading] = React.useState(false);
 
   const [errors, setErrors] = React.useState({});
-  const getFirstCohortAvailable = () => {
-    for (const session of sessions2023) {
-      if (session.dateStart.getTime() > new Date().getTime() && inscriptionModificationOpenForYoungs(session.name)) {
-        return session.name;
-      }
-    }
-  };
   const [values, setValues] = React.useState({
     status: "VALIDATED",
     firstName: "",
@@ -65,7 +51,7 @@ export default function Create() {
     email: "",
     expirationDate: null,
     phone: "",
-    cohort: getFirstCohortAvailable(),
+    cohort: "",
     parentStatementOfHonorInvalidId: "false",
     addressVerified: false,
     country: "FRANCE",
@@ -130,7 +116,15 @@ export default function Create() {
     parent2Country: "",
   });
   const [cohorts, setCohorts] = React.useState([]);
+  const cohort = cohorts.find(({ name }) => name === values?.cohort);
   const [egibilityError, setEgibilityError] = React.useState("");
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [status, setStatus] = React.useState({});
+
+  const statusOptions = [
+    { value: YOUNG_STATUS.WAITING_LIST, label: "Placer sur liste complémentaire" },
+    { value: YOUNG_STATUS.VALIDATED, label: "Valider l'inscription" },
+  ];
 
   const validate = () => {
     const errors = {};
@@ -175,14 +169,6 @@ export default function Create() {
     }
     if (!validator.isMobilePhone(values.phone)) {
       errors.phone = errorPhone;
-    }
-    // check birtDate
-    const selectedSession = sessions2023.find((session) => session.name === values.cohort);
-    if (
-      values?.temporaryDate &&
-      !(selectedSession.eligibility.bornBefore > new Date(values.temporaryDate) && selectedSession.eligibility.bornAfter < new Date(values.temporaryDate))
-    ) {
-      errors.temporaryDate = "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU.";
     }
     // Check parent 1
     if (!validator.isEmail(values.parent1Email)) {
@@ -290,7 +276,7 @@ export default function Create() {
 
     if (values.filesToUpload.length === 0) {
       errors.filesToUpload = errorEmpty;
-      toastr.error("Vous devez ajouter un papier d'identité");
+      toastr.error("Vous devez ajouter une pièce d'identité");
     }
     if (validator.isEmpty(values.latestCNIFileCategory)) {
       errors.latestCNIFileCategory = errorEmpty;
@@ -338,16 +324,21 @@ export default function Create() {
     setValues((prevValues) => ({ ...prevValues, [key]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const receivedErrors = validate();
     setErrors(receivedErrors);
     if (Object.keys(receivedErrors).length !== 0) return;
+    if (cohort.isFull) setIsOpen(true);
+    else sendData();
+  };
+
+  const sendData = async () => {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       delete values.certifyData;
-      const { ok, code, young } = await api.post("/young/invite", values);
+      const { ok, code, young } = await api.post("/young/invite", { ...values, status: status.value });
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
       setYoungId(young._id);
@@ -364,43 +355,30 @@ export default function Create() {
     setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("YYYY-MM-DD"));
   }, [values.temporaryDate]);
   React.useEffect(() => {
-    if (
-      (values.grade !== "" || values.schooled === "false") &&
-      values.department !== "" &&
-      values.birthdateAt !== null &&
-      values.situation !== "" &&
-      (values.schoolDepartment !== "" || getDepartmentByZip(values.zip))
-    ) {
-      {
-        (async () => {
-          try {
-            const res = await api.post("/cohort-session/eligibility/2023", {
-              department: values?.schoolDepartment || getDepartmentByZip(values?.zip) || null,
-              birthDate: values.birthdateAt,
-              schoolLevel: values.grade,
-              frenchNationality: "true",
-            });
-            if (res.data.msg) return setEgibilityError(res.data.msg);
-            const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
-            if (sessionsFiltered.length === 0) {
-              setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
-            } else {
-              setEgibilityError("");
-            }
-            setCohorts(sessionsFiltered);
-            setFieldValue("cohort", sessionsFiltered[0].name);
-          } catch (e) {
-            capture(e);
-            setCohorts([]);
+    if ((values.grade !== "" || values.schooled === "false") && (values.department !== "" || values.schoolDepartment !== "") && values.birthdateAt !== null) {
+      (async () => {
+        try {
+          const res = await api.post("/cohort-session/eligibility/2023", values);
+          if (res.data.msg) return setEgibilityError(res.data.msg);
+          // const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
+          const sessionsFiltered = res.data;
+          if (sessionsFiltered.length === 0) {
+            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+          } else {
+            setEgibilityError("");
           }
-          setLoading(false);
-        })();
-      }
+          setCohorts(sessionsFiltered);
+        } catch (e) {
+          capture(e);
+          setCohorts([]);
+        }
+        setLoading(false);
+      })();
     } else {
       setEgibilityError("");
       setCohorts([]);
     }
-  }, [values.birthdateAt, values.department, values.situation, values.grade, values.schoolDepartment]);
+  }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt, values.status]);
 
   return (
     <div className="py-4 px-8">
@@ -410,7 +388,7 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Informations générales</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pr-14 pl-8">
-            <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
+            <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} cohort={cohort} />
           </div>
           <div className="my-16 bg-[#E5E7EB] flex-[0_0_1px]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -445,31 +423,26 @@ export default function Create() {
 
       {(cohorts.length > 0 || egibilityError !== "") && (
         <div className="relative bg-white shadow rounded mb-4 pt-4">
-          <div className="ml-8 mb-6 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
+          <div className="ml-8 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
           {egibilityError !== "" && <div className="ml-8 pb-4">{egibilityError}</div>}
-          <div className="flex justify-start flex-row flex-wrap px-4">
+          <div className="flex justify-start flex-row flex-wrap px-3">
             {egibilityError === "" &&
-              cohorts.map((session) => {
-                if (new Date(session.dateStart).getTime() > new Date().getTime() && session.name) {
-                  return (
-                    <div
-                      key={session.name}
-                      onClick={() => setFieldValue("cohort", session.name)}
-                      className="cursor-pointer flex flex-row justify-start items-center w-60 h-14 border border-[#3B82F6] rounded-md m-3">
-                      <input
-                        className="rounded-full mx-3"
-                        type="checkbox"
-                        id="checkboxCohort"
-                        name="cohort"
-                        checked={session.name === values.cohort}
-                        onChange={() => setFieldValue("cohort", session.name)}
-                      />
-                      <div>{session.name}</div>
-                    </div>
-                  );
-                }
-                return <div key={session.name}></div>;
-              })}
+              cohorts.map((session) => (
+                <div
+                  key={session.name}
+                  onClick={() => setFieldValue("cohort", session.name)}
+                  className="cursor-pointer flex flex-row justify-start items-center w-60 h-14 border border-[#3B82F6] rounded-md m-3">
+                  <input
+                    className="rounded-full mx-3"
+                    type="radio"
+                    id="checkboxCohort"
+                    name="cohort"
+                    checked={session.name === values.cohort}
+                    onChange={() => setFieldValue("cohort", session.name)}
+                  />
+                  <div>{session.name}</div>
+                </div>
+              ))}
           </div>
         </div>
       )}
@@ -508,6 +481,51 @@ export default function Create() {
           )}
         </div>
       )}
+      <Modal size="lg" centered isOpen={isOpen}>
+        <div className="bg-white rounded-[8px]">
+          <div className="px-[24px] pt-[24px]">
+            <h1 className="text-[20px] leading-[28px] text-red-500 mt-[24px] text-center">ALERTE</h1>
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
+              <div className="flex gap-2 items-center">
+                <IoWarningOutline className="h-6 w-6" />
+                <p className="font-bold">Attention</p>
+              </div>
+              <p className="text-sm">
+                Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Merci de placer le candidat sur liste complémentaire ou de vous rapprocher de
+                votre coordinateur régional avant de valider la candidature.
+              </p>
+              <UncontrolledDropdown isActiveFromChild className="mt-2">
+                <DropdownToggle tag="button">
+                  <div className="border-[#D1D5DB] border-[1px] rounded-[100px] bg-white flex items-center justify-between w-[375px] py-[4px] px-[15px]">
+                    {status?.label || "Que souhaitez-vous faire ?"}
+                    <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
+                  </div>
+                </DropdownToggle>
+                <DropdownMenu>
+                  {statusOptions.map((e) => (
+                    <DropdownItem key={e.label} className="dropdown-item" onClick={() => setStatus(e)}>
+                      {e.label}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </div>
+          </div>
+          <div className="flex p-[24px] items-center justify-between">
+            <BorderButton onClick={() => setIsOpen(false)} className="mr-[6px] grow">
+              Annuler
+            </BorderButton>
+            <PlainButton
+              onClick={() => {
+                setIsOpen(false);
+                sendData();
+              }}
+              className="ml-[6px] grow">
+              Confirmer
+            </PlainButton>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -930,7 +948,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   );
 }
 
-function Identite({ values, handleChange, errors, setFieldValue }) {
+function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
   const genderOptions = [
     { value: "male", label: "Homme" },
     { value: "female", label: "Femme" },
@@ -991,27 +1009,26 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
             className="mb-4"
             setFielValue={setFieldValue}
           />
-          {values.latestCNIFileExpirationDate !== null &&
-            new Date(values.latestCNIFileExpirationDate).getTime() < sessions2023.find((session) => session.name === values.cohort).dateStart.getTime() && (
-              <div className="mt-4 w-100 flex flew-row justify-between items-center">
-                <div>Attestation sur l&apos;honneur</div>
-                {values.parentStatementOfHonorInvalidId === "true" ? (
-                  <a
-                    onClick={(e) => handleChangeBool(e, "false")}
-                    name="parentStatementOfHonorInvalidId"
-                    className="p-2 py text-center leading-5 border cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] rounded-3xl">
-                    Validée
-                  </a>
-                ) : (
-                  <a
-                    onClick={(e) => handleChangeBool(e, "true")}
-                    name="parentStatementOfHonorInvalidId"
-                    className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-whit rounded-3xl">
-                    Non validée
-                  </a>
-                )}
-              </div>
-            )}
+          {values.latestCNIFileExpirationDate !== null && cohort?.dateStart && new Date(values.latestCNIFileExpirationDate).getTime() < new Date(cohort?.dateStart).getTime() && (
+            <div className="mt-4 w-100 flex flew-row justify-between items-center">
+              <div>Attestation sur l&apos;honneur</div>
+              {values.parentStatementOfHonorInvalidId === "true" ? (
+                <a
+                  onClick={(e) => handleChangeBool(e, "false")}
+                  name="parentStatementOfHonorInvalidId"
+                  className="p-2 py text-center leading-5 border cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] rounded-3xl">
+                  Validée
+                </a>
+              ) : (
+                <a
+                  onClick={(e) => handleChangeBool(e, "true")}
+                  name="parentStatementOfHonorInvalidId"
+                  className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-whit rounded-3xl">
+                  Non validée
+                </a>
+              )}
+            </div>
+          )}
         </>
       )}
     </>

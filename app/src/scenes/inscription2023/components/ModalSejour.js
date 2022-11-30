@@ -3,7 +3,7 @@ import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import { formatStringDate, getDepartmentByZip } from "snu-lib";
+import { formatStringDate } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";
@@ -24,13 +24,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await api.post("/cohort-session/eligibility/2023", {
-          department: young?.schoolDepartment || getDepartmentByZip(young?.zip) || null,
-          birthDate: young.birthdateAt,
-          schoolLevel: young.grade,
-          frenchNationality: young.frenchNationality,
-          status: young.status,
-        });
+        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (res.data.msg) return setError({ text: res.data.msg });
         const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
         if (sessionsFiltered.length === 0) {

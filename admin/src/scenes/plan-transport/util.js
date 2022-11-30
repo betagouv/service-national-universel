@@ -7,6 +7,7 @@ export function formatRate(value, total, fractionDigit = 0) {
 }
 
 export const cohortList = [
+  { label: "Séjour du <b>3 au 15 Juillet 2022</b>", value: "Juillet 2022" },
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
   { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
   { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
