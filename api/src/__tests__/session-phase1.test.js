@@ -89,7 +89,7 @@ describe("Session Phase 1", () => {
       expect(res.status).toBe(404);
     });
     it("should return 200 when session-phase1 is found", async () => {
-      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture());
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();
