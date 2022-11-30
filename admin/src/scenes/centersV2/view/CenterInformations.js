@@ -342,17 +342,6 @@ export default function Details({ center, setCenter, sessions }) {
                   error={errors?.placesTotal}
                 />
               </div>
-              {user.role !== ROLES.ADMIN && (
-                <div className="flex flex-col gap-2">
-                  <Field
-                    readOnly={!editInfo}
-                    label="Places ouvertes sur le séjour"
-                    onChange={(e) => setData({ ...data, placesSession: e.target.value })}
-                    value={data.placesSession}
-                    error={errors?.placesSession}
-                  />
-                </div>
-              )}
               {user.role === ROLES.ADMIN && (
                 <>
                   <div className="flex flex-col gap-2">
