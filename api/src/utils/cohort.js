@@ -28,6 +28,11 @@ async function getAllSessions(young) {
   const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
   let region = young?.schoolRegion || young?.region || getRegionByZip(young?.zip);
   const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
+  const availableSessions = await getAvailableSessions(young);
+  for (let session of sessionsWithPlaces) {
+    if (availableSessions.includes(session)) session.isEligible = true;
+    else session.isEligible = false;
+  }
   return sessionsWithPlaces;
 }
 

@@ -25,7 +25,7 @@ export function ChangeCohortPen({ young, onChange }) {
       (async function getSessions() {
         const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (Array.isArray(data)) {
-          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull })).filter((c) => c.name !== young.cohort);
+          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
       })();
@@ -243,6 +243,7 @@ function CohortDropDown({ originalCohort, cohort, onClick, options }) {
                 return (
                   <DropdownItem key={op.name} className="dropdown-item" onClick={() => onClick(op)}>
                     Cohorte {op.name}
+                    {!op.isEligible && " (non éligible)"}
                   </DropdownItem>
                 );
               })
