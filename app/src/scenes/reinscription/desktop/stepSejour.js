@@ -38,7 +38,9 @@ export default function StepSejour() {
           return history.push("/reinscription/noneligible");
         }
 
-        setSessions(res.data);
+        const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
+        if (sessionsFiltered.length === 0) toastr.error("Il n'y a malheureusement plus de place dans votre département.");
+        setSessions(sessionsFiltered);
       } catch (e) {
         capture(e);
         toastr.error("Une erreur s'est produite :", translate(e.code));
