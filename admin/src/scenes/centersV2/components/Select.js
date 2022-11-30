@@ -7,7 +7,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Select({ options, selected, setSelected, label, readOnly = false }) {
+export default function Select({ options, selected, setSelected, label, readOnly = false, icon }) {
   return (
     <div className="coucou">
       <Listbox value={selected} onChange={setSelected}>
@@ -15,15 +15,20 @@ export default function Select({ options, selected, setSelected, label, readOnly
           <>
             <div className="relative">
               <Listbox.Button className="relative w-full text-left">
-                <div className={`flex flex-col ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border border-gray-300 bg-white py-2 px-2.5`}>
-                  <label className="text-xs leading-4 text-gray-500">{label}</label>
-                  <div className="flex items-center justify-between">
-                    <span className="block truncate">{selected?.label}</span>
-                    <span className="pointer-events-none flex items-center pr-2">
-                      {!readOnly && (
-                        <>{open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}</>
-                      )}
-                    </span>
+                <div className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border border-gray-300 bg-white py-2 px-2.5 items-center`}>
+                  {icon ? icon : null}
+                  <div className={`flex flex-col `}>
+                    <label className="text-xs leading-4 text-gray-500">{label}</label>
+                    <div className="flex items-center justify-between">
+                      <span className="block truncate">{selected?.label}</span>
+                      <span className="pointer-events-none flex items-center pr-2">
+                        {!readOnly && (
+                          <>
+                            {open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}
+                          </>
+                        )}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Listbox.Button>

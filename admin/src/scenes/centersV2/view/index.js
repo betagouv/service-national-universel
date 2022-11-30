@@ -149,7 +149,9 @@ export default function Index({ ...props }) {
               {(sessions || []).map((item, index) => (
                 <div
                   key={index}
-                  className={`py-3 px-2 mx-3 flex items-center cursor-pointer  ${focusedSession.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null}`}
+                  className={`py-3 px-2 mx-3 gap-2 flex items-center justify-center cursor-pointer  ${
+                    focusedSession.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null
+                  }`}
                   onClick={() => {
                     setFocusedSession(item);
                   }}>
@@ -228,6 +230,7 @@ export default function Index({ ...props }) {
                     <Select
                       readOnly={!editingBottom || ROLES.ADMIN != user.role}
                       label="Statut"
+                      icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5 mr-2" fill="#2563eb" color="white" /> : null}
                       options={statusOptions}
                       setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
                       selected={statusOptions.find((e) => e.value === editInfoSession.status)}
