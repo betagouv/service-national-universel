@@ -36,7 +36,7 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions }) {
+export default function Details({ center, setCenter, sessions, getCenter }) {
   const history = useHistory();
 
   const user = useSelector((state) => state.Auth.user);
@@ -135,7 +135,7 @@ export default function Details({ center, setCenter, sessions }) {
   return (
     <div className="flex flex-col m-8 gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
-      <ModalRattacherCentre editable={false} defaultCentre={center} isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
+      <ModalRattacherCentre editable={false} defaultCentre={center} isOpen={modalVisible} onSucess={getCenter} onCancel={() => setModalVisible(false)} user={user} />
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
         title={modalDelete.title}

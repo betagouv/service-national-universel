@@ -140,7 +140,7 @@ export default function Index({ ...props }) {
   return (
     <>
       <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
-      <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
+      <CenterInformations center={center} setCenter={setCenter} sessions={sessions} getCenter={getCenter} />
       {/* SESSION COMPONENT : */}
       {sessions.length > 0 ? (
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">

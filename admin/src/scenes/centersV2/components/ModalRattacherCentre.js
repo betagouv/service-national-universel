@@ -8,7 +8,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
 
-export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCentre = null, editable = true }) {
+export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
   const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1).reduce((acc, cohort) => {
     return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
@@ -131,6 +131,8 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCe
       setSelectedCohort("");
       toastr.success("La centre a été rataché au séjour avec succès");
       onCancel();
+      onSucess();
+      setSelectedCentre({ ...selectedCentre, cohorts: [...selectedCentre.cohorts, selectedCohort] });
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
     } catch (e) {
       capture(e);
@@ -154,7 +156,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCe
           <div className="flex flex-row gap-2 flex-wrap py-2">
             {availableCohorts.map((cohort) => (
               <>
-                {!selectedCentre?.cohorts.includes(cohort) ? (
+                {selectedCentre && !selectedCentre?.cohorts.includes(cohort) ? (
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
