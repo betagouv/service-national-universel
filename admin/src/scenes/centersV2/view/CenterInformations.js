@@ -9,6 +9,7 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import ReactTooltip from "react-tooltip";
+import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 
@@ -36,6 +37,8 @@ const optionsDomain = [
 ];
 
 export default function Details({ center, setCenter, sessions }) {
+  const history = useHistory();
+
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
@@ -120,6 +123,7 @@ export default function Details({ center, setCenter, sessions }) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du centre", code);
         return setIsLoading(false);
       }
+      console.log(ok, code);
       toastr.success("Le centre a bien été supprimé");
       history.push("/centre");
     } catch (e) {

@@ -8,7 +8,6 @@ import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
-import { idAdmin, isReferent } from "snu-lib";
 
 import Trash from "../../../assets/icons/Trash.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
@@ -72,7 +71,7 @@ export default function Index({ ...props }) {
           allSessions.data[i].canBeDeleted = false;
         }
       }
-      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0].cohort;
+      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
         setSessions(allSessions.data);
         console.log(allSessions.data.find((e) => e.cohort === focusedCohort));
@@ -125,7 +124,7 @@ export default function Index({ ...props }) {
     });
     setEditingBottom(false);
   };
-
+  const [modalDelete, setModalDelete] = useState({ isOpen: false });
   const handleSessionDelete = async () => {
     try {
       setLoading(true);
@@ -134,12 +133,26 @@ export default function Index({ ...props }) {
         toastr.error("Oups, une erreur est survenue lors de la suppression de la session", code);
         return setLoading(false);
       }
-      toastr.success("La session a bien été supprimée");
-      history.push(`/centre/${center._id}`);
+      setLoading(false);
+      setModalDelete({ isOpen: false });
+      setSessions((oldSessions) => {
+        const transformedArray = [];
+        oldSessions.map((session) => {
+          if (session._id !== focusedSession._id) {
+            transformedArray.push(session);
+          }
+        });
+        if (transformedArray.length > 0) {
+          setFocusedSession(transformedArray[0]);
+        }
+        return [...transformedArray];
+      });
+      return toastr.success("La session a bien été supprimée");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression de la session");
       setLoading(false);
+      setModalDelete({ isOpen: false });
+      return toastr.error("Oups, une erreur est survenue lors de la suppression de la session");
     }
   };
 
@@ -149,113 +162,117 @@ export default function Index({ ...props }) {
       <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
       {/* SESSION COMPONENT : */}
-      <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-        <div className="flex justify-between items-center border-bottom px-4">
-          <div className="flex justify-left items-center">
-            {(sessions || []).map((item, index) => (
-              <div
-                key={index}
-                className={`py-3 px-2 mx-3 flex items-center cursor-pointer  ${focusedSession.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null}`}
-                onClick={() => {
-                  setFocusedSession(item);
-                }}>
-                {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5" fill="#2563eb" color="white" /> : null}
-                {item.cohort}
-              </div>
-            ))}
-          </div>
-          <div>
-            {user.role === ROLES.ADMIN || ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession.status === "WAITING_VALIDATION") ? (
-              <>
-                {!editingBottom ? (
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => setEditingBottom(true)}
-                    disabled={loading}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                    Modifier
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => {
-                        setEditingBottom(false);
-                        setEditInfoSession(focusedSession);
-                        setErrors({});
-                      }}
-                      disabled={loading}>
-                      Annuler
-                    </button>
+      {sessions.length > 0 ? (
+        <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
+          <div className="flex justify-between items-center border-bottom px-4">
+            <div className="flex justify-left items-center">
+              {(sessions || []).map((item, index) => (
+                <div
+                  key={index}
+                  className={`py-3 px-2 mx-3 flex items-center cursor-pointer  ${focusedSession.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null}`}
+                  onClick={() => {
+                    setFocusedSession(item);
+                  }}>
+                  {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5" fill="#2563eb" color="white" /> : null}
+                  {item.cohort}
+                </div>
+              ))}
+            </div>
+            <div>
+              {user.role === ROLES.ADMIN || ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession.status === "WAITING_VALIDATION") ? (
+                <>
+                  {!editingBottom ? (
                     <button
                       className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={onSubmitBottom}
+                      onClick={() => setEditingBottom(true)}
                       disabled={loading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-                      Enregistrer les changements
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      Modifier
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setEditingBottom(false);
+                          setEditInfoSession(focusedSession);
+                          setErrors({});
+                        }}
+                        disabled={loading}>
+                        Annuler
+                      </button>
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={onSubmitBottom}
+                        disabled={loading}>
+                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        Enregistrer les changements
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : null}
+            </div>
+          </div>
+          <div className="">
+            {center?._id && focusedSession?._id ? (
+              <div className="flex">
+                {/* // Taux doccupation */}
+                <OccupationCard
+                  canBeDeleted={focusedSession.canBeDeleted}
+                  placesTotal={focusedSession.placesTotal}
+                  placesTotalModified={editInfoSession.placesTotal}
+                  placesLeft={focusedSession.placesLeft}
+                  user={user}
+                  modalDelete={modalDelete}
+                  setModalDelete={setModalDelete}
+                  handleSessionDelete={handleSessionDelete}
+                />
+                {/* // liste des volontaires */}
+                <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
+                  <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
+                    <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                      Voir les volontaires
                     </button>
                   </div>
-                )}
-              </>
+                  <div className="flex flex-1 items-center justify-center">
+                    <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                      Voir l&apos;équipe
+                    </button>
+                  </div>
+                </div>
+
+                {/* // équipe */}
+                <div className="flex gap-4 flex-1 min-w-1/4 flex-col justify-between items-center bg-white p-4 max-w-xl">
+                  <div className="w-64">
+                    <Select
+                      readOnly={!editingBottom || ROLES.ADMIN != user.role}
+                      label="Statut"
+                      options={statusOptions}
+                      setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
+                      selected={statusOptions.find((e) => e.value === editInfoSession.status)}
+                    />
+                  </div>
+                  <div className="w-64">
+                    <Field
+                      error={errors.placesTotal}
+                      readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
+                      label="Places ouvertes"
+                      value={editInfoSession.placesTotal}
+                      onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
             ) : null}
           </div>
         </div>
-        <div className="">
-          {center?._id && focusedSession?._id ? (
-            <div className="flex">
-              {/* // Taux doccupation */}
-              <OccupationCard
-                canBeDeleted={focusedSession.canBeDeleted}
-                placesTotal={focusedSession.placesTotal}
-                placesTotalModified={editInfoSession.placesTotal}
-                placesLeft={focusedSession.placesLeft}
-                user={user}
-                handleSessionDelete={handleSessionDelete}
-              />
-              {/* // liste des volontaires */}
-              <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
-                <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
-                  <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
-                    Voir les volontaires
-                  </button>
-                </div>
-                <div className="flex flex-1 items-center justify-center">
-                  <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
-                    Voir l&apos;équipe
-                  </button>
-                </div>
-              </div>
-
-              {/* // équipe */}
-              <div className="flex gap-4 flex-1 min-w-1/4 flex-col justify-between items-center bg-white p-4 max-w-xl">
-                <div className="w-64">
-                  <Select
-                    readOnly={!editingBottom || ROLES.ADMIN != user.role}
-                    label="Statut"
-                    options={statusOptions}
-                    setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
-                    selected={statusOptions.find((e) => e.value === editInfoSession.status)}
-                  />
-                </div>
-                <div className="w-64">
-                  <Field
-                    error={errors.placesTotal}
-                    readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
-                    label="Places ouvertes"
-                    value={editInfoSession.placesTotal}
-                    onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
+      ) : null}
     </>
   );
 }
 
-const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDeleted, user, handleSessionDelete }) => {
+const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDeleted, user, handleSessionDelete, modalDelete, setModalDelete }) => {
   let height = `h-0`;
   const getOccupationPercentage = () => {
     if (isNaN(placesTotalModified) || placesTotalModified === "" || placesTotalModified < 0) return 0.1;
@@ -265,7 +282,6 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
   };
   const [occupationPercentage, setOccupationPercentage] = useState(0);
   const placesLeftModified = !isNaN(placesLeft + parseInt(placesTotalModified) - placesTotal) ? placesLeft + parseInt(placesTotalModified) - placesTotal : 0;
-  const [modalDelete, setModalDelete] = useState({ isOpen: false });
   useEffect(() => {
     setOccupationPercentage(getOccupationPercentage());
   }, [placesTotalModified]);
@@ -290,9 +306,7 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
         title={modalDelete.title}
         message={modalDelete.message}
         onCancel={() => setModalDelete({ ...modalDelete, isOpen: false })}
-        onDelete={() => {
-          setModalDelete({ ...modalDelete, isOpen: false });
-        }}
+        onDelete={modalDelete.onDelete}
       />
       <div className="flex items-center justify-center gap-4">
         {/* barre */}
@@ -329,7 +343,10 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
               isOpen: true,
               title: "Supprimer la session",
               message: "Êtes-vous sûr de vouloir supprimer cette session?",
-              onDelete: handleSessionDelete,
+              onDelete: () => {
+                console.log("on delte trigger");
+                handleSessionDelete();
+              },
             });
           }}
           className={`w-full flex flex-row gap-2 mt-3 justify-end items-center ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>

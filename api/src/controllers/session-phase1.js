@@ -276,7 +276,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
     const sessionPhase1 = await SessionPhase1Model.findById(id);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -289,6 +288,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const schema = await schemaRepartitionModel.find({ sessionId: sessionPhase1._id });
     if (schema.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    // delete cohort in cohesion center
+    const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
+    cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
+    cohesionCenter.save({ fromUser: req.user });
     await sessionPhase1.remove();
 
     console.log(`sessionPhase1 ${id} has been deleted`);
