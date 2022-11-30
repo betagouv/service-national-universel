@@ -73,7 +73,8 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
-      if (newCohort.isFull && !status) return toastr.error("Veuillez choisir une action.");
+      if (newCohort.isFull && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !status)
+        return toastr.error("Veuillez choisir une action.");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       if (status) await api.put(`/referent/young/${young._id}`, { status: status.value });
       if (young.status === YOUNG_STATUS.WAITING_LIST && !newCohort.isFull) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });

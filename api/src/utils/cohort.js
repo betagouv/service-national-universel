@@ -49,6 +49,7 @@ async function getPlaces(sessions, region) {
     },
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
   ]);
+  // console.log("🚀 ~ file: cohort.js:52 ~ getPlaces ~ numberOfCandidates", numberOfCandidates);
 
   const numberOfValidated = await YoungModel.aggregate([
     {
@@ -60,6 +61,7 @@ async function getPlaces(sessions, region) {
     },
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
   ]);
+  console.log("🚀 ~ file: cohort.js:63 ~ getPlaces ~ numberOfValidated", numberOfValidated);
 
   for (let session of sessions) {
     if (sessions2023.includes(session)) {
