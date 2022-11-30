@@ -8,6 +8,7 @@ import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
+import { idAdmin, isReferent } from "snu-lib";
 
 import Trash from "../../../assets/icons/Trash.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
@@ -164,7 +165,7 @@ export default function Index({ ...props }) {
             ))}
           </div>
           <div>
-            {canCreateOrUpdateCohesionCenter(user) ? (
+            {user.role === ROLES.ADMIN || ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession.status === "WAITING_VALIDATION") ? (
               <>
                 {!editingBottom ? (
                   <button

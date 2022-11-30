@@ -11,7 +11,7 @@ const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent, YOUNG_STATUS } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS } = require("../utils");
 const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
 
 const {
@@ -23,6 +23,8 @@ const {
   canAssignCohesionCenter,
   canShareSessionPhase1,
   canCreateOrUpdateCohesionCenter,
+  isReferentOrAdmin,
+  ROLES,
 } = require("snu-lib/roles");
 const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
@@ -158,12 +160,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canCreateOrUpdateSessionPhase1(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    if (!isReferentOrAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { error, value } = validateSessionPhase1(req.body);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    if (!(req.user.role === ROLES.ADMIN) && sessionPhase1.status === "VALIDATED") {
+      value.placesTotal = sessionPhase1.placesTotal;
     }
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
