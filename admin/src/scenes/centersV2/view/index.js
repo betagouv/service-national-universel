@@ -234,7 +234,7 @@ export default function Index({ ...props }) {
                     </button>
                   </div>
                   <div className="flex flex-1 items-center justify-center">
-                    <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                    <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
                       Voir l&apos;équipe
                     </button>
                   </div>
