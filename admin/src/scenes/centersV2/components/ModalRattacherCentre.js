@@ -23,12 +23,12 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCe
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
-        setOpen((open) => !open);
+        editable && setOpen((open) => !open);
       } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
       }
       if (refStatus.current && refStatus.current.contains(event.target)) {
-        setStatusOpen((open) => !open);
+        editable && setStatusOpen((open) => !open);
       } else if (refStatus.current && !refStatus.current.contains(event.target)) {
         setStatusOpen(false);
       }
@@ -153,14 +153,18 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCe
           <div className="text-gray-800 text-sm font-medium leading-6">Choisissez un séjour</div>
           <div className="flex flex-row gap-2 flex-wrap py-2">
             {availableCohorts.map((cohort) => (
-              <div
-                key={cohort}
-                onClick={() => setSelectedCohort(cohort)}
-                className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
-                  selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
-                }`}>
-                {cohort}
-              </div>
+              <>
+                {!selectedCentre?.cohorts.includes(cohort) ? (
+                  <div
+                    key={cohort}
+                    onClick={() => setSelectedCohort(cohort)}
+                    className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
+                      selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
+                    }`}>
+                    {cohort}
+                  </div>
+                ) : null}
+              </>
             ))}
           </div>
           {selectedCohort ? (
@@ -174,7 +178,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCe
                     <div className="text-xs leading-6 font-normal text-gray-500">Choisir un centre</div>
                     {!selectedCentre ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedCentre.name}</div>}
                   </div>
-                  <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
+                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />}
                 </div>
 
                 <div
