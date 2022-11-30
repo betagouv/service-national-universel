@@ -179,7 +179,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
