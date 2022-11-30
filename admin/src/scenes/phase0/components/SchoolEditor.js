@@ -84,7 +84,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
           changes.schoolType = school.type;
           changes.schoolAddress = school.adresse;
           changes.schoolZip = school.postcode ? school.postcode : school.codeCity;
-          changes.schoolDepartment = school.departementName ? school.departementName : school.departement;
+          changes.schoolDepartment = school.departmentName ? school.departmentName : school.departement;
           changes.schoolRegion = school.region;
           changes.schoolCity = school.city;
           changes.schoolCountry = school.country;

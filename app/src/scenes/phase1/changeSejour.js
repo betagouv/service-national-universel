@@ -40,13 +40,7 @@ export default function changeSejour() {
   useEffect(() => {
     (async function getInfo() {
       try {
-        const { data } = await api.post("/cohort-session/eligibility/2023", {
-          birthDate: young.birthdateAt,
-          schoolLevel: young.grade,
-          department: young.schoolDepartment || young.department,
-          frenchNationality: young.frenchNationality,
-          status: young.status,
-        });
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         const isArray = Array.isArray(data);
         if (isArray) {
           const sejourGoal = data.map((e) => ({ sejour: e.name, goal: e.isFull }));

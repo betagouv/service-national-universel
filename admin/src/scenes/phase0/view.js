@@ -39,10 +39,11 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { copyToClipboard, getEligibleSessions } from "../../utils";
+import { copyToClipboard } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
+import { capture } from "../../sentry";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
@@ -361,24 +362,29 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   const [error, setError] = useState(null);
 
   async function validate() {
-    const sessions = await getEligibleSessions(young);
-    const session = sessions.find(({ name }) => name === young.cohort);
-    if (!session) return toastr.error("Erreur au niveau du choix de votre session", "Cette session n'est pas disponible.");
-    if (session.isFull) {
+    try {
+      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+      if (!res.ok) throw new Error(res);
+      const session = res.data.find(({ name }) => name === young.cohort);
+      if (session.isFull) {
+        return setConfirmModal({
+          icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+          title: "Jauge de candidats atteinte",
+          message:
+            "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
+          type: "SESSION_FULL",
+        });
+      }
       return setConfirmModal({
-        icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-        title: "Jauge de candidats atteinte",
-        message:
-          "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
-        type: "SESSION_FULL",
+        icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+        title: "Valider le dossier",
+        message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
+        type: "VALIDATED",
       });
+    } catch (e) {
+      capture(e);
+      toastr.error(e.message);
     }
-    return setConfirmModal({
-      icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-      title: "Valider le dossier",
-      message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
-      type: "VALIDATED",
-    });
   }
 
   function waitingList() {
