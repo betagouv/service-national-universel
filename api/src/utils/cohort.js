@@ -25,8 +25,9 @@ async function getAvailableSessions(young) {
 }
 
 async function getAllSessions(young) {
+  const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
   let region = young?.schoolRegion || young?.region || getRegionByZip(young?.zip);
-  const sessionsWithPlaces = await getPlaces(sessions2023, region);
+  const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   return sessionsWithPlaces;
 }
 
@@ -61,11 +62,13 @@ async function getPlaces(sessions, region) {
   ]);
 
   for (let session of sessions) {
-    session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
-    session.numberOfValidated = numberOfValidated.find(({ _id }) => _id === session.name)?.total;
-    session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
-    session.goalReached = session.numberOfCandidates + session.numberOfValidated >= session.numberOfPlaces * session.buffer;
-    session.isFull = session.numberOfValidated >= session.numberOfPlaces;
+    if (sessions2023.includes(session)) {
+      session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
+      session.numberOfValidated = numberOfValidated.find(({ _id }) => _id === session.name)?.total;
+      session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
+      session.goalReached = session.numberOfCandidates + session.numberOfValidated >= session.numberOfPlaces * session.buffer;
+      session.isFull = session.numberOfValidated >= session.numberOfPlaces;
+    }
   }
   return sessions;
 }

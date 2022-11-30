@@ -360,14 +360,12 @@ export default function Create() {
         try {
           const res = await api.post("/cohort-session/eligibility/2023", values);
           if (res.data.msg) return setEgibilityError(res.data.msg);
-          // const sessionsFiltered = res.data.filter((e) => e.goalReached === false);
-          const sessionsFiltered = res.data;
-          if (sessionsFiltered.length === 0) {
+          if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
           } else {
             setEgibilityError("");
           }
-          setCohorts(sessionsFiltered);
+          setCohorts(res.data);
         } catch (e) {
           capture(e);
           setCohorts([]);
@@ -488,11 +486,11 @@ export default function Create() {
             <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
               <div className="flex gap-2 items-center">
                 <IoWarningOutline className="h-6 w-6" />
-                <p className="font-bold">Attention</p>
+                <p className="font-bold">Objectif d&apos;inscription régional atteint</p>
               </div>
               <p className="text-sm">
-                Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Merci de placer le candidat sur liste complémentaire ou de vous rapprocher de
-                votre coordinateur régional avant de valider la candidature.
+                Objectif d&apos;inscription régional atteint L&apos;objectif d&apos;inscription de votre région a été atteint. Merci de placer le jeune sur liste complémentaire ou
+                de vous rapprocher de votre coordinateur régional avant de valider son inscription.
               </p>
               <UncontrolledDropdown isActiveFromChild className="mt-2">
                 <DropdownToggle tag="button">
@@ -517,6 +515,7 @@ export default function Create() {
             </BorderButton>
             <PlainButton
               onClick={() => {
+                if (status === {}) return toastr.error("Veuillez choisir une action.");
                 setIsOpen(false);
                 sendData();
               }}
