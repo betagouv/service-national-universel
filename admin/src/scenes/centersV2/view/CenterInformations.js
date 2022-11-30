@@ -135,7 +135,7 @@ export default function Details({ center, setCenter, sessions }) {
   return (
     <div className="flex flex-col m-8 gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
-      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
+      <ModalRattacherCentre defaultCentre={center} isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
         title={modalDelete.title}

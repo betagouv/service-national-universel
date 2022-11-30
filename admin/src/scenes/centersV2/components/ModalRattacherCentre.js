@@ -8,7 +8,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
 
-export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
+export default function ModalRattacherCentre({ isOpen, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
   const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1).reduce((acc, cohort) => {
     return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
@@ -41,7 +41,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
 
   const [listCentre, setListCentre] = React.useState([]);
   const [selectedCohort, setSelectedCohort] = React.useState();
-  const [selectedCentre, setSelectedCentre] = React.useState();
+  const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
   const [status, setStatus] = React.useState("WAITING_VALIDATION");
   const [search, setSearch] = React.useState("");
