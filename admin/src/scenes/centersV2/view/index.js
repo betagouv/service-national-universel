@@ -35,6 +35,7 @@ export default function Index({ ...props }) {
   const [loading, setLoading] = useState(false);
   const [editInfoSession, setEditInfoSession] = useState({});
   const [errors, setErrors] = useState({});
+  const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
   useEffect(() => {
     (async () => {
@@ -55,7 +56,7 @@ export default function Index({ ...props }) {
     setEditInfoSession(focusedSession);
   }, [focusedSession]);
 
-  useEffect(() => {
+  const getCenter = () => {
     (async () => {
       if (!center || !center?.cohorts || !center?.cohorts?.length) return;
       const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
@@ -80,6 +81,9 @@ export default function Index({ ...props }) {
         setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       }
     })();
+  };
+  useEffect(() => {
+    getCenter();
   }, [center]);
 
   const statusOptions = [
@@ -122,7 +126,6 @@ export default function Index({ ...props }) {
     });
     setEditingBottom(false);
   };
-  const [modalDelete, setModalDelete] = useState({ isOpen: false });
   const handleSessionDelete = async () => {
     try {
       setLoading(true);
@@ -133,18 +136,7 @@ export default function Index({ ...props }) {
       }
       setLoading(false);
       setModalDelete({ isOpen: false });
-      setSessions((oldSessions) => {
-        const transformedArray = [];
-        oldSessions.map((session) => {
-          if (session._id !== focusedSession._id) {
-            transformedArray.push(session);
-          }
-        });
-        if (transformedArray.length > 0) {
-          setFocusedSession(transformedArray[0]);
-        }
-        return [...transformedArray];
-      });
+      getCenter();
       return toastr.success("La session a bien été supprimée");
     } catch (e) {
       capture(e);
