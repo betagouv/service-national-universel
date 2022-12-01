@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
-const MODELNAME = "lignepoint";
+const MODELNAME = "lignetopoint";
 
 const Schema = new mongoose.Schema({
   lineId: {
