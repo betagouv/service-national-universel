@@ -322,12 +322,13 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
       {canCreateOrUpdateCohesionCenter(user) && (
         <div
           onClick={() => {
-            setModalDelete({
-              isOpen: true,
-              title: "Supprimer la session",
-              message: "Êtes-vous sûr de vouloir supprimer cette session?",
-              onDelete: handleSessionDelete,
-            });
+            canBeDeleted &&
+              setModalDelete({
+                isOpen: true,
+                title: "Supprimer la session",
+                message: "Êtes-vous sûr de vouloir supprimer cette session?",
+                onDelete: handleSessionDelete,
+              });
           }}
           className={`w-full flex flex-row gap-2 mt-3 justify-end items-center ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
           <Trash className={`${canBeDeleted ? "text-red-400" : "text-gray-400"}`} width={14} height={14} />
