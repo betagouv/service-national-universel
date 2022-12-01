@@ -3,21 +3,19 @@ import * as FileSaver from "file-saver";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, NavLink, useHistory, useParams } from "react-router-dom";
+import { NavLink, useHistory, useParams } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
-import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import ClipboardList from "../../../assets/icons/ClipboardList";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
-import Template from "../../../assets/icons/Template.js";
 import SelectAction from "../../../components/SelectAction";
-import WithTooltip from "../../../components/WithTooltip";
 import api from "../../../services/api";
+import Breadcrumbs from "../../../components/Breadcrumbs";
+
 import {
-  canSearchInElasticSearch,
   departmentLookUp,
   formatDateFRTimezoneUTC,
   formatLongDateFR,
@@ -377,25 +375,9 @@ export default function CenterYoungIndex() {
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER ? (
-        <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
-          <Template className="" />
-          <ChevronRight className="" />
-          {canSearchInElasticSearch(user, "cohesioncenter") ? (
-            <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
-              Centres
-            </Link>
-          ) : (
-            <div className="text-xs">Centres</div>
-          )}
-          <ChevronRight className="" />
-          <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
-            Fiche du centre
-          </Link>
-          <ChevronRight className="" />
-          <div className="text-xs">Liste des volontaires</div>
-        </div>
+        <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `centre/${id}` }, { label: "Liste des volontaires" }]} />
       ) : null}
-      <div className="m-4">
+      <div className="m-8">
         <div className="flex items-center justify-between">
           <div className="font-bold text-2xl mb-4">Volontaires</div>
           <div className="flex items-center gap-2">
@@ -467,7 +449,7 @@ export default function CenterYoungIndex() {
             />
           </div>
         </div>
-        <div className=" flex flex-1 flex-col lg:flex-row">
+        <div className=" flex flex-1 flex-col lg:flex-row pt-4">
           <nav className="flex flex-1 gap-1">
             <TabItem icon={<Menu />} title="Général" to={`/centre/${id}/${sessionId}/general${urlParams && "?" + urlParams}`} />
             <TabItem icon={<PencilAlt />} title="Tableau de pointage" to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`} />
