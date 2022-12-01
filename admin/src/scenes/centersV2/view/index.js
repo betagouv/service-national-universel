@@ -58,7 +58,7 @@ export default function Index({ ...props }) {
 
   const getCenter = (blockFocus = false) => {
     (async () => {
-      if (!center || !center?.cohorts || !center?.cohorts?.length) return;
+      if (!center || !center?.cohorts) return;
       const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
       if (!allSessions.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
@@ -71,6 +71,7 @@ export default function Index({ ...props }) {
           allSessions.data[i].canBeDeleted = false;
         }
       }
+      if (allSessions.data.length === 0) setSessions([]);
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
         setSessions(allSessions.data);
@@ -126,7 +127,7 @@ export default function Index({ ...props }) {
       }
       setLoading(false);
       setModalDelete({ isOpen: false });
-      getCenter();
+      setCenter({ ...center, cohorts: center.cohorts.filter((c) => c !== focusedSession.cohort) });
       return toastr.success("La session a bien été supprimée");
     } catch (e) {
       capture(e);
@@ -135,7 +136,6 @@ export default function Index({ ...props }) {
       return toastr.error("Oups, une erreur est survenue lors de la suppression de la session");
     }
   };
-
   if (!center) return <div />;
   return (
     <>
@@ -150,7 +150,7 @@ export default function Index({ ...props }) {
                 <div
                   key={index}
                   className={`py-3 px-2 mx-3 gap-2 flex items-center justify-center cursor-pointer  ${
-                    focusedSession.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null
+                    focusedSession?.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null
                   }`}
                   onClick={() => {
                     setFocusedSession(item);
