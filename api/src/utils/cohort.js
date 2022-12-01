@@ -20,6 +20,7 @@ async function getAvailableSessions(young) {
         ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEnDate > Date.now())),
   );
 
+  for (let session of sessions) session.isEligible = true;
   const sessionsWithPlaces = await getPlaces(sessions, region);
   return sessionsWithPlaces;
 }
@@ -66,7 +67,6 @@ async function getPlaces(sessions, region) {
     },
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
   ]);
-  console.log("🚀 ~ file: cohort.js:63 ~ getPlaces ~ numberOfValidated", numberOfValidated);
 
   for (let session of sessions) {
     if (sessions2023.includes(session)) {
