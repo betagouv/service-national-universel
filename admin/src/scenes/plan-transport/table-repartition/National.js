@@ -133,7 +133,7 @@ export default function National() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Table de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Table de répartition" }]} />
       <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">
@@ -211,7 +211,7 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
       <div className="flex px-4 py-2 items-center">
         <div
           className={`w-[30%] flex flex-col gap-1 ${assignRegion.length ? "cursor-pointer" : ""}`}
-          onClick={() => assignRegion.length && history.push(`/plan-de-transport/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
+          onClick={() => assignRegion.length && history.push(`/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
           <div className="text-base text-[#242526] font-bold leading-6">{region}</div>
           <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
         </div>
