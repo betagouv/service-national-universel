@@ -55,7 +55,6 @@ async function getPlaces(sessions, region) {
     },
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
   ]);
-  // console.log("🚀 ~ file: cohort.js:52 ~ getPlaces ~ numberOfCandidates", numberOfCandidates);
 
   const numberOfValidated = await YoungModel.aggregate([
     {
@@ -73,8 +72,8 @@ async function getPlaces(sessions, region) {
       session.numberOfCandidates = numberOfCandidates.find(({ _id }) => _id === session.name)?.total;
       session.numberOfValidated = numberOfValidated.find(({ _id }) => _id === session.name)?.total;
       session.numberOfPlaces = numberOfPlaces.find(({ _id }) => _id === session.name)?.total;
-      session.goalReached = session.numberOfCandidates + session.numberOfValidated >= session.numberOfPlaces * session.buffer;
-      session.isFull = session.numberOfValidated >= session.numberOfPlaces;
+      session.goalReached = session.numberOfCandidates + session.numberOfValidated >= session.numberOfPlaces * session.buffer || session.numberOfPlaces === 0;
+      session.isFull = session.numberOfValidated >= session.numberOfPlaces || session.numberOfPlaces === 0;
     }
   }
   return sessions;
