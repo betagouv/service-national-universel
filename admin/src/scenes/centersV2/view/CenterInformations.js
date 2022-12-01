@@ -48,7 +48,7 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
   const [errors, setErrors] = React.useState({});
   const [data, setData] = useState(null);
   useEffect(() => {
-    setData(center);
+    setData({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   }, [center]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
