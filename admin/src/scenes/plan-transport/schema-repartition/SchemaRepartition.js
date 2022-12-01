@@ -68,7 +68,9 @@ export default function SchemaRepartition({ region, department }) {
 
     if (data.toCenters) {
       for (const row of data.toCenters) {
-        toRegions.push({ name: row.name, departments: row.departments });
+        if (row.name !== "all") {
+          toRegions.push({ name: row.name, departments: row.departments });
+        }
         capacity += row.capacity ? row.capacity : 0;
         centers += row.centers ? row.centers : 0;
       }

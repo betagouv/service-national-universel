@@ -3,12 +3,16 @@
  *  GET    /schema-de-repartition/:cohort                       => get National data
  *  GET    /schema-de-repartition/:region/:cohort               => get Regional data
  *  GET    /schema-de-repartition/:region/:department/:cohort   => get Department data
+ *
  *  POST   /schema-de-repartition                               => création d'un groupe du schéma de répartition
  *  DELETE /schema-de-repartition/:id                           => suppression d'un group de schéma de répartition
+ *
  *  GET    /schema-de-repartition/centers/:department/:cohort ?mainPlacesCount&filter
  *                                                              => récupération des centres à partit d'un département pour le choix des centres
  *  GET    /schema-de-repartition/pdr/:department/:cohort       => récupération des points de rassemblements d'un département
  *  POST   /schema-de-repartition/get-group-detail              => Population du détail d'un groupe (centre et points de rassemblement)
+ *  GET    /schema-de-repartition/department-detail/:department/:cohort
+ *                                                              => Récupération du détail d'un département (les centres du départemetn avec les groupes y arrivant)
  */
 
 const mongoose = require("mongoose");
@@ -376,6 +380,14 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
       repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAsigned: line.intradepartmentalAsigned };
     }
 
+    // --- global data
+    let allCapacity = 0;
+    let allCenters = 0;
+    for (const r of filledRegions) {
+      allCapacity += r.intraCapacity;
+      allCenters += r.intraCenters;
+    }
+
     // --- Format result
     const rows = filledRegions.map((r) => {
       return {
@@ -392,7 +404,18 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
       };
     });
 
-    return res.status(200).send({ ok: true, data: { rows } });
+    const data = {
+      toCenters: [
+        {
+          name: "all",
+          capacity: allCapacity,
+          centers: allCenters,
+        },
+      ],
+      rows,
+    };
+
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
