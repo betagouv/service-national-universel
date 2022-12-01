@@ -396,10 +396,10 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
         intraCapacity: r.intraCapacity,
         total: 0,
         intradepartmental: 0,
-        ...youngSet[r.FromRegion],
+        ...youngSet[r.fromRegion],
         assigned: 0,
         intradepartmentalAssigned: 0,
-        ...repartitionSet[r.FromRegion],
+        ...repartitionSet[r.fromRegion],
       };
     });
 
@@ -533,7 +533,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
       youngSet[line._id] = { total: line.total, intradepartmental: line.intradepartmental };
     }
 
-    // console.log("YOUNG RESULT: ", youngSet);
+    console.log("YOUNG RESULT: ", youngSet);
 
     // --- assigned
     const repartitionResult = await schemaRepartitionModel
@@ -583,10 +583,10 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
           intraCapacity: r.intraCapacity,
           total: 0,
           intradepartmental: 0,
-          ...youngSet[r.FromDepartment],
+          ...youngSet[r.fromDepartment],
           assigned: 0,
           intradepartmentalAssigned: 0,
-          ...repartitionSet[r.FromDepartment],
+          ...repartitionSet[r.fromDepartment],
         };
       }),
     };
@@ -612,8 +612,9 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // --- find to regions from region
-    const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
+    // --- find to regions from departments
+    const regionsResult = await tableRepartitionModel.find({ cohort, fromRegion: region, fromDepartment: department });
+    console.log("REGIONS RESULT: ", regionsResult);
     const toRegionsSet = {};
     let toDepartments = [];
     for (const repart of regionsResult) {
@@ -625,12 +626,14 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       }
       if (repart.toDepartment) {
         toDepartments.push(repart.toDepartment);
-        toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+        if (!toRegionsSet[repart.toRegion].departments.includes(repart.toDepartment)) {
+          toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+        }
       }
     }
     const toRegions = Object.values(toRegionsSet);
 
-    console.log("DEPARTMENTS: ", toDepartments);
+    // console.log("DEPARTMENTS: ", toDepartments);
 
     // --- capacities & centers
     const toCenterPipeline = [
@@ -665,11 +668,13 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
 
+    console.log("TO CENTER SET: ", toCenterSet);
+
     // --- volontaires
     const youngResult = await youngModel
       .aggregate([
         // TODO: véfifier la liste des jeunes
-        { $match: { cohort, department, status: { $in: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.IN_PROGRESS] } } },
+        { $match: { cohort, department, status: { $in: [YOUNG_STATUS.VALIDATED] } } },
         {
           $group: {
             _id: null,

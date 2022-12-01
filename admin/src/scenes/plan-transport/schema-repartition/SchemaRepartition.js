@@ -264,7 +264,6 @@ function BoxAffectation({ summary, className = "", loading }) {
 }
 
 function BoxDisponibilite({ summary, className = "", loading, isNational }) {
-  console.log("summary: ", summary);
   return (
     <Box className={`flex flex-column justify-between pb-[0px] ${className}`}>
       <div>
@@ -281,7 +280,11 @@ function BoxDisponibilite({ summary, className = "", loading, isNational }) {
         )}
       </div>
       <div className="mt-[30px] h-[130px]">
-        {loading ? <Loading /> : <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={summary.capacity - summary.assigned} />}
+        {loading ? (
+          <Loading />
+        ) : (
+          <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={Math.max(0, summary.capacity - summary.assigned)} />
+        )}
       </div>
     </Box>
   );

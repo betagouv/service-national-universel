@@ -20,7 +20,7 @@ export default function GroupCreator({ group, className = "", onCreate }) {
   }
 
   function affect() {
-    onCreate && onCreate({ ...group, youngsVolume: volume }, GROUPSTEPS.MODIFICATION);
+    onCreate && onCreate({ ...group, youngsVolume: volume }, GROUPSTEPS.CENTER);
   }
 
   function changeVolume(vol) {
