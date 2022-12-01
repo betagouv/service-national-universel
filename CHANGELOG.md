@@ -1,3 +1,19 @@
+# [1.177.0](https://github.com/betagouv/service-national-universel/compare/v1.176.0...v1.177.0) (2022-12-01)
+
+
+### Bug Fixes
+
+* **admin:** Fiche centre modal ([#2102](https://github.com/betagouv/service-national-universel/issues/2102)) ([9c56012](https://github.com/betagouv/service-national-universel/commit/9c560120842c452630ae4d7f7b17cc53c399caf0))
+* **admin:** fix validation incorrectly setting waiting list status ([cd37f8e](https://github.com/betagouv/service-national-universel/commit/cd37f8eb0ed000053189639b8704629e45792b8c))
+* **api:** set isEligible status in session for refs ([a6255e8](https://github.com/betagouv/service-national-universel/commit/a6255e8a28edca09e060194b6970fcab0673dae0))
+* **api/lib:** add Corse department ([72038bd](https://github.com/betagouv/service-national-universel/commit/72038bda9fc1e141a11a16fff1692b27760dd87c))
+* **app:** upload step improvements ([#2095](https://github.com/betagouv/service-national-universel/issues/2095)) ([97d40e8](https://github.com/betagouv/service-national-universel/commit/97d40e8aba2c8285d9e21c5d089b61d1fc1a345d))
+
+
+### Features
+
+* **admin/app:** refacto Session centre ([#2098](https://github.com/betagouv/service-national-universel/issues/2098)) ([3e90672](https://github.com/betagouv/service-national-universel/commit/3e90672c31d6fd894ec73f7ba5327a5fb2e08aac))
+
 # [1.176.0](https://github.com/betagouv/service-national-universel/compare/v1.175.1...v1.176.0) (2022-11-30)
 
 
