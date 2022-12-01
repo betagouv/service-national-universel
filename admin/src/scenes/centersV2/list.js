@@ -427,7 +427,7 @@ const ListCenter = ({ firstSession }) => {
               className="dropdown-filter"
               placeholder="Code"
               componentId="CODE2022"
-              dataField="code.keyword"
+              dataField="code2022.keyword"
               react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
               title=""
               URLParams={true}
