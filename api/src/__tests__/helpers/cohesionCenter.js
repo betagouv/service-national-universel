@@ -11,6 +11,12 @@ async function createCohesionCenterWithSession(cohesionCenter, session) {
   return center;
 }
 
+async function createSessionWithCohesionCenter(cohesionCenter, session) {
+  const center = await CohesionCenterObject.create(cohesionCenter);
+  const returnedSession = await SessionPhase1.create({ ...session, cohesionCenterId: center._id });
+  return returnedSession;
+}
+
 async function getCohesionCenterById(id) {
   return await CohesionCenterObject.findById(id);
 }
@@ -21,5 +27,6 @@ module.exports = {
   createCohesionCenter,
   getCohesionCenterById,
   createCohesionCenterWithSession,
+  createSessionWithCohesionCenter,
   notExistingCohesionCenterId,
 };

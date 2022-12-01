@@ -9,6 +9,7 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import ReactTooltip from "react-tooltip";
+import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 
@@ -35,7 +36,9 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions }) {
+export default function Details({ center, setCenter, sessions, getCenter }) {
+  const history = useHistory();
+
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
@@ -45,7 +48,7 @@ export default function Details({ center, setCenter, sessions }) {
   const [errors, setErrors] = React.useState({});
   const [data, setData] = useState(null);
   useEffect(() => {
-    setData(center);
+    setData({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   }, [center]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
@@ -132,7 +135,7 @@ export default function Details({ center, setCenter, sessions }) {
   return (
     <div className="flex flex-col m-8 gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
-      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
+      <ModalRattacherCentre editable={false} defaultCentre={center} isOpen={modalVisible} onSucess={getCenter} onCancel={() => setModalVisible(false)} user={user} />
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
         title={modalDelete.title}
@@ -228,7 +231,7 @@ export default function Details({ center, setCenter, sessions }) {
                 </div>
                 <div className="flex flex-col flex-1">
                   <div className="text-sm leading-5 font-bold text-gray-700">Accessibilité PMR</div>
-                  <div className="text-sm leading-5 text-gray-700">{data.pmr ? "Oui" : "Non"}</div>
+                  <div className="text-sm leading-5 text-gray-700">{data.pmr === "true" ? "Oui" : "Non"}</div>
                 </div>
               </div>
               <Toggle disabled={!editInfo} value={data.pmr === "true"} onChange={(e) => setData({ ...data, pmr: e.toString() })} />
@@ -339,17 +342,6 @@ export default function Details({ center, setCenter, sessions }) {
                   error={errors?.placesTotal}
                 />
               </div>
-              {user.role !== ROLES.ADMIN && (
-                <div className="flex flex-col gap-2">
-                  <Field
-                    readOnly={!editInfo}
-                    label="Places ouvertes sur le séjour"
-                    onChange={(e) => setData({ ...data, placesSession: e.target.value })}
-                    value={data.placesSession}
-                    error={errors?.placesSession}
-                  />
-                </div>
-              )}
               {user.role === ROLES.ADMIN && (
                 <>
                   <div className="flex flex-col gap-2">

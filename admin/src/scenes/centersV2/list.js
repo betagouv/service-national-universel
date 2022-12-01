@@ -47,7 +47,7 @@ export default function List() {
   }, []);
 
   return (
-    <div>
+    <div className="mb-8">
       <Breadcrumbs items={[{ label: "Centres" }]} />
       <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
@@ -86,7 +86,27 @@ const ListSession = ({ firstSession }) => {
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
   const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
+    if (user.role === ROLES.ADMIN) {
+      return { query: { match_all: {} }, track_total_hits: true };
+    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      return {
+        query: {
+          terms: {
+            department: user.department,
+          },
+        },
+        track_total_hits: true,
+      };
+    } else if (user.role === ROLES.REFERENT_REGION) {
+      return {
+        query: {
+          bool: {
+            must: { match: { region: user.region } },
+          },
+        },
+        track_total_hits: true,
+      };
+    }
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
@@ -115,7 +135,7 @@ const ListSession = ({ firstSession }) => {
               showIcon={false}
               placeholder="Rechercher par mots clés, ville, code postal..."
               componentId="SEARCH"
-              dataField={["nameCentre", "cityCentre", "zipCentre", "code", "code2022"]}
+              dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ marginRight: "1rem", flex: 1 }}
               innerClass={{ input: "searchbox" }}
@@ -260,7 +280,12 @@ const ListSession = ({ firstSession }) => {
                   <div className="w-[20%]">Disponibilités</div>
                 </div>
                 {data.map((hit) => (
-                  <HitSession history={history} key={hit._id} center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]} hit={hit} />
+                  <HitSession
+                    onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
+                    key={hit._id}
+                    center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
+                    hit={hit}
+                  />
                 ))}
                 <hr />
               </div>
@@ -315,7 +340,7 @@ const ListCenter = ({ firstSession }) => {
               showIcon={false}
               placeholder="Rechercher par mots clés, ville, code postal..."
               componentId="SEARCH"
-              dataField={["name", "city", "zip", "code", "code2022"]}
+              dataField={["name", "city", "zip", "code2022"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ marginRight: "1rem", flex: 1 }}
               innerClass={{ input: "searchbox" }}
@@ -402,7 +427,7 @@ const ListCenter = ({ firstSession }) => {
               className="dropdown-filter"
               placeholder="Code"
               componentId="CODE2022"
-              dataField="code.keyword"
+              dataField="code2022.keyword"
               react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
               title=""
               URLParams={true}
@@ -463,7 +488,7 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
         <div className="flex items-center flex-wrap w-[60%]">
           {sessionsPhase1.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
-              <div className="flex items-center z-10">
+              <div className="flex items-center">
                 <Badge
                   onClick={(e) => {
                     e.stopPropagation();
@@ -479,7 +504,7 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
     </>
   );
 };
-const HitSession = ({ center, hit, onClick, history }) => {
+const HitSession = ({ center, hit, onClick }) => {
   return (
     <>
       <hr />
@@ -488,14 +513,8 @@ const HitSession = ({ center, hit, onClick, history }) => {
           <div className="font-bold leading-6 text-gray-900">{center?._source.name}</div>
           <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
-        <div className="flex items-center flex-wrap w-[20%] z-10">
-          <Badge
-            onClick={(e) => {
-              e.stopPropagation();
-              history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`);
-            }}
-            cohort={hit}
-          />
+        <div className="flex items-center flex-wrap w-[20%]">
+          <Badge cohort={hit} />
         </div>
         <div className="flex flex-col w-[20%]">
           <div>

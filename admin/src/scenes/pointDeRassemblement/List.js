@@ -42,7 +42,7 @@ export default function List() {
           ) : null}
         </div>
         <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className="flex flex-col bg-white py-4 rounded-lg">
+          <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
             <div className="flex items-center justify-between bg-white py-2 px-4">
               <div className="flex items-center gap-2">
                 <DataSearch
@@ -154,7 +154,7 @@ export default function List() {
                 paginationAt="bottom"
                 showTopResultStats={false}
                 render={({ data }) => (
-                  <div className="flex w-full flex-col  mt-6 mb-2">
+                  <div className="flex w-full flex-col mt-6 mb-2">
                     <hr />
                     <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
                       <div className="w-[40%]">Points de rassemblements</div>
