@@ -129,9 +129,10 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
       setIsLoading(false);
       setSelectedCentre("");
       setSelectedCohort("");
-      toastr.success("La centre a été rataché au séjour avec succès");
+      setPlacesTotal("");
+      toastr.success("La centre a été rattaché au séjour avec succès");
       onCancel();
-      onSucess();
+      if (onSucess) onSucess();
       setSelectedCentre({ ...selectedCentre, cohorts: [...selectedCentre.cohorts, selectedCohort] });
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
     } catch (e) {
@@ -156,7 +157,17 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
           <div className="flex flex-row gap-2 flex-wrap py-2">
             {availableCohorts.map((cohort) => (
               <>
-                {selectedCentre && !selectedCentre?.cohorts.includes(cohort) ? (
+                {defaultCentre && !selectedCentre?.cohorts?.includes(cohort) ? (
+                  <div
+                    key={cohort}
+                    onClick={() => setSelectedCohort(cohort)}
+                    className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
+                      selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
+                    }`}>
+                    {cohort}
+                  </div>
+                ) : null}
+                {!defaultCentre ? (
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
