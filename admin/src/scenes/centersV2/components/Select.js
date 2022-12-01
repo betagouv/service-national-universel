@@ -17,9 +17,9 @@ export default function Select({ options, selected, setSelected, label, readOnly
               <Listbox.Button className="relative w-full text-left">
                 <div className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border border-gray-300 bg-white py-2 px-2.5 items-center`}>
                   {icon ? icon : null}
-                  <div className={`flex flex-col `}>
+                  <div className={`flex flex-col w-full `}>
                     <label className="text-xs leading-4 text-gray-500">{label}</label>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between w-full">
                       <span className="block truncate">{selected?.label}</span>
                       <span className="pointer-events-none flex items-center pr-2">
                         {!readOnly && (
