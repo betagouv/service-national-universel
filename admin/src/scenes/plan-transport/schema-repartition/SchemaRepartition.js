@@ -305,7 +305,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
       {!isNational && loading ? (
         <Loading width="w-1/3" />
       ) : (
-        <ul className="list-none">
+        <ul className="list-none mb-6">
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
               <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>

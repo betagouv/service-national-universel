@@ -24,7 +24,6 @@ const { ERRORS } = require("../../utils");
 const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
-  regionList,
   region2department,
   getDepartmentNumber,
   COHORTS,
@@ -32,6 +31,7 @@ const {
   canDeleteSchemaDeRepartition,
   canEditSchemaDeRepartition,
 } = require("snu-lib");
+const { filteredRegionList } = require("./commons");
 const Joi = require("joi");
 const sessionPhase1Model = require("../../models/sessionPhase1");
 const youngModel = require("../../models/young");
@@ -442,6 +442,18 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
 
     // --- get to regions from region
     const toRegions = await getRegionsAndDepartmentsFromRegion(cohort, region);
+    // console.log("TO REGIONS: ", toRegions);
+
+    // --- get to departments from region
+    const toDepartmentsSet = {};
+    for (const r of toRegions) {
+      if (r.departments && r.departments.length > 0) {
+        for (const d of r.departments) {
+          toDepartmentsSet[d] = true;
+        }
+      }
+    }
+    const toDepartments = Object.keys(toDepartmentsSet);
 
     // --- get centers & capacity extra & intra for each department
     const filledDepartments = departmentsTable.map((r) => {
@@ -458,34 +470,34 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     // console.log("FILLED DEPARTMENTS: ", filledDepartments);
 
     // --- get centers by to regions
-    const toCenterResult = await sessionPhase1Model
-      .aggregate([
-        {
-          $match: { cohort },
+    const pipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
         },
-        {
-          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
-        },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "centerId",
-            foreignField: "_id",
-            as: "center",
-          },
-        },
-        { $unwind: "$center" },
+      },
+      { $unwind: "$center" },
 
-        { $match: { "center.region": { $in: toRegions.map((r) => r.name) } } },
-        {
-          $group: {
-            _id: "$center.region",
-            centers: { $sum: 1 },
-            capacity: { $sum: "$placesTotal" },
-          },
+      { $match: { "center.department": { $in: toDepartments } } },
+      {
+        $group: {
+          _id: "$center.region",
+          centers: { $sum: 1 },
+          capacity: { $sum: "$placesTotal" },
         },
-      ])
-      .exec();
+      },
+    ];
+    // console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
+    const toCenterResult = await sessionPhase1Model.aggregate(pipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
@@ -887,7 +899,7 @@ async function getDepartmentCentersAndCapacities(cohort) {
 }
 
 async function getRegionsAndDepartmentsFromRegion(cohort, region) {
-  const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
+  const regionsResult = await tableRepartitionModel.find({ cohort, fromRegion: region });
   const toRegionsSet = {};
   for (const repart of regionsResult) {
     if (toRegionsSet[repart.toRegion] === undefined) {
@@ -915,7 +927,7 @@ async function getRegionTableDeRepartition(cohort) {
     }
   }
 
-  return regionList.map((region) => {
+  return filteredRegionList.map((region) => {
     const regionData = regions[region];
     if (regionData) {
       return {
