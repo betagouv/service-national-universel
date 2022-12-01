@@ -25,7 +25,7 @@ export function ChangeCohortPen({ young, onChange }) {
       (async function getSessions() {
         const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (Array.isArray(data)) {
-          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull })).filter((c) => c.name !== young.cohort);
+          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isFull: c.isFull, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
       })();
@@ -73,6 +73,8 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
+      if (newCohort.isFull && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !status)
+        return toastr.error("Veuillez choisir une action.");
       await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       if (status) await api.put(`/referent/young/${young._id}`, { status: status.value });
       if (young.status === YOUNG_STATUS.WAITING_LIST && !newCohort.isFull) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
@@ -151,22 +153,20 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
                 <div className="flex gap-2 items-center">
                   <IoWarningOutline className="h-6 w-6" />
-                  <p className="font-bold">Attention</p>
+                  <p className="font-bold">Objectif d&apos;inscription régional atteint</p>
                 </div>
-                <p className="text-sm">
-                  Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Le volontaire va être positionné(e) sur liste complémentaire.
-                </p>
+                <p className="text-sm">L&apos;objectif d&apos;inscription de votre région a été atteint. </p>
               </div>
             )}
             {newCohort.isFull && young.status === YOUNG_STATUS.VALIDATED && (
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
                 <div className="flex gap-2 items-center">
                   <IoWarningOutline className="h-6 w-6" />
-                  <p className="font-bold">Attention</p>
+                  <p className="font-bold">Objectif d&apos;inscription régional atteint</p>
                 </div>
                 <p className="text-sm">
-                  Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour. Merci de placer le candidat sur liste complémentaire ou de vous rapprocher de
-                  votre coordinateur régional avant de valider la candidature.
+                  Objectif d&apos;inscription régional atteint L&apos;objectif d&apos;inscription de votre région a été atteint. Merci de placer le jeune sur liste complémentaire
+                  ou de vous rapprocher de votre coordinateur régional avant de valider son inscription.
                 </p>
                 <UncontrolledDropdown isActiveFromChild className="mt-2">
                   <DropdownToggle tag="button">
@@ -235,7 +235,7 @@ function CohortDropDown({ originalCohort, cohort, onClick, options }) {
             {!disabled ? <Chevron color="#0C7CFF" style={{ padding: 0, margin: 0, marginLeft: "15px" }} /> : null}
           </div>
         </DropdownToggle>
-        <DropdownMenu>
+        <DropdownMenu className="overflow-scroll max-h-[25vh]">
           {ops.length > 0 ? (
             options
               .filter((e) => e.name !== cohort.name)
@@ -243,6 +243,7 @@ function CohortDropDown({ originalCohort, cohort, onClick, options }) {
                 return (
                   <DropdownItem key={op.name} className="dropdown-item" onClick={() => onClick(op)}>
                     Cohorte {op.name}
+                    {!op.isEligible && " (non éligible)"}
                   </DropdownItem>
                 );
               })

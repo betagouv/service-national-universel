@@ -73,7 +73,7 @@ const {
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
-const { getAvailableSessions } = require("../utils/cohort");
+const { getAvailableSessions, getAllSessions } = require("../utils/cohort");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -488,7 +488,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
-    const sessions = await getAvailableSessions(young);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getAvailableSessions(young);
     if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;

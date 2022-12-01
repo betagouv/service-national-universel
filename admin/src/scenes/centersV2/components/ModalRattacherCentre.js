@@ -41,7 +41,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
 
   const [listCentre, setListCentre] = React.useState([]);
   const [selectedCohort, setSelectedCohort] = React.useState();
-  const [selectedCentre, setSelectedCentre] = React.useState();
+  const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
   const [status, setStatus] = React.useState("WAITING_VALIDATION");
   const [search, setSearch] = React.useState("");
@@ -131,7 +131,6 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
         return setIsLoading(false);
       }
       setIsLoading(false);
-
       toastr.success("La centre a été rattaché au séjour avec succès");
       onCancel();
       if (onSucess) onSucess(selectedCohort);

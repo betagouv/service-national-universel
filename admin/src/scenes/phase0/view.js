@@ -70,7 +70,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [oldCohort, setOldCohort] = useState(false);
-  const [action, setAction] = useState("");
+  const [action, setAction] = useState();
 
   useEffect(() => {
     console.log("VolontairePhase0View: ", young);
@@ -369,9 +369,9 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       if (session.isFull) {
         return setConfirmModal({
           icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-          title: "Jauge de candidats atteinte",
+          title: "Objectif d'inscription régional atteint",
           message:
-            "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
+            "L'objectif d'inscription de votre région a été atteint. Merci de placer le jeune sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider son inscription.",
           type: "SESSION_FULL",
         });
       }
@@ -412,8 +412,8 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   ];
 
   const actions = [
-    <option value="" key="none">
-      Que voulez-vous faire ?
+    <option value="NO_CHOICE" key="NO_CHOICE">
+      Que souhaitez-vous faire ?{" "}
     </option>,
     <option value="WAITING_LIST" key="WAITING_LIST">
       Placer sur liste complémentaire
@@ -448,6 +448,9 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       } else {
         setError(null);
       }
+    }
+    if (confirmModal.type === "SESSION_FULL" && (!action || action === "NO_CHOICE")) {
+      return toastr.error("Veuillez choisir un statut", "Merci de choisir entre valider l'inscription ou placer le volontaire sur liste complémentaire.");
     }
     onProcess(
       confirmModal.type,

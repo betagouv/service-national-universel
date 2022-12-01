@@ -1,3 +1,10 @@
+# [1.176.0](https://github.com/betagouv/service-national-universel/compare/v1.175.1...v1.176.0) (2022-11-30)
+
+
+### Features
+
+* **api/app/admin:** Objectives by region ([#2088](https://github.com/betagouv/service-national-universel/issues/2088)) ([316800d](https://github.com/betagouv/service-national-universel/commit/316800d6c822c14511d13ecc60e8f539096f819c))
+
 ## [1.175.1](https://github.com/betagouv/service-national-universel/compare/v1.175.0...v1.175.1) (2022-11-29)
 
 
