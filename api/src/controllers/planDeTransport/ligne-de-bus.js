@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const { canViewLigneBus, canUpdateLigneBus, canCreateLigneBus, canDeleteLigneBus } = require("snu-lib/roles");
+const { canViewLigneBus, canCreateLigneBus } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -133,3 +133,5 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+module.exports = router;
