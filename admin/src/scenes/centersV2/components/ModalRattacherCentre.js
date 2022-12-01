@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -49,6 +49,10 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   const [statusOpen, setStatusOpen] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(false);
+
+  useEffect(() => {
+    if (defaultCentre) setSelectedCentre(defaultCentre);
+  }, [defaultCentre]);
 
   React.useEffect(() => {
     if (!refInput.current) return;
@@ -127,14 +131,12 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
         return setIsLoading(false);
       }
       setIsLoading(false);
-      setSelectedCentre("");
-      setSelectedCohort("");
-      setPlacesTotal("");
       toastr.success("La centre a été rattaché au séjour avec succès");
       onCancel();
-      if (onSucess) onSucess();
-      setSelectedCentre({ ...selectedCentre, cohorts: [...selectedCentre.cohorts, selectedCohort] });
+      if (onSucess) onSucess(selectedCohort);
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
+      setSelectedCohort("");
+      setPlacesTotal("");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de l'ajout de la session");
