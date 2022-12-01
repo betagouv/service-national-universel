@@ -14,7 +14,6 @@ import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import Template from "../../../assets/icons/Template.js";
 import SelectAction from "../../../components/SelectAction";
-import WithTooltip from "../../../components/WithTooltip";
 import api from "../../../services/api";
 import {
   canSearchInElasticSearch,

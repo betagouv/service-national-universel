@@ -375,7 +375,7 @@ export default function CenterYoungIndex() {
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER ? (
-        <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `centre/${id}` }, { label: "Liste des volontaires" }]} />
+        <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Liste des volontaires" }]} />
       ) : null}
       <div className="m-8">
         <div className="flex items-center justify-between">

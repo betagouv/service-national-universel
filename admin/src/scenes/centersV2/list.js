@@ -340,7 +340,7 @@ const ListCenter = ({ firstSession }) => {
               showIcon={false}
               placeholder="Rechercher par mots clés, ville, code postal..."
               componentId="SEARCH"
-              dataField={["name", "city", "zip", "code", "code2022"]}
+              dataField={["name", "city", "zip", "code2022"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ marginRight: "1rem", flex: 1 }}
               innerClass={{ input: "searchbox" }}
