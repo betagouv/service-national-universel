@@ -135,7 +135,7 @@ const ListSession = ({ firstSession }) => {
               showIcon={false}
               placeholder="Rechercher par mots clés, ville, code postal..."
               componentId="SEARCH"
-              dataField={["nameCentre", "cityCentre", "zipCentre", "code", "code2022"]}
+              dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ marginRight: "1rem", flex: 1 }}
               innerClass={{ input: "searchbox" }}
