@@ -25,7 +25,6 @@ const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
   region2department,
-  getDepartmentNumber,
   COHORTS,
   canCreateSchemaDeRepartition,
   canDeleteSchemaDeRepartition,
@@ -616,7 +615,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     // --- find to regions from region
     const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
     const toRegionsSet = {};
-    let toDepartmentCodes = [];
+    let toDepartments = [];
     for (const repart of regionsResult) {
       if (!toRegionsSet[repart.toRegion]) {
         toRegionsSet[repart.toRegion] = {
@@ -625,40 +624,42 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         };
       }
       if (repart.toDepartment) {
-        toDepartmentCodes.push(getDepartmentNumber(repart.toDepartment));
+        toDepartments.push(repart.toDepartment);
         toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
       }
     }
     const toRegions = Object.values(toRegionsSet);
 
+    console.log("DEPARTMENTS: ", toDepartments);
+
     // --- capacities & centers
-    const toCenterResult = await sessionPhase1Model
-      .aggregate([
-        {
-          $match: { cohort },
+    const toCenterPipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
         },
-        {
-          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      { $unwind: "$center" },
+      { $match: { "center.department": { $in: toDepartments } } },
+      {
+        $group: {
+          _id: "$center.region",
+          centers: { $sum: 1 },
+          capacity: { $sum: "$placesTotal" },
         },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "centerId",
-            foreignField: "_id",
-            as: "center",
-          },
-        },
-        { $unwind: "$center" },
-        { $match: { "center.departmentCode": { $in: toDepartmentCodes } } },
-        {
-          $group: {
-            _id: "$center.region",
-            centers: { $sum: 1 },
-            capacity: { $sum: "$placesTotal" },
-          },
-        },
-      ])
-      .exec();
+      },
+    ];
+    console.log("TO CENTER PIPE: ", JSON.stringify(toCenterPipeline, null, 4));
+    const toCenterResult = await sessionPhase1Model.aggregate(toCenterPipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
@@ -702,12 +703,12 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     let intradepartmentalAssigned = 0;
     for (const schema of schemas) {
       if (schema.intradepartmental === "true") {
-        intradepartmentalAssigned++;
+        intradepartmentalAssigned += schema.youngsVolume;
         groups.intra.push(schema);
       } else {
         groups.extra.push(schema);
       }
-      assigned++;
+      assigned += schema.youngsVolume;
     }
 
     // --- Format result

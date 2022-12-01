@@ -87,7 +87,7 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
           </div>
           <Box className="mt-4">
             <div className="border-b border-b-gray-200 text-lg text-gray-900 py-4">Détail des affectations</div>
-            <div className="mt-8">
+            <div className="mt-8 grid grid-cols-3">
               {loading ? (
                 <Loading />
               ) : error ? (
@@ -109,7 +109,7 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
 
 function CenterDetail({ center }) {
   return (
-    <div className="inline-block w-[33%] pr-4 pb-4">
+    <div className="pr-4 pb-4">
       <div className="shadow p-4">
         <div className="flex items-start pb-4 border-b border-b-gray-200 mb-2">
           <IcebergColor className="w-[38px] h-[36px] mr-4" />
@@ -139,7 +139,7 @@ function CenterDetail({ center }) {
 
         <div className="flex items-center pt-4 border-t border-t-gray-200 mt-2">
           <People className="text-gray-400 mr-1.5" />
-          <div className="text-base text-gray-900 font-bold">{center.affectedYoungs} volontaires accueillis</div>
+          <div className="text-base text-gray-900 font-bold">{center.affectedYoungs} volontaires accueillis&nbsp;</div>
           <div className="text-sm text-gray-500"> / {center.placesTotal} places</div>
         </div>
       </div>

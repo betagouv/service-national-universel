@@ -1,8 +1,12 @@
-export function formatRate(value, total, fractionDigit = 0) {
+export function formatRate(value, total, fractionDigit = 0, allowMoreThan100 = false) {
   if (total === 0 || total === undefined || total === null || value === undefined || value === null) {
     return "-";
   } else {
-    return ((value / total) * 100).toFixed(fractionDigit).replace(/\./g, ",") + "%";
+    if (value > total && !allowMoreThan100) {
+      return "100%";
+    } else {
+      return ((value / total) * 100).toFixed(fractionDigit).replace(/\./g, ",") + "%";
+    }
   }
 }
 

@@ -253,7 +253,7 @@ function BoxAffectation({ summary, className = "", loading }) {
             </div>
             <div className="flex items-center mr-[16px] text-[12px] leading-[14px] text-[#1F2937]">
               <div className="rounded-[100px] w-[7px] h-[7px] bg-[#E5E7EB]" />
-              <b className="mx-[5px]">{summary.total - summary.assigned}</b>
+              <b className="mx-[5px]">{Math.max(0, summary.total - summary.assigned)}</b>
               <span>restants</span>
             </div>
           </div>
