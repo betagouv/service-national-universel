@@ -86,7 +86,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerId,
       centerArrivalTime,
       centerDepartureTime,
-      meetingPointsId: meetingPoints.map((mp) => mp._id.toString()),
+      meetingPointsId: meetingPoints.map((mp) => mp.meetingPointId),
     });
 
     const ligneToBus = [];
