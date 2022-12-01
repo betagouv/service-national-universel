@@ -70,7 +70,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [oldCohort, setOldCohort] = useState(false);
-  const [action, setAction] = useState("WAITING_LIST");
+  const [action, setAction] = useState();
 
   useEffect(() => {
     console.log("VolontairePhase0View: ", young);
@@ -412,6 +412,9 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   ];
 
   const actions = [
+    <option value="NO_CHOICE" key="NO_CHOICE">
+      Que souhaitez-vous faire ?{" "}
+    </option>,
     <option value="WAITING_LIST" key="WAITING_LIST">
       Placer sur liste complémentaire
     </option>,
@@ -445,6 +448,9 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       } else {
         setError(null);
       }
+    }
+    if (confirmModal.type === "SESSION_FULL" && (!action || action === "NO_CHOICE")) {
+      return toastr.error("Veuillez choisir un statut", "Merci de choisir entre valider l'inscription ou placer le volontaire sur liste complémentaire.");
     }
     onProcess(
       confirmModal.type,

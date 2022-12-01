@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -8,7 +8,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
 
-export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
+export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
   const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1).reduce((acc, cohort) => {
     return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
@@ -23,12 +23,12 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
-        setOpen((open) => !open);
+        editable && setOpen((open) => !open);
       } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
       }
       if (refStatus.current && refStatus.current.contains(event.target)) {
-        setStatusOpen((open) => !open);
+        editable && setStatusOpen((open) => !open);
       } else if (refStatus.current && !refStatus.current.contains(event.target)) {
         setStatusOpen(false);
       }
@@ -41,7 +41,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
 
   const [listCentre, setListCentre] = React.useState([]);
   const [selectedCohort, setSelectedCohort] = React.useState();
-  const [selectedCentre, setSelectedCentre] = React.useState();
+  const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
   const [status, setStatus] = React.useState("WAITING_VALIDATION");
   const [search, setSearch] = React.useState("");
@@ -49,6 +49,10 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
   const [statusOpen, setStatusOpen] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(false);
+
+  useEffect(() => {
+    if (defaultCentre) setSelectedCentre(defaultCentre);
+  }, [defaultCentre]);
 
   React.useEffect(() => {
     if (!refInput.current) return;
@@ -127,11 +131,12 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
         return setIsLoading(false);
       }
       setIsLoading(false);
-      setSelectedCentre("");
-      setSelectedCohort("");
-      toastr.success("La centre a été rataché au séjour avec succès");
+      toastr.success("La centre a été rattaché au séjour avec succès");
       onCancel();
+      if (onSucess) onSucess(selectedCohort);
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
+      setSelectedCohort("");
+      setPlacesTotal("");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de l'ajout de la session");
@@ -153,14 +158,28 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
           <div className="text-gray-800 text-sm font-medium leading-6">Choisissez un séjour</div>
           <div className="flex flex-row gap-2 flex-wrap py-2">
             {availableCohorts.map((cohort) => (
-              <div
-                key={cohort}
-                onClick={() => setSelectedCohort(cohort)}
-                className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
-                  selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
-                }`}>
-                {cohort}
-              </div>
+              <>
+                {defaultCentre && !selectedCentre?.cohorts?.includes(cohort) ? (
+                  <div
+                    key={cohort}
+                    onClick={() => setSelectedCohort(cohort)}
+                    className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
+                      selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
+                    }`}>
+                    {cohort}
+                  </div>
+                ) : null}
+                {!defaultCentre ? (
+                  <div
+                    key={cohort}
+                    onClick={() => setSelectedCohort(cohort)}
+                    className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
+                      selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
+                    }`}>
+                    {cohort}
+                  </div>
+                ) : null}
+              </>
             ))}
           </div>
           {selectedCohort ? (
@@ -174,7 +193,7 @@ export default function ModalRattacherCentre({ isOpen, onCancel, user }) {
                     <div className="text-xs leading-6 font-normal text-gray-500">Choisir un centre</div>
                     {!selectedCentre ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedCentre.name}</div>}
                   </div>
-                  <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
+                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />}
                 </div>
 
                 <div

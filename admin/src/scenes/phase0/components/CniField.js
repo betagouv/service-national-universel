@@ -101,7 +101,7 @@ export function CniField({
           label={label}
           correctionRequest={correctionRequest}
           onChangeRequest={onCorrectionRequestChange}
-          reasons={reasons}
+          reasons={young.latestCNIFileCategory ? reasons : reasons.filter(({ value }) => !["MISSING_FRONT", "MISSING_BACK"].includes(value))}
           messagePlaceholder="(Facultatif) Précisez les corrections à apporter ici"
         />
       )}

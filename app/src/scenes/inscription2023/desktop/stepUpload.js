@@ -14,6 +14,7 @@ import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 import ErrorMessage from "../components/ErrorMessage";
+import MyDocs from "../components/MyDocs";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -23,73 +24,88 @@ export default function StepUpload() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
+  const [hasChanged, setHasChanged] = useState(false);
   const [files, setFiles] = useState([]);
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
   async function uploadFiles() {
-    if (files.length > 3 || young.files.cniFiles.length + files.length > 3) {
-      setFiles([]);
-      return {
-        error: {
-          text: "Vous ne pouvez téleverser plus de 3 fichiers.",
-          subText: young?.files?.cniFiles?.length ? `Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` : null,
-        },
-      };
-    }
-    for (const file of files) {
-      if (file.size > 5000000) return { error: { text: `Ce fichier ${files.name} est trop volumineux.` } };
-    }
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, new Date(date));
-    if (res.code === "FILE_CORRUPTED")
-      return {
-        error: {
-          text: "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-        },
-      };
-    if (!res.ok) {
-      capture(res.code);
-      return { error: { text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code ? translate(res.code) : "" } };
+    try {
+      if (young?.files?.cniFiles?.length + files?.length > 3) {
+        return young?.files?.cniFiles?.length
+          ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
+          : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
+      }
+      for (const file of files) {
+        if (file.size > 5000000) {
+          capture(`Fichier trop volumineux : ${file.size}.`);
+          return { error: `Ce fichier ${files.name} est trop volumineux.` };
+        }
+      }
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, new Date(date));
+      if (res.code === "FILE_CORRUPTED")
+        return {
+          error:
+            "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support : inscription@snu.gouv.fr",
+        };
+      if (!res.ok) {
+        capture(res.code);
+        return { error: res.code };
+      }
+    } catch (e) {
+      capture(e);
+      return { error: translate(e) };
     }
   }
 
   async function onSubmit() {
-    setLoading(true);
-    if (files) {
-      const res = await uploadFiles();
-      if (res?.error) {
-        setError(res.error);
+    try {
+      setLoading(true);
+      if (files) {
+        const res = await uploadFiles();
+        if (res?.error) {
+          setFiles([]);
+          setHasChanged(false);
+          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
+          setLoading(false);
+          return;
+        }
+      }
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
         setLoading(false);
         return;
       }
-    }
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
-    if (!ok) {
-      capture(code);
-      setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+      dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - CI desktop");
+      history.push("/inscription2023/confirm");
+    } catch (e) {
+      capture(e);
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
       setLoading(false);
-      return;
     }
-    dispatch(setYoung(responseData));
-    plausibleEvent("Phase0/CTA inscription - CI desktop");
-    history.push("/inscription2023/confirm");
   }
 
   async function onCorrect() {
-    setLoading(true);
-    if (files) {
-      const res = await uploadFiles();
-      if (res?.error) {
-        setError(res.error);
-        setLoading(false);
-        return;
-      }
-    }
     try {
+      setLoading(true);
+      if (files) {
+        const res = await uploadFiles();
+        if (res?.error) {
+          setFiles([]);
+          setHasChanged(false);
+          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
+          setLoading(false);
+          return;
+        }
+      }
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
       if (!ok) {
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
         setLoading(false);
         return;
       }
@@ -98,13 +114,13 @@ export default function StepUpload() {
       history.push("/");
     } catch (e) {
       capture(e);
-      setError({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
+      setLoading(false);
     }
-    setLoading(false);
   }
+
+  const isEnabled =
+    (!corrections?.length && young.files.cniFiles != null && date != null && !loading && !error.text) || (corrections?.length && hasChanged && !loading && !error.text);
 
   if (!category) return <div>Loading</div>;
   return (
@@ -114,7 +130,7 @@ export default function StepUpload() {
       onSubmit={onSubmit}
       modeCorrection={corrections?.length > 0}
       onCorrection={onCorrect}
-      disabled={!young.files.cniFiles || !date || loading}
+      disabled={!isEnabled}
       loading={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {corrections
@@ -143,7 +159,11 @@ export default function StepUpload() {
         id="file-upload"
         name="file-upload"
         accept=".png, .jpg, .jpeg, .pdf"
-        onChange={(e) => setFiles(files.concat(Array.from(e.target.files)))}
+        onChange={(e) => {
+          setFiles(files.concat(Array.from(e.target.files)));
+          setError({});
+          setHasChanged(true);
+        }}
         className="hidden"
       />
       <div className="flex w-full my-4">
@@ -171,6 +191,7 @@ export default function StepUpload() {
         </a>
         .
       </div>
+      {error?.text && young?.files?.cniFiles?.length + files?.length > 2 && <MyDocs />}
       {(files || date) && (
         <>
           <hr className="my-8 h-px bg-gray-200 border-0" />
@@ -194,6 +215,7 @@ export default function StepUpload() {
                 value={date}
                 onChange={(date) => {
                   setDate(date?.setUTCHours(11, 0, 0));
+                  setHasChanged(true);
                 }}
               />
             </div>
