@@ -26,7 +26,7 @@ export default function DesktopPageContainer({
     <>
       <Navbar onSave={onSave} />
       <div className="bg-[#f9f6f2] text-[#161616]">
-        <div className="w-full md:w-[50rem] drop-shadow bg-white mx-auto px-[1rem] md:px-[6rem] pt-14 pb-4">
+        <div className="w-full md:w-[50rem] bg-white mx-auto px-[1rem] md:px-[6rem] pt-14 pb-4">
           <div className="flex justify-between items-center mt-2">
             <h1 className="text-xl font-bold">{title}</h1>
             <a className="hover:scale-105" href={questionMarckLink} target="_blank" rel="noreferrer">
@@ -36,7 +36,7 @@ export default function DesktopPageContainer({
           {subTitle && <div className="text-gray-800 mt-2 text-sm">{subTitle}</div>}
           <hr className="my-4 h-px bg-gray-200 border-0" />
           {children}
-          <div className="w-full mx-auto fixed bottom-0 bg-red-600 shadow-ninaInverted md:shadow-none py-4 px-[1rem] md:px-0 ">
+          <div className="w-full mx-auto fixed md:relative bottom-0 left-0 bg-white shadow-ninaInverted md:shadow-none py-4 px-[1rem] md:px-0 ">
             <hr className="mb-8 h-px bg-gray-200 border-0 hidden md:block" />
             <div className="flex justify-end gap-2">
               {onClickPrevious && (
