@@ -158,6 +158,7 @@ export default function StepUpload() {
         accept=".png, .jpg, .jpeg, .pdf"
         onChange={(e) => {
           setFiles(files.concat(Array.from(e.target.files)));
+          setError({});
           setHasChanged(true);
         }}
         className="hidden"
