@@ -8,6 +8,7 @@ const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
 const passport = require("passport");
 const { ROLES } = require("snu-lib");
+const { ADMIN_URL } = require("../config");
 
 // Takes either a young ID in route parameter or young data in request body (for edition or signup pages).
 // Minimum data required: birthdateAt, zip || department and (if schooled) grade.
@@ -41,7 +42,8 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
         young = body;
       }
 
-      const sessions = user.role === ROLES.ADMIN ? await getAllSessions(young) : await getAvailableSessions(young);
+      const bypassFilter = user.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL;
+      const sessions = bypassFilter ? await getAllSessions(young) : await getAvailableSessions(young);
       if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
