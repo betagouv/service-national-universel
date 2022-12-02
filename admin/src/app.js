@@ -33,6 +33,7 @@ import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
 import TableDeRepartition from "./scenes/plan-transport/table-repartition";
 import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
+import LigneBus from "./scenes/plan-transport/ligne-bus";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -204,6 +205,9 @@ const Home = () => {
             {/* Plan de transport */}
             {/* Table de répartition */}
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+            {/* Ligne de bus */}
+            <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
+
             {/* Schéma de répartition */}
             <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
