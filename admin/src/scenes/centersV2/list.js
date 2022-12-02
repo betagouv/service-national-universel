@@ -370,7 +370,7 @@ const ListCenter = ({ firstSession }) => {
             }}
             icon={<BsDownload className="text-gray-400" />}
             transform={(all) => {
-              return all.map((data) => {
+              return all?.map((data) => {
                 return {
                   Nom: data?.name,
                   Id: data._id.toString(),
