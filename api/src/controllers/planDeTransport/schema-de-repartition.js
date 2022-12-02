@@ -363,7 +363,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
                   branches: [
                     {
                       case: { $eq: ["$intradepartmental", "true"] },
-                      then: 1,
+                      then: "$youngsVolume",
                     },
                   ],
                   default: 0,
@@ -376,7 +376,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
       .exec();
     let repartitionSet = {};
     for (const line of repartitionResult) {
-      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAsigned: line.intradepartmentalAsigned };
+      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAssigned: line.intradepartmentalAssigned };
     }
 
     // --- global data
@@ -389,17 +389,19 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
     // --- Format result
     const rows = filledRegions.map((r) => {
+      const young = youngSet[r.fromRegion] ? youngSet[r.fromRegion] : { total: 0, intradepratmental: 0 };
+      const repartition = repartitionSet[r.fromRegion] ? repartitionSet[r.fromRegion] : { assigned: 0, intradepartmentalAssigned: 0 };
+
+      repartition.assigned = Math.min(repartition.assigned, young.total);
+      repartition.intradepartmentalAssigned = Math.min(repartition.intradepartmentalAssigned, young.intradepartmental);
+
       return {
         name: r.fromRegion,
         capacity: r.extraCapacity,
         centers: r.extraCenters,
         intraCapacity: r.intraCapacity,
-        total: 0,
-        intradepartmental: 0,
-        ...youngSet[r.fromRegion],
-        assigned: 0,
-        intradepartmentalAssigned: 0,
-        ...repartitionSet[r.fromRegion],
+        ...young,
+        ...repartition,
       };
     });
 
@@ -536,33 +538,33 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     console.log("YOUNG RESULT: ", youngSet);
 
     // --- assigned
-    const repartitionResult = await schemaRepartitionModel
-      .aggregate([
-        { $match: { cohort, fromRegion: region } },
-        {
-          $group: {
-            _id: "$fromDepartment",
-            assigned: { $sum: "$youngsVolume" },
-            intradepartmentalAssigned: {
-              $sum: {
-                $switch: {
-                  branches: [
-                    {
-                      case: { $eq: ["$intradepartmental", "true"] },
-                      then: 1,
-                    },
-                  ],
-                  default: 0,
-                },
+    const schemaPipeline = [
+      { $match: { cohort, fromRegion: region } },
+      {
+        $group: {
+          _id: "$fromDepartment",
+          assigned: { $sum: "$youngsVolume" },
+          intradepartmentalAssigned: {
+            $sum: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ["$intradepartmental", "true"] },
+                    then: "$youngsVolume",
+                  },
+                ],
+                default: 0,
               },
             },
           },
         },
-      ])
-      .exec();
+      },
+    ];
+    console.log("SCHEMA PIPE: ", JSON.stringify(schemaPipeline, null, 4));
+    const repartitionResult = await schemaRepartitionModel.aggregate(schemaPipeline).exec();
     let repartitionSet = {};
     for (const line of repartitionResult) {
-      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAsigned: line.intradepartmentalAsigned };
+      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAssigned: line.intradepartmentalAssigned };
     }
 
     // --- Format result
@@ -576,17 +578,19 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         };
       }),
       rows: filledDepartments.map((r) => {
+        const young = youngSet[r.fromDepartment] ? youngSet[r.fromDepartment] : { total: 0, intradepratmental: 0 };
+        const repartition = repartitionSet[r.fromDepartment] ? repartitionSet[r.fromDepartment] : { assigned: 0, intradepartmentalAssigned: 0 };
+
+        repartition.assigned = Math.min(repartition.assigned, young.total);
+        repartition.intradepartmentalAssigned = Math.min(repartition.intradepartmentalAssigned, young.intradepartmental);
+
         return {
           name: r.fromDepartment,
           capacity: r.extraCapacity,
           centers: r.extraCenters,
           intraCapacity: r.intraCapacity,
-          total: 0,
-          intradepartmental: 0,
-          ...youngSet[r.fromDepartment],
-          assigned: 0,
-          intradepartmentalAssigned: 0,
-          ...repartitionSet[r.fromDepartment],
+          ...young,
+          ...repartition,
         };
       }),
     };
@@ -661,14 +665,13 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         },
       },
     ];
-    console.log("TO CENTER PIPE: ", JSON.stringify(toCenterPipeline, null, 4));
+    // console.log("TO CENTER PIPE: ", JSON.stringify(toCenterPipeline, null, 4));
     const toCenterResult = await sessionPhase1Model.aggregate(toCenterPipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
-
-    console.log("TO CENTER SET: ", toCenterSet);
+    // console.log("TO CENTER SET: ", toCenterSet);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -715,6 +718,9 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       }
       assigned += schema.youngsVolume;
     }
+    // limit to existing.
+    assigned = Math.min(assigned, youngValues.total);
+    intradepartmentalAssigned = Math.min(intradepartmentalAssigned, youngValues.intradepartmental);
 
     // --- Format result
     let data = {

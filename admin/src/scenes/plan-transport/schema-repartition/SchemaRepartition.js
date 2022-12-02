@@ -368,7 +368,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <AlertPoint threshold={50} value={row.capacity - row.assigned} />
-                      <span>{row.capacity - row.assigned}</span>
+                      <span>{Math.max(0, row.capacity - row.assigned)}</span>
                     </div>
                   )}
                 </td>
@@ -378,10 +378,12 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <div className="">{row.intradepartmental}</div>
-                      <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="mx-[8px]">
-                        {formatRate(row.intradepartmentalAssigned, row.intradepartmental)}
-                      </Badge>
-                      <Link to="">
+                      {row.intradepartmental > 0 && (
+                        <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="ml-2">
+                          {formatRate(row.intradepartmentalAssigned, row.intradepartmental)} affectés
+                        </Badge>
+                      )}
+                      <Link to="" className="ml-2">
                         <ExternalLink className="text-[#9CA3AF]" />
                       </Link>
                     </div>
@@ -393,7 +395,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />
-                      {row.intraCapacity - row.intradepartmentalAssigned}
+                      {Math.max(0, row.intraCapacity - row.intradepartmentalAssigned)}
                     </div>
                   )}
                 </td>
