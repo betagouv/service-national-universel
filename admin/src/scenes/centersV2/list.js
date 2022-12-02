@@ -179,25 +179,28 @@ const ListSession = ({ firstSession }) => {
                 .map((data) => {
                   const center = centerList.find((e) => e?.id?.toString() === data?.cohesionCenterId?.toString());
                   return {
-                    "Cohort de la session": data.cohort,
-                    "Place total de la session": data.placesTotal,
-                    "Place restante de la session": data.placesLeft,
-                    "Statut de la session": translate(data.status),
-                    "Nom du centre": center?.name,
                     "Id centre": center?.id?.toString(),
                     "Code du centre": center?.code2022,
+                    "Nom du centre": center?.name,
                     "Désignation du centre": center?.centerDesignation,
+                    "Id de la session": data?._id?.toString(),
+                    "Cohort de la session": data.cohort,
+                    "Statut de la session": translate(data.status),
                     "Accessibilité aux personnes à mobilité réduite": translate(center?.pmr),
                     "Capacité maximale d'accueil": center?.placesTotal,
+                    "Place total de la session": data.placesTotal,
+                    "Place restante de la session": data.placesLeft,
                     Typologie: translateTypologieCenter(center?.typology),
                     Domaine: translateDomainCenter(center?.domain),
                     "Gestionnaire ou propriétaire": center?.complement,
-                    Académie: center?.academy,
                     Adresse: center?.address,
                     Ville: center?.city,
                     "Code postal": center?.zip,
                     Département: center?.department,
+                    Académie: center?.academy,
                     Région: center?.region,
+                    "Créé lé": formatLongDateFR(data.createdAt),
+                    "Mis à jour le": formatLongDateFR(data.updatedAt),
                   };
                 });
             }}
@@ -372,9 +375,9 @@ const ListCenter = ({ firstSession }) => {
             transform={(all) => {
               return all?.map((data) => {
                 return {
-                  Nom: data?.name,
                   Id: data._id.toString(),
                   "Code du centre": data?.code2022,
+                  Nom: data?.name,
                   "Désignation du centre": data?.centerDesignation,
                   "Cohorte(s)": data?.cohorts?.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]).join(", "),
                   "Accessibilité aux personnes à mobilité réduite": translate(data?.pmr),
@@ -382,11 +385,11 @@ const ListCenter = ({ firstSession }) => {
                   Typologie: translateTypologieCenter(data?.typology),
                   Domaine: translateDomainCenter(data?.domain),
                   "Gestionnaire ou propriétaire": data?.complement,
-                  Académie: data?.academy,
                   Adresse: data?.address,
                   Ville: data?.city,
                   "Code postal": data?.zip,
                   Département: data?.department,
+                  Académie: data?.academy,
                   Région: data?.region,
                   "Créé lé": formatLongDateFR(data.createdAt),
                   "Mis à jour le": formatLongDateFR(data.updatedAt),
