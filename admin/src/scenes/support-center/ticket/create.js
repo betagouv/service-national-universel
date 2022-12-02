@@ -10,16 +10,25 @@ import { capture } from "../../../sentry";
 
 import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure, step1Public } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
-import api from "../../../services/api";
+import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
+import api from "../../../services/api";
 
 export default function Create(props) {
+  const { files, addFiles, deleteFile, error } = useFileUpload();
+  const [isLoading, setLoading] = useState(false);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const fromPage = new URLSearchParams(props.location.search).get("from");
 
   const [typesList, setTypeList] = useState([]);
   const [subjectsList, setSubjectsList] = useState([]);
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   useEffect(() => {
     if (!user) return;
@@ -61,6 +70,17 @@ export default function Create(props) {
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
+              setLoading(true);
+              let uploadedFiles;
+              if (files.length > 0) {
+                const filesResponse = await api.uploadFile("/zammood/upload", files);
+                if (!filesResponse.ok) {
+                  setLoading(false);
+                  const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
+                  return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
+                }
+                uploadedFiles = filesResponse.data;
+              }
               const { subject, type, message, messageSubject } = values;
               let title = type?.label;
               if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
@@ -69,6 +89,7 @@ export default function Create(props) {
                 message,
                 subject: title,
                 fromPage,
+                files: uploadedFiles,
               });
               if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               toastr.success("Demande envoyée");
@@ -77,6 +98,7 @@ export default function Create(props) {
               console.log(e);
               capture(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
+            } finally {
             }
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
@@ -135,9 +157,20 @@ export default function Create(props) {
                 touched={touched}
                 rows="5"
               />
-              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting} loading={isSubmitting}>
-                Envoyer
-              </ContinueButton>
+              <FileUpload
+                disabled={isLoading}
+                className="px-[15px]"
+                files={files}
+                addFiles={addFiles}
+                deleteFile={deleteFile}
+                filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
+              />
+              <div className="flex md:flex-row flex-col mt-[15px] ml-[15px] items-start">
+                <LoadingButton loading={isLoading} type="submit" className="w-[105px] shrink-0" onClick={handleSubmit} disabled={isSubmitting}>
+                  Envoyer
+                </LoadingButton>
+                {isLoading && files.length > 0 && <div className="text-gray-500 text-sm mt-2 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+              </div>
             </>
           )}
         </Formik>

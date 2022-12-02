@@ -6,7 +6,7 @@ import { BsDownload } from "react-icons/bs";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
+import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateTypologieCenter, translateDomainCenter } from "../../utils";
 
 import { COHESION_STAY_START, COHORTS } from "snu-lib";
 
@@ -158,42 +158,51 @@ const ListSession = ({ firstSession }) => {
               button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
               loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
-            transform={(all) => {
-              return all.map((data) => {
-                let statutExport = {};
-                COHORTS.forEach((cohort) => {
-                  statutExport[`${cohort} statut`] = "";
-                  data.cohorts.map((e, index) => {
-                    if (e === cohort) {
-                      if (data.sessionStatus !== undefined) {
-                        statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
-                      }
-                    }
-                  });
-                });
-                return {
-                  Nom: data.name,
-                  id: data._id,
-                  "Code (2021)": data.code,
-                  "Code (2022)": data.code2022,
-                  "Cohorte(s)": data.cohorts?.join(", "),
-                  COR: data.COR,
-                  "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
-                  Adresse: data.address,
-                  Ville: data.city,
-                  "Code Postal": data.zip,
-                  "N˚ Département": data.departmentCode,
-                  Département: data.department,
-                  Région: data.region,
-                  "Places total": data.placesTotal,
-                  "Places disponibles": data.placesLeft,
-                  "Tenues livrées": data.outfitDelivered,
-                  Observations: data.observations,
-                  "Créé lé": formatLongDateFR(data.createdAt),
-                  "Mis à jour le": formatLongDateFR(data.updatedAt),
-                  ...statutExport,
-                };
+            transform={async (all) => {
+              const { responses } = await api.esQuery("cohesioncenter", {
+                size: ES_NO_LIMIT,
+                query: { match_all: {} },
+                track_total_hits: true,
               });
+
+              const centerList = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+
+              return all
+                .sort(function (a, b) {
+                  let res = a?.nameCentre?.localeCompare(b?.nameCentre);
+
+                  if (res === 0) {
+                    res = COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort];
+                  }
+                  return res;
+                })
+                .map((data) => {
+                  const center = centerList.find((e) => e?.id?.toString() === data?.cohesionCenterId?.toString());
+                  return {
+                    "Id centre": center?.id?.toString(),
+                    "Code du centre": center?.code2022,
+                    "Nom du centre": center?.name,
+                    "Désignation du centre": center?.centerDesignation,
+                    "Id de la session": data?._id?.toString(),
+                    "Cohort de la session": data.cohort,
+                    "Statut de la session": translate(data.status),
+                    "Accessibilité aux personnes à mobilité réduite": translate(center?.pmr),
+                    "Capacité maximale d'accueil": center?.placesTotal,
+                    "Place total de la session": data.placesTotal,
+                    "Place restante de la session": data.placesLeft,
+                    Typologie: translateTypologieCenter(center?.typology),
+                    Domaine: translateDomainCenter(center?.domain),
+                    "Gestionnaire ou propriétaire": center?.complement,
+                    Adresse: center?.address,
+                    Ville: center?.city,
+                    "Code postal": center?.zip,
+                    Département: center?.department,
+                    Académie: center?.academy,
+                    Région: center?.region,
+                    "Créé lé": formatLongDateFR(data.createdAt),
+                    "Mis à jour le": formatLongDateFR(data.updatedAt),
+                  };
+                });
             }}
           />
         </div>
@@ -364,39 +373,26 @@ const ListCenter = ({ firstSession }) => {
             }}
             icon={<BsDownload className="text-gray-400" />}
             transform={(all) => {
-              return all.map((data) => {
-                let statutExport = {};
-                COHORTS.forEach((cohort) => {
-                  statutExport[`${cohort} statut`] = "";
-                  data.cohorts.map((e, index) => {
-                    if (e === cohort) {
-                      if (data.sessionStatus !== undefined) {
-                        statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
-                      }
-                    }
-                  });
-                });
+              return all?.map((data) => {
                 return {
-                  Nom: data.name,
-                  id: data._id,
-                  "Code (2021)": data.code,
-                  "Code (2022)": data.code2022,
-                  "Cohorte(s)": data.cohorts?.join(", "),
-                  COR: data.COR,
-                  "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
-                  Adresse: data.address,
-                  Ville: data.city,
-                  "Code Postal": data.zip,
-                  "N˚ Département": data.departmentCode,
-                  Département: data.department,
-                  Région: data.region,
-                  "Places total": data.placesTotal,
-                  "Places disponibles": data.placesLeft,
-                  "Tenues livrées": data.outfitDelivered,
-                  Observations: data.observations,
+                  Id: data._id.toString(),
+                  "Code du centre": data?.code2022,
+                  Nom: data?.name,
+                  "Désignation du centre": data?.centerDesignation,
+                  "Cohorte(s)": data?.cohorts?.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]).join(", "),
+                  "Accessibilité aux personnes à mobilité réduite": translate(data?.pmr),
+                  "Capacité maximale d'accueil": data?.placesTotal,
+                  Typologie: translateTypologieCenter(data?.typology),
+                  Domaine: translateDomainCenter(data?.domain),
+                  "Gestionnaire ou propriétaire": data?.complement,
+                  Adresse: data?.address,
+                  Ville: data?.city,
+                  "Code postal": data?.zip,
+                  Département: data?.department,
+                  Académie: data?.academy,
+                  Région: data?.region,
                   "Créé lé": formatLongDateFR(data.createdAt),
                   "Mis à jour le": formatLongDateFR(data.updatedAt),
-                  ...statutExport,
                 };
               });
             }}

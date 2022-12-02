@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import Bin from "../assets/icons/Bin";
+import Bin from "../assets/Bin";
 
 const FILES_ACCEPTED = {
   word: [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],

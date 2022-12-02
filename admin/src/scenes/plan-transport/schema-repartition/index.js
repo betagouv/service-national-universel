@@ -10,9 +10,9 @@ export default function SchemaRepartitionIndex(props) {
   // const cohort = props.match &&
   return (
     <Switch>
-      <SentryRoute path="/plan-de-transport/schema-repartition/:region/:department" component={() => <SchemaRepartition region={region} department={department} />} />
-      <SentryRoute path="/plan-de-transport/schema-repartition/:region" component={() => <SchemaRepartition region={region} />} />
-      <SentryRoute path="/plan-de-transport/schema-repartition" component={() => <SchemaRepartition />} />
+      <SentryRoute path="/schema-repartition/:region/:department" component={() => <SchemaRepartition region={region} department={department} />} />
+      <SentryRoute path="/schema-repartition/:region" component={() => <SchemaRepartition region={region} />} />
+      <SentryRoute path="/schema-repartition" component={() => <SchemaRepartition />} />
     </Switch>
   );
 }

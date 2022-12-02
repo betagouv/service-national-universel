@@ -93,13 +93,13 @@ export default function TicketCreate(props) {
                 setLoading(false);
                 return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               }
-              setLoading(false);
               toastr.success("Demande envoyée");
               history.push("/besoin-d-aide");
             } catch (e) {
               capture(e);
-              setLoading(false);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
+            } finally {
+              setLoading(false);
             }
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (

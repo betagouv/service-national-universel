@@ -136,26 +136,26 @@ export default function SchemaRepartition({ region, department }) {
 
   function goToNational() {
     console.log("goTo national...");
-    history.push("/plan-de-transport/schema-repartition?cohort=" + cohort);
+    history.push("/schema-repartition?cohort=" + cohort);
   }
 
   function goToRegion() {
     if (region) {
-      history.push(`/plan-de-transport/schema-repartition/${region}?cohort=${cohort}`);
+      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
     }
   }
 
   // function goToDepartment() {
   //   if (region && department) {
-  //     history.push(`/plan-de-transport/schema-repartition/${region}/${department}?cohort=${cohort}`);
+  //     history.push(`/schema-repartition/${region}/${department}?cohort=${cohort}`);
   //   }
   // }
 
   function goToRow(row) {
     if (region) {
-      history.push(`/plan-de-transport/schema-repartition/${region}/${row.name}?cohort=${cohort}`);
+      history.push(`/schema-repartition/${region}/${row.name}?cohort=${cohort}`);
     } else {
-      history.push(`/plan-de-transport/schema-repartition/${row.name}?cohort=${cohort}`);
+      history.push(`/schema-repartition/${row.name}?cohort=${cohort}`);
     }
   }
 
@@ -165,7 +165,7 @@ export default function SchemaRepartition({ region, department }) {
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Schéma de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Schéma de répartition" }]} />
       <div className="p-[30px]">
         <div className="flex items-center justify-between">
           <PlanTransportBreadcrumb
@@ -317,7 +317,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
           ))}
         </ul>
       )}
-      <Link to="/plan-de-transport/tableau-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
+      <Link to="/tableau-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
         Table de répartition <ChevronRight className="ml-[5px]" />
       </Link>
     </Box>
