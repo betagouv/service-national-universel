@@ -1,3 +1,17 @@
+# [1.178.0](https://github.com/betagouv/service-national-universel/compare/v1.177.0...v1.178.0) (2022-12-02)
+
+
+### Bug Fixes
+
+* **admin:** order session by date in list center [#2104](https://github.com/betagouv/service-national-universel/issues/2104) ([0e4e13c](https://github.com/betagouv/service-national-universel/commit/0e4e13c81b18c562cae90f457ecfb6fe46b6a205))
+* **api/admin:** schéma de répartition : cohérence des données + finalisation ([#2100](https://github.com/betagouv/service-national-universel/issues/2100)) ([1471872](https://github.com/betagouv/service-national-universel/commit/1471872f5fe732a85320772745db2dacabbd1499))
+
+
+### Features
+
+* **admin:** export centre / session ([#2105](https://github.com/betagouv/service-national-universel/issues/2105)) ([a17037d](https://github.com/betagouv/service-national-universel/commit/a17037d1996583ad8e65ed156b9e21f0cd1b18eb))
+* **admin:** file upload from contact form ([#2097](https://github.com/betagouv/service-national-universel/issues/2097)) ([730c040](https://github.com/betagouv/service-national-universel/commit/730c0401ed209c0ed33d94db1d627e65e4920ddd))
+
 # [1.177.0](https://github.com/betagouv/service-national-universel/compare/v1.176.0...v1.177.0) (2022-12-01)
 
 
