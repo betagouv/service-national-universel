@@ -117,7 +117,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  meetingPointsId: {
+  meetingPointsIds: {
     type: [String],
     required: true,
     documentation: {

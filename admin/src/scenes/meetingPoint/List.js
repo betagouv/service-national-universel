@@ -32,7 +32,7 @@ export default function MeetingPoint() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport" }]} />
       <div className="m-4">
         <ReactiveBase url={`${apiURL}/es`} app="meetingpoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <div className="flex flex-row justify-between items-center">
