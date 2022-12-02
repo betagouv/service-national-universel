@@ -265,6 +265,7 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
     if (isNaN(placesTotalModified) || placesTotalModified === "" || placesTotalModified < 0) return 0.1;
     const percentage = (((placesTotal - placesLeft) * 100) / placesTotalModified).toFixed(2);
     if (percentage < 0 || percentage === Number.NEGATIVE_INFINITY) return 0.1;
+    if (isNaN(percentage)) return 0.1;
     return percentage;
   };
   const [occupationPercentage, setOccupationPercentage] = useState(0);
