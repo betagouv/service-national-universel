@@ -200,10 +200,15 @@ const Home = () => {
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
+
+            {/* Plan de transport */}
+            {/* Table de répartition */}
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+            {/* Schéma de répartition */}
             <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>
