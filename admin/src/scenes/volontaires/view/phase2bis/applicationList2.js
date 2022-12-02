@@ -50,7 +50,8 @@ export default function ApplicationList({ young, onChangeApplication }) {
 const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
   const [tags, setTags] = useState();
-
+  const [contract, setContract] = useState();
+  const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const history = useHistory();
   useEffect(() => {
     (async () => {
@@ -65,6 +66,14 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       data?.city && t.push(data?.city + (data?.zip ? ` - ${data?.zip}` : ""));
       (data?.domains || []).forEach((d) => t.push(translate(d)));
       setTags(t);
+      if (!hit.contractId) return;
+      const { ok: okContract, data: dataContract, code: codeContract } = await api.get(`/contract/${hit.contractId}`);
+      if (!okContract) {
+        capture(codeContract);
+        return toastr.error("Oups, une erreur est survenue", codeContract);
+      }
+      console.log(dataContract);
+      setContract(dataContract);
     })();
   }, []);
 
@@ -121,10 +130,37 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
 
           {/* places disponibles */}
           <div className="flex basis-[25%]">
-            {mission.placesLeft <= 1 ? (
-              <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} place disponible</div>
+            {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) ? (
+              <div className="flex flex-col">
+                {contract?.invitationSent ? (
+                  <div className="font-medium text-xs text-gray-700 ">Contrat {contract?.youngContractStatus === "VALIDATED" ? "signé" : "envoyé"}</div>
+                ) : (
+                  <div className="flex flex-row items-center">
+                    <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
+                    <div className="font-medium text-xs text-gray-700 ml-1">Contrat en brouillon</div>
+                  </div>
+                )}
+                {numberOfFiles === 1 && (
+                  <div className="flex flex-row items-center mt-1">
+                    <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
+                    <div className="font-medium text-xs text-gray-700 ml-1">1 pièce jointe</div>
+                  </div>
+                )}
+                {numberOfFiles > 1 && (
+                  <div className="flex flex-row items-center mt-1">
+                    <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
+                    <div className="font-medium text-xs text-gray-700 ml-1">{numberOfFiles} pièces jointes</div>
+                  </div>
+                )}
+              </div>
             ) : (
-              <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} places disponibles</div>
+              <>
+                {mission.placesLeft <= 1 ? (
+                  <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
+                ) : (
+                  <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
+                )}
+              </>
             )}
           </div>
           <div>

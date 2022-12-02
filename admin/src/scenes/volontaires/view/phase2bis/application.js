@@ -22,6 +22,7 @@ import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import FileCard from "../../../../components/FileCard";
 import YoungHeader from "../../../phase0/components/YoungHeader";
+import Loader from "../../../../components/Loader";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -113,7 +114,7 @@ export default function Phase2Application({ young, onChange }) {
     getContract();
   }, [application]);
 
-  if (!application || !mission) return "chargement";
+  if (!application || !mission) return <Loader />;
 
   return (
     <>
@@ -190,7 +191,7 @@ export default function Phase2Application({ young, onChange }) {
               </Link>
               <div className="flex flex-1 py-2" />
             </div>
-            <div className="border-x border-x-gray-200 basis-[40%] items-center my-4">
+            <div className="border-x border-x-gray-200 basis-[40%] items-center justify-center my-4">
               <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
@@ -200,11 +201,13 @@ export default function Phase2Application({ young, onChange }) {
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
                 <div className="flex items-center gap-2 font-bold text-2xl text-[#242526]">
                   <div>{application?.missionDuration || "0"}h</div>
-                  <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
-                    <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
-                      <Pencil width={16} height={16} />
+                  {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
+                    <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
+                      <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
+                        <Pencil width={16} height={16} />
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -222,7 +225,7 @@ export default function Phase2Application({ young, onChange }) {
                     </div>
                   </div>
                   <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
-                  {contract?.invitationSent && (
+                  {contract?.invitationSent ? (
                     <div className="grid gap-4 grid-cols-4   mt-4">
                       <StatusContractPeople
                         value={contract?.projectManagerStatus}
@@ -282,13 +285,15 @@ export default function Phase2Application({ young, onChange }) {
                         </>
                       )}
                     </div>
+                  ) : (
+                    <div
+                      onClick={() => {
+                        history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
+                      }}
+                      className="cursor-pointer py-2 rounded-md mt-7 bg-blue-600 w-48 max-w-xs items-center flex justify-center">
+                      <div className="text-white">Editer</div>
+                    </div>
                   )}
-                </div>
-                <div
-                  onClick={() => {
-                    history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contract`);
-                  }}>
-                  Contrat d&apos;engagement;
                 </div>
               </div>
               <div className="mx-8 mt-8 pb-8">

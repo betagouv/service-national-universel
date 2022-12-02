@@ -5,7 +5,6 @@ import { SentryRoute } from "../../../../sentry";
 import Phase2Application from "./application";
 import View from "./view";
 import History from "./history";
-import Contract from "../../../../components/Contract";
 
 export default function Index({ young, getYoung }) {
   if (!young) return <div />;
@@ -13,7 +12,6 @@ export default function Index({ young, getYoung }) {
     <>
       <Switch>
         <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/historique" component={() => <History young={young} onChange={getYoung} />} />
-        <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contract" component={() => <Contract young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/application/:applicationId" component={() => <Phase2Application young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2" component={() => <View young={young} onChange={getYoung} />} />
       </Switch>
