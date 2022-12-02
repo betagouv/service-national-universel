@@ -122,7 +122,7 @@ function CenterDetail({ center }) {
         </div>
 
         <div className="">
-          {center.groups &&
+          {center.groups && center.groups.length > 0 ? (
             center.groups.map((group, index) => (
               <div key={"group-" + index} className="flex items-center mb-3">
                 <div className="flex items-center mr-7 w-[50px]">
@@ -134,13 +134,16 @@ function CenterDetail({ center }) {
                   <div className="text-sm text-gray-500">{group.region}</div>
                 </div>
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="opacity-50 text-center">Aucun groupe pour l&apos;instant.</div>
+          )}
         </div>
 
-        <div className="flex items-center pt-4 border-t border-t-gray-200 mt-2">
-          <People className="text-gray-400 mr-1.5" />
-          <div className="text-base text-gray-900 font-bold">{center.affectedYoungs} volontaires accueillis&nbsp;</div>
-          <div className="text-sm text-gray-500"> / {center.placesTotal} places</div>
+        <div className="pt-4 border-t border-t-gray-200 mt-2 align-middle">
+          <People className="inline-block text-gray-400 mr-1.5 mb-[5px]" />
+          <span className="text-base text-gray-900 font-bold">{center.affectedYoungs} volontaires accueillis&nbsp;</span>
+          <span className="text-sm text-gray-500"> / {center.placesTotal} places</span>
         </div>
       </div>
     </div>
