@@ -138,6 +138,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
         <>
           <DrawerTab to="/table-repartition" title="Tableau de répartition" onClick={onClick} />
           <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+          <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
         </>
       )}
       {ssoSupportStorage === "sso-support" ? (

@@ -123,3 +123,14 @@ export function GroupSummary({ group, className = "" }) {
     </div>
   );
 }
+export const TabItem = ({ active, title, icon, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-snu-purple-800 ${
+      active ? "!text-snu-purple-800 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
+    }`}>
+    <div className={"flex items-center gap-2"}>
+      {icon} {title}
+    </div>
+  </div>
+);
