@@ -201,6 +201,8 @@ const Home = () => {
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+            <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
+            <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
