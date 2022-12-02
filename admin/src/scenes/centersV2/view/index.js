@@ -13,6 +13,8 @@ import Trash from "../../../assets/icons/Trash.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
 
+import { COHESION_STAY_START } from "snu-lib";
+
 import Field from "../components/Field";
 import Select from "../components/Select";
 
@@ -74,10 +76,12 @@ export default function Index({ ...props }) {
       if (allSessions.data.length === 0) setSessions([]);
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+        allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
         if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
+        sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(sessionFiltered);
         if (!blockFocus) setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       }
