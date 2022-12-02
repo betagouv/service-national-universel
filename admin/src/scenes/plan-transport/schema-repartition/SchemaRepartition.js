@@ -198,7 +198,7 @@ export default function SchemaRepartition({ region, department }) {
             <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
           </>
         ) : (
-          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} />
+          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} />
         )}
       </div>
     </div>
@@ -324,7 +324,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
   );
 }
 
-function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail }) {
+function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort }) {
   function goToRow(row) {
     onGoToRow && onGoToRow(row);
   }
@@ -383,7 +383,12 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                           {formatRate(row.intradepartmentalAssigned, row.intradepartmental)} affectés
                         </Badge>
                       )}
-                      <Link to="" className="ml-2">
+                      <Link
+                        to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohort)}
+                        className="ml-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}>
                         <ExternalLink className="text-[#9CA3AF]" />
                       </Link>
                     </div>
@@ -406,4 +411,17 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
       </div>
     </Box>
   );
+}
+
+function getIntradepartmentalYoungsLink(region, department, cohort) {
+  let url =
+    "/volontaire?STATUS=" + encodeURIComponent('["VALIDATED"]') + "&COHORT=" + encodeURIComponent('["' + cohort + '"]') + "&SAME_DEPARTMENT=" + encodeURIComponent('["true"]');
+
+  if (department) {
+    url += "&DEPARTMENT=" + encodeURIComponent('["' + department + '"]');
+  } else if (region) {
+    url += "&REGION=" + encodeURIComponent('["' + region + '"]');
+  }
+
+  return url;
 }
