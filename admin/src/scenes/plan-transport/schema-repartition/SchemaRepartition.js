@@ -68,7 +68,9 @@ export default function SchemaRepartition({ region, department }) {
 
     if (data.toCenters) {
       for (const row of data.toCenters) {
-        toRegions.push({ name: row.name, departments: row.departments });
+        if (row.name !== "all") {
+          toRegions.push({ name: row.name, departments: row.departments });
+        }
         capacity += row.capacity ? row.capacity : 0;
         centers += row.centers ? row.centers : 0;
       }
@@ -251,7 +253,7 @@ function BoxAffectation({ summary, className = "", loading }) {
             </div>
             <div className="flex items-center mr-[16px] text-[12px] leading-[14px] text-[#1F2937]">
               <div className="rounded-[100px] w-[7px] h-[7px] bg-[#E5E7EB]" />
-              <b className="mx-[5px]">{summary.total - summary.assigned}</b>
+              <b className="mx-[5px]">{Math.max(0, summary.total - summary.assigned)}</b>
               <span>restants</span>
             </div>
           </div>
@@ -262,7 +264,6 @@ function BoxAffectation({ summary, className = "", loading }) {
 }
 
 function BoxDisponibilite({ summary, className = "", loading, isNational }) {
-  console.log("summary: ", summary);
   return (
     <Box className={`flex flex-column justify-between pb-[0px] ${className}`}>
       <div>
@@ -279,7 +280,11 @@ function BoxDisponibilite({ summary, className = "", loading, isNational }) {
         )}
       </div>
       <div className="mt-[30px] h-[130px]">
-        {loading ? <Loading /> : <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={summary.capacity - summary.assigned} />}
+        {loading ? (
+          <Loading />
+        ) : (
+          <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={Math.max(0, summary.capacity - summary.assigned)} />
+        )}
       </div>
     </Box>
   );
@@ -303,7 +308,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
       {!isNational && loading ? (
         <Loading width="w-1/3" />
       ) : (
-        <ul className="list-none">
+        <ul className="list-none mb-6">
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
               <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>
@@ -363,7 +368,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <AlertPoint threshold={50} value={row.capacity - row.assigned} />
-                      <span>{row.capacity - row.assigned}</span>
+                      <span>{Math.max(0, row.capacity - row.assigned)}</span>
                     </div>
                   )}
                 </td>
@@ -373,10 +378,12 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <div className="">{row.intradepartmental}</div>
-                      <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="mx-[8px]">
-                        {formatRate(row.intradepartmentalAssigned, row.intradepartmental)}
-                      </Badge>
-                      <Link to="">
+                      {row.intradepartmental > 0 && (
+                        <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="ml-2">
+                          {formatRate(row.intradepartmentalAssigned, row.intradepartmental)} affectés
+                        </Badge>
+                      )}
+                      <Link to="" className="ml-2">
                         <ExternalLink className="text-[#9CA3AF]" />
                       </Link>
                     </div>
@@ -388,7 +395,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />
-                      {row.intraCapacity - row.intradepartmentalAssigned}
+                      {Math.max(0, row.intraCapacity - row.intradepartmentalAssigned)}
                     </div>
                   )}
                 </td>
