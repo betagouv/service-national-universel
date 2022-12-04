@@ -1,3 +1,10 @@
+## [1.178.1](https://github.com/betagouv/service-national-universel/compare/v1.178.0...v1.178.1) (2022-12-04)
+
+
+### Bug Fixes
+
+* **api:** remove useless slack info from cron ([457f867](https://github.com/betagouv/service-national-universel/commit/457f867226b938eea001d46d03244256702a0f41))
+
 # [1.178.0](https://github.com/betagouv/service-national-universel/compare/v1.177.0...v1.178.0) (2022-12-02)
 
 
