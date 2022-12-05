@@ -12,9 +12,7 @@ export default function View(props) {
   const [panelOpen, setPanelOpen] = React.useState(false);
   const getBus = async () => {
     try {
-      console.log(props);
       const id = props.match && props.match.params && props.match.params.id;
-      console.log("id", id);
       if (!id) return <div />;
       const { ok, code, data: reponsePDR } = await api.get(`/ligne-de-bus/${id}`);
       if (!ok) {
@@ -34,7 +32,7 @@ export default function View(props) {
   }, []);
 
   if (!data) return <div />;
-  console.log("data", data);
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: "/ligne-de-bus" }, { label: "Fiche ligne" }]} />
