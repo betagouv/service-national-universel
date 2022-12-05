@@ -118,6 +118,8 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     // check if session doesnt already exist
     if (center.cohorts.includes(value.cohort)) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
+    if (value.placesTotal > center.placesTotal) value.placesTotal = center.placesTotal;
+
     const newCohorts = center.cohorts;
     newCohorts.push(value.cohort);
 
