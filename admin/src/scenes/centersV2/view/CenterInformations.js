@@ -102,7 +102,7 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       const { ok, code, data: returnedData } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
         if (code === "ALREADY_EXISTS") {
-          toastr.error("Le code du centre existe déjà");
+          toastr.error("Le code du centre est déjà utilisé");
         } else {
           toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
         }
