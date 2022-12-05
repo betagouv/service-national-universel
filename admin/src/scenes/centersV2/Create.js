@@ -116,7 +116,7 @@ export default function Create() {
       else history.push(`/centre`);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la création du point du centre");
+      toastr.error("Oups, une erreur est survenue lors de la création du centre");
       setIsLoading(false);
     }
   };
