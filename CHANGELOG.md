@@ -1,3 +1,20 @@
+# [1.179.0](https://github.com/betagouv/service-national-universel/compare/v1.178.1...v1.179.0) (2022-12-05)
+
+
+### Bug Fixes
+
+* **admin:** Add numeros mobile fr ! ([3012344](https://github.com/betagouv/service-national-universel/commit/30123442baf2e29b7127c88589e3c88fd8fb730b))
+* **admin:** use citycode if BAN doesn't return postcode ([60f0f11](https://github.com/betagouv/service-national-universel/commit/60f0f113e3b049085cab32deb2018b1de2866fe7))
+* **admin/api:** Doublon code centre  ([#2113](https://github.com/betagouv/service-national-universel/issues/2113)) ([4f21760](https://github.com/betagouv/service-national-universel/commit/4f21760fa907387f677966ee38ea573f5c086ccf))
+* **api:** No expirationDate for military preparation files ([92efbdc](https://github.com/betagouv/service-national-universel/commit/92efbdcdd4e466a0431470726675487e812b3a73))
+* **app/api:** fix date eligibility ([#2109](https://github.com/betagouv/service-national-universel/issues/2109)) ([80db4f0](https://github.com/betagouv/service-national-universel/commit/80db4f0ff51d77f55914fc89121b91841d69bcd0))
+
+
+### Features
+
+* **admin:** Filter by schoolname ([7a043f5](https://github.com/betagouv/service-national-universel/commit/7a043f5de13fe83081d7d59e6ba64fb0c176eb95))
+* **admin:** ouverture prod centre + point de rassemblement + table de répartition  ([#2111](https://github.com/betagouv/service-national-universel/issues/2111)) ([7967fbf](https://github.com/betagouv/service-national-universel/commit/7967fbfcb1d3418bac9de4fc86ef7584cd799ac3))
+
 ## [1.178.1](https://github.com/betagouv/service-national-universel/compare/v1.178.0...v1.178.1) (2022-12-04)
 
 
