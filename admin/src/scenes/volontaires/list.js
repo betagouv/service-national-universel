@@ -51,6 +51,7 @@ import ModalExport from "../../components/modals/ModalExport";
 const FILTERS = [
   "SEARCH",
   "STATUS",
+  "SCHOOL",
   "COHORT",
   "ORIGINAL_COHORT",
   "COUNTRY",
@@ -567,6 +568,22 @@ export default function VolontaireList() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Sexe", "Sexe")}
                   showMissing
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="SCHOOL"
+                  dataField="schoolName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "École")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
