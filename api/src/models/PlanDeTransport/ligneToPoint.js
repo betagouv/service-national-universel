@@ -48,7 +48,7 @@ const Schema = new mongoose.Schema({
   transportType: {
     type: String,
     required: true,
-    enum: ["train", "bus", "fusée"],
+    enum: ["train", "bus", "fusée", "avion"],
     documentation: {
       description: "Type de transport",
     },
@@ -77,7 +77,7 @@ const Schema = new mongoose.Schema({
         },
         transportType: {
           type: String,
-          enum: ["train", "bus", "fusée"],
+          enum: ["train", "bus", "fusée", "avion"],
           documentation: {
             description: "Type de transport du point d'étape",
           },

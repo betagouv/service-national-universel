@@ -6,8 +6,6 @@ export default function Panel({ open, setOpen }) {
     setOpen(false);
   };
 
-  console.log("open 1", open);
-
   return (
     <PanelV2 title="Demandes de modifications" open={open} onClose={onClose}>
       test

@@ -12,9 +12,9 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/ligne-de-bus/historique" component={Historic} />
-      <SentryRoute path="/ligne-de-bus/demande-de-modification" component={() => <ListeDemandeModif />} />
-      <SentryRoute path="/ligne-de-bus/:id" component={() => <View />} />
-      <SentryRoute path="/ligne-de-bus" component={() => <List />} />
+      <SentryRoute path="/ligne-de-bus/demande-de-modification" component={ListeDemandeModif} />
+      <SentryRoute path="/ligne-de-bus/:id" component={View} />
+      <SentryRoute path="/ligne-de-bus" component={List} />
     </Switch>
   );
 }

@@ -3,6 +3,8 @@ const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const cohesionCenterModel = require("../../models/cohesionCenter");
 const { canViewLigneBus, canCreateLigneBus } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -32,13 +34,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
             departureHour: Joi.string().required(),
             meetingHour: Joi.string().required(),
             returnHour: Joi.string().required(),
-            transportType: Joi.string().required().valid("train", "bus", "fusée"),
+            transportType: Joi.string().required().valid("train", "bus", "fusée", "avion"),
             stepPoints: Joi.array().items(
               Joi.object({
                 address: Joi.string().required(),
                 departureHour: Joi.string().required(),
                 returnHour: Joi.string().required(),
-                transportType: Joi.string().required().valid("train", "bus", "fusée"),
+                transportType: Joi.string().required().valid("train", "bus", "fusée", "avion"),
               }),
             ),
           }),
@@ -118,7 +120,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user, ligneBus)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
     const { id } = value;
 
@@ -127,7 +129,15 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const ligneToBus = await LigneToPointModel.find({ lineId: id });
 
-    return res.status(200).send({ ok: true, data: { ...ligneBus, ligneToBus } });
+    let meetingsPointsDetail = [];
+    for (let line of ligneToBus) {
+      const pointDeRassemblement = await PointDeRassemblementModel.findById(line.meetingPointId);
+      meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
+    }
+
+    const centerDetail = await cohesionCenterModel.findById(ligneBus.centerId);
+
+    return res.status(200).send({ ok: true, data: { ...ligneBus._doc, meetingsPointsDetail, centerDetail } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
