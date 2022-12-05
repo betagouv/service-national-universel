@@ -31,7 +31,7 @@ const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswer
       if (response.ok) {
         setItems(response.data);
       }
-    }, 250);
+    }, 1000);
   };
 
   useEffect(() => {
