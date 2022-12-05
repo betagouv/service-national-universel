@@ -105,7 +105,11 @@ export default function Create() {
 
       const { ok, code, data: center } = await api.post("/cohesion-center", data);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la création du centre", code);
+        if (code === "ALREADY_EXISTS") {
+          toastr.error("Le code du centre est déjà utilisé");
+        } else {
+          toastr.error("Oups, une erreur est survenue lors de la création du centre", code);
+        }
         return setIsLoading(false);
       }
       if (center._id) history.push(`/centre/${center._id}`);

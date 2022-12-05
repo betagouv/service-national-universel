@@ -45,6 +45,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // check que le code est bien unique
+    const centerCode = await CohesionCenterModel.find({ code2022: value.code2022 });
+    if (centerCode.length > 0) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
     const cohesionCenter = await CohesionCenterModel.create({
       name: value.name,
       code2022: value.code2022,
@@ -170,6 +174,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     // check si le nombre de place > au nombre place pour chaque session
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // check que le code est bien unique
+    const centerCode = await CohesionCenterModel.find({ code2022: value.code2022, _id: { $ne: checkedId } });
+    if (centerCode.length > 0) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
     if (req.user.role !== ROLES.ADMIN) {
       delete value.centerDesignation;
       delete value.code2022;
