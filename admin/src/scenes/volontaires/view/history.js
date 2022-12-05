@@ -1,6 +1,6 @@
 import React from "react";
 
-import HistoricComponent from "../../../components/views/Historic";
+import HistoricComponent from "../../../components/views/Historic2";
 import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function History({ young, onChange }) {
