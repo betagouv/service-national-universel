@@ -699,7 +699,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         },
       ])
       .exec();
-    let youngValues = youngResult[0];
+    let youngValues = youngResult && youngResult.length > 0 ? youngResult[0] : { total: 0, intradepartmental: 0 };
 
     // --- assigned
     const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department });
