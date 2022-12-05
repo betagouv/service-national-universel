@@ -39,9 +39,9 @@ export default function VerifyAddress({
   };
 
   const formatResult = (suggestion) => {
-    let depart = suggestion.properties.postcode.substr(0, 2);
+    let depart = suggestion.properties.postcode?.substr(0, 2) || suggestion.properties.citycode.substr(0, 2);
     if (["97", "98"].includes(depart)) {
-      depart = suggestion.properties.postcode.substr(0, 3);
+      depart = suggestion.properties.postcode?.substr(0, 3) || suggestion.properties.citycode.substr(0, 3);
     }
     if (depart === "20") {
       depart = suggestion.properties.context.substr(0, 2);
