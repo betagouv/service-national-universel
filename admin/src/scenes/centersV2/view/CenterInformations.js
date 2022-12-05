@@ -36,7 +36,7 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions, getCenter }) {
+export default function Details({ center, setCenter, sessions }) {
   const history = useHistory();
 
   const user = useSelector((state) => state.Auth.user);
