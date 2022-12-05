@@ -106,7 +106,7 @@ export default function Create() {
       const { ok, code, data: center } = await api.post("/cohesion-center", data);
       if (!ok) {
         if (code === "ALREADY_EXISTS") {
-          toastr.error("Le code du centre est déjà utilisé");
+          toastr.error("Oups, le code du centre est déjà utilisé");
         } else {
           toastr.error("Oups, une erreur est survenue lors de la création du centre", code);
         }
@@ -116,7 +116,11 @@ export default function Create() {
       else history.push(`/centre`);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la création du point du centre");
+      if (e.code === "ALREADY_EXISTS") {
+        toastr.error("Oups, le code du centre est déjà utilisé");
+      } else {
+        toastr.error("Oups, une erreur est survenue lors de la création du centre");
+      }
       setIsLoading(false);
     }
   };
