@@ -36,7 +36,7 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions, getCenter }) {
+export default function Details({ center, setCenter, sessions }) {
   const history = useHistory();
 
   const user = useSelector((state) => state.Auth.user);
@@ -101,7 +101,11 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       if (Object.keys(error).length > 0) return setIsLoading(false);
       const { ok, code, data: returnedData } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        if (code === "ALREADY_EXISTS") {
+          toastr.error("Oups, le code du centre est déjà utilisé");
+        } else {
+          toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        }
         return setIsLoading(false);
       }
       setIsLoading(false);
@@ -111,7 +115,11 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       toastr.success("Le centre a été modifié avec succès");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification du centre.");
+      if (e.code === "ALREADY_EXISTS") {
+        toastr.error("Oups, le code du centre est déjà utilisé");
+      } else {
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre");
+      }
       setIsLoading(false);
     }
   };
