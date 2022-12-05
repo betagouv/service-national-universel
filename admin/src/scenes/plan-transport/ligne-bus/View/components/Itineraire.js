@@ -27,8 +27,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
   const [showRetour, setShowRetour] = React.useState(false);
   const [timeline, setTimeline] = React.useState([]);
 
-  const toggleAller = () => {
-    let maxIndex;
+  const toggleAllerRetour = () => {
     let flatMeetingsPoints = [];
     for (let i = 0; i < meetingsPoints.length; i++) {
       flatMeetingsPoints.push(meetingsPoints[i]);
@@ -40,14 +39,14 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
     }
 
     let sortMeetingsPoints = flatMeetingsPoints.sort((a, b) => {
+      if (showRetour) return a.returnHour.split(":")[0] - b.returnHour.split(":")[0];
       return a.departureHour.split(":")[0] - b.departureHour.split(":")[0];
     });
 
     let timeline = sortMeetingsPoints.map((meetingPoint, index) => {
-      maxIndex = index;
       return {
-        id: index,
-        departureHour: meetingPoint?.departureHour,
+        id: showRetour ? index + 1 : index,
+        time: showRetour ? meetingPoint?.returnHour : meetingPoint?.departureHour,
         transportType: meetingPoint?.transportType,
         department: meetingPoint?.department,
         region: meetingPoint?.region,
@@ -61,55 +60,8 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
     });
 
     timeline.push({
-      id: maxIndex + 1,
-      departureHour: center?.departureHour,
-      transportType: null,
-      department: center?.department,
-      region: center?.region,
-      name: center?.name,
-      address: center?.address,
-      city: center?.city,
-      zip: center?.zip,
-      iconColor: "text-blue-600",
-    });
-
-    setTimeline(timeline);
-  };
-
-  const toggleRetour = () => {
-    let flatMeetingsPoints = [];
-    for (let i = 0; i < meetingsPoints.length; i++) {
-      flatMeetingsPoints.push(meetingsPoints[i]);
-      if (meetingsPoints[i]?.stepPoints.length) {
-        for (let j = 0; j < meetingsPoints[i].stepPoints.length; j++) {
-          flatMeetingsPoints.push({ ...meetingsPoints[i].stepPoints[j], isEtape: true });
-        }
-      }
-    }
-
-    let sortMeetingsPoints = flatMeetingsPoints.sort((a, b) => {
-      return a.returnHour.split(":")[0] - b.returnHour.split(":")[0];
-    });
-
-    let timeline = sortMeetingsPoints.map((meetingPoint, index) => {
-      return {
-        id: index + 1,
-        departureHour: meetingPoint?.returnHour,
-        transportType: meetingPoint?.transportType,
-        department: meetingPoint?.department,
-        region: meetingPoint?.region,
-        name: meetingPoint?.name,
-        address: meetingPoint?.address,
-        city: meetingPoint?.city,
-        zip: meetingPoint?.zip,
-        isEtape: meetingPoint?.isEtape ? true : false,
-        iconColor: meetingPoint?.isEtape ? "text-gray-400" : "text-blue-600",
-      };
-    });
-
-    timeline.push({
-      id: 0,
-      departureHour: center?.returnHour,
+      id: showRetour ? 0 : timeline.length,
+      time: showRetour ? center?.returnHour : center?.departureHour,
       transportType: null,
       department: center?.department,
       region: center?.region,
@@ -128,11 +80,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
   };
 
   React.useEffect(() => {
-    if (showRetour) {
-      toggleRetour();
-    } else {
-      toggleAller();
-    }
+    toggleAllerRetour();
   }, [showRetour]);
 
   return (
@@ -158,7 +106,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
               <div className="relative">
                 <span className="absolute left-[88px] -ml-[2px] h-full w-1 bg-gray-200 space-x-3" aria-hidden="true" />
                 <div className={classNames(eventIdx !== timeline.length - 1 ? "pb-4" : "", "flex items-center gap-4")}>
-                  <div className="flex items-center justify-center py-1 rounded-lg bg-gray-100 w-14 text-xs font-medium leading-4">{event.departureHour}</div>
+                  <div className="flex items-center justify-center py-1 rounded-lg bg-gray-100 w-14 text-xs font-medium leading-4">{event.time}</div>
                   <div>
                     <span className="flex items-center justify-center w-8 h-8">
                       <GoPrimitiveDot className={classNames(event.iconColor, "h-5 w-5 z-10")} aria-hidden="true" />
