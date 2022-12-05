@@ -19,6 +19,7 @@ import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 
+import dayjs from "dayjs";
 export default function StepUpload() {
   let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
@@ -71,7 +72,7 @@ export default function StepUpload() {
           return { error: `Ce fichier ${files.name} est trop volumineux.` };
         }
       }
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, new Date(date));
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
       if (res.code === "FILE_CORRUPTED")
         return {
           error:
@@ -102,7 +103,7 @@ export default function StepUpload() {
           return;
         }
       }
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
       if (!ok) {
         capture(code);
         setLoading(false);
@@ -288,7 +289,7 @@ export default function StepUpload() {
 
   function ExpirationDate() {
     function handleChange(date) {
-      setDate(date?.setUTCHours(11, 0, 0));
+      setDate(date);
       setHasChanged(true);
     }
 
