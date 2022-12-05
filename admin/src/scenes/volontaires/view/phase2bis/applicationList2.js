@@ -11,6 +11,7 @@ import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
+import { getAge } from "snu-lib";
 import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../utils";
 
 export default function ApplicationList({ young, onChangeApplication }) {
@@ -77,6 +78,30 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
     })();
   }, []);
 
+  const checkStatusContract = (contract) => {
+    // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
+    const tokenKeys = ["projectManagerToken", "structureManagerToken"];
+    const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
+
+    const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+    if (isYoungAdult) {
+      tokenKeys.push("youngContractToken");
+      validateKeys.push("youngContractStatus");
+    } else {
+      tokenKeys.push("parent1Token", "parent2Token");
+      validateKeys.push("parent1Status", "parent2Status");
+    }
+
+    const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
+    const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+    console.log("validatedCount", validatedCount, "tokenCount", tokenCount);
+    if (validatedCount >= tokenCount) {
+      return "VALIDATED";
+    } else {
+      return "SENT";
+    }
+  };
+
   if (!mission) return null;
   return (
     <div className="relative w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-white hover:border-gray-200 shadow-ninaButton mb-4">
@@ -132,8 +157,8 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <div className="flex basis-[25%]">
             {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) ? (
               <div className="flex flex-col">
-                {contract?.invitationSent ? (
-                  <div className="font-medium text-xs text-gray-700 ">Contrat {contract?.youngContractStatus === "VALIDATED" ? "signé" : "envoyé"}</div>
+                {contract?.invitationSent === "true" ? (
+                  <div className="font-medium text-xs text-gray-700 ">Contrat {checkStatusContract(contract) === "VALIDATED" ? "signé" : "envoyé"}</div>
                 ) : (
                   <div className="flex flex-row items-center">
                     <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
