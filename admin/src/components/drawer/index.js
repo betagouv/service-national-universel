@@ -131,7 +131,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
-      <DrawerTab to="/table-repartition" title="Tableau de répartition" onClick={onClick} />
+      <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
@@ -210,7 +210,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
-      <DrawerTab to="/table-repartition" title="Tableau de répartition" onClick={onClick} />
+      <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
 
