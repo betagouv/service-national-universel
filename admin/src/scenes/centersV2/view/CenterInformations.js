@@ -115,7 +115,11 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       toastr.success("Le centre a été modifié avec succès");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification du centre.");
+      if (e.code === "ALREADY_EXISTS") {
+        toastr.error("Oups, le code du centre est déjà utilisé");
+      } else {
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre");
+      }
       setIsLoading(false);
     }
   };
