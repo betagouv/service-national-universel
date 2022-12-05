@@ -130,7 +130,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     const ligneToBus = await LigneToPointModel.find({ lineId: id });
 
     let meetingsPointsDetail = [];
-    for await (let line of ligneToBus) {
+    for (let line of ligneToBus) {
       const pointDeRassemblement = await PointDeRassemblementModel.findById(line.meetingPointId);
       meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
     }
