@@ -214,8 +214,11 @@ class api {
   }
 
   uploadFile(path, arr, properties, category, expirationDate) {
+    console.log("fnc exec");
     const names = arr.map((e) => e.name || e);
+    console.log("names", names);
     const files = arr.filter((e) => typeof e === "object");
+    console.log("files", files);
     let formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);

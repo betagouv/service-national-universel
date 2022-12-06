@@ -562,7 +562,7 @@ function SendContractLink({ contract, target }) {
 
 function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false }) {
   return (
-    <section className={`basis-1/4  bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw} border-2`}>
+    <section className={`basis-1/4  bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw}`}>
       <FileIcon filled={filled} icon={icon} />
       <section>
         <p className="text-base font-bold mt-2">{name}</p>
@@ -575,8 +575,10 @@ function FileCard({ name, filled, icon, onClick, tw, description, showNumber = f
       ) : null}
       <div></div>
       <div className="flex flex-col w-full justify-end items-end self-end my-2">
-        <div className="relative border-red-600 border-3 self-endtransition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
-          <Download className=" text-indigo-100 bg-blue-600 " onClick={() => onClick()} />
+        <div
+          onClick={() => onClick()}
+          className="relative border-red-600 border-3 self-endtransition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
+          <Download className=" text-indigo-100 bg-blue-600" />
         </div>
       </div>
     </section>
