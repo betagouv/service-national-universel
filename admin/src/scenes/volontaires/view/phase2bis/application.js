@@ -7,11 +7,15 @@ import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
 import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard } from "../../../../utils";
+import downloadPDF from "../../../../utils/download-pdf";
+import ReactLoading from "react-loading";
+
 import IconDomain from "../../../../components/IconDomain";
 import { AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../../../assets/rubberStampNotValided.svg";
 import ReactTooltip from "react-tooltip";
+import { getAge } from "snu-lib";
 
 import { HiPlus } from "react-icons/hi";
 import ModalPJ from "./components/ModalPJ";
@@ -23,6 +27,7 @@ import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmW
 import FileCard from "../../../../components/FileCard";
 import YoungHeader from "../../../phase0/components/YoungHeader";
 import Loader from "../../../../components/Loader";
+import Check from "../../../../assets/icons/Check";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -31,9 +36,10 @@ export default function Phase2Application({ young, onChange }) {
   const [contract, setContract] = React.useState(null);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalDurationOpen, setModalDurationOpen] = React.useState(false);
-
+  const [contractStatus, setContractStatus] = React.useState(null);
   let { applicationId } = useParams();
   const history = useHistory();
+  const [loadingContract, setLoadingContract] = React.useState(false);
 
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
@@ -109,18 +115,60 @@ export default function Phase2Application({ young, onChange }) {
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
+        checkStatusContract(data);
+      } else {
+        setContractStatus("DRAFT");
       }
     };
     getContract();
   }, [application]);
+  const checkStatusContract = (contract) => {
+    if (!contract.invitationSent || contract.invitationSent === "false") return setContractStatus("DRAFT");
+    // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
+    const tokenKeys = ["projectManagerToken", "structureManagerToken"];
+    const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
 
+    const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+    if (isYoungAdult) {
+      tokenKeys.push("youngContractToken");
+      validateKeys.push("youngContractStatus");
+    } else {
+      tokenKeys.push("parent1Token", "parent2Token");
+      validateKeys.push("parent1Status", "parent2Status");
+    }
+
+    const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
+    const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+
+    if (validatedCount >= tokenCount) {
+      return setContractStatus("VALIDATED");
+    } else {
+      return setContractStatus("SENT");
+    }
+  };
+  const transformNameDocument = (value) => {
+    const string = translateAddFilePhase2(value).slice(3);
+    return string[0].toUpperCase() + string.slice(1);
+  };
+  const downloadContract = async () => {
+    try {
+      setLoadingContract(true);
+      await downloadPDF({
+        url: `/contract/${application.contractId}/download`,
+        fileName: `${young.firstName} ${young.lastName} - contrat ${application.contractId}.pdf`,
+      });
+      setLoadingContract(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors du téléchargement du contrat");
+      setLoadingContract(false);
+    }
+  };
   if (!application || !mission) return <Loader />;
-
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
       <div className="p-7">
-        {/* <Contract young={young} admin={true} /> */}
         <div className="bg-white w-full h-full rounded-lg px-4">
           <div className="flex items-center justify-between py-6">
             <button
@@ -219,71 +267,97 @@ export default function Phase2Application({ young, onChange }) {
                 <div className="bg-gray-50 rounded-lg  px-10 py-6">
                   <div className="flex justify-between">
                     <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-                    <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
-                      <AiFillClockCircle className="text-sky-500" />
-                      <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
-                    </div>
+                    {contractStatus === "DRAFT" ? (
+                      <div className="text-xs font-normal px-2  bg-orange-500 text-white rounded-sm items-center flex space-x-1">
+                        <svg width="14" height="14" viewBox="0 0 22 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M21.7521 14.9194L19.4615 12.7116V9.78696C19.4589 7.76582 18.6789 5.81741 17.2722 4.31848C15.8656 2.81955 13.9323 1.87659 11.8462 1.67194V0H10.1538V1.67194C8.06772 1.87659 6.13441 2.81955 4.72777 4.31848C3.32114 5.81741 2.54109 7.76582 2.53846 9.78696V12.7116L0.247923 14.9194C0.0892274 15.0723 4.7924e-05 15.2797 0 15.496V17.9428C0 18.1591 0.0891481 18.3665 0.247833 18.5195C0.406517 18.6724 0.62174 18.7583 0.846154 18.7583H6.76923V19.392C6.75082 20.4267 7.12919 21.4315 7.83182 22.214C8.53444 22.9964 9.51192 23.5014 10.5769 23.6322C11.1652 23.6885 11.7591 23.6254 12.3205 23.4471C12.8819 23.2688 13.3984 22.9792 13.8368 22.597C14.2751 22.2147 14.6256 21.7483 14.8657 21.2276C15.1057 20.707 15.2301 20.1437 15.2308 19.5739V18.7583H21.1538C21.3783 18.7583 21.5935 18.6724 21.7522 18.5195C21.9109 18.3665 22 18.1591 22 17.9428V15.496C22 15.2797 21.9108 15.0723 21.7521 14.9194ZM13.5385 19.5739C13.5385 20.2228 13.271 20.8452 12.795 21.304C12.3189 21.7629 11.6732 22.0207 11 22.0207C10.3268 22.0207 9.68109 21.7629 9.20504 21.304C8.72898 20.8452 8.46154 20.2228 8.46154 19.5739V18.7583H13.5385V19.5739ZM20.3077 17.1272H1.69231V15.8337L3.98285 13.6259C4.14154 13.473 4.23072 13.2656 4.23077 13.0493V9.78696C4.23077 8.05652 4.94395 6.39695 6.21343 5.17334C7.48291 3.94974 9.20469 3.26232 11 3.26232C12.7953 3.26232 14.5171 3.94974 15.7866 5.17334C17.056 6.39695 17.7692 8.05652 17.7692 9.78696V13.0493C17.7693 13.2656 17.8585 13.473 18.0172 13.6259L20.3077 15.8337V17.1272Z"
+                            fill="#FFFFFF"
+                          />
+                        </svg>
+                        <div>Contrat en brouillon</div>
+                      </div>
+                    ) : null}
+                    {contractStatus === "VALIDATED" ? (
+                      <div className="text-xs font-normal px-2  bg-green-400 rounded-sm items-center flex space-x-1">
+                        <Check className="text-white" />
+                        <div className="text-white">Contrat signé</div>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
                   {contract?.invitationSent ? (
-                    <div className="grid gap-4 grid-cols-4   mt-4">
-                      <StatusContractPeople
-                        value={contract?.projectManagerStatus}
-                        description="Représentant de l’État"
-                        firstName={contract?.projectManagerFirstName}
-                        lastName={contract?.projectManagerLastName}
-                        target="projectManager"
-                        contract={contract}
-                        status={contract?.projectManagerStatus}
-                        token={contract?.projectManagerToken}
-                        validationDate={contract?.projectManagerValidationDate}
-                      />
-                      <StatusContractPeople
-                        value={contract?.structureManagerStatus}
-                        description="Représentant de la structure"
-                        firstName={contract?.structureManagerFirstName}
-                        lastName={contract?.structureManagerLastName}
-                        target="structureManager"
-                        contract={contract}
-                        status={contract?.structureManagerStatus}
-                        token={contract?.structureManagerToken}
-                        validationDate={contract?.structureManagerValidationDate}
-                      />
-                      {contract?.isYoungAdult === "true" ? (
+                    <div>
+                      <div className="grid gap-4 grid-cols-4 mt-4">
                         <StatusContractPeople
-                          value={contract?.youngContractStatus}
-                          description="Volontaire"
-                          firstName={contract?.youngFirstName}
-                          lastName={contract?.youngLastName}
+                          value={contract?.projectManagerStatus}
+                          description="Représentant de l’État"
+                          firstName={contract?.projectManagerFirstName}
+                          lastName={contract?.projectManagerLastName}
+                          target="projectManager"
+                          contract={contract}
+                          status={contract?.projectManagerStatus}
+                          token={contract?.projectManagerToken}
+                          validationDate={contract?.projectManagerValidationDate}
                         />
-                      ) : (
-                        <>
+                        <StatusContractPeople
+                          value={contract?.structureManagerStatus}
+                          description="Représentant de la structure"
+                          firstName={contract?.structureManagerFirstName}
+                          lastName={contract?.structureManagerLastName}
+                          target="structureManager"
+                          contract={contract}
+                          status={contract?.structureManagerStatus}
+                          token={contract?.structureManagerToken}
+                          validationDate={contract?.structureManagerValidationDate}
+                        />
+                        {contract?.isYoungAdult === "true" ? (
                           <StatusContractPeople
-                            value={contract?.parent1Status}
-                            description="Représentant légal 1"
-                            firstName={contract?.parent1FirstName}
-                            lastName={contract?.parent1LastName}
-                            target="parent1"
-                            contract={contract}
-                            status={contract?.parent1Status}
-                            token={contract?.parent1Token}
-                            validationDate={contract?.parent1ValidationDate}
+                            value={contract?.youngContractStatus}
+                            description="Volontaire"
+                            firstName={contract?.youngFirstName}
+                            lastName={contract?.youngLastName}
                           />
-                          {contract?.parent2Email && (
+                        ) : (
+                          <>
                             <StatusContractPeople
-                              value={contract?.parent2Status}
-                              description="Représentant légal 2"
-                              firstName={contract?.parent2FirstName}
-                              lastName={contract?.parent2LastName}
-                              target="parent2"
+                              value={contract?.parent1Status}
+                              description="Représentant légal 1"
+                              firstName={contract?.parent1FirstName}
+                              lastName={contract?.parent1LastName}
+                              target="parent1"
                               contract={contract}
-                              status={contract?.parent2Status}
-                              token={contract?.parent2Token}
-                              validationDate={contract?.parent2ValidationDate}
+                              status={contract?.parent1Status}
+                              token={contract?.parent1Token}
+                              validationDate={contract?.parent1ValidationDate}
                             />
+                            {contract?.parent2Email && (
+                              <StatusContractPeople
+                                value={contract?.parent2Status}
+                                description="Représentant légal 2"
+                                firstName={contract?.parent2FirstName}
+                                lastName={contract?.parent2LastName}
+                                target="parent2"
+                                contract={contract}
+                                status={contract?.parent2Status}
+                                token={contract?.parent2Token}
+                                validationDate={contract?.parent2ValidationDate}
+                              />
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {contractStatus === "VALIDATED" ? (
+                        <div onClick={() => downloadContract()} className="cursor-pointer py-2 rounded-md mt-7 h-10 bg-green-400 w-48 max-w-xs items-center flex justify-center">
+                          {loadingContract ? (
+                            <div className="h-10 flex items-center justify-center">
+                              <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
+                            </div>
+                          ) : (
+                            <div className="text-white">Télécharger le contrat</div>
                           )}
-                        </>
-                      )}
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <div
@@ -306,7 +380,7 @@ export default function Phase2Application({ young, onChange }) {
                       application[option].length > 0 && (
                         <FileCard
                           key={index}
-                          name={translateAddFilePhase2(option).toUpperCase()}
+                          name={transformNameDocument(option)}
                           icon="reglement"
                           filled={application[option].length}
                           color="text-blue-600 bg-white"
