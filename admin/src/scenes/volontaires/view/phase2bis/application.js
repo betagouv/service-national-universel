@@ -284,6 +284,12 @@ export default function Phase2Application({ young, onChange }) {
                         <div className="text-white">Contrat signé</div>
                       </div>
                     ) : null}
+                    {contractStatus === "SENT" ? (
+                      <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                        <AiFillClockCircle className="text-sky-500" />
+                        <div>Contrat envoyé</div>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
                   {contract?.invitationSent ? (
