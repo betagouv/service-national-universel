@@ -14,17 +14,13 @@ function getFileName(file) {
 }
 
 export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young, application, optionsType, typeChose, defaultOption }) {
-  const [type, setType] = useState(null);
-  const [stepOne, setStepOne] = useState();
-  const [disabledSave, setDisabledSave] = useState(true);
   const [newFilesList, setNewFilesList] = useState([]);
   const [numberNewFile, setNumberNewFile] = useState();
   const [selectedOption, setSelectedOption] = useState(null);
   const inputFileRef = React.useRef(null);
-  const handleSave = (type) => {
+  const handleSave = () => {
     onSave();
-    onSend(type, numberNewFile > 1 ? "true" : "false");
-    setStepOne(true);
+    onSend(selectedOption, numberNewFile > 1 ? "true" : "false");
   };
 
   const handleCancel = async () => {
@@ -36,9 +32,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
   useEffect(() => {
     let newNumberNewFile = 0;
     if (newFilesList.length === 0) return;
-    console.log("newFilesList", newFilesList);
     newFilesList?.forEach((file) => (application[selectedOption].includes(file) ? null : (newNumberNewFile += 1)));
-    console.log(newNumberNewFile);
     setNumberNewFile(newNumberNewFile);
   }, [newFilesList]);
 
@@ -55,6 +49,13 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
           <div className="w-3/4 mt-4">
             <Select options={optionsType} selected={selectedOption} setSelected={setSelectedOption} label="Choissisez le document à téléverser" />
           </div>
+          {application[selectedOption] && application[selectedOption].length > 0 && (
+            <div className="mt-2 gap-1">
+              {application[selectedOption].map((file) => {
+                return <div key={file}>{getFileName(file)}</div>;
+              })}
+            </div>
+          )}
           <input
             type="file"
             multiple
@@ -113,10 +114,8 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
                 Annuler
               </button>
               <button
-                className={`border-[1px] border-gray-300 text-white rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-default py-2 px-1  w-full bg-blue-600 ${
-                  disabledSave && "bg-blue-400"
-                }`}
-                onClick={() => (numberNewFile >= 1 ? handleSave(type) : onSave())}
+                className={`border-[1px] border-gray-300 text-white rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-default py-2 px-1  w-full bg-blue-600`}
+                onClick={() => (numberNewFile >= 1 ? handleSave() : onSave())}
                 disabled={selectedOption === null}>
                 Envoyer
               </button>
