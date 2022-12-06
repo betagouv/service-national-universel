@@ -73,7 +73,6 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
         capture(codeContract);
         return toastr.error("Oups, une erreur est survenue", codeContract);
       }
-      console.log(dataContract);
       setContract(dataContract);
     })();
   }, []);
@@ -94,7 +93,6 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
 
     const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
     const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-    console.log("validatedCount", validatedCount, "tokenCount", tokenCount);
     if (validatedCount >= tokenCount) {
       return "VALIDATED";
     } else {
