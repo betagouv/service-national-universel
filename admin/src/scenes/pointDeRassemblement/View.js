@@ -292,7 +292,7 @@ export default function View(props) {
             <div className="flex w-[10%] justify-center items-center">
               <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
             </div>
-            <div className="flex flex-col w-[45%]  justify-between">
+            <div className="flex flex-col w-[45%] justify-between">
               <div className="flex flex-col gap-3">
                 <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
                 <Field

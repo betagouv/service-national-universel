@@ -4,12 +4,15 @@ import Breadcrumbs from "../../../../components/Breadcrumbs";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { Title } from "../../components/commons";
+import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
+import Modification from "./components/Modification";
 import Panel from "./components/Panel";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
+
   const getBus = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
@@ -56,9 +59,9 @@ export default function View(props) {
               retour={data.returnDate}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
             />
-            <div className="rounded-lg bg-white  w-1/2"></div>
+            <Modification />
           </div>
-          <div className="rounded-lg bg-white h-[396px] w-full"></div>
+          <Info bus={data} setBus={setData} />
           <div className="flex gap-4 items-start">
             <div className="flex flex-col gap-4 w-1/2">
               {data.meetingsPointsDetail.map((pdr, index) => (

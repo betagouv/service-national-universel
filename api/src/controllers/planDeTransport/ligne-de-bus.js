@@ -5,7 +5,7 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
-const { canViewLigneBus, canCreateLigneBus } = require("snu-lib/roles");
+const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -51,7 +51,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canCreateLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    if (!canCreateLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const {
       cohort,
@@ -113,6 +113,60 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
+router.put("/:id/info", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      busId: Joi.string().required(),
+      departuredDate: Joi.date().required(),
+      returnDate: Joi.date().required(),
+      youngCapacity: Joi.number().required(),
+      totalCapacity: Joi.number().required(),
+      followerCapacity: Joi.number().required(),
+      travelTime: Joi.string().required(),
+      lunchBreak: Joi.boolean().required(),
+      lunchBreakReturn: Joi.boolean().required(),
+    }).validate({ ...req.params, ...req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn } = value;
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    youngCapacity = parseInt(youngCapacity);
+    totalCapacity = parseInt(totalCapacity);
+    followerCapacity = parseInt(followerCapacity);
+
+    if (totalCapacity < youngCapacity + followerCapacity) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    //add some checks
+
+    ligne.set({
+      busId,
+      departuredDate,
+      returnDate,
+      youngCapacity,
+      totalCapacity,
+      followerCapacity,
+      travelTime,
+      lunchBreak,
+      lunchBreakReturn,
+    });
+
+    await ligne.save({ fromUser: req.user });
+
+    const infoBus = await getInfoBus(ligne);
+
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -120,28 +174,33 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const ligneToBus = await LigneToPointModel.find({ lineId: id });
-
-    let meetingsPointsDetail = [];
-    for (let line of ligneToBus) {
-      const pointDeRassemblement = await PointDeRassemblementModel.findById(line.meetingPointId);
-      meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
-    }
-
-    const centerDetail = await cohesionCenterModel.findById(ligneBus.centerId);
-
-    return res.status(200).send({ ok: true, data: { ...ligneBus._doc, meetingsPointsDetail, centerDetail } });
+    const infoBus = await getInfoBus(ligneBus);
+    return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+async function getInfoBus(line) {
+  const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
+
+  let meetingsPointsDetail = [];
+  for (let line of ligneToBus) {
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(line.meetingPointId);
+    meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
+  }
+
+  const centerDetail = await cohesionCenterModel.findById(line.centerId);
+
+  return { ...line._doc, meetingsPointsDetail, centerDetail };
+}
 
 module.exports = router;
