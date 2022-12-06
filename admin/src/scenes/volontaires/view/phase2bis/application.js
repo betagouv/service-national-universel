@@ -24,10 +24,11 @@ import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../../assets/icons/Pencil";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
-import FileCard from "../../../../components/FileCard";
 import YoungHeader from "../../../phase0/components/YoungHeader";
 import Loader from "../../../../components/Loader";
 import Check from "../../../../assets/icons/Check";
+import FileIcon from "../../../../assets/FileIcon";
+import Download from "../../../../assets/icons/Download";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -380,7 +381,7 @@ export default function Phase2Application({ young, onChange }) {
                 <div className="flex justify-between">
                   <div className="text-lg leading-6 font-semibold">Documents</div>
                 </div>
-                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full items-stretch">
                   {optionsType.map(
                     (option, index) =>
                       application[option].length > 0 && (
@@ -389,6 +390,7 @@ export default function Phase2Application({ young, onChange }) {
                           name={transformNameDocument(option)}
                           icon="reglement"
                           filled={application[option].length}
+                          showNumber
                           color="text-blue-600 bg-white"
                           status="Modifier"
                           onClick={() =>
@@ -396,28 +398,32 @@ export default function Phase2Application({ young, onChange }) {
                               isOpen: true,
                               name: option,
                               stepOne: false,
+                              defaultOption: option,
                             })
                           }
                         />
                       ),
                   )}
-                  <section
-                    onClick={() => {
-                      setModalDocument({
-                        isOpen: true,
-                        stepOne: true,
-                      });
-                    }}
-                    className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
-                    <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
-                      <HiPlus />
-                      Ajouter une pièce jointe
-                    </div>
-                  </section>
+                  {optionsType.reduce((acc, option) => acc + (application[option].length > 0 ? 1 : 0), 0) < optionsType.length && (
+                    <section
+                      onClick={() => {
+                        setModalDocument({
+                          isOpen: true,
+                          stepOne: true,
+                        });
+                      }}
+                      className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
+                      <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
+                        <HiPlus />
+                        Ajouter une pièce jointe
+                      </div>
+                    </section>
+                  )}
                 </div>
                 <ModalPJ
                   isOpen={modalDocument?.isOpen}
                   name={modalDocument?.name}
+                  defaultOption={modalDocument?.defaultOption}
                   young={young}
                   application={application}
                   optionsType={optionsType}
@@ -551,5 +557,28 @@ function SendContractLink({ contract, target }) {
         }}
       />
     </>
+  );
+}
+
+function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false }) {
+  return (
+    <section className={`basis-1/4  bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw} border-2`}>
+      <FileIcon filled={filled} icon={icon} />
+      <section>
+        <p className="text-base font-bold mt-2">{name}</p>
+        {description ? <p className="ttext-xs leading-4 font-normal mt-1">{description}</p> : null}
+      </section>
+      {showNumber ? (
+        <div className="text-gray-500">
+          {filled} {filled > 1 ? "documents" : "document"}{" "}
+        </div>
+      ) : null}
+      <div></div>
+      <div className="flex flex-col w-full justify-end items-end self-end my-2">
+        <div className="relative border-red-600 border-3 self-endtransition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
+          <Download className=" text-indigo-100 bg-blue-600 " onClick={() => onClick()} />
+        </div>
+      </div>
+    </section>
   );
 }
