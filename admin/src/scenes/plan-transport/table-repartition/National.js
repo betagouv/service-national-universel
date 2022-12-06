@@ -138,7 +138,7 @@ export default function National() {
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">
             <Title>Table de répartition</Title>
-            <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>
+            {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>}
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
