@@ -628,7 +628,10 @@ export default function Edit(props) {
                             id="hebergementPayant"
                             name="hebergementPayant"
                             value={values.hebergementPayant === "true"}
-                            onChange={(e) => handleChange({ target: { value: e.toString(), name: "hebergementPayant" } })}
+                            onChange={(e) => {
+                              console.log("new value is ", e);
+                              handleChange({ target: { value: e.toString(), name: "hebergementPayant" } });
+                            }}
                           />
                         </div>
                       )}
