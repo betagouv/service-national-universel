@@ -257,7 +257,7 @@ export default function View(props) {
                     Modifier
                   </button>
                 ) : (
-                  <div className="flex itmes-center gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => setEditInfo(false)}
@@ -370,7 +370,7 @@ export default function View(props) {
                       Modifier
                     </button>
                   ) : (
-                    <div className="flex itmes-center gap-2">
+                    <div className="flex items-center gap-2">
                       <button
                         className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => setEditSession(false)}

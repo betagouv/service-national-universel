@@ -21,6 +21,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  busArrivalHour: {
+    type: String,
+    documentation: {
+      description: "Heure d'arrivée du bus",
+    },
+  },
+
   departureHour: {
     type: String,
     required: true,
