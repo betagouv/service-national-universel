@@ -8,7 +8,7 @@ import GroupModification from "./group/GroupModification";
 import GroupConfirmDelete from "./group/GroupConfirmDelete";
 import GroupUpdateYoungCounts from "./group/GroupUpdateYoungCounts";
 import GroupCenter from "./group/GroupCenter";
-import GroupGatheringPlaces from "./group/GroupGatheringPlaces";
+import GroupGatheringPlaces from "./group/GroupGatheringPlaces2";
 import GroupConfirmDeleteCenter from "./group/GroupConfirmDeleteCenter";
 import GroupAffectationSummary from "./group/GroupAffectationSummary";
 import { useSelector } from "react-redux";
