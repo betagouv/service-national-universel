@@ -15,13 +15,19 @@ import FrenchMap from "../../../assets/icons/FrenchMap";
 import { capture } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
-import { region2department } from "snu-lib";
+import { region2department, ROLES } from "snu-lib";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
+import { useSelector } from "react-redux";
+
+const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
 export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
   const location = useLocation();
+  const { user } = useSelector((state) => state.Auth);
   const [isNational, setIsNational] = useState(!region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
   const [cohort, setCohort] = useState(getDefaultCohort());
@@ -135,12 +141,13 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   function goToNational() {
-    console.log("goTo national...");
-    history.push("/schema-repartition?cohort=" + cohort);
+    if (user.role === ROLES.ADMIN) {
+      history.push("/schema-repartition?cohort=" + cohort);
+    }
   }
 
   function goToRegion() {
-    if (region) {
+    if (region && user.role !== ROLES.REFERENT_DEPARTMENT) {
       history.push(`/schema-repartition/${region}?cohort=${cohort}`);
     }
   }
@@ -160,7 +167,85 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   async function exportDetail() {
-    console.log("TODO: export detail");
+    try {
+      const groups = await loadExportData();
+      const result = await exportExcelSheet(groups);
+      const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
+      FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
+    }
+  }
+
+  async function loadExportData() {
+    let url = "/schema-de-repartition/export";
+    if (region) {
+      url += "/" + region;
+    }
+    if (department) {
+      url += "/" + department;
+    }
+    url += "/" + cohort;
+
+    const result = await API.get(url);
+    if (!result.ok) {
+      return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
+    return result.data;
+  }
+
+  async function exportExcelSheet(groups) {
+    let maxGatheringPlaces = 0;
+
+    let sheetData = groups.map((g) => {
+      let data = {
+        cohort: g.cohort,
+        region: g.fromRegion,
+        department: g.fromDepartment,
+        youngsVolume: g.youngsVolume,
+        centerId: g.centerId,
+        centerDepartment: g.toDepartment,
+        centerRegion: g.toRegion,
+      };
+      if (maxGatheringPlaces < g.gatheringPlaces.length) {
+        maxGatheringPlaces = g.gatheringPlaces.length;
+      }
+      for (let i = 0, n = g.gatheringPlaces.length; i < n; ++i) {
+        const pdr = g.gatheringPlaces[i];
+        data["gpId" + i] = pdr._id;
+        data["gpName" + i] = pdr.name;
+        data["gpAddress" + i] = pdr.address;
+        data["gpZip" + i] = pdr.zip;
+        data["gpCity" + i] = pdr.city;
+      }
+      return data;
+    });
+
+    console.log("sheetData: ", sheetData);
+    let sheet = XLSX.utils.json_to_sheet(sheetData);
+
+    // --- fix header names
+    let headers = ["Cohorte", "Région des volontaires", "Département des volontaires", "Nombre de volontaires", "ID centre", "Département du centre", "Région du centre"];
+    for (let i = 1; i <= maxGatheringPlaces; ++i) {
+      headers.push(
+        ...[
+          "ID du point de rassemblement " + i,
+          "Nom du point de rassemblement " + i,
+          "Adresse du point de rassemblement " + i,
+          "Code postal du point de rassemblement " + i,
+          "Ville du point de rassemblement " + i,
+        ],
+      );
+    }
+    XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
+
+    // --- create workbook
+    let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Schéma de répartition");
+    const fileName = "schema-repartition.xlsx";
+    // const workbook = { Sheets: { data: sheet }, SheetNames: ["Schema de repartition"] };
+    return { workbook, fileName };
   }
 
   return (

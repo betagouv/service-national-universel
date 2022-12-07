@@ -1,5 +1,9 @@
 /**
  * ROUTES:
+ *  GET    /schema-de-repartition/export/:cohort                       => get National groups populated for export
+ *  GET    /schema-de-repartition/export/:region/:cohort               => get Regional groups populated for export
+ *  GET    /schema-de-repartition/export/:region/:department/:cohort   => get Department groups populated for export
+ *
  *  GET    /schema-de-repartition/:cohort                       => get National data
  *  GET    /schema-de-repartition/:region/:cohort               => get Regional data
  *  GET    /schema-de-repartition/:region/:department/:cohort   => get Department data
@@ -55,6 +59,86 @@ const schemaRepartitionBodySchema = Joi.object({
   youngsVolume: Joi.number().greater(0),
   gatheringPlaces: Joi.array().items(Joi.string()),
 });
+
+// ------- export
+router.get("/export/:region/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required(), department: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const groups = await loadSchemaGroups(value);
+    return res.status(200).send({ ok: true, data: groups });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/export/:region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const groups = await loadSchemaGroups(value);
+    return res.status(200).send({ ok: true, data: groups });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/export/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const groups = await loadSchemaGroups(value);
+
+    return res.status(200).send({ ok: true, data: groups });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+async function loadSchemaGroups({ department, region, cohort }) {
+  let match = { cohort };
+  if (department) {
+    match.fromDepartment = department;
+  } else if (region) {
+    match.fromRegion = region;
+  }
+  return schemaRepartitionModel.aggregate([
+    { $match: match },
+    {
+      $addFields: {
+        gpIds: {
+          $map: {
+            input: "$gatheringPlaces",
+            in: { $toObjectId: "$$this" },
+          },
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "pointderassemblements",
+        localField: "gpIds",
+        foreignField: "_id",
+        as: "gatheringPlaces",
+      },
+    },
+    {
+      $project: { gpIds: 0 },
+    },
+  ]);
+}
 
 // ------- get data
 
