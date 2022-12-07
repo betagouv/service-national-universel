@@ -63,7 +63,7 @@ const translateFieldYoung = (f) => {
     case "phone":
       return "Téléphone";
     case "gender":
-      return "genre";
+      return "Genre";
     case "birthdateAt":
       return "Date de naissance";
     case "cohort":
@@ -174,6 +174,8 @@ const translateFieldYoung = (f) => {
       return "Région de l'établissement";
     case "schoolLocation":
       return "Coordonnées de l'établissement";
+    case "schoolId":
+      return "Identifiant de l'établissement";
     case "parent1Status":
       return "Statut du représentant légal 1";
     case "parent1FirstName":
@@ -392,6 +394,24 @@ const translateFieldYoung = (f) => {
       return "Le volontaire se rend par ses propres moyens (phase 1)";
     case "qpv":
       return "QPV";
+    case "files/cniFiles/0":
+    case "files/cniFiles/1":
+    case "files/cniFiles/2":
+      return "Pièce d'identité";
+    case "latestCNIFileCategory":
+      return "Catégorie de la pièce d'identité";
+    case "latestCNIFileExpirationDate":
+      return "Date d'expiration de la pièce d'identité";
+    case "CNIFileNotValidOnStart":
+      return "Pièce d'identité invalide au début du séjour";
+    case "files":
+      return "Documents";
+    case "imageRightFilesStatus":
+      return "Statut des documents de droit à l'image";
+    case "autoTestPCRFilesStatus":
+      return "Statut des documents de test PCR";
+    case "youngPhase1Agreement":
+      return "Accord du volontaire pour la phase 1";
     default:
       return f;
   }

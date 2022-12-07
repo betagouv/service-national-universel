@@ -1,203 +1,191 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 
-import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, ROLES } from "../../utils";
-import Loader from "../../components/Loader";
-import api from "../../services/api";
-import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
+import {
+  formatStringLongDate,
+  translateModelFields,
+  translate,
+  translatePhase1,
+  translatePhase2,
+  translateApplication,
+  translateEngagement,
+  ROLES,
+  areObjectsEqual,
+  isIsoDate,
+} from "../../utils";
+import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight, HiOutlineArrowRight } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
-import { formatDateFR, formatStringDate, translateAction, translateField } from "snu-lib";
+import { formatLongDateFR, translateAction } from "snu-lib";
+import Filter from "../../assets/icons/Filter";
+import UserCard from "../UserCard";
 
-export default function Historic({
-  model,
-  value,
-  // filters = [
-  //   { value: "/status", label: "Statut général" },
-  //   { value: "/cohort", label: "Cohorte" },
-  // ],
-}) {
-  const [data, setData] = useState([]);
-  const filters = generateFilters(data);
-  console.log("🚀 ~ file: Historic2.js:21 ~ filters", Object.entries(filters));
+export default function Historic({ model, data, filters }) {
   const [search, setSearch] = useState("");
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
+  console.log("🚀 ~ file: Historic2.js:25 ~ activeFilters", activeFilters);
   const filteredData = filterData(data, activeFilters);
-  console.log("🚀 ~ file: Historic2.js:23 ~ filteredData", filteredData);
+  console.log("🚀 ~ file: Historic2.js:32 ~ Historic ~ filteredData", filteredData);
 
-  // function filterData(data, filters) {
-  //   if (filters.length) return data.filter(({ path }) => filters.includes(path));
-  //   return data;
+  // function generateFilters(data) {
+  //   let filters = {};
+  //   for (const op of data) {
+  //     if (!filters[op.path]) filters[op.path] = [];
+  //     filters[op.path].push(op.value);
+  //   }
+  //   return filters;
   // }
 
-  // const filters = {
-  //   statusPhase1: ["WAITING_VALIDATION", "VALIDATED", "REFUSED"],
-  //   statusPhase2: ["WAITING_VALIDATION", "VALIDATED", "REFUSED"],
-  // };
-
-  function generateFilters(data) {
-    let filters = {};
-    for (const op of data) {
-      if (!filters[op.path]) filters[op.path] = [];
-      filters[op.path].push(op.value);
+  function filterData(data, filters, query) {
+    let filteredData = data;
+    if (filters?.length) {
+      filteredData = filteredData.filter((e) => filterEvent(e, filters));
     }
-    return filters;
-  }
-
-  function filterData(data, filters) {
-    if (filters.length) {
-      return data.filter((e) => Object.entries(filters).some(([key, value]) => (e.path === key && value.length ? value.includes(e.originalValue || e.value) : true)));
-    }
-    return data;
-  }
-
-  const getPatches = async () => {
-    try {
-      const { ok, data } = await api.get(`/${model}/${value._id}/patches`);
-      if (!ok) return;
-      setData(formatHistory(data));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  function handleChange(value) {
-    let newArr = [...activeFilters];
-    if (newArr.includes(value)) newArr = newArr.filter((item) => item !== value);
-    else newArr.push(value);
-    setActiveFilters(newArr);
-  }
-
-  useEffect(() => {
-    getPatches();
-  }, []);
-
-  function formatHistory(data) {
-    function formatField(field) {
-      return JSON.stringify(field)?.replace(/"/g, "");
-    }
-    const translator = (path, value) => {
-      if (path === "/statusPhase1") {
-        return translatePhase1(value);
-      } else if (path === "/statusPhase2") {
-        return translatePhase2(value);
-      } else if (path === "/phase2ApplicationStatus") {
-        return translateApplication(value);
-      } else if (path === "/statusPhase2Contract") {
-        return translateEngagement(value);
-      } else if (path.includes("files")) {
-        return value?.name;
-      } else if (isIsoDate(value)) {
-        return formatStringLongDate(value);
-      } else {
-        return translate(value);
-      }
-    };
-    const history = [];
-    for (const hit of data) {
-      for (const e of hit.ops) {
-        e.date = formatDateFR(hit.date);
-        e.user = hit.user;
-        e.path = formatField(e.path);
-        e.value = e.path.includes("files") ? e.value.name : translator(e.path, formatField(e.value));
-        e.originalValue = translator(e.path, formatField(e.originalValue));
-        history.push(e);
-      }
-    }
-    return history;
-  }
-
-  function isIsoDate(str) {
-    if (!Date.parse(str)) return false;
-    var d = new Date(str);
-    return d.toISOString() === str;
-  }
-
-  function filterResults(query, e) {
     if (query) {
-      const serializedQuery = query.toLowerCase().trim();
-      const matchFieldName = translateModelFields(model, e.path).toLowerCase().includes(serializedQuery);
-      const matchOriginalValue = (isIsoDate(e.originalValue) ? formatStringLongDate(e.originalValue) : e.originalValue)?.toLowerCase().includes(serializedQuery);
-      const matchFromValue = (isIsoDate(e.value) ? formatStringLongDate(e.value) : e.value)?.toLowerCase().includes(serializedQuery);
-
-      return matchFieldName || matchOriginalValue || matchFromValue;
-    } else return true;
+      filteredData = filteredData.filter((e) => searchEvent(e, query));
+    }
+    return filteredData;
   }
 
-  const statusPhase1Options = ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"];
+  function filterEvent(event, filters) {
+    return filters.every((filter) => {
+      return Object.entries(filter).some(([key, value]) => value.includes(event[key]));
+    });
+  }
 
-  if (!data.length) return <Loader />;
+  function searchEvent(e, query) {
+    const serializedQuery = query.toLowerCase().trim();
+    const matchFieldName = translateModelFields(model, e.path).toLowerCase().includes(serializedQuery);
+    const matchOriginalValue = (isIsoDate(e.originalValue) ? formatStringLongDate(e.originalValue) : e.originalValue)?.toLowerCase().includes(serializedQuery);
+    const matchFromValue = (isIsoDate(e.value) ? formatStringLongDate(e.value) : e.value)?.toLowerCase().includes(serializedQuery);
+
+    return matchFieldName || matchOriginalValue || matchFromValue;
+  }
+
+  function FilterButton({ filter, filterName }) {
+    const checked = activeFilters.some((f) => areObjectsEqual(f, filter));
+    function handleChangeFilter(newFilter) {
+      let filters = [...activeFilters];
+      if (filters.some((filter) => areObjectsEqual(filter, newFilter))) {
+        filters = filters.filter((filter) => !areObjectsEqual(filter, newFilter));
+      } else {
+        filters.push(newFilter);
+      }
+      setActiveFilters(filters);
+    }
+    return (
+      <label className={`text-blue-500 py-2 px-3 m-0 rounded-lg flex items-center gap-2 cursor-pointer ${checked && "underline underline-offset-8 decoration-2"}`}>
+        <Filter fill="dodgerblue" />
+        {filterName}
+        <input type="checkbox" checked={checked} onChange={() => handleChangeFilter(filter)} className="hidden" />
+      </label>
+    );
+  }
+
   return (
     <div className="w-full bg-white rounded-lg shadow-md">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="flex p-4 gap-4">
         <input onChange={(e) => setSearch(e.target.value)} value={search} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
-        <button onClick={() => setIsOpen(!isOpen)} className="bg-gray-100 py-2 px-3 rounded-lg">
-          Filtres
+        <button onClick={() => setIsOpen(!isOpen)} className={`bg-gray-100 py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen && "border"}`}>
+          <Filter fill="gray" />
+          <p>Filtres</p>
         </button>
-        {isOpen &&
+
+        {filters.map((filter) => (
+          <FilterButton key={filter.label} filter={filter.value} filterName={filter.label} />
+        ))}
+        {/* {isOpen &&
           Object.entries(filters)?.map(([key, value]) => (
             <label key={key} className="p-2 m-0 text-blue-600">
               {key}
               <input type={"checkbox"} checked={activeFilters.includes([key, value])} onChange={() => handleChange(value)} />
             </label>
-          ))}
-        {/* <label htmlFor="statusPhase1" className="p-2 m-0 text-blue-600">
-          Statut de phase 1
-        </label> */}
-        {Object.entries(filters).map(([key, value]) => (
+          ))} */}
+        {/* {Object.entries(filters).map(([key, value]) => (
           <label key={key} htmlFor={key} className="p-2 m-0 text-blue-600">
-            {translate(key.substring(1))}
-            <select name={key} id={key}>
-              {new Set(value)?.map((e) => (
-                <option key={e} value={e}>
-                  {translate(e)}
+          {translate(key.substring(1))}
+          <select name={key} id={key}>
+          {new Set(value)?.map((e) => (
+            <option key={e} value={e}>
+            {translate(e)}
+            </option>
+            ))}
+            </select>
+            </label>
+          ))} */}
+      </div>
+      {isOpen && (
+        <div className="p-4 gap-4">
+          <label>
+            <p>Changements de session</p>
+            <select name="status" id="status" className="border p-2 rounded-lg w-64 text-xs">
+              {["2019", "2020", "2021"].map((option) => (
+                <option key={option} value={option}>
+                  {/* {translateModelFields(model, option)} */}
+                  {option}
                 </option>
               ))}
             </select>
           </label>
-        ))}
-        <select name="statusPhase1" id="statusPhase1" className="border p-2 rounded-lg w-64 text-xs" multiple>
-          {statusPhase1Options.map((option) => (
-            <option key={option} value={option}>
-              {translate(option)}
-            </option>
-          ))}
-        </select>
-      </div>
+        </div>
+      )}
       <table className="w-full">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
-            <th className="font-normal p-4 text-xs text-gray-500">Action</th>
-            <th className="font-normal p-4 text-xs text-gray-500">Détails</th>
-            <th className="font-normal p-4 text-xs text-gray-500"></th>
-            <th className="font-normal p-4 text-xs text-gray-500"></th>
-            <th className="font-normal p-4 text-xs text-gray-500">Auteur</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
           </tr>
         </thead>
         <tbody>
           {filteredData.map((e, index) => (
-            <tr key={index} className="border-t border-t-slate-100">
-              <td className="p-4">
-                <p className="text-gray-400">
-                  {translateAction(e.op)} - {e.date}
-                </p>
-                <p>{translateField(e.path.substring(1))}</p>
-              </td>
-              <td className="p-4 text-gray-400">{e.originalValue}</td>
-              <td className="p-4">-&gt;</td>
-              <td className="p-4">{e.value}</td>
-              <td className="p-4">
-                <p>
-                  {e.user?.firstName} {e.user?.lastName}
-                </p>
-                <p className="text-gray-400">{e.user?.role}</p>
-              </td>
-            </tr>
+            <Event key={index} e={e} index={index} model={model} />
           ))}
         </tbody>
       </table>
     </div>
+  );
+}
+
+function Event({ e, index, model }) {
+  const translator = (path, value) => {
+    if (path === "/statusPhase1") {
+      return translatePhase1(value);
+    } else if (path === "/statusPhase2") {
+      return translatePhase2(value);
+    } else if (path === "/phase2ApplicationStatus") {
+      return translateApplication(value);
+    } else if (path === "/statusPhase2Contract") {
+      return translateEngagement(value);
+    } else if (path.includes("files")) {
+      return value?.name;
+    } else if (isIsoDate(value)) {
+      return formatStringLongDate(value);
+    } else {
+      return translate(value);
+    }
+  };
+
+  return (
+    <tr key={index} className="border-t border-t-slate-100">
+      <td className="px-4 py-3">
+        <p className="text-gray-400">
+          {translateAction(e.op)} • {formatLongDateFR(e.date)}
+        </p>
+        <p>{translateModelFields(model, e.path)}</p>
+      </td>
+      <td className="px-4 py-3 text-gray-400">{translator(e.path, e.originalValue)}</td>
+      <td className="px-4 py-3">
+        <HiOutlineArrowRight />
+      </td>
+      <td className="px-4 py-3">{translator(e.path, e.value)}</td>
+      <td className="px-4 py-3">
+        <UserCard user={e.user} />
+      </td>
+    </tr>
   );
 }
 
