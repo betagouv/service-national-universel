@@ -1,3 +1,10 @@
+## [1.179.1](https://github.com/betagouv/service-national-universel/compare/v1.179.0...v1.179.1) (2022-12-06)
+
+
+### Bug Fixes
+
+* **admin:** table de repartition vu departement ([d1e4dcd](https://github.com/betagouv/service-national-universel/commit/d1e4dcd3aa935db45ee7e6f0f3424e162b12f102))
+
 # [1.179.0](https://github.com/betagouv/service-national-universel/compare/v1.178.1...v1.179.0) (2022-12-05)
 
 
