@@ -14,30 +14,32 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young, application, optionsType, typeChose, defaultOption }) {
-  const [newFilesList, setNewFilesList] = useState([]);
+export default function ModalPJ({ isOpen, onCancel, onSave, onSend, application, optionsType, defaultOption }) {
   const [numberNewFile, setNumberNewFile] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const inputFileRef = React.useRef(null);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(false);
+  const [filesList, setFilesList] = useState([]);
 
-  const handleSave = () => {
-    onSave();
-    onSend(selectedOption, numberNewFile > 1 ? "true" : "false");
+  const handleAdd = (files) => {
+    const newFiles = Object.values(files).map((val) => val);
+    updateFiles(newFiles.concat(filesList), true);
+    //setFilesList(newFiles);
+    //onChange({ target: { files, name } });
   };
-
+  const handleDelete = (file) => {
+    const newArray = filesList.filter((f) => f !== file);
+    setFilesList([...newArray]);
+    updateFiles(newArray, false);
+  };
   const handleCancel = async () => {
     onCancel();
-    setSelectedOption(null);
-    setNewFilesList([]);
     setLoading(false);
   };
-  const uploadFiles = async (files) => {
+  const updateFiles = async (files, upload) => {
     const filesLength = Object.keys(files).length;
     const arr = Object.values(files).map((value) => value);
-    if (filesLength === 0) return;
-    setNumberNewFile(filesLength);
     setLoading(true);
     const res = await api.uploadFile(`/application/${application._id}/file/${selectedOption}`, arr);
     if (res.code === "FILE_CORRUPTED") {
@@ -48,16 +50,26 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
       );
     }
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-    toastr.success("Fichier téléversé");
-    setLoading(false);
+    if (!upload) {
+      toastr.success("Fichier supprimé");
+    } else {
+      setNumberNewFile(filesLength);
+      const newArray = files.filter((file) => typeof file !== "string" && !filesList.includes(file.name)).map((file) => file.name);
+      setFilesList((filesList) => [...filesList, ...newArray]);
+      toastr.success("Fichier téléversé");
+    }
     onSave();
-    //handleChange({ target: { value: res.data, name } });
+    setLoading(false);
   };
   useEffect(() => {
-    if (!defaultOption) return setSelectedOption(null);
-    setSelectedOption(defaultOption);
+    if (!selectedOption) return;
+    setFilesList(application[selectedOption]);
+  }, [selectedOption]);
+  useEffect(() => {
+    if (!defaultOption && !selectedOption) return setSelectedOption(null);
+    setNumberNewFile(0);
+    setSelectedOption(defaultOption || selectedOption);
   }, [defaultOption]);
-  const handleChange = () => {};
   return (
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[512px] bg-white rounded-lg shadow-xl">
       <div className="flex flex-col items-center justify-center mx-4 mt-3">
@@ -65,19 +77,14 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
         <div className="w-3/4 mt-4">
           <Select options={optionsType} selected={selectedOption} setSelected={setSelectedOption} label="Choissisez le document à téléverser" />
         </div>
-        {application[selectedOption] && application[selectedOption].length > 0 && (
+        {filesList && filesList.length > 0 && (
           <div className="mt-4 flex flex-col gap-2">
-            {application[selectedOption].map((file, index) => {
+            {filesList.map((file, index) => {
               return (
                 <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-400 p-2 rounded-md">
                   <FileName className="mr-2">{getFileName(file)}</FileName>
                   <div className="flex flex-row">
-                    <IconButton
-                      icon={deleteIcon}
-                      buttonsLoading={false}
-                      bgColor="bg-indigo-600"
-                      onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(application[selectedOption].filter((n, j) => file !== j)) })}
-                    />
+                    <IconButton icon={deleteIcon} buttonsLoading={false} bgColor="bg-indigo-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleDelete(file) })} />
                     <RoundDownloadButton
                       bgColor="bg-indigo-600"
                       source={async () => {
@@ -99,7 +106,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
           ref={inputFileRef}
           accept=".png, .jpg, .jpeg, .pdf"
           onChange={(e) => {
-            uploadFiles(e.target.files);
+            handleAdd(e.target.files);
           }}
           className="hidden"
         />
@@ -112,7 +119,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
             </button>
             <button
               className={`border-[1px] border-gray-300 text-white rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-default py-2 px-1  w-full bg-blue-600`}
-              onClick={() => (numberNewFile >= 1 ? handleSave() : onSave())}
+              onClick={() => onSend(selectedOption, numberNewFile > 1 ? "true" : "false")}
               disabled={loading || selectedOption === null || numberNewFile === 0}>
               Envoyer
             </button>
@@ -124,7 +131,6 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
         title="Êtes-vous sûr(e) de vouloir supprimer ce document"
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
-          console.log("should delete");
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });
         }}

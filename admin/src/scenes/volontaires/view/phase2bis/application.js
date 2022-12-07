@@ -439,15 +439,16 @@ export default function Phase2Application({ young, onChange }) {
                       });
                       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
                       toastr.success("L'email a bien été envoyé");
+                      setModalDocument({ isOpen: false });
                     } catch (e) {
                       toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
                     }
                   }}
                   onSave={async () => {
-                    setModalDocument({ isOpen: false });
                     await getMission();
                     await getApplication();
                   }}
+                  closeModal={() => setModalDocument({ isOpen: false })}
                   typeChose={modalDocument?.stepOne}
                 />
                 <ModalConfirmWithMessage
