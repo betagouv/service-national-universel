@@ -26,19 +26,16 @@ export default function History({ young, onChange }) {
     return JSON.stringify(field)?.replace(/"/g, "");
   }
 
-  function formatValue(value, path) {
-    if (path.includes("files")) return value.name;
+  function formatValue(value) {
+    if (value && value.name?.length) return value.name;
     if (typeof value === "object") return JSON.stringify(value);
     return value;
   }
 
   function formatUser(user) {
-    if (!user)
-      return {
-        name: "Acteur inconnu",
-        role: "",
-      };
-    else if (!user.role) {
+    if (!user) return { name: "Acteur inconnu", role: "" };
+    if (user.name?.includes("/Users/")) return { name: "Script", role: "Modification automatique" };
+    if (!user.role) {
       user.role = user.email ? "Volontaire" : "Modification automatique";
     }
     return user;
@@ -48,12 +45,17 @@ export default function History({ young, onChange }) {
     let history = [];
     for (const hit of data) {
       for (const e of hit.ops) {
-        e.date = hit.date;
-        e.user = formatUser(hit.user);
-        e.path = formatField(e.path.substring(1));
-        e.value = formatValue(e.value, e.path);
-        e.originalValue = formatValue(e.originalValue, e.path);
-        history.push(e);
+        try {
+          e.date = hit.date;
+          e.user = formatUser(hit.user);
+          e.path = formatField(e.path.substring(1));
+          e.value = formatValue(e.value);
+          e.originalValue = formatValue(e.originalValue, e.path);
+          history.push(e);
+        } catch (error) {
+          console.log("Error while formatting event:", e);
+          console.error(error);
+        }
       }
     }
     return history;
@@ -70,7 +72,7 @@ export default function History({ young, onChange }) {
     },
     {
       label: "Pièces justificatives",
-      value: { path: ["files"] },
+      value: { path: ["files", "files/cniFiles/0", "files/cniFiles/1", "files/cniFiles/2"] },
     },
   ];
 
