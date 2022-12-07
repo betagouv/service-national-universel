@@ -8,7 +8,7 @@ import { HiOutlineArrowRight } from "react-icons/hi";
 
 export default function Historic({ model, data, filters }) {
   const [search, setSearch] = useState("");
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState({ op: [], user: [], path: [] });
   const [customFilters, setCustomFilters] = useState([]);
@@ -28,6 +28,7 @@ export default function Historic({ model, data, filters }) {
     }
     return newFilters;
   }
+
   function getOptions(data, key) {
     const arr = data.map((e) => e[key]);
     const unique = [...new Set(arr)];
@@ -105,21 +106,18 @@ export default function Historic({ model, data, filters }) {
             options={actionOptions.map((e) => ({ label: translateAction(e), value: e }))}
             value={globalFilters.op}
             onChange={(op) => updateGlobalFilters({ op })}
-            label="Action"
             className="w-64"
           />
           <MultiSelect
             options={userOptions.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id }))}
             value={globalFilters.user}
             onChange={(user) => updateGlobalFilters({ user })}
-            label="User"
             className="w-64 z-100"
           />
           <MultiSelect
             options={fieldOptions.map((e) => ({ label: translateModelFields(model, e), value: e }))}
             value={globalFilters.path}
             onChange={(path) => updateGlobalFilters({ path })}
-            label="Field"
             className="w-64 z-100"
           />
         </div>
