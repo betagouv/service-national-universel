@@ -178,6 +178,22 @@ const Schema = new mongoose.Schema({
       description: "Commentaire sur le statut de la mission",
     },
   },
+  hebergement: {
+    type: String,
+    default: "",
+    enum: ["", "false", "true"],
+    documentation: {
+      description: "La mission propose un hébergement",
+    },
+  },
+  hebergementPayant: {
+    type: String,
+    default: "",
+    enum: ["", "false", "true"],
+    documentation: {
+      description: "L'hébergement est-il payant ?",
+    },
+  },
 
   // structure_id: { type: String, required: true },
   // referent_id: { type: String, required: true },

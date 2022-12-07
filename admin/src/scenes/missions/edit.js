@@ -7,9 +7,10 @@ import { Formik, Field } from "formik";
 import { Link, useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInputV2";
+import Toggle from "../../components/Toggle";
+
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import {
   translate,
@@ -150,6 +151,8 @@ export default function Edit(props) {
           tuteur: "",
           startAt: dateForDatePicker(Date.now()),
           endAt: dateForDatePicker(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          hebergement: "false",
+          hebergementPayant: "false",
           city: "",
           zip: "",
           address: "",
@@ -609,6 +612,26 @@ export default function Edit(props) {
                         </p>
                         <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} disabled={isJvaMission} />
                       </FormGroup>
+                      <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase">
+                        <div>Hébergement proposé</div>
+                        <Toggle
+                          id="hebergement"
+                          name="hebergement"
+                          value={values.hebergement === "true"}
+                          onChange={(e) => handleChange({ target: { value: e.toString(), name: "hebergement" } })}
+                        />
+                      </div>
+                      {values.hebergement === "true" && (
+                        <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase mt-4">
+                          <div>Hébergement payant</div>
+                          <Toggle
+                            id="hebergementPayant"
+                            name="hebergementPayant"
+                            value={values.hebergementPayant === "true"}
+                            onChange={(e) => handleChange({ target: { value: e.toString(), name: "hebergementPayant" } })}
+                          />
+                        </div>
+                      )}
                     </Wrapper>
                   </Row>
                   <Wrapper>
