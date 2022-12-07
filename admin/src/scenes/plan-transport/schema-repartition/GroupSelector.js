@@ -2,8 +2,12 @@ import React from "react";
 import People from "../../../assets/icons/People";
 import Plus from "../../../assets/icons/Plus";
 import { GroupSummary } from "../components/commons";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
 
 export default function GroupSelector({ title, groups, youngsCount, intradepartmental, className = "", onSelect, cohort, department, region, selectedGroup }) {
+  const { user } = useSelector((state) => state.Auth);
+
   function createGroup() {
     onSelect({
       cohort,
@@ -44,16 +48,18 @@ export default function GroupSelector({ title, groups, youngsCount, intradepartm
         {groups.map((group) => (
           <GroupBox key={group._id} group={group} onSelect={onSelectGroup} selected={selectedGroup && selectedGroup._id === group._id} />
         ))}
-        <div className="p-[8px]">
-          <div className="border-[1px] border-dashed border-[#D1D5DB] rounded-[8px] flex flex-column items-center justify-center py-[45px]">
-            <div
-              className="bg-[#2563EB] rounded-full shadow-[0px_1px_10px_rgba(24,59,245,0.21)] w-[32px] h-[32px] flex items-center justify-center text-[#FFFFFF] border-[transparent] border-[1px] hover:bg-[#FFFFFF] hover:border[#2563EB] hover:text-[#2563EB] cursor-pointer"
-              onClick={createGroup}>
-              <Plus width={12} height={12} />
+        {user.role !== ROLES.REFERENT_DEPARTMENT && (
+          <div className="p-[8px]">
+            <div className="border-[1px] border-dashed border-[#D1D5DB] rounded-[8px] flex flex-column items-center justify-center py-[45px]">
+              <div
+                className="bg-[#2563EB] rounded-full shadow-[0px_1px_10px_rgba(24,59,245,0.21)] w-[32px] h-[32px] flex items-center justify-center text-[#FFFFFF] border-[transparent] border-[1px] hover:bg-[#FFFFFF] hover:border[#2563EB] hover:text-[#2563EB] cursor-pointer"
+                onClick={createGroup}>
+                <Plus width={12} height={12} />
+              </div>
+              <div className="text-[#374151] text-[13px] leading-[16px]">Créer un groupe</div>
             </div>
-            <div className="text-[#374151] text-[13px] leading-[16px]">Créer un groupe</div>
           </div>
-        </div>
+        )}
         <div className="clear-both" />
       </div>
     </div>
