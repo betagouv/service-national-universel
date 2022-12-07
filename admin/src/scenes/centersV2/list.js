@@ -413,7 +413,7 @@ const ListCenter = ({ firstSession }) => {
             URLParams={true}
             showSearch={false}
             onValueChange={setFilterConhorts}
-            defaultValue={[firstSession]}
+            // defaultValue={[firstSession]}
           />
           <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
           <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
