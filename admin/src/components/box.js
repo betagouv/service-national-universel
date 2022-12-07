@@ -5,6 +5,7 @@ export const Box = ({ children, ...rest }) => <BoxStyled {...rest}>{children}</B
 
 const BoxStyled = styled.div`
   width: ${(props) => props.width || 100}%;
+  height: 100%;
   max-height: ${({ hide }) => (hide ? "20rem" : "none")};
   ${({ hide }) => (hide ? "overflow: hidden;" : "")};
   background-color: #fff;
