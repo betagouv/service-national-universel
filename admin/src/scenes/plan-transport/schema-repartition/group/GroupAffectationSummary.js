@@ -31,7 +31,7 @@ export default function GroupAffectationSummary({ group, className = "", onChang
       }
       setLoading(false);
     })();
-  }, []);
+  }, [group]);
 
   return (
     <GroupBox className={className}>
@@ -57,7 +57,13 @@ export default function GroupAffectationSummary({ group, className = "", onChang
               <div className="grow">
                 <div className="text-lg font-bold text-[#242526]">Centre de cohésion</div>
                 <div className="text-sm text-gray-800">
-                  {detail.center.name}, {detail.center.address} {detail.center.zip} {detail.center.city}&nbsp;•&nbsp;{detail.center.department}
+                  {detail.center ? (
+                    <span>
+                      {detail.center.name}, {detail.center.address} {detail.center.zip} {detail.center.city}&nbsp;•&nbsp;{detail.center.department}
+                    </span>
+                  ) : (
+                    <span className="opacity-50">Pas de centre sélectionné.</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -65,13 +71,17 @@ export default function GroupAffectationSummary({ group, className = "", onChang
               <MapColor className="w-[50px] h-[50px] mr-4" />
               <div className="grow">
                 <div className="text-lg font-bold text-[#242526]">Lieux de rassemblement</div>
-                <ul className="list-outside ml-3">
-                  {detail.gatheringPlaces.map((pdr) => (
-                    <li key={pdr._id} className="text-sm text-gray-800">
-                      {pdr.name}, {pdr.address} {pdr.zip} {pdr.city}&nbsp;•&nbsp;{pdr.department}
-                    </li>
-                  ))}
-                </ul>
+                {detail.gatheringPlaces && detail.gatheringPlaces.length > 0 ? (
+                  <ul className="list-outside ml-3">
+                    {detail.gatheringPlaces.map((pdr) => (
+                      <li key={pdr._id} className="text-sm text-gray-800">
+                        {pdr.name}, {pdr.address} {pdr.zip} {pdr.city}&nbsp;•&nbsp;{pdr.department}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="opacity-50">Aucun point de rassemblement sélectionné.</span>
+                )}
               </div>
             </div>
           </>

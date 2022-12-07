@@ -37,6 +37,9 @@ export default function GroupEditor({ group, className = "", onChange }) {
         setStep(group && group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
       }
     }
+    if (step === GROUPSTEPS.AFFECTATION_SUMMARY) {
+      setTempGroup(group);
+    }
   }, [group]);
 
   function onChangeStep(newStep) {
