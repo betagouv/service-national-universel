@@ -32,6 +32,21 @@ export default function Info({ bus, setBus }) {
     lunchBreakReturn: bus.lunchBreakReturn || false,
   });
 
+  React.useEffect(() => {
+    setData({
+      busId: bus.busId || "",
+      departuredDate: bus.departuredDate || "",
+      returnDate: bus.returnDate || "",
+      youngCapacity: bus.youngCapacity || "",
+      totalCapacity: bus.totalCapacity || "",
+      followerCapacity: bus.followerCapacity || "",
+      travelTime: bus.travelTime || "",
+      lunchBreak: bus.lunchBreak || false,
+      lunchBreakReturn: bus.lunchBreakReturn || false,
+    });
+    setErrors({});
+  }, [editInfo]);
+
   const onSubmitInfo = async () => {
     try {
       setIsLoading(true);
