@@ -25,8 +25,6 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, application,
   const handleAdd = (files) => {
     const newFiles = Object.values(files).map((val) => val);
     updateFiles(newFiles.concat(filesList), true);
-    //setFilesList(newFiles);
-    //onChange({ target: { files, name } });
   };
   const handleDelete = (file) => {
     const newArray = filesList.filter((f) => f !== file);
