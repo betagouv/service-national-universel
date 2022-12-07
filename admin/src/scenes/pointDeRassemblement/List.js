@@ -125,7 +125,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={[firstSession]}
+                //defaultValue={[firstSession]}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
