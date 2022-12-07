@@ -6,8 +6,11 @@ import People from "../../../../assets/icons/People";
 import api from "../../../../services/api";
 import IcebergColor from "../../../../assets/icons/IcebergColor";
 import MapColor from "../../../../assets/icons/MapColor";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
 
 export default function GroupAffectationSummary({ group, className = "", onChange, onChangeStep }) {
+  const { user } = useSelector((state) => state.Auth);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState(null);
@@ -32,7 +35,7 @@ export default function GroupAffectationSummary({ group, className = "", onChang
 
   return (
     <GroupBox className={className}>
-      <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)}>
+      <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)} noBack={user.role === ROLES.REFERENT_DEPARTMENT}>
         <div className="grow flex items-center justify-between">
           <div className="">Récapitulatif</div>
           <div className="flex items-center text-base text-gray-900">
@@ -74,12 +77,14 @@ export default function GroupAffectationSummary({ group, className = "", onChang
           </>
         )}
       </div>
-      <div className="flex items-end justify-center pt-[67px]">
-        <BorderButton onClick={() => onChangeStep(GROUPSTEPS.MODIFICATION)} className="mr-[8px]">
-          Annuler
-        </BorderButton>
-        <PlainButton onClick={() => onChange(group, GROUPSTEPS.CANCEL)}>Valider cette affectation</PlainButton>
-      </div>
+      {user.role !== ROLES.REFERENT_DEPARTMENT && (
+        <div className="flex items-end justify-center pt-[67px]">
+          <BorderButton onClick={() => onChangeStep(GROUPSTEPS.MODIFICATION)} className="mr-[8px]">
+            Annuler
+          </BorderButton>
+          <PlainButton onClick={() => onChange(group, GROUPSTEPS.CANCEL)}>Valider cette affectation</PlainButton>
+        </div>
+      )}
     </GroupBox>
   );
 }
