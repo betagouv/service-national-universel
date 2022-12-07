@@ -5,7 +5,7 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
-const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo } = require("snu-lib/roles");
+const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo, canEditLigneBusCenter } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -154,6 +154,40 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       travelTime,
       lunchBreak,
       lunchBreakReturn,
+    });
+
+    await ligne.save({ fromUser: req.user });
+
+    const infoBus = await getInfoBus(ligne);
+
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/centre", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      centerArrivalTime: Joi.string().required(),
+      centerDepartureTime: Joi.string().required(),
+    }).validate({ ...req.params, ...req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canEditLigneBusCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let { id, centerArrivalTime, centerDepartureTime } = value;
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    //add some checks
+
+    ligne.set({
+      centerArrivalTime,
+      centerDepartureTime,
     });
 
     await ligne.save({ fromUser: req.user });
