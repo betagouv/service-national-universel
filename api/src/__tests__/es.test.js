@@ -417,11 +417,8 @@ describe("Es", () => {
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
-      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER]);
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.REFERENT_REGION]);
       expect(filters[1]).toStrictEqual({
-        bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": passport.user.region } }] },
-      });
-      expect(filters[2]).toStrictEqual({
         bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": passport.user.department } }] },
       });
 
