@@ -879,7 +879,6 @@ const InfoStructure = ({ title, structure }) => {
 };
 
 const HoursAndPlaces = ({ duration, placesLeft, hebergement, hebergementPayant }) => {
-  console.log("hebergement", hebergement);
   return (
     <div className={`flex items-center ${duration ? "justify-between" : "justify-center"} gap-6`}>
       {duration ? (
