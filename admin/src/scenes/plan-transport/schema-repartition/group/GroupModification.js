@@ -18,6 +18,9 @@ export default function GroupModification({ group, className = "", onChangeStep 
         ) : (
           <GroupMenuItem onClick={() => onChangeStep(GROUPSTEPS.CENTER)}>Affecter les volontaires</GroupMenuItem>
         )}
+        {group.gatheringPlaces && group.gatheringPlaces.length > 0 && (
+          <GroupMenuItem onClick={() => onChangeStep(GROUPSTEPS.GATHERING_PLACES)}>Modifier les lieux de rassemblements</GroupMenuItem>
+        )}
         <GroupMenuItem onClick={() => onChangeStep(GROUPSTEPS.CONFIRM_DELETE_GROUP)}>Supprimer le groupe</GroupMenuItem>
       </div>
     </GroupBox>

@@ -223,6 +223,61 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
   }
 });
 
+router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { cohort } = valueParams;
+
+    const { error: errorQuery, value: valueQuery } = Joi.object({
+      offset: Joi.number().default(0),
+      limit: Joi.number().default(10),
+      filter: Joi.string().trim().allow("", null),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { offset, limit, filter } = valueQuery;
+
+    // search gathering places
+    let matches = [{ cohorts: cohort }];
+    if (filter && filter.length > 0) {
+      const regex = new RegExp(".*" + filter + ".*", "gi");
+      matches.push({ $or: [{ name: regex }, { city: regex }, { department: regex }, { region: regex }] });
+    }
+
+    const pipeline = [
+      { $match: { $and: matches } },
+      { $sort: { name: 1 } },
+      {
+        $group: {
+          _id: "$fromRegion",
+          total: { $sum: 1 },
+          results: { $push: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+          gatheringPlaces: { $slice: ["$results", offset, limit] },
+        },
+      },
+    ];
+
+    const data = await pointRassemblementModel.aggregate(pipeline).exec();
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data: data.length > 0 ? data[0] : { total: 0, gatheringPlaces: [] } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/pdr/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- parameters & vérification
