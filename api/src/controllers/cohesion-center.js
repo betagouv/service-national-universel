@@ -150,6 +150,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
         { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
         { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
       ];
+      for (const object of sentTo) {
         await sendTemplate(
           template,
           {
