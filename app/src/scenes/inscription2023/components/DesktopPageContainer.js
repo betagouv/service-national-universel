@@ -1,11 +1,13 @@
 import React from "react";
+import { appURL } from "../../../config";
 
+import Header from "./../../../components/header";
 import Navbar from "../components/Navbar";
+import Help from "./Help";
+import Footer from "../../../components/footerV2";
 
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Button from "../components/Button";
-import Help from "./Help";
-import { appURL } from "../../../config";
 import { FiChevronLeft } from "react-icons/fi";
 
 export default function DesktopPageContainer({
@@ -23,10 +25,11 @@ export default function DesktopPageContainer({
   loading = false,
 }) {
   return (
-    <>
+    <div className="flex flex-col h-screen justify-between bg-[#f9f6f2]">
+      <Header />
       <Navbar onSave={onSave} />
       <div className="bg-[#f9f6f2] text-[#161616]">
-        <div className="w-full md:w-[50rem] bg-white mx-auto px-[1rem] md:px-[6rem] pt-14 pb-4">
+        <main className="w-full md:w-[50rem] bg-white mx-auto px-[1rem] md:px-[6rem] pt-14 pb-4 shadow-sm">
           <div className="flex justify-between items-center mt-2">
             <h1 className="text-xl font-bold">{title}</h1>
             <a className="hover:scale-105" href={questionMarckLink} target="_blank" rel="noreferrer">
@@ -51,7 +54,7 @@ export default function DesktopPageContainer({
               </button>
             </div>
           </div>
-        </div>
+        </main>
 
         {/* <div className="flex md:justify-end gap-4">
           {onClickPrevious && (
@@ -79,6 +82,7 @@ export default function DesktopPageContainer({
         <Help />
         {/* </div> */}
       </div>
-    </>
+      <Footer />
+    </div>
   );
 }

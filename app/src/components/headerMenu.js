@@ -22,8 +22,8 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
   const { pathname } = useLocation();
   return (
     isOpen && (
-      <div className={`w-screen  text-[#000091] shadow-lg  fixed top-0 text-sm font-medium z-[100]`}>
-        <div className="bg-white w-full px-3 py-3">
+      <div className={`w-screen text-[#000091] shadow-lg fixed top-0 text-sm font-medium z-[100]`}>
+        <nav className="bg-white w-full px-3 py-3">
           <div
             className="flex w-full justify-end items-center space-x-2 mb-8"
             onClick={() => {
@@ -53,7 +53,7 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <Help />
             <div>Besoin d&apos;aide ?</div>
           </Link>
-        </div>
+        </nav>
       </div>
     )
   );

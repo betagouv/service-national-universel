@@ -1,100 +1,40 @@
 import React from "react";
 import LogoFr from "../assets/fr.png";
 import LinkTo from "../assets/icons/LinkTo";
-import useDevice from "../hooks/useDevice";
 import SNU from "../assets/logo-snu.png";
 
-const Footer = ({ marginBottom }) => {
-  const mobile = useDevice() === "mobile";
-  return mobile ? (
-    <div className="border-t border-t-[#E5E5E5] w-full bg-white pb-3">
-      <div className={`${marginBottom ? marginBottom : ""} px-3 text-sm text-[#3A3A3A] py-3`}>
-        <div className="mb-4 flex">
-          <img src={LogoFr} className="w-26 h-24" />
-        </div>
-        <div>
-          <div className="leading-6 mb-4">
-            Le Service national universel s’adresse à tous les jeunes de 15 à 17 ans qui souhaitent vivre une belle expérience collective, se rendre utile aux autres, créer des
-            liens forts et se découvrir un talent pour l’engagement !
-          </div>
-          <div className="flex-col flex font-bold">
-            <div className="w-full mb-4 flex ">
-              <div className="basis-[50%] flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  legifrance.gouv.fr
-                </a>
-                <LinkTo />
-              </div>
-              <div className="basis-[50%] flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  gouvernement.fr
-                </a>
-                <LinkTo />
-              </div>
-            </div>
-            <div className="w-full flex">
-              <div className="basis-[50%] flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.service-public.fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  service-public.fr
-                </a>
-                <LinkTo />
-              </div>
-              <div className="basis-[50%] flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.data.gouv.fr/fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  data.gouv.fr
-                </a>
-                <LinkTo />
-              </div>
-            </div>
-          </div>
-        </div>
+const Footer = () => {
+  return (
+    <footer className="flex flex-col md:flex-row px-[1rem] md:px-[7rem] w-full bg-white pt-[1rem] md:pt-[2rem] pb-32 md:pb-8 justify-between border-t-2 md:border-t-[#000091]">
+      <div className="w-full md:w-1/2 flex">
+        <img src={LogoFr} alt="République Française" className="w-26 h-24" />
+        <img src={SNU} alt="Logo du SNU" className="w-[90px] h-[90px] ml-8 hidden md:block" />
       </div>
-    </div>
-  ) : (
-    <div className={`${marginBottom ? marginBottom : ""} border-t-[#000091] border-t pt-3 px-3 w-full bg-white  pb-3`}>
-      <div className="flex justify-between w-full px-[108px] text-sm text-[#3A3A3A] py-3">
-        <div className="basis-[50%] mb-4 flex">
-          <img src={LogoFr} className="w-26 h-24" />
-          <img src={SNU} className="w-[90px] h-[90px] ml-8" />
-        </div>
-        <div className="basis-[50%]">
-          <div className="leading-6 mb-4">
-            Le Service national universel s’adresse à tous les jeunes de 15 à 17 ans qui souhaitent vivre une belle expérience collective, se rendre utile aux autres, créer des
-            liens forts et se découvrir un talent pour l’engagement !
-          </div>
-          <div className="items-center flex font-bold flex-wrap">
-            <div className="space-x-6 flex mr-6 mb-2">
-              <div className="flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  legifrance.gouv.fr
-                </a>
-                <LinkTo />
-              </div>
-              <div className="flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  gouvernement.fr
-                </a>
-                <LinkTo />
-              </div>
-            </div>
-            <div className="space-x-6 flex mb-2">
-              <div className="flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.service-public.fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  service-public.fr
-                </a>
-                <LinkTo />
-              </div>
-              <div className="flex items-center space-x-1  cursor-pointer">
-                <a href="https://www.data.gouv.fr/fr/" target="_blank" rel="noreferrer" className="hover:text-[#3A3A3A]">
-                  data.gouv.fr
-                </a>
-                <LinkTo />
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="w-full md:w-1/2">
+        <p className="leading-8 text-slate-500">
+          Le Service national universel s’adresse à tous les jeunes de 15 à 17 ans qui souhaitent vivre une belle expérience collective, se rendre utile aux autres, créer des liens
+          forts et se découvrir un talent pour l’engagement&nbsp;!
+        </p>
+        <nav className="flex flex-wrap gap-6 font-bold">
+          <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center py-2">
+            legifrance.gouv.fr
+            <LinkTo />
+          </a>
+          <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+            gouvernement.fr
+            <LinkTo />
+          </a>
+          <a href="https://www.service-public.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+            service-public.fr
+            <LinkTo />
+          </a>
+          <a href="https://www.data.gouv.fr/fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+            data.gouv.fr
+            <LinkTo />
+          </a>
+        </nav>
       </div>
-    </div>
+    </footer>
   );
 };
 
