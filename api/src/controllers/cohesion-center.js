@@ -70,13 +70,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       complement: value.complement,
       centerDesignation: value.centerDesignation,
     });
-
+    const status = req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION";
     await SessionPhase1.create({
       cohesionCenterId: cohesionCenter._id,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION",
+      status: status,
       department: value.department,
       region: value.region,
       codeCentre: value.code2022,
@@ -84,6 +84,26 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cityCentre: value.city,
       zipCentre: value.zip,
     });
+
+    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
+      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
+      let sentTo = [
+        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
+        { email: "christelle.bignon@jeunesse-sports.gouv.fr", name: "Christelle Bignon" },
+        { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
+        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
+      ];
+      for (const object of sentTo) {
+        await sendTemplate(template, {
+          emailTo: [{ name: object.name, email: object.email }],
+          params: {
+            cohort: value.cohort,
+            centre: value.name,
+            cta: `${ADMIN_URL}/centre/${cohesionCenter._id}?cohorte=${value.cohort}`,
+          },
+        });
+      }
+    }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
@@ -151,18 +171,14 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
         { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
       ];
       for (const object of sentTo) {
-        await sendTemplate(
-          template,
-          {
-            emailTo: [{ name: object.name, email: object.email }],
-            params: {
-              cohort: value.cohort,
-              centre: center.name,
-              cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
-            },
+        await sendTemplate(template, {
+          emailTo: [{ name: object.name, email: object.email }],
+          params: {
+            cohort: value.cohort,
+            centre: center.name,
+            cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
           },
-          { force: true },
-        );
+        });
       }
     }
 
