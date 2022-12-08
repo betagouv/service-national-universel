@@ -473,6 +473,7 @@ const ListCenter = ({ firstSession }) => {
   );
 };
 const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
+  const orderedSession = sessionsPhase1.sort((a, b) => COHESION_STAY_START[a._source.cohort] - COHESION_STAY_START[b._source.cohort]);
   return (
     <>
       <hr />
@@ -482,7 +483,7 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
           <div className="font-normal text-sm leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
         </div>
         <div className="flex items-center flex-wrap w-[60%]">
-          {sessionsPhase1.map((sessionPhase1) => (
+          {orderedSession.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
               <div className="flex items-center">
                 <Badge

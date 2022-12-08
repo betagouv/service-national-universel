@@ -86,12 +86,12 @@ export default function Details({ center, setCenter, sessions }) {
       if (!data?.placesTotal || isNaN(data?.placesTotal)) {
         error.placesTotal = "Le nombre de places est incorrect";
       }
-      if (!data?.centerDesignation) {
-        error.centerDesignation = "La désigniation est obligatoire";
-      }
       if (!data?.code2022) {
         error.code2022 = "Le code est obligatoire";
       }
+      if (!data?.typology) error.typology = "La typologie est obligatoire";
+      if (!data?.domain) error.domain = "Le domaine est obligatoire";
+
       // check session
       const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
       if (!canUpdateSession) {
@@ -323,6 +323,7 @@ export default function Details({ center, setCenter, sessions }) {
                     readOnly={!editInfo}
                     options={optionsTypology}
                     selected={optionsTypology.find((e) => e.value === data.typology)}
+                    error={errors?.typology}
                     setSelected={(e) => {
                       setData({ ...data, typology: e.value });
                     }}
@@ -337,6 +338,7 @@ export default function Details({ center, setCenter, sessions }) {
                   options={optionsDomain}
                   selected={optionsDomain.find((e) => e.value === data.domain)}
                   setSelected={(e) => setData({ ...data, domain: e.value })}
+                  error={errors?.domain}
                 />
               </div>
               <div className="flex flex-col gap-2">
