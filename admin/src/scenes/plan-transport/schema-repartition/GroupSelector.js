@@ -2,8 +2,12 @@ import React from "react";
 import People from "../../../assets/icons/People";
 import Plus from "../../../assets/icons/Plus";
 import { GroupSummary } from "../components/commons";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
 
 export default function GroupSelector({ title, groups, youngsCount, intradepartmental, className = "", onSelect, cohort, department, region, selectedGroup }) {
+  const { user } = useSelector((state) => state.Auth);
+
   function createGroup() {
     onSelect({
       cohort,
@@ -40,20 +44,22 @@ export default function GroupSelector({ title, groups, youngsCount, intradepartm
           <span className="text-[#111827] text-[17px] leading-[21px] font-bold">{youngsCount}</span>
         </div>
       </div>
-      <div className="relative">
+      <div className="relative grid grid-cols-2">
         {groups.map((group) => (
           <GroupBox key={group._id} group={group} onSelect={onSelectGroup} selected={selectedGroup && selectedGroup._id === group._id} />
         ))}
-        <div className="w-[50%] p-[8px] float-left">
-          <div className="border-[1px] border-dashed border-[#D1D5DB] rounded-[8px] flex flex-column items-center justify-center py-[45px]">
-            <div
-              className="bg-[#2563EB] rounded-full shadow-[0px_1px_10px_rgba(24,59,245,0.21)] w-[32px] h-[32px] flex items-center justify-center text-[#FFFFFF] border-[transparent] border-[1px] hover:bg-[#FFFFFF] hover:border[#2563EB] hover:text-[#2563EB] cursor-pointer"
-              onClick={createGroup}>
-              <Plus width={12} height={12} />
+        {user.role !== ROLES.REFERENT_DEPARTMENT && (
+          <div className="p-[8px]">
+            <div className="border-[1px] border-dashed border-[#D1D5DB] rounded-[8px] flex flex-column items-center justify-center py-[45px]">
+              <div
+                className="bg-[#2563EB] rounded-full shadow-[0px_1px_10px_rgba(24,59,245,0.21)] w-[32px] h-[32px] flex items-center justify-center text-[#FFFFFF] border-[transparent] border-[1px] hover:bg-[#FFFFFF] hover:border[#2563EB] hover:text-[#2563EB] cursor-pointer"
+                onClick={createGroup}>
+                <Plus width={12} height={12} />
+              </div>
+              <div className="text-[#374151] text-[13px] leading-[16px]">Créer un groupe</div>
             </div>
-            <div className="text-[#374151] text-[13px] leading-[16px]">Créer un groupe</div>
           </div>
-        </div>
+        )}
         <div className="clear-both" />
       </div>
     </div>
@@ -62,7 +68,7 @@ export default function GroupSelector({ title, groups, youngsCount, intradepartm
 
 function GroupBox({ group, className = "", onSelect, selected }) {
   return (
-    <div className={`w-[50%] p-[8px] float-left ${className}`}>
+    <div className={`p-[8px] ${className}`}>
       <div
         className={`p-[20px] rounded-[8px] bg-[#FFFFFF] border-[1px] border-[#E5E7EB] ${
           selected ? "shadow-[0px_5px_24px_rgba(0,0,0,0.15)]" : ""

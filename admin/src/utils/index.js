@@ -202,7 +202,7 @@ export function capitalizeFirstLetter(string) {
   return string[0].toUpperCase() + string.slice(1);
 }
 
-export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07|02)(?:\\W*\\d){8}$`;
+export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|0[1-9])(?:\\W*\\d){8}$`;
 
 export function areObjectsEqual(obj1, obj2) {
   if (obj1?.length !== obj2?.length) return false;

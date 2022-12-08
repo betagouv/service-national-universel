@@ -130,8 +130,13 @@ const rebuildYoung = (youngInfos) => {
 
 exports.handler = async () => {
   try {
+    slack.info({
+      title: "Getting access token",
+    });
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
-
+    slack.info({
+      title: "Access token ok",
+    });
     const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
 
     await findAll(young_patches, mongooseFilterForDayBefore(), process);

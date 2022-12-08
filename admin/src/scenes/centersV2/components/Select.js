@@ -7,7 +7,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Select({ options, selected, setSelected, label, readOnly = false, icon }) {
+export default function Select({ options, selected, setSelected, label, readOnly = false, icon, error }) {
   return (
     <div className="coucou">
       <Listbox value={selected} onChange={setSelected}>
@@ -15,7 +15,10 @@ export default function Select({ options, selected, setSelected, label, readOnly
           <>
             <div className="relative">
               <Listbox.Button className="relative w-full text-left">
-                <div className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border border-gray-300 bg-white py-2 px-2.5 items-center`}>
+                <div
+                  className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border ${
+                    error ? "border-red-500" : "border-gray-300"
+                  } bg-white py-2 px-2.5 items-center`}>
                   {icon ? icon : null}
                   <div className={`flex flex-col w-full `}>
                     <label className="text-xs leading-4 text-gray-500">{label}</label>
@@ -31,6 +34,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                     </div>
                   </div>
                 </div>
+                {error ? <div className="text-[#EF4444]">{error}</div> : null}
               </Listbox.Button>
 
               <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">

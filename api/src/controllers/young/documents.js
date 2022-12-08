@@ -292,8 +292,12 @@ router.post(
           }
         }
 
-        // Create document
+        // align date
+        const formatedDate = body.expirationDate;
+        formatedDate?.setUTCHours(11, 0, 0, 0);
+        body.expirationDate = formatedDate;
 
+        // Create document
         const newFile = {
           _id: mongoose.Types.ObjectId(),
           name,

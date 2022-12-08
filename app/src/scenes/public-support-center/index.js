@@ -97,7 +97,7 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
       if (response.ok) {
         setItems(response.data);
       }
-    }, 250);
+    }, 1000);
   };
 
   useEffect(() => {

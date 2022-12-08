@@ -238,7 +238,7 @@ export default function View(props) {
                 className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => setModalCreation({ isOpen: true })}
                 disabled={isLoading}>
-                Rattacher un point à un séjour
+                Rattacher le point à un séjour
               </button>
             ) : null}
           </div>
@@ -292,7 +292,7 @@ export default function View(props) {
             <div className="flex w-[10%] justify-center items-center">
               <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
             </div>
-            <div className="flex flex-col w-[45%]  justify-between">
+            <div className="flex flex-col w-[45%] justify-between">
               <div className="flex flex-col gap-3">
                 <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
                 <Field

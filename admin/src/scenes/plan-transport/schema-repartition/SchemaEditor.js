@@ -29,7 +29,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
         <div className="flex-[1_1_50%] overflow-auto">
           <GroupSelector
             title="Volontaires restants à grouper"
-            youngsCount={summary.total - summary.intradepartmental - summary.assigned + summary.intradepartmentalAssigned}
+            youngsCount={Math.max(0, summary.total - summary.intradepartmental - summary.assigned + summary.intradepartmentalAssigned)}
             groups={groups.extra}
             department={department}
             region={region}
@@ -41,7 +41,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             className="mt-[32px]"
             title="Volontaires restants à grouper"
             intradepartmental={true}
-            youngsCount={summary.intradepartmental - summary.intradepartmentalAssigned}
+            youngsCount={Math.max(0, summary.intradepartmental - summary.intradepartmentalAssigned)}
             groups={groups.intra}
             department={department}
             region={region}

@@ -97,14 +97,16 @@ export function GroupBox({ className = "", children }) {
   return <div className={`bg-[#F7F7F8] rounded-[8px] p-[16px] ${className}`}>{children}</div>;
 }
 
-export function GroupHeader({ className = "", children, onBack }) {
+export function GroupHeader({ className = "", children, onBack, noBack = false }) {
   return (
     <div className={`flex items-center pt-[7px] px-[10px] pb-[19px] text-[#242526] text-[20px] leading-[28px] font-bold ${className}`}>
-      <div
-        className="bg-[#E5E7EB] rounded-full w-[38px] h-[38px] text-[#374151] hover:bg-[#374151] hover:text-[#E5E7EB] cursor-pointer flex items-center justify-center mr-[11px]"
-        onClick={onBack}>
-        <ArrowNarrowLeft />
-      </div>
+      {!noBack && (
+        <div
+          className="bg-[#E5E7EB] rounded-full w-[38px] h-[38px] text-[#374151] hover:bg-[#374151] hover:text-[#E5E7EB] cursor-pointer flex items-center justify-center mr-[11px]"
+          onClick={onBack}>
+          <ArrowNarrowLeft />
+        </div>
+      )}
       {children}
     </div>
   );
@@ -123,3 +125,14 @@ export function GroupSummary({ group, className = "" }) {
     </div>
   );
 }
+export const TabItem = ({ active, title, icon, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-snu-purple-800 ${
+      active ? "!text-snu-purple-800 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
+    }`}>
+    <div className={"flex items-center gap-2"}>
+      {icon} {title}
+    </div>
+  </div>
+);

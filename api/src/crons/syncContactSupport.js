@@ -9,8 +9,8 @@ const { isYoung } = require("../utils");
 
 exports.handler = async () => {
   try {
-    const youngs = await YoungObject.find({ createdAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).lean();
-    const referents = await ReferentObject.find({ createdAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).lean();
+    const youngs = await YoungObject.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).lean();
+    const referents = await ReferentObject.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).lean();
     const contacts = youngs.concat(referents);
     for (const contact of contacts) {
       contact.attributes = await getUserAttributes(contact);

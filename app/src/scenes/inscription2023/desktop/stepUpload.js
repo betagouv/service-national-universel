@@ -15,6 +15,7 @@ import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 import ErrorMessage from "../components/ErrorMessage";
 import MyDocs from "../components/MyDocs";
+import dayjs from "dayjs";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -42,7 +43,7 @@ export default function StepUpload() {
           return { error: `Ce fichier ${files.name} est trop volumineux.` };
         }
       }
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, new Date(date));
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
       if (res.code === "FILE_CORRUPTED")
         return {
           error:
@@ -71,7 +72,7 @@ export default function StepUpload() {
           return;
         }
       }
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date });
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
       if (!ok) {
         capture(code);
         setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
@@ -214,7 +215,7 @@ export default function StepUpload() {
               <DatePickerList
                 value={date}
                 onChange={(date) => {
-                  setDate(date?.setUTCHours(11, 0, 0));
+                  setDate(date);
                   setHasChanged(true);
                 }}
               />

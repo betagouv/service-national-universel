@@ -15,13 +15,19 @@ import FrenchMap from "../../../assets/icons/FrenchMap";
 import { capture } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
-import { region2department } from "snu-lib";
+import { region2department, ROLES } from "snu-lib";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
+import { useSelector } from "react-redux";
+
+const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
 export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
   const location = useLocation();
+  const { user } = useSelector((state) => state.Auth);
   const [isNational, setIsNational] = useState(!region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
   const [cohort, setCohort] = useState(getDefaultCohort());
@@ -68,7 +74,9 @@ export default function SchemaRepartition({ region, department }) {
 
     if (data.toCenters) {
       for (const row of data.toCenters) {
-        toRegions.push({ name: row.name, departments: row.departments });
+        if (row.name !== "all") {
+          toRegions.push({ name: row.name, departments: row.departments });
+        }
         capacity += row.capacity ? row.capacity : 0;
         centers += row.centers ? row.centers : 0;
       }
@@ -133,12 +141,13 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   function goToNational() {
-    console.log("goTo national...");
-    history.push("/schema-repartition?cohort=" + cohort);
+    if (user.role === ROLES.ADMIN) {
+      history.push("/schema-repartition?cohort=" + cohort);
+    }
   }
 
   function goToRegion() {
-    if (region) {
+    if (region && user.role !== ROLES.REFERENT_DEPARTMENT) {
       history.push(`/schema-repartition/${region}?cohort=${cohort}`);
     }
   }
@@ -158,7 +167,85 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   async function exportDetail() {
-    console.log("TODO: export detail");
+    try {
+      const groups = await loadExportData();
+      const result = await exportExcelSheet(groups);
+      const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
+      FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
+    }
+  }
+
+  async function loadExportData() {
+    let url = "/schema-de-repartition/export";
+    if (region) {
+      url += "/" + region;
+    }
+    if (department) {
+      url += "/" + department;
+    }
+    url += "/" + cohort;
+
+    const result = await API.get(url);
+    if (!result.ok) {
+      return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
+    return result.data;
+  }
+
+  async function exportExcelSheet(groups) {
+    let maxGatheringPlaces = 0;
+
+    let sheetData = groups.map((g) => {
+      let data = {
+        cohort: g.cohort,
+        region: g.fromRegion,
+        department: g.fromDepartment,
+        youngsVolume: g.youngsVolume,
+        centerId: g.centerId,
+        centerDepartment: g.toDepartment,
+        centerRegion: g.toRegion,
+      };
+      if (maxGatheringPlaces < g.gatheringPlaces.length) {
+        maxGatheringPlaces = g.gatheringPlaces.length;
+      }
+      for (let i = 0, n = g.gatheringPlaces.length; i < n; ++i) {
+        const pdr = g.gatheringPlaces[i];
+        data["gpId" + i] = pdr._id;
+        data["gpName" + i] = pdr.name;
+        data["gpAddress" + i] = pdr.address;
+        data["gpZip" + i] = pdr.zip;
+        data["gpCity" + i] = pdr.city;
+      }
+      return data;
+    });
+
+    console.log("sheetData: ", sheetData);
+    let sheet = XLSX.utils.json_to_sheet(sheetData);
+
+    // --- fix header names
+    let headers = ["Cohorte", "Région des volontaires", "Département des volontaires", "Nombre de volontaires", "ID centre", "Département du centre", "Région du centre"];
+    for (let i = 1; i <= maxGatheringPlaces; ++i) {
+      headers.push(
+        ...[
+          "ID du point de rassemblement " + i,
+          "Nom du point de rassemblement " + i,
+          "Adresse du point de rassemblement " + i,
+          "Code postal du point de rassemblement " + i,
+          "Ville du point de rassemblement " + i,
+        ],
+      );
+    }
+    XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
+
+    // --- create workbook
+    let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Schéma de répartition");
+    const fileName = "schema-repartition.xlsx";
+    // const workbook = { Sheets: { data: sheet }, SheetNames: ["Schema de repartition"] };
+    return { workbook, fileName };
   }
 
   return (
@@ -196,7 +283,7 @@ export default function SchemaRepartition({ region, department }) {
             <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
           </>
         ) : (
-          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} />
+          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} />
         )}
       </div>
     </div>
@@ -251,7 +338,7 @@ function BoxAffectation({ summary, className = "", loading }) {
             </div>
             <div className="flex items-center mr-[16px] text-[12px] leading-[14px] text-[#1F2937]">
               <div className="rounded-[100px] w-[7px] h-[7px] bg-[#E5E7EB]" />
-              <b className="mx-[5px]">{summary.total - summary.assigned}</b>
+              <b className="mx-[5px]">{Math.max(0, summary.total - summary.assigned)}</b>
               <span>restants</span>
             </div>
           </div>
@@ -262,7 +349,6 @@ function BoxAffectation({ summary, className = "", loading }) {
 }
 
 function BoxDisponibilite({ summary, className = "", loading, isNational }) {
-  console.log("summary: ", summary);
   return (
     <Box className={`flex flex-column justify-between pb-[0px] ${className}`}>
       <div>
@@ -279,7 +365,11 @@ function BoxDisponibilite({ summary, className = "", loading, isNational }) {
         )}
       </div>
       <div className="mt-[30px] h-[130px]">
-        {loading ? <Loading /> : <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={summary.capacity - summary.assigned} />}
+        {loading ? (
+          <Loading />
+        ) : (
+          <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={Math.max(0, summary.capacity - summary.assigned)} />
+        )}
       </div>
     </Box>
   );
@@ -303,7 +393,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
       {!isNational && loading ? (
         <Loading width="w-1/3" />
       ) : (
-        <ul className="list-none">
+        <ul className="list-none mb-6">
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
               <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>
@@ -319,7 +409,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
   );
 }
 
-function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail }) {
+function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort }) {
   function goToRow(row) {
     onGoToRow && onGoToRow(row);
   }
@@ -363,7 +453,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <AlertPoint threshold={50} value={row.capacity - row.assigned} />
-                      <span>{row.capacity - row.assigned}</span>
+                      <span>{Math.max(0, row.capacity - row.assigned)}</span>
                     </div>
                   )}
                 </td>
@@ -373,10 +463,17 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <div className="">{row.intradepartmental}</div>
-                      <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="mx-[8px]">
-                        {formatRate(row.intradepartmentalAssigned, row.intradepartmental)}
-                      </Badge>
-                      <Link to="">
+                      {row.intradepartmental > 0 && (
+                        <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="ml-2">
+                          {formatRate(row.intradepartmentalAssigned, row.intradepartmental)} affectés
+                        </Badge>
+                      )}
+                      <Link
+                        to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohort)}
+                        className="ml-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}>
                         <ExternalLink className="text-[#9CA3AF]" />
                       </Link>
                     </div>
@@ -388,7 +485,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                   ) : (
                     <div className="flex items-center">
                       <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />
-                      {row.intraCapacity - row.intradepartmentalAssigned}
+                      {Math.max(0, row.intraCapacity - row.intradepartmentalAssigned)}
                     </div>
                   )}
                 </td>
@@ -399,4 +496,17 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
       </div>
     </Box>
   );
+}
+
+function getIntradepartmentalYoungsLink(region, department, cohort) {
+  let url =
+    "/volontaire?STATUS=" + encodeURIComponent('["VALIDATED"]') + "&COHORT=" + encodeURIComponent('["' + cohort + '"]') + "&SAME_DEPARTMENT=" + encodeURIComponent('["true"]');
+
+  if (department) {
+    url += "&DEPARTMENT=" + encodeURIComponent('["' + department + '"]');
+  } else if (region) {
+    url += "&REGION=" + encodeURIComponent('["' + region + '"]');
+  }
+
+  return url;
 }
