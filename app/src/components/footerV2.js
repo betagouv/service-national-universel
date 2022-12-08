@@ -11,12 +11,12 @@ const Footer = () => {
         <img src={SNU} alt="Logo du SNU" className="w-[90px] h-[90px] ml-8 hidden md:block" />
       </div>
       <div className="w-full md:w-1/2">
-        <p className="leading-8 text-slate-500">
+        <p className="leading-relaxed md:leading-loose py-[1rem] md:py-0 text-slate-500">
           Le Service national universel s’adresse à tous les jeunes de 15 à 17 ans qui souhaitent vivre une belle expérience collective, se rendre utile aux autres, créer des liens
           forts et se découvrir un talent pour l’engagement&nbsp;!
         </p>
-        <nav className="flex flex-wrap gap-6 font-bold">
-          <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center py-2">
+        <nav className="flex flex-wrap gap-6 font-bold pt-2">
+          <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
             legifrance.gouv.fr
             <LinkTo />
           </a>
