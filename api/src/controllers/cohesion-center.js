@@ -10,6 +10,9 @@ const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { sendTemplate } = require("../sendinblue");
+const { ADMIN_URL, ENVIRONMENT } = require("../config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
@@ -138,6 +141,30 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     });
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
+
+    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
+      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
+      let sentTo = [
+        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
+        { email: "christelle.bignon@jeunesse-sports.gouv.fr", name: "Christelle Bignon" },
+        { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
+        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
+      ];
+        await sendTemplate(
+          template,
+          {
+            emailTo: [{ name: object.name, email: object.email }],
+            params: {
+              cohort: value.cohort,
+              centre: center.name,
+              cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
+            },
+          },
+          { force: true },
+        );
+      }
+    }
+
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
