@@ -78,7 +78,6 @@ export default function List() {
   };
 
   const getDefaultQuery = () => {
-    console.log("get defaut query");
     let body = {
       query: {
         bool: {
