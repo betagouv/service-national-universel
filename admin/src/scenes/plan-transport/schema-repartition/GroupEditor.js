@@ -55,7 +55,6 @@ export default function GroupEditor({ group, className = "", onChange }) {
   }
 
   async function onCreate(group, nextStep) {
-    console.log("onCreate next step: ", nextStep, group);
     if (group === null) {
       onChange && onChange(null);
     } else {

@@ -441,7 +441,6 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
     // --- get table de repartition for each regions
     const regions = await getRegionTableDeRepartition(cohort);
-    // console.log("TABLE REGIONS: ", regions);
 
     // --- get centers & capacity extra & intra for each regions
     const filledRegions = regions.map((r) => {
@@ -455,7 +454,6 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
         intraCenters: intra.centers,
       };
     });
-    // console.log("FILLED REGIONS: ", filledRegions);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -574,15 +572,12 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
 
     // --- get stats for each departments
     const departments = await getDepartmentCentersAndCapacities(cohort);
-    // console.log("DEPARTEMENTS: ", departments);
 
     // --- get table de repartition for each department
     const departmentsTable = await getDepartmentTableDeRepartition(cohort, region);
-    // console.log("TABLE DEPARTMENTS: ", departmentsTable);
 
     // --- get to regions from region
     const toRegions = await getRegionsAndDepartmentsFromRegion(cohort, region);
-    // console.log("TO REGIONS: ", toRegions);
 
     // --- get to departments from region
     const toDepartmentsSet = {};
@@ -607,7 +602,6 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         intraCenters: intra.centers,
       };
     });
-    // console.log("FILLED DEPARTMENTS: ", filledDepartments);
 
     // --- get centers by to regions
     const pipeline = [
@@ -636,13 +630,11 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         },
       },
     ];
-    // console.log("PIPELINE: ", JSON.stringify(pipeline, null, 4));
     const toCenterResult = await sessionPhase1Model.aggregate(pipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
-    // console.log("CENTER SET: ", toCenterSet);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -674,8 +666,6 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
       youngSet[line._id] = { total: line.total, intradepartmental: line.intradepartmental };
     }
 
-    console.log("YOUNG RESULT: ", youngSet);
-
     // --- assigned
     const schemaPipeline = [
       { $match: { cohort, fromRegion: region } },
@@ -699,7 +689,6 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         },
       },
     ];
-    console.log("SCHEMA PIPE: ", JSON.stringify(schemaPipeline, null, 4));
     const repartitionResult = await schemaRepartitionModel.aggregate(schemaPipeline).exec();
     let repartitionSet = {};
     for (const line of repartitionResult) {
@@ -734,8 +723,6 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
       }),
     };
 
-    // console.log("DATA: ", data);
-
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -757,7 +744,6 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
 
     // --- find to regions from departments
     const regionsResult = await tableRepartitionModel.find({ cohort, fromRegion: region, fromDepartment: department });
-    console.log("REGIONS RESULT: ", regionsResult);
     const toRegionsSet = {};
     let toDepartments = [];
     for (const repart of regionsResult) {
@@ -775,8 +761,6 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       }
     }
     const toRegions = Object.values(toRegionsSet);
-
-    // console.log("DEPARTMENTS: ", toDepartments);
 
     // --- capacities & centers
     const toCenterPipeline = [
@@ -804,13 +788,11 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         },
       },
     ];
-    // console.log("TO CENTER PIPE: ", JSON.stringify(toCenterPipeline, null, 4));
     const toCenterResult = await sessionPhase1Model.aggregate(toCenterPipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
-    // console.log("TO CENTER SET: ", toCenterSet);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -882,8 +864,6 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       ],
       groups,
     };
-
-    // console.log("DATA: ", data);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {

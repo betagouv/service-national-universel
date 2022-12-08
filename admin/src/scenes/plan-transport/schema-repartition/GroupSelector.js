@@ -30,8 +30,6 @@ export default function GroupSelector({ title, groups, youngsCount, intradepartm
     onSelect && onSelect({ ...group, availableVolume: youngsCount });
   }
 
-  console.log("Groups: ", groups);
-
   return (
     <div className={className}>
       <div className="flex items-center justify-between bg-[#F7F7F8] p-[32px] mb-[8px] rounded-[8px]">
