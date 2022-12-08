@@ -32,7 +32,7 @@ export default function mission({ mission, youngLocation }) {
                 <div className="text-gray-800 text-base font-bold">
                   à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
                 </div>
-                {mission?.hebergement === "true" && (
+                {mission?.hebergement === "true" ? (
                   <>
                     {mission.hebergementPayant === "true" ? (
                       <div className="p-1.5 bg-yellow-100 rounded-full">
@@ -44,6 +44,8 @@ export default function mission({ mission, youngLocation }) {
                       </div>
                     )}
                   </>
+                ) : (
+                  <div className="p-1.5 w-[14px]" />
                 )}
               </div>
             ) : (
