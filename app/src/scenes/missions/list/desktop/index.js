@@ -35,7 +35,7 @@ import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
 import RadioInput from "../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 
-const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
+const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION", "HEBERGEMENT"];
 const DISTANCE_MAX = 100;
 
 export default function List() {
@@ -44,6 +44,7 @@ export default function List() {
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
   const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
+  const [hebergement, setHebergement] = React.useState(false);
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
   const [marginDistance, setMarginDistance] = useState();
@@ -77,6 +78,7 @@ export default function List() {
   };
 
   const getDefaultQuery = () => {
+    console.log("get defaut query");
     let body = {
       query: {
         bool: {
@@ -147,12 +149,6 @@ export default function List() {
     }
 
     if (filter?.DISTANCE && filter?.LOCATION) {
-      body.query.bool.filter.push({
-        geo_distance: {
-          distance: `${filter?.DISTANCE}km`,
-          location: filter?.LOCATION,
-        },
-      });
       body.sort.push({
         _geo_distance: {
           location: filter?.LOCATION,
@@ -224,7 +220,6 @@ export default function List() {
       try {
         if (!young) return;
         const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-
         if (!ok) return toastr.error("Aucun référent n'a été trouvé");
         setReferentManagerPhase2(data);
       } catch (e) {
@@ -283,6 +278,11 @@ export default function List() {
       setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
+
+  React.useEffect(() => {
+    console.log("should update", hebergement);
+    setFilter((prev) => ({ ...prev, HEBERGEMENT: hebergement.toString() }));
+  }, [hebergement]);
 
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -416,56 +416,71 @@ export default function List() {
               </div>
 
               <div className="flex w-full flex-col space-y-2 py-2 px-4">
-                <div className="flex justify-around my-3">
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="main-address"
-                      name="main-address"
-                      type="radio"
-                      checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
-                      onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
-                      className="hidden"
-                    />
-                    <label htmlFor="main-address" className="mr-2">
-                      {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
-                    </label>
-                    <label htmlFor="main-address" className="cursor-pointer">
-                      <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
-                      <br />
-                      <span className="text-[15px] text-gray-700">{young.city}</span>
-                    </label>
+                <div className="flex justify-around flex-row my-3">
+                  <div className="flex flex-col justify-center items-center w-1/2">
+                    <div className="w-3/4">
+                      <div className="flex items-center gap-2 w-full">
+                        <input
+                          id="main-address"
+                          name="main-address"
+                          type="radio"
+                          checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
+                          onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                          className="hidden"
+                        />
+                        <label htmlFor="main-address" className="mr-2">
+                          {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                        </label>
+                        <label htmlFor="main-address" className="cursor-pointer">
+                          <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
+                          <br />
+                          <span className="text-[15px] text-gray-700">{young.city}</span>
+                        </label>
+                      </div>
+                      {young?.mobilityNearRelativeCity ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <input
+                            id="second-address"
+                            name="address"
+                            type="radio"
+                            checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
+                            onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                            className="hidden"
+                          />
+                          <label htmlFor="second-address" className="mr-2">
+                            {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                          </label>
+                          <label htmlFor="second-address" className="cursor-pointer">
+                            <span className="text-[13px] text-gray-700">Autour de l&apos;adresse d&apos;un proche</span>
+                            <br />
+                            <span className="text-[15px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 w-full">
+                          <label className="mr-2">
+                            <img src={RadioUnchecked} />
+                          </label>
+                          <label htmlFor="second-address">
+                            <span className="text-[13px] text-gray-400">Autour de l&apos;adresse d&apos;un proche</span>
+                            <br />
+                            <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
+                              Renseigner une adresse
+                            </Link>
+                          </label>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {young?.mobilityNearRelativeCity ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        id="second-address"
-                        name="address"
-                        type="radio"
-                        checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
-                        onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
-                        className="hidden"
-                      />
-                      <label htmlFor="second-address" className="mr-2">
-                        {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
-                      </label>
-                      <label htmlFor="second-address" className="cursor-pointer">
-                        <span className="text-[13px] text-gray-700">Autour de l&apos;adresse de mon proche</span>
-                        <br />
-                        <span className="text-[15px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
-                      </label>
+                  <div className="flex flex-col justify-center items-center w-1/2">
+                    <div className="w-3/4 flex flex-row items-center justify-center">
+                      <Toggle toggled={hebergement} onClick={() => setHebergement((old) => !old)} />
+                      <div className="ml-4">
+                        <div className="text-[13px]">Mission avec hébergement</div>
+                        <div className="text-[15px]">Dans toute la France</div>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <input id="second-address" name="address" type="radio" value={young.city} disabled />
-                      <label htmlFor="second-address">
-                        <span className="text-[13px] text-gray-400">Autour de l&apos;adresse de mon proche</span>
-                        <br />
-                        <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
-                          Renseigner une adresse
-                        </Link>
-                      </label>
-                    </div>
-                  )}
+                  </div>
                 </div>
                 <div className="relative">
                   <input
@@ -755,6 +770,21 @@ const PeriodeItem = ({ name, onClick, active }) => {
       className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 text-xs"
       onClick={() => onClick(name)}>
       <div className="">{translate(name)}</div>
+    </div>
+  );
+};
+
+const Toggle = ({ toggled, onClick }) => {
+  return toggled ? (
+    <div onClick={onClick} name="visibility" className={`flex items-center w-10 h-6 rounded-full bg-blue-600 transition duration-100 ease-in cursor-pointer`}>
+      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+    </div>
+  ) : (
+    <div
+      onClick={onClick}
+      name="visibility"
+      className={`flex items-center w-10 h-6 border-[1px] rounded-full border-blue-600 bg-white transition duration-100 ease-in cursor-pointer`}>
+      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[-1px] transition duration-100 ease-in shadow-nina"></div>
     </div>
   );
 };
