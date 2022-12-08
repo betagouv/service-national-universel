@@ -89,6 +89,7 @@ const translateFieldYoung = (f) => {
     case "withdrawnMessage":
       return "Message de désistement";
     case "inscriptionStep":
+    case "inscriptionStep2023":
       return "Étape d'inscription";
     case "cohesion2020Step":
       return "Étape d'inscription (2020)";
@@ -187,7 +188,7 @@ const translateFieldYoung = (f) => {
     case "parent1Phone":
       return "Téléphone du représentant légal 1";
     case "parent1OwnAddress":
-      return "Rreprésentant légal 1 a une adresse différente";
+      return "Représentant légal 1 a une adresse différente";
     case "parent1Address":
       return "Adresse du représentant légal 1";
     case "parent1ComplementAddress":
@@ -215,7 +216,7 @@ const translateFieldYoung = (f) => {
     case "parent2Phone":
       return "Téléphone du représentant légal 2";
     case "parent2OwnAddress":
-      return "Rreprésentant légal 2 a une adresse différente";
+      return "Représentant légal 2 a une adresse différente";
     case "parent2Address":
       return "Adresse du représentant légal 2";
     case "parent2ComplementAddress":
@@ -412,6 +413,28 @@ const translateFieldYoung = (f) => {
       return "Statut des documents de test PCR";
     case "youngPhase1Agreement":
       return "Accord du volontaire pour la phase 1";
+    case "parentAllowSNU":
+      return "Autorisation du représentant légal pour la phase 1";
+    case "parent1AllowSNU":
+      return "Autorisation du représentant légal 1 pour la phase 1";
+    case "parent2AllowSNU":
+      return "Autorisation du représentant légal 2 pour la phase 1";
+    case "parent1ValidationDate":
+      return "Date de validation du représentant légal 1";
+    case "parent2ValidationDate":
+      return "Date de validation du représentant légal 2";
+    case "parentStatementOfHonorInvalidId":
+      return "Déclaration sur l'honneur";
+    case "parent1DataVerified":
+      return "Vérification des données du représentant légal 1";
+    case "parent2DataVerified":
+      return "Vérification des données du représentant légal 2";
+    case "parent1AllowImageRights":
+      return "Autorisation du représentant légal 1 pour les droits à l'image";
+    case "parent2AllowImageRights":
+      return "Autorisation du représentant légal 2 pour les droits à l'image";
+    case "inscriptionDate":
+      return "Date de fin d'inscription";
     default:
       return f;
   }

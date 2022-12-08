@@ -12,10 +12,6 @@ export default function UserCard({ user }) {
     if (user?.role === "Volontaire") return `/volontaire/${user._id}`;
     return null;
   }
-  function getName(user) {
-    if (user?.firstName) return user?.firstName + " " + user?.lastName;
-    return "Acteur inconnu";
-  }
 
   if (!user) return null;
   return (
@@ -25,8 +21,8 @@ export default function UserCard({ user }) {
           {getAvatar(user)}
         </div>
         <div className="max-w-xs">
-          <p className="font-medium truncate h-5 underline-offset-2 decoration-2 group-hover:underline">{getName(user)}</p>
-          {user?.role && <p className="capitalize text-gray-400 underline-offset-2 decoration-2 group-hover:underline">{translate(user.role)}</p>}
+          <p className="font-medium truncate underline-offset-2 decoration-2 group-hover:underline">{user.fullName}</p>
+          <p className="capitalize text-gray-400 truncate underline-offset-2 decoration-2 group-hover:underline">{translate(user?.role)}</p>
         </div>
       </div>
     </a>

@@ -28,16 +28,16 @@ export default function History({ young, onChange }) {
 
   function formatValue(value) {
     if (value && value.name?.length) return value.name;
+    if (value && value[0]?.message) return value[0].message;
     if (typeof value === "object") return JSON.stringify(value);
     return value;
   }
 
   function formatUser(user) {
-    if (!user) return { name: "Acteur inconnu", role: "" };
-    if (user.name?.includes("/Users/")) return { name: "Script", role: "Modification automatique" };
-    if (!user.role) {
-      user.role = user.email ? "Volontaire" : "Modification automatique";
-    }
+    if (!user || !user?.firstName) return { fullName: "Acteur inconnu", role: "Donnée indisponible" };
+    if (user.name?.includes("/Users/")) return { fullName: "Script", role: "Modification automatique" };
+    if (!user.role) user.role = user.email ? "Volontaire" : "Modification automatique";
+    user.fullName = `${user.firstName} ${user.lastName}`;
     return user;
   }
 
@@ -48,9 +48,11 @@ export default function History({ young, onChange }) {
         try {
           e.date = hit.date;
           e.user = formatUser(hit.user);
+          e.author = e.user.fullName;
           e.path = formatField(e.path.substring(1));
           e.value = formatValue(e.value);
           e.originalValue = formatValue(e.originalValue, e.path);
+          e.ref = hit.ref;
           history.push(e);
         } catch (error) {
           console.log("Error while formatting event:", e);

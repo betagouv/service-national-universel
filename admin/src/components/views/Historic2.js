@@ -3,50 +3,40 @@ import { formatStringLongDate, translateModelFields, areObjectsEqual, isIsoDate,
 import { formatLongDateFR, translateAction } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
-import MultiSelect from "react-multi-select-component";
+import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 
-export default function Historic({ model, data, filters }) {
+export default function Historic({ model, data, filters, refName }) {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const [globalFilters, setGlobalFilters] = useState({ op: [], user: [], path: [] });
+  const [sharedFilters, setSharedFilters] = useState({ op: [], user: [], path: [] });
   const [customFilters, setCustomFilters] = useState([]);
-  const activeFilters = [...customFilters, ...formatGlobalFilters(globalFilters)];
-  const filteredData = filterData(data, activeFilters);
+  const activeFilters = [...customFilters, ...formatSharedFilters(sharedFilters)];
+  const filteredData = filterData(data, activeFilters, search);
 
-  const actionOptions = getOptions(data, "op");
-  const userOptions = getOptions(data, "user");
-  const fieldOptions = getOptions(data, "path");
-
-  function formatGlobalFilters(filters) {
+  function formatSharedFilters(filters) {
     let newFilters = [];
     for (const [key, value] of Object.entries(filters)) {
-      if (value.length) {
-        newFilters.push({ [key]: value.map((e) => e.value) });
-      }
+      if (value.length) newFilters.push({ [key]: value });
     }
     return newFilters;
   }
 
-  function getOptions(data, key) {
-    const arr = data.map((e) => e[key]);
+  function getOptions(key) {
+    const arr = data?.map((e) => e[key]);
     const unique = [...new Set(arr)];
     return unique.map((e) => e);
   }
 
-  function updateGlobalFilters(n) {
-    setGlobalFilters({ ...globalFilters, ...n });
+  function updateSharedFilters(n) {
+    setSharedFilters((f) => ({ ...f, ...n }));
   }
 
   function filterData(data, filters, query) {
     let filteredData = data;
-    if (filters?.length) {
-      filteredData = filteredData.filter((e) => filterEvent(e, filters));
-    }
-    if (query) {
-      filteredData = filteredData.filter((e) => searchEvent(e, query));
-    }
+    if (filters?.length) filteredData = filteredData.filter((e) => filterEvent(e, filters));
+    if (query) filteredData = filteredData.filter((e) => searchEvent(e, query));
     return filteredData;
   }
 
@@ -69,12 +59,10 @@ export default function Historic({ model, data, filters }) {
     const checked = activeFilters.some((f) => areObjectsEqual(f, filter));
 
     function handleCustomFilter(newFilter) {
-      let filters = [...activeFilters];
+      let filters = [...customFilters];
       if (filters.some((f) => areObjectsEqual(f, newFilter))) {
         filters = filters.filter((f) => !areObjectsEqual(f, newFilter));
-      } else {
-        filters.push(newFilter);
-      }
+      } else filters.push(newFilter);
       setCustomFilters(filters);
     }
 
@@ -88,43 +76,46 @@ export default function Historic({ model, data, filters }) {
   }
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-md">
+    <div className="w-full bg-white rounded-lg shadow-md text-slate-700">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="flex p-4 gap-4">
         <input onChange={(e) => setSearch(e.target.value)} value={search} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
-        <button onClick={() => setIsOpen(!isOpen)} className={`py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-600 text-white" : "bg-gray-100"}`}>
-          <FilterIcon fill="gray" />
-          <p>Filtres</p>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
+          <FilterIcon className={isOpen ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
+          <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
         </button>
         {filters.map((filter) => (
           <FilterButton key={filter.label} filter={filter.value} filterName={filter.label} />
         ))}
       </div>
       {isOpen && (
-        <div className="flex flex-wrap gap-4 p-4">
+        <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
           <MultiSelect
-            options={actionOptions.map((e) => ({ label: translateAction(e), value: e }))}
-            value={globalFilters.op}
-            onChange={(op) => updateGlobalFilters({ op })}
-            className="w-64"
+            options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
+            value={sharedFilters.path}
+            onChange={(path) => updateSharedFilters({ path })}
+            label="Donnée modifiée"
           />
           <MultiSelect
-            options={userOptions.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id }))}
-            value={globalFilters.user}
-            onChange={(user) => updateGlobalFilters({ user })}
-            className="w-64 z-100"
+            options={getOptions("op").map((e) => ({ label: translateAction(e), value: e }))}
+            value={sharedFilters.op}
+            onChange={(op) => updateSharedFilters({ op })}
+            label="Type d'action"
           />
           <MultiSelect
-            options={fieldOptions.map((e) => ({ label: translateModelFields(model, e), value: e }))}
-            value={globalFilters.path}
-            onChange={(path) => updateGlobalFilters({ path })}
-            className="w-64 z-100"
+            options={getOptions("author").map((e) => ({ label: e, value: e }))}
+            value={sharedFilters.author}
+            onChange={(author) => updateSharedFilters({ author })}
+            label="Auteur de la modification"
           />
         </div>
       )}
       <table className="w-full z-0">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
+            {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
             <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
             <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
             <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
@@ -134,7 +125,7 @@ export default function Historic({ model, data, filters }) {
         </thead>
         <tbody>
           {filteredData.map((e, index) => (
-            <Event key={index} e={e} index={index} model={model} />
+            <Event key={index} e={e} index={index} model={model} refName={refName} />
           ))}
         </tbody>
       </table>
@@ -142,9 +133,14 @@ export default function Historic({ model, data, filters }) {
   );
 }
 
-function Event({ e, index, model }) {
+function Event({ e, index, model, refName, path }) {
   return (
     <tr key={index} className="border-t border-t-slate-100 hover:bg-slate-50 cursor-default">
+      {refName && (
+        <td className="px-4 py-3 cursor-pointer">
+          <a href={`/${path}/${e.ref}`}>{e.ref}</a>
+        </td>
+      )}
       <td className="px-4 py-3">
         <p className="text-gray-400">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
