@@ -169,16 +169,14 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
         { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
         { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
       ];
-      for (const object of sentTo) {
-        await sendTemplate(template, {
-          emailTo: [{ name: object.name, email: object.email }],
-          params: {
-            cohort: value.cohort,
-            centre: center.name,
-            cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
-          },
-        });
-      }
+      await sendTemplate(template, {
+        emailTo: sentTo,
+        params: {
+          cohort: value.cohort,
+          centre: center.name,
+          cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
+        },
+      });
     }
 
     res.status(200).send({ ok: true });
