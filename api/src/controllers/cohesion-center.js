@@ -156,10 +156,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error, value } = Joi.object({
       academy: Joi.string().required(),
       addressVerified: Joi.boolean().required(),
-      centerDesignation: Joi.string().required(),
+      centerDesignation: Joi.string().allow(null, ""),
       city: Joi.string().required(),
       code2022: Joi.string().required(),
-      complement: Joi.string(),
+      complement: Joi.string().allow(null, ""),
       placesTotal: Joi.number().required(),
       department: Joi.string().required(),
       domain: Joi.string().required(),
