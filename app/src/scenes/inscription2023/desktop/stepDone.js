@@ -176,7 +176,10 @@ export default function StepWaitingConsent() {
                 Modifier mes informations
               </div>
               <hr className="my-4 h-px bg-gray-200 border-0" />
-              <div className="flex flex-col items-end w-full">
+              <div className="flex flex-row justify-between items-center w-full">
+                <a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
+                  <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
+                </a>
                 <div className="flex justify-end space-x-4">
                   <button
                     className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] cursor-pointer hover:bg-[#000091] hover:text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
