@@ -1,3 +1,17 @@
+# [1.180.0](https://github.com/betagouv/service-national-universel/compare/v1.179.1...v1.180.0) (2022-12-07)
+
+
+### Bug Fixes
+
+* **admin:** fix cohorts default value PDR ([923da4b](https://github.com/betagouv/service-national-universel/commit/923da4bd02a10c042aadd02884bad9cf29d7262b))
+* **admin:** fix PDR view for ref dep ([a5e6b3d](https://github.com/betagouv/service-national-universel/commit/a5e6b3dc6b550d5684b74a243cbf6023973b270e))
+* **admin:** schema repartition - role référent département ([#2119](https://github.com/betagouv/service-national-universel/issues/2119)) ([b06eb6c](https://github.com/betagouv/service-national-universel/commit/b06eb6c434238b665336b5c439c30543a8b65b7e))
+
+
+### Features
+
+* **admin:** ligne de bus centre ([#2116](https://github.com/betagouv/service-national-universel/issues/2116)) ([1848250](https://github.com/betagouv/service-national-universel/commit/1848250d9d7b2beddc4241245cb4e57c22f11ec5))
+
 ## [1.179.1](https://github.com/betagouv/service-national-universel/compare/v1.179.0...v1.179.1) (2022-12-06)
 
 

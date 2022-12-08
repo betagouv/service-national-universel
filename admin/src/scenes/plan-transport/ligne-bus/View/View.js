@@ -4,6 +4,7 @@ import Breadcrumbs from "../../../../components/Breadcrumbs";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { Title } from "../../components/commons";
+import Centre from "./components/Centre";
 import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
@@ -68,7 +69,7 @@ export default function View(props) {
                 <div key={index} className="rounded-lg bg-white h-[396px] w-full"></div>
               ))}
             </div>
-            <div className="rounded-lg bg-white h-[396px] w-1/2"></div>
+            <Centre bus={data} setBus={setData} />
           </div>
         </div>
       </div>

@@ -11,9 +11,12 @@ import GroupCenter from "./group/GroupCenter";
 import GroupGatheringPlaces from "./group/GroupGatheringPlaces";
 import GroupConfirmDeleteCenter from "./group/GroupConfirmDeleteCenter";
 import GroupAffectationSummary from "./group/GroupAffectationSummary";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
 
 export default function GroupEditor({ group, className = "", onChange }) {
-  const [step, setStep] = useState(group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+  const { user } = useSelector((state) => state.Auth);
+  const [step, setStep] = useState(group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
   const [reloadNextStep, setReloadNextStep] = useState(null);
   const [tempGroup, setTempGroup] = useState(group);
 
@@ -25,17 +28,24 @@ export default function GroupEditor({ group, className = "", onChange }) {
         if (reloadNextStep === GROUPSTEPS.CANCEL) {
           onChange(null);
         } else {
-          setStep(reloadNextStep);
+          if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+            setStep(reloadNextStep);
+          }
           setReloadNextStep(null);
         }
       } else {
-        setStep(group && group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+        setStep(group && group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
       }
+    }
+    if (step === GROUPSTEPS.AFFECTATION_SUMMARY) {
+      setTempGroup(group);
     }
   }, [group]);
 
   function onChangeStep(newStep) {
-    setStep(newStep);
+    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+      setStep(newStep);
+    }
 
     if (newStep === GROUPSTEPS.CANCEL) {
       onChange(null);
@@ -109,7 +119,9 @@ export default function GroupEditor({ group, className = "", onChange }) {
 
   async function onUpdateTemp(group, nextStep) {
     setTempGroup(group);
-    setStep(nextStep);
+    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+      setStep(nextStep);
+    }
   }
 
   switch (step) {

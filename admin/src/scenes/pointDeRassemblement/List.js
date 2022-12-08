@@ -140,7 +140,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+                defaultValue={user.role === ROLES.REFERENT_REGION ? [...user.region] : []}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -155,7 +155,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
               />
               <DeleteFilters />
             </div>
