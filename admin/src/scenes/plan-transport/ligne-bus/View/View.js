@@ -9,6 +9,7 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import Panel from "./components/Panel";
+import PointDeRassemblement from "./components/PointDeRassemblement";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -66,7 +67,7 @@ export default function View(props) {
           <div className="flex gap-4 items-start">
             <div className="flex flex-col gap-4 w-1/2">
               {data.meetingsPointsDetail.map((pdr, index) => (
-                <div key={index} className="rounded-lg bg-white h-[396px] w-full"></div>
+                <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} />
               ))}
             </div>
             <Centre bus={data} setBus={setData} />

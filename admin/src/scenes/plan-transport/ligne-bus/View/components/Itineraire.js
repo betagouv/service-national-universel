@@ -116,7 +116,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
                     <div className="flex flex-col">
                       {event.isEtape ? (
                         <>
-                          <p className="text-xs leading-4 text-[#738297]">Point d’étape</p>
+                          <p className="text-xs leading-4 text-[#738297]">Correspondance</p>
                           <p className="text-xs leading-4 text-[#738297] font-light">{event.address}</p>
                         </>
                       ) : (
