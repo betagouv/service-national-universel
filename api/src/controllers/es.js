@@ -30,6 +30,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
   try {
     const { user, body } = req;
     const filter = [];
+
     // A young can only see validated missions.
     if (isYoung(user)) filter.push({ term: { "status.keyword": "VALIDATED" } });
     if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
