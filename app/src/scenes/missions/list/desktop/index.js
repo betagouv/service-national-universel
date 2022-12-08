@@ -147,8 +147,38 @@ export default function List() {
         },
       });
     }
-
     if (filter?.DISTANCE && filter?.LOCATION) {
+      if (hebergement) {
+        body.query.bool.filter.push({
+          bool: {
+            should: [
+              {
+                geo_distance: {
+                  distance: `${filter?.DISTANCE}km`,
+                  location: filter?.LOCATION,
+                },
+              },
+              { term: { "hebergement.keyword": "true" } },
+            ],
+            minimum_should_match: "1",
+          },
+        });
+      } else {
+        body.query.bool.must.push({
+          bool: {
+            should: [
+              {
+                geo_distance: {
+                  distance: `${filter?.DISTANCE}km`,
+                  location: filter?.LOCATION,
+                },
+              },
+            ],
+            minimum_should_match: "1",
+          },
+        });
+      }
+
       body.sort.push({
         _geo_distance: {
           location: filter?.LOCATION,
