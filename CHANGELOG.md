@@ -1,3 +1,21 @@
+# [1.182.0](https://github.com/betagouv/service-national-universel/compare/v1.181.0...v1.182.0) (2022-12-09)
+
+
+### Bug Fixes
+
+* **admin:** Schema de répartition : réactivité des groupes sur la modification des lieux de rassemblements ([#2125](https://github.com/betagouv/service-national-universel/issues/2125)) ([d575442](https://github.com/betagouv/service-national-universel/commit/d5754429ef6a6ad001b1dc9574a685a185d7719b))
+
+
+### Features
+
+* **admin/api:** Mise en prod du schéma de répartition ([#2127](https://github.com/betagouv/service-national-universel/issues/2127)) ([4bf6799](https://github.com/betagouv/service-national-universel/commit/4bf679922d928923d4c46d176bbce143d1878d55))
+* **api/admin/app:** ajout hebergement pour mission ([#2123](https://github.com/betagouv/service-national-universel/issues/2123)) ([543a581](https://github.com/betagouv/service-national-universel/commit/543a5817eb9d85eb34e893dace08e50728b67d3d))
+
+
+### Reverts
+
+* Revert "fix(admin): open code centre ref creation" ([be76238](https://github.com/betagouv/service-national-universel/commit/be76238c7921a7d932a24540f8a4641e3435c78c))
+
 # [1.181.0](https://github.com/betagouv/service-national-universel/compare/v1.180.0...v1.181.0) (2022-12-08)
 
 
