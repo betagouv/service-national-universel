@@ -22,7 +22,7 @@ import ModalButton from "../../components/buttons/ModalButton";
 import { Formik, Field } from "formik";
 import { Modal } from "reactstrap";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "CONTRACT_STATUS"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -124,6 +124,17 @@ export default function List() {
       value: "application",
     },
   ];
+
+  const translateContractStatus = (status) => {
+    switch (status) {
+      case "DRAFT":
+        return "Brouillon";
+      case "SENT":
+        return "Envoyé";
+      case "VALIDATED":
+        return "Validé";
+    }
+  };
 
   return (
     <div>
@@ -383,6 +394,20 @@ export default function List() {
                   componentId="TUTOR"
                   dataField="tutorName.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Contrat"
+                  componentId="CONTRACT_STATUS"
+                  dataField="contractStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateContractStatus(e)} (${count})`;
+                  }}
                   title=""
                   URLParams={true}
                   showSearch={false}
