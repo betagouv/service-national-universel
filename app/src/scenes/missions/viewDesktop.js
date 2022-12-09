@@ -206,11 +206,11 @@ export default function viewDesktop() {
                     <>
                       {mission.hebergementPayant === "true" ? (
                         <div className="p-2 bg-yellow-100 rounded-full">
-                          <House tooltip={"Hébergement payant proposé"} color="#D97706" />
+                          <House id="tooltip-payant" tooltip={"Hébergement payant proposé"} color="#D97706" />
                         </div>
                       ) : (
                         <div className="p-2 bg-green-50 rounded-full">
-                          <House tooltip={"Hébergement gratuit proposé"} color="#059669" />
+                          <House id="tooltip-gratuit" tooltip={"Hébergement gratuit proposé"} color="#059669" />
                         </div>
                       )}
                     </>
@@ -378,7 +378,7 @@ export default function viewDesktop() {
                     <div className="flex flex-row justify-between">
                       <div className="text-sm font-bold">Hébergement payant proposé</div>
                       <div className="p-2 bg-yellow-100 rounded-full">
-                        <House color="#D97706" tooltip={"Hébergement payant proposé"} />
+                        <House color="#D97706" id="tooltip-payant" tooltip={"Hébergement payant proposé"} />
                       </div>
                     </div>
                     <div className="text-xs">
@@ -390,7 +390,7 @@ export default function viewDesktop() {
                     <div className="flex flex-row justify-between">
                       <div className="text-sm font-bold">Hébergement gratuit proposé</div>
                       <div className="p-2 bg-green-50 rounded-full">
-                        <House color="#059669" tooltip={"Hébergement gratuit proposé"} />
+                        <House color="#059669" id="tooltip-gratuit" tooltip={"Hébergement gratuit proposé"} />
                       </div>
                     </div>
                     <div className="text-xs">

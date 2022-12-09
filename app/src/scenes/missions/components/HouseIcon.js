@@ -1,11 +1,11 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 
-export default function House({ color, tooltip }) {
+export default function House({ color, tooltip, id }) {
   return (
-    <div data-tip="" data-for="tooltip-house">
+    <div data-tip="" data-for={id ? id : tooltip}>
       {tooltip ? (
-        <ReactTooltip id="tooltip-house" className="bg-white shadow-xl text-black" arrowColor="white" disable={false}>
+        <ReactTooltip id={id ? id : tooltip} className="bg-white shadow-xl text-black" arrowColor="white" disable={false}>
           <div className="text-[black]">{tooltip}</div>
         </ReactTooltip>
       ) : null}
