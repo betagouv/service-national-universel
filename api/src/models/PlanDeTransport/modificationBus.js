@@ -13,6 +13,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  lineName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Nom de la ligne de bus",
+    },
+  },
+
   request: {
     type: String,
     required: true,
