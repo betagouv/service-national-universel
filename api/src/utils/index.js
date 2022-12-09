@@ -447,8 +447,15 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   //on filtre les contrats liés à ces candidatures filtrée précédement
   const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
 
+  const arrayContract = [];
+  for (const contract of activeContracts) {
+    const status = checkStatusContract(contract);
+    await ApplicationModel.updateOne({ _id: contract.applicationId, contractStatus: status });
+    arrayContract.push(status);
+  }
+
   young.set({
-    statusPhase2Contract: activeContracts.map((contract) => checkStatusContract(contract)),
+    statusPhase2Contract: arrayContract,
   });
 
   await young.save({ fromUser });
