@@ -407,7 +407,7 @@ export default function Edit(props) {
                         options={Object.keys(MISSION_DOMAINS)
                           .filter((el) => el !== values.mainDomain)
                           .map((el) => ({ value: el, label: translate(el) }))}
-                        placeholder={"Sélectionnez une ou plusieurs périodes"}
+                        placeholder={"Sélectionnez un ou plusieurs domaines"}
                         onChange={(e) => {
                           handleChange({ target: { value: e, name: "domains" } });
                         }}
