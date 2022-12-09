@@ -51,10 +51,8 @@ export default function SchemaRepartition({ region, department }) {
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
     if (cohort) {
-      console.log("default cohort = ", cohort);
       return cohort;
     } else {
-      console.log("default cohort = ", cohortList[0].value);
       return cohortList[0].value;
     }
   }

@@ -13,7 +13,6 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
   }
 
   function onChangeGroup(group, forceReload) {
-    // console.log("group changed: ", group);
     setSelectedGroup(group);
     if (group || forceReload) {
       onChange && onChange();

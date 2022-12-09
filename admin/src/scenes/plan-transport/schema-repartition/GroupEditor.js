@@ -40,9 +40,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
         setStep(group && group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
       }
     }
-    if (step === GROUPSTEPS.AFFECTATION_SUMMARY) {
-      setTempGroup(group);
-    }
+    setTempGroup(group);
   }, [group]);
 
   function onChangeStep(newStep) {
@@ -57,7 +55,6 @@ export default function GroupEditor({ group, className = "", onChange }) {
   }
 
   async function onCreate(group, nextStep) {
-    console.log("onCreate next step: ", nextStep, group);
     if (group === null) {
       onChange && onChange(null);
     } else {
