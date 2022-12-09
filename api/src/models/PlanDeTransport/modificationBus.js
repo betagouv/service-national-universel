@@ -29,14 +29,27 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  requestUser: {
-    type: {
-      _id: { type: String, required: true },
-      firstName: { type: String, required: true },
-      lastName: { type: String, required: true },
-    },
+  requestUserId: {
+    type: String,
+    required: true,
     documentation: {
-      description: "Utilisateur ayant fait la demande",
+      description: "Id de l'utilisateur ayant fait la demande",
+    },
+  },
+
+  requestUserName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Prénom / nom de l'utilisateur ayant fait la demande",
+    },
+  },
+
+  requestUserRole: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Rôle de l'utilisateur ayant fait la demande",
     },
   },
 
