@@ -411,6 +411,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Contrat", "Contrat")}
                 />
               </FilterRow>
             </Filter>
