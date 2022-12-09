@@ -620,12 +620,8 @@ export default function Edit(props) {
                               options={(() => {
                                 const valuesToCheck = values.period;
                                 let options = [];
-                                if (valuesToCheck?.indexOf("WHENEVER") !== -1) {
-                                  options = Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).concat(Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                                } else {
-                                  if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
-                                  if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                                }
+                                if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                                if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
                                 console.log(options);
                                 return options.map((el) => ({ value: el, label: translate(el) }));
                               })()}
