@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import IconDomain from "../../../components/IconDomain";
 import { getDistance } from "../../../../../utils";
+import House from "../../../components/HouseIcon";
 
 export default function mission({ mission, youngLocation }) {
   return (
@@ -31,6 +32,21 @@ export default function mission({ mission, youngLocation }) {
                 <div className="text-gray-800 text-base font-bold">
                   à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
                 </div>
+                {mission?.hebergement === "true" ? (
+                  <>
+                    {mission.hebergementPayant === "true" ? (
+                      <div className="p-1.5 bg-yellow-100 rounded-full">
+                        <House color="#D97706" />
+                      </div>
+                    ) : (
+                      <div className="p-1.5 bg-green-50 rounded-full">
+                        <House color="#059669" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="p-1.5 w-[14px]" />
+                )}
               </div>
             ) : (
               <div />

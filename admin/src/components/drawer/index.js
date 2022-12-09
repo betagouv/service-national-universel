@@ -131,7 +131,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
-      {environment !== "production" && <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />}
+      <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
@@ -210,16 +210,12 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
-      {environment !== "production" && (
-        <>
-          {user.role === ROLES.REFERENT_DEPARTMENT ? (
-            <DrawerTab to={`/schema-repartition/${user.region}/${user.department}`} title="Schéma de répartition" onClick={onClick} />
-          ) : user.role === ROLES.REFERENT_REGION ? (
-            <DrawerTab to={`/schema-repartition/${user.region}`} title="Schéma de répartition" onClick={onClick} />
-          ) : (
-            <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
-          )}
-        </>
+      {user.role === ROLES.REFERENT_DEPARTMENT ? (
+        <DrawerTab to={`/schema-repartition/${user.region}/${user.department}`} title="Schéma de répartition" onClick={onClick} />
+      ) : user.role === ROLES.REFERENT_REGION ? (
+        <DrawerTab to={`/schema-repartition/${user.region}`} title="Schéma de répartition" onClick={onClick} />
+      ) : (
+        <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       )}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />

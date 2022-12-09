@@ -38,6 +38,7 @@ import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
 import { capture } from "../../sentry";
+import House from "./components/HouseIcon";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -201,6 +202,19 @@ export default function viewDesktop() {
                   {mission.isMilitaryPreparation === "true" ? (
                     <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
                   ) : null}
+                  {mission?.hebergement === "true" && (
+                    <>
+                      {mission.hebergementPayant === "true" ? (
+                        <div className="p-2 bg-yellow-100 rounded-full">
+                          <House id="tooltip-payant" tooltip={"Hébergement payant proposé"} color="#D97706" />
+                        </div>
+                      ) : (
+                        <div className="p-2 bg-green-50 rounded-full">
+                          <House id="tooltip-gratuit" tooltip={"Hébergement gratuit proposé"} color="#059669" />
+                        </div>
+                      )}
+                    </>
+                  )}
                   {mission?.duration ? (
                     <div className="flex items-center gap-1 ml-2">
                       <AiOutlineClockCircle className="text-gray-400" />
@@ -357,6 +371,35 @@ export default function viewDesktop() {
             {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
             <Detail title="Période pour réaliser la mission" content={mission.period} />
             <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
+            {mission?.hebergement === "true" && (
+              <div className="bg-white shadow-sm rounded-lg p-3">
+                {mission.hebergementPayant === "true" ? (
+                  <div>
+                    <div className="flex flex-row justify-between">
+                      <div className="text-sm font-bold">Hébergement payant proposé</div>
+                      <div className="p-2 bg-yellow-100 rounded-full">
+                        <House color="#D97706" id="tooltip-payant" tooltip={"Hébergement payant proposé"} />
+                      </div>
+                    </div>
+                    <div className="text-xs">
+                      Un hébergement est proposé par la structure d&apos;accueil pour cette mission. Les frais de cet hébergement sont à la charge du volontaire.
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex flex-row justify-between">
+                      <div className="text-sm font-bold">Hébergement gratuit proposé</div>
+                      <div className="p-2 bg-green-50 rounded-full">
+                        <House color="#059669" id="tooltip-gratuit" tooltip={"Hébergement gratuit proposé"} />
+                      </div>
+                    </div>
+                    <div className="text-xs">
+                      Un hébergement est proposé par la structure d&apos;accueil pour cette mission. Les frais de cet hébergement ne sont pas à la charge du volontaire.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         {mission.isMilitaryPreparation === "true" ? (

@@ -40,6 +40,8 @@ function validateMission(mission) {
       placesLeft: Joi.number().allow(null),
       actions: Joi.string().allow(null, ""),
       description: Joi.string().allow(null, ""),
+      hebergement: Joi.string().allow(null, ""),
+      hebergementPayant: Joi.string().allow(null, ""),
       justifications: Joi.string().allow(null, ""),
       contraintes: Joi.string().allow(null, ""),
       structureId: Joi.string().allow(null, ""),

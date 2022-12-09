@@ -359,26 +359,28 @@ export default function Details({ center, setCenter, sessions }) {
                   error={errors?.placesTotal}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <Field
-                  readOnly={!editInfo}
-                  label="Désignation du centre"
-                  onChange={(e) => setData({ ...data, centerDesignation: e.target.value })}
-                  value={data.centerDesignation}
-                  error={errors?.centerDesignation}
-                  disabled={user.role !== "admin" && editInfo}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Field
-                  readOnly={!editInfo}
-                  label="Code du centre"
-                  onChange={(e) => setData({ ...data, code2022: e.target.value })}
-                  value={data.code2022}
-                  error={errors?.code2022}
-                  disabled={user.role !== "admin" && editInfo}
-                />
-              </div>
+              {user.role === ROLES.ADMIN && (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <Field
+                      readOnly={!editInfo}
+                      label="Désignation du centre"
+                      onChange={(e) => setData({ ...data, centerDesignation: e.target.value })}
+                      value={data.centerDesignation}
+                      error={errors?.centerDesignation}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Field
+                      readOnly={!editInfo}
+                      label="Code du centre"
+                      onChange={(e) => setData({ ...data, code2022: e.target.value })}
+                      value={data.code2022}
+                      error={errors?.code2022}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
