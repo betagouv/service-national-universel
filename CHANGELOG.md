@@ -1,3 +1,17 @@
+# [1.181.0](https://github.com/betagouv/service-national-universel/compare/v1.180.0...v1.181.0) (2022-12-08)
+
+
+### Bug Fixes
+
+* **admin:** open code centre ref creation ([4708948](https://github.com/betagouv/service-national-universel/commit/47089480f377ccb2d67a01d3ec019a8b18564f8c))
+
+
+### Features
+
+* **admin/api:** bus point de rassemblement  ([#2120](https://github.com/betagouv/service-national-universel/issues/2120)) ([079feff](https://github.com/betagouv/service-national-universel/commit/079fefff9b5a73618fc51734282d74119e138f17))
+* **admin/api:** Schéma de répartition : Nouvelle étape de choix des Points de rassemblements ([#2122](https://github.com/betagouv/service-national-universel/issues/2122)) ([409bd89](https://github.com/betagouv/service-national-universel/commit/409bd89a894428dc0edbcc443f2f26353f833e2c))
+* **api:** template mail session waiting validation ([#2121](https://github.com/betagouv/service-national-universel/issues/2121)) ([0feeb0e](https://github.com/betagouv/service-national-universel/commit/0feeb0ed0be511773b2ccc0e4ed259f9ac571b06))
+
 # [1.180.0](https://github.com/betagouv/service-national-universel/compare/v1.179.1...v1.180.0) (2022-12-07)
 
 
