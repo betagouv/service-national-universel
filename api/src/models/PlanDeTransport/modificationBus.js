@@ -21,11 +21,11 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  request: {
+  requestMessage: {
     type: String,
     required: true,
     documentation: {
-      description: "Demande de modification",
+      description: "Message de la demande de modification",
     },
   },
 
