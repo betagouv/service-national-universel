@@ -66,7 +66,7 @@ const Schema = new mongoose.Schema({
     type: [String],
     required: false,
     documentation: {
-      description: "Tags de la demande",
+      description: "Id des tags de la demande",
     },
   },
 
