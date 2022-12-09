@@ -622,7 +622,6 @@ export default function Edit(props) {
                                 let options = [];
                                 if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
                                 if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                                console.log(options);
                                 return options.map((el) => ({ value: el, label: translate(el) }));
                               })()}
                               placeholder={"Sélectionnez une ou plusieurs périodes"}
@@ -658,7 +657,6 @@ export default function Edit(props) {
                             name="hebergementPayant"
                             value={values.hebergementPayant === "true"}
                             onChange={(e) => {
-                              console.log("new value is ", e);
                               handleChange({ target: { value: e.toString(), name: "hebergementPayant" } });
                             }}
                           />
