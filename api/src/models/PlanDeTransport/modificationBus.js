@@ -102,14 +102,25 @@ const Schema = new mongoose.Schema({
             description: "Avis sur la demande",
           },
         },
-        user: {
-          type: {
-            _id: { type: String, required: true },
-            firstName: { type: String, required: true },
-            lastName: { type: String, required: true },
-          },
+        userId: {
+          type: String,
+          required: true,
           documentation: {
-            description: "Utilisateur ayant envoyé le message / avis",
+            description: "Id de l'utilisateur ayant envoyé le message / avis",
+          },
+        },
+        userName: {
+          type: String,
+          required: true,
+          documentation: {
+            description: "Prénom / nom de l'utilisateur ayant envoyé le message / avis",
+          },
+        },
+        userRole: {
+          type: String,
+          required: true,
+          documentation: {
+            description: "Rôle de l'utilisateur ayant envoyé le message / avis",
           },
         },
         date: {
