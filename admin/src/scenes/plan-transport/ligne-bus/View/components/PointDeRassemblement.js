@@ -155,7 +155,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }
           <div className="flex items-center justify-center rounded-full bg-gray-200 h-7 w-7 text-sm">{index}</div>
           <div className="flex items-center gap-2 ml-3">
             <DoubleProfil className="text-gray-400" />
-            <div className="text-gray-900 text-lg leading-5 font-medium ">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
+            <div className="text-gray-900 text-lg leading-5 font-medium pb-1">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
           </div>
         </div>
         {canEditLigneBusPointDeRassemblement(user) ? (
