@@ -52,11 +52,11 @@ export default function mission({ mission, youngLocation }) {
               <>
                 {mission.hebergementPayant === "true" ? (
                   <div className="p-2 bg-yellow-100 rounded-full">
-                    <House color="#D97706" />
+                    <House tooltip={"Hébergement payant proposé"} color="#D97706" />
                   </div>
                 ) : (
                   <div className="p-2 bg-green-50 rounded-full">
-                    <House color="#059669" />
+                    <House tooltip={"Hébergement gratuit proposé"} color="#059669" />
                   </div>
                 )}
               </>
