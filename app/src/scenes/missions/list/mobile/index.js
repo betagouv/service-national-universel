@@ -333,7 +333,6 @@ export default function List() {
   }, []);
 
   React.useEffect(() => {
-    console.log("should update", hebergement);
     setFilter((prev) => ({ ...prev, HEBERGEMENT: hebergement.toString() }));
   }, [hebergement]);
 
