@@ -68,7 +68,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
       <div className="flex flex-col w-full px-3 py-4">
         {!loading ? (
-          <div className="flex justify-end items-center text-sm gap-2 text-[#000091] pb-2" onClick={onCancel}>
+          <div className="flex justify-end items-center text-sm gap-2 text-[#000091] pb-2 cursor-pointer" onClick={onCancel}>
             <GrClose />
             Fermer
           </div>

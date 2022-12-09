@@ -7,7 +7,6 @@ import Help from "./Help";
 import Footer from "../../../components/footerV2";
 
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Button from "../components/Button";
 import { FiChevronLeft } from "react-icons/fi";
 
 export default function DesktopPageContainer({
@@ -43,44 +42,22 @@ export default function DesktopPageContainer({
             <hr className="mb-8 h-px bg-gray-200 border-0 hidden md:block" />
             <div className="flex justify-end gap-2">
               {onClickPrevious && (
-                <button className="flex items-center justify-center w-10 border-[1px] border-[#000091]" onClick={onClickPrevious}>
+                <button className="flex items-center justify-center w-10 border-[1px] border-[#000091]" onClick={onClickPrevious} disabled={disabled}>
                   <FiChevronLeft className="text-[#000091] font-bold" />
                 </button>
               )}
               <button
-                className={`flex items-center justify-center py-2 px-4 w-full md:w-auto cursor-pointer ${disabled ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-                onClick={() => !disabled && onSubmit()}>
+                className={`flex items-center justify-center py-2 px-4 w-full md:w-auto cursor-pointer ${
+                  disabled ? "bg-[#E5E5E5] text-[#929292] cursor-not-allowed" : "bg-[#000091] text-white"
+                }`}
+                onClick={() => (!disabled && modeCorrection ? onCorrection() : onSubmit())}
+                disabled={disabled || loading}>
                 {childrenContinueButton}
               </button>
             </div>
           </div>
         </main>
-
-        {/* <div className="flex md:justify-end gap-4">
-          {onClickPrevious && (
-            <button
-              className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:bg-[#000091] hover:text-white"
-              onClick={onClickPrevious}
-              disabled={disabled}>
-              Précédent
-            </button>
-          )}
-          {modeCorrection ? (
-            <Button onClick={onCorrection} disabled={disabled}>
-              {childrenContinueButton}
-            </Button>
-          ) : (
-            onSubmit && (
-              <Button onClick={onSubmit} disabled={disabled}>
-                {childrenContinueButton}
-              </Button>
-            )
-          )}
-        </div> */}
-
-        {/* <div className="w-[55rem] drop-shadow bg-white mx-auto my-8 px-[80px] py-[40px]"> */}
         <Help />
-        {/* </div> */}
       </div>
       <Footer />
     </div>

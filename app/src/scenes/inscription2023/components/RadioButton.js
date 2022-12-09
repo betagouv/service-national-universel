@@ -3,7 +3,7 @@ import ErrorMessage from "./ErrorMessage";
 
 const RadioButton = ({ options, label, description = "", onChange, value: currentValue, error, correction = "" }) => {
   return (
-    <div className="mt-2 mb-6">
+    <div className="my-3">
       <label className={`mb-2 ${correction || error ? "text-[#CE0500]" : "text-[#666666]"}`}>
         {label} <span className="text-[#666666] text-[14px] leading-tight"> {description}</span>
       </label>

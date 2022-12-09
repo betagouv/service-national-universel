@@ -6,7 +6,7 @@ const style = "bg-[#000091] border-[#000091] text-white";
 
 const Button = ({ onClick, children = "Continuer", disabled = false }) => {
   return (
-    <button disabled={disabled} className={`flex items-center justify-center px-3 py-2 border  ${disabled ? disabledStyle : style} ${!disabled && hoveredStyle}`} onClick={onClick}>
+    <button disabled={disabled} className={`flex items-center justify-center px-3 py-2 border ${disabled ? disabledStyle : style} ${!disabled && hoveredStyle}`} onClick={onClick}>
       {children}
     </button>
   );

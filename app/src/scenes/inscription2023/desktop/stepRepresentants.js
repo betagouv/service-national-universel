@@ -4,7 +4,6 @@ import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/inscription/checkbox";
 import { supportURL } from "../../../config";
@@ -14,9 +13,8 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { regexPhoneFrenchCountries, translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import Help from "../components/Help";
+import DesktopPageContainer from "../components/DesktopPageContainer";
 import Input from "../components/Input";
-import Navbar from "../components/Navbar";
 import RadioButton from "../components/RadioButton";
 
 const parentsStatus = [
@@ -217,60 +215,25 @@ export default function StepRepresentants() {
   };
 
   return (
-    <>
-      <Navbar onSave={onSave} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="basis-[70%] mx-auto my-0">
-          <div className="bg-white px-[102px] py-[60px]">
-            <div className="w-full flex justify-between items-center mt-2">
-              <h1 className="text-xl font-bold">Mes représentants légaux</h1>
-              <a href={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`} target="_blank" rel="noreferrer">
-                <QuestionMarkBlueCircle />
-              </a>
-            </div>
-            <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
-            <hr className="my-4 h-px bg-gray-200 border-0" />
-            {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
-            <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} />
-            <hr className="my-4 h-px bg-gray-200 border-0" />
-            <div className="flex gap-4 items-center">
-              <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
-              <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
-            </div>
-            {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} /> : null}
-            <hr className="my-8 h-px bg-gray-200 border-0" />
-            {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-              <div className="flex justify-end gap-4">
-                <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] " onClick={() => history.push("/")}>
-                  Précédent
-                </button>
-                <button
-                  className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-                  onClick={() => !loading && onCorrection()}>
-                  Corriger
-                </button>
-              </div>
-            ) : (
-              <div className="flex justify-end gap-4">
-                <button
-                  className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] "
-                  onClick={() => history.push("/inscription2023/consentement")}>
-                  Précédent
-                </button>
-                <button
-                  className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-                  onClick={() => !loading && onSubmit()}>
-                  Continuer
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="flex w-full mt-4">
-            <Help />
-          </div>
-        </div>
+    <DesktopPageContainer
+      title={"Mes représentants légaux"}
+      onSave={onSave}
+      onSubmit={onSubmit}
+      onClickPrevious={() => (young.status === YOUNG_STATUS.WAITING_CORRECTION ? history.push("/") : history.push("/inscription2023/consentement"))}
+      modeCorrection={young.status === YOUNG_STATUS.WAITING_CORRECTION}
+      onclickCorrection={onCorrection}
+      childrenContinueButton={young.status === YOUNG_STATUS.WAITING_CORRECTION ? "Corriger" : "Continuer"}
+      disabled={loading}
+      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`}>
+      {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
+      <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} />
+      <hr className="my-4 h-px bg-gray-200 border-0" />
+      <div className="flex gap-4 items-center">
+        <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
+        <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
       </div>
-    </>
+      {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} /> : null}
+    </DesktopPageContainer>
   );
 }
 

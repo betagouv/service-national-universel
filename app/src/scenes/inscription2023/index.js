@@ -11,9 +11,6 @@ import DesktopDone from "./desktop/stepDone";
 import DesktopRepresentants from "./desktop/stepRepresentants";
 import DesktopUpload from "./desktop/stepUpload";
 
-import MobileCoordonnees from "./mobile/stepCoordonnees";
-import MobileDocuments from "./mobile/stepDocuments";
-import MobileRepresentants from "./mobile/stepRepresentants";
 import MobileUpload from "./mobile/stepUpload";
 
 import DesktopCorrectionEligibilite from "./desktop/correction/stepEligibilite";
@@ -68,9 +65,9 @@ function renderStepCorrection(step, device) {
   if (step === CORRECTION_STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopCorrectionEligibilite /> : <MobileCorrectionEligibilite />;
   if (step === CORRECTION_STEPS.PROFIL) return device === "desktop" ? <DesktopCorrectionProfil /> : <MobileCorrectionProfil />;
   // On peut réutiliser les composants si on veut pas dupliquer le code
-  if (step === CORRECTION_STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
-  if (step === CORRECTION_STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants /> : <MobileRepresentants />;
-  if (step === CORRECTION_STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
+  if (step === CORRECTION_STEPS.COORDONNEES) return <DesktopCoordonnees />;
+  if (step === CORRECTION_STEPS.REPRESENTANTS) return <DesktopRepresentants />;
+  if (step === CORRECTION_STEPS.DOCUMENTS) return <DesktopDocuments />;
   if (step === CORRECTION_STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
   return false;
 }

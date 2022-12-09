@@ -154,8 +154,8 @@ export default function StepUpload() {
         </ErrorMessage>
       ))}
       <div className="w-full my-16 flex justify-around">
-        <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-        {ID[category].imgBack && <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
+        <img className="h-48" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+        {ID[category].imgBack && <img className="h-48" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
       </div>
       <div className="border-l-8 border-l-[#6A6AF4] pl-8 leading-loose">
         Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le

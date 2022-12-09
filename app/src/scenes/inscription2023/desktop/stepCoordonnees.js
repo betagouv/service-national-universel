@@ -490,6 +490,7 @@ export default function StepCoordonnees() {
         value={frenchNationality}
         error={errors.frenchNationality}
         correction={corrections?.frenchNationality}
+        className="flex-1 gap-4"
       />
       {!isFrench && (
         <SearchableSelect
@@ -502,24 +503,16 @@ export default function StepCoordonnees() {
           correction={corrections.birthCountry}
         />
       )}
-      <div className="flex">
+      <div className="flex flex-col md:flex-row md:gap-4">
         <Input
-          className="flex-1 mr-3"
+          className="flex-1"
           value={birthCityZip}
           label="Code postal de naissance"
           onChange={updateData("birthCityZip")}
           error={errors.birthCityZip}
           correction={corrections.birthCityZip}
         />
-
-        <Input
-          className="flex-1 ml-3"
-          value={birthCity}
-          label="Commune de naissance"
-          onChange={updateData("birthCity")}
-          error={errors.birthCity}
-          correction={corrections.birthCity}
-        />
+        <Input className="flex-1" value={birthCity} label="Commune de naissance" onChange={updateData("birthCity")} error={errors.birthCity} correction={corrections.birthCity} />
       </div>
       <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} correction={corrections.gender} error={errors?.gender} />
       <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} />
@@ -549,9 +542,9 @@ export default function StepCoordonnees() {
         error={isFrenchResident ? errors.address : errors.foreignAddress}
         correction={isFrenchResident ? corrections.address : corrections.foreignAddress}
       />
-      <div className="flex">
+      <div className="flex flex-col md:flex-row md:gap-4">
         <Input
-          className="flex-1 mr-3"
+          className="flex-1"
           value={isFrenchResident ? zip : foreignZip}
           label="Code postal"
           onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
@@ -559,7 +552,7 @@ export default function StepCoordonnees() {
           correction={isFrenchResident ? corrections.zip : corrections.foreignZip}
         />
         <Input
-          className="flex-1 ml-3"
+          className="flex-1"
           value={isFrenchResident ? city : foreignCity}
           label="Ville"
           onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
