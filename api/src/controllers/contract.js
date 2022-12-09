@@ -231,6 +231,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     application.contractId = contract._id;
     // We have to update the application's mission duration.
     application.missionDuration = contract.missionDuration;
+    // We have to update the application's contract status.
     application.contractStatus = checkStatusContract(data);
     await application.save({ fromUser: req.user });
 
