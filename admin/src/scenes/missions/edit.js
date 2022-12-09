@@ -393,14 +393,25 @@ export default function Edit(props) {
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINE(S) D&apos;ACTION SECONDAIRE(S)</label>
-                      <MultiSelect
-                        value={values.domains || []}
-                        valueToExclude={values.mainDomain}
-                        onChange={handleChange}
-                        name="domains"
-                        // eslint-disable-next-line no-prototype-builtins
-                        options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
-                        placeholder="Sélectionnez un ou plusieurs domaines"
+                      <CustomSelect
+                        styles={{
+                          container: () => ({ flex: 1 }),
+                          menu: () => ({
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            borderColor: "#dedede",
+                          }),
+                        }}
+                        isMulti
+                        options={Object.keys(MISSION_DOMAINS)
+                          .filter((el) => el !== values.mainDomain)
+                          .map((el) => ({ value: el, label: translate(el) }))}
+                        placeholder={"Sélectionnez une ou plusieurs périodes"}
+                        onChange={(e) => {
+                          handleChange({ target: { value: e, name: "domains" } });
+                        }}
+                        value={values.domains}
                       />
                     </FormGroup>
                     <FormGroup>
@@ -574,33 +585,55 @@ export default function Edit(props) {
                       </FormGroup>
                       <FormGroup>
                         <label>Période de réalisation de la mission :</label>
-                        <MultiSelect
-                          value={values.period}
-                          valueRenderer={(values) => {
-                            const valuesFiltered = values.map((el) => el.label);
-                            return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                        <CustomSelect
+                          styles={{
+                            container: () => ({ flex: 1 }),
+                            menu: () => ({
+                              borderStyle: "solid",
+                              borderWidth: 1,
+                              borderRadius: 5,
+                              borderColor: "#dedede",
+                            }),
                           }}
-                          onChange={handleChange}
-                          name="period"
-                          options={Object.keys(PERIOD)}
+                          isMulti
+                          options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
+                          placeholder={"Sélectionnez une ou plusieurs périodes"}
+                          onChange={(e) => {
+                            handleChange({ target: { value: e, name: "period" } });
+                          }}
+                          value={values.period}
                         />
                         {values.period?.length ? (
                           <>
                             <label style={{ marginTop: "10px" }}>Précisez :</label>
-                            <MultiSelect
-                              value={values.subPeriod}
-                              valueRenderer={(values) => {
-                                const valuesFiltered = values.map((el) => el.label);
-                                return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                            <CustomSelect
+                              styles={{
+                                container: () => ({ flex: 1 }),
+                                menu: () => ({
+                                  borderStyle: "solid",
+                                  borderWidth: 1,
+                                  borderRadius: 5,
+                                  borderColor: "#dedede",
+                                }),
                               }}
-                              onChange={handleChange}
-                              name="subPeriod"
+                              isMulti
                               options={(() => {
+                                const valuesToCheck = values.period;
                                 let options = [];
-                                if (values.period?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
-                                if (values.period?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                                return options;
+                                if (valuesToCheck?.indexOf("WHENEVER") !== -1) {
+                                  options = Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).concat(Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                                } else {
+                                  if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                                  if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                                }
+                                console.log(options);
+                                return options.map((el) => ({ value: el, label: translate(el) }));
                               })()}
+                              placeholder={"Sélectionnez une ou plusieurs périodes"}
+                              onChange={(e) => {
+                                handleChange({ target: { value: e, name: "subPeriod" } });
+                              }}
+                              value={values.subPeriod}
                             />
                           </>
                         ) : null}
@@ -791,7 +824,17 @@ export default function Edit(props) {
     </Formik>
   );
 }
-
+const CustomSelect = ({ onChange, options, value, isMulti, placeholder }) => {
+  return (
+    <ReactSelect
+      options={options}
+      placeholder={placeholder}
+      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val.value))}
+      value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
+      isMulti={isMulti}
+    />
+  );
+};
 const Wrapper = styled.div`
   padding: 2rem;
   li {
