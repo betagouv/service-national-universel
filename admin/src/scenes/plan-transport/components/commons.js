@@ -1,6 +1,7 @@
 import React from "react";
 import ArrowNarrowLeft from "../../../assets/icons/ArrowNarrowLeft";
 import People from "../../../assets/icons/People";
+import ChevronRight from "../../../assets/icons/ChevronRight";
 
 export function Title({ children, className = "" }) {
   return <div className={`text-2xl font-bold text-[#242526] leading-7 ${className}`}>{children}</div>;
@@ -40,6 +41,17 @@ export function Loading({ width }) {
           <div className="h-2 bg-gray-300 rounded col-span-1"></div>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function GroupMenuItem({ children, onClick }) {
+  return (
+    <div
+      className="flex items-center justify-between px-[16px] py-[30px] border-b-[1px] border-b-[#E5E7EB] text-[#1F2937] hover:text-[#1F2937] hover:bg-[#E5E7EB] cursor-pointer"
+      onClick={onClick}>
+      <div className="text-[15px] leading-[18px] font-bold">{children}</div>
+      <ChevronRight className="text-[#9CA3AF]" />
     </div>
   );
 }

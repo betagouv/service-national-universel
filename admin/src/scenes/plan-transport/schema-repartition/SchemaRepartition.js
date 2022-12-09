@@ -400,7 +400,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
           ))}
         </ul>
       )}
-      <Link to="/tableau-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
+      <Link to="/table-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
         Table de répartition <ChevronRight className="ml-[5px]" />
       </Link>
     </Box>
