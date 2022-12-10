@@ -1,3 +1,10 @@
+## [1.182.1](https://github.com/betagouv/service-national-universel/compare/v1.182.0...v1.182.1) (2022-12-10)
+
+
+### Bug Fixes
+
+* **app:** make cron patch processes exit ([200b4df](https://github.com/betagouv/service-national-universel/commit/200b4df80c5af24278c3c29a9d737303a0c3ab33))
+
 # [1.182.0](https://github.com/betagouv/service-national-universel/compare/v1.181.0...v1.182.0) (2022-12-09)
 
 
