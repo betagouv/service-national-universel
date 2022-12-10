@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import { setUser, setSessionPhase1 } from "./redux/auth/actions";
@@ -32,6 +32,7 @@ import SessionShareIndex from "./scenes/session-phase1/index";
 import TableDeRepartition from "./scenes/plan-transport/table-repartition";
 import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
+import DSNJExport from "./scenes/dsnj-export";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -195,6 +196,7 @@ const Home = () => {
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
+            <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
 
             {/* Plan de transport */}
             {/* Table de répartition */}
@@ -229,10 +231,14 @@ const Home = () => {
 };
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
+  const { pathname } = useLocation();
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+  }
+  if (user.role === ROLES.DSNJ && pathname !== "/dsnj-export") {
+    return <Redirect to="/dsnj-export" />;
   }
   if (!roles.includes(user.role)) {
     return <Redirect to="/dashboard" />;

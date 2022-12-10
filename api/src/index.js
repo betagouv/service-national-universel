@@ -90,6 +90,7 @@ app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
 app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
 app.use("/young-edition", require("./controllers/young-edition"));
 app.use("/tags", require("./controllers/tags"));
+app.use("/session", require("./controllers/session"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
