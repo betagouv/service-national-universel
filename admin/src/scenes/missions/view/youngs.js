@@ -333,7 +333,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
               isOpen={modalDurationOpen}
               title="Validation de réalisation de mission"
               message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
-              type="number"
+              type="missionduration"
               onChange={() => setModalDurationOpen(false)}
               defaultInput={hit.missionDuration}
               placeholder="Nombre d'heures"
