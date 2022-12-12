@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard, checkStatusContract } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 
@@ -15,7 +15,6 @@ import { AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../../../assets/rubberStampNotValided.svg";
 import ReactTooltip from "react-tooltip";
-import { getAge } from "snu-lib";
 
 import { HiPlus } from "react-icons/hi";
 import ModalPJ from "./components/ModalPJ";
@@ -121,30 +120,7 @@ export default function Phase2Application({ young, onChange }) {
     };
     getContract();
   }, [application]);
-  const checkStatusContract = (contract) => {
-    if (!contract.invitationSent || contract.invitationSent === "false") return setContractStatus("DRAFT");
-    // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-    const tokenKeys = ["projectManagerToken", "structureManagerToken"];
-    const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
 
-    const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
-    if (isYoungAdult) {
-      tokenKeys.push("youngContractToken");
-      validateKeys.push("youngContractStatus");
-    } else {
-      tokenKeys.push("parent1Token", "parent2Token");
-      validateKeys.push("parent1Status", "parent2Status");
-    }
-
-    const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
-    const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-
-    if (validatedCount >= tokenCount) {
-      return setContractStatus("VALIDATED");
-    } else {
-      return setContractStatus("SENT");
-    }
-  };
   const transformNameDocument = (value) => {
     const string = translateAddFilePhase2(value).slice(3);
     return string[0].toUpperCase() + string.slice(1);

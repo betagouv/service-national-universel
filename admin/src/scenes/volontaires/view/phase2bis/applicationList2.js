@@ -11,8 +11,7 @@ import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { getAge } from "snu-lib";
-import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../utils";
+import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication, checkStatusContract } from "../../../../utils";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -77,29 +76,6 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
     })();
   }, []);
 
-  const checkStatusContract = (contract) => {
-    // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-    const tokenKeys = ["projectManagerToken", "structureManagerToken"];
-    const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
-
-    const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
-    if (isYoungAdult) {
-      tokenKeys.push("youngContractToken");
-      validateKeys.push("youngContractStatus");
-    } else {
-      tokenKeys.push("parent1Token", "parent2Token");
-      validateKeys.push("parent1Status", "parent2Status");
-    }
-
-    const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
-    const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-    if (validatedCount >= tokenCount) {
-      return "VALIDATED";
-    } else {
-      return "SENT";
-    }
-  };
-
   if (!mission) return null;
   return (
     <div className="relative w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-white hover:border-gray-200 shadow-ninaButton mb-4">
@@ -107,7 +83,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       <div className="text-gray-500 font-medium uppercase text-xs flex justify-end tracking-wider mb-2">
         {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
       </div>
-      <div className="flex justify-between  ">
+      <div className="flex justify-between">
         <Link className="flex basis-[35%] items-center" to={`/mission/${hit.missionId}`}>
           {/* icon */}
           <div className="flex items-center mr-4">
