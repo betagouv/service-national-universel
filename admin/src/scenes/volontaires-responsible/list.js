@@ -386,21 +386,6 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Contrat"
-                  componentId="CONTRACT_STATUS"
-                  dataField="contractStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
-                  renderItem={(e, count) => {
-                    return `${translateContractStatus(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Contrat", "Contrat")}
-                />
               </FilterRow>
             </Filter>
             <ResultTable>
