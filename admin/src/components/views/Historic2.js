@@ -1,43 +1,38 @@
 import React, { useState } from "react";
-import { formatStringLongDate, translateModelFields, areObjectsEqual, isIsoDate, translateHistory } from "../../utils";
+import { formatStringLongDate, translateModelFields, isIsoDate, translateHistory } from "../../utils";
 import { formatLongDateFR, translateAction } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
 import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 
-export default function Historic({ model, data, filters, refName }) {
-  const [search, setSearch] = useState("");
+export default function Historic({ model, data, customFilterOptions, refName }) {
+  const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [commonFilters, setCommonFilters] = useState({ op: [], user: [], path: [] });
+  const [customFilter, setCustomFilter] = useState({ label: "", values: null });
+  const activeFilters = getActiveFilters();
+  const filteredData = filterData();
 
-  const [sharedFilters, setSharedFilters] = useState({ op: [], user: [], path: [] });
-  const [customFilters, setCustomFilters] = useState([]);
-  const activeFilters = [...customFilters, ...formatSharedFilters(sharedFilters)];
-  const filteredData = filterData(data, activeFilters, search);
-
-  function formatSharedFilters(filters) {
-    let newFilters = [];
-    for (const [key, value] of Object.entries(filters)) {
-      if (value.length) newFilters.push({ [key]: value });
+  function getActiveFilters() {
+    let filters = [];
+    for (const [key, value] of Object.entries(commonFilters)) {
+      if (value.length) filters.push({ [key]: value });
     }
-    return newFilters;
+    if (customFilter?.value) filters.push(customFilter.value);
+    return filters;
   }
 
   function getOptions(key) {
     const arr = data?.map((e) => e[key]);
-    const unique = [...new Set(arr)];
-    return unique.map((e) => e);
+    return [...new Set(arr)];
   }
 
-  function updateSharedFilters(n) {
-    setSharedFilters((f) => ({ ...f, ...n }));
-  }
-
-  function filterData(data, filters, query) {
-    let filteredData = data;
-    if (filters?.length) filteredData = filteredData.filter((e) => filterEvent(e, filters));
-    if (query) filteredData = filteredData.filter((e) => searchEvent(e, query));
-    return filteredData;
+  function filterData() {
+    let d = data;
+    if (activeFilters?.length) d = d.filter((e) => filterEvent(e, activeFilters));
+    if (query) d = d.filter((e) => searchEvent(e, query));
+    return d;
   }
 
   function filterEvent(event, filters) {
@@ -55,72 +50,50 @@ export default function Historic({ model, data, filters, refName }) {
     return matchFieldName || matchOriginalValue || matchFromValue;
   }
 
-  function FilterButton({ filter, filterName }) {
-    const checked = activeFilters.some((f) => areObjectsEqual(f, filter));
-
-    function handleCustomFilter(newFilter) {
-      let filters = [...customFilters];
-      if (filters.some((f) => areObjectsEqual(f, newFilter))) {
-        filters = filters.filter((f) => !areObjectsEqual(f, newFilter));
-      } else filters.push(newFilter);
-      setCustomFilters(filters);
-    }
-
-    return (
-      <label className={`text-blue-500 py-2 px-3 m-0 rounded-lg flex items-center gap-2 cursor-pointer ${checked && "underline underline-offset-8 decoration-2"}`}>
-        <FilterIcon fill="dodgerblue" />
-        {filterName}
-        <input type="checkbox" checked={checked} onChange={() => handleCustomFilter(filter)} className="hidden" />
-      </label>
-    );
-  }
-
   return (
-    <div className="w-full bg-white rounded-lg shadow-md text-slate-700">
+    <div className="w-full bg-white rounded-xl shadow-md text-slate-700">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="flex p-4 gap-4">
-        <input onChange={(e) => setSearch(e.target.value)} value={search} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
+        <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
           <FilterIcon className={isOpen ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
           <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
         </button>
-        {filters.map((filter) => (
-          <FilterButton key={filter.label} filter={filter.value} filterName={filter.label} />
-        ))}
+        {customFilterOptions && <CustomFilters customFilterOptions={customFilterOptions} customFilter={customFilter} setCustomFilter={setCustomFilter} />}
       </div>
       {isOpen && (
         <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
           <MultiSelect
             options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
-            value={sharedFilters.path}
-            onChange={(path) => updateSharedFilters({ path })}
+            value={commonFilters.path}
+            onChange={(path) => setCommonFilters((f) => ({ ...f, ...{ path } }))}
             label="Donnée modifiée"
           />
           <MultiSelect
             options={getOptions("op").map((e) => ({ label: translateAction(e), value: e }))}
-            value={sharedFilters.op}
-            onChange={(op) => updateSharedFilters({ op })}
+            value={commonFilters.op}
+            onChange={(op) => setCommonFilters((f) => ({ ...f, ...{ op } }))}
             label="Type d'action"
           />
           <MultiSelect
             options={getOptions("author").map((e) => ({ label: e, value: e }))}
-            value={sharedFilters.author}
-            onChange={(author) => updateSharedFilters({ author })}
+            value={commonFilters.author}
+            onChange={(author) => setCommonFilters((f) => ({ ...f, ...{ author } }))}
             label="Auteur de la modification"
           />
         </div>
       )}
-      <table className="w-full z-0">
+      <table className="table-fixed w-full">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
             {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-96">Action</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80">Détails</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-auto">Auteur</th>
           </tr>
         </thead>
         <tbody>
@@ -129,6 +102,33 @@ export default function Historic({ model, data, filters, refName }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function FilterButton({ filter, setCustomFilter, customFilter }) {
+  const checked = filter.label === customFilter.label;
+
+  function handleChange() {
+    if (checked) return setCustomFilter({ label: "", value: null });
+    return setCustomFilter(filter);
+  }
+
+  return (
+    <label className={`text-blue-500 py-2 px-3 m-0 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-50 ${checked && "bg-blue-50"}`}>
+      <FilterIcon className="fill-blue-300" />
+      {filter.label}
+      <input type="checkbox" checked={checked} onChange={() => handleChange()} className="hidden" />
+    </label>
+  );
+}
+
+function CustomFilters({ customFilterOptions, setCustomFilter, customFilter }) {
+  return (
+    <div className="flex flex-wrap gap-4">
+      {customFilterOptions.map((filter) => (
+        <FilterButton key={filter.label} filter={filter} setCustomFilter={setCustomFilter} customFilter={customFilter} />
+      ))}
     </div>
   );
 }
@@ -142,7 +142,7 @@ function Event({ e, index, model, refName, path }) {
         </td>
       )}
       <td className="px-4 py-3">
-        <p className="text-gray-400">
+        <p className="text-gray-400 truncate">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
         <p>{translateModelFields(model, e.path)}</p>

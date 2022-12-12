@@ -204,17 +204,6 @@ export function capitalizeFirstLetter(string) {
 
 export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|0[1-9])(?:\\W*\\d){8}$`;
 
-export function areObjectsEqual(obj1, obj2) {
-  if (obj1?.length !== obj2?.length) return false;
-  if (typeof obj1 !== typeof obj2) return false;
-  if (typeof obj1 !== "object") return obj1 === obj2;
-  for (let key of Object.keys(obj1)) {
-    if (obj1[key]?.length !== obj2[key]?.length) return false;
-    if (!obj1[key].every((v, i) => v === obj2[key][i])) return false;
-  }
-  return true;
-}
-
 export function isIsoDate(str) {
   if (!Date.parse(str)) return false;
   var d = new Date(str);
@@ -230,8 +219,6 @@ export function translateHistory(path, value) {
     return translateApplication(value);
   } else if (path === "/statusPhase2Contract") {
     return translateEngagement(value);
-  } else if (path.includes("files")) {
-    return value?.name;
   } else if (isIsoDate(value)) {
     return formatStringLongDate(value);
   } else {

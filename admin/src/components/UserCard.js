@@ -4,6 +4,7 @@ import { ROLES, translate } from "snu-lib";
 export default function UserCard({ user }) {
   function getAvatar(user) {
     if (user?.firstName?.includes("Script")) return "🤖";
+    if (user?.firstName === "Acteur inconnu") return "?";
     if (user?.firstName) return user?.firstName?.substring(0, 1) + user?.lastName?.substring(0, 1);
     return "?";
   }
@@ -21,8 +22,10 @@ export default function UserCard({ user }) {
           {getAvatar(user)}
         </div>
         <div className="max-w-xs">
-          <p className="font-medium truncate underline-offset-2 decoration-2 group-hover:underline">{user.fullName}</p>
-          <p className="capitalize text-gray-400 truncate underline-offset-2 decoration-2 group-hover:underline">{translate(user?.role)}</p>
+          <p className="font-medium truncate underline-offset-2 decoration-2">
+            {user.firstName} {user.lastName && user.lastName}
+          </p>
+          <p className="capitalize text-gray-400 truncate underline-offset-2 decoration-2">{translate(user?.role)}</p>
         </div>
       </div>
     </a>

@@ -99,6 +99,8 @@ const translateFieldYoung = (f) => {
       return "Présence séjour de cohésion";
     case "cohesionStayMedicalFileReceived":
       return "Fiche sanitaire";
+    case "cohesionStayMedicalFileDownload":
+      return "Téléchargement de la fiche sanitaire";
     case "cohesionCenterId":
       return "Id centre de cohésion";
     case "cohesionCenterName":
@@ -434,6 +436,10 @@ const translateFieldYoung = (f) => {
     case "parent2AllowImageRights":
       return "Autorisation du représentant légal 2 pour les droits à l'image";
     case "inscriptionDate":
+      return "Date de fin d'inscription";
+    case "presenceJDM":
+      return "Présence à la JDM";
+    case "inscriptionDoneDate":
       return "Date de fin d'inscription";
     default:
       return f;
