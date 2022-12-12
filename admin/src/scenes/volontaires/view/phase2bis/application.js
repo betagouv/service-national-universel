@@ -70,7 +70,6 @@ export default function Phase2Application({ young, onChange }) {
   };
 
   const getApplication = async () => {
-    console.log("get application");
     if (!young) return;
     // todo : why not just
     let { ok, data, code } = await api.get(`/application/${applicationId}`);
