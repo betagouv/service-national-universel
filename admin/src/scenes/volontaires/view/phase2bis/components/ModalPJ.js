@@ -8,7 +8,7 @@ import styled from "styled-components";
 import RoundDownloadButton from "../../../../../components/buttons/RoundDownloadButton";
 import IconButton from "../../../../../components/buttons/IconButton";
 import deleteIcon from "../../../../../assets/delete.svg";
-import ModalConfirm from "./ModalConfirm";
+import ModalConfirm from "../../../../../components/modals/ModalConfirm";
 
 function getFileName(file) {
   return (file && file.name) || file;
