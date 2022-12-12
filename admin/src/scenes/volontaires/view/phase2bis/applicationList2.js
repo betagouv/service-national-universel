@@ -11,7 +11,7 @@ import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication, checkStatusContract } from "../../../../utils";
+import { APPLICATION_STATUS, colors, formatStringDateTimezoneUTC, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../utils";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -132,7 +132,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) ? (
               <div className="flex flex-col">
                 {contract?.invitationSent === "true" ? (
-                  <div className="font-medium text-xs text-gray-700 ">Contrat {checkStatusContract(contract) === "VALIDATED" ? "signé" : "envoyé"}</div>
+                  <div className="font-medium text-xs text-gray-700 ">Contrat {hit.contractStatus === "VALIDATED" ? "signé" : "envoyé"}</div>
                 ) : (
                   <div className="flex flex-row items-center">
                     <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />

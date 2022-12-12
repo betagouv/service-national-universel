@@ -5,7 +5,6 @@ import slugify from "slugify";
 import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
-import { getAge } from "snu-lib";
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
 
@@ -202,27 +201,3 @@ export function capitalizeFirstLetter(string) {
 }
 
 export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|06|07|02)(?:\\W*\\d){8}$`;
-
-export const checkStatusContract = (contract) => {
-  if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
-  // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-  const tokenKeys = ["projectManagerToken", "structureManagerToken"];
-  const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
-
-  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
-  if (isYoungAdult) {
-    tokenKeys.push("youngContractToken");
-    validateKeys.push("youngContractStatus");
-  } else {
-    tokenKeys.push("parent1Token", "parent2Token");
-    validateKeys.push("parent1Status", "parent2Status");
-  }
-
-  const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
-  const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-  if (validatedCount >= tokenCount) {
-    return "VALIDATED";
-  } else {
-    return "SENT";
-  }
-};

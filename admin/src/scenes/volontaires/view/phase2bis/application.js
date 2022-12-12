@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard, checkStatusContract } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 
@@ -113,7 +113,7 @@ export default function Phase2Application({ young, onChange }) {
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
-        checkStatusContract(data);
+        setContractStatus(application.contractStatus);
       } else {
         setContractStatus("DRAFT");
       }
