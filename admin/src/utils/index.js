@@ -5,6 +5,7 @@ import slugify from "slugify";
 import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
+
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
 
