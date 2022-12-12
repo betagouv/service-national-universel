@@ -98,7 +98,7 @@ export default function Inscription() {
                   handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"
                   defaultQuery={getExportQuery}
-                  exportTitle="Candidatures"
+                  exportTitle="Inscriptions"
                   index="young"
                   react={{ and: FILTERS }}
                   transform={async (data) => {
