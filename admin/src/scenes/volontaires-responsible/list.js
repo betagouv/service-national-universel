@@ -124,18 +124,6 @@ export default function List() {
       value: "application",
     },
   ];
-
-  const translateContractStatus = (status) => {
-    switch (status) {
-      case "DRAFT":
-        return "Brouillon";
-      case "SENT":
-        return "Envoyé";
-      case "VALIDATED":
-        return "Validé";
-    }
-  };
-
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
