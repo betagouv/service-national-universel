@@ -81,7 +81,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
 
   React.useEffect(() => {
     toggleAllerRetour();
-  }, [showRetour]);
+  }, [showRetour, meetingsPoints, center, aller, retour]);
 
   return (
     <div className="p-8 w-1/2 bg-white rounded-xl min-h-[396px]">
