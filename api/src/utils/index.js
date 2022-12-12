@@ -450,7 +450,9 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   const arrayContract = [];
   for (const contract of activeContracts) {
     const status = checkStatusContract(contract);
-    await ApplicationModel.updateOne({ _id: contract.applicationId, contractStatus: status });
+    const application = await ApplicationModel.findById(contract.applicationId);
+    application.contractStatus = status;
+    await application.save({ fromUser });
     arrayContract.push(status);
   }
 
