@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { Col, Row, Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
@@ -15,6 +15,9 @@ import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
+
+import Bin from "../../../assets/Bin";
+import Field from "../components/Field";
 
 export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
@@ -59,7 +62,7 @@ export default function Wrapper({ mission, tab, children }) {
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
       <div className=" flex flex-row border-b border-gray-200 my-7 px-8 gap-4 justify-between">
-        <div>
+        <div className="flex flex-col justify-end">
           <div className="text-2xl font-bold mb-7 ">
             {mission.name} {mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
           </div>
@@ -105,7 +108,7 @@ export default function Wrapper({ mission, tab, children }) {
             ) : null}
           </div>
         </div>
-        <div>
+        <div className="flex flex-row justify-center items-center gap-4">
           <div className="flex flex-col text-right">
             <div className="font-bold text-3xl">{mission.placesLeft}</div>
             <div className="uppercase text-gray-500 text-xs">
@@ -126,7 +129,17 @@ export default function Wrapper({ mission, tab, children }) {
               <div>&nbsp;{mission.placesTotal}</div>
             </div>
           </div>
-          <div></div>
+          <div className="flex flex-col">
+            <SelectStatusMission hit={mission} />
+            <div className="flex items-center justify-between my-[15px]">
+              <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+                Supprimer
+              </Button>
+              <Button className="ml-[8px]" onClick={onClickDuplicate}>
+                Dupliquer
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -248,3 +261,29 @@ const BoxPlaces = styled(Box)`
     }
   }
 `;
+
+function Button({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel }) {
+  if (href) {
+    return (
+      <a
+        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        href={href}
+        target={target}
+        rel={rel}
+        onClick={onClick}>
+        {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
+        {children}
+      </a>
+    );
+  } else {
+    return (
+      <button
+        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        onClick={onClick}>
+        {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+        {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
+        {children}
+      </button>
+    );
+  }
+}
