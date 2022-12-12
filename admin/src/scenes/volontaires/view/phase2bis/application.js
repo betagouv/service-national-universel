@@ -102,7 +102,6 @@ export default function Phase2Application({ young, onChange }) {
   React.useEffect(() => {
     if (!application) return;
     getMission();
-    console.log(application);
   }, [application]);
 
   React.useEffect(() => {
