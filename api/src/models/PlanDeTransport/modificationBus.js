@@ -74,8 +74,8 @@ const Schema = new mongoose.Schema({
   // Informations de la modification sur le statut de la demande (pour es)
   status: {
     type: String,
-    default: "pending",
-    enum: ["pending", "accepted", "rejected"],
+    default: "PENDING",
+    enum: ["PENDING", "ACCEPTED", "REJECTED"],
     documentation: {
       description: "Statut de la demande",
     },
@@ -107,8 +107,7 @@ const Schema = new mongoose.Schema({
 
   // Informations de la modification sur l'avis de la demande (pour es)
   opinion: {
-    type: String,
-    enum: ["favorable", "unfavorable"],
+    type: Boolean,
     documentation: {
       description: "Avis sur la demande",
     },
@@ -138,7 +137,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  conversation: {
+  messages: {
     type: [
       {
         message: {
