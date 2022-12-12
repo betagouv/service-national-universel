@@ -317,6 +317,107 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
   }
 });
 
+router.get("/:id/data-for-check", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { id } = value;
+
+    const ligneBus = await LigneBusModel.findById(id);
+    if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    //Get all youngs for this ligne and by meeting point
+    const queryYoung = [
+      { $match: { _id: ligneBus._id } },
+      { $unwind: "$meetingPointsIds" },
+      {
+        $lookup: {
+          from: "youngs",
+          let: { meetingPoint: "$meetingPointsIds" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$cohort", ligneBus.cohort] },
+                    { $eq: ["$status", "VALIDATED"] },
+                    { $eq: ["$sessionPhase1Id", ligneBus.sessionId] },
+                    { $eq: ["$meetingPointId", "$$meetingPoint"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "youngs",
+        },
+      },
+      {
+        $lookup: {
+          from: "youngs",
+          let: { id: ligneBus._id.toString() },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$ligneId", "$$id"] }],
+                },
+              },
+            },
+          ],
+          as: "youngsBus",
+        },
+      },
+      {
+        $project: { meetingPointsIds: 1, youngsCount: { $size: "$youngs" }, youngsBusCount: { $size: "$youngsBus" } },
+      },
+    ];
+
+    const dataYoung = await LigneBusModel.aggregate(queryYoung).exec();
+
+    let result = {
+      meetingPoints: [],
+    };
+    let youngsCountBus = 0;
+    for (let data of dataYoung) {
+      result.meetingPoints.push({ youngsCount: data.youngsCount, meetingPointId: data.meetingPointsIds });
+      youngsCountBus = data.youngsBusCount;
+    }
+    result.youngsCountBus = youngsCountBus;
+
+    //Get young volume need for the destination center in schema
+    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId });
+
+    let schemaVolume = 0;
+    for (let data of dataSchema) {
+      schemaVolume += data.youngsVolume;
+    }
+
+    result.schemaVolume = schemaVolume;
+
+    //Get young volume need for the destination center in bus
+    const dataBus = await LigneBusModel.find({ sessionId: ligneBus.sessionId, _id: { $ne: ligneBus._id } });
+
+    let busVolume = 0;
+    for (let data of dataBus) {
+      busVolume += data.youngCapacity;
+    }
+
+    result.busVolume = busVolume;
+
+    console.log(result);
+
+    return res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 async function getInfoBus(line) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
 

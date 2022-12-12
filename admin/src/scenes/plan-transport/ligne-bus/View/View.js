@@ -10,22 +10,26 @@ import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import Panel from "./components/Panel";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import Loader from "../../../../components/Loader";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
+  const [dataForCheck, setDataForCheck] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
 
   const getBus = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return <div />;
-      const { ok, code, data: reponsePDR } = await api.get(`/ligne-de-bus/${id}`);
-      if (!ok) {
+      const { ok: ok1, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
+      const { ok: ok2, data: reponseCheck } = await api.get(`/ligne-de-bus/${id}/data-for-check`);
+
+      if (!ok1 || !ok2) {
         toastr.error("Oups, une erreur est survenue lors de la récupération du bus", code);
         return history.push("/point-de-rassemblement");
       }
-      setData({ ...reponsePDR, addressVerified: true });
-      return reponsePDR.cohorts;
+      setDataForCheck(reponseCheck);
+      setData(reponseBus);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
@@ -36,7 +40,7 @@ export default function View(props) {
     getBus();
   }, []);
 
-  if (!data) return <div />;
+  if (!data || !dataForCheck) return <Loader />;
 
   return (
     <>
@@ -63,11 +67,11 @@ export default function View(props) {
             />
             <Modification />
           </div>
-          <Info bus={data} setBus={setData} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} />
           <div className="flex gap-4 items-start">
             <div className="flex flex-col gap-4 w-1/2">
               {data.meetingsPointsDetail.map((pdr, index) => (
-                <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} />
+                <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} volume={dataForCheck.meetingPoints} />
               ))}
             </div>
             <Centre bus={data} setBus={setData} />

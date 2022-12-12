@@ -22,7 +22,7 @@ const options = [
 
 const keys = ["code", "name", "city", "zip", "department", "region"];
 
-export default function PointDeRassemblement({ bus, setBus, index, pdr }) {
+export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }) {
   const user = useSelector((state) => state.Auth.user);
   const [editPdr, setEditPdr] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -43,7 +43,6 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr }) {
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
   const refContainer = React.useRef(null);
-
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
@@ -156,7 +155,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr }) {
           <div className="flex items-center justify-center rounded-full bg-gray-200 h-7 w-7 text-sm">{index}</div>
           <div className="flex items-center gap-2 ml-3">
             <DoubleProfil className="text-gray-400" />
-            <div className="text-gray-900 text-lg leading-5 font-medium ">102</div>
+            <div className="text-gray-900 text-lg leading-5 font-medium pb-1">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
           </div>
         </div>
         {canEditLigneBusPointDeRassemblement(user) ? (
@@ -245,9 +244,8 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr }) {
                   <hr className="my-2" />
                 </div>
                 {filteredPDR.map((p) => (
-                  <>
+                  <div key={p._id}>
                     <div
-                      key={p._id}
                       onClick={() => {
                         setSelectedPDR(p);
                         setOpen(false);
@@ -259,7 +257,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr }) {
                       </div>
                     </div>
                     <hr className="my-2" />
-                  </>
+                  </div>
                 ))}
                 {filteredPDR.length === 0 && (
                   <div className="flex items-center gap-2 pt-2 pb-4 justify-center">
