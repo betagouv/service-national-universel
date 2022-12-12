@@ -22,7 +22,7 @@ import ModalButton from "../../components/buttons/ModalButton";
 import { Formik, Field } from "formik";
 import { Modal } from "reactstrap";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "CONTRACT_STATUS"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -124,6 +124,7 @@ export default function List() {
       value: "application",
     },
   ];
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
