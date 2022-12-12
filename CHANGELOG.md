@@ -1,3 +1,16 @@
+# [1.183.0](https://github.com/betagouv/service-national-universel/compare/v1.182.1...v1.183.0) (2022-12-12)
+
+
+### Bug Fixes
+
+* **admin:** Search in school filter ([4b9a646](https://github.com/betagouv/service-national-universel/commit/4b9a646bf76a061a175f814fc8465beff3145ad5))
+* **api:** slack function is async ([c3ceebe](https://github.com/betagouv/service-national-universel/commit/c3ceebee84a98b120a319861b88c57df7eb0371a))
+
+
+### Features
+
+* **admin/api:** add check for bus  ([#2130](https://github.com/betagouv/service-national-universel/issues/2130)) ([5fd085d](https://github.com/betagouv/service-national-universel/commit/5fd085d2fdf166c5f1384557c240c5ba56690d6b))
+
 ## [1.182.1](https://github.com/betagouv/service-national-universel/compare/v1.182.0...v1.182.1) (2022-12-10)
 
 
