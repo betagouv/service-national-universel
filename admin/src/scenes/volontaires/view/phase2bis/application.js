@@ -108,7 +108,6 @@ export default function Phase2Application({ young, onChange }) {
     const getContract = async () => {
       if (application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
-        console.log("get contract", data);
         if (!ok) {
           capture(code);
           return toastr.error("Oups, une erreur est survenue", code);
