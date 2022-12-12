@@ -106,7 +106,7 @@ exports.handler = async () => {
 
     const mission_patches = mongoose.model("mission_patches", new mongoose.Schema({}, { collection: "mission_patches" }));
     await findAll(mission_patches, mongooseFilterForDayBefore(), processPatch);
-    slack.info({
+    await slack.info({
       title: "✅ Mission Logs",
       text: `${result.missionPatchScanned} missions were scanned:\n ${printResult(result.event)}`,
     });

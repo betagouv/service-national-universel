@@ -134,7 +134,7 @@ exports.handler = async () => {
 
     const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
     await findAll(young_patches, mongooseFilterForDayBefore(), processPatch);
-    slack.info({
+    await slack.info({
       title: "✅ Young Logs",
       text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
