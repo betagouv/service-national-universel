@@ -5,6 +5,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "modificationbus";
 
 const Schema = new mongoose.Schema({
+  //Informations de la ligne de bus
   lineId: {
     type: String,
     required: true,
@@ -21,6 +22,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // Informations de la demande
   requestMessage: {
     type: String,
     required: true,
@@ -53,15 +55,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  status: {
-    type: String,
-    default: "pending",
-    enum: ["pending", "accepted", "rejected"],
-    documentation: {
-      description: "Statut de la demande",
-    },
-  },
-
   tags: {
     type: [String],
     required: false,
@@ -78,28 +71,80 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // Informations de la modification sur le statut de la demande (pour es)
+  status: {
+    type: String,
+    default: "pending",
+    enum: ["pending", "accepted", "rejected"],
+    documentation: {
+      description: "Statut de la demande",
+    },
+  },
+
+  statusUserId: {
+    type: String,
+    required: false,
+    documentation: {
+      description: "Id de l'utilisateur ayant changé le statut de la demande",
+    },
+  },
+
+  statusUserName: {
+    type: String,
+    required: false,
+    documentation: {
+      description: "Prénom / nom de l'utilisateur ayant changé le statut de la demande",
+    },
+  },
+
+  statusDate: {
+    type: Date,
+    required: false,
+    documentation: {
+      description: "Date du changement de statut de la demande",
+    },
+  },
+
+  // Informations de la modification sur l'avis de la demande (pour es)
+  opinion: {
+    type: String,
+    enum: ["favorable", "unfavorable"],
+    documentation: {
+      description: "Avis sur la demande",
+    },
+  },
+
+  opinionUserId: {
+    type: String,
+    required: false,
+    documentation: {
+      description: "Id de l'utilisateur ayant donné son avis sur la demande",
+    },
+  },
+
+  opinionUserName: {
+    type: String,
+    required: false,
+    documentation: {
+      description: "Prénom / nom de l'utilisateur ayant donné son avis sur la demande",
+    },
+  },
+
+  opinionDate: {
+    type: Date,
+    required: false,
+    documentation: {
+      description: "Date de l'avis sur la demande",
+    },
+  },
+
   conversation: {
     type: [
       {
-        type: {
-          type: String,
-          required: true,
-          enum: ["message", "opinion"],
-          documentation: {
-            description: "Type de message",
-          },
-        },
         message: {
           type: String,
           documentation: {
             description: "Message",
-          },
-        },
-        opinion: {
-          type: String,
-          enum: ["favorable", "unfavorable"],
-          documentation: {
-            description: "Avis sur la demande",
           },
         },
         userId: {
@@ -114,13 +159,6 @@ const Schema = new mongoose.Schema({
           required: true,
           documentation: {
             description: "Prénom / nom de l'utilisateur ayant envoyé le message / avis",
-          },
-        },
-        userRole: {
-          type: String,
-          required: true,
-          documentation: {
-            description: "Rôle de l'utilisateur ayant envoyé le message / avis",
           },
         },
         date: {
