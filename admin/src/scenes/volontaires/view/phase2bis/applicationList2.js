@@ -163,16 +163,12 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                     <div className="font-medium text-xs text-gray-700 ml-1">Contrat en brouillon</div>
                   </div>
                 )}
-                {numberOfFiles === 1 && (
+                {numberOfFiles >= 1 && (
                   <div className="flex flex-row items-center mt-1">
                     <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
-                    <div className="font-medium text-xs text-gray-700 ml-1">1 pièce jointe</div>
-                  </div>
-                )}
-                {numberOfFiles > 1 && (
-                  <div className="flex flex-row items-center mt-1">
-                    <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
-                    <div className="font-medium text-xs text-gray-700 ml-1">{numberOfFiles} pièces jointes</div>
+                    <div className="font-medium text-xs text-gray-700 ml-1">
+                      {numberOfFiles} pièce{numberOfFiles > 1 ? "s" : ""} jointe{numberOfFiles > 1 ? "s" : ""}
+                    </div>
                   </div>
                 )}
               </div>
