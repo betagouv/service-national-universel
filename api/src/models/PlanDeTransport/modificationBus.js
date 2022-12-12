@@ -55,7 +55,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  tags: {
+  tagIds: {
     type: [String],
     required: false,
     documentation: {
