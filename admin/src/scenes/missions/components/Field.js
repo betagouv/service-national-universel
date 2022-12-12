@@ -11,7 +11,7 @@ export default function Field({ name, label, value, className = "", type = "text
         {type === "select" && (
           <SimpleSelect value={value} name={name} showBackgroundColor={false} transformer={transformer} options={options} onChange={(value) => handleChange(name, value)} />
         )}
-        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block p-1 w-[100%]" />}
+        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block  w-[100%]" />}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
       </div>
     </div>

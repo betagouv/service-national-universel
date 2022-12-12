@@ -17,7 +17,6 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 
 import Bin from "../../../assets/Bin";
-import Field from "../components/Field";
 
 export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
