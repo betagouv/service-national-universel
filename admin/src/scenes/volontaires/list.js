@@ -580,10 +580,11 @@ export default function VolontaireList() {
                   }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
                   renderLabel={(items) => getFilterLabel(items, "École")}
                   showMissing
                   missingLabel="Non renseigné"
+                  searchPlaceholder="Rechercher..."
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
