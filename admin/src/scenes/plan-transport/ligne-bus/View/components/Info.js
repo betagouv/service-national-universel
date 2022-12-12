@@ -69,7 +69,7 @@ export default function Info({ bus, setBus, dataForCheck }) {
 
       //total capacity must be greater than young capacity + follower capacity
       if (data?.totalCapacity < data?.youngCapacity + data?.followerCapacity) {
-        errors.totalCapacity = "La capacité totale doit être supérieur ou égal à la capacité volontaire + la capacité accompagnateurs";
+        errors.totalCapacity = "La capacité totale doit être supérieure ou égale à la capacité volontaire + la capacité accompagnateurs";
       }
 
       if (dataForCheck.schemaVolume > dataForCheck.busVolume + data.youngCapacity) {
