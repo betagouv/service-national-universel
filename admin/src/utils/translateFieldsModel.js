@@ -445,6 +445,12 @@ const translateFieldYoung = (f) => {
       return "Demande de correction";
     case "correctionRequests/status":
       return "Statut de la demande de correction";
+    case "isRegionRural":
+      return "Région rurale";
+    case "reducedMobilityAccess":
+      return "Accès pour personnes à mobilité réduite";
+    case "handicapInSameDepartment":
+      return "Même département (handicap)";
     default:
       return f;
   }
