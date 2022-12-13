@@ -11,7 +11,6 @@ import ExportComponent from "../../../components/ExportXlsx";
 import { ES_NO_LIMIT } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
-import Panel from "./Panel";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH"];

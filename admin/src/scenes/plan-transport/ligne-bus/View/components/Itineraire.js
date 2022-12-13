@@ -84,7 +84,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
   }, [showRetour, meetingsPoints, center, aller, retour]);
 
   return (
-    <div className="p-8 w-1/2 bg-white rounded-xl min-h-[396px]">
+    <div className="p-8 w-1/2 bg-white rounded-xl">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Itinéraire</div>
         <div className="flex items-center gap-3">
@@ -99,7 +99,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
           </div>
         </div>
       </div>
-      <div className="flow-root mt-8 mb-8">
+      <div className="flow-root mt-8 mb-8 overflow-y-auto max-h-[300px]">
         <ul role="list" className="pr-4">
           {timeline.map((event, eventIdx) => (
             <li key={event.id} className="list-none">

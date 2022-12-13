@@ -12,6 +12,7 @@ import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
+import Loader from "../../../../../components/Loader";
 
 const options = [
   { label: "Bus", value: "bus" },
@@ -146,6 +147,13 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }
       setIsLoading(false);
     }
   };
+
+  if (!volume)
+    return (
+      <div className="p-8 w-full bg-white rounded-xl">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="p-8 w-full bg-white rounded-xl">
