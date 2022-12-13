@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { AiOutlineCheck } from "react-icons/ai";
-import { translateAddFilePhase2 } from "../../../../../utils";
+import { translateAddFilePhase2WithoutPreposition } from "../../../../../utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -20,7 +20,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                 <div className={`flex flex-col w-full `}>
                   <label className="text-xs leading-4 text-gray-500">{label}</label>
                   <div className="flex items-center justify-between w-full">
-                    <span className="block truncate">{selected ? translateAddFilePhase2(selected)[0].toUpperCase() + translateAddFilePhase2(selected).slice(1) : null}</span>
+                    <span className="block truncate">{selected ? translateAddFilePhase2WithoutPreposition(selected) : null}</span>
                     <span className="pointer-events-none flex items-center pr-2">
                       {!readOnly && (
                         <>{open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}</>
@@ -40,7 +40,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                     value={option}>
                     {({ selected, active }) => (
                       <>
-                        <div>{translateAddFilePhase2(option)[0].toUpperCase() + translateAddFilePhase2(option).slice(1)}</div>
+                        <div>{translateAddFilePhase2WithoutPreposition(option)}</div>
                         {selected ? (
                           <span className={classNames(active ? "text-white" : "text-blue-600", "absolute inset-y-0 right-0 flex items-center pr-4")}>
                             <AiOutlineCheck className="h-5 w-5" aria-hidden="true" />

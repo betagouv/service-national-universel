@@ -15,7 +15,7 @@ import {
   copyToClipboard,
   APPLICATION_STATUS,
   SENDINBLUE_TEMPLATES,
-  translateAddFilePhase2,
+  translateAddFilePhase2WithoutPreposition,
   COHESION_STAY_END,
 } from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
@@ -444,7 +444,7 @@ export default function viewDesktop() {
                       mission.application[option].length > 0 && (
                         <FileCard
                           key={index}
-                          name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                          name={translateAddFilePhase2WithoutPreposition(option)}
                           icon="reglement"
                           filled={mission.application[option].length}
                           color="text-blue-600 bg-white"
