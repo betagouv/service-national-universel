@@ -2,8 +2,9 @@ import passwordValidator from "password-validator";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
-import { formatStringLongDate, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
+import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
 import api from "../services/api";
+import { translateModelFields } from "./translateFieldsModel";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
 
@@ -224,4 +225,97 @@ export function translateHistory(path, value) {
   } else {
     return translate(value);
   }
+}
+
+function formatField(field) {
+  let f = field;
+  if (field.includes("correctionRequests")) f = "correctionRequests";
+  const re = /(.*)\/\d\/(.*)/;
+  const match = field.match(re);
+  if (match) f = match.slice(1).join("/");
+  return f;
+}
+
+function formatValue(path, value) {
+  if (!value) return "Vide";
+
+  if (typeof value === "object") {
+    if (path.includes("cniFiles")) return value.name;
+    if (path.includes("correctionRequests")) return `${translateModelFields("young", value.field)} : ${value.message}`;
+    if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;
+    if (path.includes("notes")) return value.note?.substring(0, 100);
+    return JSON.stringify(value);
+  }
+
+  return value;
+}
+
+function formatUser(user, role) {
+  if (!user || !user?.firstName) return { firstName: "Acteur inconnu", lastName: "", role: "Donnée indisponible" };
+  if (user.firstName?.includes("/Users/")) user.firstName = "Modification automatique";
+  if (!user.role) {
+    if (user.email) user.role = "Volontaire";
+    if (!user.email && role !== ROLES.ADMIN) {
+      user.firstName = "Modification automatique";
+    }
+  }
+  return user;
+}
+
+function createEvent(e, hit, value, originalValue, role) {
+  let event = {};
+
+  const path = formatField(e.path.substring(1));
+  const user = formatUser(hit.user, role);
+
+  event.user = user;
+  event.author = `${event.user.firstName} ${event.user.lastName}`;
+  event.op = e.op;
+  event.path = path;
+  event.date = hit.date;
+  event.value = formatValue(path, value);
+  event.originalValue = formatValue(path, originalValue);
+  event.ref = hit.ref;
+
+  return event;
+}
+
+function filterEmptyValues(e) {
+  const ignoredValues = [null, undefined, "", "Vide", "[]", false];
+  return (!e.value || !e.value.length || ignoredValues.includes(e.value)) && (!e.originalValue || !e.originalValue.length || ignoredValues.includes(e.originalValue));
+}
+
+function filterHiddenFields(e) {
+  const hiddenFields = [
+    "parent1InscriptionToken",
+    "parent2InscriptionToken",
+    "parent1Inscription2023Token",
+    "parent2InscriptionToken",
+    "missionsInMail",
+    "historic",
+    "uploadedAt",
+    "sessionPhase1Id",
+    "correctedAt",
+    "lastStatusAt",
+    "token",
+    "Token",
+  ];
+  return hiddenFields.some((f) => e.path.includes(f));
+}
+
+export function formatHistory(data, role) {
+  // Flatten history: each value inside each op is a separate event
+  let history = [];
+  for (const hit of data) {
+    for (const e of hit.ops) {
+      if (Array.isArray(e.value)) {
+        for (const [i, v] of e.value.entries()) {
+          let ogValue = null;
+          if (e.originalValue) ogValue = e.originalValue[i];
+          history.push(createEvent(e, hit, v, ogValue, role));
+        }
+      } else history.push(createEvent(e, hit, e.value, e.originalValue, role));
+    }
+  }
+  return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
 }

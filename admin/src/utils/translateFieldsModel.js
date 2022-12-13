@@ -441,6 +441,10 @@ const translateFieldYoung = (f) => {
       return "Présence à la JDM";
     case "inscriptionDoneDate":
       return "Date de fin d'inscription";
+    case "correctionRequests":
+      return "Demande de correction";
+    case "correctionRequests/status":
+      return "Statut de la demande de correction";
     default:
       return f;
   }
