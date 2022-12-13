@@ -3,9 +3,9 @@ import { ROLES, translate } from "snu-lib";
 
 export default function UserCard({ user }) {
   function getAvatar(user) {
-    if (user?.firstName?.includes("Script")) return "🤖";
+    if (user?.firstName?.toLowerCase().includes("script" || "modification automatique")) return "🤖";
     if (user?.firstName === "Acteur inconnu") return "?";
-    if (user?.firstName) return user?.firstName?.substring(0, 1) + user?.lastName?.substring(0, 1);
+    if (user?.firstName) return `${user?.firstName?.substring(0, 1)}${user?.lastName?.substring(0, 1) || null}`;
     return "?";
   }
   function getlink(user) {

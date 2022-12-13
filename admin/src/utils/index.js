@@ -230,24 +230,31 @@ export function translateHistory(path, value) {
 function formatField(field) {
   let f = field;
   if (field.includes("correctionRequests")) f = "correctionRequests";
-  const re = /(.*)\/\d\/(.*)/;
-  const match = field.match(re);
-  if (match) f = match.slice(1).join("/");
+  // correctionRequests/0/field
+  const match1 = field.match(/(.*)\/\d\/(.*)/);
+  if (match1) f = match1.slice(1).join("/");
+  // /files/fileCategory/mimetype
+  const match2 = field.match(/.*\/(.*)\/.*/);
+  if (match2) f = match2[1];
+  // notes/0
+  const match3 = field.match(/(.*)\/\d/);
+  if (match3) f = match3[1];
+  // files/fileCategory/0/
+  const match4 = field.match(/files\/(.*)\/\d/);
+  if (match4) f = match4[1];
   return f;
 }
 
 function formatValue(path, value) {
   if (!value) return "Vide";
-
   if (typeof value === "object") {
     if (Object.values(value).every((v) => !v.length)) return "Vide";
-    if (path.includes("cniFiles")) return value.name;
+    if (path.includes("Files")) return value.name;
     if (path.includes("correctionRequests")) return `${translateModelFields("young", value.field)} : ${value.message}`;
     if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;
     if (path.includes("notes")) return value.note?.substring(0, 100);
     return JSON.stringify(value);
   }
-
   return value;
 }
 
@@ -265,19 +272,14 @@ function formatUser(user, role) {
 
 function createEvent(op, e, value, originalValue, role) {
   let event = {};
-
-  const path = formatField(op.path.substring(1));
-  const user = formatUser(e.user, role);
-
-  event.user = user;
+  event.path = formatField(op.path.substring(1));
+  event.user = formatUser(e.user, role);
   event.author = `${event.user.firstName} ${event.user.lastName}`;
   event.op = op.op;
-  event.path = path;
   event.date = e.date;
-  event.value = formatValue(path, value);
-  event.originalValue = formatValue(path, originalValue);
+  event.value = formatValue(event.path, value);
+  event.originalValue = formatValue(event.path, originalValue);
   event.ref = e.ref;
-
   return event;
 }
 
@@ -287,20 +289,7 @@ function filterEmptyValues(e) {
 }
 
 function filterHiddenFields(e) {
-  const hiddenFields = [
-    "parent1InscriptionToken",
-    "parent2InscriptionToken",
-    "parent1Inscription2023Token",
-    "parent2InscriptionToken",
-    "missionsInMail",
-    "historic",
-    "uploadedAt",
-    "sessionPhase1Id",
-    "correctedAt",
-    "lastStatusAt",
-    "token",
-    "Token",
-  ];
+  const hiddenFields = ["missionsInMail", "historic", "uploadedAt", "sessionPhase1Id", "correctedAt", "lastStatusAt", "token", "Token"];
   return hiddenFields.some((f) => e.path.includes(f));
 }
 
@@ -311,9 +300,7 @@ export function formatHistory(data, role) {
     for (const op of e.ops) {
       if (Array.isArray(op.value)) {
         for (const [i, v] of op.value.entries()) {
-          let ogValue = null;
-          if (op.originalValue) ogValue = op.originalValue[i];
-          history.push(createEvent(op, e, v, ogValue, role));
+          history.push(createEvent(op, e, v, op.originalValue ? op.originalValue[i] : null, role));
         }
       } else history.push(createEvent(op, e, op.value, op.originalValue, role));
     }
