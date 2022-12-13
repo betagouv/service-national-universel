@@ -119,7 +119,7 @@ export default function View({ open, setOpen, modification, getModification }) {
               </div>
               <div className="text-sm text-gray-800 leading-5 whitespace-pre-wrap">{modification.requestMessage}</div>
               <div className="flex justify-end">
-                <Quote className="text-gray-400" />
+                <Quote className="text-gray-400 rotate-180" />
               </div>
             </div>
             <div className="flex justify-between py-1">
