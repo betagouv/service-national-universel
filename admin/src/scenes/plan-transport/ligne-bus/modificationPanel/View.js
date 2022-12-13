@@ -158,7 +158,7 @@ export default function View({ open, setOpen, modification, getModification }) {
                       <div className="text-sm text-gray-500">{dayjs(modification.statusDate).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
                     <div className="text-gray-800 text-sm leading-5 whitespace-pre-wrap">
-                      {modification.status === "accepted" ? "A accepté la demande de modification" : "A refusé la demande de modification"}
+                      {modification.status === "ACCEPTED" ? "A accepté la demande de modification" : "A refusé la demande de modification"}
                     </div>
                   </div>
                 </div>
