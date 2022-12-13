@@ -26,7 +26,7 @@ export default function View(props) {
       const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
 
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
       setData(reponseBus);
     } catch (e) {
@@ -40,7 +40,7 @@ export default function View(props) {
       const id = props.match && props.match.params && props.match.params.id;
       const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${id}/data-for-check`);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
       setDataForCheck(reponseCheck);
     } catch (e) {
@@ -54,7 +54,7 @@ export default function View(props) {
       const id = props.match && props.match.params && props.match.params.id;
       const { ok, code, data: reponseDemandeDeModification } = await api.get(`/demande-de-modification/ligne/${id}`);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
       reponseDemandeDeModification.sort((a, b) => {
         return new Date(b.createdAt) - new Date(a.createdAt);
