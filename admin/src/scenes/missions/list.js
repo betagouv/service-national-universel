@@ -18,7 +18,23 @@ import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
 import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE", "VISIBILITY"];
+const FILTERS = [
+  "DOMAIN",
+  "SEARCH",
+  "STATUS",
+  "PLACES",
+  "LOCATION",
+  "TUTOR",
+  "REGION",
+  "DEPARTMENT",
+  "STRUCTURE",
+  "MILITARY_PREPARATION",
+  "DATE",
+  "SOURCE",
+  "VISIBILITY",
+  "HEBERGEMENT",
+  "HEBERGEMENT_PAYANT",
+];
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { missionExportFields } from "snu-lib";
 import ModalExport from "../../components/modals/ModalExport";
@@ -324,6 +340,34 @@ export default function List() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="HEBERGEMENT"
+                  dataField="hebergement.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HEBERGEMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Hébergement")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="HEBERGEMENT_PAYANT"
+                  dataField="hebergementPayant.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HEBERGEMENT_PAYANT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Hébergement Payant")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
