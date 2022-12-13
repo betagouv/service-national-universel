@@ -202,7 +202,6 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
               onConfirm={async (duration) => {
                 try {
                   const value = duration.target.value;
-                  console.log("🚀 ~ file: applicationList.js:205 ~ onConfirm={ ~ value", value);
                   var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
                   if (re.test(value) || !value) {
                     const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
