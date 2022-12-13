@@ -240,6 +240,7 @@ function formatValue(path, value) {
   if (!value) return "Vide";
 
   if (typeof value === "object") {
+    if (Object.values(value).every((v) => !v.length)) return "Vide";
     if (path.includes("cniFiles")) return value.name;
     if (path.includes("correctionRequests")) return `${translateModelFields("young", value.field)} : ${value.message}`;
     if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;
@@ -262,20 +263,20 @@ function formatUser(user, role) {
   return user;
 }
 
-function createEvent(e, hit, value, originalValue, role) {
+function createEvent(op, e, value, originalValue, role) {
   let event = {};
 
-  const path = formatField(e.path.substring(1));
-  const user = formatUser(hit.user, role);
+  const path = formatField(op.path.substring(1));
+  const user = formatUser(e.user, role);
 
   event.user = user;
   event.author = `${event.user.firstName} ${event.user.lastName}`;
-  event.op = e.op;
+  event.op = op.op;
   event.path = path;
-  event.date = hit.date;
+  event.date = e.date;
   event.value = formatValue(path, value);
   event.originalValue = formatValue(path, originalValue);
-  event.ref = hit.ref;
+  event.ref = e.ref;
 
   return event;
 }
@@ -306,15 +307,15 @@ function filterHiddenFields(e) {
 export function formatHistory(data, role) {
   // Flatten history: each value inside each op is a separate event
   let history = [];
-  for (const hit of data) {
-    for (const e of hit.ops) {
-      if (Array.isArray(e.value)) {
-        for (const [i, v] of e.value.entries()) {
+  for (const e of data) {
+    for (const op of e.ops) {
+      if (Array.isArray(op.value)) {
+        for (const [i, v] of op.value.entries()) {
           let ogValue = null;
-          if (e.originalValue) ogValue = e.originalValue[i];
-          history.push(createEvent(e, hit, v, ogValue, role));
+          if (op.originalValue) ogValue = op.originalValue[i];
+          history.push(createEvent(op, e, v, ogValue, role));
         }
-      } else history.push(createEvent(e, hit, e.value, e.originalValue, role));
+      } else history.push(createEvent(op, e, op.value, op.originalValue, role));
     }
   }
   return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
