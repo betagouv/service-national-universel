@@ -23,7 +23,7 @@ const options = [
 
 const keys = ["code", "name", "city", "zip", "department", "region"];
 
-export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }) {
+export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume }) {
   const user = useSelector((state) => state.Auth.user);
   const [editPdr, setEditPdr] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -138,6 +138,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }
         return setIsLoading(false);
       }
       setBus(ligneInfo);
+      await getVolume();
       setEditPdr(false);
       setIsLoading(false);
       setSearch("");
