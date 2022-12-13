@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, htmlCleaner } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, htmlCleaner, MISSION_DOMAINS } from "../../../utils";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
@@ -24,7 +24,10 @@ export default function DetailsView({ mission, structure, tutor }) {
   const user = useSelector((state) => state.Auth.user);
 
   const onSubmit = () => {};
-
+  console.log(MISSION_DOMAINS);
+  const mainDomainsOption = Object.keys(MISSION_DOMAINS).map((d) => {
+    return { value: d, label: translate(d) };
+  });
   const domains = mission?.domains?.filter((d) => {
     return d !== mission.mainDomain;
   });
@@ -90,16 +93,21 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
                   <Field
                     readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, mainDomain: e.target.value })}
+                    handleChange={(e) => setValues({ ...values, mainDomain: e })}
+                    type="select"
+                    options={mainDomainsOption}
                     label="Sélectionnez un domaine principal"
-                    value={values.mainDomain}
+                    value={translate(values.mainDomain)}
                   />
-                  <div className="text-xs font-medium my-2">Domaine(s) d&apos;action secondaire(s) (facultatif)</div>
+                  <div className="flex flex-row text-xs font-medium my-2">
+                    <div>Domaine(s) d&apos;action secondaire(s)</div>
+                    <div className="text-gray-400">(facultatif)</div>
+                  </div>
                   <Field
                     readOnly={!editing}
                     handleChange={(e) => setValues({ ...values, mainDomain: e.target.value })}
                     label="Sélectionnez un domaine principal"
-                    value={values.mainDomain}
+                    value={translate(values.mainDomain)}
                   />
                 </div>
               </div>
