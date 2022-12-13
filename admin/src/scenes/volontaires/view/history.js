@@ -10,7 +10,6 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 export default function History({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const [data, setData] = useState([]);
-  console.log("🚀 ~ file: history.js:13 ~ History ~ data", data);
   const formattedData = formatHistory(data, user.role);
 
   const getPatches = async () => {
