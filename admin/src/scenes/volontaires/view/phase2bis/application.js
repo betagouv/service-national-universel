@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 
@@ -121,10 +121,6 @@ export default function Phase2Application({ young, onChange }) {
     getContract();
   }, [application]);
 
-  const transformNameDocument = (value) => {
-    const string = translateAddFilePhase2(value).slice(3);
-    return string[0].toUpperCase() + string.slice(1);
-  };
   const downloadContract = async () => {
     try {
       setLoadingContract(true);
@@ -356,7 +352,7 @@ export default function Phase2Application({ young, onChange }) {
                       application[option].length > 0 && (
                         <FileCard
                           key={index}
-                          name={transformNameDocument(option)}
+                          name={translateAddFilePhase2WithoutPreposition(option)}
                           icon="reglement"
                           filled={application[option].length}
                           showNumber

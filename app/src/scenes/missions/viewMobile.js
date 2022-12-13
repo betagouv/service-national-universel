@@ -27,7 +27,7 @@ import {
   htmlCleaner,
   SENDINBLUE_TEMPLATES,
   translate,
-  translateAddFilePhase2,
+  translateAddFilePhase2WithoutPreposition,
   translateApplication,
 } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
@@ -443,7 +443,7 @@ export default function viewMobile() {
                       mission.application[option].length > 0 && (
                         <FileCard
                           key={index}
-                          name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                          name={translateAddFilePhase2WithoutPreposition(option)}
                           icon="reglement"
                           filled={mission.application[option].length}
                           color="text-blue-600 bg-white"
