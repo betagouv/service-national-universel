@@ -766,7 +766,7 @@ export default function Contract({ young, admin }) {
                     </ContractContainer>
                   </Bloc>
                 </Box>
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
                   <LoadingButton
                     onClick={async () => {
                       if (contract?.invitationSent === "true") {
@@ -802,6 +802,7 @@ export default function Contract({ young, admin }) {
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
+                      style={{ marginLeft: "1rem" }}
                       loading={loadings.submitButton}
                       disabled={loadings.saveButton}>
                       Envoyer une demande de validation aux {values.parent2Email && !isYoungAdult ? "4" : "3"} parties prenantes
