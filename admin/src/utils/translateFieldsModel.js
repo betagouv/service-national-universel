@@ -451,6 +451,8 @@ const translateFieldYoung = (f) => {
       return "Accès pour personnes à mobilité réduite";
     case "handicapInSameDepartment":
       return "Même département (handicap)";
+    case "notes":
+      return "Notes";
     default:
       return f;
   }
