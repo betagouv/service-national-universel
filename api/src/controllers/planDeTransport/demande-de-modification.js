@@ -12,6 +12,7 @@ const {
   LigneBusCanSendMessageDemandeDeModification,
   LigneBusCanEditStatusDemandeDeModification,
   LigneBusCanEditOpinionDemandeDeModification,
+  LigneBusCanEditTagsDemandeDeModification,
 } = require("snu-lib");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -129,6 +130,70 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
     const messages = modif.messages || [];
 
     modif.set({ messages: [...messages, { message, userId: req.user._id.toString(), userName: req.user.firstName + " " + req.user.lastName, date: new Date() }] });
+
+    await modif.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/tags", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      tagId: Joi.string().required(),
+      id: Joi.string().required(),
+    }).validate({ ...req.body, ...req.params });
+    console.log(error);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!LigneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { tagId, id } = value;
+
+    const modif = await ModificationBusModel.findById(id);
+    if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const tags = modif.tagIds || [];
+    //check if tag already exist
+    const tagExist = tags.find((tag) => tag === tagId);
+    if (tagExist) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    modif.set({ tagIds: [...tags, tagId] });
+
+    await modif.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/tags/delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      tagId: Joi.string().required(),
+      id: Joi.string().required(),
+    }).validate({ ...req.body, ...req.params });
+    console.log(error);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!LigneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { tagId, id } = value;
+
+    const modif = await ModificationBusModel.findById(id);
+    if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const tags = modif.tagIds || [];
+    //check if tag already exist
+    const tagExist = tags.find((tag) => tag === tagId);
+    if (!tagExist) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    modif.set({ tagIds: tags.filter((tag) => tag !== tagId) });
 
     await modif.save({ fromUser: req.user });
 

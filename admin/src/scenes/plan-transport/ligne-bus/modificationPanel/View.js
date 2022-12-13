@@ -11,8 +11,9 @@ import Quote from "../components/Icons/Quote";
 import Thumbs from "../components/Icons/Thumbs";
 import ReactTooltip from "react-tooltip";
 import Send from "../components/Icons/Send";
+import Tags from "../components/Tags";
 
-export default function View({ open, setOpen, modification, getModification }) {
+export default function View({ open, setOpen, modification, getModification, tagsOptions, getTags }) {
   const user = useSelector((state) => state.Auth.user);
   const [message, setMessage] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -106,6 +107,61 @@ export default function View({ open, setOpen, modification, getModification }) {
     }
   };
 
+  const onCreateTags = async (inputValue) => {
+    try {
+      setIsLoading(true);
+      // Save data
+      const { ok, code, data: tags } = await api.post(`/tags`, { name: inputValue, type: "modification_bus" });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la création du tag", translate(code));
+        return setIsLoading(false);
+      }
+      await getTags();
+      await onChangeTags(tags._id);
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la création du tag");
+      setIsLoading(false);
+    }
+  };
+
+  const onChangeTags = async (tagId) => {
+    try {
+      setIsLoading(true);
+      // Save data
+      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tags`, { tagId });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag", translate(code));
+        return setIsLoading(false);
+      }
+      await getModification();
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag");
+      setIsLoading(false);
+    }
+  };
+
+  const onDeleteTags = async (tagId) => {
+    try {
+      setIsLoading(true);
+      // Save data
+      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tags/delete`, { tagId });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag", translate(code));
+        return setIsLoading(false);
+      }
+      await getModification();
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag");
+      setIsLoading(false);
+    }
+  };
+
   if (!modification) return null;
 
   return (
@@ -142,7 +198,18 @@ export default function View({ open, setOpen, modification, getModification }) {
                 </div>
               </div>
             </div>
-            <div className="text-lg leading-6 font-medium text-[#242526] mt-4">Commentaires</div>
+            <div className="mt-2">
+              <Tags
+                options={tagsOptions}
+                placeholder="Spécifiez le type de demande..."
+                onChange={onChangeTags}
+                onCreateOption={onCreateTags}
+                onDeleteOption={onDeleteTags}
+                values={modification.tagIds}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="text-lg leading-6 font-medium text-[#242526] mt-2">Commentaires</div>
             <div className="flex flex-col gap-6 pl-2 mt-2">
               {modification?.status !== "PENDING" && (
                 <div className="flex items-start gap-3 rounded-xl">
