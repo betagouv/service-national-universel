@@ -63,14 +63,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  date: {
-    type: Date,
-    required: true,
-    documentation: {
-      description: "Date de la demande",
-    },
-  },
-
   // Informations de la modification sur le statut de la demande (pour es)
   status: {
     type: String,

@@ -409,8 +409,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     result.busVolume = busVolume;
 
-    console.log(result);
-
     return res.status(200).send({ ok: true, data: result });
   } catch (error) {
     capture(error);
