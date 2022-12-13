@@ -123,6 +123,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  contractStatus: {
+    type: String,
+    default: "DRAFT",
+    enum: ["DRAFT", "SENT", "VALIDATED"],
+    documentation: {
+      description: "Statut du contrat d'engagement",
+    },
+  },
+
   tutorName: {
     type: String,
     documentation: {

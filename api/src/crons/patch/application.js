@@ -14,7 +14,7 @@ const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll
 let token;
 const result = { event: {} };
 
-async function process(patch, count, total) {
+async function processPatch(patch, count, total) {
   try {
     result.applicationPatchScanned = result.applicationPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
@@ -91,11 +91,12 @@ exports.handler = async () => {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
     const application_patches = mongoose.model("application_patches", new mongoose.Schema({}, { collection: "application_patches" }));
-    await findAll(application_patches, mongooseFilterForDayBefore(), process);
-    slack.info({
+    await findAll(application_patches, mongooseFilterForDayBefore(), processPatch);
+    await slack.info({
       title: "✅ Application Logs",
       text: `${result.applicationPatchScanned} application patches were scanned:\n ${printResult(result.event)}`,
     });
+    process.exit();
   } catch (e) {
     capture("Error during creation of application patch logs", e);
     slack.error({ title: "❌ Application Logs", text: e });

@@ -20,10 +20,8 @@ import VolontairesHeadCenter from "./scenes/volontaires-head-center";
 import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
 import Goal from "./scenes/goal";
-import Center from "./scenes/centers";
-import CenterV2 from "./scenes/centersV2";
+import Center from "./scenes/centersV2";
 import Inscription from "./scenes/inscription";
-import MeetingPoint from "./scenes/meetingPoint";
 import PointDeRassemblement from "./scenes/pointDeRassemblement";
 import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
@@ -31,7 +29,9 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
-import PlanDeTransport from "./scenes/plan-transport";
+import TableDeRepartition from "./scenes/plan-transport/table-repartition";
+import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
+import LigneBus from "./scenes/plan-transport/ligne-bus";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -187,19 +187,26 @@ const Home = () => {
             <RestrictedRoute path="/user" component={Utilisateur} />
             <RestrictedRoute path="/contenu" component={Content} />
             <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-            {environment === "production" ? <RestrictedRoute path="/centre" component={Center} /> : <RestrictedRoute path="/centre" component={CenterV2} />}
-            {environment === "production" ? (
-              <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
-            ) : (
-              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
-            )}
+            <RestrictedRoute path="/centre" component={Center} />
+            <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />
-            <RestrictedRoute path="/plan-de-transport" component={PlanDeTransport} />
+
+            {/* Plan de transport */}
+            {/* Table de répartition */}
+            <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+            {/* Ligne de bus */}
+            <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
+
+            {/* Schéma de répartition */}
+            <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
+            <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
+            <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>

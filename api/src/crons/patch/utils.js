@@ -52,10 +52,6 @@ async function getAccessToken(endpoint, apiKey) {
 async function findAll(Model, where, cb) {
   let count = 0;
   const total = await Model.countDocuments(where);
-  slack.info({
-    title: "Log count",
-    text: `${total} logs found}`,
-  });
   await Model.find(where)
     .cursor()
     .addCursorFlag("noCursorTimeout", true)

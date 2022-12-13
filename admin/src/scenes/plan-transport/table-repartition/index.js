@@ -7,8 +7,8 @@ import Regional from "./Regional";
 export default function TableRepartition() {
   return (
     <Switch>
-      <SentryRoute path="/plan-de-transport/table-repartition/regional" component={Regional} />
-      <SentryRoute path="/plan-de-transport/table-repartition" component={National} />
+      <SentryRoute path="/table-repartition/regional" component={Regional} />
+      <SentryRoute path="/table-repartition" component={National} />
     </Switch>
   );
 }

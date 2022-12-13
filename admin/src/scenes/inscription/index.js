@@ -98,7 +98,7 @@ export default function Inscription() {
                   handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"
                   defaultQuery={getExportQuery}
-                  exportTitle="Candidatures"
+                  exportTitle="Inscriptions"
                   index="young"
                   react={{ and: FILTERS }}
                   transform={async (data) => {
@@ -391,6 +391,23 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="SCHOOL"
+                  dataField="schoolName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  renderLabel={(items) => getFilterLabel(items, "École")}
                   showMissing
                   missingLabel="Non renseigné"
                 />

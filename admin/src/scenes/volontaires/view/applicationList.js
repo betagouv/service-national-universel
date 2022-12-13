@@ -195,18 +195,22 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
               isOpen={modalDurationOpen}
               title="Validation de réalisation de mission"
               message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
-              type="number"
+              type="missionduration"
               onChange={() => setModalDurationOpen(false)}
               defaultInput={hit.missionDuration}
               placeholder="Nombre d'heures"
               onConfirm={async (duration) => {
                 try {
-                  const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
-                  if (!ok) {
-                    toastr.error("Une erreur s'est produite :", translate(code));
-                  } else {
-                    onChangeApplication();
-                    toastr.success("Mis à jour!");
+                  const value = duration.target.value;
+                  var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
+                  if (re.test(value) || !value) {
+                    const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
+                    if (!ok) {
+                      toastr.error("Une erreur s'est produite :", translate(code));
+                    } else {
+                      onChangeApplication();
+                      toastr.success("Mis à jour!");
+                    }
                   }
                 } catch (e) {
                   toastr.error("Une erreur s'est produite :", translate(e?.code));

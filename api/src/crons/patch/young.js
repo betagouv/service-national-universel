@@ -14,7 +14,7 @@ const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll
 let token;
 const result = { event: {} };
 
-async function process(patch, count, total) {
+async function processPatch(patch, count, total) {
   try {
     result.youngPatchScanned = result.youngPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
@@ -133,12 +133,12 @@ exports.handler = async () => {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
     const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
-
-    await findAll(young_patches, mongooseFilterForDayBefore(), process);
-    slack.info({
+    await findAll(young_patches, mongooseFilterForDayBefore(), processPatch);
+    await slack.info({
       title: "✅ Young Logs",
       text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
+    process.exit();
   } catch (e) {
     capture("Error during creation of young patch logs", e);
     slack.error({ title: "❌ Young Logs", text: e });

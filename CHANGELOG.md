@@ -1,3 +1,130 @@
+# [1.183.0](https://github.com/betagouv/service-national-universel/compare/v1.182.1...v1.183.0) (2022-12-12)
+
+
+### Bug Fixes
+
+* **admin:** Search in school filter ([4b9a646](https://github.com/betagouv/service-national-universel/commit/4b9a646bf76a061a175f814fc8465beff3145ad5))
+* **api:** slack function is async ([c3ceebe](https://github.com/betagouv/service-national-universel/commit/c3ceebee84a98b120a319861b88c57df7eb0371a))
+
+
+### Features
+
+* **admin/api:** add check for bus  ([#2130](https://github.com/betagouv/service-national-universel/issues/2130)) ([5fd085d](https://github.com/betagouv/service-national-universel/commit/5fd085d2fdf166c5f1384557c240c5ba56690d6b))
+
+## [1.182.1](https://github.com/betagouv/service-national-universel/compare/v1.182.0...v1.182.1) (2022-12-10)
+
+
+### Bug Fixes
+
+* **app:** make cron patch processes exit ([200b4df](https://github.com/betagouv/service-national-universel/commit/200b4df80c5af24278c3c29a9d737303a0c3ab33))
+
+# [1.182.0](https://github.com/betagouv/service-national-universel/compare/v1.181.0...v1.182.0) (2022-12-09)
+
+
+### Bug Fixes
+
+* **admin:** Schema de répartition : réactivité des groupes sur la modification des lieux de rassemblements ([#2125](https://github.com/betagouv/service-national-universel/issues/2125)) ([d575442](https://github.com/betagouv/service-national-universel/commit/d5754429ef6a6ad001b1dc9574a685a185d7719b))
+
+
+### Features
+
+* **admin/api:** Mise en prod du schéma de répartition ([#2127](https://github.com/betagouv/service-national-universel/issues/2127)) ([4bf6799](https://github.com/betagouv/service-national-universel/commit/4bf679922d928923d4c46d176bbce143d1878d55))
+* **api/admin/app:** ajout hebergement pour mission ([#2123](https://github.com/betagouv/service-national-universel/issues/2123)) ([543a581](https://github.com/betagouv/service-national-universel/commit/543a5817eb9d85eb34e893dace08e50728b67d3d))
+
+
+### Reverts
+
+* Revert "fix(admin): open code centre ref creation" ([be76238](https://github.com/betagouv/service-national-universel/commit/be76238c7921a7d932a24540f8a4641e3435c78c))
+
+# [1.181.0](https://github.com/betagouv/service-national-universel/compare/v1.180.0...v1.181.0) (2022-12-08)
+
+
+### Bug Fixes
+
+* **admin:** open code centre ref creation ([4708948](https://github.com/betagouv/service-national-universel/commit/47089480f377ccb2d67a01d3ec019a8b18564f8c))
+
+
+### Features
+
+* **admin/api:** bus point de rassemblement  ([#2120](https://github.com/betagouv/service-national-universel/issues/2120)) ([079feff](https://github.com/betagouv/service-national-universel/commit/079fefff9b5a73618fc51734282d74119e138f17))
+* **admin/api:** Schéma de répartition : Nouvelle étape de choix des Points de rassemblements ([#2122](https://github.com/betagouv/service-national-universel/issues/2122)) ([409bd89](https://github.com/betagouv/service-national-universel/commit/409bd89a894428dc0edbcc443f2f26353f833e2c))
+* **api:** template mail session waiting validation ([#2121](https://github.com/betagouv/service-national-universel/issues/2121)) ([0feeb0e](https://github.com/betagouv/service-national-universel/commit/0feeb0ed0be511773b2ccc0e4ed259f9ac571b06))
+
+# [1.180.0](https://github.com/betagouv/service-national-universel/compare/v1.179.1...v1.180.0) (2022-12-07)
+
+
+### Bug Fixes
+
+* **admin:** fix cohorts default value PDR ([923da4b](https://github.com/betagouv/service-national-universel/commit/923da4bd02a10c042aadd02884bad9cf29d7262b))
+* **admin:** fix PDR view for ref dep ([a5e6b3d](https://github.com/betagouv/service-national-universel/commit/a5e6b3dc6b550d5684b74a243cbf6023973b270e))
+* **admin:** schema repartition - role référent département ([#2119](https://github.com/betagouv/service-national-universel/issues/2119)) ([b06eb6c](https://github.com/betagouv/service-national-universel/commit/b06eb6c434238b665336b5c439c30543a8b65b7e))
+
+
+### Features
+
+* **admin:** ligne de bus centre ([#2116](https://github.com/betagouv/service-national-universel/issues/2116)) ([1848250](https://github.com/betagouv/service-national-universel/commit/1848250d9d7b2beddc4241245cb4e57c22f11ec5))
+
+## [1.179.1](https://github.com/betagouv/service-national-universel/compare/v1.179.0...v1.179.1) (2022-12-06)
+
+
+### Bug Fixes
+
+* **admin:** table de repartition vu departement ([d1e4dcd](https://github.com/betagouv/service-national-universel/commit/d1e4dcd3aa935db45ee7e6f0f3424e162b12f102))
+
+# [1.179.0](https://github.com/betagouv/service-national-universel/compare/v1.178.1...v1.179.0) (2022-12-05)
+
+
+### Bug Fixes
+
+* **admin:** Add numeros mobile fr ! ([3012344](https://github.com/betagouv/service-national-universel/commit/30123442baf2e29b7127c88589e3c88fd8fb730b))
+* **admin:** use citycode if BAN doesn't return postcode ([60f0f11](https://github.com/betagouv/service-national-universel/commit/60f0f113e3b049085cab32deb2018b1de2866fe7))
+* **admin/api:** Doublon code centre  ([#2113](https://github.com/betagouv/service-national-universel/issues/2113)) ([4f21760](https://github.com/betagouv/service-national-universel/commit/4f21760fa907387f677966ee38ea573f5c086ccf))
+* **api:** No expirationDate for military preparation files ([92efbdc](https://github.com/betagouv/service-national-universel/commit/92efbdcdd4e466a0431470726675487e812b3a73))
+* **app/api:** fix date eligibility ([#2109](https://github.com/betagouv/service-national-universel/issues/2109)) ([80db4f0](https://github.com/betagouv/service-national-universel/commit/80db4f0ff51d77f55914fc89121b91841d69bcd0))
+
+
+### Features
+
+* **admin:** Filter by schoolname ([7a043f5](https://github.com/betagouv/service-national-universel/commit/7a043f5de13fe83081d7d59e6ba64fb0c176eb95))
+* **admin:** ouverture prod centre + point de rassemblement + table de répartition  ([#2111](https://github.com/betagouv/service-national-universel/issues/2111)) ([7967fbf](https://github.com/betagouv/service-national-universel/commit/7967fbfcb1d3418bac9de4fc86ef7584cd799ac3))
+
+## [1.178.1](https://github.com/betagouv/service-national-universel/compare/v1.178.0...v1.178.1) (2022-12-04)
+
+
+### Bug Fixes
+
+* **api:** remove useless slack info from cron ([457f867](https://github.com/betagouv/service-national-universel/commit/457f867226b938eea001d46d03244256702a0f41))
+
+# [1.178.0](https://github.com/betagouv/service-national-universel/compare/v1.177.0...v1.178.0) (2022-12-02)
+
+
+### Bug Fixes
+
+* **admin:** order session by date in list center [#2104](https://github.com/betagouv/service-national-universel/issues/2104) ([0e4e13c](https://github.com/betagouv/service-national-universel/commit/0e4e13c81b18c562cae90f457ecfb6fe46b6a205))
+* **api/admin:** schéma de répartition : cohérence des données + finalisation ([#2100](https://github.com/betagouv/service-national-universel/issues/2100)) ([1471872](https://github.com/betagouv/service-national-universel/commit/1471872f5fe732a85320772745db2dacabbd1499))
+
+
+### Features
+
+* **admin:** export centre / session ([#2105](https://github.com/betagouv/service-national-universel/issues/2105)) ([a17037d](https://github.com/betagouv/service-national-universel/commit/a17037d1996583ad8e65ed156b9e21f0cd1b18eb))
+* **admin:** file upload from contact form ([#2097](https://github.com/betagouv/service-national-universel/issues/2097)) ([730c040](https://github.com/betagouv/service-national-universel/commit/730c0401ed209c0ed33d94db1d627e65e4920ddd))
+
+# [1.177.0](https://github.com/betagouv/service-national-universel/compare/v1.176.0...v1.177.0) (2022-12-01)
+
+
+### Bug Fixes
+
+* **admin:** Fiche centre modal ([#2102](https://github.com/betagouv/service-national-universel/issues/2102)) ([9c56012](https://github.com/betagouv/service-national-universel/commit/9c560120842c452630ae4d7f7b17cc53c399caf0))
+* **admin:** fix validation incorrectly setting waiting list status ([cd37f8e](https://github.com/betagouv/service-national-universel/commit/cd37f8eb0ed000053189639b8704629e45792b8c))
+* **api:** set isEligible status in session for refs ([a6255e8](https://github.com/betagouv/service-national-universel/commit/a6255e8a28edca09e060194b6970fcab0673dae0))
+* **api/lib:** add Corse department ([72038bd](https://github.com/betagouv/service-national-universel/commit/72038bda9fc1e141a11a16fff1692b27760dd87c))
+* **app:** upload step improvements ([#2095](https://github.com/betagouv/service-national-universel/issues/2095)) ([97d40e8](https://github.com/betagouv/service-national-universel/commit/97d40e8aba2c8285d9e21c5d089b61d1fc1a345d))
+
+
+### Features
+
+* **admin/app:** refacto Session centre ([#2098](https://github.com/betagouv/service-national-universel/issues/2098)) ([3e90672](https://github.com/betagouv/service-national-universel/commit/3e90672c31d6fd894ec73f7ba5327a5fb2e08aac))
+
 # [1.176.0](https://github.com/betagouv/service-national-universel/compare/v1.175.1...v1.176.0) (2022-11-30)
 
 

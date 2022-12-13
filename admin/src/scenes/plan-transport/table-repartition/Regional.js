@@ -1,6 +1,7 @@
 import React from "react";
 import { BsChevronDown } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
@@ -24,9 +25,7 @@ export default function Regional() {
 
   return (
     <>
-      <Breadcrumbs
-        items={[{ label: "Plan de transport", to: "/plan-de-transport" }, { label: "Table de répartition", to: "/plan-de-transport/table-repartition" }, { label: region }]}
-      />
+      <Breadcrumbs items={[{ label: "Table de répartition", to: "/table-repartition" }, { label: region }]} />
       <div className="flex flex-col w-full px-8 pb-8 ">
         {/* HEADER */}
         <div className="py-8 flex items-center justify-between">
@@ -35,7 +34,7 @@ export default function Regional() {
               <Title>Table de répartition </Title>
               <div className="text-2xl text-gray-600 leading-7">{region}</div>
             </div>
-            <SubTitle>Assignez les départements d’accueil des volontaires de {region}</SubTitle>
+            {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez les départements d’accueil des volontaires de {region}</SubTitle>}
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>

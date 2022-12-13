@@ -8,8 +8,11 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, deleteCenterDependencies, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
+const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { sendTemplate } = require("../sendinblue");
+const { ADMIN_URL, ENVIRONMENT } = require("../config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
@@ -45,6 +48,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // check que le code est bien unique
+    const centerCode = await CohesionCenterModel.find({ code2022: value.code2022 });
+    if (centerCode.length > 0) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
     const cohesionCenter = await CohesionCenterModel.create({
       name: value.name,
       code2022: value.code2022,
@@ -63,13 +70,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       complement: value.complement,
       centerDesignation: value.centerDesignation,
     });
-
+    const status = req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION";
     await SessionPhase1.create({
       cohesionCenterId: cohesionCenter._id,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION",
+      status: status,
       department: value.department,
       region: value.region,
       codeCentre: value.code2022,
@@ -77,6 +84,25 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cityCentre: value.city,
       zipCentre: value.zip,
     });
+
+    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
+      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
+      let sentTo = [
+        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
+        { email: "christelle.bignon@jeunesse-sports.gouv.fr", name: "Christelle Bignon" },
+        { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
+        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
+      ];
+
+      await sendTemplate(template, {
+        emailTo: sentTo,
+        params: {
+          cohort: value.cohort,
+          centre: value.name,
+          cta: `${ADMIN_URL}/centre/${cohesionCenter._id}?cohorte=${value.cohort}`,
+        },
+      });
+    }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
@@ -114,6 +140,8 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     // check if session doesnt already exist
     if (center.cohorts.includes(value.cohort)) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
+    if (value.placesTotal > center.placesTotal) value.placesTotal = center.placesTotal;
+
     const newCohorts = center.cohorts;
     newCohorts.push(value.cohort);
 
@@ -132,6 +160,25 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     });
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
+
+    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
+      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
+      let sentTo = [
+        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
+        { email: "christelle.bignon@jeunesse-sports.gouv.fr", name: "Christelle Bignon" },
+        { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
+        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
+      ];
+      await sendTemplate(template, {
+        emailTo: sentTo,
+        params: {
+          cohort: value.cohort,
+          centre: center.name,
+          cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
+        },
+      });
+    }
+
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -150,10 +197,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error, value } = Joi.object({
       academy: Joi.string().required(),
       addressVerified: Joi.boolean().required(),
-      centerDesignation: Joi.string().required(),
+      centerDesignation: Joi.string().allow(null, ""),
       city: Joi.string().required(),
       code2022: Joi.string().required(),
-      complement: Joi.string(),
+      complement: Joi.string().allow(null, ""),
       placesTotal: Joi.number().required(),
       department: Joi.string().required(),
       domain: Joi.string().required(),
@@ -170,6 +217,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     // check si le nombre de place > au nombre place pour chaque session
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // check que le code est bien unique
+    const centerCode = await CohesionCenterModel.find({ code2022: value.code2022, _id: { $ne: checkedId } });
+    if (centerCode.length > 0) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
     if (req.user.role !== ROLES.ADMIN) {
       delete value.centerDesignation;
       delete value.code2022;

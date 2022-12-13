@@ -74,7 +74,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                 <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
                 <Details title="Objectifs" value={mission.description} />
                 <Details title="Actions" value={mission.actions} />
-                <Details title="Contraintes" value={mission.contraintes} />
+                <Details title="Hébergement proposé" value={mission?.hebergement === "true" ? "Oui" : "Non"} />
+                {mission?.hebergement === "true" && <Details title="Hébergement payant" value={mission?.hebergementPayant === "true" ? "Oui" : "Non"} />}
+                <div></div>
               </Bloc>
             </Col>
             <Col md={6} style={{ padding: 0 }}>

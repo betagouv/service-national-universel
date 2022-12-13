@@ -89,7 +89,7 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
             {type === "all" ? "Voir tout" : "Places disponibles"} <ChevronDown className="w-[10px] h-[6px] ml-3" />
           </div>
           {typeDropdownOpened && (
-            <div className="absolute bg-[#FFFFFF] shadow rounded-md text-sm right-[0px]">
+            <div className="absolute bg-[#FFFFFF] shadow rounded-md text-sm right-[0px] whitespace-nowrap z-10">
               <div className={`px-4 py-2 ${type === "all" ? "text-gray-500" : "text-gray-700 cursor-pointer whitespace-nowrap"}`} onClick={() => setType("all")}>
                 Voir tout
               </div>
@@ -108,7 +108,9 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
         <>
           <div className="">
             {list.map((center) => (
-              <div key={center.name} className="group border-t border-t-gray-200 p-4 hover:bg-gray-200 flex items-center justify-between">
+              <div
+                key={center.name}
+                className={`group border-t border-t-gray-200 p-4 ${center._id === group.centerId ? "bg-gray-200" : ""} hover:bg-gray-200 flex items-center justify-between`}>
                 <div className="">
                   <div className="text-base text-[#242526] font-bold pb-2.5">{center.name}</div>
                   <div className="text-xs text-[#738297]">

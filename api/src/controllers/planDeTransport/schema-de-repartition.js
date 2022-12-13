@@ -1,14 +1,22 @@
 /**
  * ROUTES:
+ *  GET    /schema-de-repartition/export/:cohort                       => get National groups populated for export
+ *  GET    /schema-de-repartition/export/:region/:cohort               => get Regional groups populated for export
+ *  GET    /schema-de-repartition/export/:region/:department/:cohort   => get Department groups populated for export
+ *
  *  GET    /schema-de-repartition/:cohort                       => get National data
  *  GET    /schema-de-repartition/:region/:cohort               => get Regional data
  *  GET    /schema-de-repartition/:region/:department/:cohort   => get Department data
+ *
  *  POST   /schema-de-repartition                               => création d'un groupe du schéma de répartition
  *  DELETE /schema-de-repartition/:id                           => suppression d'un group de schéma de répartition
+ *
  *  GET    /schema-de-repartition/centers/:department/:cohort ?mainPlacesCount&filter
  *                                                              => récupération des centres à partit d'un département pour le choix des centres
  *  GET    /schema-de-repartition/pdr/:department/:cohort       => récupération des points de rassemblements d'un département
  *  POST   /schema-de-repartition/get-group-detail              => Population du détail d'un groupe (centre et points de rassemblement)
+ *  GET    /schema-de-repartition/department-detail/:department/:cohort
+ *                                                              => Récupération du détail d'un département (les centres du départemetn avec les groupes y arrivant)
  */
 
 const mongoose = require("mongoose");
@@ -20,14 +28,13 @@ const { ERRORS } = require("../../utils");
 const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
-  regionList,
   region2department,
-  getDepartmentNumber,
   COHORTS,
   canCreateSchemaDeRepartition,
   canDeleteSchemaDeRepartition,
   canEditSchemaDeRepartition,
 } = require("snu-lib");
+const { filteredRegionList } = require("./commons");
 const Joi = require("joi");
 const sessionPhase1Model = require("../../models/sessionPhase1");
 const youngModel = require("../../models/young");
@@ -52,6 +59,86 @@ const schemaRepartitionBodySchema = Joi.object({
   youngsVolume: Joi.number().greater(0),
   gatheringPlaces: Joi.array().items(Joi.string()),
 });
+
+// ------- export
+router.get("/export/:region/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required(), department: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const groups = await loadSchemaGroups(value);
+    return res.status(200).send({ ok: true, data: groups });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/export/:region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const groups = await loadSchemaGroups(value);
+    return res.status(200).send({ ok: true, data: groups });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/export/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const groups = await loadSchemaGroups(value);
+
+    return res.status(200).send({ ok: true, data: groups });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+async function loadSchemaGroups({ department, region, cohort }) {
+  let match = { cohort };
+  if (department) {
+    match.fromDepartment = department;
+  } else if (region) {
+    match.fromRegion = region;
+  }
+  return schemaRepartitionModel.aggregate([
+    { $match: match },
+    {
+      $addFields: {
+        gpIds: {
+          $map: {
+            input: "$gatheringPlaces",
+            in: { $toObjectId: "$$this" },
+          },
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "pointderassemblements",
+        localField: "gpIds",
+        foreignField: "_id",
+        as: "gatheringPlaces",
+      },
+    },
+    {
+      $project: { gpIds: 0 },
+    },
+  ]);
+}
 
 // ------- get data
 
@@ -130,6 +217,61 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
 
     // --- résultat
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { cohort } = valueParams;
+
+    const { error: errorQuery, value: valueQuery } = Joi.object({
+      offset: Joi.number().default(0),
+      limit: Joi.number().default(10),
+      filter: Joi.string().trim().allow("", null),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { offset, limit, filter } = valueQuery;
+
+    // search gathering places
+    let matches = [{ cohorts: cohort }];
+    if (filter && filter.length > 0) {
+      const regex = new RegExp(".*" + filter + ".*", "gi");
+      matches.push({ $or: [{ name: regex }, { city: regex }, { department: regex }, { region: regex }] });
+    }
+
+    const pipeline = [
+      { $match: { $and: matches } },
+      { $sort: { name: 1 } },
+      {
+        $group: {
+          _id: "$fromRegion",
+          total: { $sum: 1 },
+          results: { $push: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+          gatheringPlaces: { $slice: ["$results", offset, limit] },
+        },
+      },
+    ];
+
+    const data = await pointRassemblementModel.aggregate(pipeline).exec();
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data: data.length > 0 ? data[0] : { total: 0, gatheringPlaces: [] } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -299,7 +441,6 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
     // --- get table de repartition for each regions
     const regions = await getRegionTableDeRepartition(cohort);
-    // console.log("TABLE REGIONS: ", regions);
 
     // --- get centers & capacity extra & intra for each regions
     const filledRegions = regions.map((r) => {
@@ -313,7 +454,6 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
         intraCenters: intra.centers,
       };
     });
-    // console.log("FILLED REGIONS: ", filledRegions);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -360,7 +500,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
                   branches: [
                     {
                       case: { $eq: ["$intradepartmental", "true"] },
-                      then: 1,
+                      then: "$youngsVolume",
                     },
                   ],
                   default: 0,
@@ -373,26 +513,47 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
       .exec();
     let repartitionSet = {};
     for (const line of repartitionResult) {
-      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAsigned: line.intradepartmentalAsigned };
+      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAssigned: line.intradepartmentalAssigned };
+    }
+
+    // --- global data
+    let allCapacity = 0;
+    let allCenters = 0;
+    for (const r of filledRegions) {
+      allCapacity += r.intraCapacity;
+      allCenters += r.intraCenters;
     }
 
     // --- Format result
     const rows = filledRegions.map((r) => {
+      const young = youngSet[r.fromRegion] ? youngSet[r.fromRegion] : { total: 0, intradepratmental: 0 };
+      const repartition = repartitionSet[r.fromRegion] ? repartitionSet[r.fromRegion] : { assigned: 0, intradepartmentalAssigned: 0 };
+
+      repartition.assigned = Math.min(repartition.assigned, young.total);
+      repartition.intradepartmentalAssigned = Math.min(repartition.intradepartmentalAssigned, young.intradepartmental);
+
       return {
         name: r.fromRegion,
         capacity: r.extraCapacity,
         centers: r.extraCenters,
         intraCapacity: r.intraCapacity,
-        total: 0,
-        intradepartmental: 0,
-        ...youngSet[r.FromRegion],
-        assigned: 0,
-        intradepartmentalAssigned: 0,
-        ...repartitionSet[r.FromRegion],
+        ...young,
+        ...repartition,
       };
     });
 
-    return res.status(200).send({ ok: true, data: { rows } });
+    const data = {
+      toCenters: [
+        {
+          name: "all",
+          capacity: allCapacity,
+          centers: allCenters,
+        },
+      ],
+      rows,
+    };
+
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -411,14 +572,23 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
 
     // --- get stats for each departments
     const departments = await getDepartmentCentersAndCapacities(cohort);
-    // console.log("DEPARTEMENTS: ", departments);
 
     // --- get table de repartition for each department
     const departmentsTable = await getDepartmentTableDeRepartition(cohort, region);
-    // console.log("TABLE DEPARTMENTS: ", departmentsTable);
 
     // --- get to regions from region
     const toRegions = await getRegionsAndDepartmentsFromRegion(cohort, region);
+
+    // --- get to departments from region
+    const toDepartmentsSet = {};
+    for (const r of toRegions) {
+      if (r.departments && r.departments.length > 0) {
+        for (const d of r.departments) {
+          toDepartmentsSet[d] = true;
+        }
+      }
+    }
+    const toDepartments = Object.keys(toDepartmentsSet);
 
     // --- get centers & capacity extra & intra for each department
     const filledDepartments = departmentsTable.map((r) => {
@@ -432,42 +602,39 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         intraCenters: intra.centers,
       };
     });
-    // console.log("FILLED DEPARTMENTS: ", filledDepartments);
 
     // --- get centers by to regions
-    const toCenterResult = await sessionPhase1Model
-      .aggregate([
-        {
-          $match: { cohort },
+    const pipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
         },
-        {
-          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
-        },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "centerId",
-            foreignField: "_id",
-            as: "center",
-          },
-        },
-        { $unwind: "$center" },
+      },
+      { $unwind: "$center" },
 
-        { $match: { "center.region": { $in: toRegions.map((r) => r.name) } } },
-        {
-          $group: {
-            _id: "$center.region",
-            centers: { $sum: 1 },
-            capacity: { $sum: "$placesTotal" },
-          },
+      { $match: { "center.department": { $in: toDepartments } } },
+      {
+        $group: {
+          _id: "$center.region",
+          centers: { $sum: 1 },
+          capacity: { $sum: "$placesTotal" },
         },
-      ])
-      .exec();
+      },
+    ];
+    const toCenterResult = await sessionPhase1Model.aggregate(pipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
     }
-    // console.log("CENTER SET: ", toCenterSet);
 
     // --- volontaires
     const youngResult = await youngModel
@@ -499,36 +666,33 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
       youngSet[line._id] = { total: line.total, intradepartmental: line.intradepartmental };
     }
 
-    // console.log("YOUNG RESULT: ", youngSet);
-
     // --- assigned
-    const repartitionResult = await schemaRepartitionModel
-      .aggregate([
-        { $match: { cohort, fromRegion: region } },
-        {
-          $group: {
-            _id: "$fromDepartment",
-            assigned: { $sum: "$youngsVolume" },
-            intradepartmentalAssigned: {
-              $sum: {
-                $switch: {
-                  branches: [
-                    {
-                      case: { $eq: ["$intradepartmental", "true"] },
-                      then: 1,
-                    },
-                  ],
-                  default: 0,
-                },
+    const schemaPipeline = [
+      { $match: { cohort, fromRegion: region } },
+      {
+        $group: {
+          _id: "$fromDepartment",
+          assigned: { $sum: "$youngsVolume" },
+          intradepartmentalAssigned: {
+            $sum: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ["$intradepartmental", "true"] },
+                    then: "$youngsVolume",
+                  },
+                ],
+                default: 0,
               },
             },
           },
         },
-      ])
-      .exec();
+      },
+    ];
+    const repartitionResult = await schemaRepartitionModel.aggregate(schemaPipeline).exec();
     let repartitionSet = {};
     for (const line of repartitionResult) {
-      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAsigned: line.intradepartmentalAsigned };
+      repartitionSet[line._id] = { assigned: line.assigned, intradepartmentalAssigned: line.intradepartmentalAssigned };
     }
 
     // --- Format result
@@ -542,22 +706,22 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
         };
       }),
       rows: filledDepartments.map((r) => {
+        const young = youngSet[r.fromDepartment] ? youngSet[r.fromDepartment] : { total: 0, intradepratmental: 0 };
+        const repartition = repartitionSet[r.fromDepartment] ? repartitionSet[r.fromDepartment] : { assigned: 0, intradepartmentalAssigned: 0 };
+
+        repartition.assigned = Math.min(repartition.assigned, young.total);
+        repartition.intradepartmentalAssigned = Math.min(repartition.intradepartmentalAssigned, young.intradepartmental);
+
         return {
           name: r.fromDepartment,
           capacity: r.extraCapacity,
           centers: r.extraCenters,
           intraCapacity: r.intraCapacity,
-          total: 0,
-          intradepartmental: 0,
-          ...youngSet[r.FromDepartment],
-          assigned: 0,
-          intradepartmentalAssigned: 0,
-          ...repartitionSet[r.FromDepartment],
+          ...young,
+          ...repartition,
         };
       }),
     };
-
-    // console.log("DATA: ", data);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -578,10 +742,10 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // --- find to regions from region
-    const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
+    // --- find to regions from departments
+    const regionsResult = await tableRepartitionModel.find({ cohort, fromRegion: region, fromDepartment: department });
     const toRegionsSet = {};
-    let toDepartmentCodes = [];
+    let toDepartments = [];
     for (const repart of regionsResult) {
       if (!toRegionsSet[repart.toRegion]) {
         toRegionsSet[repart.toRegion] = {
@@ -590,40 +754,41 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         };
       }
       if (repart.toDepartment) {
-        toDepartmentCodes.push(getDepartmentNumber(repart.toDepartment));
-        toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+        toDepartments.push(repart.toDepartment);
+        if (!toRegionsSet[repart.toRegion].departments.includes(repart.toDepartment)) {
+          toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+        }
       }
     }
     const toRegions = Object.values(toRegionsSet);
 
     // --- capacities & centers
-    const toCenterResult = await sessionPhase1Model
-      .aggregate([
-        {
-          $match: { cohort },
+    const toCenterPipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
         },
-        {
-          $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      { $unwind: "$center" },
+      { $match: { "center.department": { $in: toDepartments } } },
+      {
+        $group: {
+          _id: "$center.region",
+          centers: { $sum: 1 },
+          capacity: { $sum: "$placesTotal" },
         },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "centerId",
-            foreignField: "_id",
-            as: "center",
-          },
-        },
-        { $unwind: "$center" },
-        { $match: { "center.departmentCode": { $in: toDepartmentCodes } } },
-        {
-          $group: {
-            _id: "$center.region",
-            centers: { $sum: 1 },
-            capacity: { $sum: "$placesTotal" },
-          },
-        },
-      ])
-      .exec();
+      },
+    ];
+    const toCenterResult = await sessionPhase1Model.aggregate(toCenterPipeline).exec();
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
@@ -633,7 +798,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     const youngResult = await youngModel
       .aggregate([
         // TODO: véfifier la liste des jeunes
-        { $match: { cohort, department, status: { $in: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.IN_PROGRESS] } } },
+        { $match: { cohort, department, status: { $in: [YOUNG_STATUS.VALIDATED] } } },
         {
           $group: {
             _id: null,
@@ -655,7 +820,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
         },
       ])
       .exec();
-    let youngValues = youngResult[0];
+    let youngValues = youngResult && youngResult.length > 0 ? youngResult[0] : { total: 0, intradepartmental: 0 };
 
     // --- assigned
     const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department });
@@ -667,13 +832,16 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     let intradepartmentalAssigned = 0;
     for (const schema of schemas) {
       if (schema.intradepartmental === "true") {
-        intradepartmentalAssigned++;
+        intradepartmentalAssigned += schema.youngsVolume;
         groups.intra.push(schema);
       } else {
         groups.extra.push(schema);
       }
-      assigned++;
+      assigned += schema.youngsVolume;
     }
+    // limit to existing.
+    assigned = Math.min(assigned, youngValues.total);
+    intradepartmentalAssigned = Math.min(intradepartmentalAssigned, youngValues.intradepartmental);
 
     // --- Format result
     let data = {
@@ -696,8 +864,6 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       ],
       groups,
     };
-
-    // console.log("DATA: ", data);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -864,7 +1030,7 @@ async function getDepartmentCentersAndCapacities(cohort) {
 }
 
 async function getRegionsAndDepartmentsFromRegion(cohort, region) {
-  const regionsResult = await tableRepartitionModel.find({ fromRegion: region });
+  const regionsResult = await tableRepartitionModel.find({ cohort, fromRegion: region });
   const toRegionsSet = {};
   for (const repart of regionsResult) {
     if (toRegionsSet[repart.toRegion] === undefined) {
@@ -892,7 +1058,7 @@ async function getRegionTableDeRepartition(cohort) {
     }
   }
 
-  return regionList.map((region) => {
+  return filteredRegionList.map((region) => {
     const regionData = regions[region];
     if (regionData) {
       return {

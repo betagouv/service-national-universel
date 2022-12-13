@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Bin from "../assets/icons/Bin";
 
 const FILES_ACCEPTED = {
@@ -12,6 +12,7 @@ const FILES_ACCEPTED = {
 const MAX_FILE_SIZE = 5000000;
 
 const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted = ["jpeg", "png", "pdf"], disabled = false }) => {
+  const inputRef = useRef(null);
   const accept = Object.keys(FILES_ACCEPTED).reduce((previous, current) => {
     if (filesAccepted.includes(current)) {
       return `${previous}${previous ? ", " : ""}${FILES_ACCEPTED[current].join(", ")}`;
@@ -24,6 +25,7 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
       <label className="text-[#374151] font-semibold text-[14px]">Ajouter un fichier</label>
       <div className="text-gray-500 text-sm mt-1">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf, docx, xlsx. Plusieurs fichiers possibles.</div>
       <input
+        ref={inputRef}
         disabled={disabled}
         type="file"
         multiple
@@ -48,7 +50,14 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
                 <p className="text-gray-800 text-sm w-3/5 md:w-1/3 lg:w-1/2 xl:w-3/5 truncate overflow-hidden" key={e.name}>
                   {e.name}
                 </p>
-                <div onClick={() => !disabled && deleteFile(i)} className={`cursor-pointer ${disabled && "cursor-not-allowed"} text-blue-800 flex ml-2 w-1/3`}>
+                <div
+                  onClick={() => {
+                    if (!disabled) {
+                      deleteFile(i);
+                      inputRef.current.value = "";
+                    }
+                  }}
+                  className={`cursor-pointer ${disabled && "cursor-not-allowed"} text-blue-800 flex ml-2 w-1/3`}>
                   <div className="mt-1">
                     <Bin />
                   </div>

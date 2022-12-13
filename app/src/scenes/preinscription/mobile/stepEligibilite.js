@@ -18,6 +18,7 @@ import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DateFilter from "../components/DatePickerList";
+import dayjs from "dayjs";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -94,7 +95,7 @@ export default function StepEligibilite() {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,
-      birthdateAt: data.birthDate,
+      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       grade: data.scolarity,
       zip: data.zip,
     });
@@ -150,7 +151,7 @@ export default function StepEligibilite() {
         </div>
         <div className="flex flex-col flex-start my-4">
           Date de naissance
-          <DateFilter value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date?.setUTCHours(11, 0, 0) })} />
+          <DateFilter value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
           {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (

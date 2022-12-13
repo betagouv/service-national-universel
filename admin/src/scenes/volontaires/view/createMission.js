@@ -280,7 +280,19 @@ export default function CreateMission({ young, onSend }) {
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                     <Row>
                       <Col>
-                        <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                        <Input
+                          type="text"
+                          name="duration"
+                          id="duration"
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
+                            if (re.test(value) || !value) {
+                              handleChange({ target: { value: value, name: "duration" } });
+                            }
+                          }}
+                          value={values.duration}
+                        />
                       </Col>
                       <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                     </Row>

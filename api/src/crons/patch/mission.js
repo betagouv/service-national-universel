@@ -13,7 +13,7 @@ const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll
 let token;
 let result = { event: {} };
 
-async function process(patch, count, total) {
+async function processPatch(patch, count, total) {
   try {
     result.missionPatchScanned = result.missionPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
@@ -105,13 +105,12 @@ exports.handler = async () => {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
     const mission_patches = mongoose.model("mission_patches", new mongoose.Schema({}, { collection: "mission_patches" }));
-
-    await findAll(mission_patches, mongooseFilterForDayBefore(), process);
-    slack.info({
+    await findAll(mission_patches, mongooseFilterForDayBefore(), processPatch);
+    await slack.info({
       title: "✅ Mission Logs",
-      text: JSON.stringify(result),
       text: `${result.missionPatchScanned} missions were scanned:\n ${printResult(result.event)}`,
     });
+    process.exit();
   } catch (e) {
     capture("Error during creation of mission patch logs", e);
     slack.error({ title: "❌ Mission Logs", text: e });

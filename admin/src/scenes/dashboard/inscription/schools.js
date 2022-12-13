@@ -2,7 +2,10 @@ import React from "react";
 
 import api from "../../../services/api";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
+import { getLink, replaceSpaces } from "../../../utils";
+
 import { apiURL } from "../../../config";
+import { useHistory } from "react-router-dom";
 
 function round1Decimal(num) {
   return Math.round((num + Number.EPSILON) * 10) / 10;
@@ -28,14 +31,6 @@ export default function Schools({ filter }) {
 
     return body;
   };
-
-  // ! Handle school filter
-  // const handleClick = (link) => {
-  //   history.push(link);
-  // onClick={() =>
-  //   // ! Le filtre SCHOOL ne marche pas sur la page des inscriptions
-  //   user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
-  // };
 
   return (
     <ReactiveBase url={`${apiURL}/es`} app="young-having-school-in-department/inscriptions" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -68,7 +63,7 @@ export default function Schools({ filter }) {
               </thead>
               <tbody className="">
                 {rawData?.aggregations?.names.buckets.map((e) => (
-                  <CardSchool key={e.key} school={e} totalHits={totalHits} />
+                  <CardSchool key={e.key} school={e} totalHits={totalHits} filter={filter} />
                 ))}
               </tbody>
             </table>
@@ -79,15 +74,21 @@ export default function Schools({ filter }) {
   );
 }
 
-const CardSchool = ({ school, totalHits }) => {
+const CardSchool = ({ school, totalHits, filter }) => {
   const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
   const total = school.doc_count;
   const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
   const inDepartment = isThereDep.doc_count || 0;
   const outDepartment = total - inDepartment;
 
+  const history = useHistory();
+
+  const handleClick = (link) => {
+    history.push(link);
+  };
+
   return (
-    <tr className={`bg-white group`}>
+    <tr className={`bg-white group`} onClick={() => handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(schoolInfo.schoolName)}"%5D`] }))}>
       <td className={`group-hover:bg-gray-200 rounded-l-lg p-2`}>
         <div className={`font-bold text-[15px]`}>{`${schoolInfo.schoolName}`}</div>
         <div className={`font-normal text-xs`}>{`${schoolInfo.schoolCity} - ${schoolInfo.schoolZip}`}</div>

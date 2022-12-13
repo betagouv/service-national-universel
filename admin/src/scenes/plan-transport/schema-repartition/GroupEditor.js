@@ -4,16 +4,20 @@ import GroupCreator from "./group/GroupCreator";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import GroupModification from "./group/GroupModification";
 import GroupConfirmDelete from "./group/GroupConfirmDelete";
 import GroupUpdateYoungCounts from "./group/GroupUpdateYoungCounts";
 import GroupCenter from "./group/GroupCenter";
 import GroupGatheringPlaces from "./group/GroupGatheringPlaces";
 import GroupConfirmDeleteCenter from "./group/GroupConfirmDeleteCenter";
 import GroupAffectationSummary from "./group/GroupAffectationSummary";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
+import GroupModificationEnhanced from "./group/GroupModificationEnhanced";
 
 export default function GroupEditor({ group, className = "", onChange }) {
-  const [step, setStep] = useState(group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+  const { user } = useSelector((state) => state.Auth);
+  const [step, setStep] = useState(group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
+  const [previousStep, setPreviousStep] = useState(null);
   const [reloadNextStep, setReloadNextStep] = useState(null);
   const [tempGroup, setTempGroup] = useState(group);
 
@@ -25,17 +29,25 @@ export default function GroupEditor({ group, className = "", onChange }) {
         if (reloadNextStep === GROUPSTEPS.CANCEL) {
           onChange(null);
         } else {
-          setStep(reloadNextStep);
+          if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+            setPreviousStep(step);
+            setStep(reloadNextStep);
+          }
           setReloadNextStep(null);
         }
       } else {
-        setStep(group && group._id ? GROUPSTEPS.MODIFICATION : GROUPSTEPS.CREATION);
+        setPreviousStep(null);
+        setStep(group && group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
       }
     }
+    setTempGroup(group);
   }, [group]);
 
   function onChangeStep(newStep) {
-    setStep(newStep);
+    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+      setPreviousStep(step);
+      setStep(newStep);
+    }
 
     if (newStep === GROUPSTEPS.CANCEL) {
       onChange(null);
@@ -57,7 +69,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
           return;
         }
         if (nextStep) {
-          setStep(nextStep);
+          setReloadNextStep(nextStep);
           onChange && onChange(changedGroup);
         } else {
           onChange && onChange(null, true);
@@ -108,14 +120,17 @@ export default function GroupEditor({ group, className = "", onChange }) {
 
   async function onUpdateTemp(group, nextStep) {
     setTempGroup(group);
-    setStep(nextStep);
+    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+      setPreviousStep(step);
+      setStep(nextStep);
+    }
   }
 
   switch (step) {
     case GROUPSTEPS.CREATION:
       return <GroupCreator className={className} group={group} onCreate={onCreate} onChangeStep={onChangeStep} />;
     case GROUPSTEPS.MODIFICATION:
-      return <GroupModification className={className} group={group} onChangeStep={onChangeStep} />;
+      return <GroupModificationEnhanced className={className} group={group} onChangeStep={onChangeStep} />;
     case GROUPSTEPS.CONFIRM_DELETE_GROUP:
       return <GroupConfirmDelete className={className} group={group} onChangeStep={onChangeStep} onDelete={onDelete} />;
     case GROUPSTEPS.YOUNG_COUNTS:
@@ -123,7 +138,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
     case GROUPSTEPS.CENTER:
       return <GroupCenter className={className} group={group} onChangeStep={onChangeStep} onChange={onUpdateTemp} />;
     case GROUPSTEPS.GATHERING_PLACES:
-      return <GroupGatheringPlaces className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdateTemp} />;
+      return <GroupGatheringPlaces className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdateTemp} previousStep={previousStep} />;
     case GROUPSTEPS.AFFECTATION_SUMMARY:
       return <GroupAffectationSummary className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdate} />;
     case GROUPSTEPS.CONFIRM_DELETE_CENTER:

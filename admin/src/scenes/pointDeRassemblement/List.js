@@ -3,7 +3,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START } from "snu-lib";
 import FilterSvg from "../../assets/icons/Filter";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
@@ -20,6 +20,7 @@ export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [modal, setModal] = React.useState({ isOpen: false });
+  const [firstSession, setFirstSession] = React.useState(null);
 
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
@@ -27,6 +28,19 @@ export default function List() {
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
+  const getFirstCohortAvailable = () => {
+    for (const session of COHORTS) {
+      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
+        return setFirstSession(session);
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    getFirstCohortAvailable();
+  }, []);
+
+  if (!firstSession) return <div></div>;
   return (
     <>
       <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
@@ -111,7 +125,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                //defaultValue={[firstSession]}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -126,7 +140,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+                defaultValue={user.role === ROLES.REFERENT_REGION ? [...user.region] : []}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -141,7 +155,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
               />
               <DeleteFilters />
             </div>

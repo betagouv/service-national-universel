@@ -36,7 +36,7 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions, getCenter }) {
+export default function Details({ center, setCenter, sessions }) {
   const history = useHistory();
 
   const user = useSelector((state) => state.Auth.user);
@@ -86,12 +86,12 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       if (!data?.placesTotal || isNaN(data?.placesTotal)) {
         error.placesTotal = "Le nombre de places est incorrect";
       }
-      if (!data?.centerDesignation) {
-        error.centerDesignation = "La désigniation est obligatoire";
-      }
       if (!data?.code2022) {
         error.code2022 = "Le code est obligatoire";
       }
+      if (!data?.typology) error.typology = "La typologie est obligatoire";
+      if (!data?.domain) error.domain = "Le domaine est obligatoire";
+
       // check session
       const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
       if (!canUpdateSession) {
@@ -101,7 +101,11 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       if (Object.keys(error).length > 0) return setIsLoading(false);
       const { ok, code, data: returnedData } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        if (code === "ALREADY_EXISTS") {
+          toastr.error("Oups, le code du centre est déjà utilisé");
+        } else {
+          toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        }
         return setIsLoading(false);
       }
       setIsLoading(false);
@@ -111,7 +115,11 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
       toastr.success("Le centre a été modifié avec succès");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification du centre.");
+      if (e.code === "ALREADY_EXISTS") {
+        toastr.error("Oups, le code du centre est déjà utilisé");
+      } else {
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre");
+      }
       setIsLoading(false);
     }
   };
@@ -202,7 +210,7 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
                   Modifier
                 </button>
               ) : (
-                <div className="flex itmes-center gap-2">
+                <div className="flex items-center gap-2">
                   <button
                     className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => {
@@ -315,6 +323,7 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
                     readOnly={!editInfo}
                     options={optionsTypology}
                     selected={optionsTypology.find((e) => e.value === data.typology)}
+                    error={errors?.typology}
                     setSelected={(e) => {
                       setData({ ...data, typology: e.value });
                     }}
@@ -329,6 +338,7 @@ export default function Details({ center, setCenter, sessions, getCenter }) {
                   options={optionsDomain}
                   selected={optionsDomain.find((e) => e.value === data.domain)}
                   setSelected={(e) => setData({ ...data, domain: e.value })}
+                  error={errors?.domain}
                 />
               </div>
               <div className="flex flex-col gap-2">

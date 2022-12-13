@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch, canViewBus } = require("snu-lib/roles");
+const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch, canViewBus, canSearchLigneBus } = require("snu-lib/roles");
 const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
 const { region2department, department2region } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
@@ -400,8 +400,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
       filter.push({
         bool: {
           should: [
-            { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER] } },
-            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": user.region } }] } },
+            { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.REFERENT_REGION] } },
             { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": user.department } }] } },
           ],
         },
@@ -582,6 +581,35 @@ router.post("/pointderassemblement/:action(_msearch|export)", passport.authentic
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "pointderassemblement", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/lignebus/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
+    filter.push({
+      bool: {
+        must_not: {
+          exists: {
+            field: "deletedAt",
+          },
+        },
+      },
+    });
+
+    if (!canSearchLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("lignebus", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "lignebus", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

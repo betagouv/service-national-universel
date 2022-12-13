@@ -1,7 +1,6 @@
 import React from "react";
-import { GroupBox, GroupHeader, GroupSummary } from "../../components/commons";
+import { GroupBox, GroupHeader, GroupMenuItem, GroupSummary } from "../../components/commons";
 import { GROUPSTEPS } from "../../util";
-import ChevronRight from "../../../../assets/icons/ChevronRight";
 
 export default function GroupModification({ group, className = "", onChangeStep }) {
   return (
@@ -18,19 +17,11 @@ export default function GroupModification({ group, className = "", onChangeStep 
         ) : (
           <GroupMenuItem onClick={() => onChangeStep(GROUPSTEPS.CENTER)}>Affecter les volontaires</GroupMenuItem>
         )}
+        {group.gatheringPlaces && group.gatheringPlaces.length > 0 && (
+          <GroupMenuItem onClick={() => onChangeStep(GROUPSTEPS.GATHERING_PLACES)}>Modifier les lieux de rassemblements</GroupMenuItem>
+        )}
         <GroupMenuItem onClick={() => onChangeStep(GROUPSTEPS.CONFIRM_DELETE_GROUP)}>Supprimer le groupe</GroupMenuItem>
       </div>
     </GroupBox>
-  );
-}
-
-function GroupMenuItem({ children, onClick }) {
-  return (
-    <div
-      className="flex items-center justify-between px-[16px] py-[30px] border-b-[1px] border-b-[#E5E7EB] text-[#1F2937] hover:text-[#1F2937] hover:bg-[#E5E7EB] cursor-pointer"
-      onClick={onClick}>
-      <div className="text-[15px] leading-[18px] font-bold">{children}</div>
-      <ChevronRight className="text-[#9CA3AF]" />
-    </div>
   );
 }
