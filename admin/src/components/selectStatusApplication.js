@@ -139,7 +139,7 @@ export default function SelectStatusApplication({ hit, options = [], callback })
         title="Validation de réalisation de mission"
         message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
         onChange={() => setModalDone({ isOpen: false, onConfirm: null })}
-        type="number"
+        type="missionduration"
         defaultInput={application.missionDuration}
         placeholder="Nombre d'heures"
         onConfirm={(duration) => {

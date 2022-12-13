@@ -344,7 +344,7 @@ export default function Phase2Application({ young, onChange }) {
               isOpen={modalDurationOpen}
               title="Validation de réalisation de mission"
               message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
-              type="number"
+              type="missionduration"
               onChange={() => setModalDurationOpen(false)}
               defaultInput={application.missionDuration}
               placeholder="Nombre d'heures"
