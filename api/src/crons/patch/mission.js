@@ -46,7 +46,7 @@ async function processPatch(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create mission log for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(e);
     throw e;
   }
 }
@@ -86,7 +86,7 @@ async function createLog(patch, actualMission, event, value) {
   });
 
   const successResponse = checkResponseStatus(response);
-  return await successResponse.json();
+  return successResponse.json();
 }
 
 const rebuildMission = (missionInfos) => {
@@ -110,9 +110,8 @@ exports.handler = async () => {
       title: "✅ Mission Logs",
       text: `${result.missionPatchScanned} missions were scanned:\n ${printResult(result.event)}`,
     });
-    process.exit();
   } catch (e) {
-    capture("Error during creation of mission patch logs", e);
     slack.error({ title: "❌ Mission Logs", text: e });
+    capture(e);
   }
 };

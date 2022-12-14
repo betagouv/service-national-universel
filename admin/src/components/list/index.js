@@ -257,6 +257,7 @@ export const FilterRow = styled.div`
     font-size: 14px;
     color: #242526;
     min-width: 150px;
+    max-width: none;
     margin-right: 10px;
     cursor: pointer;
     div {
