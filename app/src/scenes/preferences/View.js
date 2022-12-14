@@ -12,8 +12,8 @@ import SimpleCheckbox from "./components/SimpleCheckbox";
 
 export default function View({ young, onSave, saving, onToggleDomain, hasDomainSelected, onChange, mobile }) {
   return (
-    <div className="m-0 md:m-8">
-      <Box>
+    <div className="md:m-8">
+      <Box className="shadow mb-8 rounded-b-lg">
         <div className="flex flex-col md:flex-row items-center md:items-start">
           <div className="mr0 md:mr-4 mb-4 md:mb-0">
             <BigTitle>Mes préférences de missions</BigTitle>
@@ -200,7 +200,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
               </div>
               {young.mobilityNearRelative && (
                 <div className="flex justify-center mt-8">
-                  <div className="w-[100%] w-[50%] border border-gray-200 rounded-md p-8">
+                  <div className="w-[100%] md:w-[50%] border border-gray-200 rounded-md p-8">
                     <MiniTitle>Adresse du proche</MiniTitle>
                     <div className="grid grid-rows-3 gap-4">
                       <SimpleInput

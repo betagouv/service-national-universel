@@ -88,18 +88,15 @@ export default function Index() {
   }
 
   function onToggleDomain(type) {
-    console.log("OnToggleDomain: ", JSON.stringify(data));
     const idx = data.domains.indexOf(type);
+    let domains = [...data.domains];
     if (idx >= 0) {
-      let domains = data.domains;
       domains.splice(idx, 1);
       setData({ ...data, domains });
     } else {
-      if (data.domains.length < 3) {
-        let domains = data.domains;
-        domains.push(type);
-        setData({ ...data, domains });
-      }
+      let domains = data.domains.length >= 3 ? data.domains.slice(1, 4) : [...data.domains];
+      domains.push(type);
+      setData({ ...data, domains });
     }
   }
 
