@@ -24,7 +24,7 @@ export default function MultiGroup({ onChange = () => {}, className = "", value,
   return (
     <div className={`${className}`}>
       {options.map((option) => (
-        <ToggleButton key={option.value} className="mr-2 last:mr-0" onClick={() => onToggle(option.value)} active={isSelected(option.value)} mode="multi">
+        <ToggleButton key={option.value} className="mr-2 mb-2 last:mr-0" onClick={() => onToggle(option.value)} active={isSelected(option.value)} mode="multi">
           <span className={option.icon ? "mr-2" : ""}>{option.label}</span>
           {option.icon}
         </ToggleButton>

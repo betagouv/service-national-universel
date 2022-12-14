@@ -20,8 +20,8 @@ export function BigTitle({ children, className = "" }) {
   return <div className={`font-bold text-4xl text-gray-800 mb-1.5 ${className}`}>{children}</div>;
 }
 
-export function Title({ children, className = "" }) {
-  return <div className={`font-bold text-xl text-[#242526] mb-8 text-center ${className}`}>{children}</div>;
+export function Title({ children, className = "", noBorder = false }) {
+  return <div className={`font-bold text-xl text-[#242526] mb-8 text-center ${noBorder ? "" : "border-t border-t-gray-200 p-16"} ${className}`}>{children}</div>;
 }
 
 export function MiniTitle({ children, className = "" }) {
@@ -40,7 +40,9 @@ export function PlainButton({ children, className = "", onClick = () => {}, spin
   return (
     <button
       className={`flex items-center justify-center whitespace-nowrap px-12 py-2 cursor-pointer bg-blue-600 text-[#FFFFFF] border-[transparent] border-[1px] hover:!text-blue-600 hover:bg-[#FFFFFF] hover:border-blue-600 rounded-md ${className}`}
-      onClick={onClick}>
+      onClick={(e) => {
+        if (!spinner) onClick(e);
+      }}>
       {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
       {children}
     </button>
