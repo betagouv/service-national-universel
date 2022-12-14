@@ -241,12 +241,13 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const ok = await updateContact(email, { attributes, listIds });
-    if (!ok) {
+    try {
+      await updateContact(email, { attributes, listIds });
+    } catch (e) {
       await createContact({ email, attributes, listIds });
     }
   } catch (e) {
-    console.log("error", e);
+    capture(e);
   }
 }
 
