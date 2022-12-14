@@ -202,6 +202,23 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
                   <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, duration: e.target.value })} label="Heure(s)" value={translate(values.duration)} />
                 </div>
+                <div>
+                  <div className="flex flex-row text-xs font-medium my-2">
+                    <div>
+                      Objectifs de la mission -
+                      <span className="text-gray-400">
+                        &nbsp;En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau
+                        étudiée par votre référent départemental.
+                      </span>
+                    </div>
+                  </div>
+                  <Field
+                    readOnly={!editing}
+                    handleChange={(e) => setValues({ ...values, duration: e.target.value })}
+                    label="Décrivez en quelques mots votre mission"
+                    value={translate(values.duration)}
+                  />
+                </div>
               </div>
             </div>
           </div>
