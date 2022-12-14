@@ -3,7 +3,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START } from "snu-lib";
+import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getFilterLabel } from "snu-lib";
 import FilterSvg from "../../assets/icons/Filter";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
@@ -125,6 +125,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
                 //defaultValue={[firstSession]}
               />
               <MultiDropdownList
@@ -141,6 +142,7 @@ export default function List() {
                 searchPlaceholder="Rechercher..."
                 size={1000}
                 defaultValue={user.role === ROLES.REFERENT_REGION ? [...user.region] : []}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -156,6 +158,7 @@ export default function List() {
                 searchPlaceholder="Rechercher..."
                 size={1000}
                 defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
               />
               <DeleteFilters />
             </div>
