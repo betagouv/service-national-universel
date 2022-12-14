@@ -1,3 +1,16 @@
+# [1.185.0](https://github.com/betagouv/service-national-universel/compare/v1.184.0...v1.185.0) (2022-12-14)
+
+
+### Bug Fixes
+
+* **admin:** getFilterLabel ([#2140](https://github.com/betagouv/service-national-universel/issues/2140)) ([6ac0673](https://github.com/betagouv/service-national-universel/commit/6ac0673d4b386c071841804542407d00519637dc))
+* **api:** fix sib error management ([#2141](https://github.com/betagouv/service-national-universel/issues/2141)) ([e479e0b](https://github.com/betagouv/service-national-universel/commit/e479e0bc345ca50625ccb9bf0097206e17095f4c))
+
+
+### Features
+
+* **api/admin:** tags for demande de modification ([#2138](https://github.com/betagouv/service-national-universel/issues/2138)) ([346487e](https://github.com/betagouv/service-national-universel/commit/346487e1bee6a004bd661341600a207d5bbf4742))
+
 # [1.184.0](https://github.com/betagouv/service-national-universel/compare/v1.183.0...v1.184.0) (2022-12-13)
 
 
