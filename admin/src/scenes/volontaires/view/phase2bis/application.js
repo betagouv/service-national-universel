@@ -257,7 +257,23 @@ export default function Phase2Application({ young, onChange }) {
                       </div>
                     ) : null}
                   </div>
-                  <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+                  {contractStatus === "DRAFT" ? (
+                    <div className="text-sm mt-1">
+                      Vous devez renseigner ce contrat d&apos;engagement puis l&apos;envoyer pour validation aux représentant(s) légal(aux) du volontaire, au tuteur de la mission
+                      et au représentant de l&apos;État
+                    </div>
+                  ) : null}
+                  {contractStatus === "SENT" ? (
+                    <div className="text-sm mt-1">
+                      Ce contrat doit être validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
+                    </div>
+                  ) : null}
+                  {contractStatus === "VALIDATED" ? (
+                    <div className="text-sm mt-1">
+                      Ce contrat a été validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
+                    </div>
+                  ) : null}
+
                   {contract?.invitationSent ? (
                     <div>
                       <div className="grid gap-4 grid-cols-4 mt-4">
