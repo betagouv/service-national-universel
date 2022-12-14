@@ -72,7 +72,7 @@ async function processPatch(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create young log for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(e);
     throw e;
   }
 }
@@ -114,7 +114,7 @@ async function createLog(patch, actualYoung, event, value) {
   });
 
   const successResponse = checkResponseStatus(response);
-  return await successResponse.json();
+  return successResponse.json();
 }
 
 const rebuildYoung = (youngInfos) => {
@@ -138,9 +138,8 @@ exports.handler = async () => {
       title: "✅ Young Logs",
       text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
-    process.exit();
   } catch (e) {
-    capture("Error during creation of young patch logs", e);
     slack.error({ title: "❌ Young Logs", text: e });
+    capture(e);
   }
 };

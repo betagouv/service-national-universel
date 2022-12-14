@@ -15,14 +15,24 @@ import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
 import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
-import { translate, translateApplication, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
+import {
+  translate,
+  translateApplication,
+  getFilterLabel,
+  formatStringLongDate,
+  formatStringDateTimezoneUTC,
+  getAge,
+  ES_NO_LIMIT,
+  ROLES,
+  translateContractStatus,
+} from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { ModalContainer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import { Formik, Field } from "formik";
 import { Modal } from "reactstrap";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "CONTRACT_STATUS"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -386,6 +396,21 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Contrat"
+                  componentId="CONTRACT_STATUS"
+                  dataField="contractStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateContractStatus(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Contrat", "Contrat")}
                 />
               </FilterRow>
             </Filter>
