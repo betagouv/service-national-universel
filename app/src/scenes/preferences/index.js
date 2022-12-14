@@ -1,13 +1,12 @@
-import { useDispatch, useSelector } from "react-redux";
-import View from "./View";
 import React, { useEffect, useState } from "react";
-import { TRANSPORT } from "snu-lib";
+import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
+import { setYoung } from "../../redux/auth/actions";
 import plausibleEvent from "../../services/plausible";
 import api from "../../services/api";
-import { translate } from "../../utils";
-import { setYoung } from "../../redux/auth/actions";
+import { TRANSPORT, translate } from "snu-lib";
+import View from "./View";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);

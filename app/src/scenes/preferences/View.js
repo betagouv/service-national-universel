@@ -7,7 +7,7 @@ import MultiGroup from "./components/MultiGroup";
 import SimpleSelect from "./components/SimpleSelect";
 import SimpleInput from "./components/SimpleInput";
 import SimpleSwitch from "./components/SimpleSwitch";
-import RankingPeriod from "./rankingPeriod";
+import RankingPeriod from "./components/RankingPeriod";
 import SimpleCheckbox from "./components/SimpleCheckbox";
 
 export default function View({ young, onSave, saving, onToggleDomain, hasDomainSelected, onChange, mobile }) {
