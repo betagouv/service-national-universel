@@ -116,7 +116,8 @@ export default function View({ open, setOpen, modification, getModification, tag
         toastr.error("Oups, une erreur est survenue lors de la création du tag", translate(code));
         return setIsLoading(false);
       }
-      await getTags();
+      tagsOptions.push({ value: tags._id, label: tags.name });
+      getTags();
       await onChangeTags(tags._id);
       setIsLoading(false);
     } catch (e) {
