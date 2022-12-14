@@ -6,6 +6,8 @@ import { PERIOD, TRANSPORT, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISI
 import MultiGroup from "../components/MultiGroup";
 import SimpleSelect from "../components/SimpleSelect";
 import SimpleInput from "../components/SimpleInput";
+import SimpleSwitch from "../components/SimpleSwitch";
+import RankingPeriod from "../rankingPeriod";
 
 export default function DestktopIndex({
   young,
@@ -17,6 +19,12 @@ export default function DestktopIndex({
   changeMobilityTransport,
   changeProfessionalProject,
   changeProfessionalProjectPrecision,
+  toggleDesiredLocation,
+  changeDesiredLocation,
+  toggleEngaged,
+  changeEngagedDescription,
+  changePeriodRanking,
+  changeMobilityTransportOther,
 }) {
   return (
     <div className="m-8">
@@ -65,6 +73,22 @@ export default function DestktopIndex({
             ) : (
               <div />
             )}
+            <SimpleSwitch value={young.desiredLocationToggle} onChange={toggleDesiredLocation}>
+              Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d&apos;intérêt général ?
+            </SimpleSwitch>
+            <SimpleSwitch value={young.engaged} onChange={toggleEngaged}>
+              Bénévole en parallèle
+            </SimpleSwitch>
+            {young.desiredLocationToggle ? (
+              <SimpleInput title="Endroit où je souhaite effectuer ma mission" value={young.desiredLocation} placeholder="précisez l'endroit" onChange={changeDesiredLocation} />
+            ) : (
+              <div />
+            )}
+            {young.engaged ? (
+              <SimpleInput title="Description de l’activité" value={young.engagedDescription} placeholder="précisez votre activité bénévole" onChange={changeEngagedDescription} />
+            ) : (
+              <div />
+            )}
           </div>
         </Section>
         <Section>
@@ -74,12 +98,30 @@ export default function DestktopIndex({
           <ToggleGroup className="mb-8 text-center" value={young.missionFormat} onChange={changeMissionFormat} options={translateEnumToOptions(PREF_FORMATS)} />
           <MiniTitle>Période de réalisation de la mission</MiniTitle>
           <ToggleGroup className="mb-8 text-center" value={young.period} onChange={changePeriod} options={translateEnumToOptions(PERIOD, PREF_PERIOD_ICONS)} />
+          {young.period && (
+            <div className="flex justify-center">
+              <RankingPeriod handleChange={(e) => changePeriodRanking(e.target.value)} period={young.period} values={young} name="periodRanking" />
+            </div>
+          )}
         </Section>
         <Section>
           <Title>Quelle est votre mobilité géographique ?</Title>
           <MiniTitle>Moyen(s) de transport privilégié(s)</MiniTitle>
           <MultiGroup className="mb-8 text-center" value={young.mobilityTransport} onChange={changeMobilityTransport} options={translateEnumToOptions(TRANSPORT)} />
+          {young.mobilityTransport && young.mobilityTransport.includes(TRANSPORT.OTHER) && (
+            <div className="flex justify-center mb-8">
+              <SimpleInput className="w-[50%]" title="Précisez" placeholder="Renseignez l'autre moyen de transport" value={young.mobilityTransportOther} onChange={changeMobilityTransportOther} />
+            </div>
+          )}
           <MiniTitle>Périmètre de recherche</MiniTitle>
+          <div className="grid grid-cols-3 gap-4">
+            <SimpleCheck value={young.mobilityNearHome} title="Autour de l’adresse principale" detail={young.city} onChange={changeMobilityNearHome} />
+            {young.schooled && young.schoolCity && <SimpleCheck value={young.mobilityNearSchool} title="Autour de l’établissement" detail={young.schoolCity} onChange={changeMobilityNearSchool} />}
+            <SimpleCheck value={young.mobilityNearRelative} title="Autour de l’adresse d’un proche" detail={relativeAddress ? relativeAddress : "Renseigner une adresse"} onChange={changeMobilityNearRelative} />
+          </div>
+          {young.mobilityNearRelative && (
+            
+          )}
         </Section>
       </Box>
     </div>

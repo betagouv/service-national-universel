@@ -2,11 +2,11 @@ import { useSelector } from "react-redux";
 import DesktopView from "./desktop";
 import MobileView from "./mobile";
 import React, { useEffect, useState } from "react";
+import { TRANSPORT } from "snu-lib";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [data, setData] = useState({});
-  const [viewProps, setViewProps] = useState({ onSave, onToggleDomain, hasDomainSelected, changeMissionFormat, changePeriod, changeMobilityTransport });
 
   useEffect(() => {
     console.log("SET DATA = ", young);
@@ -17,8 +17,13 @@ export default function Index() {
         period: young.period,
         periodRanking: young.periodRanking ? young.periodRanking : [],
         mobilityTransport: young.mobilityTransport ? young.mobilityTransport : [],
+        mobilityTransportOther: young.mobilityTransport && young.mobilityTransportOther ? young.mobilityTransportOther : "",
         professionalProject: young.professionalProject,
         professionnalProjectPrecision: young.professionnalProjectPrecision,
+        desiredLocationToggle: young.desiredLocation !== null && young.desiredLocation !== undefined && young.desiredLocation.trim().length > 0,
+        desiredLocation: young.desiredLocation !== null && young.desiredLocation !== undefined && young.desiredLocation.trim().length > 0 ? young.desiredLocation.trim() : "",
+        engaged: young.engaged === "true",
+        engagedDescription: young.engagedDescription && young.engaged === "true" ? young.engagedDescription : "",
       });
     } else {
       setData({ domains: [] });
@@ -59,7 +64,15 @@ export default function Index() {
   }
 
   function changeMobilityTransport(mobilityTransport) {
-    setData({ ...data, mobilityTransport });
+    if (mobilityTransport.includes(TRANSPORT.OTHER)) {
+      setData({ ...data, mobilityTransport });
+    } else {
+      setData({ ...data, mobilityTransport, mobilityTransportOther: "" });
+    }
+  }
+
+  function changeMobilityTransportOther(mobilityTransportOther) {
+    setData({ ...data, mobilityTransportOther });
   }
 
   function changeProfessionalProject(professionalProject) {
@@ -74,6 +87,34 @@ export default function Index() {
     setData({ ...data, professionalProjectPrecision });
   }
 
+  function toggleDesiredLocation(val) {
+    if (val) {
+      setData({ ...data, desiredLocationToggle: true });
+    } else {
+      setData({ ...data, desiredLocationToggle: false, desiredLocation: "" });
+    }
+  }
+
+  function changeDesiredLocation(desiredLocation) {
+    setData({ ...data, desiredLocation });
+  }
+
+  function toggleEngaged(engaged) {
+    if (engaged) {
+      setData({ ...data, engaged });
+    } else {
+      setData({ ...data, engaged, engagedDescription: "" });
+    }
+  }
+
+  function changeEngagedDescription(engagedDescription) {
+    setData({ ...data, engagedDescription });
+  }
+
+  function changePeriodRanking(periodRanking) {
+    setData({ ...data, periodRanking });
+  }
+
   return (
     <>
       <div className="hidden md:flex flex-1">
@@ -83,14 +124,20 @@ export default function Index() {
           onSave={onSave}
           hasDomainSelected={hasDomainSelected}
           changePeriod={changePeriod}
+          changePeriodRanking={changePeriodRanking}
           changeMissionFormat={changeMissionFormat}
           changeMobilityTransport={changeMobilityTransport}
           changeProfessionalProject={changeProfessionalProject}
           changeProfessionalProjectPrecision={changeProfessionalProjectPrecision}
+          toggleDesiredLocation={toggleDesiredLocation}
+          changeDesiredLocation={changeDesiredLocation}
+          toggleEngaged={toggleEngaged}
+          changeEngagedDescription={changeEngagedDescription}
+          changeMobilityTransportOther={changeMobilityTransportOther}
         />
       </div>
       <div className="flex md:hidden">
-        <MobileView young={data} {...viewProps} />
+        <MobileView young={data} />
       </div>
     </>
   );

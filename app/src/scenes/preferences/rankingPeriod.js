@@ -26,9 +26,25 @@ export default function RankingPeriod({ title, period, handleChange, name, value
   };
 
   useEffect(() => {
-    let defaultRanking = items;
-    if (period === PERIOD.DURING_HOLIDAYS && !Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).includes(items[0])) defaultRanking = Object.keys(MISSION_PERIOD_DURING_HOLIDAYS);
-    if (period === PERIOD.DURING_SCHOOL && !Object.keys(MISSION_PERIOD_DURING_SCHOOL).includes(items[0])) defaultRanking = Object.keys(MISSION_PERIOD_DURING_SCHOOL);
+    let defaultRanking;
+    switch (period) {
+      case PERIOD.DURING_HOLIDAYS:
+        if (items && items.length > 0 && Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).includes(items[0])) {
+          defaultRanking = items;
+        } else {
+          defaultRanking = Object.keys(MISSION_PERIOD_DURING_HOLIDAYS);
+        }
+        break;
+      case PERIOD.DURING_SCHOOL:
+        if (items && items.length > 0 && Object.keys(MISSION_PERIOD_DURING_SCHOOL).includes(items[0])) {
+          defaultRanking = items;
+        } else {
+          defaultRanking = Object.keys(MISSION_PERIOD_DURING_SCHOOL);
+        }
+        break;
+      default:
+        defaultRanking = null;
+    }
     updateList(defaultRanking);
   }, [period]);
 
@@ -36,7 +52,7 @@ export default function RankingPeriod({ title, period, handleChange, name, value
 
   return (
     <Container>
-      <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
+      {title && <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="list">
           {(provided) => (
@@ -118,7 +134,7 @@ const Badge = styled.div`
 
 const Container = styled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
+  padding: 0 6px;
   border-width: 1px;
   border-radius: 0.5rem;
   border-style: solid;
@@ -135,8 +151,11 @@ const ItemContainer = styled.div`
   border-top-style: solid;
   width: 100%;
   flex: 1;
-  padding: 1rem 0;
+  padding: 6px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  &:first-child {
+    border-top: none;
+  }
 `;
