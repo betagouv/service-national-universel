@@ -189,9 +189,6 @@ router.put("/:id/tags/delete", passport.authenticate("referent", { session: fals
     if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const tags = modif.tagIds || [];
-    //check if tag already exist
-    const tagExist = tags.find((tag) => tag === tagId);
-    if (!tagExist) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     modif.set({ tagIds: tags.filter((tag) => tag !== tagId) });
 
