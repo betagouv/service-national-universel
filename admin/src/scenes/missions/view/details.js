@@ -101,13 +101,17 @@ export default function DetailsView({ mission, structure, tutor }) {
                   />
                   <div className="flex flex-row text-xs font-medium my-2">
                     <div>Domaine(s) d&apos;action secondaire(s)</div>
-                    <div className="text-gray-400">(facultatif)</div>
+                    <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
                   <Field
                     readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, mainDomain: e.target.value })}
-                    label="Sélectionnez un domaine principal"
-                    value={translate(values.mainDomain)}
+                    handleChange={(e) => setValues({ ...values, domains: e })}
+                    type="select"
+                    multiple
+                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
+                    label="Sélectionnez un ou plusieurs domaines"
+                    transformer={translate}
+                    value={translate(values.domains)}
                   />
                 </div>
               </div>

@@ -1,14 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import DatePickerList from "../../phase0/components/DatePickerList";
 import ChevronDown from "../../../assets/icons/ChevronDown";
+import Cross from "../../../assets/Cross.svg";
 
-export default function Field({ name, label, value, className = "", type = "text", options = [], handleChange, setFielValue, transformer, readOnly = false, errors = {} }) {
+export default function Field({
+  name,
+  label,
+  value,
+  className = "",
+  type = "text",
+  options = [],
+  handleChange,
+  setFielValue,
+  transformer,
+  readOnly = false,
+  errors = {},
+  multiple = false,
+}) {
   return (
     <div className={className}>
       <div className={`relative bg-white px-3 border-[#D1D5DB] border rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
         {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
         {type === "date" && <DatePickerList fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => setFielValue(name, new Date(date))} />}
-        {type === "select" && <SimpleSelect value={value} name={name} showBackgroundColor={false} transformer={transformer} options={options} onChange={handleChange} />}
+        {type === "select" && (
+          <SimpleSelect multiple={multiple} value={value} name={name} showBackgroundColor={false} transformer={transformer} options={options} onChange={handleChange} />
+        )}
         {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block  w-[100%]" />}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
       </div>
@@ -16,7 +32,7 @@ export default function Field({ name, label, value, className = "", type = "text
   );
 }
 
-function SimpleSelect({ value, transformer, options, onChange, showBackgroundColor = true }) {
+function SimpleSelect({ value, transformer, options, onChange, showBackgroundColor = true, multiple }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
 
   const selectOptionsRef = useRef();
@@ -52,7 +68,20 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
   return (
     <div ref={selectOptionsRef}>
       <div className={`flex items-center justify-between cursor-pointer ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
-        <div>{transformer ? transformer(value) : value}</div>
+        {multiple ? (
+          <>
+            <div className="flex flex-row flex-wrap gap-2">
+              {value.map((val) => (
+                <div className="bg-gray-200 px-0.5 rounded" key={val}>
+                  {transformer ? transformer(val) : val}
+                </div>
+              ))}
+            </div>
+            <img src={Cross} width={14} height={14} />
+          </>
+        ) : (
+          <div>{transformer ? transformer(value) : value}</div>
+        )}
         <ChevronDown className="text-gray-500 ml-[8px]" />
       </div>
       {selectOptionsOpened && (
