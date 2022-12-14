@@ -19,7 +19,7 @@ export default function Field({
 }) {
   return (
     <div className={className}>
-      <div className={`relative bg-white px-3 border-[#D1D5DB] border rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
+      <div className={`relative bg-white px-3 border-[#D1D5DB] w-full border rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
         {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
         {type === "date" && <DatePickerList fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => setFielValue(name, new Date(date))} />}
         {type === "select" && (
@@ -34,7 +34,7 @@ export default function Field({
             onChange={handleChange}
           />
         )}
-        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block  w-[100%]" />}
+        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="w-full" />}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
       </div>
     </div>

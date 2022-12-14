@@ -14,6 +14,7 @@ import { VscWarning } from "react-icons/vsc";
 
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
+import VerifyAddress from "../../phase0/components/VerifyAddress";
 
 const rowStyle = { marginRight: 0, marginLeft: 0 };
 
@@ -21,6 +22,7 @@ export default function DetailsView({ mission, structure, tutor }) {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(mission);
+  const [errors, setErrors] = useState({});
   const user = useSelector((state) => state.Auth.user);
 
   const onSubmit = () => {};
@@ -31,6 +33,20 @@ export default function DetailsView({ mission, structure, tutor }) {
   const domains = mission?.domains?.filter((d) => {
     return d !== mission.mainDomain;
   });
+
+  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+    return;
+    setData({
+      ...data,
+      addressVerified: true,
+      region: suggestion.region,
+      department: suggestion.department,
+      academy: departmentToAcademy[suggestion.department],
+      address: isConfirmed ? suggestion.address : data.address,
+      zip: isConfirmed ? suggestion.zip : data.zip,
+      city: isConfirmed ? suggestion.city : data.city,
+    });
+  };
 
   console.log(mission);
 
@@ -43,7 +59,7 @@ export default function DetailsView({ mission, structure, tutor }) {
               <div className="text-lg font-medium text-gray-900">
                 <div>Informations générales</div>
               </div>
-              {user.role === ROLES.ADMIN || ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession.status === "WAITING_VALIDATION") ? (
+              {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION ? (
                 <>
                   {!editing ? (
                     <button
@@ -113,6 +129,51 @@ export default function DetailsView({ mission, structure, tutor }) {
                     transformer={translate}
                     value={translate(values.domains)}
                   />
+                </div>
+                <div>
+                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Lieu où se déroule la mission</div>
+                  <div className="text-xs font-medium mb-2">Adresse</div>
+
+                  <Field
+                    readOnly={!editing}
+                    label="Adresse"
+                    onChange={(e) => {
+                      console.log(e);
+                      setValues({ ...values, address: e.target.value, addressVerified: false });
+                    }}
+                    value={values.address}
+                    error={errors?.address}
+                  />
+                  <div className="flex flex-row justify-between gap-3 my-4">
+                    <Field
+                      readOnly={!editing}
+                      label="Code postal"
+                      className="w-[50%]"
+                      onChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
+                      value={values.zip}
+                      error={errors?.zip}
+                    />
+                    <Field
+                      readOnly={!editing}
+                      label="Ville"
+                      className="w-[50%]"
+                      onChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
+                      value={values.city}
+                      error={errors?.city}
+                    />
+                  </div>
+                  {editing && !values.addressVerified && (
+                    <VerifyAddress
+                      address={values.address}
+                      zip={values.zip}
+                      city={values.city}
+                      onSuccess={onVerifyAddress(true)}
+                      onFail={onVerifyAddress()}
+                      isVerified={values.addressVerified === true}
+                      buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+                      verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
+                    />
+                  )}
                 </div>
               </div>
               <div className="flex w-[10%] justify-center items-center">
