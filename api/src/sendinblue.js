@@ -1,3 +1,4 @@
+const { captureMessage } = require("@sentry/node");
 const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
