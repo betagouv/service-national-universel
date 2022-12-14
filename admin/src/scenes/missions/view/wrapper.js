@@ -135,7 +135,7 @@ export default function Wrapper({ mission, tab, children }) {
               <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
                 Supprimer
               </Button>
-              <Button icon={<Duplicate />} className="ml-[8px]" onClick={onClickDuplicate}>
+              <Button icon={<Duplicate fill="#6B7280" />} className="ml-[8px]" onClick={onClickDuplicate}>
                 Dupliquer
               </Button>
             </div>
