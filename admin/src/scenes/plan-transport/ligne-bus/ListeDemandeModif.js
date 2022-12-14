@@ -224,7 +224,7 @@ export default function ListeDemandeModif() {
                       <div className="w-[18%]">Auteur</div>
                     </div>
                     {data?.map((hit) => {
-                      return <Line key={hit} modification={hit} tagsOptions={tagsOptions} />;
+                      return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} />;
                     })}
                     <hr />
                   </div>
@@ -291,7 +291,7 @@ const Line = ({ modification, tagsOptions }) => {
                   <div ref={refChildren} className={`absolute top-[105%] left-[95%] bg-white shadow-lg rounded-xl z-10 w-96 ${!open ? "hidden" : ""}`}>
                     <div className="flex flex-col p-3 gap-2">
                       {modification.tagIds.map((value, index) => (
-                        <div key={index} className="p-2 rounded-lg bg-[#E8EDFF] w-fit max-w-full">
+                        <div key={index + modification._id.toString()} className="p-2 rounded-lg bg-[#E8EDFF] w-fit max-w-full">
                           <div className="text-sm text-[#0063CB] truncate">{tagsOptions.find((option) => option.value === value)?.label}</div>
                         </div>
                       ))}

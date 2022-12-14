@@ -122,7 +122,7 @@ export default function List() {
                       <div className="w-[5%] h-1"></div>
                     </div>
                     {data?.map((hit) => {
-                      return <Line key={hit} />;
+                      return <Line key={hit._id} />;
                     })}
                     <hr />
                   </div>
