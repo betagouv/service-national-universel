@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function SimpleSelect({ value, title, transformer, options, onChange, placeholder = "Choisissez une valeur" }) {
+export default function SimpleSelect({ value, title, transformer, options, onChange, placeholder = "Choisissez une valeur", className = "" }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
 
   const selectOptionsRef = useRef();
@@ -40,7 +40,7 @@ export default function SimpleSelect({ value, title, transformer, options, onCha
   }
 
   return (
-    <div ref={selectOptionsRef} className="relative">
+    <div ref={selectOptionsRef} className={`relative ${className}`}>
       <div className={`flex items-center justify-between cursor-pointer p-2 border rounded-md relative`} onClick={toggleSelectOptions}>
         <div className="grow">
           {title && <div className="text-sm text-gray-500">{title}</div>}

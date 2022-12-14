@@ -1,5 +1,5 @@
 import React from "react";
-import ToggleButton from "./ToggleButton";
+import MultiButton from "./MultiButton";
 
 export default function MultiGroup({ onChange = () => {}, className = "", value, options = [] }) {
   function onToggle(val) {
@@ -24,10 +24,10 @@ export default function MultiGroup({ onChange = () => {}, className = "", value,
   return (
     <div className={`${className}`}>
       {options.map((option) => (
-        <ToggleButton key={option.value} className="mr-2 mb-2 last:mr-0" onClick={() => onToggle(option.value)} active={isSelected(option.value)} mode="multi">
+        <MultiButton key={option.value} className="mr-2 mb-2 last:mr-0" onClick={() => onToggle(option.value)} active={isSelected(option.value)}>
           <span className={option.icon ? "mr-2" : ""}>{option.label}</span>
           {option.icon}
-        </ToggleButton>
+        </MultiButton>
       ))}
     </div>
   );

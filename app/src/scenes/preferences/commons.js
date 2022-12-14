@@ -17,11 +17,13 @@ import Sun from "../../assets/icons/Sun";
 // --- COMPONENTS
 
 export function BigTitle({ children, className = "" }) {
-  return <div className={`font-bold text-4xl text-gray-800 mb-1.5 ${className}`}>{children}</div>;
+  return <div className={`font-bold text-2xl md:text-4xl text-gray-800 mb-1.5 ${className}`}>{children}</div>;
 }
 
 export function Title({ children, className = "", noBorder = false }) {
-  return <div className={`font-bold text-xl text-[#242526] mb-8 text-center ${noBorder ? "" : "border-t border-t-gray-200 p-16"} ${className}`}>{children}</div>;
+  return (
+    <div className={`font-bold text-base md:text-xl text-[#242526] mb-8 md:text-center ${noBorder ? "" : "border-t border-t-gray-200 pt-8 md:pt-16"} ${className}`}>{children}</div>
+  );
 }
 
 export function MiniTitle({ children, className = "" }) {
@@ -29,11 +31,11 @@ export function MiniTitle({ children, className = "" }) {
 }
 
 export function Box({ children, className = "" }) {
-  return <div className={`bg-[#FFFFFF] text-sm text-gray-700 shadow-lg p-8 rounded-lg ${className}`}>{children}</div>;
+  return <div className={`bg-[#FFFFFF] text-sm text-gray-700 md:shadow-lg p-4 md:p-8 md:rounded-lg ${className}`}>{children}</div>;
 }
 
 export function Section({ children, className = "" }) {
-  return <div className={`mt-16 ${className}`}>{children}</div>;
+  return <div className={`mt-8 md:mt-16 ${className}`}>{children}</div>;
 }
 
 export function PlainButton({ children, className = "", onClick = () => {}, spinner = false }) {

@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import DesktopView from "./desktop";
-import MobileView from "./mobile";
+import View from "./View";
 import React, { useEffect, useState } from "react";
 import { TRANSPORT } from "snu-lib";
 import { capture } from "../../sentry";
@@ -133,14 +132,5 @@ export default function Index() {
     setData(newData);
   }
 
-  return (
-    <>
-      <div className="hidden md:flex flex-1">
-        <DesktopView young={data} onToggleDomain={onToggleDomain} onSave={onSave} saving={saving} hasDomainSelected={hasDomainSelected} onChange={onChangeYoung} />
-      </div>
-      <div className="flex md:hidden">
-        <MobileView young={data} />
-      </div>
-    </>
-  );
+  return <View young={data} onToggleDomain={onToggleDomain} onSave={onSave} saving={saving} hasDomainSelected={hasDomainSelected} onChange={onChangeYoung} />;
 }
