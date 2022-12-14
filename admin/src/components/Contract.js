@@ -235,11 +235,11 @@ export default function Contract({ young, admin }) {
     <>
       <BackLink
         onClick={() => {
-          history.push(`/volontaire/${young._id}/${admin ? "phase2" : ""}`);
+          history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`);
         }}>
-        {"<"} Revenir à la fiche volontaire
+        {"<"} Revenir à l&apos;espace candidature
       </BackLink>
-      <Box>
+      {/*<Box>
         <Bloc title="Contrat d’engagement en mission d’intérêt général">
           <div style={{ display: "flex" }}>
             <div style={{ flex: 1, marginRight: "1rem", fontSize: "0.8rem", fontStyle: "italic", color: "#444" }}>
@@ -323,6 +323,7 @@ export default function Contract({ young, admin }) {
           </div>
         </Bloc>
       </Box>
+      */}
       {hasAllValidation ? (
         <DownloadContractButton young={young} uri={contract?._id}>
           Télécharger le contrat
