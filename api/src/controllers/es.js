@@ -714,6 +714,26 @@ router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"]
   }
 });
 
+router.post("/modificationbus/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
+
+    if (!canSearchInElasticSearch(user, "modificationbus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("modificationbus", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: serializeReferents(response) });
+    } else {
+      const response = await esClient.msearch({ index: "modificationbus", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(serializeReferents(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 // Add filter to all lines of the body.
 function withFilterForMSearch(body, filter) {
   const lines = body.split(`\n`).filter((e) => e);

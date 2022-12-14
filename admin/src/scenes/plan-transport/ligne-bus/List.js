@@ -37,7 +37,7 @@ export default function List() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Table de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport" }]} />
       <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <Title>Plan de transport</Title>

@@ -34,6 +34,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     await ModificationBusModel.create({
       lineId: line._id.toString(),
       lineName: line.busId,
+      cohort: line.cohort,
       requestMessage: message,
       requestUserId: req.user._id.toString(),
       requestUserName: req.user.firstName + " " + req.user.lastName,
@@ -82,7 +83,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 router.put("/:id/opinion", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      opinion: Joi.boolean().required(),
+      opinion: Joi.string().required().valid("true", "false"),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
 
