@@ -35,20 +35,23 @@ export default function DetailsView({ mission, structure, tutor }) {
   });
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    return;
-    setData({
-      ...data,
+    setValues({
+      ...values,
       addressVerified: true,
       region: suggestion.region,
       department: suggestion.department,
-      academy: departmentToAcademy[suggestion.department],
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
+      address: isConfirmed ? suggestion.address : values.address,
+      zip: isConfirmed ? suggestion.zip : values.zip,
+      city: isConfirmed ? suggestion.city : values.city,
     });
   };
 
   console.log(mission);
+
+  const formatOptions = [
+    { value: "CONTINUOUS", label: translate("CONTINUOUS") },
+    { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
+  ];
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -137,7 +140,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <Field
                     readOnly={!editing}
                     label="Adresse"
-                    onChange={(e) => {
+                    handleChange={(e) => {
                       console.log(e);
                       setValues({ ...values, address: e.target.value, addressVerified: false });
                     }}
@@ -149,7 +152,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                       readOnly={!editing}
                       label="Code postal"
                       className="w-[50%]"
-                      onChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
+                      handleChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
                       value={values.zip}
                       error={errors?.zip}
                     />
@@ -157,7 +160,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                       readOnly={!editing}
                       label="Ville"
                       className="w-[50%]"
-                      onChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
+                      handleChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
                       value={values.city}
                       error={errors?.city}
                     />
@@ -179,7 +182,19 @@ export default function DetailsView({ mission, structure, tutor }) {
               <div className="flex w-[10%] justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col w-[45%] gap-4 ">testEn </div>
+              <div className="flex flex-col w-[45%] gap-4 ">
+                <div>
+                  <div className="text-xs font-medium mb-2">Type de mission</div>
+                  <Field
+                    readOnly={!editing}
+                    type="select"
+                    handleChange={(e) => setValues({ ...values, format: e })}
+                    options={formatOptions}
+                    label="Mission regroupée sur des journées"
+                    value={translate(values.format)}
+                  />
+                </div>{" "}
+              </div>
             </div>
           </div>
         </div>

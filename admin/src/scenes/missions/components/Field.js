@@ -70,9 +70,13 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
     if (readOnly) return;
     setSelectOptionsOpened((opened) => !opened);
   }
+  function selectOption(opt) {
+    setSelectOptionsOpened(false);
+    onChange && onChange(opt);
+  }
   return (
     <div ref={selectOptionsRef}>
-      <div className={`flex items-center justify-between cursor-pointer ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
+      <div className={`flex min-h-[30px] items-center justify-between cursor-pointer ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
         {multiple ? (
           <>
             <div className="flex flex-row flex-wrap gap-2">
@@ -105,6 +109,7 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
               className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer"
               key={opt.value}
               onClick={() => {
+                if (!multiple) return selectOption(opt.value);
                 const newValue = value;
                 if (!newValue.includes(opt.value)) newValue.push(opt.value);
                 onChange(newValue);

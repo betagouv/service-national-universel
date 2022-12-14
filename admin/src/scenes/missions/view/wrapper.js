@@ -17,6 +17,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 
 import Bin from "../../../assets/Bin";
+import Duplicate from "../../../assets/Duplicate";
 
 export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
@@ -134,7 +135,7 @@ export default function Wrapper({ mission, tab, children }) {
               <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
                 Supprimer
               </Button>
-              <Button className="ml-[8px]" onClick={onClickDuplicate}>
+              <Button icon={<Duplicate />} className="ml-[8px]" onClick={onClickDuplicate}>
                 Dupliquer
               </Button>
             </div>
