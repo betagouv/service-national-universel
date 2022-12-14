@@ -6,7 +6,7 @@ import { BsDownload } from "react-icons/bs";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateTypologieCenter, translateDomainCenter } from "../../utils";
+import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateTypologieCenter, translateDomainCenter, getFilterLabel } from "../../utils";
 
 import { COHESION_STAY_START, COHORTS } from "snu-lib";
 
@@ -222,9 +222,21 @@ const ListSession = ({ firstSession }) => {
             URLParams={true}
             showSearch={false}
             defaultValue={[firstSession]}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Cohortes", "Cohortes")}</div>}
           />
-          <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-          <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+
+          <RegionFilter
+            renderLabel={(items) => <div>{getFilterLabel(items, "Régions", "Régions")}</div>}
+            defaultQuery={getDefaultQuery}
+            filters={FILTERS}
+            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+          />
+          <DepartmentFilter
+            defaultQuery={getDefaultQuery}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Départements", "Départements")}</div>}
+            filters={FILTERS}
+            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
+          />
           {user.role === ROLES.ADMIN ? (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
@@ -240,6 +252,7 @@ const ListSession = ({ firstSession }) => {
               searchPlaceholder="Rechercher..."
               showMissing
               missingLabel="Non renseigné"
+              renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
             />
           ) : null}
           <MultiDropdownList
@@ -253,6 +266,7 @@ const ListSession = ({ firstSession }) => {
             URLParams={true}
             sortBy="asc"
             showSearch={false}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")}</div>}
           />
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
@@ -266,6 +280,7 @@ const ListSession = ({ firstSession }) => {
             title=""
             URLParams={true}
             showSearch={false}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Statut", "Statut")}</div>}
           />
           <DeleteFilters />
         </div>
@@ -414,9 +429,20 @@ const ListCenter = ({ firstSession }) => {
             showSearch={false}
             onValueChange={setFilterConhorts}
             // defaultValue={[firstSession]}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Cohortes", "Cohortes")}</div>}
           />
-          <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-          <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+          <RegionFilter
+            defaultQuery={getDefaultQuery}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Régions", "Régions")}</div>}
+            filters={FILTERS}
+            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+          />
+          <DepartmentFilter
+            defaultQuery={getDefaultQuery}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Départements", "Départements")}</div>}
+            filters={FILTERS}
+            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
+          />
           {user.role === ROLES.ADMIN ? (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
@@ -432,6 +458,7 @@ const ListCenter = ({ firstSession }) => {
               searchPlaceholder="Rechercher..."
               showMissing
               missingLabel="Non renseigné"
+              renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
             />
           ) : null}
           <DeleteFilters />
