@@ -1,8 +1,7 @@
-const { captureMessage } = require("@sentry/node");
 const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
-const { capture } = require("./sentry");
+const { capture, captureMessage } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
