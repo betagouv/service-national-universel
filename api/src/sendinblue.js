@@ -244,6 +244,7 @@ async function syncContact(email, attributes, listIds) {
     try {
       await updateContact(email, { attributes, listIds });
     } catch (e) {
+      capture(e);
       await createContact({ email, attributes, listIds });
     }
   } catch (e) {
