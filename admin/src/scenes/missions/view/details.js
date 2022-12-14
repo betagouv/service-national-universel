@@ -225,6 +225,25 @@ export default function DetailsView({ mission, structure, tutor }) {
                     value={translate(values.description)}
                   />
                 </div>
+                <div>
+                  <div className="flex flex-row text-xs font-medium my-2">
+                    <div>
+                      Actions concrètes confiées au(x) volontaire(s) -
+                      <span className="text-gray-400">
+                        &nbsp;En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau
+                        étudiée par votre référent départemental.
+                      </span>
+                    </div>
+                  </div>
+                  <Field
+                    readOnly={!editing}
+                    type="textarea"
+                    row={4}
+                    handleChange={(e) => setValues({ ...values, description: e.target.value })}
+                    label="Listez brièvement les actions confiées au(x) volontaires"
+                    value={translate(values.description)}
+                  />
+                </div>
               </div>
             </div>
           </div>
