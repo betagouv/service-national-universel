@@ -100,7 +100,7 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
         ) : (
           <div>{transformer ? transformer(value) : value}</div>
         )}
-        <ChevronDown className="text-gray-500 ml-[8px]" />
+        {!readOnly && <ChevronDown className="text-gray-500 ml-[8px]" />}
       </div>
       {selectOptionsOpened && (
         <div className="absolute z-10 mt-[-1] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
