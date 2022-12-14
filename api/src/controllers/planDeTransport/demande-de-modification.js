@@ -146,7 +146,6 @@ router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false
       tagId: Joi.string().required(),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
