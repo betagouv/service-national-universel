@@ -222,18 +222,18 @@ const ListSession = ({ firstSession }) => {
             URLParams={true}
             showSearch={false}
             defaultValue={[firstSession]}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Cohortes", "Cohortes")}</div>}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
           />
 
           <RegionFilter
-            renderLabel={(items) => <div>{getFilterLabel(items, "Régions", "Régions")}</div>}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
             defaultQuery={getDefaultQuery}
             filters={FILTERS}
             defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
           />
           <DepartmentFilter
             defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Départements", "Départements")}</div>}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
             filters={FILTERS}
             defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
           />
@@ -429,17 +429,17 @@ const ListCenter = ({ firstSession }) => {
             showSearch={false}
             onValueChange={setFilterConhorts}
             // defaultValue={[firstSession]}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Cohortes", "Cohortes")}</div>}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
           />
           <RegionFilter
             defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Régions", "Régions")}</div>}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
             filters={FILTERS}
             defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
           />
           <DepartmentFilter
             defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Départements", "Départements")}</div>}
+            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
             filters={FILTERS}
             defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
           />
