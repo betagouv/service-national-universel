@@ -14,7 +14,7 @@ const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll
 let token;
 const result = { event: {} };
 
-async function process(patch, count, total) {
+async function processPatch(patch, count, total) {
   try {
     result.youngPatchScanned = result.youngPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
@@ -72,7 +72,7 @@ async function process(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create young log for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(e);
     throw e;
   }
 }
@@ -114,7 +114,7 @@ async function createLog(patch, actualYoung, event, value) {
   });
 
   const successResponse = checkResponseStatus(response);
-  return await successResponse.json();
+  return successResponse.json();
 }
 
 const rebuildYoung = (youngInfos) => {
@@ -130,22 +130,16 @@ const rebuildYoung = (youngInfos) => {
 
 exports.handler = async () => {
   try {
-    slack.info({
-      title: "Getting access token",
-    });
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
-    slack.info({
-      title: "Access token ok",
-    });
-    const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
 
-    await findAll(young_patches, mongooseFilterForDayBefore(), process);
-    slack.info({
+    const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
+    await findAll(young_patches, mongooseFilterForDayBefore(), processPatch);
+    await slack.info({
       title: "✅ Young Logs",
       text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    capture("Error during creation of young patch logs", e);
     slack.error({ title: "❌ Young Logs", text: e });
+    capture(e);
   }
 };

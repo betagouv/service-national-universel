@@ -35,7 +35,7 @@ import { capture } from "../../../../../src/sentry";
 import RadioInput from "../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 
-const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
+const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION", "HEBERGEMENT"];
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
@@ -52,6 +52,7 @@ export default function List() {
   const [marginDistance, setMarginDistance] = useState();
   const [showMoreDetails, setShowMoreDetails] = useState(false);
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
+  const [hebergement, setHebergement] = React.useState(false);
 
   const callSingleAddressAPI = async (params) => {
     try {
@@ -151,13 +152,30 @@ export default function List() {
     }
 
     if (filter?.DISTANCE && filter?.LOCATION) {
-      // todo : make it work
-      body.query.bool.filter.push({
-        geo_distance: {
-          distance: `${filter?.DISTANCE}km`,
-          location: filter?.LOCATION,
-        },
-      });
+      if (hebergement) {
+        body.query.bool.filter.push({
+          bool: {
+            should: [
+              {
+                geo_distance: {
+                  distance: `${filter?.DISTANCE}km`,
+                  location: filter?.LOCATION,
+                },
+              },
+              { term: { "hebergement.keyword": "true" } },
+            ],
+            minimum_should_match: "1",
+          },
+        });
+      } else {
+        body.query.bool.filter.push({
+          geo_distance: {
+            distance: `${filter?.DISTANCE}km`,
+            location: filter?.LOCATION,
+          },
+        });
+      }
+
       body.sort.push({
         _geo_distance: {
           location: filter?.LOCATION,
@@ -313,6 +331,10 @@ export default function List() {
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
+
+  React.useEffect(() => {
+    setFilter((prev) => ({ ...prev, HEBERGEMENT: hebergement.toString() }));
+  }, [hebergement]);
 
   const marginLeftDistance = (ele) => {
     if (ele) {
@@ -506,7 +528,7 @@ export default function List() {
                                 {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                               </label>
                               <label htmlFor="second-address" className="cursor-pointer">
-                                <span className="text-xs text-gray-700">Autour de l&apos;adresse de mon proche</span>
+                                <span className="text-xs text-gray-700">Autour de l&apos;adresse d&apos; un proche</span>
                                 <br />
                                 <span className="text-[13px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
                               </label>
@@ -515,7 +537,7 @@ export default function List() {
                             <div className="flex items-center gap-2">
                               <input id="second-address" name="address" type="radio" value={young.city} disabled />
                               <label htmlFor="second-address">
-                                <span className="text-xs text-gray-400">Autour de l&apos;adresse de mon proche</span>
+                                <span className="text-xs text-gray-400">Autour de l&apos;adresse d&apos; un proche</span>
                                 <br />
                                 <Link to="/preferences" className="text-[13px] text-blue-600 underline hover:underline">
                                   Renseigner une adresse
@@ -523,6 +545,13 @@ export default function List() {
                               </label>
                             </div>
                           )}
+                        </div>
+                        <div className="flex flex-row justify-start items-center mb-3">
+                          <Toggle toggled={hebergement} onClick={() => setHebergement((old) => !old)} />
+                          <div className="ml-4">
+                            <div className="text-[12px]">Mission avec hébergement</div>
+                            <div className="text-[13px]">Dans toute la France</div>
+                          </div>
                         </div>
                         <div className="relative">
                           <input
@@ -826,7 +855,20 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
     </div>
   );
 };
-
+const Toggle = ({ toggled, onClick }) => {
+  return toggled ? (
+    <div onClick={onClick} name="visibility" className={`flex items-center w-10 h-6 rounded-full bg-blue-600 transition duration-100 ease-in cursor-pointer`}>
+      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+    </div>
+  ) : (
+    <div
+      onClick={onClick}
+      name="visibility"
+      className={`flex items-center w-10 h-6 border-[1px] rounded-full border-blue-600 bg-white transition duration-100 ease-in cursor-pointer`}>
+      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[-1px] transition duration-100 ease-in shadow-nina"></div>
+    </div>
+  );
+};
 const Missions = styled.div`
   font-family: "Marianne";
   padding: 0.5rem;

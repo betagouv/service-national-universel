@@ -14,7 +14,7 @@ const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll
 let token;
 const result = { event: {} };
 
-async function process(patch, count, total) {
+async function processPatch(patch, count, total) {
   try {
     result.applicationPatchScanned = result.applicationPatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
@@ -39,7 +39,7 @@ async function process(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create application log for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(e);
     throw e;
   }
 }
@@ -72,7 +72,7 @@ async function createLog(patch, actualApplication, event, value) {
   });
 
   const successResponse = checkResponseStatus(response);
-  return await successResponse.json();
+  return successResponse.json();
 }
 
 const rebuildApplication = (applicationInfos) => {
@@ -91,13 +91,13 @@ exports.handler = async () => {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
     const application_patches = mongoose.model("application_patches", new mongoose.Schema({}, { collection: "application_patches" }));
-    await findAll(application_patches, mongooseFilterForDayBefore(), process);
-    slack.info({
+    await findAll(application_patches, mongooseFilterForDayBefore(), processPatch);
+    await slack.info({
       title: "✅ Application Logs",
       text: `${result.applicationPatchScanned} application patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    capture("Error during creation of application patch logs", e);
     slack.error({ title: "❌ Application Logs", text: e });
+    capture(e);
   }
 };

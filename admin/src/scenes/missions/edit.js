@@ -7,9 +7,10 @@ import { Formik, Field } from "formik";
 import { Link, useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInputV2";
+import Toggle from "../../components/Toggle";
+
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import {
   translate,
@@ -150,6 +151,8 @@ export default function Edit(props) {
           tuteur: "",
           startAt: dateForDatePicker(Date.now()),
           endAt: dateForDatePicker(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          hebergement: "false",
+          hebergementPayant: "false",
           city: "",
           zip: "",
           address: "",
@@ -390,14 +393,25 @@ export default function Edit(props) {
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINE(S) D&apos;ACTION SECONDAIRE(S)</label>
-                      <MultiSelect
-                        value={values.domains || []}
-                        valueToExclude={values.mainDomain}
-                        onChange={handleChange}
-                        name="domains"
-                        // eslint-disable-next-line no-prototype-builtins
-                        options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
-                        placeholder="Sélectionnez un ou plusieurs domaines"
+                      <CustomSelect
+                        styles={{
+                          container: () => ({ flex: 1 }),
+                          menu: () => ({
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            borderColor: "#dedede",
+                          }),
+                        }}
+                        isMulti
+                        options={Object.keys(MISSION_DOMAINS)
+                          .filter((el) => el !== values.mainDomain)
+                          .map((el) => ({ value: el, label: translate(el) }))}
+                        placeholder={"Sélectionnez un ou plusieurs domaines"}
+                        onChange={(e) => {
+                          handleChange({ target: { value: e, name: "domains" } });
+                        }}
+                        value={values.domains}
                       />
                     </FormGroup>
                     <FormGroup>
@@ -571,33 +585,50 @@ export default function Edit(props) {
                       </FormGroup>
                       <FormGroup>
                         <label>Période de réalisation de la mission :</label>
-                        <MultiSelect
-                          value={values.period}
-                          valueRenderer={(values) => {
-                            const valuesFiltered = values.map((el) => el.label);
-                            return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                        <CustomSelect
+                          styles={{
+                            container: () => ({ flex: 1 }),
+                            menu: () => ({
+                              borderStyle: "solid",
+                              borderWidth: 1,
+                              borderRadius: 5,
+                              borderColor: "#dedede",
+                            }),
                           }}
-                          onChange={handleChange}
-                          name="period"
-                          options={Object.keys(PERIOD)}
+                          isMulti
+                          options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
+                          placeholder={"Sélectionnez une ou plusieurs périodes"}
+                          onChange={(e) => {
+                            handleChange({ target: { value: e, name: "period" } });
+                          }}
+                          value={values.period}
                         />
                         {values.period?.length ? (
                           <>
                             <label style={{ marginTop: "10px" }}>Précisez :</label>
-                            <MultiSelect
-                              value={values.subPeriod}
-                              valueRenderer={(values) => {
-                                const valuesFiltered = values.map((el) => el.label);
-                                return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                            <CustomSelect
+                              styles={{
+                                container: () => ({ flex: 1 }),
+                                menu: () => ({
+                                  borderStyle: "solid",
+                                  borderWidth: 1,
+                                  borderRadius: 5,
+                                  borderColor: "#dedede",
+                                }),
                               }}
-                              onChange={handleChange}
-                              name="subPeriod"
+                              isMulti
                               options={(() => {
+                                const valuesToCheck = values.period;
                                 let options = [];
-                                if (values.period?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
-                                if (values.period?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                                return options;
+                                if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                                if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                                return options.map((el) => ({ value: el, label: translate(el) }));
                               })()}
+                              placeholder={"Sélectionnez une ou plusieurs périodes"}
+                              onChange={(e) => {
+                                handleChange({ target: { value: e, name: "subPeriod" } });
+                              }}
+                              value={values.subPeriod}
                             />
                           </>
                         ) : null}
@@ -609,6 +640,34 @@ export default function Edit(props) {
                         </p>
                         <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} disabled={isJvaMission} />
                       </FormGroup>
+                      <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase">
+                        <div className="flex flex-row items-center gap-1">
+                          <div>Hébergement proposé : </div>
+                          <div className="font-bold">{values.hebergement === "true" ? "Oui" : "Non"}</div>
+                        </div>
+                        <Toggle
+                          id="hebergement"
+                          name="hebergement"
+                          value={values.hebergement === "true"}
+                          onChange={(e) => handleChange({ target: { value: e.toString(), name: "hebergement" } })}
+                        />
+                      </div>
+                      {values.hebergement === "true" && (
+                        <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase mt-4">
+                          <div className="flex flex-row items-center gap-1">
+                            <div>Hébergement payant : </div>
+                            <div className="font-bold">{values.hebergementPayant === "true" ? "Oui" : "Non"}</div>
+                          </div>
+                          <Toggle
+                            id="hebergementPayant"
+                            name="hebergementPayant"
+                            value={values.hebergementPayant === "true"}
+                            onChange={(e) => {
+                              handleChange({ target: { value: e.toString(), name: "hebergementPayant" } });
+                            }}
+                          />
+                        </div>
+                      )}
                     </Wrapper>
                   </Row>
                   <Wrapper>
@@ -765,7 +824,17 @@ export default function Edit(props) {
     </Formik>
   );
 }
-
+const CustomSelect = ({ onChange, options, value, isMulti, placeholder }) => {
+  return (
+    <ReactSelect
+      options={options}
+      placeholder={placeholder}
+      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val.value))}
+      value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
+      isMulti={isMulti}
+    />
+  );
+};
 const Wrapper = styled.div`
   padding: 2rem;
   li {

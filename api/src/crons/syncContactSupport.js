@@ -15,8 +15,15 @@ exports.handler = async () => {
     for (const contact of contacts) {
       contact.attributes = await getUserAttributes(contact);
     }
-    const response = await zammood.api(`/v0/contact`, { method: "POST", credentials: "include", body: JSON.stringify({ contacts }) });
-    if (!response.ok) slack.error({ title: "Fail sync contacts (young + ref) to Zammood", text: JSON.stringify(response.code) });
+    let updatedLength = 0;
+    while (updatedLength < contacts.length) {
+      let length = 100;
+      if (updatedLength + 100 > contacts.length) length = contacts.length - updatedLength;
+      const slicedContacts = contacts.slice(updatedLength, updatedLength + length);
+      const response = await zammood.api(`/v0/contact`, { method: "POST", credentials: "include", body: JSON.stringify({ contacts: slicedContacts }) });
+      if (!response.ok) slack.error({ title: "Fail sync contacts (young + ref) to Zammood", text: JSON.stringify(response.code) });
+      updatedLength += 100;
+    }
   } catch (e) {
     capture(e);
   }

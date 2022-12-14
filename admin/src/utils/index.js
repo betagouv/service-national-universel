@@ -2,7 +2,9 @@ import passwordValidator from "password-validator";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
+import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
 import api from "../services/api";
+import { translateModelFields } from "./translateFieldsModel";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
 
@@ -202,3 +204,106 @@ export function capitalizeFirstLetter(string) {
 }
 
 export const regexPhoneFrenchCountries = `(\\+(33|590|594|262|596|269|687|689|508|681)|0[1-9])(?:\\W*\\d){8}$`;
+
+export function isIsoDate(str) {
+  if (!Date.parse(str)) return false;
+  var d = new Date(str);
+  return d.toISOString() === str;
+}
+
+export function translateHistory(path, value) {
+  if (path === "/statusPhase1") {
+    return translatePhase1(value);
+  } else if (path === "/statusPhase2") {
+    return translatePhase2(value);
+  } else if (path === "/phase2ApplicationStatus") {
+    return translateApplication(value);
+  } else if (path === "/statusPhase2Contract") {
+    return translateEngagement(value);
+  } else if (isIsoDate(value)) {
+    return formatStringLongDate(value);
+  } else {
+    return translate(value);
+  }
+}
+
+function formatField(field) {
+  let f = field;
+  if (field.includes("correctionRequests")) f = "correctionRequests";
+  // correctionRequests/0/field
+  const match1 = field.match(/(.*)\/\d\/(.*)/);
+  if (match1) f = match1.slice(1).join("/");
+  // /files/fileCategory/mimetype
+  const match2 = field.match(/.*\/(.*)\/.*/);
+  if (match2) f = match2[1];
+  // notes/0
+  const match3 = field.match(/(.*)\/\d/);
+  if (match3) f = match3[1];
+  // files/fileCategory/0/
+  const match4 = field.match(/files\/(.*)\/\d/);
+  if (match4) f = match4[1];
+  return f;
+}
+
+function formatValue(path, value) {
+  if (!value) return "Vide";
+  if (typeof value === "object") {
+    if (Object.values(value).every((v) => !v.length)) return "Vide";
+    if (path.includes("Files")) return value.name;
+    if (path.includes("correctionRequests")) return `${translateModelFields("young", value.field)} : ${value.message}`;
+    if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;
+    if (path.includes("notes")) return value.note?.substring(0, 100);
+    return JSON.stringify(value);
+  }
+  return value;
+}
+
+function formatUser(user, role) {
+  if (!user || !user?.firstName) return { firstName: "Acteur inconnu", lastName: "", role: "Donnée indisponible" };
+  if (user.firstName?.includes("/Users/")) user.firstName = "Modification automatique";
+  if (!user.role) {
+    if (user.email) user.role = "Volontaire";
+    if (!user.email && role !== ROLES.ADMIN) {
+      user.firstName = "Modification automatique";
+    }
+  }
+  return user;
+}
+
+function createEvent(op, e, value, originalValue, role) {
+  let event = {};
+  event.path = formatField(op.path.substring(1));
+  event.user = formatUser(e.user, role);
+  event.author = `${event.user.firstName} ${event.user.lastName}`;
+  event.op = op.op;
+  event.date = e.date;
+  event.value = formatValue(event.path, value);
+  event.originalValue = formatValue(event.path, originalValue);
+  event.ref = e.ref;
+  return event;
+}
+
+function filterEmptyValues(e) {
+  const ignoredValues = [null, undefined, "", "Vide", "[]", false];
+  return (!e.value || !e.value.length || ignoredValues.includes(e.value)) && (!e.originalValue || !e.originalValue.length || ignoredValues.includes(e.originalValue));
+}
+
+function filterHiddenFields(e) {
+  const hiddenFields = ["missionsInMail", "historic", "uploadedAt", "sessionPhase1Id", "correctedAt", "lastStatusAt", "token", "Token"];
+  return hiddenFields.some((f) => e.path.includes(f));
+}
+
+export function formatHistory(data, role) {
+  // Flatten history: each value inside each op is a separate event
+  let history = [];
+  for (const e of data) {
+    for (const op of e.ops) {
+      if (Array.isArray(op.value)) {
+        for (const [i, v] of op.value.entries()) {
+          history.push(createEvent(op, e, v, op.originalValue ? op.originalValue[i] : null, role));
+        }
+      } else history.push(createEvent(op, e, op.value, op.originalValue, role));
+    }
+  }
+  return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
+}

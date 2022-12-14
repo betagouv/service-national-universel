@@ -63,7 +63,7 @@ const translateFieldYoung = (f) => {
     case "phone":
       return "Téléphone";
     case "gender":
-      return "genre";
+      return "Genre";
     case "birthdateAt":
       return "Date de naissance";
     case "cohort":
@@ -89,6 +89,7 @@ const translateFieldYoung = (f) => {
     case "withdrawnMessage":
       return "Message de désistement";
     case "inscriptionStep":
+    case "inscriptionStep2023":
       return "Étape d'inscription";
     case "cohesion2020Step":
       return "Étape d'inscription (2020)";
@@ -98,6 +99,8 @@ const translateFieldYoung = (f) => {
       return "Présence séjour de cohésion";
     case "cohesionStayMedicalFileReceived":
       return "Fiche sanitaire";
+    case "cohesionStayMedicalFileDownload":
+      return "Téléchargement de la fiche sanitaire";
     case "cohesionCenterId":
       return "Id centre de cohésion";
     case "cohesionCenterName":
@@ -174,6 +177,8 @@ const translateFieldYoung = (f) => {
       return "Région de l'établissement";
     case "schoolLocation":
       return "Coordonnées de l'établissement";
+    case "schoolId":
+      return "Identifiant de l'établissement";
     case "parent1Status":
       return "Statut du représentant légal 1";
     case "parent1FirstName":
@@ -185,7 +190,7 @@ const translateFieldYoung = (f) => {
     case "parent1Phone":
       return "Téléphone du représentant légal 1";
     case "parent1OwnAddress":
-      return "Rreprésentant légal 1 a une adresse différente";
+      return "Représentant légal 1 a une adresse différente";
     case "parent1Address":
       return "Adresse du représentant légal 1";
     case "parent1ComplementAddress":
@@ -213,7 +218,7 @@ const translateFieldYoung = (f) => {
     case "parent2Phone":
       return "Téléphone du représentant légal 2";
     case "parent2OwnAddress":
-      return "Rreprésentant légal 2 a une adresse différente";
+      return "Représentant légal 2 a une adresse différente";
     case "parent2Address":
       return "Adresse du représentant légal 2";
     case "parent2ComplementAddress":
@@ -392,6 +397,62 @@ const translateFieldYoung = (f) => {
       return "Le volontaire se rend par ses propres moyens (phase 1)";
     case "qpv":
       return "QPV";
+    case "files/cniFiles/0":
+    case "files/cniFiles/1":
+    case "files/cniFiles/2":
+      return "Pièce d'identité";
+    case "latestCNIFileCategory":
+      return "Catégorie de la pièce d'identité";
+    case "latestCNIFileExpirationDate":
+      return "Date d'expiration de la pièce d'identité";
+    case "CNIFileNotValidOnStart":
+      return "Pièce d'identité invalide au début du séjour";
+    case "files":
+      return "Documents";
+    case "imageRightFilesStatus":
+      return "Statut des documents de droit à l'image";
+    case "autoTestPCRFilesStatus":
+      return "Statut des documents de test PCR";
+    case "youngPhase1Agreement":
+      return "Accord du volontaire pour la phase 1";
+    case "parentAllowSNU":
+      return "Autorisation du représentant légal pour la phase 1";
+    case "parent1AllowSNU":
+      return "Autorisation du représentant légal 1 pour la phase 1";
+    case "parent2AllowSNU":
+      return "Autorisation du représentant légal 2 pour la phase 1";
+    case "parent1ValidationDate":
+      return "Date de validation du représentant légal 1";
+    case "parent2ValidationDate":
+      return "Date de validation du représentant légal 2";
+    case "parentStatementOfHonorInvalidId":
+      return "Déclaration sur l'honneur";
+    case "parent1DataVerified":
+      return "Vérification des données du représentant légal 1";
+    case "parent2DataVerified":
+      return "Vérification des données du représentant légal 2";
+    case "parent1AllowImageRights":
+      return "Autorisation du représentant légal 1 pour les droits à l'image";
+    case "parent2AllowImageRights":
+      return "Autorisation du représentant légal 2 pour les droits à l'image";
+    case "inscriptionDate":
+      return "Date de fin d'inscription";
+    case "presenceJDM":
+      return "Présence à la JDM";
+    case "inscriptionDoneDate":
+      return "Date de fin d'inscription";
+    case "correctionRequests":
+      return "Demande de correction";
+    case "correctionRequests/status":
+      return "Statut de la demande de correction";
+    case "isRegionRural":
+      return "Région rurale";
+    case "reducedMobilityAccess":
+      return "Accès pour personnes à mobilité réduite";
+    case "handicapInSameDepartment":
+      return "Même département (handicap)";
+    case "notes":
+      return "Notes";
     default:
       return f;
   }

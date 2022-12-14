@@ -575,6 +575,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  //Phase 1 Affectation
   sessionPhase1Id: {
     type: String,
     documentation: {
@@ -587,6 +588,35 @@ const Schema = new mongoose.Schema({
       description: "TODO",
     },
   },
+  cohesionCenterId: {
+    type: String,
+    documentation: {
+      description: "Id du centre de cohésion d'accueil pour la phase 1",
+    },
+  },
+
+  ligneId: {
+    type: String,
+    documentation: {
+      description: "Id de la ligne de bus pour la phase 1",
+    },
+  },
+
+  meetingPointId: {
+    type: String,
+    documentation: {
+      description: "Identifiant du point de rassemblement pour le sejour de cohesion",
+    },
+  },
+  deplacementPhase1Autonomous: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Le volontaire se rend au centre de cohésion par ses propres moyens ",
+    },
+  },
+
+  // Legacy ?
   codeCenterTmp: {
     type: String,
     documentation: {
@@ -599,14 +629,9 @@ const Schema = new mongoose.Schema({
       description: "TODO",
     },
   },
+
   // *** START LEGACY COHESION CENTER ***
   // phase1 legacy infos, we keep it for retrocompatibility, can be deleted in the future
-  cohesionCenterId: {
-    type: String,
-    documentation: {
-      description: "Id du centre de cohésion d'accueil pour la phase 1",
-    },
-  },
   cohesionCenterName: {
     type: String,
     documentation: {
@@ -631,20 +656,6 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date limite de réponse a la participation à la phase 1",
-    },
-  },
-
-  meetingPointId: {
-    type: String,
-    documentation: {
-      description: "Identifiant du point de rassemblement pour le sejour de cohesion",
-    },
-  },
-  deplacementPhase1Autonomous: {
-    type: String,
-    enum: ["true", "false", ""],
-    documentation: {
-      description: "Le volontaire se rend au centre de cohésion par ses propres moyens ",
     },
   },
 

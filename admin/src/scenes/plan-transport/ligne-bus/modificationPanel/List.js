@@ -1,7 +1,7 @@
 import React from "react";
-import PanelV2 from "../../../../../components/PanelV2";
+import PanelV2 from "../../../../components/PanelV2";
 
-export default function Panel({ open, setOpen }) {
+export default function List({ open, setOpen }) {
   const onClose = () => {
     setOpen(false);
   };

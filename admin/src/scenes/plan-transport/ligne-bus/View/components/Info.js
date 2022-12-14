@@ -9,13 +9,14 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
+import Loader from "../../../../../components/Loader";
 
 const options = [
   { label: "Oui", value: true },
   { label: "Non", value: false },
 ];
 
-export default function Info({ bus, setBus }) {
+export default function Info({ bus, setBus, dataForCheck }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -69,7 +70,15 @@ export default function Info({ bus, setBus }) {
 
       //total capacity must be greater than young capacity + follower capacity
       if (data?.totalCapacity < data?.youngCapacity + data?.followerCapacity) {
-        errors.totalCapacity = "La capacité total doit être supérieur ou égal à la capacité jeunes + la capacité accompagnateurs";
+        errors.totalCapacity = "La capacité totale doit être supérieure ou égale à la capacité volontaire + la capacité accompagnateurs";
+      }
+
+      if (dataForCheck.schemaVolume > dataForCheck.busVolume + data.youngCapacity) {
+        errors.youngCapacity = "La capacité volontaire est trop faible par rapport au schéma de répartition";
+      }
+
+      if (dataForCheck.youngsCountBus > data.youngCapacity) {
+        errors.youngCapacity = "La capacité volontaire est trop faible par rapport au nombre de volontaire deja affectés à cette ligne";
       }
 
       if (Object.keys(errors).length > 0) {
@@ -94,6 +103,13 @@ export default function Info({ bus, setBus }) {
       setIsLoading(false);
     }
   };
+
+  if (!dataForCheck)
+    return (
+      <div className="p-8 w-full bg-white rounded-xl">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="p-8 w-full bg-white rounded-xl">

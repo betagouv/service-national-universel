@@ -93,6 +93,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sessionId: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Session",
+    },
+  },
+
   centerId: {
     type: String,
     required: true,

@@ -50,7 +50,8 @@ export default function ApplicationList({ young, onChangeApplication }) {
 const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
   const [tags, setTags] = useState();
-
+  const [contract, setContract] = useState();
+  const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const history = useHistory();
   useEffect(() => {
     (async () => {
@@ -65,6 +66,13 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       data?.city && t.push(data?.city + (data?.zip ? ` - ${data?.zip}` : ""));
       (data?.domains || []).forEach((d) => t.push(translate(d)));
       setTags(t);
+      if (!hit.contractId) return;
+      const { ok: okContract, data: dataContract, code: codeContract } = await api.get(`/contract/${hit.contractId}`);
+      if (!okContract) {
+        capture(codeContract);
+        return toastr.error("Oups, une erreur est survenue", codeContract);
+      }
+      setContract(dataContract);
     })();
   }, []);
 
@@ -75,7 +83,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       <div className="text-gray-500 font-medium uppercase text-xs flex justify-end tracking-wider mb-2">
         {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
       </div>
-      <div className="flex justify-between  ">
+      <div className="flex justify-between">
         <Link className="flex basis-[35%] items-center" to={`/mission/${hit.missionId}`}>
           {/* icon */}
           <div className="flex items-center mr-4">
@@ -121,10 +129,33 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
 
           {/* places disponibles */}
           <div className="flex basis-[25%]">
-            {mission.placesLeft <= 1 ? (
-              <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} place disponible</div>
+            {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) ? (
+              <div className="flex flex-col">
+                {contract?.invitationSent === "true" ? (
+                  <div className="font-medium text-xs text-gray-700 ">Contrat {hit.contractStatus === "VALIDATED" ? "signé" : "envoyé"}</div>
+                ) : (
+                  <div className="flex flex-row items-center">
+                    <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
+                    <div className="font-medium text-xs text-gray-700 ml-1">Contrat en brouillon</div>
+                  </div>
+                )}
+                {numberOfFiles >= 1 && (
+                  <div className="flex flex-row items-center mt-1">
+                    <div className="w-[8px] h-[8px] rounded-full bg-orange-500" />
+                    <div className="font-medium text-xs text-gray-700 ml-1">
+                      {numberOfFiles} pièce{numberOfFiles > 1 ? "s" : ""} jointe{numberOfFiles > 1 ? "s" : ""}
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
-              <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} places disponibles</div>
+              <>
+                {mission.placesLeft <= 1 ? (
+                  <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
+                ) : (
+                  <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
+                )}
+              </>
             )}
           </div>
           <div>
@@ -310,7 +341,7 @@ const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) => {
         title="Validation de réalisation de mission"
         message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
         onChange={() => setModalDone({ isOpen: false, onConfirm: null })}
-        type="number"
+        type="missionduration"
         defaultInput={application.missionDuration}
         placeholder="Nombre d'heures"
         onConfirm={(duration) => {

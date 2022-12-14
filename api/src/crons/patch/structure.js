@@ -13,7 +13,7 @@ const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll
 let token;
 const result = { event: {} };
 
-async function process(patch, count, total) {
+async function processPatch(patch, count, total) {
   try {
     result.structurePatchScanned = result.structurePatchScanned + 1 || 1;
     // if (count % 100 === 0) console.log(count, "/", total);
@@ -38,7 +38,7 @@ async function process(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create structure log for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(e);
     throw e;
   }
 }
@@ -80,7 +80,7 @@ async function createLog(patch, actualStructure, event, value) {
   });
 
   const successResponse = checkResponseStatus(response);
-  return await successResponse.json();
+  return successResponse.json();
 }
 
 const rebuildStruct = (structInfos) => {
@@ -99,14 +99,13 @@ exports.handler = async () => {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
     const structure_patches = mongoose.model("structure_patches", new mongoose.Schema({}, { collection: "structure_patches" }));
-
-    await findAll(structure_patches, mongooseFilterForDayBefore(), process);
-    slack.info({
+    await findAll(structure_patches, mongooseFilterForDayBefore(), processPatch);
+    await slack.info({
       title: "✅ Structure Logs",
       text: `${result.structurePatchScanned} structure patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    capture("Error during creation of young structure logs", e);
     slack.error({ title: "❌ Structure Logs", text: e });
+    capture(e);
   }
 };

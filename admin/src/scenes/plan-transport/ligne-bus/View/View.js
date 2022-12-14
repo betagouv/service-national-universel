@@ -8,24 +8,58 @@ import Centre from "./components/Centre";
 import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
-import Panel from "./components/Panel";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import Loader from "../../../../components/Loader";
+import { translate } from "snu-lib";
+import Creation from "../modificationPanel/Creation";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
+  const [dataForCheck, setDataForCheck] = React.useState(null);
+  const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
 
   const getBus = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return <div />;
-      const { ok, code, data: reponsePDR } = await api.get(`/ligne-de-bus/${id}`);
+      const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
+
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération du bus", code);
-        return history.push("/point-de-rassemblement");
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
-      setData({ ...reponsePDR, addressVerified: true });
-      return reponsePDR.cohorts;
+      setData(reponseBus);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+    }
+  };
+
+  const getDataForCheck = async () => {
+    try {
+      const id = props.match && props.match.params && props.match.params.id;
+      const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${id}/data-for-check`);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+      }
+      setDataForCheck(reponseCheck);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+    }
+  };
+
+  const getDemandeDeModification = async () => {
+    try {
+      const id = props.match && props.match.params && props.match.params.id;
+      const { ok, code, data: reponseDemandeDeModification } = await api.get(`/demande-de-modification/ligne/${id}`);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+      }
+      reponseDemandeDeModification.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      setDemandeDeModification(reponseDemandeDeModification);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
@@ -34,9 +68,11 @@ export default function View(props) {
 
   React.useEffect(() => {
     getBus();
+    getDataForCheck();
+    getDemandeDeModification();
   }, []);
 
-  if (!data) return <div />;
+  if (!data) return <Loader />;
 
   return (
     <>
@@ -54,27 +90,27 @@ export default function View(props) {
           </button>
         </div>
         <div className="flex flex-col gap-8">
-          <div className="flex gap-4 items-stretch">
+          <div className="flex gap-4">
             <Itineraire
               meetingsPoints={data.meetingsPointsDetail}
               aller={data.departuredDate}
               retour={data.returnDate}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
             />
-            <Modification />
+            <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
-          <Info bus={data} setBus={setData} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} />
           <div className="flex gap-4 items-start">
             <div className="flex flex-col gap-4 w-1/2">
               {data.meetingsPointsDetail.map((pdr, index) => (
-                <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} />
+                <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} volume={dataForCheck?.meetingPoints} getVolume={getDataForCheck} />
               ))}
             </div>
             <Centre bus={data} setBus={setData} />
           </div>
         </div>
       </div>
-      <Panel open={panelOpen} setOpen={setPanelOpen} />
+      <Creation open={panelOpen} setOpen={setPanelOpen} bus={data} getModification={getDemandeDeModification} />
     </>
   );
 }

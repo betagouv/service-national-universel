@@ -27,7 +27,7 @@ import {
   htmlCleaner,
   SENDINBLUE_TEMPLATES,
   translate,
-  translateAddFilePhase2,
+  translateAddFilePhase2WithoutPreposition,
   translateApplication,
 } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
@@ -37,6 +37,7 @@ import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
 import IconDomain from "./components/IconDomain";
 import ModalPJ from "./components/ModalPJ";
+import House from "./components/HouseIcon";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -211,6 +212,8 @@ export default function viewMobile() {
                 scrollToBottom={scrollToBottom}
                 duration={mission?.duration}
                 isMilitaryPreparation={mission?.isMilitaryPreparation}
+                hebergement={mission?.hebergement}
+                hebergementPayant={mission?.hebergementPayant}
               />
             )}
           </div>
@@ -319,6 +322,35 @@ export default function viewMobile() {
             {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
             <Detail title="Période pour réaliser la mission" content={mission.period} />
             <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
+            {mission?.hebergement === "true" && (
+              <div className="bg-white shadow-sm rounded-lg px-3 pt-3">
+                {mission.hebergementPayant === "true" ? (
+                  <div>
+                    <div className="flex flex-row justify-between">
+                      <div className="text-sm font-bold">Hébergement payant proposé</div>
+                      <div className="p-1.5 bg-yellow-100 rounded-full">
+                        <House color="#D97706" />
+                      </div>
+                    </div>
+                    <div className="text-xs">
+                      Un hébergement est proposé par la structure d&apos;accueil pour cette mission. Les frais de cet hébergement sont à la charge du volontaire.
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex flex-row justify-between">
+                      <div className="text-sm font-bold">Hébergement gratuit proposé</div>
+                      <div className="p-1.5 bg-green-50 rounded-full">
+                        <House color="#059669" />
+                      </div>
+                    </div>
+                    <div className="text-xs">
+                      Un hébergement est proposé par la structure d&apos;accueil pour cette mission. Les frais de cet hébergement ne sont pas à la charge du volontaire.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
         {mission.application ? (
@@ -411,7 +443,7 @@ export default function viewMobile() {
                       mission.application[option].length > 0 && (
                         <FileCard
                           key={index}
-                          name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                          name={translateAddFilePhase2WithoutPreposition(option)}
                           icon="reglement"
                           filled={mission.application[option].length}
                           color="text-blue-600 bg-white"
@@ -484,7 +516,19 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young, isMilitaryPreparation }) => {
+const ApplyButton = ({
+  placesLeft,
+  setModal,
+  disabledAge,
+  disabledIncomplete,
+  disabledPmRefused,
+  scrollToBottom,
+  duration,
+  young,
+  isMilitaryPreparation,
+  hebergement,
+  hebergementPayant,
+}) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -501,7 +545,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
           </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
     );
@@ -515,7 +559,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
           </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
     );
@@ -528,7 +572,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
           </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
     );
@@ -539,7 +583,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
         <div className="text-red-500 text-xs">Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater</div>
         <div className="flex flex-col items-stretch gap-4">
           <button className="px-12 py-2 rounded-lg text-white bg-blue-600/60  text-sm cursor-pointer">Candidater</button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
     );
@@ -551,7 +595,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
           <button className="px-12 py-2 rounded-lg text-white bg-blue-600  text-sm cursor-pointer" onClick={() => scrollToBottom()}>
             Candidater
           </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
     );
@@ -570,7 +614,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
         }}>
         Candidater
       </button>
-      <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+      <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
     </div>
   );
 };
@@ -653,7 +697,7 @@ const ApplicationStatus = ({
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
           </div>
         </div>
-        <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} />
+        <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>
     );
   }
@@ -773,7 +817,7 @@ const ApplicationStatus = ({
         </div>
         {disabledAge || disabledIncomplete || disabledPmRefused ? <div className="text-red-500 text-center text-xs">{message}</div> : null}
 
-        <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} />
+        <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>
     );
   }
@@ -834,12 +878,25 @@ const InfoStructure = ({ title, structure }) => {
   );
 };
 
-const HoursAndPlaces = ({ duration, placesLeft }) => {
+const HoursAndPlaces = ({ duration, placesLeft, hebergement, hebergementPayant }) => {
   return (
     <div className={`flex items-center ${duration ? "justify-between" : "justify-center"} gap-6`}>
       {duration ? (
         <div className="flex items-center gap-1">
-          <AiOutlineClockCircle className="text-gray-400" />
+          {hebergement === "true" && (
+            <>
+              {hebergementPayant === "true" ? (
+                <div className="p-1.5 bg-yellow-100 rounded-full">
+                  <House color="#D97706" />
+                </div>
+              ) : (
+                <div className="p-1.5 bg-green-50 rounded-full">
+                  <House color="#059669" />
+                </div>
+              )}
+            </>
+          )}
+          <AiOutlineClockCircle className="text-gray-400 ml-2" />
           <div className="text-xs">{duration} heure(s)</div>
         </div>
       ) : null}
