@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -24,6 +24,7 @@ export default function DetailsView({ mission, structure, tutor }) {
   const [values, setValues] = useState(mission);
   const [errors, setErrors] = useState({});
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
 
   const onSubmit = () => {};
   console.log(MISSION_DOMAINS);
@@ -107,6 +108,13 @@ export default function DetailsView({ mission, structure, tutor }) {
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Structure rattachée</div>
                   <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, structureName: e.target.value })} label="Structure" value={values.structureName} />
+                  {values.structureName && editing && (
+                    <div
+                      onClick={() => history.push(`/structure/${values.structureId}/edit`)}
+                      className="border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
+                      Modifier la structure
+                    </div>
+                  )}
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
