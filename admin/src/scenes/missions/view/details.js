@@ -108,7 +108,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                     handleChange={(e) => setValues({ ...values, domains: e })}
                     type="select"
                     multiple
-                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
+                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain && !values.domains.includes(d.value))}
                     label="Sélectionnez un ou plusieurs domaines"
                     transformer={translate}
                     value={translate(values.domains)}

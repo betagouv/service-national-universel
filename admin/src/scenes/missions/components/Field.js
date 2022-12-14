@@ -23,7 +23,16 @@ export default function Field({
         {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
         {type === "date" && <DatePickerList fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => setFielValue(name, new Date(date))} />}
         {type === "select" && (
-          <SimpleSelect multiple={multiple} value={value} name={name} showBackgroundColor={false} transformer={transformer} options={options} onChange={handleChange} />
+          <SimpleSelect
+            multiple={multiple}
+            readOnly={readOnly}
+            value={value}
+            name={name}
+            showBackgroundColor={false}
+            transformer={transformer}
+            options={options}
+            onChange={handleChange}
+          />
         )}
         {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block  w-[100%]" />}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
@@ -32,7 +41,7 @@ export default function Field({
   );
 }
 
-function SimpleSelect({ value, transformer, options, onChange, showBackgroundColor = true, multiple }) {
+function SimpleSelect({ value, transformer, options, onChange, showBackgroundColor = true, multiple, readOnly }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
 
   const selectOptionsRef = useRef();
@@ -58,12 +67,8 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
   }, []);
 
   function toggleSelectOptions() {
+    if (readOnly) return;
     setSelectOptionsOpened((opened) => !opened);
-  }
-
-  function selectOption(opt) {
-    setSelectOptionsOpened(false);
-    onChange && onChange(opt);
   }
   return (
     <div ref={selectOptionsRef}>
@@ -72,12 +77,21 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
           <>
             <div className="flex flex-row flex-wrap gap-2">
               {value.map((val) => (
-                <div className="bg-gray-200 px-0.5 rounded" key={val}>
-                  {transformer ? transformer(val) : val}
+                <div className="flex flex-row items-center justify-center gap-2 rounded bg-gray-300" key={val}>
+                  <div className="pt-0.5 p-1">{transformer ? transformer(val) : val}</div>
+                  {!readOnly && (
+                    <div
+                      className="h-full flex items-center justify-center pt-0.5 px-1 hover:bg-red-200 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChange(value.filter((v) => v !== val));
+                      }}>
+                      <img src={Cross} width={14} height={14} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-            <img src={Cross} width={14} height={14} />
           </>
         ) : (
           <div>{transformer ? transformer(value) : value}</div>
@@ -87,7 +101,14 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
       {selectOptionsOpened && (
         <div className="absolute z-10 mt-[-1] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
           {options.map((opt) => (
-            <div className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer" key={opt.value} onClick={() => selectOption(opt.value)}>
+            <div
+              className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer"
+              key={opt.value}
+              onClick={() => {
+                const newValue = value;
+                if (!newValue.includes(opt.value)) newValue.push(opt.value);
+                onChange(newValue);
+              }}>
               {opt.label}
             </div>
           ))}
