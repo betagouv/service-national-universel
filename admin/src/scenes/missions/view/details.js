@@ -193,7 +193,15 @@ export default function DetailsView({ mission, structure, tutor }) {
                     label="Mission regroupée sur des journées"
                     value={translate(values.format)}
                   />
-                </div>{" "}
+                </div>
+                <div>
+                  <div className="flex flex-row text-xs font-medium mt-2">
+                    <div>Domaine(s) d&apos;action secondaire(s)</div>
+                    <div className="text-gray-400">&nbsp;(facultatif)</div>
+                  </div>
+                  <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
+                  <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, duration: e.target.value })} label="Heure(s)" value={translate(values.duration)} />
+                </div>
               </div>
             </div>
           </div>
