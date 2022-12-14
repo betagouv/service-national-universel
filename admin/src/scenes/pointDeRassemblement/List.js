@@ -125,6 +125,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
                 //defaultValue={[firstSession]}
               />
               <MultiDropdownList
@@ -141,6 +142,7 @@ export default function List() {
                 searchPlaceholder="Rechercher..."
                 size={1000}
                 defaultValue={user.role === ROLES.REFERENT_REGION ? [...user.region] : []}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -156,6 +158,7 @@ export default function List() {
                 searchPlaceholder="Rechercher..."
                 size={1000}
                 defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
               />
               <DeleteFilters />
             </div>

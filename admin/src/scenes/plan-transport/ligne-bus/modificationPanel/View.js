@@ -116,7 +116,8 @@ export default function View({ open, setOpen, modification, getModification, tag
         toastr.error("Oups, une erreur est survenue lors de la création du tag", translate(code));
         return setIsLoading(false);
       }
-      await getTags();
+      tagsOptions.push({ value: tags._id, label: tags.name });
+      getTags();
       await onChangeTags(tags._id);
       setIsLoading(false);
     } catch (e) {
@@ -130,7 +131,7 @@ export default function View({ open, setOpen, modification, getModification, tag
     try {
       setIsLoading(true);
       // Save data
-      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tags`, { tagId });
+      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tag/${tagId}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag", translate(code));
         return setIsLoading(false);
@@ -148,7 +149,7 @@ export default function View({ open, setOpen, modification, getModification, tag
     try {
       setIsLoading(true);
       // Save data
-      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tags/delete`, { tagId });
+      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tag/${tagId}/delete`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag", translate(code));
         return setIsLoading(false);

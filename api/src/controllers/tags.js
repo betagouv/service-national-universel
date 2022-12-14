@@ -30,7 +30,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       type: Joi.string().required(),
