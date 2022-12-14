@@ -15,6 +15,7 @@ export default function Field({
   transformer,
   readOnly = false,
   errors = {},
+  row,
   multiple = false,
 }) {
   return (
@@ -34,7 +35,11 @@ export default function Field({
             onChange={handleChange}
           />
         )}
-        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="w-full" />}
+        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className={"w-full"} />}
+
+        {type === "textarea" && (
+          <textarea rows={row} readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
+        )}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
       </div>
     </div>

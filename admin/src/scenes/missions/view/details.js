@@ -222,6 +222,8 @@ export default function DetailsView({ mission, structure, tutor }) {
                   </div>
                   <Field
                     readOnly={!editing}
+                    type="textarea"
+                    row={4}
                     handleChange={(e) => setValues({ ...values, duration: e.target.value })}
                     label="Décrivez en quelques mots votre mission"
                     value={translate(values.duration)}
