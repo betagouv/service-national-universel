@@ -140,7 +140,7 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.put("/:id/tags", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       tagId: Joi.string().required(),
@@ -172,7 +172,7 @@ router.put("/:id/tags", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.put("/:id/tags/delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       tagId: Joi.string().required(),
