@@ -27,12 +27,8 @@ export default function DetailsView({ mission, structure, tutor }) {
   const history = useHistory();
 
   const onSubmit = () => {};
-  console.log(MISSION_DOMAINS);
   const mainDomainsOption = Object.keys(MISSION_DOMAINS).map((d) => {
     return { value: d, label: translate(d) };
-  });
-  const domains = mission?.domains?.filter((d) => {
-    return d !== mission.mainDomain;
   });
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
@@ -224,9 +220,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                     readOnly={!editing}
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, duration: e.target.value })}
+                    handleChange={(e) => setValues({ ...values, description: e.target.value })}
                     label="Décrivez en quelques mots votre mission"
-                    value={translate(values.duration)}
+                    value={translate(values.description)}
                   />
                 </div>
               </div>
