@@ -34,7 +34,7 @@ export default function ListeDemandeModif() {
 
   const getTags = async () => {
     try {
-      const { ok, code, data: reponseTags } = await api.get(`/tags/all?type=modification_bus`);
+      const { ok, code, data: reponseTags } = await api.get(`/tags?type=modification_bus`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des tags", translate(code));
       }
