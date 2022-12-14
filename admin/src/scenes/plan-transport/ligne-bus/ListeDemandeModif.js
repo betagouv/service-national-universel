@@ -282,16 +282,18 @@ const Line = ({ modification, tagsOptions }) => {
             <div className=" text-sm text-gray-700 p-2 bg-gray-100 leading-4 rounded-lg">Non renseigné</div>
           ) : (
             <div className="flex items-center gap-1">
-              <div className="p-2 rounded-lg bg-[#E8EDFF]">
+              <div className="px-2 py-1 rounded-lg bg-[#E8EDFF]">
                 <div className="text-sm text-[#0063CB]  line-clamp-2">{tagsOptions.find((option) => option.value === modification.tagIds[0])?.label}</div>
               </div>
               {modification.tagIds.length > 1 && (
-                <div ref={refContainer} className="relative flex justify-center items-center text-sm text-[#0063CB] h-full leading-4 p-2 rounded-lg bg-[#E8EDFF] cursor-pointer">
+                <div
+                  ref={refContainer}
+                  className="relative flex justify-center items-center text-sm text-[#0063CB] h-full leading-4 px-2 py-1 rounded-lg bg-[#E8EDFF] cursor-pointer">
                   +{modification.tagIds.length - 1}
                   <div ref={refChildren} className={`absolute top-[105%] left-[95%] bg-white shadow-lg rounded-xl z-10 w-96 ${!open ? "hidden" : ""}`}>
                     <div className="flex flex-col p-3 gap-2">
                       {modification.tagIds.map((value, index) => (
-                        <div key={index + modification._id.toString()} className="p-2 rounded-lg bg-[#E8EDFF] w-fit max-w-full">
+                        <div key={index + modification._id.toString()} className="px-2 py-1 rounded-lg bg-[#E8EDFF] w-fit max-w-full">
                           <div className="text-sm text-[#0063CB] truncate">{tagsOptions.find((option) => option.value === value)?.label}</div>
                         </div>
                       ))}
