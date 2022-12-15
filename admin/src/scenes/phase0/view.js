@@ -1125,11 +1125,11 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     let errors = {};
 
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
-      if (!validator.isEmail(data[`parent${parent}Email`])) {
+      if (data[`parent${parent}ContactPreference`] === "email" && !validator.isEmail(data[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if (!validator.isMobilePhone(data[`parent${parent}Phone`], ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+      if (data[`parent${parent}ContactPreference`] === "phone" && !validator.isMobilePhone(data[`parent${parent}Phone`], ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
         errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide.";
         result = false;
       }
