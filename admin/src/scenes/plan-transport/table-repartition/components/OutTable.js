@@ -207,7 +207,7 @@ export function OutTable({ cohort, region, user }) {
           <div className="absolute  bottom-4 right-0">
             <FrenchMap />
           </div>
-          <div className="flex items-center gap-1 absolute bottom-4 right-6 cursor-pointer hover:underline" onClick={() => history.push("/plan-de-transport/table-repartition")}>
+          <div className="flex items-center gap-1 absolute bottom-4 right-6 cursor-pointer hover:underline" onClick={() => history.push("/table-repartition?cohort=" + cohort)}>
             <div className="text-xs text-blue-600 leading-5 ">Table de répartition</div>
             <BsChevronRight className="text-blue-600 " />
           </div>
