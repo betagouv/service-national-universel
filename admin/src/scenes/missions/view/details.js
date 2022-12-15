@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -7,11 +7,13 @@ import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
+import api from "../../../services/api";
 
 export default function DetailsView({ mission, structure, tutor }) {
+  const [values, setValues] = useState(mission);
+  const [structures, setStructures] = useState([]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [values, setValues] = useState(mission);
   const [errors, setErrors] = useState({});
 
   const [editingBottom, setEdittingBottom] = useState(false);
@@ -21,18 +23,29 @@ export default function DetailsView({ mission, structure, tutor }) {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
+  async function initStructures() {
+    const responseStructure = await api.get("/structure");
+    const s = responseStructure.data.map((e) => ({ label: e.name, value: { name: e.name, _id: e._id } }));
+    setStructures(s);
+  }
+
+  useEffect(() => {
+    initStructures();
+  }, []);
+
   const onSubmit = () => {
     setLoading(true);
     const error = {};
     if (!values.name) error.name = "Ce champ est obligatoire";
     if (!values.description) error.description = "Ce champ est obligatoire";
-    if (!values.structureName) error.structureName = "Ce champ est obligatoire";
+    if (!values.structureName || !values.structureId) error.structureName = "Ce champ est obligatoire";
     if (!values.domain) error.domain = "Ce champ est obligatoire";
     if (!values.period) error.period = "Ce champ est obligatoire";
     if (!values.address) error.address = "Ce champ est obligatoire";
     if (!values.zip) error.zip = "Ce champ est obligatoire";
     if (!values.city) error.city = "Ce champ est obligatoire";
     if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifié";
+    console.log(values);
     setErrors(error);
     if (Object.keys(error).length > 0) return setLoading(false);
   };
@@ -53,10 +66,6 @@ export default function DetailsView({ mission, structure, tutor }) {
       city: isConfirmed ? suggestion.city : values.city,
     });
   };
-
-  React.useEffect(() => {
-    console.log("current errors are : ", errors);
-  }, [errors]);
 
   const formatOptions = [
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
@@ -127,8 +136,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <Field
                     errors={errors}
                     name="structureName"
+                    type="select"
                     readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, structureName: e.target.value })}
+                    options={structures}
+                    handleChange={(e) => setValues({ ...values, structureName: e.name, structureId: e._id })}
                     label="Structure"
                     value={values.structureName}
                   />
@@ -145,7 +156,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <Field
                     errors={errors}
                     readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, mainDomain: e })}
+                    handleChange={(e) => setValues({ ...values, mainDomain: e, domains: values.domains.filter((d) => d !== e) })}
                     type="select"
                     name="mainDomain"
                     options={mainDomainsOption}

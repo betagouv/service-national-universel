@@ -23,10 +23,11 @@ export default function Field({
       <div className={`relative bg-white px-3 border-[1px] w-full rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
         {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
         {type === "date" && <DatePickerList disabled={readOnly} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />}
-        {type === "select" && (
+        {(type === "select-input" || type === "select") && (
           <SimpleSelect
             multiple={multiple}
             readOnly={readOnly}
+            type={type}
             value={value}
             name={name}
             showBackgroundColor={false}
@@ -109,19 +110,25 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
       </div>
       {selectOptionsOpened && (
         <div className="absolute z-10 mt-[-1] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
-          {options.map((opt) => (
-            <div
-              className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer"
-              key={opt.value}
-              onClick={() => {
-                if (!multiple) return selectOption(opt.value);
-                const newValue = value;
-                if (!newValue.includes(opt.value)) newValue.push(opt.value);
-                onChange(newValue);
-              }}>
-              {opt.label}
-            </div>
-          ))}
+          {options.length === 0 ? (
+            <div className="p-1 text-center">Chargement...</div>
+          ) : (
+            <>
+              {options.map((opt) => (
+                <div
+                  className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer"
+                  key={opt.value}
+                  onClick={() => {
+                    if (!multiple) return selectOption(opt.value);
+                    const newValue = value;
+                    if (!newValue.includes(opt.value)) newValue.push(opt.value);
+                    onChange(newValue);
+                  }}>
+                  {opt.label}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
