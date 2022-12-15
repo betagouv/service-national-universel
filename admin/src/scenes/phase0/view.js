@@ -1158,9 +1158,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     );
   }
 
-  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) }];
+  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) || Object.keys(errors)?.some((error) => error.includes("parent1")) }];
   if (young.parent2Status) {
-    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) });
+    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) || Object.keys(errors)?.some((error) => error.includes("parent2")) });
   }
 
   function onParrentTabChange(tab) {
