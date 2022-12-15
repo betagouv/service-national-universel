@@ -61,7 +61,7 @@ export default function Wrapper({ mission, tab, children }) {
   if (!mission) return null;
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
-      <div className=" flex flex-row border-b border-gray-200 my-7 px-8 gap-4 justify-between">
+      <div className=" flex flex-wrap-reverse flex-row border-b border-gray-200 my-7 px-8 gap-4 justify-between">
         <div className="flex flex-col justify-end">
           <div className="text-2xl font-bold mb-7 ">
             {mission.name} {mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}

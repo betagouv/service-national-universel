@@ -71,8 +71,8 @@ export default function DetailsView({ mission, structure, tutor }) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="details">
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex flex-col rounded-lg pt-6 pb-12 px-8 bg-white gap-8">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
+            <div className="flex items-center justify-between my-4">
               <div className="text-lg font-medium text-gray-900">
                 <div>Informations générales</div>
               </div>
@@ -109,8 +109,8 @@ export default function DetailsView({ mission, structure, tutor }) {
                 </>
               ) : null}
             </div>
-            <div className="flex">
-              <div className="flex flex-col w-[45%] gap-4 ">
+            <div className="flex flex-wrap">
+              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
@@ -199,10 +199,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                   )}
                 </div>
               </div>
-              <div className="flex w-[10%] justify-center items-center">
+              <div className="hidden lg:flex w-[10%] justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col w-[45%] gap-4 ">
+              <div className="flex flex-col gap-4 flex-1 min-w-[350px] ">
                 <div>
                   <div className="text-xs font-medium mb-2">Type de mission</div>
                   <Field
@@ -282,8 +282,8 @@ export default function DetailsView({ mission, structure, tutor }) {
           </div>
         </div>
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex flex-col rounded-lg pt-6 pb-12 px-8 bg-white gap-8">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
+            <div className="flex items-center justify-between my-4">
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
               </div>
