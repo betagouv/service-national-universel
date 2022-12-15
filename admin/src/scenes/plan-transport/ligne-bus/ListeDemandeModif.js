@@ -305,7 +305,7 @@ const Line = ({ modification, tagsOptions }) => {
           )}
         </div>
         <div className="flex gap-2 items-center w-[12%]">
-          <div className={`flex items-center justify-center text-white text-sm rounded-full py-1 px-3 ${getStatusClass(modification.status)}`}>
+          <div className={`flex items-center justify-center text-white text-sm rounded-full py-1 px-3 whitespace-nowrap ${getStatusClass(modification.status)}`}>
             {translateStatus(modification.status)}
           </div>
           {modification?.opinion && (
