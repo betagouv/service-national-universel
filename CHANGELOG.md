@@ -1,3 +1,10 @@
+# [1.186.0](https://github.com/betagouv/service-national-universel/compare/v1.185.0...v1.186.0) (2022-12-15)
+
+
+### Features
+
+* **api/admin:** Liste demande de modification plan de tranport  ([#2145](https://github.com/betagouv/service-national-universel/issues/2145)) ([67046f3](https://github.com/betagouv/service-national-universel/commit/67046f3b92bd2dde3a3612d96b68831c918986a9))
+
 # [1.185.0](https://github.com/betagouv/service-national-universel/compare/v1.184.0...v1.185.0) (2022-12-14)
 
 
