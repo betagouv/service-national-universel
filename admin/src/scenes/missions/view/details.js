@@ -4,7 +4,18 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, htmlCleaner, MISSION_DOMAINS } from "../../../utils";
+import {
+  translate,
+  formatStringDateTimezoneUTC,
+  ROLES,
+  copyToClipboard,
+  MISSION_STATUS,
+  htmlCleaner,
+  MISSION_DOMAINS,
+  PERIOD,
+  MISSION_PERIOD_DURING_HOLIDAYS,
+  MISSION_PERIOD_DURING_SCHOOL,
+} from "../../../utils";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
@@ -359,32 +370,42 @@ export default function DetailsView({ mission, structure, tutor }) {
                     <div>Période de réalisation de la mission</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
+                  {/* Script pour passage d'array periode en single value */}
                   <Field
                     readOnly={!editingBottom}
-                    handleChange={(e) => setValues({ ...values, mainDomain: e })}
+                    handleChange={(e) => setValues({ ...values, period: e })}
                     type="select"
-                    multiple
-                    options={mainDomainsOption}
+                    options={Object.keys(PERIOD).map((d) => {
+                      return { value: d, label: translate(d) };
+                    })}
                     label="Sélectionnez une ou plusieurs périodes"
-                    value={translate(values.mainDomain)}
+                    value={translate(values.period)}
                   />
-                  <Field
-                    readOnly={!editingBottom}
-                    className="mt-4"
-                    handleChange={(e) => setValues({ ...values, domains: e })}
-                    type="select"
-                    multiple
-                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain && !values.domains.includes(d.value))}
-                    label="Précisez"
-                    transformer={translate}
-                    value={translate(values.domains)}
-                  />
+                  {values.period !== "" && values.period !== "WHENEVER" && (
+                    <Field
+                      readOnly={!editingBottom}
+                      className="mt-4"
+                      handleChange={(e) => setValues({ ...values, subPeriod: e })}
+                      type="select"
+                      multiple
+                      options={(() => {
+                        const valuesToCheck = values.period;
+                        let options = [];
+                        if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                        if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                        return options.filter((el) => !values.subPeriod.includes(el)).map((el) => ({ value: el, label: translate(el) }));
+                      })()}
+                      label="Précisez"
+                      transformer={translate}
+                      value={translate(values.subPeriod)}
+                    />
+                  )}
                 </div>
                 <div>
                   <div className="flex flex-col text-xs font-medium my-2">
                     Nombre de volontaire(s) recherché(s). Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
                   </div>
-                  <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, contraintes: e.target.value })} value={translate(values.contraintes)} />
+                  <Field readOnly={!editingBottom} handleChange={(e) => setValues({ ...values, contraintes: e.target.value })} value={translate(values.contraintes)} />
                 </div>
               </div>
             </div>
