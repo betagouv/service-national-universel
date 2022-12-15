@@ -9,24 +9,26 @@ import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { cohortList, parseQuery } from "../util";
 
 export default function National() {
   const user = useSelector((state) => state.Auth.user);
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
-  const cohortList = [
-    { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
-    { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
-    { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
-    { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
-    { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
-  ];
-
+  const [cohort, setCohort] = React.useState(getDefaultCohort());
   const [youngsByRegion, setYoungsByRegion] = React.useState([]);
   const [placesCenterByRegion, setPlacesCenterByRegion] = React.useState({});
   const [loadingQuery, setLoadingQuery] = React.useState(false);
   const [searchRegion, setSearchRegion] = React.useState("");
   const [regions, setRegions] = React.useState(regionList);
   const [data, setData] = React.useState([]);
+
+  function getDefaultCohort() {
+    const { cohort } = parseQuery(location.search);
+    if (cohort) {
+      return cohort;
+    } else {
+      return cohortList[0].value;
+    }
+  }
 
   const getRepartitionRegion = async () => {
     try {
