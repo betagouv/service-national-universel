@@ -23,10 +23,16 @@ export default function DetailsView({ mission, structure, tutor }) {
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(mission);
   const [errors, setErrors] = useState({});
+
+  const [editingBottom, setEdittingBottom] = useState(false);
+  const [loadingBottom, setLoadingBottom] = useState(false);
+
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
   const onSubmit = () => {};
+  const onSubmitBottom = () => {};
+
   const mainDomainsOption = Object.keys(MISSION_DOMAINS).map((d) => {
     return { value: d, label: translate(d) };
   });
@@ -54,7 +60,7 @@ export default function DetailsView({ mission, structure, tutor }) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="details">
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex flex-col rounded-lg pt-8 pb-12 px-8 bg-white gap-8">
+          <div className="flex flex-col rounded-lg pt-6 pb-12 px-8 bg-white gap-8">
             <div className="flex items-center justify-between">
               <div className="text-lg font-medium text-gray-900">
                 <div>Informations générales</div>
@@ -239,12 +245,77 @@ export default function DetailsView({ mission, structure, tutor }) {
                     readOnly={!editing}
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, description: e.target.value })}
+                    handleChange={(e) => setValues({ ...values, actions: e.target.value })}
                     label="Listez brièvement les actions confiées au(x) volontaires"
-                    value={translate(values.description)}
+                    value={translate(values.actions)}
+                  />
+                </div>
+                <div>
+                  <div className="flex flex-col text-xs font-medium my-2">
+                    <div>
+                      Contraintes spécifiques pour cette mission
+                      <span className="text-gray-400">&nbsp;(facultatif).&nbsp;</span>
+                    </div>
+                    <div>(conditons physiques, période de formation, mission en soirée...)</div>
+                  </div>
+                  <Field
+                    readOnly={!editing}
+                    type="textarea"
+                    row={4}
+                    handleChange={(e) => setValues({ ...values, contraintes: e.target.value })}
+                    label="Précisez les informations complémentaires à préciser au volontaire."
+                    value={translate(values.contraintes)}
                   />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
+          <div className="flex flex-col rounded-lg pt-6 pb-12 px-8 bg-white gap-8">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-medium text-gray-900">
+                <div>Dates et places disponibles</div>
+              </div>
+              {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION ? (
+                <>
+                  {!editingBottom ? (
+                    <button
+                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setEdittingBottom(true)}
+                      disabled={loadingBottom}>
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      Modifier
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setEdittingBottom(false);
+                          setValues(mission);
+                        }}
+                        disabled={loading}>
+                        Annuler
+                      </button>
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={onSubmitBottom}
+                        disabled={loadingBottom}>
+                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        Enregistrer les changements
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : null}
+            </div>
+            <div className="flex">
+              <div className="flex flex-col w-[45%] gap-4 "></div>
+              <div className="flex w-[10%] justify-center items-center">
+                <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+              </div>
+              <div className="flex flex-col w-[45%] gap-4 "></div>
             </div>
           </div>
         </div>
