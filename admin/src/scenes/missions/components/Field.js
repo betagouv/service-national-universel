@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import DatePickerList from "../../phase0/components/DatePickerList";
 import ChevronDown from "../../../assets/icons/ChevronDown";
-import Cross from "../../../assets/Cross.svg";
 
 export default function Field({
   name,
@@ -87,7 +86,7 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
           <>
             <div className="flex flex-row flex-wrap gap-2">
               {value.map((val) => (
-                <div className="flex flex-row items-center justify-center gap-2 mt-1 rounded bg-gray-300" key={val}>
+                <div className="flex flex-row items-center justify-center mt-1 rounded bg-gray-300" key={val}>
                   <div className="pt-0.5 p-1">{transformer ? transformer(val) : val}</div>
                   {!readOnly && (
                     <div
@@ -96,7 +95,7 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
                         e.stopPropagation();
                         onChange(value.filter((v) => v !== val));
                       }}>
-                      <img src={Cross} width={14} height={14} />
+                      <div>X</div>
                     </div>
                   )}
                 </div>

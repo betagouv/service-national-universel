@@ -8,6 +8,7 @@ import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import api from "../../../services/api";
+import Toggle from "../../../components/Toggle";
 
 export default function DetailsView({ mission, structure, tutor }) {
   const [values, setValues] = useState(mission);
@@ -37,14 +38,16 @@ export default function DetailsView({ mission, structure, tutor }) {
     setLoading(true);
     const error = {};
     if (!values.name) error.name = "Ce champ est obligatoire";
-    if (!values.description) error.description = "Ce champ est obligatoire";
     if (!values.structureName || !values.structureId) error.structureName = "Ce champ est obligatoire";
     if (!values.domain) error.domain = "Ce champ est obligatoire";
-    if (!values.period) error.period = "Ce champ est obligatoire";
     if (!values.address) error.address = "Ce champ est obligatoire";
     if (!values.zip) error.zip = "Ce champ est obligatoire";
     if (!values.city) error.city = "Ce champ est obligatoire";
     if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifié";
+
+    if (!values.description) error.description = "Ce champ est obligatoire";
+    if (!values.actions) error.actions = "Ce champ est obligatoire";
+
     console.log(values);
     setErrors(error);
     if (Object.keys(error).length > 0) return setLoading(false);
@@ -71,15 +74,29 @@ export default function DetailsView({ mission, structure, tutor }) {
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
-
+  console.log(mission);
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="details">
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
           <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
-              <div className="text-lg font-medium text-gray-900">
-                <div>Informations générales</div>
+              <div className="flex flex-row gap-4 items-center justify-center">
+                <div className="text-lg font-medium text-gray-900">Informations générales</div>
+                {mission.status === "VALIDATED" && (
+                  <div className="flex flex-row gap-2">
+                    <Toggle
+                      id="visibility"
+                      name="visibility"
+                      disabled={!editing}
+                      value={mission.visibility === "VISIBLE"}
+                      onChange={(e) => setValues({ ...values, visibility: e ? "VISIBLE" : "HIDDEN" })}
+                    />
+                    <div>
+                      La mission est <strong>{mission.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                    </div>
+                  </div>
+                )}
               </div>
               {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION ? (
                 <>
