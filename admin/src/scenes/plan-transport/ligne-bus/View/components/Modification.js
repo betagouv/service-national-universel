@@ -1,6 +1,10 @@
 import dayjs from "dayjs";
 import React from "react";
+import { toastr } from "react-redux-toastr";
+import { translate } from "snu-lib";
 import Loader from "../../../../../components/Loader";
+import { capture } from "../../../../../sentry";
+import api from "../../../../../services/api";
 import { getInitials, getStatusClass, translateStatus } from "../../../components/commons";
 import Chat from "../../components/Icons/Chat";
 import Quote from "../../components/Icons/Quote";
@@ -9,6 +13,23 @@ import View from "../../modificationPanel/View";
 
 export default function Modification({ demandeDeModification, getModification }) {
   const [panel, setPanel] = React.useState({ open: false });
+  const [tagsOptions, setTagsOptions] = React.useState(null);
+
+  const getTags = async () => {
+    try {
+      const { ok, code, data: reponseTags } = await api.get(`/tags?type=modification_bus`);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des tags", translate(code));
+      }
+      const options = reponseTags.map((tag) => {
+        return { value: tag._id, label: tag.name };
+      });
+      setTagsOptions(options);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des tags");
+    }
+  };
 
   React.useEffect(() => {
     if (panel.open) {
@@ -19,12 +40,17 @@ export default function Modification({ demandeDeModification, getModification })
     }
   }, [demandeDeModification]);
 
-  if (!demandeDeModification)
+  React.useEffect(() => {
+    getTags();
+  }, []);
+
+  if (!demandeDeModification || !tagsOptions)
     return (
       <div className="p-8 w-1/2 bg-white rounded-xl">
         <Loader />
       </div>
     );
+
   return (
     <div className="p-8 w-1/2 bg-white rounded-xl">
       <div className="text-xl leading-6 text-[#242526]">Demandes de modifications ({demandeDeModification.length})</div>
@@ -70,7 +96,14 @@ export default function Modification({ demandeDeModification, getModification })
           </div>
         ))}
       </div>
-      <View open={panel.open} setOpen={() => setPanel({ open: false })} modification={panel.modification} getModification={getModification} />
+      <View
+        open={panel.open}
+        setOpen={() => setPanel({ open: false })}
+        modification={panel.modification}
+        getModification={getModification}
+        tagsOptions={tagsOptions}
+        getTags={getTags}
+      />
     </div>
   );
 }

@@ -7,11 +7,12 @@ const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const {
-  LigneBusCanCreateDemandeDeModification,
-  LigneBusCanViewDemandeDeModification,
-  LigneBusCanSendMessageDemandeDeModification,
-  LigneBusCanEditStatusDemandeDeModification,
-  LigneBusCanEditOpinionDemandeDeModification,
+  ligneBusCanCreateDemandeDeModification,
+  ligneBusCanViewDemandeDeModification,
+  ligneBusCanSendMessageDemandeDeModification,
+  ligneBusCanEditStatusDemandeDeModification,
+  ligneBusCanEditOpinionDemandeDeModification,
+  ligneBusCanEditTagsDemandeDeModification,
 } = require("snu-lib");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -23,7 +24,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { lineId, message } = value;
 
@@ -55,7 +56,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanEditStatusDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditStatusDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { status, id } = value;
 
@@ -87,7 +88,7 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanEditOpinionDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditOpinionDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { opinion, id } = value;
 
@@ -119,7 +120,7 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
     console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { message, id } = value;
 
@@ -139,6 +140,66 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
   }
 });
 
+router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      tagId: Joi.string().required(),
+      id: Joi.string().required(),
+    }).validate({ ...req.body, ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { tagId, id } = value;
+
+    const modif = await ModificationBusModel.findById(id);
+    if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const tags = modif.tagIds || [];
+    //check if tag already exist
+    const tagExist = tags.find((tag) => tag === tagId);
+    if (tagExist) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    modif.set({ tagIds: [...tags, tagId] });
+
+    await modif.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      tagId: Joi.string().required(),
+      id: Joi.string().required(),
+    }).validate({ ...req.body, ...req.params });
+    console.log(error);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { tagId, id } = value;
+
+    const modif = await ModificationBusModel.findById(id);
+    if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const tags = modif.tagIds || [];
+
+    modif.set({ tagIds: tags.filter((tag) => tag !== tagId) });
+
+    await modif.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/ligne/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -147,7 +208,7 @@ router.get("/ligne/:id", passport.authenticate("referent", { session: false, fai
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanViewDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanViewDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 
