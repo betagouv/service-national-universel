@@ -2,9 +2,18 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
+const { COHORTS } = require("snu-lib");
 const MODELNAME = "modificationbus";
 
 const Schema = new mongoose.Schema({
+  cohort: {
+    type: String,
+    required: true,
+    enum: COHORTS,
+    documentation: {
+      description: "Cohorte de la ligne de bus",
+    },
+  },
   //Informations de la ligne de bus
   lineId: {
     type: String,
@@ -99,7 +108,8 @@ const Schema = new mongoose.Schema({
 
   // Informations de la modification sur l'avis de la demande (pour es)
   opinion: {
-    type: Boolean,
+    type: String,
+    enum: ["true", "false"],
     documentation: {
       description: "Avis sur la demande",
     },

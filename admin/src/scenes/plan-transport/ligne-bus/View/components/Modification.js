@@ -80,7 +80,7 @@ export default function Modification({ demandeDeModification, getModification })
                 </div>
                 {modification?.opinion && (
                   <div className="flex items-center justify-center text-white text-xs rounded-full h-[22px] w-[22px] bg-[#3D5B85]">
-                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === false && "rotate-180"}`} />
+                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === "false" && "rotate-180"}`} />
                   </div>
                 )}
               </div>

@@ -33,7 +33,7 @@ export default function View({ open, setOpen, modification, getModification, tag
       });
 
       //add opinion to conversation
-      if (modification.opinion === true || modification.opinion === false) {
+      if (modification.opinion === "true" || modification.opinion === "false") {
         conversation.push({
           opinion: modification.opinion,
           userId: modification.opinionUserId,
@@ -186,7 +186,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                 </div>
                 {modification?.opinion && (
                   <div className="flex items-center justify-center text-white text-xs rounded-full p-1.5 bg-[#3D5B85]">
-                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === false && "rotate-180"}`} />
+                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === "false" && "rotate-180"}`} />
                   </div>
                 )}
               </div>
@@ -240,7 +240,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                   )}
                   {message.type === "opinion" && (
                     <div className="flex items-center justify-center text-white text-xs rounded-full p-2.5 bg-[#3D5B85] cursor-pointer  border-[1px] border-white shadow-lg h-11 w-11">
-                      <Thumbs className={`text-white ${message.opinion === false && "rotate-180"}`} />
+                      <Thumbs className={`text-white ${message.opinion === "false" && "rotate-180"}`} />
                     </div>
                   )}
                   <div className="flex flex-col gap-1">
@@ -249,7 +249,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                       <div className="text-sm text-gray-500">{dayjs(message.date).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
                     <div className="text-gray-800 text-sm leading-5 whitespace-pre-wrap">
-                      {message.type === "message" ? message?.message : message.opinion ? "A donné un avis favorable" : "A donné un avis défavorable"}
+                      {message.type === "message" ? message?.message : message.opinion === "true" ? "A donné un avis favorable" : "A donné un avis défavorable"}
                     </div>
                   </div>
                 </div>
@@ -279,13 +279,13 @@ export default function View({ open, setOpen, modification, getModification, tag
                   {getInitials(user.firstName + " " + user.lastName)}
                 </div>
                 <textarea rows={1} className="flex-1 appearance-none p-1" placeholder="Répondre" value={message} onChange={(e) => setMessage(e.target.value)} />
-                {modification?.opinion !== true && modification?.opinion !== false && message === "" && (
+                {modification?.opinion !== "true" && modification?.opinion !== "false" && message === "" && (
                   <>
                     <button
                       data-tip
                       data-for="tool-up"
                       disabled={isLoading}
-                      onClick={() => onSendOpinion(true)}
+                      onClick={() => onSendOpinion("true")}
                       className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
                       <Thumbs className="text-white h-4 w-4" />
                     </button>
@@ -297,7 +297,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                       data-tip
                       data-for="tool-down"
                       disabled={isLoading}
-                      onClick={() => onSendOpinion(false)}
+                      onClick={() => onSendOpinion("false")}
                       className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
                       <Thumbs className="text-white h-4 w-4 rotate-180" />
                     </button>

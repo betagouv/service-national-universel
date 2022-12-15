@@ -71,14 +71,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  km: {
-    type: Number,
-    required: true,
-    documentation: {
-      description: "Nombre de km",
-    },
-  },
-
   lunchBreak: {
     type: Boolean,
     documentation: {
