@@ -15,6 +15,7 @@ import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
+import { VscWarning } from "react-icons/vsc";
 
 import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
@@ -72,12 +73,18 @@ export default function Wrapper({ mission, tab, children }) {
               onClick={() => history.push(`/mission/${mission._id}`)}>
               Détails
             </div>
-            {/* TODO: point d'exclamation si candidatures en attente */}
             <div
-              className={`cursor-pointer text-gray-400 text-sm ${tab === "youngs" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
+              className={`flex flex-row items-center gap-2 cursor-pointer text-gray-400 text-sm pb-4 ${tab === "youngs" && "text-blue-600 border-b-2 border-blue-600"}`}
               onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
-              Candidatures
+              {/* should it be red when no remaining places ?*/}
+              {mission.pendingApplications >= mission.placesLeft * 5 ? (
+                <ExclamationCircle className="text-white" fill="red" />
+              ) : mission.pendingApplications > 1 ? (
+                <ExclamationCircle className="text-white" fill="orange" />
+              ) : null}
+              <div>Candidatures</div>
             </div>
+
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 || mission.placesLeft < 1 ? (
                 <div className={`cursor-pointer text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`} disabled>
