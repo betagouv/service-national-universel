@@ -17,9 +17,10 @@ export default function Field({
   row,
   multiple = false,
 }) {
+  console.log(errors[name]);
   return (
     <div className={className}>
-      <div className={`relative bg-white px-3 border-[#D1D5DB] w-full border rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
+      <div className={`relative bg-white px-3 border-[1px] w-full rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
         {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
         {type === "date" && <DatePickerList disabled={readOnly} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />}
         {type === "select" && (

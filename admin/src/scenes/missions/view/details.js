@@ -1,33 +1,12 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Col, Row } from "reactstrap";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import {
-  translate,
-  formatStringDateTimezoneUTC,
-  ROLES,
-  copyToClipboard,
-  MISSION_STATUS,
-  htmlCleaner,
-  MISSION_DOMAINS,
-  PERIOD,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-} from "../../../utils";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../utils";
 import MissionView from "./wrapper";
-import { Box, BoxTitle } from "../../../components/box";
-import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle } from "react-icons/hi";
-import { VscWarning } from "react-icons/vsc";
-
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
-
-const rowStyle = { marginRight: 0, marginLeft: 0 };
 
 export default function DetailsView({ mission, structure, tutor }) {
   const [editing, setEditing] = useState(false);
@@ -37,11 +16,26 @@ export default function DetailsView({ mission, structure, tutor }) {
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
+  const [errorsBottom, setErrorsBottom] = useState({});
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  const onSubmit = () => {};
+  const onSubmit = () => {
+    setLoading(true);
+    const error = {};
+    if (!values.name) error.name = "Ce champ est obligatoire";
+    if (!values.description) error.description = "Ce champ est obligatoire";
+    if (!values.structureName) error.structureName = "Ce champ est obligatoire";
+    if (!values.domain) error.domain = "Ce champ est obligatoire";
+    if (!values.period) error.period = "Ce champ est obligatoire";
+    if (!values.address) error.address = "Ce champ est obligatoire";
+    if (!values.zip) error.zip = "Ce champ est obligatoire";
+    if (!values.city) error.city = "Ce champ est obligatoire";
+    if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifié";
+    setErrors(error);
+    if (Object.keys(error).length > 0) return setLoading(false);
+  };
   const onSubmitBottom = () => {};
 
   const mainDomainsOption = Object.keys(MISSION_DOMAINS).map((d) => {
@@ -60,7 +54,9 @@ export default function DetailsView({ mission, structure, tutor }) {
     });
   };
 
-  console.log(mission);
+  React.useEffect(() => {
+    console.log("current errors are : ", errors);
+  }, [errors]);
 
   const formatOptions = [
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
@@ -93,6 +89,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                         onClick={() => {
                           setEditing(false);
                           setValues(mission);
+                          setErrors({});
                         }}
                         disabled={loading}>
                         Annuler
@@ -116,11 +113,25 @@ export default function DetailsView({ mission, structure, tutor }) {
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
                     fragiles »
                   </div>
-                  <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, name: e.target.value })} label="Nom de la mission" value={values.name} />
+                  <Field
+                    name="name"
+                    errors={errors}
+                    readOnly={!editing}
+                    handleChange={(e) => setValues({ ...values, name: e.target.value })}
+                    label="Nom de la mission"
+                    value={values.name}
+                  />
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Structure rattachée</div>
-                  <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, structureName: e.target.value })} label="Structure" value={values.structureName} />
+                  <Field
+                    errors={errors}
+                    name="structureName"
+                    readOnly={!editing}
+                    handleChange={(e) => setValues({ ...values, structureName: e.target.value })}
+                    label="Structure"
+                    value={values.structureName}
+                  />
                   {values.structureName && editing && (
                     <div
                       onClick={() => history.push(`/structure/${values.structureId}/edit`)}
@@ -132,9 +143,11 @@ export default function DetailsView({ mission, structure, tutor }) {
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
                   <Field
+                    errors={errors}
                     readOnly={!editing}
                     handleChange={(e) => setValues({ ...values, mainDomain: e })}
                     type="select"
+                    name="mainDomain"
                     options={mainDomainsOption}
                     label="Sélectionnez un domaine principal"
                     value={translate(values.mainDomain)}
@@ -144,7 +157,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
                   <Field
+                    errors={errors}
                     readOnly={!editing}
+                    name="domains"
                     handleChange={(e) => setValues({ ...values, domains: e })}
                     type="select"
                     multiple
@@ -158,8 +173,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Lieu où se déroule la mission</div>
                   <div className="text-xs font-medium mb-2">Adresse</div>
                   <Field
+                    errors={errors}
                     readOnly={!editing}
                     label="Adresse"
+                    name="address"
                     handleChange={(e) => {
                       console.log(e);
                       setValues({ ...values, address: e.target.value, addressVerified: false });
@@ -169,16 +186,20 @@ export default function DetailsView({ mission, structure, tutor }) {
                   />
                   <div className="flex flex-row justify-between gap-3 my-4">
                     <Field
+                      errors={errors}
                       readOnly={!editing}
                       label="Code postal"
                       className="w-[50%]"
+                      name="zip"
                       handleChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
                       value={values.zip}
                       error={errors?.zip}
                     />
                     <Field
+                      errors={errors}
                       readOnly={!editing}
                       label="Ville"
+                      name="city"
                       className="w-[50%]"
                       handleChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
                       value={values.city}
@@ -206,7 +227,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                 <div>
                   <div className="text-xs font-medium mb-2">Type de mission</div>
                   <Field
+                    errors={errors}
                     readOnly={!editing}
+                    name="format"
                     type="select"
                     handleChange={(e) => setValues({ ...values, format: e })}
                     options={formatOptions}
@@ -220,7 +243,14 @@ export default function DetailsView({ mission, structure, tutor }) {
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
                   <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
-                  <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, duration: e.target.value })} label="Heure(s)" value={translate(values.duration)} />
+                  <Field
+                    errors={errors}
+                    readOnly={!editing}
+                    name="duration"
+                    handleChange={(e) => setValues({ ...values, duration: e.target.value })}
+                    label="Heure(s)"
+                    value={translate(values.duration)}
+                  />
                 </div>
                 <div>
                   <div className="flex flex-row text-xs font-medium my-2">
@@ -233,7 +263,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                     </div>
                   </div>
                   <Field
+                    errors={errors}
                     readOnly={!editing}
+                    name="description"
                     type="textarea"
                     row={4}
                     handleChange={(e) => setValues({ ...values, description: e.target.value })}
@@ -252,8 +284,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                     </div>
                   </div>
                   <Field
+                    errors={errors}
                     readOnly={!editing}
                     type="textarea"
+                    name="actions"
                     row={4}
                     handleChange={(e) => setValues({ ...values, actions: e.target.value })}
                     label="Listez brièvement les actions confiées au(x) volontaires"
@@ -326,6 +360,8 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <div className="text-xs font-medium mb-2">Dates de la mission</div>
                   <div className="flex flex-row justify-between gap-3 my-4">
                     <Field
+                      errors={errorsBottom}
+                      name="startAt"
                       readOnly={!editingBottom}
                       label="Date de début"
                       type="date"
@@ -335,8 +371,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                       error={errors?.startAt}
                     />
                     <Field
+                      errors={errorsBottom}
                       readOnly={!editingBottom}
                       label="Date de fin"
+                      name="endAt"
                       className="w-[50%]"
                       type="date"
                       handleChange={(e) => setValues({ ...values, endAt: e })}
@@ -352,7 +390,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                     </div>
                   </div>
                   <Field
+                    errors={errorsBottom}
                     readOnly={!editingBottom}
+                    name="frequence"
                     type="textarea"
                     row={4}
                     handleChange={(e) => setValues({ ...values, frequence: e.target.value })}
@@ -372,19 +412,27 @@ export default function DetailsView({ mission, structure, tutor }) {
                   </div>
                   {/* Script pour passage d'array periode en single value */}
                   <Field
+                    errors={errorsBottom}
                     readOnly={!editingBottom}
+                    name="values"
                     handleChange={(e) => setValues({ ...values, period: e })}
                     type="select"
-                    options={Object.keys(PERIOD).map((d) => {
-                      return { value: d, label: translate(d) };
-                    })}
+                    multiple
+                    options={Object.keys(PERIOD)
+                      .filter((el) => !values.period.includes(el))
+                      .map((d) => {
+                        return { value: d, label: translate(d) };
+                      })}
                     label="Sélectionnez une ou plusieurs périodes"
-                    value={translate(values.period)}
+                    transformer={translate}
+                    value={values.period}
                   />
                   {values.period !== "" && values.period !== "WHENEVER" && (
                     <Field
+                      errors={errorsBottom}
                       readOnly={!editingBottom}
                       className="mt-4"
+                      name="subPeriod"
                       handleChange={(e) => setValues({ ...values, subPeriod: e })}
                       type="select"
                       multiple
@@ -405,7 +453,13 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <div className="flex flex-col text-xs font-medium my-2">
                     Nombre de volontaire(s) recherché(s). Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
                   </div>
-                  <Field readOnly={!editingBottom} handleChange={(e) => setValues({ ...values, contraintes: e.target.value })} value={translate(values.contraintes)} />
+                  <Field
+                    name="placesTotal"
+                    errors={errorsBottom}
+                    readOnly={!editingBottom}
+                    handleChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
+                    value={values.placesTotal}
+                  />
                 </div>
               </div>
             </div>
@@ -523,83 +577,3 @@ export default function DetailsView({ mission, structure, tutor }) {
     </div>
   );
 }
-
-const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
-  return (
-    <Row
-      style={{
-        width: "100%",
-        borderTop: borderTop ? "2px solid #f4f5f7" : 0,
-        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
-        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
-        backgroundColor: disabled ? "#f9f9f9" : "transparent",
-        padding: 0,
-        ...rowStyle,
-      }}>
-      <Wrapper
-        style={{
-          width: "100%",
-        }}>
-        <div style={{ display: "flex", width: "100%" }}>
-          <BoxTitle>
-            <div>{title}</div>
-            <div>{titleRight}</div>
-          </BoxTitle>
-        </div>
-        {children}
-      </Wrapper>
-    </Row>
-  );
-};
-
-const Details = ({ title, value, copy }) => {
-  if (!value) return <div />;
-  const [copied, setCopied] = React.useState(false);
-  if (typeof value === "function") value = value();
-  React.useEffect(() => {
-    if (copied) {
-      setTimeout(() => setCopied(false), 3000);
-    }
-  }, [copied]);
-  return (
-    <div className="flex justify-between border-b-[0.5px] border-solid border-[#F4F5F7]/50 text-[14px] mt-4 pb-2">
-      <div className="min-w-[120px] mr-4 text-[#798399]">{title}&nbsp;:</div>
-      <div className="flex">
-        <div className="text-[#1A202C] whitespace-pre-line" dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
-        {copy ? (
-          <div
-            className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
-            onClick={() => {
-              copyToClipboard(value);
-              setCopied(true);
-            }}>
-            {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-snu-purple-300" />}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-};
-
-const Wrapper = styled.div`
-  padding: 2rem;
-  flex: 1;
-  .icon {
-    cursor: pointer;
-    margin: 0 0.5rem;
-  }
-`;
-
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 300;
-  font-size: 1rem;
-`;
-
-const SubtitleLink = styled(Subtitle)`
-  color: #5245cc;
-  max-width: 200px;
-  :hover {
-    text-decoration: underline;
-  }
-`;
