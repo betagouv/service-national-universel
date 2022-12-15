@@ -6,7 +6,15 @@ const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo, canEditLigneBusCenter, canEditLigneBusPointDeRassemblement, ROLES } = require("snu-lib/roles");
+const {
+  canViewLigneBus,
+  canCreateLigneBus,
+  canEditLigneBusGeneralInfo,
+  canEditLigneBusCenter,
+  canEditLigneBusPointDeRassemblement,
+  ROLES,
+  canViewPatchesHistory,
+} = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -429,5 +437,34 @@ async function getInfoBus(line) {
 
   return { ...line._doc, meetingsPointsDetail, centerDetail };
 }
+
+router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+    }).validate(req.params);
+    if (error) {
+      console.log("🚀 ~ file: ligne-de-bus.js:439 ~ router.get ~ error", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort } = value;
+    const lines = await LigneBusModel.find({ cohort }, { _id: 1 });
+
+    const patches = [];
+    for (const line of lines) {
+      const data = await line.patches.find({ ref: line._id }).sort("-date");
+
+      patches.push(...data);
+    }
+    // const linesWithDetails = await Promise.all(lines.map((line) => getInfoBus(line)));
+
+    return res.status(200).send({ ok: true, data: patches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 module.exports = router;

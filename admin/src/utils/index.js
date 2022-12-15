@@ -294,6 +294,7 @@ function filterHiddenFields(e) {
 }
 
 export function formatHistory(data, role) {
+  if (!data) return [];
   // Flatten history: each value inside each op is a separate event
   let history = [];
   for (const e of data) {

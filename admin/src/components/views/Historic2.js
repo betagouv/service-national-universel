@@ -6,7 +6,7 @@ import UserCard from "../UserCard";
 import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 
-export default function Historic({ model, data, customFilterOptions, refName }) {
+export default function Historic({ model, data, customFilterOptions, refName, path }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [commonFilters, setCommonFilters] = useState({ op: [], user: [], path: [] });
@@ -89,16 +89,16 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
             {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-96">Action</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80">Détails</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
             <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-auto">Auteur</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
           </tr>
         </thead>
         <tbody>
           {filteredData.map((e, index) => (
-            <Event key={index} e={e} index={index} model={model} refName={refName} />
+            <Event key={index} e={e} index={index} model={model} refName={refName} path={path} />
           ))}
         </tbody>
       </table>
