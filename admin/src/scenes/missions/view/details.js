@@ -146,7 +146,6 @@ export default function DetailsView({ mission, structure, tutor }) {
                 <div>
                   <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Lieu où se déroule la mission</div>
                   <div className="text-xs font-medium mb-2">Adresse</div>
-
                   <Field
                     readOnly={!editing}
                     label="Adresse"
@@ -311,11 +310,83 @@ export default function DetailsView({ mission, structure, tutor }) {
               ) : null}
             </div>
             <div className="flex">
-              <div className="flex flex-col w-[45%] gap-4 "></div>
+              <div className="flex flex-col w-[45%] gap-4 ">
+                <div>
+                  <div className="text-xs font-medium mb-2">Dates de la mission</div>
+                  <div className="flex flex-row justify-between gap-3 my-4">
+                    <Field
+                      readOnly={!editingBottom}
+                      label="Date de début"
+                      type="date"
+                      className="w-[50%]"
+                      handleChange={(e) => setValues({ ...values, startAt: e })}
+                      value={values.startAt}
+                      error={errors?.startAt}
+                    />
+                    <Field
+                      readOnly={!editingBottom}
+                      label="Date de fin"
+                      className="w-[50%]"
+                      type="date"
+                      handleChange={(e) => setValues({ ...values, endAt: e })}
+                      value={values.endAt}
+                      error={errors?.endAt}
+                    />
+                  </div>
+                  <div className="flex flex-col text-xs font-medium my-2">
+                    <div>
+                      Fréquence estimée de la mission
+                      <span className="text-gray-400">&nbsp;(facultatif)&nbsp;</span>
+                      (tous les mardis soirs, le samedi, tous les mercredis après-midi pendant un trimestre...)
+                    </div>
+                  </div>
+                  <Field
+                    readOnly={!editingBottom}
+                    type="textarea"
+                    row={4}
+                    handleChange={(e) => setValues({ ...values, frequence: e.target.value })}
+                    label="Fréquence estimée de la mission"
+                    value={values.frequence}
+                  />
+                </div>
+              </div>
               <div className="flex w-[10%] justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col w-[45%] gap-4 "></div>
+              <div className="flex flex-col w-[45%] gap-4 ">
+                <div>
+                  <div className="flex flex-row text-xs font-medium my-2">
+                    <div>Période de réalisation de la mission</div>
+                    <div className="text-gray-400">&nbsp;(facultatif)</div>
+                  </div>
+                  <Field
+                    readOnly={!editingBottom}
+                    handleChange={(e) => setValues({ ...values, mainDomain: e })}
+                    type="select"
+                    multiple
+                    options={mainDomainsOption}
+                    label="Sélectionnez une ou plusieurs périodes"
+                    value={translate(values.mainDomain)}
+                  />
+                  <Field
+                    readOnly={!editingBottom}
+                    className="mt-4"
+                    handleChange={(e) => setValues({ ...values, domains: e })}
+                    type="select"
+                    multiple
+                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain && !values.domains.includes(d.value))}
+                    label="Précisez"
+                    transformer={translate}
+                    value={translate(values.domains)}
+                  />
+                </div>
+                <div>
+                  <div className="flex flex-col text-xs font-medium my-2">
+                    Nombre de volontaire(s) recherché(s). Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
+                  </div>
+                  <Field readOnly={!editing} handleChange={(e) => setValues({ ...values, contraintes: e.target.value })} value={translate(values.contraintes)} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -11,7 +11,6 @@ export default function Field({
   type = "text",
   options = [],
   handleChange,
-  setFielValue,
   transformer,
   readOnly = false,
   errors = {},
@@ -22,7 +21,7 @@ export default function Field({
     <div className={className}>
       <div className={`relative bg-white px-3 border-[#D1D5DB] w-full border rounded-md py-2 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
         {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
-        {type === "date" && <DatePickerList fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => setFielValue(name, new Date(date))} />}
+        {type === "date" && <DatePickerList disabled={readOnly} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />}
         {type === "select" && (
           <SimpleSelect
             multiple={multiple}
@@ -86,7 +85,7 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
           <>
             <div className="flex flex-row flex-wrap gap-2">
               {value.map((val) => (
-                <div className="flex flex-row items-center justify-center gap-2 rounded bg-gray-300" key={val}>
+                <div className="flex flex-row items-center justify-center gap-2 mt-1 rounded bg-gray-300" key={val}>
                   <div className="pt-0.5 p-1">{transformer ? transformer(val) : val}</div>
                   {!readOnly && (
                     <div
