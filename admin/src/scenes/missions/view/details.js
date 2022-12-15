@@ -109,7 +109,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                 </>
               ) : null}
             </div>
-            <div className="flex flex-wrap">
+            <div className="flex flex-wrap gap-14">
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">
@@ -199,10 +199,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                   )}
                 </div>
               </div>
-              <div className="hidden lg:flex w-[10%] justify-center items-center">
+              <div className="hidden xl:flex justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col gap-4 flex-1 min-w-[350px] ">
+              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">Type de mission</div>
                   <Field
@@ -320,8 +320,8 @@ export default function DetailsView({ mission, structure, tutor }) {
                 </>
               ) : null}
             </div>
-            <div className="flex">
-              <div className="flex flex-col w-[45%] gap-4 ">
+            <div className="flex flex-wrap gap-12">
+              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">Dates de la mission</div>
                   <div className="flex flex-row justify-between gap-3 my-4">
@@ -361,10 +361,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                   />
                 </div>
               </div>
-              <div className="flex w-[10%] justify-center items-center">
+              <div className="hidden xl:flex justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col w-[45%] gap-4 ">
+              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="flex flex-row text-xs font-medium my-2">
                     <div>Période de réalisation de la mission</div>
