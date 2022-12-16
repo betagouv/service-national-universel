@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "snu-lib";
 
-export default function RankingPeriod({ title, period, handleChange, name, values }) {
+export default function RankingPeriod({ period, handleChange, name, values }) {
   const [items, setItems] = useState(values[name]);
 
   const updateList = (value) => {
@@ -35,27 +33,20 @@ export default function RankingPeriod({ title, period, handleChange, name, value
   if (!items) return <div />;
 
   return (
-    <Row className={"detail"}>
-      <Col md={4}>
-        <label>{title}</label>
-      </Col>
-      <Col md={8}>
-        <Container>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="list">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {items.map((e, i) => (
-                    <Item key={e} index={i} value={e} values={values} updateList={updateList} name={name} />
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </Container>
-      </Col>
-    </Row>
+    <Container>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="list">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {items.map((e, i) => (
+                <Item key={e} index={i} value={e} values={values} updateList={updateList} name={name} />
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </Container>
   );
 }
 
@@ -75,12 +66,12 @@ const Item = ({ value, values, index, updateList, name }) => {
     <Draggable draggableId={value} index={index}>
       {(provided) => (
         <ItemContainer ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} index={index}>
-          <div className="flex">
+          <div className="flex items-center ml-2 mr-4">
             <Badge>{index + 1}</Badge>
-            <Label>{translate(value)}</Label>
+            <div className="mx-2">{translate(value)}</div>
           </div>
-          <div className="flex mr-1">
-            <RoundItem plus onClick={() => handleMove(index, -1)} />
+          <div className="flex mr-2">
+            <RoundItem plus onClick={() => handleMove(index, -1)} className="mr-2" />
             <RoundItem minus onClick={() => handleMove(index, 1)} />
           </div>
         </ItemContainer>
@@ -89,55 +80,39 @@ const Item = ({ value, values, index, updateList, name }) => {
   );
 };
 
-const RoundItem = ({ value, plus, minus, onClick }) => {
+const RoundItem = ({ value, plus, minus, onClick, className = "" }) => {
   const getValue = () => {
     if (plus) return "↑";
     if (minus) return "↓";
     return value;
   };
   return (
-    <Badge onClick={onClick} style={{ borderWidth: "1px", borderStyle: "solid", borderRadius: "9999px" }}>
+    <Badge onClick={onClick} className={className}>
       {getValue()}
     </Badge>
   );
 };
 
-const Label = styled.div`
-  margin: 0 0.1rem;
-`;
+function Badge({ onClick = () => {}, className = "", children }) {
+  return (
+    <div
+      className={`flex justify-center items-center rounded-full w-[1.75rem] h-[1.75rem] text-[#6b7280] text-[0.75rem] border-[#d2d6dc] border-[1px] cursor-pointer mx-[0.01rem] ${className}`}
+      onClick={onClick}>
+      {children}
+    </div>
+  );
+}
 
-const Badge = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  color: #6b7280;
-  font-size: 0.75rem;
-  border-color: #d2d6dc;
-  cursor: pointer;
-  margin: 0 0.1rem;
-`;
+function Container({ className = "", children }) {
+  return <div className={`shadow border-[1px] border-[#d2d6dc] rounded-[0.5rem] flex flex-col w-[100%] md:w-fit ${className}`}>{children}</div>;
+}
 
-const Container = styled.div`
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  border-width: 1px;
-  border-radius: 0.5rem;
-  border-style: solid;
-  border-color: #d2d6dc;
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-`;
-
-const ItemContainer = styled.div`
-  border-top-width: ${({ index }) => (index === 0 ? `0px` : `1px`)};
-  border-top-color: #d2d6dc;
-  border-top-style: solid;
-  width: 100%;
-  flex: 1;
-  padding: 1rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
+// eslint-disable-next-line react/display-name
+const ItemContainer = React.forwardRef((props, ref) => (
+  <div
+    ref={ref}
+    className={`${props.index === 0 ? "border-t-[0px]" : "border-t-[1px]"} border-t-[#d2d6dc] w-[100%] grow py-4 flex items-center justify-between ${props.className}`}
+    {...props}>
+    {props.children}
+  </div>
+));

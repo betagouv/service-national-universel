@@ -10,7 +10,7 @@ import SimpleSwitch from "./components/SimpleSwitch";
 import RankingPeriod from "./components/RankingPeriod";
 import SimpleCheckbox from "./components/SimpleCheckbox";
 
-export default function View({ young, onSave, saving, onToggleDomain, hasDomainSelected, onChange, mobile }) {
+export default function View({ young, onSave, saving, onToggleDomain, hasDomainSelected, onChange, mobile, errors }) {
   return (
     <div className="md:m-8">
       <Box className="shadow mb-8 rounded-b-lg">
@@ -41,6 +41,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
               </DomainSelector>
             ))}
           </div>
+          {errors.domains && <div className="text-[#F71701] text-sm mt-2 text-center">{errors.domains}</div>}
         </Section>
         <Section>
           <Title>Quel est votre projet professionnel ?</Title>
@@ -52,6 +53,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
               options={translateEnumToOptions(PROFESSIONNAL_PROJECT)}
               transformer={translate}
               onChange={(val) => onChange("professionnalProject", val)}
+              error={errors.professionnalProject}
             />
             {young.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
               <SimpleSelect
@@ -62,6 +64,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 transformer={translate}
                 placeholder="Projet professionnel"
                 onChange={(val) => onChange("professionnalProjectPrecision", val)}
+                error={errors.professionnalProjectPrecision}
               />
             ) : young.professionnalProject === PROFESSIONNAL_PROJECT.OTHER ? (
               <SimpleInput
@@ -69,7 +72,8 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 title="Précisez"
                 value={young.professionnalProjectPrecision}
                 placeholder="précisez votre projet"
-                onChange={(val) => onChange("professionnalPrecision", val)}
+                onChange={(val) => onChange("professionnalProjectPrecision", val)}
+                error={errors.professionnalProjectPrecision}
               />
             ) : (
               <div className="hidden md:block" />
@@ -85,6 +89,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                   value={young.desiredLocation}
                   placeholder="précisez l'endroit"
                   onChange={(val) => onChange("desiredLocation", val)}
+                  error={errors.desiredLocation}
                 />
               )}
             </div>
@@ -99,6 +104,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                   value={young.engagedDescription}
                   placeholder="précisez votre activité bénévole"
                   onChange={(val) => onChange("engagedDescription", val)}
+                  error={errors.engaged}
                 />
               )}
             </div>
@@ -109,6 +115,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 value={young.desiredLocation}
                 placeholder="précisez l'endroit"
                 onChange={(val) => onChange("desiredLocation", val)}
+                error={errors.desiredLocation}
               />
             ) : (
               <div className="hidden md:block" />
@@ -120,6 +127,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 value={young.engagedDescription}
                 placeholder="précisez votre activité bénévole"
                 onChange={(val) => onChange("engagedDescription", val)}
+                error={errors.engagedDescription}
               />
             ) : (
               <div className="hidden md:block" />
@@ -175,6 +183,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                     placeholder="Renseignez l'autre moyen de transport"
                     value={young.mobilityTransportOther}
                     onChange={(val) => onChange("mobilityTransportOther", val)}
+                    error={errors.mobilityTransportOther}
                   />
                 </div>
               )}
@@ -209,6 +218,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                         value={young.mobilityNearRelativeName}
                         placeholder="Nom du proche"
                         onChange={(val) => onChange("mobilityNearRelativeName", val)}
+                        error={errors.mobilityNearRelativeName}
                       />
                       <SimpleInput
                         className=""
@@ -216,6 +226,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                         value={young.mobilityNearRelativeAddress}
                         placeholder="Adresse du proche"
                         onChange={(val) => onChange("mobilityNearRelativeAddress", val)}
+                        error={errors.mobilityNearRelativeAddress}
                       />
                       <div className="grid grid-cols-2 gap-4">
                         <SimpleInput
@@ -224,6 +235,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                           value={young.mobilityNearRelativeZip}
                           placeholder="Saisissez un code postal"
                           onChange={(val) => onChange("mobilityNearRelativeZip", val)}
+                          error={errors.mobilityNearRelativeZip}
                         />
                         <SimpleInput
                           className=""
@@ -231,6 +243,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                           value={young.mobilityNearRelativeCity}
                           placeholder="Ville du proche"
                           onChange={(val) => onChange("mobilityNearRelativeCity", val)}
+                          error={errors.mobilityNearRelativeCity}
                         />
                       </div>
                     </div>

@@ -5,13 +5,15 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import plausibleEvent from "../../services/plausible";
 import api from "../../services/api";
-import { TRANSPORT, translate } from "snu-lib";
+import { TRANSPORT, translate, PROFESSIONNAL_PROJECT, PERIOD } from "snu-lib";
 import View from "./View";
+import { PREF_FORMATS } from "./commons";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function Index() {
         mobilityTransport: young.mobilityTransport ? young.mobilityTransport : [],
         mobilityTransportOther: young.mobilityTransport && young.mobilityTransportOther ? young.mobilityTransportOther : "",
         professionnalProject: young.professionnalProject,
-        professionnalProjectPrecision: young.professionnalProjectPrecision,
+        professionnalProjectPrecision: young.professionnalProjectPrecision ? young.professionnalProjectPrecision : "",
         desiredLocationToggle: young.desiredLocation !== null && young.desiredLocation !== undefined && young.desiredLocation.trim().length > 0,
         desiredLocation: young.desiredLocation !== null && young.desiredLocation !== undefined && young.desiredLocation.trim().length > 0 ? young.desiredLocation.trim() : "",
         engaged: young.engaged === "true",
@@ -35,10 +37,10 @@ export default function Index() {
         mobilityNearHome: young.mobilityNearHome === "true",
         mobilityNearSchool: young.mobilityNearSchool === "true",
         mobilityNearRelative: young.mobilityNearRelative === "true",
-        mobilityNearRelativeName: young.mobilityNearRelativeName,
-        mobilityNearRelativeAddress: young.mobilityNearRelativeAddress,
-        mobilityNearRelativeZip: young.mobilityNearRelativeZip,
-        mobilityNearRelativeCity: young.mobilityNearRelativeCity,
+        mobilityNearRelativeName: young.mobilityNearRelativeName ? young.mobilityNearRelativeName : "",
+        mobilityNearRelativeAddress: young.mobilityNearRelativeAddress ? young.mobilityNearRelativeAddress : "",
+        mobilityNearRelativeZip: young.mobilityNearRelativeZip ? young.mobilityNearRelativeZip : "",
+        mobilityNearRelativeCity: young.mobilityNearRelativeCity ? young.mobilityNearRelativeCity : "",
       });
     } else {
       setData({ domains: [] });
@@ -65,22 +67,101 @@ export default function Index() {
 
   async function onSave() {
     setSaving(true);
-    try {
-      plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
-      const { ok, code, data: updatedYoung } = await api.put("/young", getCleanedYoung());
-      if (ok) {
-        if (updatedYoung) {
-          dispatch(setYoung(updatedYoung));
+    if (validateBeforeSave()) {
+      try {
+        plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
+        const { ok, code, data: updatedYoung } = await api.put("/young", getCleanedYoung());
+        if (ok) {
+          if (updatedYoung) {
+            dispatch(setYoung(updatedYoung));
+          }
+          toastr.success("Vos préférences ont bien été enregistrées.");
+        } else {
+          toastr.error("Une erreur s'est produite", translate(code));
         }
-        toastr.success("Vos préférences ont bien été enregistrées.");
-      } else {
-        toastr.error("Une erreur s'est produite", translate(code));
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible d'enregistrer", "Une erreur est survenue lors de l'enregistrement de vos préférences. Veuillez réessayer dans quelques instants.");
       }
-    } catch (err) {
-      capture(err);
-      toastr.error("Impossible d'enregistrer", "Une erreur est survenue lors de l'enregistrement de vos préférences. Veuillez réessayer dans quelques instants.");
     }
     setSaving(false);
+  }
+
+  function validateBeforeSave() {
+    let validated = true;
+    let errors = {};
+
+    console.log("validate data: ", data);
+
+    if (data.domains.length < 3) {
+      errors.domains = "Vous devez choisir 3 thématiques.";
+      validated = false;
+    }
+
+    if (!Object.keys(PROFESSIONNAL_PROJECT).includes(data.professionnalProject)) {
+      errors.professionnalProject = "Vous devez précisez votre projet professionnel";
+      validated = false;
+    }
+    if (data.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN) {
+      if (data.professionnalProjectPrecision === null || data.professionnalProjectPrecision === undefined || data.professionnalProjectPrecision.trim().length === 0) {
+        errors.professionnalProjectPrecision = "Vous devez indiquer une précision.";
+        validated = false;
+      }
+    }
+
+    if (data.desiredLocationToggle) {
+      if (data.desiredLocation === null || data.desiredLocation === undefined || data.desiredLocation.trim().length === 0) {
+        errors.desiredLocation = "Vous devez précisez l'endroit désiré.";
+        validated = false;
+      }
+    }
+
+    if (data.engaged) {
+      if (data.engagedDescription === null || data.engagedDescription === undefined || data.engagedDescription.trim().length === 0) {
+        errors.engagedDescription = "Vous devez précisez votre activité bénévole.";
+        validated = false;
+      }
+    }
+
+    if (!Object.keys(PREF_FORMATS).includes(data.missionFormat)) {
+      errors.missionFormat = "Vous devez précisez votre format préféré";
+      validated = false;
+    }
+
+    if (!Object.keys(PERIOD).includes(data.period)) {
+      errors.period = "Vous devez précisez une période de réalisation de la mission";
+      validated = false;
+    }
+
+    if (data.mobilityTransport.includes(TRANSPORT.OTHER)) {
+      if (data.mobilityTransportOther === null || data.mobilityTransportOther === undefined || data.mobilityTransportOther.trim().length === 0) {
+        errors.mobilityTransportOther = "Vous devez précisez votre autre moyen de transport privilégié.";
+        validated = false;
+      }
+    }
+
+    if (data.mobilityNearRelative) {
+      if (data.mobilityNearRelativeName === null || data.mobilityNearRelativeName === undefined || data.mobilityNearRelativeName.trim().length === 0) {
+        errors.mobilityNearRelativeName = "Vous devez précisez le nom de votre proche.";
+        validated = false;
+      }
+      if (data.mobilityNearRelativeAddress === null || data.mobilityNearRelativeAddress === undefined || data.mobilityNearRelativeAddress.trim().length === 0) {
+        errors.mobilityNearRelativeAddress = "Vous devez précisez l'adresse de votre proche.";
+        validated = false;
+      }
+      if (data.mobilityNearRelativeZip === null || data.mobilityNearRelativeZip === undefined || data.mobilityNearRelativeZip.trim().length === 0) {
+        errors.mobilityNearRelativeZip = "Vous devez précisez le code postal de votre proche.";
+        validated = false;
+      }
+      if (data.mobilityNearRelativeCity === null || data.mobilityNearRelativeCity === undefined || data.mobilityNearRelativeCity.trim().length === 0) {
+        errors.mobilityNearRelativeCity = "Vous devez précisez la ville de votre proche.";
+        validated = false;
+      }
+    }
+
+    console.log("Errors : ", errors);
+    setErrors(errors);
+    return validated;
   }
 
   function hasDomainSelected(type) {
@@ -128,5 +209,5 @@ export default function Index() {
     setData(newData);
   }
 
-  return <View young={data} onToggleDomain={onToggleDomain} onSave={onSave} saving={saving} hasDomainSelected={hasDomainSelected} onChange={onChangeYoung} />;
+  return <View young={data} onToggleDomain={onToggleDomain} onSave={onSave} saving={saving} hasDomainSelected={hasDomainSelected} onChange={onChangeYoung} errors={errors} />;
 }
