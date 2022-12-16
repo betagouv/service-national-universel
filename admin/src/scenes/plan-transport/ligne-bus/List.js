@@ -3,7 +3,7 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import { TabItem, Title } from "../components/commons";
 import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
-import { DataSearch, ReactiveBase } from "@appbaseio/reactivesearch";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
@@ -12,6 +12,7 @@ import { ES_NO_LIMIT } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
 const FILTERS = ["SEARCH"];
 
@@ -103,10 +104,62 @@ export default function List() {
                 />
               </div>
             </div>
-            <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>{/* Filter */}</div>
+            <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
+              {/* Filter */}
+              {/* Sur la ligne - N° de ligne - Date du transport aller/retour - Taux de remplissage (100%-0%, le reste) Sur les points de rassemblement : - Région - Département -
+              Commune (pour REF REG et DEP) - Nom Sur le centre : - Région - Département - Nom - Code Sur les demandes de modifications : - Demande de modification oui/non - Statut
+              de la demande de modification (à instruire/validée/refusée) - Avis (favorable/défavorable) (pour MOD ONLY) */}
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Séjours"
+                componentId="COHORT"
+                dataField="cohorts.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                // defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Region"
+                componentId="REGION"
+                dataField="region.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                // defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Département"
+                componentId="DEPARTMENT"
+                dataField="department.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                // defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+              />
+              <DeleteFilters />
+            </div>
             <div className="reactive-result">
               <ReactiveListComponent
-                pageSize={50}
+                pageSize={10}
+                // ! Vérfier que l'on fait la query que pour 10 car on enchaine avec une query mongo
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
                 paginationAt="bottom"
@@ -122,7 +175,7 @@ export default function List() {
                       <div className="w-[5%] h-1"></div>
                     </div>
                     {data?.map((hit) => {
-                      return <Line key={hit._id} />;
+                      return <Line key={hit._id} hit={hit} />;
                     })}
                     <hr />
                   </div>
@@ -136,15 +189,30 @@ export default function List() {
   );
 }
 
-const Line = () => {
+const Line = ({ hit }) => {
+  console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit.hit);
   return (
     <>
       <hr />
       <div className="flex py-2 items-center px-4 hover:bg-gray-50">
-        <div className="w-[40%]"></div>
-        <div className="w-[30%]"></div>
-        <div className="w-[15%]"></div>
-        <div className="w-[10%]"></div>
+        <div className="w-[40%]">
+          <div className="flex flex-col">
+            <div className="text-sm font-medium">{hit.busId}</div>
+            <div className="text-xs text-gray-400">Région départ > Région arrivée</div>
+          </div>
+        </div>
+        <div className="w-[30%]">
+          {/* // Meeting points list */}
+          <div className="flex gap-2">
+            {hit.meetingPointsIds.map((meetingPoint) => {
+              return <div className="text-sm font-medium">{meetingPoint}</div>;
+            })}
+          </div>
+        </div>
+        <div className="w-[15%]">
+          <div className="flex gap-2">{hit.centerId}</div>
+        </div>
+        <div className="w-[10%]">Cercle avec pourcentage</div>
         <div className="w-[5%]"></div>
       </div>
     </>

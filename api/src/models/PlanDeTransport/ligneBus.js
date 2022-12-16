@@ -5,6 +5,19 @@ const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const MODELNAME = "lignebus";
 
+// // Dans le modele :
+//  Sur la ligne - N° de ligne - Date du transport aller/retour -
+
+//  // A aller chercher:
+//  (Pas l'info) Taux de remplissage (100%-0%, le reste) ??
+//  // A partir des points de rassemblement :
+//  Sur les points de rassemblement : - Région - Département - Commune (pour REF REG et DEP) - Nom
+//  // A partir du centre :
+//  Sur le centre : - Région - Département - Nom - Code
+//  // A partir des demandes de modifications :
+//  Sur les demandes de modifications : - Demande de modification oui/non - Statut
+//                 de la demande de modification (à instruire/validée/refusée) - Avis (favorable/défavorable) (pour MOD ONLY)
+
 const Schema = new mongoose.Schema({
   cohort: {
     type: String,

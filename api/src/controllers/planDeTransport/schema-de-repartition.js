@@ -223,6 +223,80 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
   }
 });
 
+router.get("/test_route", async (req, res) => {
+  try {
+    const { error: errorQuery, value: query } = Joi.object({
+      intra: Joi.boolean().default(false),
+      minPlacesCount: Joi.number().default(0),
+      filter: Joi.string().trim().allow("", null),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { minPlacesCount, filter, intra } = query;
+
+    // get the destination departments from table de repartition
+    let toDepartments;
+    if (intra) {
+      toDepartments = [department];
+    } else {
+      toDepartments = await getDepartmentsFromDepartment(cohort, department);
+    }
+
+    // search centers & sessions
+    const pipeline = [
+      {
+        $match: { cohort },
+      },
+      {
+        $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerId",
+          foreignField: "_id",
+          as: "center",
+        },
+      },
+      { $unwind: "$center" },
+      { $match: { "center.department": { $in: toDepartments } } },
+    ];
+
+    if (minPlacesCount > 0) {
+      pipeline.push({ $match: { placesTotal: { $gte: minPlacesCount } } });
+    }
+
+    // --- pour l'instant on ne filtre le texte que dans le nom, la ville et le départment du centre.
+    if (filter && filter.length > 0) {
+      const regex = new RegExp(".*" + filter + ".*", "gi");
+      pipeline.push({ $match: { $or: [{ "center.name": regex }, { "center.city": regex }, { "center.department": regex }] } });
+    }
+
+    // --- sort and limit.
+    pipeline.push({ $sort: { "center.name": 1 } });
+
+    // QUERY
+    const sessionResult = await sessionPhase1Model.aggregate(pipeline).exec();
+
+    // format result
+    const data = sessionResult.map((session) => {
+      return {
+        ...session.center,
+        placesTotal: session.placesTotal,
+        placesLeft: session.placesLeft,
+        sessionId: session._id,
+      };
+    });
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- parameters & vérification

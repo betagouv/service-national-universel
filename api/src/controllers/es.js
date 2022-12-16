@@ -605,11 +605,16 @@ router.post("/lignebus/:action(_msearch|export)", passport.authenticate(["refere
 
     if (!canSearchLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // * Aggregation with fake params
+
     if (req.params.action === "export") {
       const response = await allRecords("lignebus", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "lignebus", body: withFilterForMSearch(body, filter) });
+
+      // * Aggregation with fake params
+
       return res.status(200).send(response.body);
     }
   } catch (error) {
