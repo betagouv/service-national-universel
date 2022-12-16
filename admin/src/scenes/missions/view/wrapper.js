@@ -1,21 +1,15 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import styled from "styled-components";
-import { Col, Row, Spinner } from "reactstrap";
+import { useHistory } from "react-router-dom";
+import { Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import { translate, ROLES, MISSION_STATUS } from "../../../utils";
-import TabList from "../../../components/views/TabList";
-import Tab from "../../../components/views/Tab";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import Badge from "../../../components/Badge";
-import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
-import { VscWarning } from "react-icons/vsc";
 
 import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
@@ -235,40 +229,6 @@ export default function Wrapper({ mission, tab, children, getMission }) {
     </div>
   );
 }
-
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  margin: 2rem 0 1rem 0;
-  align-items: flex-start;
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  border-radius: 8px;
-`;
-
-const BoxPlaces = styled(Box)`
-  padding: 0 1rem;
-  display: flex;
-  align-items: center;
-  h1 {
-    font-size: 3rem;
-    margin: 0;
-  }
-  p {
-    margin-left: 1rem;
-    font-size: 0.8rem;
-    color: black;
-    &.places {
-      color: #777;
-    }
-  }
-`;
-
 function Button({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel }) {
   if (href) {
     return (
