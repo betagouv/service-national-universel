@@ -43,7 +43,7 @@ export default function DetailsView({ mission, structure, tutor }) {
     if (!values.address) error.address = "Ce champ est obligatoire";
     if (!values.zip) error.zip = "Ce champ est obligatoire";
     if (!values.city) error.city = "Ce champ est obligatoire";
-    if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifié";
+    if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
 
     if (!values.description) error.description = "Ce champ est obligatoire";
     if (!values.actions) error.actions = "Ce champ est obligatoire";
@@ -89,11 +89,14 @@ export default function DetailsView({ mission, structure, tutor }) {
                       id="visibility"
                       name="visibility"
                       disabled={!editing}
-                      value={mission.visibility === "VISIBLE"}
-                      onChange={(e) => setValues({ ...values, visibility: e ? "VISIBLE" : "HIDDEN" })}
+                      value={values.visibility === "VISIBLE"}
+                      onChange={(e) => {
+                        console.log(e);
+                        setValues({ ...values, visibility: e ? "VISIBLE" : "HIDDEN" });
+                      }}
                     />
                     <div>
-                      La mission est <strong>{mission.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                      La mission est <strong>{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
                     </div>
                   </div>
                 )}
@@ -235,16 +238,19 @@ export default function DetailsView({ mission, structure, tutor }) {
                     />
                   </div>
                   {editing && !values.addressVerified && (
-                    <VerifyAddress
-                      address={values.address}
-                      zip={values.zip}
-                      city={values.city}
-                      onSuccess={onVerifyAddress(true)}
-                      onFail={onVerifyAddress()}
-                      isVerified={values.addressVerified === true}
-                      buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-                      verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
-                    />
+                    <div className="flex flex-col gap-2 ">
+                      <VerifyAddress
+                        address={values.address}
+                        zip={values.zip}
+                        city={values.city}
+                        onSuccess={onVerifyAddress(true)}
+                        onFail={onVerifyAddress()}
+                        isVerified={values.addressVerified === true}
+                        buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
+                        verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
+                      />
+                      {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
+                    </div>
                   )}
                 </div>
               </div>
