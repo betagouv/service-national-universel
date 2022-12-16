@@ -7,10 +7,14 @@ import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
-import api from "../../../services/api";
 import Toggle from "../../../components/Toggle";
 
-export default function DetailsView({ mission, structure, tutor }) {
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+
+import api from "../../../services/api";
+import { toastr } from "react-redux-toastr";
+
+export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
   const [structures, setStructures] = useState([]);
   const [editing, setEditing] = useState(false);
@@ -20,6 +24,8 @@ export default function DetailsView({ mission, structure, tutor }) {
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
   const [errorsBottom, setErrorsBottom] = useState({});
+
+  const [modalConfirmation, setModalConfirmation] = useState(false);
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -37,20 +43,40 @@ export default function DetailsView({ mission, structure, tutor }) {
   const onSubmit = () => {
     setLoading(true);
     const error = {};
-    if (!values.name) error.name = "Ce champ est obligatoire";
-    if (!values.structureName || !values.structureId) error.structureName = "Ce champ est obligatoire";
-    if (!values.domain) error.domain = "Ce champ est obligatoire";
-    if (!values.address) error.address = "Ce champ est obligatoire";
-    if (!values.zip) error.zip = "Ce champ est obligatoire";
-    if (!values.city) error.city = "Ce champ est obligatoire";
+    const baseError = "Ce champ est obligatoire";
+    const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions"];
+    valuesToCheck.map((val) => {
+      if (!values[val]) error[val] = baseError;
+    });
     if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
+    //check duration only if specified
+    if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
 
-    if (!values.description) error.description = "Ce champ est obligatoire";
-    if (!values.actions) error.actions = "Ce champ est obligatoire";
-
-    console.log(values);
     setErrors(error);
     if (Object.keys(error).length > 0) return setLoading(false);
+
+    // open modal to confirm is mission has to change status
+    if (values.description !== mission.description || values.actions !== mission.actions) return setModalConfirmation(true);
+    const valuesToUpdate = [...valuesToCheck, "addressVerified", "duration", "contraintes"];
+    updateMission(valuesToUpdate);
+  };
+
+  const updateMission = async (valuesToUpdate) => {
+    try {
+      const { ok, code, data: mission } = await api.put(`/mission/${values._id}`, valuesToUpdate);
+      setValues(mission);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
+        return setLoading(false);
+      }
+      toastr.success("Mission enregistrée");
+      setLoading(false);
+      setEditing(false);
+      setMission(mission);
+    } catch (e) {
+      setLoading(false);
+      return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
+    }
   };
   const onSubmitBottom = () => {};
 
@@ -74,24 +100,32 @@ export default function DetailsView({ mission, structure, tutor }) {
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
-  console.log(mission);
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <MissionView mission={mission} tab="details">
+      <ModalConfirm
+        isOpen={modalConfirmation}
+        title={"Modification de statut"}
+        message={"Êtes-vous sûr(e) de vouloir continuer ? Certaines modifications entraîneront une modification du statut de la mission : En attente de validation."}
+        onCancel={() => setModalConfirmation(false)}
+        onConfirm={() => {
+          setModalConfirmation(false);
+          updateMission();
+        }}
+      />
+      <MissionView mission={mission} getMission={getMission} tab="details">
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
           <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
               <div className="flex flex-row gap-4 items-center justify-center">
                 <div className="text-lg font-medium text-gray-900">Informations générales</div>
                 {mission.status === "VALIDATED" && (
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row gap-2 items-center justify-center">
                     <Toggle
                       id="visibility"
                       name="visibility"
                       disabled={!editing}
                       value={values.visibility === "VISIBLE"}
                       onChange={(e) => {
-                        console.log(e);
                         setValues({ ...values, visibility: e ? "VISIBLE" : "HIDDEN" });
                       }}
                     />
@@ -209,7 +243,6 @@ export default function DetailsView({ mission, structure, tutor }) {
                     label="Adresse"
                     name="address"
                     handleChange={(e) => {
-                      console.log(e);
                       setValues({ ...values, address: e.target.value, addressVerified: false });
                     }}
                     value={values.address}
@@ -273,7 +306,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                 </div>
                 <div>
                   <div className="flex flex-row text-xs font-medium mt-2">
-                    <div>Domaine(s) d&apos;action secondaire(s)</div>
+                    <div>Durée de la mission</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
                   <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>

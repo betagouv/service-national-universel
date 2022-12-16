@@ -20,7 +20,7 @@ import { VscWarning } from "react-icons/vsc";
 import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
 
-export default function Wrapper({ mission, tab, children }) {
+export default function Wrapper({ mission, tab, children, getMission }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -137,7 +137,7 @@ export default function Wrapper({ mission, tab, children }) {
             </div>
           </div>
           <div className="flex flex-col">
-            <SelectStatusMission hit={mission} />
+            <SelectStatusMission hit={mission} callback={getMission} />
             <div className="flex items-center justify-between my-[15px]">
               <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
                 Supprimer
