@@ -407,7 +407,7 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
-                  renderLabel={(items) => getFilterLabel(items, "École")}
+                  renderLabel={(items) => getFilterLabel(items, "Établissement")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
