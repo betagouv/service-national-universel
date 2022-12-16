@@ -61,30 +61,35 @@ export default function DetailsView({ mission, setMission, getMission }) {
     updateMission(valuesToUpdate);
   };
 
-  const updateMission = async (valuesToUpdate) => {
-    try {
-      const { ok, code, data: mission } = await api.put(`/mission/${values._id}`, valuesToUpdate);
-      setValues(mission);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
-        return setLoading(false);
-      }
-      toastr.success("Mission enregistrée");
-      setLoading(false);
-      setEditing(false);
-      setMission(mission);
-    } catch (e) {
-      setLoading(false);
-      return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
-    }
-  };
   const onSubmitBottom = () => {
     setLoadingBottom(true);
     const error = {};
     if (values.startAt < new Date()) error.startAt = "La date est incorrect";
-    if (values.startAt > values.endAt) {
-      error.startAt = "Les dates sont incorrects";
-      error.endAt = "Les dates sont incorrects";
+    if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
+    if (values.placesTotal < 0 || isNaN(values.placesTotal)) error.placesTotal = "Le nombre de places est incorrect";
+    setErrorsBottom(error);
+    if (Object.keys(error).length > 0) return setLoadingBottom(false);
+    updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
+  };
+
+  const updateMission = async (valuesToUpdate) => {
+    try {
+      // build object from array of keys
+      const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
+      const { ok, code, data: mission } = await api.put(`/mission/${values._id}`, valuesToSend);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
+        return setLoading(false);
+      }
+      console.log(mission);
+      toastr.success("Mission enregistrée");
+      setLoading(false);
+      setEditing(false);
+      setValues(mission);
+      setMission(mission);
+    } catch (e) {
+      setLoading(false);
+      return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
     }
   };
 
