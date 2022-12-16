@@ -37,7 +37,7 @@ async function sendSMS(phoneNumber, content, tag) {
     const formattedPhoneNumber = phoneNumber
       .replace(/[^0-9]/g, "")
       .replace(/^0([6,7])/, "33$1")
-      .replace(/330/, "33");
+      .replace(/^330/, "33");
 
     const body = {};
     body.sender = SENDER_NAME_SMS;
