@@ -1,3 +1,15 @@
+# [1.187.0](https://github.com/betagouv/service-national-universel/compare/v1.186.0...v1.187.0) (2022-12-16)
+
+
+### Bug Fixes
+
+* **admin:** Name of filters ([2c65a7f](https://github.com/betagouv/service-national-universel/commit/2c65a7fb586c8a68f49630f0213cdcaa686b91a6))
+
+
+### Features
+
+* **app:** je donne mon avis post inscription  ([#2148](https://github.com/betagouv/service-national-universel/issues/2148)) ([a1ceef8](https://github.com/betagouv/service-national-universel/commit/a1ceef8334087535695806ca9a1849ad9feb5ccb))
+
 # [1.186.0](https://github.com/betagouv/service-national-universel/compare/v1.185.0...v1.186.0) (2022-12-15)
 
 
