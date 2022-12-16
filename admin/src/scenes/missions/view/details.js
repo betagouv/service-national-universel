@@ -57,7 +57,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
     // open modal to confirm is mission has to change status
     if (values.description !== mission.description || values.actions !== mission.actions) return setModalConfirmation(true);
-    const valuesToUpdate = [...valuesToCheck, "addressVerified", "duration", "contraintes"];
+    const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes"];
     updateMission(valuesToUpdate);
   };
 
@@ -78,7 +78,15 @@ export default function DetailsView({ mission, setMission, getMission }) {
       return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
     }
   };
-  const onSubmitBottom = () => {};
+  const onSubmitBottom = () => {
+    setLoadingBottom(true);
+    const error = {};
+    if (values.startAt < new Date()) error.startAt = "La date est incorrect";
+    if (values.startAt > values.endAt) {
+      error.startAt = "Les dates sont incorrects";
+      error.endAt = "Les dates sont incorrects";
+    }
+  };
 
   const mainDomainsOption = Object.keys(MISSION_DOMAINS).map((d) => {
     return { value: d, label: translate(d) };
@@ -191,6 +199,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     errors={errors}
                     name="structureName"
                     type="select"
+                    shouldShowLoading
                     readOnly={!editing}
                     options={structures}
                     handleChange={(e) => setValues({ ...values, structureName: e.name, structureId: e._id })}
@@ -231,7 +240,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     options={mainDomainsOption.filter((d) => d.value !== values.mainDomain && !values.domains.includes(d.value))}
                     label="Sélectionnez un ou plusieurs domaines"
                     transformer={translate}
-                    value={translate(values.domains)}
+                    value={[...values.domains]}
                   />
                 </div>
                 <div>
@@ -405,6 +414,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         onClick={() => {
                           setEdittingBottom(false);
                           setValues(mission);
+                          setErrorsBottom({});
                         }}
                         disabled={loading}>
                         Annuler
@@ -481,7 +491,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <Field
                     errors={errorsBottom}
                     readOnly={!editingBottom}
-                    name="values"
+                    name="period"
                     handleChange={(e) => setValues({ ...values, period: e })}
                     type="select"
                     multiple
@@ -492,9 +502,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       })}
                     label="Sélectionnez une ou plusieurs périodes"
                     transformer={translate}
-                    value={values.period}
+                    value={[...values.period]}
                   />
-                  {values.period !== "" && values.period !== "WHENEVER" && (
+                  {values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
                     <Field
                       errors={errorsBottom}
                       readOnly={!editingBottom}
@@ -512,7 +522,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       })()}
                       label="Précisez"
                       transformer={translate}
-                      value={translate(values.subPeriod)}
+                      value={[...values.subPeriod]}
                     />
                   )}
                 </div>

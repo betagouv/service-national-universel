@@ -15,6 +15,7 @@ export default function Field({
   errors = {},
   row,
   multiple = false,
+  shouldShowLoading = false,
 }) {
   return (
     <div className={className}>
@@ -30,6 +31,7 @@ export default function Field({
             name={name}
             showBackgroundColor={false}
             transformer={transformer}
+            shouldShowLoading={shouldShowLoading}
             options={options}
             onChange={handleChange}
           />
@@ -45,7 +47,7 @@ export default function Field({
   );
 }
 
-function SimpleSelect({ value, transformer, options, onChange, showBackgroundColor = true, multiple, readOnly }) {
+function SimpleSelect({ value, shouldShowLoading, transformer, options, onChange, showBackgroundColor = true, multiple, readOnly }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
 
   const selectOptionsRef = useRef();
@@ -108,7 +110,7 @@ function SimpleSelect({ value, transformer, options, onChange, showBackgroundCol
       </div>
       {selectOptionsOpened && (
         <div className="absolute z-10 mt-[-1] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
-          {options.length === 0 ? (
+          {options.length === 0 && shouldShowLoading ? (
             <div className="p-1 text-center">Chargement...</div>
           ) : (
             <>
