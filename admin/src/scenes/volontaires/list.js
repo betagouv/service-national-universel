@@ -581,7 +581,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={true}
-                  renderLabel={(items) => getFilterLabel(items, "École")}
+                  renderLabel={(items) => getFilterLabel(items, "Établissement")}
                   showMissing
                   missingLabel="Non renseigné"
                   searchPlaceholder="Rechercher..."
