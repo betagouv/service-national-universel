@@ -160,7 +160,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       console.error("Candidature déjà existante trouvée :", doublon);
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-
+    value.contractStatus = "DRAFT";
     const data = await ApplicationObject.create(value);
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);

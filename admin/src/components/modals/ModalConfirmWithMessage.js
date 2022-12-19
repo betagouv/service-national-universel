@@ -29,6 +29,23 @@ export default function ModalConfirmWithMessage({
   const renderInput = () => {
     if (type === "textarea") return <textarea placeholder={placeholder} rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />;
     if (type === "number") return <input placeholder={placeholder} onChange={(e) => setMessageTextArea(e.target.value)} value={messageTextArea} type="number" min={1} max={999} />;
+    if (type === "missionduration")
+      return (
+        <input
+          placeholder={placeholder}
+          onChange={(e) => {
+            const value = e.target.value;
+            var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
+            if (re.test(value) || !value) {
+              setMessageTextArea(e.target.value);
+            }
+          }}
+          value={messageTextArea}
+          type="number"
+          min={1}
+          max={99}
+        />
+      );
   };
 
   return (

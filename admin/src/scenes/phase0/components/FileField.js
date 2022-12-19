@@ -169,7 +169,15 @@ export function FileField({ young, label, className = "", onChange, mode, status
         onCancel={() => setConfirmDeleteModal(null)}
         onConfirm={confirmDelete}
       />
-      <input ref={fileUploader} type="file" id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={(e) => uploadFile(e.target.files)} className="hidden" />
+      <input
+        ref={fileUploader}
+        type="file"
+        id="file-upload-imageRight"
+        name="file-upload-imageRight"
+        accept=".png, .jpg, .jpeg, .pdf"
+        onChange={(e) => uploadFile(e.target.files)}
+        className="hidden"
+      />
     </>
   );
 }

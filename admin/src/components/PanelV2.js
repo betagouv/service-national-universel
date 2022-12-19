@@ -29,7 +29,7 @@ export default function PanelV2({ children, title, open, onClose }) {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full">
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-lg">
-                  <div className="flex h-full flex-col overflow-y-scroll bg-white py-2 shadow-xl">
+                  <div className="flex h-full flex-col overflow-y-auto bg-white pt-2 shadow-xl">
                     <div className="px-4 sm:px-6">
                       <div className="flex items-start justify-between">
                         <Dialog.Title className="text-lg font-medium text-gray-900">{title}</Dialog.Title>
@@ -41,7 +41,7 @@ export default function PanelV2({ children, title, open, onClose }) {
                         </div>
                       </div>
                     </div>
-                    <div className="relative mt-6 flex-1 px-4">{children}</div>
+                    <div className="relative flex-1 px-4">{children}</div>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

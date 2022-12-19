@@ -3,7 +3,7 @@ import { Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
-import { appURL } from "../config";
+import { appURL, environment } from "../config";
 import { useSelector } from "react-redux";
 import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR } from "../utils";
 import api from "../services/api";
@@ -235,94 +235,97 @@ export default function Contract({ young, admin }) {
     <>
       <BackLink
         onClick={() => {
-          history.push(`/volontaire/${young._id}/${admin ? "phase2" : ""}`);
+          history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`);
         }}>
-        {"<"} Revenir à la fiche volontaire
+        {"<"} Revenir à l&apos;espace candidature
       </BackLink>
-      <Box>
-        <Bloc title="Contrat d’engagement en mission d’intérêt général">
-          <div style={{ display: "flex" }}>
-            <div style={{ flex: 1, marginRight: "1rem", fontSize: "0.8rem", fontStyle: "italic", color: "#444" }}>
-              <p>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
-              {isReferentOrAdmin(user) ? (
-                <p>
-                  La structure d&apos;accueil doit envoyer le contrat d&apos;engagement après validation de la candidature. Néanmoins vous pouvez le faire en rattrapage et suivi
-                  d&apos;une structure.
-                </p>
-              ) : (
-                <p>La structure d&apos;accueil doit envoyer le contrat d&apos;engagement après validation de la candidature. </p>
-              )}
-            </div>
-            <div style={{ textAlign: "right" }}>
-              {contract?.invitationSent === "true" ? (
-                <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} color={APPLICATION_STATUS_COLORS.VALIDATED} />
-              ) : (
-                <Badge text="Contrat pas encore envoyé" style={{ verticalAlign: "top" }} />
-              )}
-            </div>
-          </div>
-          <hr />
-          <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <ContractStatusBadge
-              title="Représentant de l'Etat"
-              target="projectManager"
-              contract={contract}
-              status={contract?.projectManagerStatus}
-              token={contract?.projectManagerToken}
-              lastName={contract?.projectManagerLastName}
-              firstName={contract?.projectManagerFirstName}
-              validationDate={contract?.projectManagerValidationDate}
-            />
-            <ContractStatusBadge
-              title="Représentant structure"
-              target="structureManager"
-              contract={contract}
-              status={contract?.structureManagerStatus}
-              token={contract?.structureManagerToken}
-              lastName={contract?.structureManagerLastName}
-              firstName={contract?.structureManagerFirstName}
-              validationDate={contract?.structureManagerValidationDate}
-            />
-            {contract?.isYoungAdult === "false" || isYoungAdult === "false" ? (
-              <>
-                <ContractStatusBadge
-                  title="Représentant légal 1"
-                  target="parent1"
-                  contract={contract}
-                  status={contract?.parent1Status}
-                  token={contract?.parent1Token}
-                  lastName={contract?.parent1LastName}
-                  firstName={contract?.parent1FirstName}
-                  validationDate={contract?.parent1ValidationDate}
-                />
-                {young.parent2Email && (
-                  <ContractStatusBadge
-                    title="Représentant légal 2"
-                    target="parent2"
-                    contract={contract}
-                    status={contract?.parent2Status}
-                    token={contract?.parent2Token}
-                    lastName={contract?.parent2LastName}
-                    firstName={contract?.parent2FirstName}
-                    validationDate={contract?.parent2ValidationDate}
-                  />
+      {environment === "production" && (
+        <Box>
+          <Bloc title="Contrat d’engagement en mission d’intérêt général">
+            <div style={{ display: "flex" }}>
+              <div style={{ flex: 1, marginRight: "1rem", fontSize: "0.8rem", fontStyle: "italic", color: "#444" }}>
+                <p>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+                {isReferentOrAdmin(user) ? (
+                  <p>
+                    La structure d&apos;accueil doit envoyer le contrat d&apos;engagement après validation de la candidature. Néanmoins vous pouvez le faire en rattrapage et suivi
+                    d&apos;une structure.
+                  </p>
+                ) : (
+                  <p>La structure d&apos;accueil doit envoyer le contrat d&apos;engagement après validation de la candidature. </p>
                 )}
-              </>
-            ) : (
+              </div>
+              <div style={{ textAlign: "right" }}>
+                {contract?.invitationSent === "true" ? (
+                  <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} color={APPLICATION_STATUS_COLORS.VALIDATED} />
+                ) : (
+                  <Badge text="Contrat pas encore envoyé" style={{ verticalAlign: "top" }} />
+                )}
+              </div>
+            </div>
+            <hr />
+            <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
               <ContractStatusBadge
-                title="Volontaire"
-                target="young"
+                title="Représentant de l'Etat"
+                target="projectManager"
                 contract={contract}
-                status={contract?.youngContractStatus}
-                token={contract?.youngContractToken}
-                lastName={contract?.youngLastName}
-                firstName={contract?.youngFirstName}
-                validationDate={contract?.youngContractValidationDate}
+                status={contract?.projectManagerStatus}
+                token={contract?.projectManagerToken}
+                lastName={contract?.projectManagerLastName}
+                firstName={contract?.projectManagerFirstName}
+                validationDate={contract?.projectManagerValidationDate}
               />
-            )}
-          </div>
-        </Bloc>
-      </Box>
+              <ContractStatusBadge
+                title="Représentant structure"
+                target="structureManager"
+                contract={contract}
+                status={contract?.structureManagerStatus}
+                token={contract?.structureManagerToken}
+                lastName={contract?.structureManagerLastName}
+                firstName={contract?.structureManagerFirstName}
+                validationDate={contract?.structureManagerValidationDate}
+              />
+              {contract?.isYoungAdult === "false" || isYoungAdult === "false" ? (
+                <>
+                  <ContractStatusBadge
+                    title="Représentant légal 1"
+                    target="parent1"
+                    contract={contract}
+                    status={contract?.parent1Status}
+                    token={contract?.parent1Token}
+                    lastName={contract?.parent1LastName}
+                    firstName={contract?.parent1FirstName}
+                    validationDate={contract?.parent1ValidationDate}
+                  />
+                  {young.parent2Email && (
+                    <ContractStatusBadge
+                      title="Représentant légal 2"
+                      target="parent2"
+                      contract={contract}
+                      status={contract?.parent2Status}
+                      token={contract?.parent2Token}
+                      lastName={contract?.parent2LastName}
+                      firstName={contract?.parent2FirstName}
+                      validationDate={contract?.parent2ValidationDate}
+                    />
+                  )}
+                </>
+              ) : (
+                <ContractStatusBadge
+                  title="Volontaire"
+                  target="young"
+                  contract={contract}
+                  status={contract?.youngContractStatus}
+                  token={contract?.youngContractToken}
+                  lastName={contract?.youngLastName}
+                  firstName={contract?.youngFirstName}
+                  validationDate={contract?.youngContractValidationDate}
+                />
+              )}
+            </div>
+          </Bloc>
+        </Box>
+      )}
+
       {hasAllValidation ? (
         <DownloadContractButton young={young} uri={contract?._id}>
           Télécharger le contrat
@@ -766,7 +769,7 @@ export default function Contract({ young, admin }) {
                     </ContractContainer>
                   </Bloc>
                 </Box>
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
                   <LoadingButton
                     onClick={async () => {
                       if (contract?.invitationSent === "true") {
@@ -802,6 +805,7 @@ export default function Contract({ young, admin }) {
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
+                      style={{ marginLeft: "1rem" }}
                       loading={loadings.submitButton}
                       disabled={loadings.saveButton}>
                       Envoyer une demande de validation aux {values.parent2Email && !isYoungAdult ? "4" : "3"} parties prenantes

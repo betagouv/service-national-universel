@@ -38,7 +38,7 @@ async function processPatch(patch, count, total) {
       }
     }
   } catch (e) {
-    capture(`Couldn't create structure log for patch id : ${patch._id}`, JSON.stringify(e));
+    capture(e);
     throw e;
   }
 }
@@ -80,7 +80,7 @@ async function createLog(patch, actualStructure, event, value) {
   });
 
   const successResponse = checkResponseStatus(response);
-  return await successResponse.json();
+  return successResponse.json();
 }
 
 const rebuildStruct = (structInfos) => {
@@ -100,13 +100,12 @@ exports.handler = async () => {
 
     const structure_patches = mongoose.model("structure_patches", new mongoose.Schema({}, { collection: "structure_patches" }));
     await findAll(structure_patches, mongooseFilterForDayBefore(), processPatch);
-    slack.info({
+    await slack.info({
       title: "✅ Structure Logs",
       text: `${result.structurePatchScanned} structure patches were scanned:\n ${printResult(result.event)}`,
     });
-    process.exit();
   } catch (e) {
-    capture("Error during creation of young structure logs", e);
     slack.error({ title: "❌ Structure Logs", text: e });
+    capture(e);
   }
 };

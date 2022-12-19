@@ -11,7 +11,6 @@ import ExportComponent from "../../../components/ExportXlsx";
 import { ES_NO_LIMIT } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
-import Panel from "./Panel";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH"];
@@ -38,7 +37,7 @@ export default function List() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Table de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport" }]} />
       <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <Title>Plan de transport</Title>
@@ -123,7 +122,7 @@ export default function List() {
                       <div className="w-[5%] h-1"></div>
                     </div>
                     {data?.map((hit) => {
-                      return <Line key={hit} />;
+                      return <Line key={hit._id} />;
                     })}
                     <hr />
                   </div>

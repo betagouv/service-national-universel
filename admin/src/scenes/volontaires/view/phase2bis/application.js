@@ -6,7 +6,10 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard } from "../../../../utils";
+import downloadPDF from "../../../../utils/download-pdf";
+import ReactLoading from "react-loading";
+
 import IconDomain from "../../../../components/IconDomain";
 import { AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../../../assets/rubberStampValided.svg";
@@ -20,8 +23,12 @@ import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../../assets/icons/Pencil";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../components/modals/ModalConfirmWithMessage";
-import FileCard from "../../../../components/FileCard";
 import YoungHeader from "../../../phase0/components/YoungHeader";
+import Loader from "../../../../components/Loader";
+import Check from "../../../../assets/icons/Check";
+import FileIcon from "../../../../assets/FileIcon";
+import Download from "../../../../assets/icons/Download";
+import Bell from "../../../../assets/icons/Bell";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -30,9 +37,10 @@ export default function Phase2Application({ young, onChange }) {
   const [contract, setContract] = React.useState(null);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalDurationOpen, setModalDurationOpen] = React.useState(false);
-
+  const [contractStatus, setContractStatus] = React.useState(null);
   let { applicationId } = useParams();
   const history = useHistory();
+  const [loadingContract, setLoadingContract] = React.useState(false);
 
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
@@ -105,20 +113,35 @@ export default function Phase2Application({ young, onChange }) {
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
+        setContractStatus(application.contractStatus);
+      } else {
+        setContractStatus("DRAFT");
       }
     };
     getContract();
   }, [application]);
 
-  if (!application || !mission) return "chargement";
-
+  const downloadContract = async () => {
+    try {
+      setLoadingContract(true);
+      await downloadPDF({
+        url: `/contract/${application.contractId}/download`,
+        fileName: `${young.firstName} ${young.lastName} - contrat ${application.contractId}.pdf`,
+      });
+      setLoadingContract(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors du téléchargement du contrat");
+      setLoadingContract(false);
+    }
+  };
+  if (!application || !mission) return <Loader />;
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
       <div className="p-7">
-        {/* <Contract young={young} admin={true} /> */}
         <div className="bg-white w-full h-full rounded-lg px-4">
-          <div className="flex justify-between py-6">
+          <div className="flex items-center justify-between py-6">
             <button
               onClick={history.goBack}
               className="h-8 w-8 flex items-center justify-center space-x-1 bg-gray-100 rounded-full border-[1px] border-gray-100 hover:border-gray-300">
@@ -142,17 +165,24 @@ export default function Phase2Application({ young, onChange }) {
               <div />
             )}
           </div>
-          <hr className="my-4" />
-          <div className="flex relative w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
+          <hr />
+          <div className="flex relative items-center justify-center w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
             {/* Choix*/}
-            <div className="flex-1 flex justify-between basis-[60%] ">
-              <Link className="flex items-center w-full px-2" to={`/mission/${application.missionId}`}>
-                {/* icon */}
-                <div className="flex items-center mr-4">
-                  <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
-                </div>
+            <div className="flex flex-col w-full pr-2 flex-1 justify-between basis-[60%] h-full">
+              <div className="w-full flex justify-end">
+                <button
+                  className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
+                  onClick={() => history.push(`/mission/${mission._id.toString()}`)}>
+                  <div className="text-xs text-gray-800 ">Voir la mission</div>
+                </button>
+              </div>
+              <Link className="flex flex-col w-full" to={`/mission/${application.missionId}`}>
                 {/* mission info */}
                 <div className="flex flex-1 justify-between items-start">
+                  {/* icon */}
+                  <div className="flex items-center mr-4">
+                    <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+                  </div>
                   <div className="flex flex-col flex-1 justify-center">
                     <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
                     <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
@@ -176,15 +206,11 @@ export default function Phase2Application({ young, onChange }) {
                       </div>
                     )}
                   </div>
-                  <button
-                    className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
-                    onClick={() => history.push(`/mission/${mission._id.toString()}`)}>
-                    <div className="text-xs text-gray-800 ">Voir la mission</div>
-                  </button>
                 </div>
               </Link>
+              <div className="flex flex-1 py-2" />
             </div>
-            <div className="border-x border-x-gray-200 basis-[40%]">
+            <div className="border-x border-x-gray-200 basis-[40%] items-center justify-center my-4">
               <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
@@ -194,177 +220,247 @@ export default function Phase2Application({ young, onChange }) {
                 <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
                 <div className="flex items-center gap-2 font-bold text-2xl text-[#242526]">
                   <div>{application?.missionDuration || "0"}h</div>
-                  <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
-                    <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
-                      <Pencil width={16} height={16} />
+                  {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
+                    <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
+                      <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
+                        <Pencil width={16} height={16} />
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
                 </div>
               </div>
             </div>
           </div>
-          <hr className="my-4" />
-          <div className="p-4">
-            <div className="bg-gray-50 rounded-lg  px-10 py-6">
-              <div className="flex justify-between">
-                <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-                <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
-                  <AiFillClockCircle className="text-sky-500" />
-                  <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
-                </div>
-              </div>
-              <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
-              {contract?.invitationSent && (
-                <div className="grid gap-4 grid-cols-4   mt-4">
-                  <StatusContractPeople
-                    value={contract?.projectManagerStatus}
-                    description="Représentant de l’État"
-                    firstName={contract?.projectManagerFirstName}
-                    lastName={contract?.projectManagerLastName}
-                    target="projectManager"
-                    contract={contract}
-                    status={contract?.projectManagerStatus}
-                    token={contract?.projectManagerToken}
-                    validationDate={contract?.projectManagerValidationDate}
-                  />
-                  <StatusContractPeople
-                    value={contract?.structureManagerStatus}
-                    description="Représentant de la structure"
-                    firstName={contract?.structureManagerFirstName}
-                    lastName={contract?.structureManagerLastName}
-                    target="structureManager"
-                    contract={contract}
-                    status={contract?.structureManagerStatus}
-                    token={contract?.structureManagerToken}
-                    validationDate={contract?.structureManagerValidationDate}
-                  />
-                  {contract?.isYoungAdult === "true" ? (
-                    <StatusContractPeople value={contract?.youngContractStatus} description="Volontaire" firstName={contract?.youngFirstName} lastName={contract?.youngLastName} />
-                  ) : (
-                    <>
-                      <StatusContractPeople
-                        value={contract?.parent1Status}
-                        description="Représentant légal 1"
-                        firstName={contract?.parent1FirstName}
-                        lastName={contract?.parent1LastName}
-                        target="parent1"
-                        contract={contract}
-                        status={contract?.parent1Status}
-                        token={contract?.parent1Token}
-                        validationDate={contract?.parent1ValidationDate}
-                      />
-                      {contract?.parent2Email && (
+          <hr className="mb-4" />
+          {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
+            <>
+              <div className="p-4">
+                <div className="bg-gray-50 rounded-lg  px-10 py-6">
+                  <div className="flex justify-between">
+                    <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+                    {contractStatus === "DRAFT" ? (
+                      <div className="text-xs font-normal px-2  bg-orange-500 text-white rounded-sm items-center flex space-x-1">
+                        <Bell />
+                        <div>Contrat en brouillon</div>
+                      </div>
+                    ) : null}
+                    {contractStatus === "VALIDATED" ? (
+                      <div className="text-xs font-normal px-2  bg-green-400 rounded-sm items-center flex space-x-1">
+                        <Check className="text-white" />
+                        <div className="text-white">Contrat signé</div>
+                      </div>
+                    ) : null}
+                    {contractStatus === "SENT" ? (
+                      <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                        <AiFillClockCircle className="text-sky-500" />
+                        <div>Contrat envoyé</div>
+                      </div>
+                    ) : null}
+                  </div>
+                  {contractStatus === "DRAFT" ? (
+                    <div className="text-sm mt-1">
+                      Vous devez renseigner ce contrat d&apos;engagement puis l&apos;envoyer pour validation aux représentant(s) légal(aux) du volontaire, au tuteur de la mission
+                      et au représentant de l&apos;État
+                    </div>
+                  ) : null}
+                  {contractStatus === "SENT" ? (
+                    <div className="text-sm mt-1">
+                      Ce contrat doit être validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
+                    </div>
+                  ) : null}
+                  {contractStatus === "VALIDATED" ? (
+                    <div className="text-sm mt-1">
+                      Ce contrat a été validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
+                    </div>
+                  ) : null}
+
+                  {contract?.invitationSent ? (
+                    <div>
+                      <div className="grid gap-4 grid-cols-4 mt-4">
                         <StatusContractPeople
-                          value={contract?.parent2Status}
-                          description="Représentant légal 2"
-                          firstName={contract?.parent2FirstName}
-                          lastName={contract?.parent2LastName}
-                          target="parent2"
+                          value={contract?.projectManagerStatus}
+                          description="Représentant de l’État"
+                          firstName={contract?.projectManagerFirstName}
+                          lastName={contract?.projectManagerLastName}
+                          target="projectManager"
                           contract={contract}
-                          status={contract?.parent2Status}
-                          token={contract?.parent2Token}
-                          validationDate={contract?.parent2ValidationDate}
+                          status={contract?.projectManagerStatus}
+                          token={contract?.projectManagerToken}
+                          validationDate={contract?.projectManagerValidationDate}
                         />
-                      )}
-                    </>
+                        <StatusContractPeople
+                          value={contract?.structureManagerStatus}
+                          description="Représentant de la structure"
+                          firstName={contract?.structureManagerFirstName}
+                          lastName={contract?.structureManagerLastName}
+                          target="structureManager"
+                          contract={contract}
+                          status={contract?.structureManagerStatus}
+                          token={contract?.structureManagerToken}
+                          validationDate={contract?.structureManagerValidationDate}
+                        />
+                        {contract?.isYoungAdult === "true" ? (
+                          <StatusContractPeople
+                            value={contract?.youngContractStatus}
+                            description="Volontaire"
+                            firstName={contract?.youngFirstName}
+                            lastName={contract?.youngLastName}
+                          />
+                        ) : (
+                          <>
+                            <StatusContractPeople
+                              value={contract?.parent1Status}
+                              description="Représentant légal 1"
+                              firstName={contract?.parent1FirstName}
+                              lastName={contract?.parent1LastName}
+                              target="parent1"
+                              contract={contract}
+                              status={contract?.parent1Status}
+                              token={contract?.parent1Token}
+                              validationDate={contract?.parent1ValidationDate}
+                            />
+                            {contract?.parent2Email && (
+                              <StatusContractPeople
+                                value={contract?.parent2Status}
+                                description="Représentant légal 2"
+                                firstName={contract?.parent2FirstName}
+                                lastName={contract?.parent2LastName}
+                                target="parent2"
+                                contract={contract}
+                                status={contract?.parent2Status}
+                                token={contract?.parent2Token}
+                                validationDate={contract?.parent2ValidationDate}
+                              />
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {contractStatus === "VALIDATED" ? (
+                        <div onClick={() => downloadContract()} className="cursor-pointer py-2 rounded-md mt-7 h-10 bg-green-400 w-48 max-w-xs items-center flex justify-center">
+                          {loadingContract ? (
+                            <div className="h-10 flex items-center justify-center">
+                              <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
+                            </div>
+                          ) : (
+                            <div className="text-white">Télécharger le contrat</div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => {
+                        history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
+                      }}
+                      className="cursor-pointer py-2 rounded-md mt-7 bg-blue-600 w-48 max-w-xs items-center flex justify-center">
+                      <div className="text-white">Editer</div>
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          </div>
-          <div className="mx-8 mt-8 pb-8">
-            <div className="flex justify-between">
-              <div className="text-lg leading-6 font-semibold">Documents</div>
-            </div>
-            <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
-              {optionsType.map(
-                (option, index) =>
-                  application[option].length > 0 && (
-                    <FileCard
-                      key={index}
-                      name={translateAddFilePhase2(option).toUpperCase()}
-                      icon="reglement"
-                      filled={application[option].length}
-                      color="text-blue-600 bg-white"
-                      status="Modifier"
-                      onClick={() =>
+              </div>
+              <div className="mx-8 mt-8 pb-8">
+                <div className="flex justify-between">
+                  <div className="text-lg leading-6 font-semibold">Documents</div>
+                </div>
+                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full items-stretch">
+                  {optionsType.map(
+                    (option, index) =>
+                      application[option].length > 0 && (
+                        <FileCard
+                          key={index}
+                          name={translateAddFilePhase2WithoutPreposition(option)}
+                          icon="reglement"
+                          filled={application[option].length}
+                          showNumber
+                          color="text-blue-600 bg-white"
+                          status="Modifier"
+                          onClick={() =>
+                            setModalDocument({
+                              isOpen: true,
+                              name: option,
+                              stepOne: false,
+                              defaultOption: option,
+                            })
+                          }
+                        />
+                      ),
+                  )}
+                  {optionsType.reduce((acc, option) => acc + (application[option].length > 0 ? 1 : 0), 0) < optionsType.length && (
+                    <section
+                      onClick={() => {
                         setModalDocument({
                           isOpen: true,
-                          name: option,
-                          stepOne: false,
-                        })
-                      }
-                    />
-                  ),
-              )}
-              <section
-                onClick={() => {
-                  setModalDocument({
-                    isOpen: true,
-                    stepOne: true,
-                  });
-                }}
-                className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
-                <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
-                  <HiPlus />
-                  Ajouter une pièce jointe
+                          stepOne: true,
+                        });
+                      }}
+                      className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
+                      <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
+                        <HiPlus />
+                        Ajouter une pièce jointe
+                      </div>
+                    </section>
+                  )}
                 </div>
-              </section>
-            </div>
-            <ModalPJ
-              isOpen={modalDocument?.isOpen}
-              name={modalDocument?.name}
-              young={young}
-              application={application}
-              optionsType={optionsType}
-              onCancel={async () => {
-                setModalDocument({ isOpen: false });
-                await getMission();
-              }}
-              onSend={async (type, multipleDocument) => {
-                try {
-                  const responseNotification = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
-                    type,
-                    multipleDocument,
-                  });
-                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                  toastr.success("L'email a bien été envoyé");
-                } catch (e) {
-                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                }
-              }}
-              onSave={async () => {
-                setModalDocument({ isOpen: false });
-                await getMission();
-                await getApplication();
-              }}
-              typeChose={modalDocument?.stepOne}
-            />
-            <ModalConfirmWithMessage
-              isOpen={modalDurationOpen}
-              title="Validation de réalisation de mission"
-              message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
-              type="number"
-              onChange={() => setModalDurationOpen(false)}
-              defaultInput={application.missionDuration}
-              placeholder="Nombre d'heures"
-              onConfirm={async (duration) => {
-                try {
-                  const { ok, code, data } = await api.put("/application", { _id: application._id, missionDuration: duration });
-                  if (!ok) {
-                    toastr.error("Une erreur s'est produite :", translate(code));
-                  } else {
-                    // onChangeApplication();
-                    setApplication(data);
-                    toastr.success("Mis à jour!");
-                  }
-                } catch (e) {
-                  toastr.error("Une erreur s'est produite :", translate(e?.code));
-                }
-                setModalDurationOpen(false);
-              }}
-            />
-          </div>
+                <ModalPJ
+                  isOpen={modalDocument?.isOpen}
+                  name={modalDocument?.name}
+                  defaultOption={modalDocument?.defaultOption}
+                  young={young}
+                  application={application}
+                  optionsType={optionsType}
+                  onCancel={async () => {
+                    setModalDocument({ isOpen: false });
+                    await getMission();
+                  }}
+                  onSend={async (type, multipleDocument) => {
+                    try {
+                      const responseNotification = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                        type,
+                        multipleDocument,
+                      });
+                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                      toastr.success("L'email a bien été envoyé");
+                      setModalDocument({ isOpen: false });
+                    } catch (e) {
+                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                    }
+                  }}
+                  onSave={async () => {
+                    await getMission();
+                    await getApplication();
+                  }}
+                  closeModal={() => setModalDocument({ isOpen: false })}
+                  typeChose={modalDocument?.stepOne}
+                />
+                <ModalConfirmWithMessage
+                  isOpen={modalDurationOpen}
+                  title="Validation de réalisation de mission"
+                  message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
+                  type="number"
+                  onChange={() => setModalDurationOpen(false)}
+                  defaultInput={application.missionDuration}
+                  placeholder="Nombre d'heures"
+                  onConfirm={async (duration) => {
+                    try {
+                      const { ok, code, data } = await api.put("/application", { _id: application._id, missionDuration: duration });
+                      if (!ok) {
+                        toastr.error("Une erreur s'est produite :", translate(code));
+                      } else {
+                        // onChangeApplication();
+                        setApplication(data);
+                        toastr.success("Mis à jour!");
+                      }
+                    } catch (e) {
+                      toastr.error("Une erreur s'est produite :", translate(e?.code));
+                    }
+                    setModalDurationOpen(false);
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="pt-5"></div>
+          )}
         </div>
       </div>
     </>
@@ -443,5 +539,30 @@ function SendContractLink({ contract, target }) {
         }}
       />
     </>
+  );
+}
+
+function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false }) {
+  return (
+    <section className={`basis-1/4  bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw}`}>
+      <FileIcon filled={filled} icon={icon} />
+      <section>
+        <p className="text-base font-bold mt-2">{name}</p>
+        {description ? <p className="ttext-xs leading-4 font-normal mt-1">{description}</p> : null}
+      </section>
+      {showNumber ? (
+        <div className="text-gray-500">
+          {filled} {filled > 1 ? "documents" : "document"}{" "}
+        </div>
+      ) : null}
+      <div></div>
+      <div className="flex flex-col w-full justify-end items-end self-end my-2">
+        <div
+          onClick={() => onClick()}
+          className="relative border-red-600 border-3 self-endtransition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
+          <Download className=" text-indigo-100 bg-blue-600" />
+        </div>
+      </div>
+    </section>
   );
 }

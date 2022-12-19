@@ -1125,11 +1125,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     let errors = {};
 
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
-      if (!validator.isEmail(data[`parent${parent}Email`])) {
+      if ((data[`parent${parent}ContactPreference`] === "email" || data[`parent${parent}Email`] !== "") && !validator.isEmail(data[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if (!validator.isMobilePhone(data[`parent${parent}Phone`], ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+      if (
+        (data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") &&
+        !validator.isMobilePhone(data[`parent${parent}Phone`], ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])
+      ) {
         errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide.";
         result = false;
       }
@@ -1158,9 +1161,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     );
   }
 
-  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) }];
+  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) || Object.keys(errors)?.some((error) => error.includes("parent1")) }];
   if (young.parent2Status) {
-    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) });
+    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) || Object.keys(errors)?.some((error) => error.includes("parent2")) });
   }
 
   function onParrentTabChange(tab) {
