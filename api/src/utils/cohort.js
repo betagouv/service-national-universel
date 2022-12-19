@@ -50,7 +50,7 @@ async function getPlaces(sessions, region) {
       $match: {
         $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
         cohort: { $in: sessionNames },
-        status: { $nin: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN] },
+        status: { $in: [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.REINSCRIPTION] },
       },
     },
     { $group: { _id: "$cohort", total: { $sum: 1 } } },
@@ -59,7 +59,10 @@ async function getPlaces(sessions, region) {
   const numberOfValidated = await YoungModel.aggregate([
     {
       $match: {
-        $or: [{ schoolRegion: region }, { schoolRegion: { $exists: false }, region }],
+        $or: [
+          { schooled: "true", schoolRegion: region },
+          { schooled: "false", region },
+        ],
         cohort: { $in: sessionNames },
         status: YOUNG_STATUS.VALIDATED,
       },
