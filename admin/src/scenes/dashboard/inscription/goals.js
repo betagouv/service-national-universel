@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import api from "../../../services/api";
 import { YOUNG_STATUS } from "snu-lib";
 import WithTooltip from "../../../components/WithTooltip";
+import ReactTooltip from "react-tooltip";
 
 export default function Goal({ filter }) {
   const user = useSelector((state) => state.Auth.user);
@@ -175,12 +176,15 @@ export default function Goal({ filter }) {
         <Col md={3}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
             <CardTitle>
-              <div className="flex justify-between">
-                <WithTooltip tooltipText="Nombre de dossiers ouverts (en cours, en attente de validation, en attente de correction, sur liste complémentaire, validés) de jeunes scolarisés dans la région (ou si non scolarisés, résidents dans la région) divisé par l’objectif d’inscription régional.">
-                  Taux d&apos;ouverture de dossiers (i)
-                </WithTooltip>
-                <div></div>
+              <div data-tip="" data-for="tooltip-goal">
+                Taux d&apos;ouverture de dossiers (i)
               </div>
+              <ReactTooltip id="tooltip-goal" className="bg-white shadow-xl opacity-100" arrowColor="white" place="top">
+                <div className="text-xs text-gray-700 w-[375px]">
+                  Nombre de dossiers ouverts (en cours, en attente de validation, en attente de correction, sur liste complémentaire, validés) de jeunes scolarisés dans la région
+                  (ou si non scolarisés, résidents dans la région) divisé par l’objectif d’inscription régional.
+                </div>
+              </ReactTooltip>
             </CardTitle>
             <CardValueWrapper>
               <CardValue style={openApplications && percent2 >= 100 ? { color: "firebrick" } : {}}>{openApplications ? `${percent2} %` : "-"}</CardValue>
