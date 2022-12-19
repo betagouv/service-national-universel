@@ -78,6 +78,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     try {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
+      if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
       const { ok, code, data: mission } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
@@ -132,6 +133,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
           <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
               <div className="flex flex-row gap-4 items-center justify-center">
+              <div className="flex flex-row gap-4 items-center justify-start w-full flex-1">
                 <div className="text-lg font-medium text-gray-900">Informations générales</div>
                 {mission.status === "VALIDATED" && (
                   <div className="flex flex-row gap-2 items-center justify-center">
@@ -150,10 +152,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       </span>
                       {thresholdPendingReached && (
                         <span>
-                          <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des{" "}
-                          <div className="text-blue-600 underline" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+                          <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des&nbsp;
+                          <span className="text-blue-600 underline" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
                             candidatures à traiter
-                          </div>
+                          </span>
                         </span>
                       )}
                     </div>
@@ -223,7 +225,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     label="Structure"
                     value={values.structureName}
                   />
-                  {values.structureName && editing && (
+                  {values.structureName && (
                     <div
                       onClick={() => history.push(`/structure/${values.structureId}/edit`)}
                       className="border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
