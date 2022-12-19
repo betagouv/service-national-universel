@@ -14,6 +14,8 @@ import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
 
+import ReactTooltip from "react-tooltip";
+
 export default function Wrapper({ mission, tab, children, getMission }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
@@ -81,8 +83,13 @@ export default function Wrapper({ mission, tab, children, getMission }) {
 
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 || mission.placesLeft < 1 ? (
-                <div className={`cursor-pointer text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`} disabled>
-                  Proposer cette mission
+                <div data-tip="" data-for="tooltip-full">
+                  <ReactTooltip id="tooltip-full" className="bg-white shadow-xl text-black" arrowColor="white" disable={false}>
+                    <div className="text-[black]">Vous ne pouvez pas proposer cette mission</div>
+                  </ReactTooltip>
+                  <div className={`cursor-pointer text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`} disabled>
+                    Proposer cette mission
+                  </div>
                 </div>
               ) : (
                 <div
