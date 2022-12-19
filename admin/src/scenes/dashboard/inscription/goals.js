@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import { YOUNG_STATUS } from "snu-lib";
-import { environment } from "../../../config";
 import WithTooltip from "../../../components/WithTooltip";
 
 export default function Goal({ filter }) {
@@ -173,24 +172,22 @@ export default function Goal({ filter }) {
             </CardValueWrapper>
           </Card>
         </Col>
-        {environment !== "production" && (
-          <Col md={3}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-              <CardTitle>
-                <div className="flex justify-between">
-                  <WithTooltip tooltipText="Nombre de dossiers ouverts (en cours, en attente de validation, en attente de correction, sur liste complémentaire, validés) de jeunes scolarisés dans la région (ou si non scolarisés, résidents dans la région) divisé par l’objectif d’inscription régional.">
-                    Taux d&apos;ouverture de dossiers (i)
-                  </WithTooltip>
-                  <div></div>
-                </div>
-              </CardTitle>
-              <CardValueWrapper>
-                <CardValue style={openApplications && percent2 >= 100 ? { color: "firebrick" } : {}}>{openApplications ? `${percent2} %` : "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-          </Col>
-        )}
+        <Col md={3}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>
+              <div className="flex justify-between">
+                <WithTooltip tooltipText="Nombre de dossiers ouverts (en cours, en attente de validation, en attente de correction, sur liste complémentaire, validés) de jeunes scolarisés dans la région (ou si non scolarisés, résidents dans la région) divisé par l’objectif d’inscription régional.">
+                  Taux d&apos;ouverture de dossiers (i)
+                </WithTooltip>
+                <div></div>
+              </div>
+            </CardTitle>
+            <CardValueWrapper>
+              <CardValue style={openApplications && percent2 >= 100 ? { color: "firebrick" } : {}}>{openApplications ? `${percent2} %` : "-"}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
       </Row>
     </>
   );
