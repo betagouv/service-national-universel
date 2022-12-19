@@ -3,7 +3,8 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import { translateField, translateCorrectionReason } from "snu-lib";
+import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate } from "snu-lib";
+import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 
 export default function WaitingCorrectionV2() {
@@ -21,7 +22,9 @@ export default function WaitingCorrectionV2() {
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
               <div className="text-[#242526] font-bold text-xl mt-3">Votre dossier d’inscription est en attente de correction.</div>
-              <div className="text-[#738297] text-sm mt-2">Merci d’effectuer les modifications demandées par votre référent :</div>
+              <div className="text-[#738297] text-sm mt-2">
+                Merci d’effectuer <b>avant le {formatDateFR(PHASE1_YOUNG_ACCESS_LIMIT[young.cohort])} inclus</b> les modifications demandées par votre référent :
+              </div>
               <div className="flex flex-col gap-5 mt-3 overflow-auto max-h-[250px]">
                 <hr className="border-gray-200" />
                 {young.correctionRequests.map((correction, i) => {
@@ -51,17 +54,27 @@ export default function WaitingCorrectionV2() {
             </div>
             <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
           </div>
+          <div className="flex justify-end mt-10">
+            <a
+              className="w-40"
+              href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+              onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
+              <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
+            </a>
+          </div>
         </div>
       </div>
       {/* MOBILE */}
-      <div className="flex lg:hidden w-full">
+      <div className="flex flex-col lg:hidden w-full">
         <div className="flex flex-col-reverse w-full">
           <div className="px-4 pb-4 flex-col w-full">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
             <div className="text-[#242526] font-bold text-base mt-3">Votre dossier d’inscription est en attente de correction.</div>
-            <div className="text-[#738297] text-sm mt-2">Merci d’effectuer les modifications demandées par votre référent :</div>
+            <div className="text-[#738297] text-sm mt-2">
+              Merci d’effectuer avant le <b>{formatDateFR(PHASE1_YOUNG_ACCESS_LIMIT[young.cohort])} inclus</b> les modifications demandées par votre référent :
+            </div>
             <div className="flex flex-col gap-5 mt-3">
               <hr className="border-gray-200" />
               {young.correctionRequests.map((correction, i) => {
@@ -87,6 +100,14 @@ export default function WaitingCorrectionV2() {
                   </>
                 );
               })}
+            </div>
+            <div className="flex justify-center mt-20">
+              <a
+                className="w-36"
+                href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+                onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
+                <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
+              </a>
             </div>
           </div>
           <img src={require("../../assets/homePhase2Mobile.png")} />
