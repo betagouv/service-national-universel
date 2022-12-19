@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
+import AsyncSelect from "react-select/async";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, ES_NO_LIMIT } from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
@@ -17,7 +18,6 @@ import { toastr } from "react-redux-toastr";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
-  const [structures, setStructures] = useState([]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -33,15 +33,50 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  async function initStructures() {
-    const responseStructure = await api.get("/structure");
-    const s = responseStructure.data.map((e) => ({ label: e.name, value: { name: e.name, _id: e._id } }));
-    setStructures(s);
-  }
-
-  useEffect(() => {
-    initStructures();
-  }, []);
+  const fetchStructures = async (inputValue) => {
+    const body = {
+      query: { bool: { must: [] } },
+      size: 50,
+      track_total_hits: true,
+    };
+    if (inputValue) {
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: inputValue,
+                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+                type: "cross_fields",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: inputValue,
+                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+                type: "phrase",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: inputValue,
+                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+                type: "phrase_prefix",
+                operator: "and",
+              },
+            },
+          ],
+          minimum_should_match: "1",
+        },
+      });
+    }
+    const { responses } = await api.esQuery("structure", body);
+    return responses[0].hits.hits.map((hit) => {
+      return { value: hit._source, _id: hit._id, label: hit._source.name };
+    });
+  };
 
   const onSubmit = () => {
     setLoading(true);
@@ -116,6 +151,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
+
+  useEffect(() => {
+    console.log(values.structureName);
+  }, [values.structureName]);
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -214,16 +253,28 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Structure rattachée</div>
-                  <Field
-                    errors={errors}
-                    name="structureName"
-                    type="select"
-                    shouldShowLoading
-                    readOnly={!editing}
-                    options={structures}
-                    handleChange={(e) => setValues({ ...values, structureName: e.name, structureId: e._id })}
+                  <AsyncSelect
                     label="Structure"
-                    value={values.structureName}
+                    value={{ label: values.structureName }}
+                    loadOptions={fetchStructures}
+                    isDisabled={!editing}
+                    styles={{
+                      control: (styles, { isDisabled }) => {
+                        return {
+                          ...styles,
+                          backgroundColor: isDisabled ? "white" : "white",
+                          color: "black",
+                          opacity: 1,
+                          backgroundOpacity: 1,
+                        };
+                      },
+                    }}
+                    defaultOptions
+                    onChange={(e) => {
+                      setValues({ ...values, structureName: e.label, structureId: e._id });
+                    }}
+                    placeholder="Rechercher une structure"
+                    error={errors.structureName}
                   />
                   {values.structureName && (
                     <div
@@ -559,6 +610,17 @@ const CustomSelect = ({ onChange, readOnly, options, value, isMulti, placeholder
   return (
     <ReactSelect
       isDisabled={readOnly}
+      styles={{
+        control: (styles, { isDisabled }) => {
+          return {
+            ...styles,
+            backgroundColor: isDisabled ? "white" : "white",
+          };
+        },
+        multiValueRemove: (styles, { isDisabled }) => {
+          return { ...styles, display: isDisabled ? "none" : "flex" };
+        },
+      }}
       options={options}
       placeholder={placeholder}
       onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val.value))}
