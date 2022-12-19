@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
@@ -42,7 +42,29 @@ export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState();
   const [isExportOpen, setIsExportOpen] = useState(false);
-
+  const checkboxRef = React.useRef();
+  const [youngSelected, setYoungSelected] = useState([]);
+  const [youngsInPage, setYoungsInPage] = useState([]);
+  const onClickMainCheckBox = () => {
+    if (youngSelected.length === 0) {
+      setYoungSelected(youngsInPage);
+    } else {
+      setYoungSelected([]);
+    }
+  };
+  useEffect(() => {
+    if (!checkboxRef.current) return;
+    if (youngSelected?.length === 0) {
+      checkboxRef.current.checked = false;
+      checkboxRef.current.indeterminate = false;
+    } else if (youngSelected?.length < youngsInPage?.length) {
+      checkboxRef.current.checked = false;
+      checkboxRef.current.indeterminate = true;
+    } else if (youngSelected?.length === youngsInPage?.length) {
+      checkboxRef.current.checked = true;
+      checkboxRef.current.indeterminate = false;
+    }
+  }, [youngSelected]);
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   const handleClick = async (application) => {
@@ -248,10 +270,15 @@ export default function Youngs({ mission, applications, updateMission }) {
                     render={({ data }) => (
                       <Table>
                         <thead>
-                          <tr>
+                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                            <th className="py-3 pl-4">
+                              <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
+                            </th>
                             <th className="w-5/12 ">Volontaire</th>
-                            <th className="w-3/12 ">Date</th>
-                            <th className="w-3/12 ">Statut pour la mission </th>
+                            <th className="w-3/12 ">A candidaté le</th>
+                            <th className="w-3/12 ">Contrat</th>
+                            <th className="w-3/12 ">Documents</th>
+
                             <th className="w-1/12">
                               <MdOutlineAttachFile className="w-full" />
                             </th>
@@ -290,9 +317,7 @@ export default function Youngs({ mission, applications, updateMission }) {
 
 const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  const [openModalPJ, setOpenModalPJ] = useState(false);
   const history = useHistory();
 
   return (
@@ -310,144 +335,8 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplication hit={hit} callback={onChangeApplication} />
-        {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" || hit.status === "ABANDON" ? (
-          <ContractLink
-            onClick={() => {
-              history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
-            }}>
-            Contrat d&apos;engagement &gt;
-          </ContractLink>
-        ) : null}
-        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
-          <div>
-            <div style={{ textAlign: "center" }}>
-              {!hit.missionDuration ? (
-                <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d&apos;heure</ModifyDurationLink>
-              ) : (
-                <span>
-                  Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
-                </span>
-              )}
-            </div>
-            <ModalConfirmWithMessage
-              isOpen={modalDurationOpen}
-              title="Validation de réalisation de mission"
-              message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
-              type="number"
-              onChange={() => setModalDurationOpen(false)}
-              defaultInput={hit.missionDuration}
-              placeholder="Nombre d'heures"
-              onConfirm={async (duration) => {
-                try {
-                  const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
-                  if (!ok) {
-                    toastr.error("Une erreur s'est produite :", translate(code));
-                  } else {
-                    onChangeApplication();
-                    toastr.success("Mis à jour!");
-                  }
-                } catch (e) {
-                  toastr.error("Une erreur s'est produite :", translate(e?.code));
-                }
-                setModalDurationOpen(false);
-              }}
-            />
-          </div>
-        )}
-
-        {hit.status === "WAITING_VALIDATION" && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) && (
-          <React.Fragment>
-            <CopyLink
-              onClick={async () => {
-                setModal({
-                  isOpen: true,
-                  title: "Renvoyer un mail",
-                  message: "Souhaitez-vous renvoyer un mail à la structure ?",
-                  onConfirm: async () => {
-                    try {
-                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
-                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                      toastr.success("L'email a bien été envoyé");
-                    } catch (e) {
-                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                    }
-                  },
-                });
-              }}>
-              ✉️ Renvoyer un mail à la structure
-            </CopyLink>
-            <ModalConfirm
-              isOpen={modal?.isOpen}
-              title={modal?.title}
-              message={modal?.message}
-              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-              onConfirm={() => {
-                modal?.onConfirm();
-                setModal({ isOpen: false, onConfirm: null });
-              }}
-            />
-          </React.Fragment>
-        )}
       </td>
-      <td>
-        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit?.status) && (
-          <>
-            <div className="flex justify-center">
-              <div className="bg-blue-600  rounded-full text-white p-2 " onClick={() => setOpenModalPJ(true)}>
-                {optionsType.reduce((sum, option) => sum + hit[option]?.length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
-              </div>
-            </div>
-            <ModalPJ
-              isOpen={openModalPJ}
-              application={hit}
-              young={hit}
-              optionsType={optionsType}
-              onCancel={() => {
-                setOpenModalPJ(false);
-                onChangeApplication();
-              }}
-              onSend={async (type, multipleDocument) => {
-                try {
-                  const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
-                    type,
-                    multipleDocument,
-                  });
-                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                  toastr.success("L'email a bien été envoyé");
-                } catch (e) {
-                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                }
-              }}
-              onSave={() => {
-                setOpenModalPJ(false);
-                onChangeApplication();
-              }}
-            />
-          </>
-        )}
-      </td>
+      <td>test</td>
     </tr>
   );
 };
-
-const CopyLink = styled.button`
-  background: none;
-  color: rgb(81, 69, 205);
-  font-size: 0.8rem;
-  font-style: italic;
-  margin: 0 auto;
-  display: block;
-  border: none;
-  :hover {
-    outline: none;
-    text-decoration: underline;
-  }
-  padding: 0;
-`;
-
-const ModifyDurationLink = styled.span`
-  color: #007bff;
-  :hover {
-    text-decoration: underline;
-  }
-`;
