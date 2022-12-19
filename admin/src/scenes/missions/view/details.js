@@ -142,7 +142,17 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       }}
                     />
                     <div>
-                      La mission est <strong>{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                      <span>
+                        La mission est <strong>{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                      </span>
+                      {mission.pendingApplications >= mission.placesLeft * 5 && (
+                        <span>
+                          <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des{" "}
+                          <div className="text-blue-600 underline" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+                            candidatures à traiter
+                          </div>
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
