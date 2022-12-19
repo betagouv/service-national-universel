@@ -152,10 +152,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
 
-  useEffect(() => {
-    console.log(values.structureName);
-  }, [values.structureName]);
-
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <ModalConfirm
