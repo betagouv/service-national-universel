@@ -81,7 +81,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
         return setLoading(false);
       }
-      console.log(mission);
       toastr.success("Mission enregistrée");
       setLoading(false);
       setEditing(false);
