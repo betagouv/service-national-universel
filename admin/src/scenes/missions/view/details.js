@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ReactSelect from "react-select";
 
 import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../utils";
 import MissionView from "./wrapper";
@@ -234,31 +235,29 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
-                  <Field
-                    errors={errors}
+                  <CustomSelect
                     readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, mainDomain: e, domains: values.domains.filter((d) => d !== e) })}
-                    type="select"
-                    name="mainDomain"
                     options={mainDomainsOption}
-                    label="Sélectionnez un domaine principal"
-                    value={translate(values.mainDomain)}
+                    placeholder={"Sélectionnez un ou plusieurs domaines"}
+                    onChange={(e) => {
+                      setValues({ ...values, mainDomain: e, domains: values.domains.filter((d) => d !== e) });
+                    }}
+                    value={values.mainDomain}
                   />
                   <div className="flex flex-row text-xs font-medium my-2">
                     <div>Domaine(s) d&apos;action secondaire(s)</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
-                  <Field
-                    errors={errors}
+                  <CustomSelect
                     readOnly={!editing}
-                    name="domains"
-                    handleChange={(e) => setValues({ ...values, domains: e })}
-                    type="select"
-                    multiple
-                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain && !values.domains.includes(d.value))}
-                    label="Sélectionnez un ou plusieurs domaines"
-                    transformer={translate}
-                    value={[...values.domains]}
+                    isMulti
+                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
+                    placeholder={"Sélectionnez un ou plusieurs domaines"}
+                    onChange={(e) => {
+                      console.log(values.domains);
+                      setValues({ ...values, domains: e });
+                    }}
+                    value={values.domains}
                   />
                 </div>
                 <div>
@@ -360,7 +359,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     errors={errors}
                     readOnly={!editing}
                     name="description"
-                    type="textarea"
                     row={4}
                     handleChange={(e) => setValues({ ...values, description: e.target.value })}
                     label="Décrivez en quelques mots votre mission"
@@ -506,21 +504,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
                   {/* Script pour passage d'array periode en single value */}
-                  <Field
-                    errors={errorsBottom}
+                  <CustomSelect
                     readOnly={!editingBottom}
-                    name="period"
-                    handleChange={(e) => setValues({ ...values, period: e })}
-                    type="select"
-                    multiple
-                    options={Object.keys(PERIOD)
-                      .filter((el) => !values.period.includes(el))
-                      .map((d) => {
-                        return { value: d, label: translate(d) };
-                      })}
-                    label="Sélectionnez une ou plusieurs périodes"
-                    transformer={translate}
-                    value={[...values.period]}
+                    isMulti
+                    options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
+                    placeholder={"Sélectionnez une ou plusieurs périodes"}
+                    onChange={(e) => setValues({ ...values, period: e })}
+                    value={values.period}
                   />
                   {values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
                     <Field
@@ -564,3 +554,16 @@ export default function DetailsView({ mission, setMission, getMission }) {
     </div>
   );
 }
+
+const CustomSelect = ({ onChange, readOnly, options, value, isMulti, placeholder }) => {
+  return (
+    <ReactSelect
+      isDisabled={readOnly}
+      options={options}
+      placeholder={placeholder}
+      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val.value))}
+      value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
+      isMulti={isMulti}
+    />
+  );
+};
