@@ -27,6 +27,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
+  const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
+
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -112,6 +114,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <ModalConfirm
@@ -136,16 +139,16 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       id="visibility"
                       name="visibility"
                       disabled={!editing}
-                      value={values.visibility === "VISIBLE"}
+                      value={!thresholdPendingReached && values.visibility === "VISIBLE"}
                       onChange={(e) => {
                         setValues({ ...values, visibility: e ? "VISIBLE" : "HIDDEN" });
                       }}
                     />
                     <div>
                       <span>
-                        La mission est <strong>{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                        La mission est <strong>{!thresholdPendingReached && values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
                       </span>
-                      {mission.pendingApplications >= mission.placesLeft * 5 && (
+                      {thresholdPendingReached && (
                         <span>
                           <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des{" "}
                           <div className="text-blue-600 underline" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
