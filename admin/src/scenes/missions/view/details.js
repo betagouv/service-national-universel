@@ -132,7 +132,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
         <div className="bg-white rounded-lg mb-8 overflow-hidden pt-2">
           <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
-              <div className="flex flex-row gap-4 items-center justify-center">
               <div className="flex flex-row gap-4 items-center justify-start w-full flex-1">
                 <div className="text-lg font-medium text-gray-900">Informations générales</div>
                 {mission.status === "VALIDATED" && (
