@@ -20,22 +20,13 @@ import {
   translate,
   getAge,
   ES_NO_LIMIT,
-  translateContractStatus,
-  SENDINBLUE_TEMPLATES,
   ROLES,
   translateApplication,
 } from "../../../utils";
 import Loader from "../../../components/Loader";
-import ContractLink from "../../../components/ContractLink";
 import { DepartmentFilter } from "../../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
+import { Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
-import ModalPJ from "../../volontaires/components/ModalPJ";
-import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
-import { MdOutlineAttachFile } from "react-icons/md";
-import ModalExport from "../../../components/modals/ModalExport";
 import { applicationExportFields } from "snu-lib/excelExports";
 import Eye from "../../../assets/icons/Eye";
 import ExportComponent from "../../../components/ExportXlsx";
@@ -48,6 +39,10 @@ export default function Youngs({ mission, applications, updateMission }) {
   const checkboxRef = React.useRef();
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
+  const [currentTab, setCurrentTab] = useState("all");
+  const countAll = applications?.length;
+  const countPending = applications?.filter((a) => ["WAITING_VALIDATION", "WAITING_CONFIRMATION", "WAITING_VERIFICATION"].includes(a.status)).length;
+  const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -74,16 +69,16 @@ export default function Youngs({ mission, applications, updateMission }) {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
   };
+  const getDefaultQuery = () => {
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "missionId.keyword": mission._id } }] } }, size: ES_NO_LIMIT };
 
-  const getDefaultQuery = () => ({
-    query: {
-      ids: {
-        type: "_doc",
-        values: applications?.map((e) => e._id),
-      },
-    },
-    track_total_hits: true,
-  });
+    if (currentTab === "pending") {
+      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CONFIRMATION", "WAITING_VERIFICATION"] } });
+    } else if (currentTab === "follow") {
+      body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
+    }
+    return body;
+  };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function transform(data, values) {
@@ -205,13 +200,17 @@ export default function Youngs({ mission, applications, updateMission }) {
   }
 
   if (!applications) return <Loader />;
-
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
         <MissionView mission={mission} tab="youngs">
+          <div className="flex flex-1 mx-8">
+            <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
+            <TabItem count={countPending} title="À traiter" onClick={() => setCurrentTab("pending")} active={currentTab === "pending"} />
+            <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
+          </div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div className={`relative items-start mx-8`}>
+            <div className={`relative items-start mx-8 mb-4`}>
               <div className="flex-1 flex-column bg-white flex-wrap rounded-b-lg rounded-tr-lg">
                 <div className="flex flex-row pt-4 justify-between items-center px-8">
                   <div className="flex flex-row">
@@ -400,3 +399,14 @@ function FilterButton({ onClick }) {
     </div>
   );
 }
+const TabItem = ({ active, title, count, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-snu-purple-800 ${
+      active ? "!text-snu-purple-800 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
+    }`}>
+    <div className={"flex items-center gap-2"}>
+      {title} {count}
+    </div>
+  </div>
+);
