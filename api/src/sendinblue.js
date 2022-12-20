@@ -1,4 +1,3 @@
-const { captureMessage } = require("@sentry/node");
 const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
@@ -245,7 +244,6 @@ async function syncContact(email, attributes, listIds) {
     try {
       await updateContact(email, { attributes, listIds });
     } catch (e) {
-      sentryCaptureMessage("Contact not found during update, creating new contact:" + email);
       await createContact({ email, attributes, listIds });
     }
   } catch (e) {
