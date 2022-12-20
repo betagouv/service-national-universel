@@ -409,6 +409,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     errors={errors}
                     readOnly={!editing}
                     name="description"
+                    type="textarea"
                     row={4}
                     handleChange={(e) => setValues({ ...values, description: e.target.value })}
                     label="Décrivez en quelques mots votre mission"

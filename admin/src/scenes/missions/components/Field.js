@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import DatePickerList from "../../phase0/components/DatePickerList";
 import ChevronDown from "../../../assets/icons/ChevronDown";
+import { htmlCleaner } from "../../../utils";
 
 export default function Field({
   name,
@@ -39,7 +40,13 @@ export default function Field({
         {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className={"w-full"} />}
 
         {type === "textarea" && (
-          <textarea rows={row} readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
+          <>
+            {readOnly ? (
+              <div rows={row} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
+            ) : (
+              <textarea rows={row} readOnly={readOnly} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
+            )}
+          </>
         )}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
       </div>
