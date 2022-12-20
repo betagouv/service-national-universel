@@ -12,6 +12,7 @@ function round1Decimal(num) {
 }
 
 export default function Schools({ filter }) {
+  const history = useHistory();
   const getDefaultQuery = () => {
     let body = {
       query: { bool: { must: { match_all: {} }, filter: [] } },
@@ -42,7 +43,19 @@ export default function Schools({ filter }) {
         showLoader={true}
         renderResultStats={({ numberOfResults, displayedResults }) => {
           return (
-            <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${displayedResults}  établissement${numberOfResults > 1 ? "s" : ""} affichés sur ${numberOfResults}`}</div>
+            <div className="flex items-end justify-between w-full mb-3 px-2">
+              <div className="text-gray-700 text-sm">{`${displayedResults}  établissement${numberOfResults > 1 ? "s" : ""} affichés sur ${numberOfResults}`}</div>
+              <div className="flex flex-col">
+                <div className="text-gray-800 text-sm">Besoin d’exporter les inscrits scolarisés dans le département ?</div>
+                <div className="text-gray-500 text-xs inline">
+                  Vous pouvez le faire depuis l’
+                  <span className="text-blue-600 underline cursor-pointer" onClick={() => history.push("/inscription")}>
+                    onglet Inscriptions
+                  </span>
+                  .
+                </div>
+              </div>
+            </div>
           );
         }}
         loader="Chargement..."
