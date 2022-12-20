@@ -188,7 +188,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       {thresholdPendingReached && (
                         <span>
                           <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des&nbsp;
-                          <span className="text-blue-600 underline" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+                          <span className="text-blue-600 underline cursor-pointer" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
                             candidatures à traiter
                           </span>
                         </span>
@@ -213,7 +213,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => {
                           setEditing(false);
-                          setValues(mission);
+                          setValues({ ...mission });
                           setErrors({});
                         }}
                         disabled={loading}>
@@ -476,7 +476,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => {
                           setEdittingBottom(false);
-                          setValues(mission);
+                          setValues({ ...mission });
                           setErrorsBottom({});
                         }}
                         disabled={loading}>
@@ -559,27 +559,24 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     onChange={(e) => setValues({ ...values, period: e })}
                     value={values.period}
                   />
-                  {values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
-                    <Field
-                      errors={errorsBottom}
-                      readOnly={!editingBottom}
-                      className="mt-4"
-                      name="subPeriod"
-                      handleChange={(e) => setValues({ ...values, subPeriod: e })}
-                      type="select"
-                      multiple
-                      options={(() => {
-                        const valuesToCheck = values.period;
-                        let options = [];
-                        if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
-                        if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                        return options.filter((el) => !values.subPeriod.includes(el)).map((el) => ({ value: el, label: translate(el) }));
-                      })()}
-                      label="Précisez"
-                      transformer={translate}
-                      value={[...values.subPeriod]}
-                    />
-                  )}
+                  <div className="mt-4">
+                    {values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
+                      <CustomSelect
+                        readOnly={!editingBottom}
+                        isMulti
+                        options={(() => {
+                          const valuesToCheck = values.period;
+                          let options = [];
+                          if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                          if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                          return options.map((el) => ({ value: el, label: translate(el) }));
+                        })()}
+                        placeholder={"Sélectionnez une ou plusieurs périodes"}
+                        onChange={(e) => setValues({ ...values, subPeriod: e })}
+                        value={values.subPeriod}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div>
                   <div className="flex flex-col text-xs font-medium my-2">
