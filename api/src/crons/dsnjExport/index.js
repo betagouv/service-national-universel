@@ -3,7 +3,7 @@ require("../../mongo");
 const XLSX = require("xlsx");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const SessionModel = require("../../models/session");
+const CohortModel = require("../../models/cohort");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const YoungModel = require("../../models/young");
@@ -16,8 +16,8 @@ const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
 const EXPORT_YOUNGS_AFTER_SESSION = "youngsAfterSession";
 const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-const generateCohesionCentersExport = async (session) => {
-  const sessions = await SessionPhase1Model.find({ cohort: session.name }).select({ cohesionCenterId: 1, _id: 0 });
+const generateCohesionCentersExport = async (cohort) => {
+  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ cohesionCenterId: 1, _id: 0 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({
     _id: 1,
@@ -47,11 +47,11 @@ const generateCohesionCentersExport = async (session) => {
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
   const encryptedBuffer = encrypt(buffer);
   const file = { mimetype: xlsxMimetype, encoding: "7bit", data: encryptedBuffer };
-  await uploadFile(`dsnj/${session.id}/${EXPORT_COHESION_CENTERS}.xlsx`, file);
+  await uploadFile(`dsnj/${cohort.snuId}/${EXPORT_COHESION_CENTERS}.xlsx`, file);
 };
 
-const generateYoungsExport = async (session, afterSession = false) => {
-  const sessions = await SessionPhase1Model.find({ cohort: session.name }).select({ _id: 1, cohesionCenterId: 1 });
+const generateYoungsExport = async (cohort, afterSession = false) => {
+  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ _id: 1, cohesionCenterId: 1 });
   const sessionIds = sessions.map(({ _id }) => _id);
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
@@ -127,7 +127,7 @@ const generateYoungsExport = async (session, afterSession = false) => {
         "Statut professionnel": situationTranslations[situation] || situation,
         "Code du centre": cohesionCenter.code2022,
         "Libellé du centre": cohesionCenter.name,
-        "Date début session": session.dateStart,
+        "Date début session": cohort.dateStart,
         'Validation séjour (validation phase 1 ET présence JDM "oui")': afterSession ? (statusPhase1 === "DONE" && presenceJDM === "true" ? "Oui" : "Non") : "null",
       };
     },
@@ -140,31 +140,31 @@ const generateYoungsExport = async (session, afterSession = false) => {
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
   const encryptedBuffer = encrypt(buffer);
   const file = { mimetype: xlsxMimetype, encoding: "7bit", data: encryptedBuffer };
-  await uploadFile(`dsnj/${session.id}/${afterSession ? EXPORT_YOUNGS_AFTER_SESSION : EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`, file);
+  await uploadFile(`dsnj/${cohort.snuId}/${afterSession ? EXPORT_YOUNGS_AFTER_SESSION : EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`, file);
 };
 
 exports.handler = async () => {
   try {
-    const sessions = await SessionModel.find({});
+    const cohorts = await CohortModel.find({});
     const exportsGenerated = {};
-    sessions.forEach(async (session) => {
-      const cohesionCenterExportDate = new Date(session.dsnjExportDates[EXPORT_COHESION_CENTERS]);
-      const youngBeforeSessionExportDate = new Date(session.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]);
-      const youngAfterSessionExportDate = new Date(session.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]);
+    cohorts.forEach(async (cohort) => {
+      const cohesionCenterExportDate = new Date(cohort.dsnjExportDates[EXPORT_COHESION_CENTERS]);
+      const youngBeforeSessionExportDate = new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]);
+      const youngAfterSessionExportDate = new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]);
       const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
       const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
 
       if (cohesionCenterExportDate >= todayStart && cohesionCenterExportDate <= todayEnd) {
-        await generateCohesionCentersExport(session);
-        addToSlackRapport(exportsGenerated, session.name, EXPORT_COHESION_CENTERS);
+        await generateCohesionCentersExport(cohort);
+        addToSlackRapport(exportsGenerated, cohort.name, EXPORT_COHESION_CENTERS);
       }
       if (youngBeforeSessionExportDate >= todayStart && youngBeforeSessionExportDate <= todayEnd) {
-        await generateYoungsExport(session);
-        addToSlackRapport(exportsGenerated, session.name, EXPORT_YOUNGS_BEFORE_SESSION);
+        await generateYoungsExport(cohort);
+        addToSlackRapport(exportsGenerated, cohort.name, EXPORT_YOUNGS_BEFORE_SESSION);
       }
       if (youngAfterSessionExportDate >= todayStart && youngAfterSessionExportDate <= todayEnd) {
-        await generateYoungsExport(session, true);
-        addToSlackRapport(exportsGenerated, session.name, EXPORT_YOUNGS_AFTER_SESSION);
+        await generateYoungsExport(cohort, true);
+        addToSlackRapport(exportsGenerated, cohort.name, EXPORT_YOUNGS_AFTER_SESSION);
       }
     });
 

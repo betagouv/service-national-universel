@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 
-const MODELNAME = "session";
+const MODELNAME = "cohort";
 
 const DSNJExportDates = new mongoose.Schema({
   cohesionCenters: Date,
@@ -11,7 +11,7 @@ const DSNJExportDates = new mongoose.Schema({
 });
 
 const Schema = new mongoose.Schema({
-  id: {
+  snuId: {
     type: String,
     required: true,
     documentation: {
@@ -37,7 +37,7 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.pre("save", function (next, params) {
+Schema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });

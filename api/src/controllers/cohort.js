@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const passport = require("passport");
-const SessionModel = require("../models/session");
+const CohortModel = require("../models/cohort");
 
 const { capture } = require("../sentry");
 const { ERRORS, getFile } = require("../utils");
@@ -56,24 +56,24 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    let session = await SessionModel.findOne({ id });
-    if (!session) {
+    let cohort = await CohortModel.findOne({ snuId: id });
+    if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!session.dsnjExportDates) {
-      session.dsnjExportDates = {};
+    if (!cohort.dsnjExportDates) {
+      cohort.dsnjExportDates = {};
     }
 
-    if (session.dsnjExportDates[exportDateKey] && session.dsnjExportDates[exportDateKey] <= today) {
+    if (cohort.dsnjExportDates[exportDateKey] && cohort.dsnjExportDates[exportDateKey] <= today) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    session.dsnjExportDates[exportDateKey] = date;
+    cohort.dsnjExportDates[exportDateKey] = date;
 
-    await session.save();
+    await cohort.save();
 
-    return res.status(200).send({ ok: true, data: session });
+    return res.status(200).send({ ok: true, data: cohort });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -82,8 +82,8 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
 
 router.get("/", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (_, res) => {
   try {
-    const sessions = await SessionModel.find({});
-    return res.status(200).send({ ok: true, data: sessions });
+    const cohorts = await CohortModel.find({});
+    return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -109,13 +109,13 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    let session = await SessionModel.findOne({ id });
-    if (!session) {
+    let cohort = await CohortModel.findOne({ snuId: id });
+    if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const exportAvailableFrom = new Date(session.dsnjExportDates[exportKey]);
-    const exportAvailableUntil = new Date(session.dateEnd);
+    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey]);
+    const exportAvailableUntil = new Date(cohort.dateEnd);
     exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();
 
@@ -127,17 +127,17 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
 
     let file, fileName;
     if (exportKey === EXPORT_COHESION_CENTERS) {
-      file = await getFile(`dsnj/${session.id}/${EXPORT_COHESION_CENTERS}.xlsx`);
-      fileName = `DSNJ - Fichier des centres-${session.id}-${formattedDate}.xlsx`;
+      file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_COHESION_CENTERS}.xlsx`);
+      fileName = `DSNJ - Fichier des centres-${cohort.snuId}-${formattedDate}.xlsx`;
     }
 
     if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
-      file = await getFile(`dsnj/${session.id}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
-      fileName = `DSNJ - Fichier volontaire-${session.id}-${formattedDate}.xlsx`;
+      file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
+      fileName = `DSNJ - Fichier volontaire-${cohort.snuId}-${formattedDate}.xlsx`;
     }
     if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
-      file = await getFile(`dsnj/${session.id}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
-      fileName = `DSNJ - Fichier volontaire avec validation-${session.id}-${formattedDate}.xlsx`;
+      file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
+      fileName = `DSNJ - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
     }
 
     const decryptedBuffer = decrypt(file.Body);
