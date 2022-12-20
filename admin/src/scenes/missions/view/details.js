@@ -29,6 +29,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
   const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
+  const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format"];
+  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains"];
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -82,7 +84,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
     setLoading(true);
     const error = {};
     const baseError = "Ce champ est obligatoire";
-    const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions"];
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
     });
@@ -94,8 +95,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     if (Object.keys(error).length > 0) return setLoading(false);
 
     // open modal to confirm is mission has to change status
-    if (values.description !== mission.description || values.actions !== mission.actions) return setModalConfirmation(true);
-    const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes"];
+    if ((values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION") return setModalConfirmation(true);
     updateMission(valuesToUpdate);
   };
 
@@ -114,18 +114,21 @@ export default function DetailsView({ mission, setMission, getMission }) {
     try {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
+      console.log(valuesToSend);
       if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
-      const { ok, code, data: mission } = await api.put(`/mission/${values._id}`, valuesToSend);
+      const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
+        console.log(code);
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
         return setLoading(false);
       }
       toastr.success("Mission enregistrée");
       setLoading(false);
       setEditing(false);
-      setValues(mission);
-      setMission(mission);
+      setValues(missionReturned);
+      setMission(missionReturned);
     } catch (e) {
+      console.log(e);
       setLoading(false);
       return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
     }
@@ -158,10 +161,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
         isOpen={modalConfirmation}
         title={"Modification de statut"}
         message={"Êtes-vous sûr(e) de vouloir continuer ? Certaines modifications entraîneront une modification du statut de la mission : En attente de validation."}
-        onCancel={() => setModalConfirmation(false)}
+        onCancel={() => {
+          setModalConfirmation(false);
+          setLoading(false);
+        }}
         onConfirm={() => {
           setModalConfirmation(false);
-          updateMission();
+          updateMission(valuesToUpdate);
         }}
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
@@ -304,7 +310,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       console.log(values.domains);
                       setValues({ ...values, domains: e });
                     }}
-                    value={values.domains}
+                    value={[...values.domains]}
                   />
                 </div>
                 <div>
@@ -607,6 +613,7 @@ const CustomSelect = ({ onChange, readOnly, options, value, isMulti, placeholder
         dropdownIndicator: (styles, { isDisabled }) => {
           return { ...styles, display: isDisabled ? "none" : "flex" };
         },
+        placeholder: (styles, { isDisabled }) => ({ ...styles, color: "black" }),
         control: (styles, { isDisabled }) => {
           return {
             ...styles,
