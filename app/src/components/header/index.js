@@ -25,7 +25,7 @@ const HeaderNav = styled.div`
   display: flex;
   align-items: center;
   padding: 1rem 2rem;
-  margin-bottom: 1rem;
+  // margin-bottom: 1rem;
   background-color: #fff;
   height: 6rem;
   justify-content: space-between;
