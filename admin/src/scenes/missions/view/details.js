@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, ES_NO_LIMIT } from "../../../utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
@@ -604,6 +604,9 @@ const CustomSelect = ({ onChange, readOnly, options, value, isMulti, placeholder
     <ReactSelect
       isDisabled={readOnly}
       styles={{
+        dropdownIndicator: (styles, { isDisabled }) => {
+          return { ...styles, display: isDisabled ? "none" : "flex" };
+        },
         control: (styles, { isDisabled }) => {
           return {
             ...styles,
