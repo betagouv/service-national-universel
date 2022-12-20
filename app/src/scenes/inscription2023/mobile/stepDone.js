@@ -163,7 +163,13 @@ export default function StepWaitingConsent() {
               <EditPen />
               Modifier mes informations
             </div>
+            <div className="w-full flex justify-end">
+              <a className="w-1/3" href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3504?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
+                <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
+              </a>
+            </div>
           </div>
+
           <div className="fixed bottom-0 w-full z-50">
             <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
               <button

@@ -9,6 +9,7 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
+import Loader from "../../../../../components/Loader";
 
 const options = [
   { label: "Oui", value: true },
@@ -37,9 +38,9 @@ export default function Info({ bus, setBus, dataForCheck }) {
       busId: bus.busId || "",
       departuredDate: bus.departuredDate || "",
       returnDate: bus.returnDate || "",
-      youngCapacity: bus.youngCapacity || "",
-      totalCapacity: bus.totalCapacity || "",
-      followerCapacity: bus.followerCapacity || "",
+      youngCapacity: bus.youngCapacity || 0,
+      totalCapacity: bus.totalCapacity || 0,
+      followerCapacity: bus.followerCapacity || 0,
       travelTime: bus.travelTime || "",
       lunchBreak: bus.lunchBreak || false,
       lunchBreakReturn: bus.lunchBreakReturn || false,
@@ -102,6 +103,13 @@ export default function Info({ bus, setBus, dataForCheck }) {
       setIsLoading(false);
     }
   };
+
+  if (!dataForCheck)
+    return (
+      <div className="p-8 w-full bg-white rounded-xl">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="p-8 w-full bg-white rounded-xl">

@@ -225,7 +225,6 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
 
     // Create or update contract.
     const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
-
     // Update the application.
     const application = await ApplicationObject.findById(contract.applicationId);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -375,8 +374,13 @@ router.post("/token/:token", async (req, res) => {
 
     await updateYoungStatusPhase2Contract(young, req.user);
 
+    const contractStatus = checkStatusContract(data);
+    const application = await ApplicationObject.findById(data.applicationId);
+    application.set({ contractStatus });
+    await application.save({ fromUser: req.user });
+
     // notify the young and parents when the contract has been validated by everyone.
-    if (checkStatusContract(data) === "VALIDATED") {
+    if (contractStatus === "VALIDATED") {
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
 
       if (young.parent1FirstName && young.parent1LastName && young.parent1Email) {

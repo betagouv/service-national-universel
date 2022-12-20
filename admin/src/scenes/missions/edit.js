@@ -641,7 +641,10 @@ export default function Edit(props) {
                         <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} disabled={isJvaMission} />
                       </FormGroup>
                       <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase">
-                        <div>Hébergement proposé</div>
+                        <div className="flex flex-row items-center gap-1">
+                          <div>Hébergement proposé : </div>
+                          <div className="font-bold">{values.hebergement === "true" ? "Oui" : "Non"}</div>
+                        </div>
                         <Toggle
                           id="hebergement"
                           name="hebergement"
@@ -651,7 +654,10 @@ export default function Edit(props) {
                       </div>
                       {values.hebergement === "true" && (
                         <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase mt-4">
-                          <div>Hébergement payant</div>
+                          <div className="flex flex-row items-center gap-1">
+                            <div>Hébergement payant : </div>
+                            <div className="font-bold">{values.hebergementPayant === "true" ? "Oui" : "Non"}</div>
+                          </div>
                           <Toggle
                             id="hebergementPayant"
                             name="hebergementPayant"

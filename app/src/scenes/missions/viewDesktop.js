@@ -15,7 +15,7 @@ import {
   copyToClipboard,
   APPLICATION_STATUS,
   SENDINBLUE_TEMPLATES,
-  translateAddFilePhase2,
+  translateAddFilePhase2WithoutPreposition,
   COHESION_STAY_END,
 } from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
@@ -444,7 +444,7 @@ export default function viewDesktop() {
                       mission.application[option].length > 0 && (
                         <FileCard
                           key={index}
-                          name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                          name={translateAddFilePhase2WithoutPreposition(option)}
                           icon="reglement"
                           filled={mission.application[option].length}
                           color="text-blue-600 bg-white"
@@ -526,7 +526,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -539,7 +539,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -551,7 +551,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -561,7 +561,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
         <WithTooltip tooltipText="Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater">
           <button className="px-12 py-2 rounded-lg text-white bg-blue-600/60  text-sm cursor-pointer">Candidater</button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
   if (disabledIncomplete)
@@ -572,7 +572,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -590,7 +590,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
         }}>
         Candidater
       </button>
-      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
     </div>
   );
 };
@@ -655,9 +655,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
               {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
             </div>
           </div>
-          <div className="text-xs leading-none font-normal text-gray-500">
-            Places disponibles : {mission.placesLeft}/{mission.placesTotal}{" "}
-          </div>
+          <div className="text-xs leading-none font-normal text-gray-500">Places restantes : {mission.placesLeft}</div>
         </div>
         <ModalConfirm
           isOpen={cancelModal?.isOpen}
@@ -784,9 +782,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
             <span className="text-sm leading-5 font-medium text-black">Décliner</span>
           </button>
         </div>
-        <div className="text-xs leading-none font-normal text-gray-500">
-          Places disponibles : {mission.placesTotal - mission.placesLeft}/{mission.placesTotal}
-        </div>
+        <div className="text-xs leading-none font-normal text-gray-500">Places restantes : {mission.placesLeft}</div>
       </div>
     );
   }

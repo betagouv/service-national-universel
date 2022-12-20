@@ -80,7 +80,7 @@ const Item = ({ value, values, index, updateList, name }) => {
             <Badge>{index + 1}</Badge>
             <Label>{translate(value)}</Label>
           </div>
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", "margin-right": "4px" }}>
             <RoundItem plus onClick={() => handleMove(index, -1)} />
             <RoundItem minus onClick={() => handleMove(index, 1)} />
           </div>

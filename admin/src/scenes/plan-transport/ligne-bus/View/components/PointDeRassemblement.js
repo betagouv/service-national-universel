@@ -12,6 +12,7 @@ import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
+import Loader from "../../../../../components/Loader";
 
 const options = [
   { label: "Bus", value: "bus" },
@@ -22,7 +23,7 @@ const options = [
 
 const keys = ["code", "name", "city", "zip", "department", "region"];
 
-export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }) {
+export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume }) {
   const user = useSelector((state) => state.Auth.user);
   const [editPdr, setEditPdr] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -137,6 +138,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }
         return setIsLoading(false);
       }
       setBus(ligneInfo);
+      await getVolume();
       setEditPdr(false);
       setIsLoading(false);
       setSearch("");
@@ -146,6 +148,13 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume }
       setIsLoading(false);
     }
   };
+
+  if (!volume)
+    return (
+      <div className="p-8 w-full bg-white rounded-xl">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="p-8 w-full bg-white rounded-xl">

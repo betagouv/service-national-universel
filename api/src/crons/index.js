@@ -115,11 +115,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     loginAttempts.handler();
   });
 
-  cron.schedule("15 3 * * *", () => {
+  cron.schedule("45 2 * * *", () => {
     syncReferentSupport.handler();
   });
 
-  cron.schedule("30 3 * * *", () => {
+  cron.schedule("15 1 * * *", () => {
     syncContactSupport.handler();
   });
 

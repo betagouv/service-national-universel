@@ -148,3 +148,36 @@ export const TabItem = ({ active, title, icon, onClick }) => (
     </div>
   </div>
 );
+
+export const getStatusClass = (status) => {
+  switch (status) {
+    case "PENDING":
+      return "bg-[#F97316]";
+    case "ACCEPTED":
+      return "bg-[#10B981]";
+    case "REJECTED":
+      return "bg-[#EF4444]";
+    default:
+      return "bg-orange-500";
+  }
+};
+
+export const translateStatus = (status) => {
+  switch (status) {
+    case "PENDING":
+      return "À traiter";
+    case "ACCEPTED":
+      return "Validée";
+    case "REJECTED":
+      return "Refusée";
+    default:
+      return "À traiter";
+  }
+};
+
+export const getInitials = (word) =>
+  (word || "")
+    .match(/\b(\w)/g)
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();

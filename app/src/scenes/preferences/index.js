@@ -1,394 +1,213 @@
-import * as Sentry from "@sentry/react";
-import { Field, Formik } from "formik";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
-import { Col, Input, Row } from "reactstrap";
-import styled from "styled-components";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import { Content, Hero, HeroContainer } from "../../components/Content";
 import { setYoung } from "../../redux/auth/actions";
-import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate } from "../../utils";
-import Button from "./button";
-import DomainItem from "./domainItem";
-import ErrorMessage, { requiredMessage } from "./errorMessage";
-import MobilityCard from "./mobilityCard";
-import RankingPeriod from "./rankingPeriod";
-import TransportCard from "./transportCard";
+import api from "../../services/api";
+import { TRANSPORT, translate, PROFESSIONNAL_PROJECT, PERIOD } from "snu-lib";
+import View from "./View";
+import { PREF_FORMATS } from "./commons";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
-  const [loading, setLoading] = React.useState(false);
+  const [data, setData] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
 
-  return (
-    <>
-      <HeroContainer>
-        <Hero>
-          <Content>
-            <h1>Préférences de missions</h1>
-            <p>
-              En vue de la mission d&apos;intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l&apos;administration de vous proposer des
-              missions en cohérence avec vos motivations.
-            </p>
-          </Content>
-          <div className="thumb" />
-        </Hero>
-      </HeroContainer>
-      <Formik
-        initialValues={{ ...young, firstName1: young.parent1FirstName, lastName1: young.parent1LastName, firstName2: young.parent2FirstName, lastName2: young.parent2LastName }}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={async (values) => {
-          try {
-            setLoading(true);
-            console.log(values);
-            plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
-            if (young) {
-              dispatch(setYoung(young));
-            }
-            setLoading(false);
-            return toastr.success("Mis à jour !");
-          } catch (e) {
-            console.log(e);
-            Sentry.captureException(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
-            setLoading(false);
+  useEffect(() => {
+    if (young) {
+      setData({
+        domains: young.domains ? young.domains : [],
+        missionFormat: young.missionFormat,
+        period: young.period,
+        periodRanking: young.periodRanking ? young.periodRanking : [],
+        mobilityTransport: young.mobilityTransport ? young.mobilityTransport : [],
+        mobilityTransportOther: young.mobilityTransport && young.mobilityTransportOther ? young.mobilityTransportOther : "",
+        professionnalProject: young.professionnalProject,
+        professionnalProjectPrecision: young.professionnalProjectPrecision ? young.professionnalProjectPrecision : "",
+        desiredLocationToggle: young.desiredLocation !== null && young.desiredLocation !== undefined && young.desiredLocation.trim().length > 0,
+        desiredLocation: young.desiredLocation !== null && young.desiredLocation !== undefined && young.desiredLocation.trim().length > 0 ? young.desiredLocation.trim() : "",
+        engaged: young.engaged === "true",
+        engagedDescription: young.engagedDescription && young.engaged === "true" ? young.engagedDescription : "",
+        city: young.city,
+        schoolCity: young.schoolCity,
+        schooled: young.schooled,
+        mobilityNearHome: young.mobilityNearHome === "true",
+        mobilityNearSchool: young.mobilityNearSchool === "true",
+        mobilityNearRelative: young.mobilityNearRelative === "true",
+        mobilityNearRelativeName: young.mobilityNearRelativeName ? young.mobilityNearRelativeName : "",
+        mobilityNearRelativeAddress: young.mobilityNearRelativeAddress ? young.mobilityNearRelativeAddress : "",
+        mobilityNearRelativeZip: young.mobilityNearRelativeZip ? young.mobilityNearRelativeZip : "",
+        mobilityNearRelativeCity: young.mobilityNearRelativeCity ? young.mobilityNearRelativeCity : "",
+      });
+    } else {
+      setData({ domains: [] });
+    }
+  }, [young]);
+
+  function getCleanedYoung() {
+    let cleanData = { ...data };
+    delete cleanData.desiredLocationToggle;
+    delete cleanData.city;
+    delete cleanData.schooled;
+    delete cleanData.schoolCity;
+
+    for (const key of Object.keys(cleanData)) {
+      if (cleanData[key] === true) {
+        cleanData[key] = "true";
+      } else if (cleanData[key] === false) {
+        cleanData[key] = "false";
+      }
+    }
+
+    return { ...young, ...cleanData };
+  }
+
+  async function onSave() {
+    setSaving(true);
+    if (validateBeforeSave()) {
+      try {
+        plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
+        const { ok, code, data: updatedYoung } = await api.put("/young", getCleanedYoung());
+        if (ok) {
+          if (updatedYoung) {
+            dispatch(setYoung(updatedYoung));
           }
-        }}>
-        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
-          <>
-            <PreferenceItem title="Sélectionnez 3 thématiques qui vous intéressent le plus parmi les domaines d'action disponibles">
-              <Field
-                hidden
-                validate={(v) => {
-                  if (!v) return requiredMessage;
-                  if (v.length < 3) return "Veuillez selectionner 3 domaines";
-                }}
-                name="domains"
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.CITIZENSHIP}
-                title="Citoyenneté"
-                subtitle="Animation d’un conseil citoyen, aide à la lutte contre le racisme, l’homophobie..."
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.CULTURE}
-                title="Culture"
-                subtitle="Restauration du patrimoine, aide à une association culturelle, bénévole au sein d’un salle de musique, d’un musée..."
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.DEFENSE}
-                title="Défense et mémoire"
-                subtitle="Préparations militaires, participation à des commémorations, entretien de lieux de mémoire, participation à l’organisation de visites...."
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.EDUCATION}
-                title="Éducation"
-                subtitle="Aide scolaire, aide à apprendre le français à Des personnes étrangères, animation dans des médiathèques"
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.ENVIRONMENT}
-                title="Environnement"
-                subtitle="Protection de la nature et des animaux, promotion du tri des déchets"
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.HEALTH}
-                title="Santé"
-                subtitle="Accompagnement de personnes vulnérables comme des enfants hospitalisés, des personnes âgées, organisation d’actions pour le téléthon ..."
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.SECURITY}
-                title="Sécurité"
-                subtitle="Gendarmerie - sapeurs-pompiers - associations de protection civile"
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.SOLIDARITY}
-                title="Solidarité"
-                subtitle="Aide aux sans-abris, aux migrants, aux personnes en situation de handicap ..."
-              />
-              <DomainItem
-                name="domains"
-                handleChange={handleChange}
-                values={values}
-                value={MISSION_DOMAINS.SPORT}
-                title="Sport"
-                subtitle="Animation d’un club ou d’une association sportive..."
-              />
-              <ErrorMessage errors={errors} touched={touched} name="domains" />
-            </PreferenceItem>
-            <PreferenceItem title="Quel est votre projet professionnel ?">
-              <Wrapper>
-                <Button
-                  name="professionnalProject"
-                  handleChange={handleChange}
-                  values={values}
-                  value={PROFESSIONNAL_PROJECT.UNIFORM}
-                  title="Corps en uniforme"
-                  onClick={() => {
-                    handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
-                  }}
-                />
-                <Button
-                  name="professionnalProject"
-                  handleChange={handleChange}
-                  values={values}
-                  value={PROFESSIONNAL_PROJECT.OTHER}
-                  title="Autre"
-                  onClick={() => {
-                    handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
-                  }}
-                />
-                <Button
-                  name="professionnalProject"
-                  handleChange={handleChange}
-                  values={values}
-                  value={PROFESSIONNAL_PROJECT.UNKNOWN}
-                  title="Non connu pour le moment"
-                  onClick={() => {
-                    handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
-                  }}
-                />
-              </Wrapper>
-              <ErrorMessage errors={errors} touched={touched} name="professionnalProject" />
-              {values.professionnalProject && values.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN ? (
-                <>
-                  <span style={{ textTransform: "uppercase", letterSpacing: "0.05rem", margin: "0.75rem 0", fontSize: "0,875rem", fontWeight: "500", color: "#6b7280" }}>
-                    Précisez
-                  </span>
-                  {values.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
-                    <Wrapper>
-                      <Button
-                        name="professionnalProjectPrecision"
-                        handleChange={handleChange}
-                        values={values}
-                        value={PROFESSIONNAL_PROJECT_PRECISION.FIREFIGHTER}
-                        title="Pompiers"
-                      />
-                      <Button name="professionnalProjectPrecision" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT_PRECISION.POLICE} title="Police" />
-                      <Button name="professionnalProjectPrecision" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT_PRECISION.ARMY} title="Militaire" />
-                    </Wrapper>
-                  ) : (
-                    <>
-                      <Field
-                        validate={(v) => {
-                          if (!v) return requiredMessage;
-                        }}
-                        placeholder="Exemple : Je rêve de devenir danseuse étoile..."
-                        className="form-control"
-                        name="professionnalProjectPrecision"
-                        value={values.professionnalProjectPrecision}
-                        onChange={handleChange}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="professionnalProjectPrecision" />
-                    </>
-                  )}
-                  <ErrorMessage errors={errors} touched={touched} name="professionnalProjectPrecision" />
-                </>
-              ) : null}
-            </PreferenceItem>
-            <PreferenceItem title="Quelle période privilégiez-vous pour réaliser la mission d'intérêt général ?">
-              <Wrapper style={{ alignItems: "center", marginBottom: "0.5rem" }}>
-                <Button name="period" handleChange={handleChange} values={values} value={PERIOD.DURING_HOLIDAYS} title="Sur les vacances scolaires" />
-                <span>OU</span>
-                <Button name="period" handleChange={handleChange} values={values} value={PERIOD.DURING_SCHOOL} title="Sur le temps scolaire" />
-              </Wrapper>
-              <ErrorMessage errors={errors} touched={touched} name="period" />
-              {values.period ? (
-                <RankingPeriod
-                  handleChange={handleChange}
-                  title={values.period === PERIOD.DURING_HOLIDAYS ? "SUR LES VACANCES SCOLAIRES" : "SUR LE TEMPS SCOLAIRE"}
-                  period={values.period}
-                  values={values}
-                  name="periodRanking"
-                />
-              ) : null}
-            </PreferenceItem>
-            <PreferenceItem
-              title="Quelle est votre mobilité géographique ?"
-              subtitle="Les frais de transport et d'hébergement sont à votre charge pour la réalisation de votre mission de phase 2.">
-              <Row style={{ width: "100%" }}>
-                <Col md={6}>
-                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} validateField={validateField} />
-                </Col>
-                <Col md={6}>
-                  <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ(S)" handleChange={handleChange} values={values} errors={errors} touched={touched} />
-                </Col>
-              </Row>
-            </PreferenceItem>
-            <PreferenceItem title="Quel format de mission préfèrez-vous ?">
-              <Wrapper style={{ alignItems: "center", marginBottom: "0.5rem" }}>
-                <Button name="missionFormat" handleChange={handleChange} values={values} value="CONTINUOUS" title={translate("CONTINUOUS")} />
-                OU
-                <Button name="missionFormat" handleChange={handleChange} values={values} value="DISCONTINUOUS" title={translate("DISCONTINUOUS")} />
-              </Wrapper>
-              <ErrorMessage errors={errors} touched={touched} name="missionFormat" />
-            </PreferenceItem>
-            <PreferenceItem title="Etes-vous engagés comme bénévole en parallèle de votre inscription au SNU ?">
-              <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
-                <Button name="engaged" handleChange={handleChange} values={values} value="true" title="OUI" />
-                OU
-                <Button name="engaged" handleChange={handleChange} values={values} value="false" title="NON" />
-              </div>
-              <ErrorMessage errors={errors} touched={touched} name="engaged" />
-              {values.engaged === "true" ? (
-                <>
-                  <Field
-                    hidden
-                    validate={(v) => {
-                      if (!v) return requiredMessage;
-                    }}
-                    name="engagedDescription"
-                  />
-                  <Input
-                    type="textarea"
-                    rows={3}
-                    placeholder="Expliquez cette mission en quelques mots..."
-                    name="engagedDescription"
-                    value={values.engagedDescription}
-                    onChange={handleChange}
-                  />
-                  <ErrorMessage errors={errors} touched={touched} name="engagedDescription" />
-                </>
-              ) : null}
-            </PreferenceItem>
-            <PreferenceItem title="Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d'intérêt général ? (Optionnel)">
-              <Input
-                type="textarea"
-                rows={3}
-                placeholder="Précisez à l'administration le lieu où vous souhaiteriez effectuer votre mission..."
-                name="desiredLocation"
-                value={values.desiredLocation}
-                onChange={handleChange}
-              />
-            </PreferenceItem>
-            <Footer>
-              <LoadingButton onClick={handleSubmit} loading={loading}>
-                Enregistrer mes préférences
-              </LoadingButton>
-              {Object.keys(errors).length ? <h3>Vous ne pouvez pas enregistrer votre avancée car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            </Footer>
-          </>
-        )}
-      </Formik>
-    </>
-  );
+          toastr.success("Vos préférences ont bien été enregistrées.");
+        } else {
+          toastr.error("Une erreur s'est produite", translate(code));
+        }
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible d'enregistrer", "Une erreur est survenue lors de l'enregistrement de vos préférences. Veuillez réessayer dans quelques instants.");
+      }
+    }
+    setSaving(false);
+  }
+
+  function validateBeforeSave() {
+    let validated = true;
+    let errors = {};
+
+    console.log("validate data: ", data);
+
+    if (data.domains.length < 3) {
+      errors.domains = "Vous devez choisir 3 thématiques.";
+      validated = false;
+    }
+
+    if (!Object.keys(PROFESSIONNAL_PROJECT).includes(data.professionnalProject)) {
+      errors.professionnalProject = "Vous devez précisez votre projet professionnel";
+      validated = false;
+    }
+    if (data.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN) {
+      if (data.professionnalProjectPrecision === null || data.professionnalProjectPrecision === undefined || data.professionnalProjectPrecision.trim().length === 0) {
+        errors.professionnalProjectPrecision = "Vous devez indiquer une précision.";
+        validated = false;
+      }
+    }
+
+    if (data.desiredLocationToggle) {
+      if (data.desiredLocation === null || data.desiredLocation === undefined || data.desiredLocation.trim().length === 0) {
+        errors.desiredLocation = "Vous devez précisez l'endroit désiré.";
+        validated = false;
+      }
+    }
+
+    if (data.engaged) {
+      if (data.engagedDescription === null || data.engagedDescription === undefined || data.engagedDescription.trim().length === 0) {
+        errors.engagedDescription = "Vous devez précisez votre activité bénévole.";
+        validated = false;
+      }
+    }
+
+    if (!Object.keys(PREF_FORMATS).includes(data.missionFormat)) {
+      errors.missionFormat = "Vous devez précisez votre format préféré";
+      validated = false;
+    }
+
+    if (!Object.keys(PERIOD).includes(data.period)) {
+      errors.period = "Vous devez précisez une période de réalisation de la mission";
+      validated = false;
+    }
+
+    if (data.mobilityTransport.includes(TRANSPORT.OTHER)) {
+      if (data.mobilityTransportOther === null || data.mobilityTransportOther === undefined || data.mobilityTransportOther.trim().length === 0) {
+        errors.mobilityTransportOther = "Vous devez précisez votre autre moyen de transport privilégié.";
+        validated = false;
+      }
+    }
+
+    if (data.mobilityNearRelative) {
+      if (data.mobilityNearRelativeName === null || data.mobilityNearRelativeName === undefined || data.mobilityNearRelativeName.trim().length === 0) {
+        errors.mobilityNearRelativeName = "Vous devez précisez le nom de votre proche.";
+        validated = false;
+      }
+      if (data.mobilityNearRelativeAddress === null || data.mobilityNearRelativeAddress === undefined || data.mobilityNearRelativeAddress.trim().length === 0) {
+        errors.mobilityNearRelativeAddress = "Vous devez précisez l'adresse de votre proche.";
+        validated = false;
+      }
+      if (data.mobilityNearRelativeZip === null || data.mobilityNearRelativeZip === undefined || data.mobilityNearRelativeZip.trim().length === 0) {
+        errors.mobilityNearRelativeZip = "Vous devez précisez le code postal de votre proche.";
+        validated = false;
+      }
+      if (data.mobilityNearRelativeCity === null || data.mobilityNearRelativeCity === undefined || data.mobilityNearRelativeCity.trim().length === 0) {
+        errors.mobilityNearRelativeCity = "Vous devez précisez la ville de votre proche.";
+        validated = false;
+      }
+    }
+
+    console.log("Errors : ", errors);
+    setErrors(errors);
+    return validated;
+  }
+
+  function hasDomainSelected(type) {
+    return data.domains && data.domains.includes(type);
+  }
+
+  function onToggleDomain(type) {
+    const idx = data.domains.indexOf(type);
+    let domains = [...data.domains];
+    if (idx >= 0) {
+      domains.splice(idx, 1);
+      setData({ ...data, domains });
+    } else {
+      let domains = data.domains.length >= 3 ? data.domains.slice(1, 4) : [...data.domains];
+      domains.push(type);
+      setData({ ...data, domains });
+    }
+  }
+
+  function onChangeYoung(name, value) {
+    let newData = { ...data };
+    switch (name) {
+      case "mobilityTtransport":
+        if (!value.includes(TRANSPORT.OTHER)) {
+          newData.mobilityTransportOther = "";
+        }
+        break;
+      case "engaged":
+        if (!value) {
+          newData.engagedDescription = "";
+        }
+        break;
+      case "desiredLocationToggle":
+        if (!value) {
+          newData.desiredLocation = "";
+        }
+        break;
+      case "professionnalProject":
+        if (data.professionnalProject !== value) {
+          newData.professionnalProjectPrecision = null;
+        }
+        break;
+    }
+    newData[name] = value;
+    setData(newData);
+  }
+
+  return <View young={data} onToggleDomain={onToggleDomain} onSave={onSave} saving={saving} hasDomainSelected={hasDomainSelected} onChange={onChangeYoung} errors={errors} />;
 }
-
-const Infos = styled.div`
-  font-size: 0.8rem;
-  color: #6a7181;
-  font-weight: 400;
-  @media (max-width: 768px) {
-    font-size: 0.7rem;
-  }
-`;
-
-const PreferenceItem = ({ title, children, subtitle }) => {
-  return (
-    <HeroContainer>
-      <Hero>
-        <PreferenceContent style={{ width: "100%" }}>
-          <Title>
-            <span>{title}</span>
-            <Infos>{subtitle}</Infos>
-          </Title>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{children}</div>
-        </PreferenceContent>
-      </Hero>
-    </HeroContainer>
-  );
-};
-
-const Wrapper = styled.div`
-  display: flex;
-  text-align: center;
-  @media (max-width: 767px) {
-    display: block;
-    > * {
-      margin: 0.5rem auto;
-    }
-  }
-`;
-
-const Footer = styled.div`
-  margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  h3 {
-    border: 1px solid #fc8181;
-    border-radius: 0.25em;
-    margin-top: 1em;
-    background-color: #fff5f5;
-    color: #c53030;
-    font-weight: 400;
-    font-size: 12px;
-    padding: 1em;
-  }
-`;
-
-const Title = styled.div`
-  position: relative;
-  text-align: center;
-  font-size: 1.25rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 700;
-  margin: 1rem 0;
-  ::after {
-    content: "";
-    display: block;
-    height: 1px;
-    width: 100%;
-    background-color: #d2d6dc;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    @media (max-width: 768px) {
-      top: 110%;
-    }
-    transform: translateY(-50%);
-    z-index: -1;
-  }
-  span {
-    padding: 0 10px;
-    background-color: #fff;
-    color: rgb(22, 30, 46);
-  }
-`;
-
-const PreferenceContent = styled(Content)`
-  padding: 2rem;
-  padding-top: 0.5rem;
-`;
