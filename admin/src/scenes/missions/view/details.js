@@ -172,8 +172,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
         }}
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
-        <div className="bg-white rounded-lg mb-8 pt-2">
-          <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
+        <div className="bg-white rounded-xl mb-8 pt-2">
+          <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
               <div className="flex flex-row gap-4 items-center justify-start w-full flex-1">
                 <div className="text-lg font-medium text-gray-900">Informations générales</div>
@@ -289,7 +289,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <CustomSelect
                     readOnly={!editing}
                     options={mainDomainsOption}
-                    placeholder={"Sélectionnez un ou plusieurs domaines"}
+                    placeholder={"Sélectionnez un domaine principal"}
                     onChange={(e) => {
                       setValues({ ...values, mainDomain: e, domains: values.domains.filter((d) => d !== e) });
                     }}
@@ -369,15 +369,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">Type de mission</div>
-                  <Field
+                  <CustomSelect
                     errors={errors}
                     readOnly={!editing}
-                    name="format"
-                    type="select"
-                    handleChange={(e) => setValues({ ...values, format: e })}
                     options={formatOptions}
-                    label="Mission regroupée sur des journées"
-                    value={translate(values.format)}
+                    placeholder={"Mission regroupée sur des journées"}
+                    onChange={(e) => setValues({ ...values, format: e })}
+                    value={values.format}
                   />
                 </div>
                 <div>
@@ -458,8 +456,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg mb-8 pt-2">
-          <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
+        <div className="bg-white rounded-xl mb-8 pt-2">
+          <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
@@ -603,7 +601,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   );
 }
 
-const CustomSelect = ({ onChange, readOnly, options, value, isMulti, placeholder }) => {
+const CustomSelect = ({ onChange, readOnly, options, value, isMulti = false, placeholder }) => {
   return (
     <ReactSelect
       isDisabled={readOnly}
