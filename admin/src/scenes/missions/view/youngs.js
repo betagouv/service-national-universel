@@ -302,7 +302,6 @@ export default function Youngs({ mission, applications, updateMission }) {
                                   return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
                                 })
                               }
-                              optionsType={optionsType}
                             />
                           ))}
                         </tbody>
@@ -325,12 +324,8 @@ export default function Youngs({ mission, applications, updateMission }) {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType, onSelect }) => {
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const user = useSelector((state) => state.Auth.user);
-  const history = useHistory();
+const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
-
   return (
     <tr className={"hover:!bg-gray-100"} onClick={onClick}>
       <td className={`pl-4 ml-2 rounded-l-lg`}>
@@ -364,10 +359,10 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType, onSelec
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
-      <td className="flex justify-center items-center">
+      <td className="text-center">
         <NavLink
           to={`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`}
-          className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
+          className="mx-auto flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
           <Eye width={16} height={16} />
         </NavLink>
       </td>
