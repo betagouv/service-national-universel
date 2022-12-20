@@ -217,9 +217,9 @@ export default function Youngs({ mission, applications, updateMission }) {
                     <DataSearch
                       defaultQuery={getDefaultQuery}
                       showIcon={false}
-                      placeholder="Rechercher par mots clés, ville, code postal..."
+                      placeholder="Rechercher par prénom, nom, email"
                       componentId="SEARCH"
-                      dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
+                      dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
                       react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                       style={{ marginRight: "1rem", flex: 1 }}
                       innerClass={{ input: "searchbox" }}
