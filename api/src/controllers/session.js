@@ -123,19 +123,21 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
+    const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
+
     let file, fileName;
     if (exportKey === EXPORT_COHESION_CENTERS) {
       file = await getFile(`dsnj/${session.id}/${EXPORT_COHESION_CENTERS}.xlsx`);
-      fileName = `DSNJ - Fichier des centres-${session.id}.xlsx`;
+      fileName = `DSNJ - Fichier des centres-${session.id}-${formattedDate}.xlsx`;
     }
 
     if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
       file = await getFile(`dsnj/${session.id}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
-      fileName = `DSNJ - Fichier volontaire-${session.id}.xlsx`;
+      fileName = `DSNJ - Fichier volontaire-${session.id}-${formattedDate}.xlsx`;
     }
     if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
       file = await getFile(`dsnj/${session.id}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
-      fileName = `DSNJ - Fichier volontaire avec validation-${session.id}.xlsx`;
+      fileName = `DSNJ - Fichier volontaire avec validation-${session.id}-${formattedDate}.xlsx`;
     }
 
     const decryptedBuffer = decrypt(file.Body);

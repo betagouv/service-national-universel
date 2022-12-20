@@ -42,6 +42,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
     if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
     if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
     if (user.role === ROLES.HEAD_CENTER) return "Chef de centre";
+    if (user.role === ROLES.DSNJ) return "DSNJ";
     return "";
   }
 

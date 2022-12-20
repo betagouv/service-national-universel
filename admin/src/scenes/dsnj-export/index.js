@@ -54,7 +54,6 @@ const DSNJExport = () => {
   };
 
   const updateExportDate = (key) => async (date) => {
-    console.log({ key, date });
     const { ok, code, data: updatedSession } = await api.put(`/session/${sessionId}/export/${key}`, { date });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
     const updatedSessions = sessions.map((currentSession) => {
