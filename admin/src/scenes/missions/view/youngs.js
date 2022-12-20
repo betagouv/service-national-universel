@@ -268,6 +268,9 @@ export default function Youngs({ mission, applications, updateMission }) {
                     dataField="youngLastName.keyword"
                     sortBy="asc"
                     size={30}
+                    onData={async ({ rawData }) => {
+                      if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
+                    }}
                     render={({ data }) => (
                       <Table>
                         <thead>
@@ -289,7 +292,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                               key={hit._id}
                               hit={hit}
                               onClick={() => handleClick(hit)}
-                              selected={young?._id === hit._id}
+                              selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                               onChangeApplication={updateMission}
                               onSelect={(newItem) =>
                                 setYoungSelected((prev) => {
