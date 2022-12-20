@@ -13,7 +13,7 @@ const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLU
 const { sendTemplate, sendSMS } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
-const { getAvailableSessions } = require("../../utils/cohort");
+const { getFilteredSessions } = require("../../utils/cohort");
 const { isInRuralArea } = require("snu-lib");
 
 const youngSchooledSituationOptions = [
@@ -457,7 +457,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check inscription goals
-    const sessions = await getAvailableSessions(young);
+    const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session || session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 

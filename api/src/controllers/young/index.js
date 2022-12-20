@@ -49,7 +49,7 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
-const { getAvailableSessions } = require("../../utils/cohort");
+const { getFilteredSessions } = require("../../utils/cohort");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -562,7 +562,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getAvailableSessions(young);
+    const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
