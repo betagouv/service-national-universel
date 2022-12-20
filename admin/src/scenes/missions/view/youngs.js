@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
-import SelectStatusApplication from "../../../components/selectStatusApplication";
+import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
@@ -359,7 +359,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType, onSelec
         )}
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} callback={onChangeApplication} />
+        <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
       <td className="flex justify-center items-center">
         <NavLink
