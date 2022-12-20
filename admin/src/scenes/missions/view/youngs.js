@@ -402,11 +402,12 @@ function FilterButton({ onClick }) {
 const TabItem = ({ active, title, count, onClick }) => (
   <div
     onClick={onClick}
-    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-snu-purple-800 ${
-      active ? "!text-snu-purple-800 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
+    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-blue-600 ${
+      active ? "!text-blue-600 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
     }`}>
     <div className={"flex items-center gap-2"}>
-      {title} {count}
+      <div>{title}</div>
+      <div className={`px-2 border-[0.5px] font-medium text-xs rounded-3xl ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
     </div>
   </div>
 );
