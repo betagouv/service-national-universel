@@ -261,10 +261,11 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={{ label: values.structureName }}
                     loadOptions={fetchStructures}
                     isDisabled={!editing}
+                    noOptionsMessage={"Aucune structure ne correspond à cette recherche"}
                     styles={{
                       dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       placeholder: (styles) => ({ ...styles, color: "black" }),
-                      control: (styles, { isDisabled }) => ({ ...styles, backgroundColor: isDisabled ? "white" : "white" }),
+                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
                       singleValue: (styles) => ({ ...styles, color: "black" }),
                       multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
@@ -288,6 +289,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
                   <CustomSelect
                     readOnly={!editing}
+                    noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     options={mainDomainsOption}
                     placeholder={"Sélectionnez un domaine principal"}
                     onChange={(e) => {
@@ -303,6 +305,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     readOnly={!editing}
                     isMulti
                     options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
+                    noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un ou plusieurs domaines"}
                     onChange={(e) => {
                       setValues({ ...values, domains: e });
@@ -601,14 +604,15 @@ export default function DetailsView({ mission, setMission, getMission }) {
   );
 }
 
-const CustomSelect = ({ onChange, readOnly, options, value, isMulti = false, placeholder }) => {
+const CustomSelect = ({ onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option" }) => {
   return (
     <ReactSelect
       isDisabled={readOnly}
+      noOptionsMessage={() => noOptionsMessage}
       styles={{
         dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
         placeholder: (styles) => ({ ...styles, color: "black" }),
-        control: (styles, { isDisabled }) => ({ ...styles, backgroundColor: isDisabled ? "white" : "white" }),
+        control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
         singleValue: (styles) => ({ ...styles, color: "black" }),
         multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
         indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
