@@ -46,8 +46,8 @@ import { appURL } from "../../config";
 import { capture } from "../../sentry";
 
 const REJECTION_REASONS = {
-  NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
-  TOO_YOUNG: "Le volontaire n&apos;a pas l&apos;âge requis",
+  NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
+  TOO_YOUNG: "Le volontaire n'a pas l'âge requis",
   OTHER: "Autre (préciser)",
 };
 

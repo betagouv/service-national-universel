@@ -47,4 +47,7 @@ const customStyles = {
   indicatorSeparator: () => {
     return { display: "none" };
   },
+  dropdownIndicator: () => {
+    return { display: "none" };
+  },
 };

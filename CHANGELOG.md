@@ -1,3 +1,10 @@
+# [1.188.0](https://github.com/betagouv/service-national-universel/compare/v1.187.0...v1.188.0) (2022-12-19)
+
+
+### Features
+
+* **admin:** ajout d'une stat "Taux de dossiers ouverts" sur le dashboard inscriptions ([#2154](https://github.com/betagouv/service-national-universel/issues/2154)) ([26155a0](https://github.com/betagouv/service-national-universel/commit/26155a0b757d1d64ce113e515163455f8b4f2903))
+
 # [1.187.0](https://github.com/betagouv/service-national-universel/compare/v1.186.0...v1.187.0) (2022-12-16)
 
 

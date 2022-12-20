@@ -176,7 +176,7 @@ export default function Goal({ filter }) {
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
             <CardTitle>
               <div data-tip="" data-for="tooltip-goal">
-                Taux d&apos;ouverture de dossiers (i)
+                Taux d&apos;ouverture de dossiers
               </div>
               <ReactTooltip id="tooltip-goal" className="bg-white shadow-xl opacity-100" arrowColor="white" place="top">
                 <div className="text-xs text-gray-700 w-[375px]">

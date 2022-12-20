@@ -900,7 +900,7 @@ const HoursAndPlaces = ({ duration, placesLeft, hebergement, hebergementPayant }
           <div className="text-xs">{duration} heure(s)</div>
         </div>
       ) : null}
-      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
     </div>
   );
 };

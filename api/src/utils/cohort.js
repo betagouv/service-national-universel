@@ -60,16 +60,8 @@ async function getPlaces(sessions, region) {
     {
       $group: {
         _id: "$cohort",
-        candidates: {
-          $sum: {
-            $cond: [{ $in: ["$status", ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "WAITING_LIST", "REINSCRIPTION"]] }, "$status", 1],
-          },
-        },
-        validated: {
-          $sum: {
-            $cond: [{ $in: ["$status", ["VALIDATED"]] }, "$status", 1],
-          },
-        },
+        candidates: { $sum: { $cond: [{ $in: ["$status", ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "WAITING_LIST", "REINSCRIPTION"]] }, "$status", 1] } },
+        validated: { $sum: { $cond: [{ $in: ["$status", ["VALIDATED"]] }, "$status", 1] } },
       },
     },
   ]);
@@ -79,8 +71,8 @@ async function getPlaces(sessions, region) {
       session.numberOfCandidates = agg.find(({ _id }) => _id === session.name)?.candidates || 0;
       session.numberOfValidated = agg.find(({ _id }) => _id === session.name)?.validated || 0;
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;
-      session.goalReached = session.goal <= 0 ? false : session.numberOfCandidates + session.numberOfValidated >= session.goal * session.buffer;
-      session.isFull = session.goal <= 0 ? false : session.numberOfValidated >= session.goal;
+      session.goalReached = session.goal <= 0 ? true : session.numberOfCandidates + session.numberOfValidated >= session.goal * session.buffer;
+      session.isFull = session.goal <= 0 ? true : session.numberOfValidated >= session.goal;
     }
   }
   return sessions;
