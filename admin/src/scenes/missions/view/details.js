@@ -503,7 +503,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">Dates de la mission</div>
-                  <div className="flex flex-row justify-between gap-3 my-4">
+                  <div className="flex flex-row justify-between gap-3 my-2">
                     <Field
                       errors={errorsBottom}
                       name="startAt"
@@ -564,8 +564,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     onChange={(e) => setValues({ ...values, period: e })}
                     value={values.period}
                   />
-                  <div className="mt-4">
-                    {values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
+                  {(editingBottom || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
+                    <div className="mt-4">
                       <CustomSelect
                         readOnly={!editingBottom}
                         isMulti
@@ -580,8 +580,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         onChange={(e) => setValues({ ...values, subPeriod: e })}
                         value={values.subPeriod}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className="flex flex-col text-xs font-medium my-2">
