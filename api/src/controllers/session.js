@@ -86,7 +86,7 @@ router.get("/", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: fals
     return res.status(200).send({ ok: true, data: sessions });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
