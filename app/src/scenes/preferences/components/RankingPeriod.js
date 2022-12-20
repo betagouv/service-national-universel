@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "snu-lib";
 
-import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../utils";
-
-export default function RankingPeriod({ title, period, handleChange, name, values }) {
+export default function RankingPeriod({ period, handleChange, name, values }) {
   const [items, setItems] = useState(values[name]);
 
   const updateList = (value) => {
@@ -36,7 +34,6 @@ export default function RankingPeriod({ title, period, handleChange, name, value
 
   return (
     <Container>
-      <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="list">
           {(provided) => (
@@ -53,18 +50,14 @@ export default function RankingPeriod({ title, period, handleChange, name, value
   );
 }
 
-Array.prototype.toggleValue = function (i, j) {
-  const temp = this[j];
-  this[j] = this[i];
-  this[i] = temp;
-};
-
 const Item = ({ value, values, index, updateList, name }) => {
   const handleMove = (index, delta) => {
     const nextIndex = index + delta;
     if (nextIndex >= 0 && nextIndex < values[name].length) {
       const d = values[name];
-      d.toggleValue(nextIndex, index);
+      const temp = d[index];
+      d[index] = d[nextIndex];
+      d[nextIndex] = temp;
       updateList(d);
     }
   };
@@ -72,13 +65,13 @@ const Item = ({ value, values, index, updateList, name }) => {
   return (
     <Draggable draggableId={value} index={index}>
       {(provided) => (
-        <ItemContainer ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-          <div style={{ display: "flex", flex: 1 }}>
-            <RoundItem value={index + 1} />
-            <Label>{translate(value)}</Label>
+        <ItemContainer ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} index={index}>
+          <div className="flex items-center ml-2 mr-4">
+            <Badge>{index + 1}</Badge>
+            <div className="mx-2">{translate(value)}</div>
           </div>
-          <div style={{ display: "flex" }}>
-            <RoundItem plus onClick={() => handleMove(index, -1)} />
+          <div className="flex mr-2">
+            <RoundItem plus onClick={() => handleMove(index, -1)} className="mr-2" />
             <RoundItem minus onClick={() => handleMove(index, 1)} />
           </div>
         </ItemContainer>
@@ -87,56 +80,39 @@ const Item = ({ value, values, index, updateList, name }) => {
   );
 };
 
-const RoundItem = ({ value, plus, minus, onClick }) => {
+const RoundItem = ({ value, plus, minus, onClick, className = "" }) => {
   const getValue = () => {
     if (plus) return "↑";
     if (minus) return "↓";
     return value;
   };
-  return <Badge onClick={onClick}>{getValue()}</Badge>;
+  return (
+    <Badge onClick={onClick} className={className}>
+      {getValue()}
+    </Badge>
+  );
 };
 
-const Label = styled.div`
-  margin: 0 1rem;
-`;
+function Badge({ onClick = () => {}, className = "", children }) {
+  return (
+    <div
+      className={`flex justify-center items-center rounded-full w-[1.75rem] h-[1.75rem] text-[#6b7280] text-[0.75rem] border-[#d2d6dc] border-[1px] cursor-pointer mx-[0.01rem] ${className}`}
+      onClick={onClick}>
+      {children}
+    </div>
+  );
+}
 
-const Badge = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  color: #6b7280;
-  font-size: 0.75rem;
-  border-width: 1px;
-  border-color: #d2d6dc;
-  border-style: solid;
-  border-radius: 9999px;
-  cursor: pointer;
-  margin: 0 0.1rem;
-`;
+function Container({ className = "", children }) {
+  return <div className={`shadow border-[1px] border-[#d2d6dc] rounded-[0.5rem] flex flex-col w-[100%] md:w-fit ${className}`}>{children}</div>;
+}
 
-const Container = styled.div`
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  border-width: 1px;
-  border-radius: 0.5rem;
-  border-style: solid;
-  border-color: #d2d6dc;
-  margin: 0 0.25rem 1rem 0.25rem;
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-`;
-
-const ItemContainer = styled.div`
-  border-top-width: 1px;
-  border-top-color: #d2d6dc;
-  border-top-style: solid;
-  width: 100%;
-  flex: 1;
-  padding: 1rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
+// eslint-disable-next-line react/display-name
+const ItemContainer = React.forwardRef((props, ref) => (
+  <div
+    ref={ref}
+    className={`${props.index === 0 ? "border-t-[0px]" : "border-t-[1px]"} border-t-[#d2d6dc] w-[100%] grow py-4 flex items-center justify-between ${props.className}`}
+    {...props}>
+    {props.children}
+  </div>
+));
