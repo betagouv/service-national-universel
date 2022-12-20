@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { useHistory } from "react-router-dom";
+import { useHistory, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
@@ -11,14 +11,14 @@ import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
 import {
-  formatStringLongDate,
+  formatDateFRTimezoneUTC,
   formatLongDateUTC,
   formatLongDateUTCWithoutTime,
   getFilterLabel,
   translate,
   getAge,
   ES_NO_LIMIT,
-  colors,
+  translateContractStatus,
   SENDINBLUE_TEMPLATES,
   ROLES,
   translateApplication,
@@ -35,6 +35,7 @@ import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
 import { MdOutlineAttachFile } from "react-icons/md";
 import ModalExport from "../../../components/modals/ModalExport";
 import { applicationExportFields } from "snu-lib/excelExports";
+import Eye from "../../../assets/icons/Eye";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
@@ -271,17 +272,15 @@ export default function Youngs({ mission, applications, updateMission }) {
                       <Table>
                         <thead>
                           <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
-                            <th className="py-3 pl-4">
+                            <th className="w-1/12">
                               <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
                             </th>
-                            <th className="w-5/12 ">Volontaire</th>
-                            <th className="w-3/12 ">A candidaté le</th>
-                            <th className="w-3/12 ">Contrat</th>
-                            <th className="w-3/12 ">Documents</th>
-
-                            <th className="w-1/12">
-                              <MdOutlineAttachFile className="w-full" />
-                            </th>
+                            <th className="w-3/12">Volontaire</th>
+                            <th className="w-2/12">A candidaté le</th>
+                            <th className="w-1/12">Contrat</th>
+                            <th className="w-1/12">Documents</th>
+                            <th className="w-3/12">Statut candidature</th>
+                            <th className="w-1/12">Actions </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -292,6 +291,14 @@ export default function Youngs({ mission, applications, updateMission }) {
                               onClick={() => handleClick(hit)}
                               selected={young?._id === hit._id}
                               onChangeApplication={updateMission}
+                              onSelect={(newItem) =>
+                                setYoungSelected((prev) => {
+                                  if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                                    return prev.filter((e) => e._id.toString() !== newItem._id.toString());
+                                  }
+                                  return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
+                                })
+                              }
                               optionsType={optionsType}
                             />
                           ))}
@@ -315,13 +322,19 @@ export default function Youngs({ mission, applications, updateMission }) {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType, onSelect }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+  const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
 
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
+    <tr className={"hover:!bg-gray-100"} onClick={onClick}>
+      <td className={`pl-4 ml-2 rounded-l-lg`}>
+        <div onClick={(e) => e.stopPropagation()}>
+          <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(hit)} />
+        </div>
+      </td>
       <td>
         <MultiLine>
           <span className="font-bold text-black">{`${hit.youngFirstName} ${hit.youngLastName}`}</span>
@@ -331,12 +344,47 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
         </MultiLine>
       </td>
       <td>
-        <div>{formatStringLongDate(hit.createdAt)}</div>
+        <div className="font-normal text-xs">{formatDateFRTimezoneUTC(hit.createdAt)}</div>
+      </td>
+      <td>
+        <div>{BadgeContract(hit.contractStatus)}</div>
+      </td>
+      <td>
+        {numberOfFiles > 0 && (
+          <div className="flex flex-row justify-center items-center">
+            {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
+            <div className="font-medium text-sm text-gray-700 mr-1">{numberOfFiles}</div>
+            <PaperClip />
+          </div>
+        )}
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplication hit={hit} callback={onChangeApplication} />
       </td>
-      <td>test</td>
+      <td className="flex justify-center items-center">
+        <NavLink
+          to={`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`}
+          className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
+          <Eye width={16} height={16} />
+        </NavLink>
+      </td>
     </tr>
+  );
+};
+
+const BadgeContract = (status) => {
+  if (!status) return;
+  if (status === "DRAFT") return <span className="text-xs font-medium border-[0.5px] text-white px-2 rounded-3xl py-1 bg-orange-500">Brouillon</span>;
+  if (status === "SENT") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-white">Envoyé</span>;
+  if (status === "VALIDATED") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-gray-100">Signé</span>;
+};
+const PaperClip = () => {
+  return (
+    <svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M7.48223 3.875L3.36612 7.99112C2.87796 8.47927 2.87796 9.27073 3.36612 9.75888C3.85427 10.247 4.64573 10.247 5.13388 9.75888L9.14277 5.64277C10.1191 4.66646 10.1191 3.08354 9.14277 2.10723C8.16646 1.13092 6.58354 1.13092 5.60723 2.10723L1.59835 6.22335C0.133883 7.68782 0.133883 10.0622 1.59835 11.5267C3.06282 12.9911 5.43718 12.9911 6.90165 11.5267L10.8125 7.625"
+        stroke="#9CA3AF"
+      />
+    </svg>
   );
 };
