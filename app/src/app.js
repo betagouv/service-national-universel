@@ -49,7 +49,7 @@ import GoogleTags from "./components/GoogleTags";
 import "./index.css";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
-import { youngCanChangeSession } from "snu-lib";
+import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 
@@ -169,7 +169,8 @@ const Espace = () => {
   if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
 
   const forceRedirectInscription =
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) || (young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
+    (inscriptionModificationOpenForYoungs(young.cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
