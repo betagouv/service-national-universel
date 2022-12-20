@@ -104,7 +104,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     const error = {};
     if (values.startAt < new Date()) error.startAt = "La date est incorrect";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
-    if (values.placesTotal < 0 || isNaN(values.placesTotal)) error.placesTotal = "Le nombre de places est incorrect";
+    if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) return setLoadingBottom(false);
     updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
@@ -114,22 +114,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
     try {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
-      console.log(valuesToSend);
       if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
       const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
-        console.log(code);
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
+        setLoadingBottom(false);
         return setLoading(false);
       }
       toastr.success("Mission enregistrée");
       setLoading(false);
+      setLoadingBottom(false);
+      setEdittingBottom(false);
       setEditing(false);
       setValues(missionReturned);
       setMission(missionReturned);
     } catch (e) {
-      console.log(e);
       setLoading(false);
+      setLoadingBottom(false);
       return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
     }
   };
@@ -261,15 +262,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     loadOptions={fetchStructures}
                     isDisabled={!editing}
                     styles={{
-                      control: (styles, { isDisabled }) => {
-                        return {
-                          ...styles,
-                          backgroundColor: isDisabled ? "white" : "white",
-                          color: "black",
-                          opacity: 1,
-                          backgroundOpacity: 1,
-                        };
-                      },
+                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      placeholder: (styles) => ({ ...styles, color: "black" }),
+                      control: (styles, { isDisabled }) => ({ ...styles, backgroundColor: isDisabled ? "white" : "white" }),
+                      singleValue: (styles) => ({ ...styles, color: "black" }),
+                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                     }}
                     defaultOptions
                     onChange={(e) => {
@@ -307,7 +305,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
                     placeholder={"Sélectionnez un ou plusieurs domaines"}
                     onChange={(e) => {
-                      console.log(values.domains);
                       setValues({ ...values, domains: e });
                     }}
                     value={[...values.domains]}
@@ -610,19 +607,12 @@ const CustomSelect = ({ onChange, readOnly, options, value, isMulti, placeholder
     <ReactSelect
       isDisabled={readOnly}
       styles={{
-        dropdownIndicator: (styles, { isDisabled }) => {
-          return { ...styles, display: isDisabled ? "none" : "flex" };
-        },
-        placeholder: (styles, { isDisabled }) => ({ ...styles, color: "black" }),
-        control: (styles, { isDisabled }) => {
-          return {
-            ...styles,
-            backgroundColor: isDisabled ? "white" : "white",
-          };
-        },
-        multiValueRemove: (styles, { isDisabled }) => {
-          return { ...styles, display: isDisabled ? "none" : "flex" };
-        },
+        dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        placeholder: (styles) => ({ ...styles, color: "black" }),
+        control: (styles, { isDisabled }) => ({ ...styles, backgroundColor: isDisabled ? "white" : "white" }),
+        singleValue: (styles) => ({ ...styles, color: "black" }),
+        multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
       }}
       options={options}
       placeholder={placeholder}
