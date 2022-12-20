@@ -4,6 +4,8 @@ import { useHistory, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import { BsDownload } from "react-icons/bs";
+import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
 import { apiURL } from "../../../config";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
@@ -36,13 +38,13 @@ import { MdOutlineAttachFile } from "react-icons/md";
 import ModalExport from "../../../components/modals/ModalExport";
 import { applicationExportFields } from "snu-lib/excelExports";
 import Eye from "../../../assets/icons/Eye";
-
+import ExportComponent from "../../../components/ExportXlsx";
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState();
-  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [filterVisible, setFilterVisible] = useState(false);
   const checkboxRef = React.useRef();
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
@@ -209,72 +211,70 @@ export default function Youngs({ mission, applications, updateMission }) {
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
         <MissionView mission={mission} tab="youngs">
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
-              <div style={{ display: "flex" }}>
-                <button
-                  className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
-                  onClick={() => setIsExportOpen(true)}>
-                  Exporter les candidatures
-                </button>
-                <ModalExport
-                  isOpen={isExportOpen}
-                  setIsOpen={setIsExportOpen}
-                  index="application"
-                  transform={transform}
-                  exportFields={getExportFields()}
-                  filters={FILTERS}
-                  getExportQuery={getExportQuery}
-                />
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-              <div style={{ flex: 1, position: "relative" }}>
-                <Filter>
-                  <FilterRow visible>
+            <div className={`relative items-start mx-8`}>
+              <div className="flex-1 flex-column bg-white flex-wrap rounded-b-lg rounded-tr-lg">
+                <div className="flex flex-row pt-4 justify-between items-center px-8">
+                  <div className="flex flex-row">
                     <DataSearch
                       defaultQuery={getDefaultQuery}
                       showIcon={false}
-                      placeholder="Rechercher par prénom, nom, email"
+                      placeholder="Rechercher par mots clés, ville, code postal..."
                       componentId="SEARCH"
-                      dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
+                      dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
                       react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                      // fuzziness={2}
-                      style={{ flex: 1, marginRight: "1rem" }}
+                      style={{ marginRight: "1rem", flex: 1 }}
                       innerClass={{ input: "searchbox" }}
-                      autosuggest={false}
-                      queryFormat="and"
-                    />
-                    <MultiDropdownList
-                      defaultQuery={getDefaultQuery}
-                      className="dropdown-filter"
-                      componentId="STATUS"
-                      dataField="status.keyword"
-                      react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                      renderItem={(e, count) => {
-                        return `${translateApplication(e)} (${count})`;
-                      }}
-                      title=""
+                      className="datasearch-searchfield"
                       URLParams={true}
-                      showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut")}
+                      autosuggest={false}
                     />
-                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
-                  </FilterRow>
-                </Filter>
-                <ResultTable>
+                    <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
+                  </div>
+                  <ExportComponent
+                    title="Exporter les candidatures"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Application"
+                    index="application"
+                    react={{ and: FILTERS }}
+                    transform={transform}
+                  />
+                </div>
+
+                <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="STATUS"
+                    dataField="status.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translateApplication(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  />
+                  <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
+                  <DeleteFilters />
+                </div>
+
+                <div className="reactive-result mt-2">
                   <ReactiveListComponent
                     defaultQuery={getDefaultQuery}
                     react={{ and: FILTERS }}
                     dataField="youngLastName.keyword"
                     sortBy="asc"
                     size={30}
+                    showTopResultStats={false}
+                    paginationAt="bottom"
                     onData={async ({ rawData }) => {
                       if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
                     }}
                     render={({ data }) => (
                       <Table>
                         <thead>
-                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2">
                             <th className="w-1/12">
                               <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
                             </th>
@@ -308,7 +308,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                       </Table>
                     )}
                   />
-                </ResultTable>
+                </div>
               </div>
             </div>
           </ReactiveBase>
@@ -345,7 +345,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect }) => {
         <div className="font-normal text-xs">{formatDateFRTimezoneUTC(hit.createdAt)}</div>
       </td>
       <td>
-        <div>{BadgeContract(hit.contractStatus)}</div>
+        <div>{BadgeContract(hit.contractStatus, hit.status)}</div>
       </td>
       <td>
         {numberOfFiles > 0 && (
@@ -370,8 +370,9 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect }) => {
   );
 };
 
-const BadgeContract = (status) => {
-  if (!status) return;
+const BadgeContract = (status, applicationStatus) => {
+  // TODO : a quel moment affiche t on le status du contrat ?
+  if (!status || ["WAITING_VALIDATION", "WAITING_ACCEPTATION"].includes(applicationStatus)) return;
   if (status === "DRAFT") return <span className="text-xs font-medium border-[0.5px] text-white px-2 rounded-3xl py-1 bg-orange-500">Brouillon</span>;
   if (status === "SENT") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-white">Envoyé</span>;
   if (status === "VALIDATED") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-gray-100">Signé</span>;
@@ -386,3 +387,16 @@ const PaperClip = () => {
     </svg>
   );
 };
+function FilterButton({ onClick }) {
+  return (
+    <div onClick={onClick} className="cursor-pointer bg-[#F3F4F6] w-24 h-10 rounded-md flex flex-row justify-center items-center">
+      <svg width={12} height={11} viewBox="0 0 12 11" fill="#9CA3AF" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M0 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.252a1 1 0 0 1-.293.708l-4.08 4.08a1 1 0 0 0-.294.708v1.171a1 1 0 0 1-.293.707l-.666.667c-.63.63-1.707.184-1.707-.707V7.748a1 1 0 0 0-.293-.708L.293 2.96A1 1 0 0 1 0 2.252V1Z"
+          fill="#9CA3AF"
+        />
+      </svg>
+      <div className="ml-2 text-grey-700">Filtres</div>
+    </div>
+  );
+}
