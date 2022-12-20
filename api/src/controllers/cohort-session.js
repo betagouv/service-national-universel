@@ -3,7 +3,7 @@ const router = express.Router();
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { getAvailableSessions, getAllSessions } = require("../utils/cohort");
+const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
 const passport = require("passport");
@@ -43,7 +43,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       }
 
       const bypassFilter = user.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL;
-      const sessions = bypassFilter ? await getAllSessions(young) : await getAvailableSessions(young);
+      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young);
       if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
