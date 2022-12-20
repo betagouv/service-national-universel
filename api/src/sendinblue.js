@@ -20,10 +20,6 @@ const api = async (path, options = {}) => {
     ...options,
     headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
   });
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(error);
-  }
   const contentType = res.headers.raw()["content-type"];
   if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
   return await res.text();
@@ -46,6 +42,7 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
+    if (sms.code !== "success") throw new Error(sms.message);
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -76,6 +73,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
+    if (mail.code !== "success") throw new Error(mail.message);
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -102,6 +100,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
+    if (mail.code !== "success") throw new Error(mail.message);
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -124,17 +123,23 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
  * @returns {Promise<void>}
  */
 async function createContact({ email, attributes, emailBlacklisted, smsBlacklisted, listIds, updateEnabled, smtpBlacklistSender } = {}) {
-  const body = {
-    email,
-    attributes,
-    emailBlacklisted,
-    smsBlacklisted,
-    listIds,
-    updateEnabled,
-    smtpBlacklistSender,
-  };
-  const res = await api("/contacts", { method: "POST", body: JSON.stringify(body) });
-  return res;
+  try {
+    const body = {
+      email,
+      attributes,
+      emailBlacklisted,
+      smsBlacklisted,
+      listIds,
+      updateEnabled,
+      smtpBlacklistSender,
+    };
+    const res = await api("/contacts", { method: "POST", body: JSON.stringify(body) });
+    if (res.code !== "success") throw new Error(res.message);
+    return res;
+  } catch (e) {
+    console.log("Erreur in createContact", e);
+    capture(e);
+  }
 }
 
 /**
@@ -143,8 +148,15 @@ async function createContact({ email, attributes, emailBlacklisted, smsBlacklist
  * @returns {Promise<void>}
  */
 async function deleteContact(id) {
-  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
-  return await api(`/contacts/${identifier}`, { method: "DELETE" });
+  try {
+    const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+    const res = await api(`/contacts/${identifier}`, { method: "DELETE" });
+    if (res.code !== "success") throw new Error(res.message);
+    return;
+  } catch (e) {
+    console.log("Erreur in deleteContact", e);
+    capture(e);
+  }
 }
 
 /**
@@ -153,8 +165,15 @@ async function deleteContact(id) {
  * @returns {Promise<void>}
  */
 async function getContact(id) {
-  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
-  return await api(`/contacts/${identifier}`, { method: "GET" });
+  try {
+    const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+    const res = await api(`/contacts/${identifier}`, { method: "GET" });
+    if (res.code !== "success") throw new Error(res.message);
+    return;
+  } catch (e) {
+    console.log("Erreur in getContact", e);
+    capture(e);
+  }
 }
 
 /**
@@ -169,20 +188,25 @@ async function getContact(id) {
  * @returns {Promise<void>}
  */
 async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted, listIds, unlinkListIds, smtpBlacklistSender } = {}) {
-  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+  try {
+    const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
 
-  const body = {
-    attributes,
-    emailBlacklisted,
-    smsBlacklisted,
-    listIds,
-    unlinkListIds,
-    smtpBlacklistSender,
-  };
+    const body = {
+      attributes,
+      emailBlacklisted,
+      smsBlacklisted,
+      listIds,
+      unlinkListIds,
+      smtpBlacklistSender,
+    };
 
-  const res = await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
-  if (res && res.code) return false;
-  return true;
+    const res = await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
+    if (res && res.code) return false;
+    return true;
+  } catch (e) {
+    console.log("Erreur in updateContact", e);
+    capture(e);
+  }
 }
 
 async function sync(obj, type, { force } = { force: false }) {
@@ -240,14 +264,22 @@ async function sync(obj, type, { force } = { force: false }) {
 }
 
 async function syncContact(email, attributes, listIds) {
-  try {
-    try {
-      await updateContact(email, { attributes, listIds });
-    } catch (e) {
-      await createContact({ email, attributes, listIds });
+  const res = api.getContact(email);
+  if (res && res.code === "not_found") {
+    const res = await createContact({ email, attributes, listIds });
+    if (!res.ok) {
+      const error = await res.text();
+      return capture(error);
     }
-  } catch (e) {
-    capture(e);
+  }
+  if (res && res.code === "success") {
+    const res = await updateContact(email, { attributes, listIds });
+    const error = await res.text();
+    return capture(error);
+  }
+  if (!res.ok) {
+    const error = await res.text();
+    return capture(error);
   }
 }
 
