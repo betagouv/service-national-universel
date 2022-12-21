@@ -168,6 +168,166 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
   }
 });
 
+router.post("/test_route", async (req, res) => {
+  try {
+    const { error: errorQuery, value: valueQuery } = Joi.object({
+      offset: Joi.number().default(0),
+      limit: Joi.number().default(10),
+      filter: Joi.array().items(
+        Joi.object().keys({
+          name: Joi.string().required(),
+          value: Joi.string().allow("", null).required(),
+        }),
+      ),
+      search: Joi.string().trim().allow("", null),
+    }).validate(req.body, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { offset, limit, search } = valueQuery;
+
+    const pipeline = [];
+
+    // search gathering places
+    if (search && search.length > 0) {
+      const regex = new RegExp(".*" + search + ".*", "gi");
+      pipeline.push({ $match: { busId: regex } });
+    }
+
+    //Sur la ligne
+    // - N° de ligne
+    // - Date du transport aller/retour
+    // - Taux de remplissage (100%-0%, le reste)
+
+    // Sur le centre :
+    // - Région
+    // - Département
+    // - Nom
+    // - Code
+
+    // Sur les points de rassemblement :
+    // - Région
+    // - Département
+    // - Commune (pour REF REG et DEP)
+    // - Nom
+
+    // Sur les demandes de modifications :
+    // - Demande de modification oui/non
+    // - Statut de la demande de modification (à instruire/validée/refusée)
+    // - Avis (favorable/défavorable) (pour MOD ONLY)
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: "pointderassemblements",
+          as: "pointderassemblements",
+          let: {
+            arrayOfMeetingPointsObjectIds: {
+              $map: {
+                input: "$meetingPointsIds",
+                as: "string",
+                in: {
+                  $toObjectId: "$$string",
+                },
+              },
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$_id", "$$arrayOfMeetingPointsObjectIds"],
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          centerObjectId: {
+            $toObjectId: "$centerId",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "centerObjectId",
+          foreignField: "_id",
+          as: "center",
+        },
+      },
+      {
+        $unwind: "$center",
+      },
+      {
+        $lookup: {
+          from: "youngs",
+          let: {
+            id: {
+              $toString: "$_id",
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$ligneId", "$$id"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "youngsBus",
+        },
+      },
+      {
+        $addFields: {
+          youngsBusCount: {
+            $size: "$youngsBus",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "modificationbuses",
+          let: {
+            id: {
+              $toString: "$_id",
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                lineId: "$id",
+              },
+            },
+          ],
+          as: "modificationbuses",
+        },
+      },
+      {
+        $skip: offset,
+      },
+      {
+        $limit: limit,
+      },
+    );
+
+    const data = await LigneBusModel.aggregate(pipeline).exec();
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data: data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/:id/centre", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({

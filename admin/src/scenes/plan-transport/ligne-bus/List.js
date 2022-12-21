@@ -3,7 +3,7 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import { TabItem, Title } from "../components/commons";
 import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
@@ -36,6 +36,21 @@ export default function List() {
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
+  const endpoint = {
+    url: `${apiURL}/ligne-de-bus/test_route`,
+    headers: { Authorization: `JWT ${api.getToken()}` },
+    method: "POST",
+    body: {},
+  };
+  console.log("🚀 ~ file: List.js:45 ~ endpoint", endpoint);
+
+  const searchCriteria = {
+    dataField: "title", // Field to search in
+    size: 10, // Number of items to display
+    sortBy: "asc", // Sort order
+    className: "list-container", // CSS class for list container
+  };
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport" }]} />
@@ -44,8 +59,22 @@ export default function List() {
           <Title>Plan de transport</Title>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
-
-        <ReactiveBase url={`${apiURL}/es`} app="lignebus" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+        {/* <ReactiveBase url={`${apiURL}/planDeTransport/ligne-de-bus`} app="test_route" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
+        <ReactiveBase enableAppbase endpoint={endpoint}>
+          <ReactiveList
+            componentId="list"
+            // data={items}
+            {...searchCriteria}
+            render={({ data }) => (
+              <ul>
+                {data.map((item) => (
+                  <li key={item._id}>{item.title}</li>
+                ))}
+              </ul>
+            )}
+          />
+        </ReactiveBase>
+        {/* <ReactiveBase enableAppbase endpoint={endpoint}>
           <div className="flex flex-1">
             <TabItem icon={<BsArrowRight />} title="Aller" onClick={() => setCurrentTab("aller")} active={currentTab === "aller"} />
             <TabItem icon={<BsArrowLeft />} title="Retour" onClick={() => setCurrentTab("retour")} active={currentTab === "retour"} />
@@ -106,10 +135,10 @@ export default function List() {
             </div>
             <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
               {/* Filter */}
-              {/* Sur la ligne - N° de ligne - Date du transport aller/retour - Taux de remplissage (100%-0%, le reste) Sur les points de rassemblement : - Région - Département -
+        {/* Sur la ligne - N° de ligne - Date du transport aller/retour - Taux de remplissage (100%-0%, le reste) Sur les points de rassemblement : - Région - Département -
               Commune (pour REF REG et DEP) - Nom Sur le centre : - Région - Département - Nom - Code Sur les demandes de modifications : - Demande de modification oui/non - Statut
               de la demande de modification (à instruire/validée/refusée) - Avis (favorable/défavorable) (pour MOD ONLY) */}
-              <MultiDropdownList
+        {/* <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
                 placeholder="Séjours"
@@ -182,8 +211,8 @@ export default function List() {
                 )}
               />
             </div>
-          </div>
-        </ReactiveBase>
+          </div> */}
+        {/* </ReactiveBase> */}
       </div>
     </>
   );
