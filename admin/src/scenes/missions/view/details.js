@@ -30,7 +30,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
   const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format"];
-  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains"];
+  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant"];
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -365,6 +365,44 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   )}
                 </div>
+                <div>
+                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Tuteur de la mission</div>
+                  <div className="text-xs font-medium mb-2">
+                    Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
+                  </div>
+                  <AsyncSelect
+                    label="Tuteur"
+                    value={{ label: values.tutor.firstName + " " + values.tutor.lastName }}
+                    loadOptions={fetchStructures}
+                    isDisabled={!editing}
+                    noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
+                    styles={{
+                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      placeholder: (styles) => ({ ...styles, color: "black" }),
+                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                      singleValue: (styles) => ({ ...styles, color: "black" }),
+                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                    }}
+                    defaultOptions
+                    onChange={(e) => {
+                      setValues({ ...values, structureName: e.label, structureId: e._id });
+                    }}
+                    placeholder="Sélectionnez un tuteur"
+                    error={errors.structureName}
+                  />
+                  <Field
+                    errors={errors}
+                    readOnly={!editing}
+                    label="Adresse"
+                    name="address"
+                    handleChange={(e) => {
+                      setValues({ ...values, address: e.target.value, addressVerified: false });
+                    }}
+                    value={values.address}
+                    error={errors?.address}
+                  />
+                </div>
               </div>
               <div className="hidden xl:flex justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
@@ -469,6 +507,32 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       }}
                     />
                   </div>
+                  {values?.hebergement === "true" && (
+                    <div className="flex flex-row gap-8 mt-4">
+                      <div
+                        onClick={() => editing && setValues({ ...values, hebergementPayant: "false" })}
+                        className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
+                        <input
+                          type="checkbox"
+                          className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
+                          id={"hebergement-gratuit"}
+                          checked={values?.hebergementPayant === "false"}
+                        />
+                        <div className="text-gray-700 font-medium">Hébergement gratuit</div>
+                      </div>
+                      <div
+                        onClick={() => editing && setValues({ ...values, hebergementPayant: "true" })}
+                        className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
+                        <input
+                          type="checkbox"
+                          className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
+                          id={"hebergement-gratuit"}
+                          checked={values.hebergementPayant === "true"}
+                        />
+                        <div className="text-gray-700 font-medium">Hébergement payant</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
