@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
+import CreatableSelect from "react-select/creatable";
+import { AiOutlinePlus } from "react-icons/ai";
 
 import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, ES_NO_LIMIT } from "../../../utils";
 import MissionView from "./wrapper";
@@ -22,26 +24,38 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [referents, setReferents] = useState([]);
+  const [creationTutor, setCreationTutor] = useState(false);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
   const [errorsBottom, setErrorsBottom] = useState({});
 
+  const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
   const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
-  const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format"];
-  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant"];
+  const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
+  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor"];
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+
+  const referentSelectRef = useRef();
 
   async function initReferents() {
     const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
     const { responses } = await api.esQuery("referent", body);
     if (responses?.length) {
-      console.log(responses);
-      setReferents(responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source })));
+      const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
+      console.log(values.tutorId, "reget ref", responseReferents);
+      if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
+        //referentSelectRef.current.select.select.clearValue();
+        //console.log(referentSelectRef.current.select.select);
+        setValues({ ...values, tutorId: "" });
+      }
+      console.log(responseReferents.find((ref) => ref.value === values.tutorId));
+      setReferents(responseReferents);
     }
   }
 
@@ -99,8 +113,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     const error = {};
     const baseError = "Ce champ est obligatoire";
     valuesToCheck.map((val) => {
+      console.log(values[val]);
       if (!values[val]) error[val] = baseError;
     });
+    console.log(error);
     if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
@@ -384,17 +400,86 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="text-xs font-medium mb-2">
                     Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
                   </div>
-                  {console.log(values)}
-                  <CustomSelect
-                    readOnly={!editing}
+                  <CreatableSelect
+                    isDisabled={!editing}
                     options={referents}
-                    noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
+                    ref={referentSelectRef}
+                    error={errors.tutorId}
+                    styles={{
+                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
+                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                      singleValue: (styles) => ({ ...styles, color: "black" }),
+                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                    }}
+                    noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un tuteur"}
                     onChange={(e) => {
+                      console.log(e);
                       setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
                     }}
-                    value={values.tutorId}
+                    formatCreateLabel={() => {
+                      return (
+                        <div className="flex items-center gap-2 flex-col" onClick={() => setCreationTutor(true)}>
+                          <div className="text-sm">Le tuteur recherché n&apos;est pas dans la liste ?</div>
+                          <div className="font-medium text-blue-600 text-">Ajouter un nouveau tuteur</div>
+                        </div>
+                      );
+                    }}
+                    isValidNewOption={() => true}
+                    defaultValue={referents.find((ref) => ref.value === values.tutorId)}
                   />
+                  {editing && creationTutor && (
+                    <div>
+                      <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Créer un tuteur</div>
+                      <div className="text-xs font-medium mb-2">Identité et contact</div>
+                      <div className="flex flex-row justify-between gap-3 mb-4">
+                        <Field
+                          errors={errors}
+                          readOnly={!editing}
+                          label="Nom"
+                          className="w-[50%]"
+                          name="lastName"
+                          handleChange={(e) => setNewTutor({ ...newTutor, lastName: e.target.value })}
+                          value={newTutor.lastName}
+                          error={errors?.lastName}
+                        />
+                        <Field
+                          errors={errors}
+                          readOnly={!editing}
+                          label="Prénom"
+                          name="firstName"
+                          className="w-[50%]"
+                          handleChange={(e) => setNewTutor({ ...newTutor, firstName: e.target.value })}
+                          value={newTutor.firstName}
+                          error={errors?.firstName}
+                        />
+                      </div>
+                      <Field
+                        errors={errors}
+                        readOnly={!editing}
+                        label="Email"
+                        name="email"
+                        handleChange={(e) => setNewTutor({ ...newTutor, email: e.target.value })}
+                        value={newTutor.email}
+                        error={errors?.email}
+                      />
+                      <Field
+                        errors={errors}
+                        readOnly={!editing}
+                        label="Téléphone"
+                        name="phone"
+                        className="my-4"
+                        handleChange={(e) => setNewTutor({ ...newTutor, phone: e.target.value })}
+                        value={newTutor.phone}
+                        error={errors?.phone}
+                      />
+                      <div className="flex w-full justify-end">
+                        <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer">Envoyer l&apos;invitation</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="hidden xl:flex justify-center items-center">
@@ -676,14 +761,15 @@ export default function DetailsView({ mission, setMission, getMission }) {
   );
 }
 
-const CustomSelect = ({ onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option" }) => {
+const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option", error }) => {
   return (
     <ReactSelect
       isDisabled={readOnly}
+      ref={ref}
       noOptionsMessage={() => noOptionsMessage}
       styles={{
         dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-        placeholder: (styles) => ({ ...styles, color: "black" }),
+        placeholder: (styles) => ({ ...styles, color: error ? "red" : "black" }),
         control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
         singleValue: (styles) => ({ ...styles, color: "black" }),
         multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
