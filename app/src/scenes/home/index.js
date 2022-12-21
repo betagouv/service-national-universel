@@ -6,6 +6,7 @@ import Banner from "./components/banner";
 import Default from "./default";
 import HomePhase2 from "./HomePhase2";
 import Refused from "./refused";
+import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingList from "./waitingList";
@@ -43,7 +44,7 @@ export default () => {
       return (
         <>
           {young.cohort === "2021" ? <Banner /> : null}
-          <Refused />
+          <RefusedV2 />
         </>
       );
     if (
