@@ -146,7 +146,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 }
 
 if (ENVIRONMENT === "staging") {
-  cron.schedule("35 12 * * *", () => {
+  cron.schedule("40 13 * * *", () => {
     dsnjExport.handler();
   });
 }

@@ -155,6 +155,8 @@ exports.handler = async () => {
       const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
       const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
 
+      console.log({ cohort, cohesionCenterExportDate, youngBeforeSessionExportDate, youngAfterSessionExportDate, todayStart, todayEnd });
+
       if (cohesionCenterExportDate >= todayStart && cohesionCenterExportDate <= todayEnd) {
         await generateCohesionCentersExport(cohort);
         addToSlackRapport(exportsGenerated, cohort.name, EXPORT_COHESION_CENTERS);
@@ -168,6 +170,8 @@ exports.handler = async () => {
         addToSlackRapport(exportsGenerated, cohort.name, EXPORT_YOUNGS_AFTER_SESSION);
       }
     }
+
+    console.log({ exportsGenerated });
 
     await slack.info({
       title: "✅ DSNJ export generation",
