@@ -5,6 +5,7 @@ import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
 import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
+import Pagination from "../Pagination";
 
 export default function Historic({ model, data, customFilterOptions, refName, path }) {
   const [query, setQuery] = useState("");
@@ -14,6 +15,12 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
   const activeFilters = getActiveFilters();
   const filteredData = filterData();
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const paginatedData = [...filteredData].splice((currentPage - 1) * 30, 30);
+  const pages = Array(Math.ceil(filteredData.length / 30))
+    .fill(0)
+    .map((_, i) => i + 1);
+
   function getActiveFilters() {
     let filters = [];
     for (const [key, value] of Object.entries(commonFilters)) {
@@ -21,11 +28,6 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
     }
     if (customFilter?.value) filters.push(customFilter.value);
     return filters;
-  }
-
-  function getOptions(key) {
-    const arr = data?.map((e) => e[key]);
-    return [...new Set(arr)];
   }
 
   function filterData() {
@@ -53,7 +55,7 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
   return (
     <div className="w-full bg-white rounded-xl shadow-md text-slate-700">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
-      <div className="flex p-4 gap-4">
+      <div className="w-full flex p-4 gap-4">
         <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -63,28 +65,7 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
         </button>
         {customFilterOptions && <CustomFilters customFilterOptions={customFilterOptions} customFilter={customFilter} setCustomFilter={setCustomFilter} />}
       </div>
-      {isOpen && (
-        <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
-          <MultiSelect
-            options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
-            value={commonFilters.path}
-            onChange={(path) => setCommonFilters((f) => ({ ...f, ...{ path } }))}
-            label="Donnée modifiée"
-          />
-          <MultiSelect
-            options={getOptions("op").map((e) => ({ label: translateAction(e), value: e }))}
-            value={commonFilters.op}
-            onChange={(op) => setCommonFilters((f) => ({ ...f, ...{ op } }))}
-            label="Type d'action"
-          />
-          <MultiSelect
-            options={getOptions("author").map((e) => ({ label: e, value: e }))}
-            value={commonFilters.author}
-            onChange={(author) => setCommonFilters((f) => ({ ...f, ...{ author } }))}
-            label="Auteur de la modification"
-          />
-        </div>
-      )}
+      {isOpen && FilterDrawer({ data, commonFilters, setCommonFilters, activeFilters, model })}
       <table className="table-fixed w-full">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
@@ -97,11 +78,13 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((e, index) => (
+          {paginatedData.map((e, index) => (
             <Event key={index} e={e} index={index} model={model} refName={refName} path={path} />
           ))}
         </tbody>
       </table>
+      <hr className="border-t border-t-slate-200" />
+      <Pagination pages={pages} currentPage={currentPage} setCurrentPage={setCurrentPage} className="p-4" />
     </div>
   );
 }
@@ -137,11 +120,11 @@ function Event({ e, index, model, refName, path }) {
   return (
     <tr key={index} className="border-t border-t-slate-100 hover:bg-slate-50 cursor-default">
       {refName && (
-        <td className="px-4 py-3 cursor-pointer">
+        <td className="px-4 py-3 cursor-pointer overflow-hidden">
           <a href={`/${path}/${e.ref}`}>{e.ref}</a>
         </td>
       )}
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 overflow-hidden">
         <p className="text-gray-400 truncate">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
@@ -152,9 +135,38 @@ function Event({ e, index, model, refName, path }) {
         <HiOutlineArrowRight />
       </td>
       <td className="px-4 py-3 truncate">{translateHistory(e.path, e.value)}</td>
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 overflow-hidden">
         <UserCard user={e.user} />
       </td>
     </tr>
+  );
+}
+
+function FilterDrawer({ data, commonFilters, setCommonFilters, model }) {
+  function getOptions(key) {
+    const arr = data?.map((e) => e[key]);
+    return [...new Set(arr)];
+  }
+  return (
+    <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
+      <MultiSelect
+        options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
+        value={commonFilters.path}
+        onChange={(path) => setCommonFilters((f) => ({ ...f, ...{ path } }))}
+        label="Donnée modifiée"
+      />
+      <MultiSelect
+        options={getOptions("op").map((e) => ({ label: translateAction(e), value: e }))}
+        value={commonFilters.op}
+        onChange={(op) => setCommonFilters((f) => ({ ...f, ...{ op } }))}
+        label="Type d'action"
+      />
+      <MultiSelect
+        options={getOptions("author").map((e) => ({ label: e, value: e }))}
+        value={commonFilters.author}
+        onChange={(author) => setCommonFilters((f) => ({ ...f, ...{ author } }))}
+        label="Auteur de la modification"
+      />
+    </div>
   );
 }
