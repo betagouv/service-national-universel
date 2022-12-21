@@ -828,7 +828,7 @@ const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti 
       styles={{
         dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
         placeholder: (styles) => ({ ...styles, color: error ? "red" : "black" }),
-        control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: !readOnly && isJvaMission ? "#E5E7EB" : "white" }),
+        control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: !readOnly && isJvaMission ? "#E5E7EB" : "white" }),
         singleValue: (styles) => ({ ...styles, color: "black" }),
         multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
         indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
