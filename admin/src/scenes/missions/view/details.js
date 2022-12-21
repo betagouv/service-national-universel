@@ -59,13 +59,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     const { responses } = await api.esQuery("referent", body);
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
-      console.log(values.tutorId, "reget ref", responseReferents);
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
-        //referentSelectRef.current.select.select.clearValue();
-        //console.log(referentSelectRef.current.select.select);
+        referentSelectRef.current.select.select.setValue("");
         setValues({ ...values, tutorId: "" });
       }
-      console.log(responseReferents.find((ref) => ref.value === values.tutorId));
       setReferents(responseReferents);
     }
   }
@@ -133,7 +130,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
 
     setErrors(error);
-    if (Object.keys(error).length > 0) return setLoading(false);
+    if (Object.keys(error).length > 0) {
+      toastr.error("Oups, le formulaire est imcomplet");
+      return setLoading(false);
+    }
 
     // open modal to confirm is mission has to change status
     if ((values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION") return setModalConfirmation(true);
@@ -147,7 +147,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     setErrorsBottom(error);
-    if (Object.keys(error).length > 0) return setLoadingBottom(false);
+    if (Object.keys(error).length > 0) {
+      toastr.error("Oups, le formulaire est imcomplet");
+      return setLoadingBottom(false);
+    }
     updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
   };
 
@@ -198,21 +201,28 @@ export default function DetailsView({ mission, setMission, getMission }) {
   ];
   const sendInvitation = async () => {
     try {
-      if (!values.firstName || !values.lastName || !values.email || !values.phone) {
-        toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
-        return;
+      let error = {};
+      if (!newTutor.firstName) error.firstName = "Ce champ est obligatoire";
+      if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
+      if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
+      if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
+      if (!validator.matches(newTutor.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      setErrors(error);
+      if (Object.keys(error).length > 0) return setLoading(false);
+
+      if (selectedStructure?.isNetwork === "true") {
+        newTutor.role = ROLES.SUPERVISOR;
+      } else {
+        newTutor.role = ROLES.RESPONSIBLE;
       }
-      if (!validator.matches(values.phone, regexPhoneFrenchCountries)) {
-        toastr.error("Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX");
-        return;
-      }
-      if (selectedStructure?.isNetwork === "true") values.role = ROLES.SUPERVISOR;
-      const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, values);
+      const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, newTutor);
       if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
+      setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
+      setCreationTutor(false);
       return toastr.success("Invitation envoyée");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
-        return toastr.error("Cette adresse email est déjà utilisée.", `${values.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
+        return toastr.error("Cette adresse email est déjà utilisée.", `${newTutor.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
   };
@@ -475,7 +485,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                           name="lastName"
                           handleChange={(e) => setNewTutor({ ...newTutor, lastName: e.target.value })}
                           value={newTutor.lastName}
-                          error={errors?.lastName}
+                          error={errors}
                         />
                         <Field
                           errors={errors}
@@ -485,7 +495,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                           className="w-[50%]"
                           handleChange={(e) => setNewTutor({ ...newTutor, firstName: e.target.value })}
                           value={newTutor.firstName}
-                          error={errors?.firstName}
+                          error={errors}
                         />
                       </div>
                       <Field
@@ -495,7 +505,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         name="email"
                         handleChange={(e) => setNewTutor({ ...newTutor, email: e.target.value })}
                         value={newTutor.email}
-                        error={errors?.email}
+                        error={errors}
                       />
                       <Field
                         errors={errors}
@@ -505,7 +515,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         className="my-4"
                         handleChange={(e) => setNewTutor({ ...newTutor, phone: e.target.value })}
                         value={newTutor.phone}
-                        error={errors?.phone}
+                        error={errors}
                       />
                       <div className="flex w-full justify-end">
                         <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer" onClick={sendInvitation}>
