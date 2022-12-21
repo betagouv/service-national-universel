@@ -444,7 +444,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       Contraintes spécifiques pour cette mission
                       <span className="text-gray-400">&nbsp;(facultatif).&nbsp;</span>
                     </div>
-                    <div>(conditons physiques, période de formation, mission en soirée...)</div>
+                    <div>(conditions physiques, période de formation, mission en soirée...)</div>
                   </div>
                   <Field
                     readOnly={!editing}
