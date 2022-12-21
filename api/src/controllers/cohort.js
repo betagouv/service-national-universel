@@ -45,6 +45,9 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
       value: { date },
     } = result;
 
+    //ensure that date does not change base on time zone (works only for France)
+    date.setHours(11);
+
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
