@@ -140,6 +140,11 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
         </>
       )}
+      {environment !== "production" && (
+        <>
+          <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
+        </>
+      )}
       {ssoSupportStorage === "sso-support" ? (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
@@ -269,6 +274,18 @@ function visitor({ onClick, from }) {
   );
 }
 
+function dsnj({ onClick }) {
+  return (
+    <>
+      {environment !== "production" && (
+        <>
+          <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
+        </>
+      )}
+    </>
+  );
+}
+
 const Drawer = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -334,8 +351,8 @@ const Drawer = (props) => {
       {!isOpen ? (
         <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
-            <ul className="divide-y divide-slate-700">
-              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+            <ul className="divide-y divide-slate-700 min-w-[220px]">
+              {user.role !== ROLES.DSNJ && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
@@ -343,6 +360,7 @@ const Drawer = (props) => {
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
+              {user.role === ROLES.DSNJ && dsnj({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>

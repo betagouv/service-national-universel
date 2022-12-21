@@ -22,6 +22,7 @@ const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
 const parentConsentementReminder = require("./parentConsentementReminder");
+const dsnjExport = require("./dsnjExport");
 
 // doubt ? -> https://crontab.guru/
 
@@ -141,5 +142,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
+  });
+}
+
+if (ENVIRONMENT === "staging" && process.env.INSTANCE_NUMBER === "0") {
+  cron.schedule("15 11 * * *", () => {
+    dsnjExport.handler();
   });
 }

@@ -364,6 +364,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
       <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.ADMIN}>{translate(ROLES.ADMIN)}</option> : null}
+      {user.role === ROLES.ADMIN ? <option value={ROLES.DSNJ}>{translate(ROLES.DSNJ)}</option> : null}
     </Field>
   );
 };
