@@ -273,7 +273,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                     render={({ data }) => (
                       <Table>
                         <thead>
-                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2">
+                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2 text-start">
                             <th className="w-1/12">
                               <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
                             </th>
@@ -287,7 +287,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                             )}
 
                             <th className="w-3/12">Statut candidature</th>
-                            <th className="w-1/12">Actions </th>
+                            <th className="w-1/12">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -369,10 +369,10 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
-      <td className="text-center">
+      <td>
         <NavLink
           to={`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`}
-          className="mx-auto flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
+          className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
           <Eye width={16} height={16} />
         </NavLink>
       </td>
