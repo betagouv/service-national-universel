@@ -453,15 +453,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
                   </div>
                   <CreatableSelect
-                    isDisabled={!editing}
-                    isJvaMission={mission?.isJvaMission === "true"}
+                    isDisabled={!editing || mission?.isJvaMission === "true"}
                     options={referents}
                     ref={referentSelectRef}
                     error={errors.tutorId}
                     styles={{
                       dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
-                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                      control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: editing && mission?.isJvaMission === "true" ? "#E5E7EB" : "white" }),
                       singleValue: (styles) => ({ ...styles, color: "black" }),
                       multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
