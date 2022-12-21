@@ -16,10 +16,8 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
   const filteredData = filterData();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const pageCount = Math.ceil(filteredData.length / 30);
   const paginatedData = [...filteredData].splice((currentPage - 1) * 30, 30);
-  const pages = Array(Math.ceil(filteredData.length / 30))
-    .fill(0)
-    .map((_, i) => i + 1);
 
   function getActiveFilters() {
     let filters = [];
@@ -83,8 +81,8 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
           ))}
         </tbody>
       </table>
-      <hr className="border-t border-t-slate-200" />
-      <Pagination pages={pages} currentPage={currentPage} setCurrentPage={setCurrentPage} className="p-4" />
+      <hr className="border-t border-t-slate-100" />
+      <Pagination pageCount={pageCount} currentPage={currentPage} setCurrentPage={setCurrentPage} className="p-4" />
     </div>
   );
 }
