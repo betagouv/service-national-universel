@@ -279,8 +279,13 @@ export default function Youngs({ mission, applications, updateMission }) {
                             </th>
                             <th className="w-3/12">Volontaire</th>
                             <th className="w-2/12">A candidaté le</th>
-                            <th className="w-1/12">Contrat</th>
-                            <th className="w-1/12">Documents</th>
+                            {currentTab !== "pending" && (
+                              <>
+                                <th className="w-1/12">Contrat</th>
+                                <th className="w-1/12">Documents</th>
+                              </>
+                            )}
+
                             <th className="w-3/12">Statut candidature</th>
                             <th className="w-1/12">Actions </th>
                           </tr>
@@ -290,6 +295,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                             <Hit
                               key={hit._id}
                               hit={hit}
+                              currentTab={currentTab}
                               onClick={() => handleClick(hit)}
                               selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                               onChangeApplication={updateMission}
@@ -323,7 +329,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   return (
     <tr className={"hover:!bg-gray-100"} onClick={onClick}>
@@ -343,18 +349,23 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect }) => {
       <td>
         <div className="font-normal text-xs">{formatDateFRTimezoneUTC(hit.createdAt)}</div>
       </td>
-      <td>
-        <div>{BadgeContract(hit.contractStatus, hit.status)}</div>
-      </td>
-      <td>
-        {numberOfFiles > 0 && (
-          <div className="flex flex-row justify-center items-center">
-            {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
-            <div className="font-medium text-sm text-gray-700 mr-1">{numberOfFiles}</div>
-            <PaperClip />
-          </div>
-        )}
-      </td>
+      {currentTab !== "pending" && (
+        <>
+          <td>
+            <div>{BadgeContract(hit.contractStatus, hit.status)}</div>
+          </td>
+          <td>
+            {numberOfFiles > 0 && (
+              <div className="flex flex-row justify-center items-center">
+                {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
+                <div className="font-medium text-sm text-gray-700 mr-1">{numberOfFiles}</div>
+                <PaperClip />
+              </div>
+            )}
+          </td>
+        </>
+      )}
+
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
