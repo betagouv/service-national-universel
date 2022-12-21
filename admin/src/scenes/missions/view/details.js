@@ -455,6 +455,21 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={translate(values.contraintes)}
                   />
                 </div>
+                <div>
+                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Hébergement</div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="text-gray-800 font-medium">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
+                    <Toggle
+                      id="hebergement"
+                      name="hebergement"
+                      disabled={!editing}
+                      value={values?.hebergement === "true"}
+                      onChange={(e) => {
+                        setValues({ ...values, hebergement: e.toString() });
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
