@@ -60,7 +60,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
-        referentSelectRef.current.select.select.setValue("");
+        if (referentSelectRef.current?.select?.select) referentSelectRef.current.select.select.setValue("");
         setValues({ ...values, tutorId: "" });
       }
       setReferents(responseReferents);
@@ -469,7 +469,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un tuteur"}
                     onChange={(e) => {
-                      if (e === "") return;
                       setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
                     }}
                     formatCreateLabel={() => {
@@ -481,7 +480,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       );
                     }}
                     isValidNewOption={() => true}
-                    value={referents?.find((ref) => ref.value === values.tutorId) || null}
+                    value={referents?.find((ref) => ref.value === values.tutorId)}
                   />
                   {editing && creationTutor && (
                     <div>
