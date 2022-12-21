@@ -121,13 +121,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
     const error = {};
     const baseError = "Ce champ est obligatoire";
     valuesToCheck.map((val) => {
-      console.log(values[val]);
       if (!values[val]) error[val] = baseError;
     });
-    console.log(error);
     if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
+    if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
 
     setErrors(error);
     if (Object.keys(error).length > 0) {
@@ -226,7 +225,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
   };
-
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <ModalConfirm
@@ -243,6 +241,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
         }}
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
+        {mission?.isJvaMission === "true" ? (
+          <div className="bg-violet-100 text-indigo-800 p-4 mb-2.5 rounded-lg text-center text-base">
+            Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
+            <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
+              jeveuxaider.gouv.fr
+            </a>
+          </div>
+        ) : null}
         <div className="bg-white rounded-xl mb-8 pt-2">
           <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
@@ -458,7 +464,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un tuteur"}
                     onChange={(e) => {
-                      console.log(e);
+                      if (e === "") return;
                       setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
                     }}
                     formatCreateLabel={() => {
@@ -470,7 +476,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       );
                     }}
                     isValidNewOption={() => true}
-                    defaultValue={referents.find((ref) => ref.value === values.tutorId)}
+                    value={referents?.find((ref) => ref.value === values.tutorId) || null}
                   />
                   {editing && creationTutor && (
                     <div>
