@@ -209,6 +209,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
       setErrors(error);
       if (Object.keys(error).length > 0) return setLoading(false);
 
+      newTutor.structureId = values.structureId;
+      newTutor.structureName = values.structureName;
       if (selectedStructure?.isNetwork === "true") {
         newTutor.role = ROLES.SUPERVISOR;
       } else {
@@ -218,6 +220,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
       setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
       setCreationTutor(false);
+      initReferents();
       return toastr.success("Invitation envoyée");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
