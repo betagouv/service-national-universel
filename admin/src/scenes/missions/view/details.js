@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, ES_NO_LIMIT } from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
@@ -21,6 +21,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [referents, setReferents] = useState([]);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
@@ -34,6 +35,19 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+
+  async function initReferents() {
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
+    const { responses } = await api.esQuery("referent", body);
+    if (responses?.length) {
+      console.log(responses);
+      setReferents(responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source })));
+    }
+  }
+
+  useEffect(() => {
+    initReferents();
+  }, [values.structureId]);
 
   const fetchStructures = async (inputValue) => {
     const body = {
@@ -293,7 +307,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     options={mainDomainsOption}
                     placeholder={"Sélectionnez un domaine principal"}
                     onChange={(e) => {
-                      setValues({ ...values, mainDomain: e, domains: values.domains.filter((d) => d !== e) });
+                      setValues({ ...values, mainDomain: e.value, domains: values.domains.filter((d) => d !== e.value) });
                     }}
                     value={values.mainDomain}
                   />
@@ -308,7 +322,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un ou plusieurs domaines"}
                     onChange={(e) => {
-                      setValues({ ...values, domains: e });
+                      setValues({ ...values, domains: e.value });
                     }}
                     value={[...values.domains]}
                   />
@@ -370,37 +384,16 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="text-xs font-medium mb-2">
                     Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
                   </div>
-                  <AsyncSelect
-                    label="Tuteur"
-                    value={{ label: values.tutor.firstName + " " + values.tutor.lastName }}
-                    loadOptions={fetchStructures}
-                    isDisabled={!editing}
-                    noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
-                    styles={{
-                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      placeholder: (styles) => ({ ...styles, color: "black" }),
-                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
-                      singleValue: (styles) => ({ ...styles, color: "black" }),
-                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
-                    }}
-                    defaultOptions
-                    onChange={(e) => {
-                      setValues({ ...values, structureName: e.label, structureId: e._id });
-                    }}
-                    placeholder="Sélectionnez un tuteur"
-                    error={errors.structureName}
-                  />
-                  <Field
-                    errors={errors}
+                  {console.log(values)}
+                  <CustomSelect
                     readOnly={!editing}
-                    label="Adresse"
-                    name="address"
-                    handleChange={(e) => {
-                      setValues({ ...values, address: e.target.value, addressVerified: false });
+                    options={referents}
+                    noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
+                    placeholder={"Sélectionnez un tuteur"}
+                    onChange={(e) => {
+                      setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
                     }}
-                    value={values.address}
-                    error={errors?.address}
+                    value={values.tutorId}
                   />
                 </div>
               </div>
@@ -415,7 +408,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     readOnly={!editing}
                     options={formatOptions}
                     placeholder={"Mission regroupée sur des journées"}
-                    onChange={(e) => setValues({ ...values, format: e })}
+                    onChange={(e) => setValues({ ...values, format: e.value })}
                     value={values.format}
                   />
                 </div>
@@ -640,7 +633,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     isMulti
                     options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
                     placeholder={"Sélectionnez une ou plusieurs périodes"}
-                    onChange={(e) => setValues({ ...values, period: e })}
+                    onChange={(e) => setValues({ ...values, period: e.value })}
                     value={values.period}
                   />
                   {(editingBottom || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
@@ -656,7 +649,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                           return options.map((el) => ({ value: el, label: translate(el) }));
                         })()}
                         placeholder={"Sélectionnez une ou plusieurs périodes"}
-                        onChange={(e) => setValues({ ...values, subPeriod: e })}
+                        onChange={(e) => setValues({ ...values, subPeriod: e.value })}
                         value={values.subPeriod}
                       />
                     </div>
@@ -698,7 +691,7 @@ const CustomSelect = ({ onChange, readOnly, options, value, isMulti = false, pla
       }}
       options={options}
       placeholder={placeholder}
-      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val.value))}
+      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val))}
       value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
       isMulti={isMulti}
     />
