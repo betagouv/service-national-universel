@@ -276,12 +276,19 @@ export default function Edit(props) {
                           }}
                           allowEmpty={false}
                           title="Rôle"
-                          options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
-                            (key) => ({
-                              value: key,
-                              label: translate(key),
-                            }),
-                          )}
+                          options={[
+                            ROLES.REFERENT_DEPARTMENT,
+                            ROLES.REFERENT_REGION,
+                            ROLES.ADMIN,
+                            ROLES.RESPONSIBLE,
+                            ROLES.SUPERVISOR,
+                            ROLES.HEAD_CENTER,
+                            ROLES.VISITOR,
+                            ROLES.DSNJ,
+                          ].map((key) => ({
+                            value: key,
+                            label: translate(key),
+                          }))}
                         />
                         {values.role === ROLES.RESPONSIBLE ? (
                           structures ? (

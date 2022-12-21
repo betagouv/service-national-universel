@@ -230,16 +230,23 @@ const Home = () => {
   );
 };
 
+const limitedAccess = {
+  [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
+};
+
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const { pathname } = useLocation();
+
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
-  if (user.role === ROLES.DSNJ && pathname !== "/dsnj-export") {
-    return <Redirect to="/dsnj-export" />;
+
+  if (limitedAccess[user.role] && !limitedAccess[user.role]?.authorised.includes(pathname)) {
+    return <Redirect to={limitedAccess[user.role].default} />;
   }
+
   if (!roles.includes(user.role)) {
     return <Redirect to="/dashboard" />;
   }
