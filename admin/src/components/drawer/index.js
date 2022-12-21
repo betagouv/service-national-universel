@@ -120,7 +120,7 @@ function supervisor({ onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -145,49 +145,27 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
         </>
       )}
-      {ssoSupportStorage === "sso-support" ? (
-        <DrawerConnectToZammood title="Boîte de réception" history={history}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerConnectToZammood>
-      ) : (
-        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerTabWithIcons>
-      )}
+      <DrawerConnectToZammood title="Boîte de réception" history={history}>
+        {!tickets ? (
+          <div />
+        ) : (
+          <>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
+              <div>{newTickets}</div>
+            </div>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
+              <div>{openedTickets}</div>
+            </div>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
+              <div>{closedTickets}</div>
+            </div>
+          </>
+        )}
+      </DrawerConnectToZammood>
+
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -296,7 +274,6 @@ const Drawer = (props) => {
   const [open, setOpen] = useState();
   const [from, setFrom] = useState();
   const history = useHistory();
-  const ssoSupportStorage = localStorage?.getItem("sso-support");
 
   const [info, setInfo] = useState({
     isOpen: false,
@@ -356,7 +333,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
