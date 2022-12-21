@@ -4,9 +4,19 @@ import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-import { AiOutlinePlus } from "react-icons/ai";
+import validator from "validator";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, ES_NO_LIMIT } from "../../../utils";
+import {
+  translate,
+  ROLES,
+  MISSION_DOMAINS,
+  PERIOD,
+  MISSION_PERIOD_DURING_HOLIDAYS,
+  MISSION_PERIOD_DURING_SCHOOL,
+  ES_NO_LIMIT,
+  regexPhoneFrenchCountries,
+  SENDINBLUE_TEMPLATES,
+} from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
@@ -25,6 +35,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [errors, setErrors] = useState({});
   const [referents, setReferents] = useState([]);
   const [creationTutor, setCreationTutor] = useState(false);
+  const [selectedStructure, setSelectedStructure] = useState(null);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
@@ -104,7 +115,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     }
     const { responses } = await api.esQuery("structure", body);
     return responses[0].hits.hits.map((hit) => {
-      return { value: hit._source, _id: hit._id, label: hit._source.name };
+      return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
     });
   };
 
@@ -185,6 +196,26 @@ export default function DetailsView({ mission, setMission, getMission }) {
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
+  const sendInvitation = async () => {
+    try {
+      if (!values.firstName || !values.lastName || !values.email || !values.phone) {
+        toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
+        return;
+      }
+      if (!validator.matches(values.phone, regexPhoneFrenchCountries)) {
+        toastr.error("Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX");
+        return;
+      }
+      if (selectedStructure?.isNetwork === "true") values.role = ROLES.SUPERVISOR;
+      const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, values);
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
+      return toastr.success("Invitation envoyée");
+    } catch (e) {
+      if (e.code === "USER_ALREADY_REGISTERED")
+        return toastr.error("Cette adresse email est déjà utilisée.", `${values.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
+      toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
+    }
+  };
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -303,6 +334,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     defaultOptions
                     onChange={(e) => {
                       setValues({ ...values, structureName: e.label, structureId: e._id });
+                      setSelectedStructure(e.structure);
                     }}
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
@@ -476,7 +508,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         error={errors?.phone}
                       />
                       <div className="flex w-full justify-end">
-                        <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer">Envoyer l&apos;invitation</div>
+                        <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer" onClick={sendInvitation}>
+                          Envoyer l&apos;invitation
+                        </div>
                       </div>
                     </div>
                   )}
