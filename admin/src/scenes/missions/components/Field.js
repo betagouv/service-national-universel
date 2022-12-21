@@ -21,7 +21,7 @@ export default function Field({ name, label, value, className = "", type = "text
             name={name}
             value={value}
             onChange={handleChange}
-            className={`${isJvaMission && "bg-gray-200"} w-full`}
+            className={`${!readOnly && isJvaMission && "bg-gray-200"} w-full`}
           />
         )}
 
