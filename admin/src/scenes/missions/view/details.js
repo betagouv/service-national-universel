@@ -241,7 +241,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
         }}
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
-        {mission?.isJvaMission === "true" ? (
+        {(editing || editingBottom) && mission?.isJvaMission === "true" ? (
           <div className="bg-violet-100 text-indigo-800 p-4 mb-2.5 rounded-lg text-center text-base">
             Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
             <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
@@ -367,6 +367,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
                   <CustomSelect
                     readOnly={!editing}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     options={mainDomainsOption}
                     placeholder={"Sélectionnez un domaine principal"}
@@ -397,6 +398,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <Field
                     errors={errors}
                     readOnly={!editing}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     label="Adresse"
                     name="address"
                     handleChange={(e) => {
@@ -409,6 +411,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <Field
                       errors={errors}
                       readOnly={!editing}
+                      isJvaMission={mission?.isJvaMission === "true"}
                       label="Code postal"
                       className="w-[50%]"
                       name="zip"
@@ -419,6 +422,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <Field
                       errors={errors}
                       readOnly={!editing}
+                      isJvaMission={mission?.isJvaMission === "true"}
                       label="Ville"
                       name="city"
                       className="w-[50%]"
@@ -427,7 +431,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       error={errors?.city}
                     />
                   </div>
-                  {editing && !values.addressVerified && (
+                  {editing && (!mission?.isJvaMission || mission?.isJvaMission === "false") && !values.addressVerified && (
                     <div className="flex flex-col gap-2 ">
                       <VerifyAddress
                         address={values.address}
@@ -450,6 +454,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   <CreatableSelect
                     isDisabled={!editing}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     options={referents}
                     ref={referentSelectRef}
                     error={errors.tutorId}
@@ -725,6 +730,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <Field
                       errors={errorsBottom}
                       readOnly={!editingBottom}
+                      isJvaMission={mission?.isJvaMission === "true"}
                       label="Date de fin"
                       name="endAt"
                       className="w-[50%]"
@@ -744,6 +750,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <Field
                     errors={errorsBottom}
                     readOnly={!editingBottom}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     name="frequence"
                     type="textarea"
                     row={4}
@@ -798,6 +805,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     name="placesTotal"
                     errors={errorsBottom}
                     readOnly={!editingBottom}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     handleChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
                     value={values.placesTotal}
                   />
@@ -811,16 +819,16 @@ export default function DetailsView({ mission, setMission, getMission }) {
   );
 }
 
-const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option", error }) => {
+const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option", error, isJvaMission = false }) => {
   return (
     <ReactSelect
-      isDisabled={readOnly}
+      isDisabled={readOnly || isJvaMission}
       ref={ref}
       noOptionsMessage={() => noOptionsMessage}
       styles={{
         dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
         placeholder: (styles) => ({ ...styles, color: error ? "red" : "black" }),
-        control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+        control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isJvaMission ? "#E5E7EB" : "white" }),
         singleValue: (styles) => ({ ...styles, color: "black" }),
         multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
         indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
