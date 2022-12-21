@@ -147,7 +147,8 @@ exports.handler = async () => {
   try {
     const cohorts = await CohortModel.find({});
     const exportsGenerated = {};
-    cohorts.forEach(async (cohort) => {
+
+    for (const cohort of cohorts) {
       const cohesionCenterExportDate = new Date(cohort.dsnjExportDates[EXPORT_COHESION_CENTERS]);
       const youngBeforeSessionExportDate = new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]);
       const youngAfterSessionExportDate = new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]);
@@ -166,14 +167,14 @@ exports.handler = async () => {
         await generateYoungsExport(cohort, true);
         addToSlackRapport(exportsGenerated, cohort.name, EXPORT_YOUNGS_AFTER_SESSION);
       }
-    });
+    }
 
     await slack.info({
       title: "✅ DSNJ export generation",
       text: printSlackInfo(exportsGenerated),
     });
   } catch (e) {
-    slack.error({ title: "❌ DSNJ export generation", text: e });
+    slack.error({ title: "DSNJ export generation", text: e });
     capture(e);
   }
 };
