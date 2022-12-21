@@ -1,3 +1,23 @@
+# [1.190.0](https://github.com/betagouv/service-national-universel/compare/v1.189.0...v1.190.0) (2022-12-21)
+
+
+### Bug Fixes
+
+* **admin:** Bug historic ([547544d](https://github.com/betagouv/service-national-universel/commit/547544d7e1702643a764862ec418eb244adc1fbf))
+* **admin:** redirect support ([6184734](https://github.com/betagouv/service-national-universel/commit/6184734677597aff5f442c5f41bc3f95b8d31d88))
+* **api:** dsnj export async loop ([a3babb6](https://github.com/betagouv/service-national-universel/commit/a3babb68a846ce78db628b13bc31075797ff0b1c))
+* **api:** export date timezone error ([1247f68](https://github.com/betagouv/service-national-universel/commit/1247f6845fd0dd0a0109a0d420b0c447c6b8ccf7))
+* **lib:** add invite dsnj template ([bf1ca35](https://github.com/betagouv/service-national-universel/commit/bf1ca350213e9d5a4a1edd6b7f7347d8ff457cb3))
+* **lib:** cloture inscription date ([ed06d13](https://github.com/betagouv/service-national-universel/commit/ed06d135abe868d0e0071a32695c9c166dac3807))
+* **lib:** mapping Occitanie ([eaa81c5](https://github.com/betagouv/service-national-universel/commit/eaa81c5031cd586e6e159c1d743e6c371aea68c6))
+* cron for staging ([a18b900](https://github.com/betagouv/service-national-universel/commit/a18b9008217bc91a5a747be50c41fa71b0f2f9fb))
+* cron for staging ([0182357](https://github.com/betagouv/service-national-universel/commit/0182357bc3af1b8bc289150f08ed0ffc622b5aa3))
+
+
+### Features
+
+* **api/admin:** generate and download dsnj exports ([#2151](https://github.com/betagouv/service-national-universel/issues/2151)) ([5c0fef2](https://github.com/betagouv/service-national-universel/commit/5c0fef215dd062dc0a9fd7a5532c5958c90b3289))
+
 # [1.189.0](https://github.com/betagouv/service-national-universel/compare/v1.188.0...v1.189.0) (2022-12-20)
 
 
