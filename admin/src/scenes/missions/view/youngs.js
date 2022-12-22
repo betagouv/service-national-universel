@@ -29,8 +29,8 @@ import { Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { applicationExportFields } from "snu-lib/excelExports";
 import Eye from "../../../assets/icons/Eye";
-import ExportComponent from "../../../components/ExportXlsx";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
+import ModalExport from "../../../components/modals/ModalExport";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
@@ -42,6 +42,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
   const [currentTab, setCurrentTab] = useState("all");
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const countAll = applications?.length;
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
@@ -85,7 +86,8 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   async function transform(data, values) {
     let all = data;
-    if (["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
+    console.log(data, values);
+    if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
       const youngIds = [...new Set(data.map((item) => item.youngId))];
       if (youngIds?.length) {
         const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
@@ -208,7 +210,6 @@ export default function Youngs({ mission, applications, updateMission }) {
         <MissionView mission={mission} tab="youngs">
           <div className="flex flex-1 mx-8">
             <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
-            {console.log(mission)}
             <TabItem
               count={countPending}
               icon={
@@ -244,18 +245,19 @@ export default function Youngs({ mission, applications, updateMission }) {
                     />
                     <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                   </div>
-                  <ExportComponent
-                    title="Exporter les candidatures"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Application"
+                  <button
+                    className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                    onClick={() => setIsExportOpen(true)}>
+                    Exporter les candidatures
+                  </button>
+                  <ModalExport
+                    isOpen={isExportOpen}
+                    setIsOpen={setIsExportOpen}
                     index="application"
-                    react={{ and: FILTERS }}
                     transform={transform}
-                    css={{
-                      override: true,
-                      button: `text-white bg-blue-600 border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-                      loadingButton: `text-white bg-blue-600 border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-                    }}
+                    exportFields={getExportFields()}
+                    filters={FILTERS}
+                    getExportQuery={getExportQuery}
                   />
                 </div>
 
