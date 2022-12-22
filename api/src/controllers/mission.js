@@ -42,7 +42,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         }
       }
     }
-
+    if (checkedMission?.hebergement === "false") {
+      delete checkedMission.hebergementPayant;
+    }
     const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
     if (data.status === MISSION_STATUS.WAITING_VALIDATION) {
@@ -106,6 +108,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         checkedMission.status = "WAITING_VALIDATION";
       }
     }
+    console.log(checkedMission.hebergementPayant);
+    if (checkedMission?.hebergement === "false") {
+      delete checkedMission.hebergementPayant;
+    }
+    console.log(checkedMission.hebergementPayant);
 
     const oldStatus = mission.status;
     mission.set(checkedMission);

@@ -1,8 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ReactSelect from "react-select";
+import AsyncSelect from "react-select/async";
+import CreatableSelect from "react-select/creatable";
+import validator from "validator";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../utils";
+import {
+  translate,
+  ROLES,
+  MISSION_DOMAINS,
+  PERIOD,
+  MISSION_PERIOD_DURING_HOLIDAYS,
+  MISSION_PERIOD_DURING_SCHOOL,
+  ES_NO_LIMIT,
+  regexPhoneFrenchCountries,
+  SENDINBLUE_TEMPLATES,
+} from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
@@ -16,48 +30,112 @@ import { toastr } from "react-redux-toastr";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
-  const [structures, setStructures] = useState([]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [referents, setReferents] = useState([]);
+  const [creationTutor, setCreationTutor] = useState(false);
+  const [selectedStructure, setSelectedStructure] = useState(null);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
   const [errorsBottom, setErrorsBottom] = useState({});
 
+  const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+
   const [modalConfirmation, setModalConfirmation] = useState(false);
+
+  const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
+  const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
+  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor"];
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  async function initStructures() {
-    const responseStructure = await api.get("/structure");
-    const s = responseStructure.data.map((e) => ({ label: e.name, value: { name: e.name, _id: e._id } }));
-    setStructures(s);
+  const referentSelectRef = useRef();
+
+  async function initReferents() {
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
+    const { responses } = await api.esQuery("referent", body);
+    if (responses?.length) {
+      const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
+      if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
+        if (referentSelectRef.current?.select?.select) referentSelectRef.current.select.select.setValue("");
+        setValues({ ...values, tutorId: "" });
+      }
+      setReferents(responseReferents);
+    }
   }
 
   useEffect(() => {
-    initStructures();
-  }, []);
+    initReferents();
+  }, [values.structureId]);
+
+  const fetchStructures = async (inputValue) => {
+    const body = {
+      query: { bool: { must: [] } },
+      size: 50,
+      track_total_hits: true,
+    };
+    if (inputValue) {
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: inputValue,
+                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+                type: "cross_fields",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: inputValue,
+                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+                type: "phrase",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: inputValue,
+                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+                type: "phrase_prefix",
+                operator: "and",
+              },
+            },
+          ],
+          minimum_should_match: "1",
+        },
+      });
+    }
+    const { responses } = await api.esQuery("structure", body);
+    return responses[0].hits.hits.map((hit) => {
+      return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
+    });
+  };
 
   const onSubmit = () => {
     setLoading(true);
     const error = {};
     const baseError = "Ce champ est obligatoire";
-    const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions"];
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
     });
     if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
+    if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
 
     setErrors(error);
-    if (Object.keys(error).length > 0) return setLoading(false);
+    if (Object.keys(error).length > 0) {
+      toastr.error("Oups, le formulaire est imcomplet");
+      return setLoading(false);
+    }
 
     // open modal to confirm is mission has to change status
-    if (values.description !== mission.description || values.actions !== mission.actions) return setModalConfirmation(true);
-    const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes"];
+    if ((values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION") return setModalConfirmation(true);
     updateMission(valuesToUpdate);
   };
 
@@ -66,9 +144,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
     const error = {};
     if (values.startAt < new Date()) error.startAt = "La date est incorrect";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
-    if (values.placesTotal < 0 || isNaN(values.placesTotal)) error.placesTotal = "Le nombre de places est incorrect";
+    if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     setErrorsBottom(error);
-    if (Object.keys(error).length > 0) return setLoadingBottom(false);
+    if (Object.keys(error).length > 0) {
+      toastr.error("Oups, le formulaire est imcomplet");
+      return setLoadingBottom(false);
+    }
     updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
   };
 
@@ -76,18 +157,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
     try {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
-      const { ok, code, data: mission } = await api.put(`/mission/${values._id}`, valuesToSend);
+      if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
+      const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
+        setLoadingBottom(false);
         return setLoading(false);
       }
       toastr.success("Mission enregistrée");
       setLoading(false);
+      setLoadingBottom(false);
+      setEdittingBottom(false);
       setEditing(false);
-      setValues(mission);
-      setMission(mission);
+      setValues(missionReturned);
+      setMission(missionReturned);
     } catch (e) {
       setLoading(false);
+      setLoadingBottom(false);
       return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
     }
   };
@@ -112,23 +198,64 @@ export default function DetailsView({ mission, setMission, getMission }) {
     { value: "CONTINUOUS", label: translate("CONTINUOUS") },
     { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
   ];
+  const sendInvitation = async () => {
+    try {
+      let error = {};
+      if (!newTutor.firstName) error.firstName = "Ce champ est obligatoire";
+      if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
+      if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
+      if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
+      if (!validator.matches(newTutor.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      setErrors(error);
+      if (Object.keys(error).length > 0) return setLoading(false);
+
+      newTutor.structureId = values.structureId;
+      newTutor.structureName = values.structureName;
+      if (selectedStructure?.isNetwork === "true") {
+        newTutor.role = ROLES.SUPERVISOR;
+      } else {
+        newTutor.role = ROLES.RESPONSIBLE;
+      }
+      const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, newTutor);
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
+      setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
+      setCreationTutor(false);
+      initReferents();
+      return toastr.success("Invitation envoyée");
+    } catch (e) {
+      if (e.code === "USER_ALREADY_REGISTERED")
+        return toastr.error("Cette adresse email est déjà utilisée.", `${newTutor.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
+      toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
+    }
+  };
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <ModalConfirm
         isOpen={modalConfirmation}
         title={"Modification de statut"}
         message={"Êtes-vous sûr(e) de vouloir continuer ? Certaines modifications entraîneront une modification du statut de la mission : En attente de validation."}
-        onCancel={() => setModalConfirmation(false)}
+        onCancel={() => {
+          setModalConfirmation(false);
+          setLoading(false);
+        }}
         onConfirm={() => {
           setModalConfirmation(false);
-          updateMission();
+          updateMission(valuesToUpdate);
         }}
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
-        <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
+        {(editing || editingBottom) && mission?.isJvaMission === "true" ? (
+          <div className="bg-violet-100 text-indigo-800 p-4 mb-2.5 rounded-lg text-center text-base">
+            Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
+            <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
+              jeveuxaider.gouv.fr
+            </a>
+          </div>
+        ) : null}
+        <div className="bg-white rounded-xl mb-8 pt-2">
+          <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
-              <div className="flex flex-row gap-4 items-center justify-center">
+              <div className="flex flex-row gap-4 items-center justify-start w-full flex-1">
                 <div className="text-lg font-medium text-gray-900">Informations générales</div>
                 {mission.status === "VALIDATED" && (
                   <div className="flex flex-row gap-2 items-center justify-center">
@@ -136,13 +263,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       id="visibility"
                       name="visibility"
                       disabled={!editing}
-                      value={values.visibility === "VISIBLE"}
+                      value={!thresholdPendingReached && values.visibility === "VISIBLE"}
                       onChange={(e) => {
                         setValues({ ...values, visibility: e ? "VISIBLE" : "HIDDEN" });
                       }}
                     />
                     <div>
-                      La mission est <strong>{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                      <span>
+                        La mission est <strong>{!thresholdPendingReached && values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</strong> aux candidatures
+                      </span>
+                      {thresholdPendingReached && (
+                        <span>
+                          <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des&nbsp;
+                          <span className="text-blue-600 underline cursor-pointer" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+                            candidatures à traiter
+                          </span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -163,7 +300,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => {
                           setEditing(false);
-                          setValues(mission);
+                          setValues({ ...mission });
                           setErrors({});
                         }}
                         disabled={loading}>
@@ -199,18 +336,29 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Structure rattachée</div>
-                  <Field
-                    errors={errors}
-                    name="structureName"
-                    type="select"
-                    shouldShowLoading
-                    readOnly={!editing}
-                    options={structures}
-                    handleChange={(e) => setValues({ ...values, structureName: e.name, structureId: e._id })}
+                  <AsyncSelect
                     label="Structure"
-                    value={values.structureName}
+                    value={{ label: values.structureName }}
+                    loadOptions={fetchStructures}
+                    isDisabled={!editing}
+                    noOptionsMessage={"Aucune structure ne correspond à cette recherche"}
+                    styles={{
+                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      placeholder: (styles) => ({ ...styles, color: "black" }),
+                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                      singleValue: (styles) => ({ ...styles, color: "black" }),
+                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                    }}
+                    defaultOptions
+                    onChange={(e) => {
+                      setValues({ ...values, structureName: e.label, structureId: e._id });
+                      setSelectedStructure(e.structure);
+                    }}
+                    placeholder="Rechercher une structure"
+                    error={errors.structureName}
                   />
-                  {values.structureName && editing && (
+                  {values.structureName && (
                     <div
                       onClick={() => history.push(`/structure/${values.structureId}/edit`)}
                       className="border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
@@ -220,30 +368,30 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
-                  <Field
-                    errors={errors}
+                  <CustomSelect
                     readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, mainDomain: e, domains: values.domains.filter((d) => d !== e) })}
-                    type="select"
-                    name="mainDomain"
+                    isJvaMission={mission?.isJvaMission === "true"}
+                    noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     options={mainDomainsOption}
-                    label="Sélectionnez un domaine principal"
-                    value={translate(values.mainDomain)}
+                    placeholder={"Sélectionnez un domaine principal"}
+                    onChange={(e) => {
+                      setValues({ ...values, mainDomain: e.value, domains: values.domains.filter((d) => d !== e.value) });
+                    }}
+                    value={values.mainDomain}
                   />
                   <div className="flex flex-row text-xs font-medium my-2">
                     <div>Domaine(s) d&apos;action secondaire(s)</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
-                  <Field
-                    errors={errors}
+                  <CustomSelect
                     readOnly={!editing}
-                    name="domains"
-                    handleChange={(e) => setValues({ ...values, domains: e })}
-                    type="select"
-                    multiple
-                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain && !values.domains.includes(d.value))}
-                    label="Sélectionnez un ou plusieurs domaines"
-                    transformer={translate}
+                    isMulti
+                    options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
+                    noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
+                    placeholder={"Sélectionnez un ou plusieurs domaines"}
+                    onChange={(e) => {
+                      setValues({ ...values, domains: e.value });
+                    }}
                     value={[...values.domains]}
                   />
                 </div>
@@ -253,6 +401,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <Field
                     errors={errors}
                     readOnly={!editing}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     label="Adresse"
                     name="address"
                     handleChange={(e) => {
@@ -265,6 +414,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <Field
                       errors={errors}
                       readOnly={!editing}
+                      isJvaMission={mission?.isJvaMission === "true"}
                       label="Code postal"
                       className="w-[50%]"
                       name="zip"
@@ -275,6 +425,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <Field
                       errors={errors}
                       readOnly={!editing}
+                      isJvaMission={mission?.isJvaMission === "true"}
                       label="Ville"
                       name="city"
                       className="w-[50%]"
@@ -283,7 +434,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       error={errors?.city}
                     />
                   </div>
-                  {editing && !values.addressVerified && (
+                  {editing && (!mission?.isJvaMission || mission?.isJvaMission === "false") && !values.addressVerified && (
                     <div className="flex flex-col gap-2 ">
                       <VerifyAddress
                         address={values.address}
@@ -299,6 +450,93 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   )}
                 </div>
+                <div>
+                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Tuteur de la mission</div>
+                  <div className="text-xs font-medium mb-2">
+                    Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
+                  </div>
+                  <CreatableSelect
+                    isDisabled={!editing || mission?.isJvaMission === "true"}
+                    options={referents}
+                    ref={referentSelectRef}
+                    error={errors.tutorId}
+                    styles={{
+                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
+                      control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: editing && mission?.isJvaMission === "true" ? "#E5E7EB" : "white" }),
+                      singleValue: (styles) => ({ ...styles, color: "black" }),
+                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                    }}
+                    noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
+                    placeholder={"Sélectionnez un tuteur"}
+                    onChange={(e) => {
+                      setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
+                    }}
+                    formatCreateLabel={() => {
+                      return (
+                        <div className="flex items-center gap-2 flex-col" onClick={() => setCreationTutor(true)}>
+                          <div className="text-sm">Le tuteur recherché n&apos;est pas dans la liste ?</div>
+                          <div className="font-medium text-blue-600 text-">Ajouter un nouveau tuteur</div>
+                        </div>
+                      );
+                    }}
+                    isValidNewOption={() => true}
+                    value={referents?.find((ref) => ref.value === values.tutorId)}
+                  />
+                  {editing && creationTutor && (
+                    <div>
+                      <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Créer un tuteur</div>
+                      <div className="text-xs font-medium mb-2">Identité et contact</div>
+                      <div className="flex flex-row justify-between gap-3 mb-4">
+                        <Field
+                          errors={errors}
+                          readOnly={!editing}
+                          label="Nom"
+                          className="w-[50%]"
+                          name="lastName"
+                          handleChange={(e) => setNewTutor({ ...newTutor, lastName: e.target.value })}
+                          value={newTutor.lastName}
+                          error={errors}
+                        />
+                        <Field
+                          errors={errors}
+                          readOnly={!editing}
+                          label="Prénom"
+                          name="firstName"
+                          className="w-[50%]"
+                          handleChange={(e) => setNewTutor({ ...newTutor, firstName: e.target.value })}
+                          value={newTutor.firstName}
+                          error={errors}
+                        />
+                      </div>
+                      <Field
+                        errors={errors}
+                        readOnly={!editing}
+                        label="Email"
+                        name="email"
+                        handleChange={(e) => setNewTutor({ ...newTutor, email: e.target.value })}
+                        value={newTutor.email}
+                        error={errors}
+                      />
+                      <Field
+                        errors={errors}
+                        readOnly={!editing}
+                        label="Téléphone"
+                        name="phone"
+                        className="my-4"
+                        handleChange={(e) => setNewTutor({ ...newTutor, phone: e.target.value })}
+                        value={newTutor.phone}
+                        error={errors}
+                      />
+                      <div className="flex w-full justify-end">
+                        <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer" onClick={sendInvitation}>
+                          Envoyer l&apos;invitation
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="hidden xl:flex justify-center items-center">
                 <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
@@ -306,15 +544,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">Type de mission</div>
-                  <Field
+                  <CustomSelect
                     errors={errors}
                     readOnly={!editing}
-                    name="format"
-                    type="select"
-                    handleChange={(e) => setValues({ ...values, format: e })}
                     options={formatOptions}
-                    label="Mission regroupée sur des journées"
-                    value={translate(values.format)}
+                    placeholder={"Mission regroupée sur des journées"}
+                    onChange={(e) => setValues({ ...values, format: e.value })}
+                    value={values.format}
                   />
                 </div>
                 <div>
@@ -380,7 +616,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       Contraintes spécifiques pour cette mission
                       <span className="text-gray-400">&nbsp;(facultatif).&nbsp;</span>
                     </div>
-                    <div>(conditons physiques, période de formation, mission en soirée...)</div>
+                    <div>(conditions physiques, période de formation, mission en soirée...)</div>
                   </div>
                   <Field
                     readOnly={!editing}
@@ -391,12 +627,43 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={translate(values.contraintes)}
                   />
                 </div>
+                <div>
+                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Hébergement</div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="text-gray-800 font-medium">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
+                    <Toggle
+                      id="hebergement"
+                      name="hebergement"
+                      disabled={!editing}
+                      value={values?.hebergement === "true"}
+                      onChange={(e) => {
+                        setValues({ ...values, hebergement: e.toString() });
+                      }}
+                    />
+                  </div>
+                  {values?.hebergement === "true" && (
+                    <div className="flex flex-row gap-8 mt-4">
+                      <div
+                        onClick={() => editing && setValues({ ...values, hebergementPayant: "false" })}
+                        className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
+                        <CheckBox value={values?.hebergementPayant === "false"} />
+                        <div className="text-gray-700 font-medium">Hébergement gratuit</div>
+                      </div>
+                      <div
+                        onClick={() => editing && setValues({ ...values, hebergementPayant: "true" })}
+                        className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
+                        <CheckBox value={values.hebergementPayant === "true"} />
+                        <div className="text-gray-700 font-medium">Hébergement payant</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex flex-col rounded-lg pb-12 px-8 bg-white">
+        <div className="bg-white rounded-xl mb-8 pt-2">
+          <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
             <div className="flex items-center justify-between my-4">
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
@@ -417,7 +684,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => {
                           setEdittingBottom(false);
-                          setValues(mission);
+                          setValues({ ...mission });
                           setErrorsBottom({});
                         }}
                         disabled={loading}>
@@ -439,7 +706,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
                 <div>
                   <div className="text-xs font-medium mb-2">Dates de la mission</div>
-                  <div className="flex flex-row justify-between gap-3 my-4">
+                  <div className="flex flex-row justify-between gap-3 my-2">
                     <Field
                       errors={errorsBottom}
                       name="startAt"
@@ -454,6 +721,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <Field
                       errors={errorsBottom}
                       readOnly={!editingBottom}
+                      isJvaMission={mission?.isJvaMission === "true"}
                       label="Date de fin"
                       name="endAt"
                       className="w-[50%]"
@@ -473,6 +741,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <Field
                     errors={errorsBottom}
                     readOnly={!editingBottom}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     name="frequence"
                     type="textarea"
                     row={4}
@@ -492,42 +761,31 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
                   {/* Script pour passage d'array periode en single value */}
-                  <Field
-                    errors={errorsBottom}
+                  <CustomSelect
                     readOnly={!editingBottom}
-                    name="period"
-                    handleChange={(e) => setValues({ ...values, period: e })}
-                    type="select"
-                    multiple
-                    options={Object.keys(PERIOD)
-                      .filter((el) => !values.period.includes(el))
-                      .map((d) => {
-                        return { value: d, label: translate(d) };
-                      })}
-                    label="Sélectionnez une ou plusieurs périodes"
-                    transformer={translate}
-                    value={[...values.period]}
+                    isMulti
+                    options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
+                    placeholder={"Sélectionnez une ou plusieurs périodes"}
+                    onChange={(e) => setValues({ ...values, period: e.value })}
+                    value={values.period}
                   />
-                  {values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
-                    <Field
-                      errors={errorsBottom}
-                      readOnly={!editingBottom}
-                      className="mt-4"
-                      name="subPeriod"
-                      handleChange={(e) => setValues({ ...values, subPeriod: e })}
-                      type="select"
-                      multiple
-                      options={(() => {
-                        const valuesToCheck = values.period;
-                        let options = [];
-                        if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
-                        if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                        return options.filter((el) => !values.subPeriod.includes(el)).map((el) => ({ value: el, label: translate(el) }));
-                      })()}
-                      label="Précisez"
-                      transformer={translate}
-                      value={[...values.subPeriod]}
-                    />
+                  {(editingBottom || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
+                    <div className="mt-4">
+                      <CustomSelect
+                        readOnly={!editingBottom}
+                        isMulti
+                        options={(() => {
+                          const valuesToCheck = values.period;
+                          let options = [];
+                          if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                          if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                          return options.map((el) => ({ value: el, label: translate(el) }));
+                        })()}
+                        placeholder={"Sélectionnez une ou plusieurs périodes"}
+                        onChange={(e) => setValues({ ...values, subPeriod: e.value })}
+                        value={values.subPeriod}
+                      />
+                    </div>
                   )}
                 </div>
                 <div>
@@ -538,6 +796,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     name="placesTotal"
                     errors={errorsBottom}
                     readOnly={!editingBottom}
+                    isJvaMission={mission?.isJvaMission === "true"}
                     handleChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
                     value={values.placesTotal}
                   />
@@ -550,3 +809,44 @@ export default function DetailsView({ mission, setMission, getMission }) {
     </div>
   );
 }
+
+const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option", error, isJvaMission = false }) => {
+  return (
+    <ReactSelect
+      isDisabled={readOnly || isJvaMission}
+      ref={ref}
+      noOptionsMessage={() => noOptionsMessage}
+      styles={{
+        dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        placeholder: (styles) => ({ ...styles, color: error ? "red" : "black" }),
+        control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: !readOnly && isJvaMission ? "#E5E7EB" : "white" }),
+        singleValue: (styles) => ({ ...styles, color: "black" }),
+        multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+      }}
+      options={options}
+      placeholder={placeholder}
+      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val))}
+      value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
+      isMulti={isMulti}
+    />
+  );
+};
+
+const CheckBox = ({ value }) => {
+  return (
+    <>
+      {value ? (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="16" height="16" rx="8" fill="#2563EB" />
+          <circle cx="8" cy="8" r="3" fill="white" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" fill="white" />
+          <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" stroke="#D1D5DB" />
+        </svg>
+      )}
+    </>
+  );
+};

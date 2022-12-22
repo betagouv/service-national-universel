@@ -14,7 +14,6 @@ export default function Index() {
     <Switch>
       <SentryRoute path="/mission/create/:structureId" component={Edit} />
       <SentryRoute path="/mission/create" component={Edit} />
-      {/*<SentryRoute path="/mission/:id/edit" component={Edit} />*/}
       <SentryRoute path="/mission/:id" component={View} />
       <SentryRoute path="/mission" component={List} />
     </Switch>
