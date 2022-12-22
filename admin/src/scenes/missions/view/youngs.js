@@ -41,7 +41,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const [youngsInPage, setYoungsInPage] = useState([]);
   const [currentTab, setCurrentTab] = useState("all");
   const countAll = applications?.length;
-  const countPending = applications?.filter((a) => ["WAITING_VALIDATION", "WAITING_CONFIRMATION", "WAITING_VERIFICATION"].includes(a.status)).length;
+  const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
@@ -73,7 +73,7 @@ export default function Youngs({ mission, applications, updateMission }) {
     const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "missionId.keyword": mission._id } }] } }, size: ES_NO_LIMIT };
 
     if (currentTab === "pending") {
-      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CONFIRMATION", "WAITING_VERIFICATION"] } });
+      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
     } else if (currentTab === "follow") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
     }
