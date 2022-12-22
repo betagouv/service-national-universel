@@ -108,11 +108,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         checkedMission.status = "WAITING_VALIDATION";
       }
     }
-    console.log(checkedMission.hebergementPayant);
     if (checkedMission?.hebergement === "false") {
       delete checkedMission.hebergementPayant;
     }
-    console.log(checkedMission.hebergementPayant);
 
     const oldStatus = mission.status;
     mission.set(checkedMission);
