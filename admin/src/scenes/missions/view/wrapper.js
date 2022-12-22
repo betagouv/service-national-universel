@@ -73,7 +73,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
               className={`flex flex-row items-center gap-2 cursor-pointer text-gray-400 text-sm pb-4 ${tab === "youngs" && "text-blue-600 border-b-2 border-blue-600"}`}
               onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
               {/* should it be red when no remaining places ?*/}
-              {mission.pendingApplications >= mission.placesLeft * 5 ? (
+              {mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
               ) : mission.pendingApplications > 1 ? (
                 <ExclamationCircle className="text-white" fill="orange" />

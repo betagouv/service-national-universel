@@ -30,6 +30,8 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { applicationExportFields } from "snu-lib/excelExports";
 import Eye from "../../../assets/icons/Eye";
 import ExportComponent from "../../../components/ExportXlsx";
+import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
+
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
 export default function Youngs({ mission, applications, updateMission }) {
@@ -206,7 +208,20 @@ export default function Youngs({ mission, applications, updateMission }) {
         <MissionView mission={mission} tab="youngs">
           <div className="flex flex-1 mx-8">
             <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
-            <TabItem count={countPending} title="À traiter" onClick={() => setCurrentTab("pending")} active={currentTab === "pending"} />
+            {console.log(mission)}
+            <TabItem
+              count={countPending}
+              icon={
+                mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
+                  <ExclamationCircle className="text-white" fill="red" />
+                ) : mission.pendingApplications > 1 ? (
+                  <ExclamationCircle className="text-white" fill="orange" />
+                ) : null
+              }
+              title="À traiter"
+              onClick={() => setCurrentTab("pending")}
+              active={currentTab === "pending"}
+            />
             <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
           </div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -236,6 +251,11 @@ export default function Youngs({ mission, applications, updateMission }) {
                     index="application"
                     react={{ and: FILTERS }}
                     transform={transform}
+                    css={{
+                      override: true,
+                      button: `text-white bg-blue-600 border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+                      loadingButton: `text-white bg-blue-600 border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+                    }}
                   />
                 </div>
 
@@ -410,14 +430,18 @@ function FilterButton({ onClick }) {
     </div>
   );
 }
-const TabItem = ({ active, title, count, onClick }) => (
+const TabItem = ({ active, title, count, onClick, icon }) => (
   <div
     onClick={onClick}
     className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-blue-600 ${
       active ? "!text-blue-600 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
     }`}>
     <div className={"flex items-center gap-2"}>
-      <div>{title}</div>
+      <div className="flex flex-row items-center gap-2">
+        {icon && <div>{icon}</div>}
+        <div>{title}</div>
+      </div>
+
       <div className={`px-2 border-[0.5px] font-medium text-xs rounded-3xl ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
     </div>
   </div>
