@@ -340,14 +340,15 @@ export default function Youngs({ mission, applications, updateMission }) {
                     />
                     <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                   </div>
-                  <div className="flex flex-row gap-2 items-center">
-                    {currentTab !== "all" && <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={optionsActions} />}
+                  {currentTab !== "all" ? (
+                    <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={optionsActions} />
+                  ) : (
                     <button
                       className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
                       onClick={() => setIsExportOpen(true)}>
                       Exporter les candidatures
                     </button>
-                  </div>
+                  )}
 
                   <ModalExport
                     isOpen={isExportOpen}
