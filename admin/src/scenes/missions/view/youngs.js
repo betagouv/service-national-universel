@@ -31,6 +31,9 @@ import { applicationExportFields } from "snu-lib/excelExports";
 import Eye from "../../../assets/icons/Eye";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import ModalExport from "../../../components/modals/ModalExport";
+import SelectAction from "../../../components/SelectAction";
+import CursorClick from "../../../assets/icons/CursorClick";
+import SpeakerPhone from "../../../assets/icons/SpeakerPhone";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
@@ -46,6 +49,8 @@ export default function Youngs({ mission, applications, updateMission }) {
   const countAll = applications?.length;
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
+  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -203,6 +208,96 @@ export default function Youngs({ mission, applications, updateMission }) {
     } else return applicationExportFields.filter((e) => !["missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
   }
 
+  const updateApplicationStatus = (status) => {
+    if (youngSelected.length === 0) return;
+
+    setModalPointagePresenceArrivee({
+      isOpen: true,
+      values: youngSelected,
+      value: "true",
+      onSubmit: async () => {
+        try {
+          const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+            value: "true",
+            ids: youngSelected.map((y) => y._id),
+          });
+          if (!ok) {
+            toastr.error("Oups, une erreur s'est produite", translate(code));
+            return;
+          }
+          history.go(0);
+        } catch (e) {
+          console.log(e);
+          toastr.error("Oups, une erreur s'est produite", translate(e.code));
+          return;
+        }
+      },
+    });
+  };
+  const RenderText = (text) => {
+    return (
+      <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+        <div className="font-normal">
+          Marquer en <span className="font-bold">{text}</span>
+          {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+        </div>
+      </div>
+    );
+  };
+  const optionsActions = [
+    {
+      items: [
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Proposition en attente"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature en attente"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature annulée"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature approuvée"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature non retenue"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature en cours"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature abandonnée"),
+        },
+        {
+          action: async () => {
+            updateApplicationStatus();
+          },
+          render: RenderText("Candidature effectuée"),
+        },
+      ],
+    },
+  ];
   if (!applications) return <Loader />;
   return (
     <div>
@@ -245,11 +340,15 @@ export default function Youngs({ mission, applications, updateMission }) {
                     />
                     <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                   </div>
-                  <button
-                    className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
-                    onClick={() => setIsExportOpen(true)}>
-                    Exporter les candidatures
-                  </button>
+                  <div className="flex flex-row gap-2 items-center">
+                    {currentTab !== "all" && <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={optionsActions} />}
+                    <button
+                      className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                      onClick={() => setIsExportOpen(true)}>
+                      Exporter les candidatures
+                    </button>
+                  </div>
+
                   <ModalExport
                     isOpen={isExportOpen}
                     setIsOpen={setIsExportOpen}
