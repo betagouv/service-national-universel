@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
-const { capture, captureMessage: sentryCaptureMessage } = require("./sentry");
+const { capture } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -10,19 +10,24 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 //https://my.sendinblue.com/lists/add-attributes
 
 const api = async (path, options = {}) => {
-  if (!SENDINBLUEKEY) {
-    console.log("NO SENDINBLUE KEY");
-    console.log(options);
-    return console.log("Mail was not sent.");
-  }
+  try {
+    if (!SENDINBLUEKEY) {
+      console.log("NO SENDINBLUE KEY");
+      console.log(options);
+      return console.log("Mail was not sent.");
+    }
 
-  const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
-    ...options,
-    headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
-  });
-  const contentType = res.headers.raw()["content-type"];
-  if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
-  return await res.text();
+    const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
+      ...options,
+      headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
+    });
+    const contentType = res.headers.raw()["content-type"];
+    if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
+    return await res.text();
+  } catch (e) {
+    console.log("Erreur in sendinblue api", e);
+    capture(e);
+  }
 };
 
 // https://developers.sendinblue.com/reference/sendtransacsms
@@ -123,23 +128,18 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
  * @returns {Promise<void>}
  */
 async function createContact({ email, attributes, emailBlacklisted, smsBlacklisted, listIds, updateEnabled, smtpBlacklistSender } = {}) {
-  try {
-    const body = {
-      email,
-      attributes,
-      emailBlacklisted,
-      smsBlacklisted,
-      listIds,
-      updateEnabled,
-      smtpBlacklistSender,
-    };
-    const res = await api("/contacts", { method: "POST", body: JSON.stringify(body) });
-    if (res.code !== "success") throw new Error(res.message);
-    return res;
-  } catch (e) {
-    console.log("Erreur in createContact", e);
-    capture(e);
-  }
+  const body = {
+    email,
+    attributes,
+    emailBlacklisted,
+    smsBlacklisted,
+    listIds,
+    updateEnabled,
+    smtpBlacklistSender,
+  };
+  const res = await api("/contacts", { method: "POST", body: JSON.stringify(body) });
+  if (res.code !== "success") throw new Error(await res.text());
+  return res;
 }
 
 /**
@@ -148,15 +148,8 @@ async function createContact({ email, attributes, emailBlacklisted, smsBlacklist
  * @returns {Promise<void>}
  */
 async function deleteContact(id) {
-  try {
-    const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
-    const res = await api(`/contacts/${identifier}`, { method: "DELETE" });
-    if (res.code !== "success") throw new Error(res.message);
-    return;
-  } catch (e) {
-    console.log("Erreur in deleteContact", e);
-    capture(e);
-  }
+  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+  return await api(`/contacts/${identifier}`, { method: "DELETE" });
 }
 
 /**
@@ -165,15 +158,8 @@ async function deleteContact(id) {
  * @returns {Promise<void>}
  */
 async function getContact(id) {
-  try {
-    const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
-    const res = await api(`/contacts/${identifier}`, { method: "GET" });
-    if (res.code !== "success") throw new Error(res.message);
-    return;
-  } catch (e) {
-    console.log("Erreur in getContact", e);
-    capture(e);
-  }
+  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+  return await api(`/contacts/${identifier}`, { method: "GET" });
 }
 
 /**
@@ -188,25 +174,20 @@ async function getContact(id) {
  * @returns {Promise<void>}
  */
 async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted, listIds, unlinkListIds, smtpBlacklistSender } = {}) {
-  try {
-    const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
 
-    const body = {
-      attributes,
-      emailBlacklisted,
-      smsBlacklisted,
-      listIds,
-      unlinkListIds,
-      smtpBlacklistSender,
-    };
+  const body = {
+    attributes,
+    emailBlacklisted,
+    smsBlacklisted,
+    listIds,
+    unlinkListIds,
+    smtpBlacklistSender,
+  };
 
-    const res = await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
-    if (res && res.code) return false;
-    return true;
-  } catch (e) {
-    console.log("Erreur in updateContact", e);
-    capture(e);
-  }
+  const res = await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
+  if (res && res.code) return false;
+  return true;
 }
 
 async function sync(obj, type, { force } = { force: false }) {
@@ -264,22 +245,19 @@ async function sync(obj, type, { force } = { force: false }) {
 }
 
 async function syncContact(email, attributes, listIds) {
-  const res = api.getContact(email);
-  if (res && res.code === "not_found") {
-    const res = await createContact({ email, attributes, listIds });
-    if (!res.ok) {
-      const error = await res.text();
-      return capture(error);
+  try {
+    const res = api.getContact(email);
+    if (res && res.status === 404) {
+      const res = await createContact({ email, attributes, listIds });
+      if (!res.ok) throw new Error(await res.text());
     }
-  }
-  if (res && res.code === "success") {
-    const res = await updateContact(email, { attributes, listIds });
-    const error = await res.text();
-    return capture(error);
-  }
-  if (!res.ok) {
-    const error = await res.text();
-    return capture(error);
+    if (res && res.status === 200) {
+      const res = await updateContact(email, { attributes, listIds });
+      if (!res.ok) throw new Error(await res.text());
+    }
+    if (!res.ok) throw new Error(await res.text());
+  } catch (e) {
+    capture(e);
   }
 }
 
