@@ -208,7 +208,7 @@ export default function Youngs({ mission, applications, updateMission }) {
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
         <MissionView mission={mission} tab="youngs">
-          <div className="flex flex-1 mx-8">
+          <div className="flex flex-1">
             <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
             <TabItem
               count={countPending}
@@ -226,7 +226,7 @@ export default function Youngs({ mission, applications, updateMission }) {
             <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
           </div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div className={`relative items-start mx-8 mb-4`}>
+            <div className={`relative items-start mb-4`}>
               <div className="flex-1 flex-column bg-white flex-wrap rounded-b-lg rounded-tr-lg">
                 <div className="flex flex-row pt-4 justify-between items-center px-8">
                   <div className="flex flex-row">
