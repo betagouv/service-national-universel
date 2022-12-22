@@ -1,3 +1,10 @@
+## [1.190.1](https://github.com/betagouv/service-national-universel/compare/v1.190.0...v1.190.1) (2022-12-22)
+
+
+### Bug Fixes
+
+* **app:** home jeune refusé [#2159](https://github.com/betagouv/service-national-universel/issues/2159) ([932f125](https://github.com/betagouv/service-national-universel/commit/932f12505afa3df2432ef1a03cab2ba680a68f35))
+
 # [1.190.0](https://github.com/betagouv/service-national-universel/compare/v1.189.0...v1.190.0) (2022-12-21)
 
 
