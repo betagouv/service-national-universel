@@ -646,23 +646,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       <div
                         onClick={() => editing && setValues({ ...values, hebergementPayant: "false" })}
                         className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
-                        <input
-                          type="checkbox"
-                          className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
-                          id={"hebergement-gratuit"}
-                          checked={values?.hebergementPayant === "false"}
-                        />
+                        <CheckBox value={values?.hebergementPayant === "false"} />
                         <div className="text-gray-700 font-medium">Hébergement gratuit</div>
                       </div>
                       <div
                         onClick={() => editing && setValues({ ...values, hebergementPayant: "true" })}
                         className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
-                        <input
-                          type="checkbox"
-                          className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
-                          id={"hebergement-gratuit"}
-                          checked={values.hebergementPayant === "true"}
-                        />
+                        <CheckBox value={values.hebergementPayant === "true"} />
                         <div className="text-gray-700 font-medium">Hébergement payant</div>
                       </div>
                     </div>
@@ -840,5 +830,22 @@ const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti 
       value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
       isMulti={isMulti}
     />
+  );
+};
+
+const CheckBox = ({ value }) => {
+  return (
+    <>
+      {value ? (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="16" height="16" rx="8" fill="#2563EB" />
+          <circle cx="8" cy="8" r="3" fill="white" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="16" height="16" rx="8" fill="#E5E7EB" />
+        </svg>
+      )}
+    </>
   );
 };
