@@ -609,7 +609,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const emailsTo = [];
     if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_YOUNG_COHORT_CHANGE, {
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
       emailTo: emailsTo,
       params: {
         cohort,
