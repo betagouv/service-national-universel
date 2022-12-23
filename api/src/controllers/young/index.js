@@ -615,6 +615,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         cohort,
         youngFirstName: young.firstName,
         youngName: young.lastName,
+        cta: `${config.APP_URL}/change-cohort`,
       },
     });
 

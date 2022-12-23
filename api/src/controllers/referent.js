@@ -530,6 +530,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohort,
         youngFirstName: young.firstName,
         youngName: young.lastName,
+        cta: `${config.APP_URL}/change-cohort`,
       },
     });
 
