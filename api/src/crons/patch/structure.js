@@ -1,12 +1,12 @@
 require("../../mongo");
 
 const { ObjectId } = require("mongodb");
-const mongoose = require("mongoose");
 const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const StructureModel = require("../../models/structure");
+const StructurePatchModel = require("./models/structurePatch");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
@@ -98,8 +98,7 @@ exports.handler = async () => {
   try {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
-    const structure_patches = mongoose.model("structure_patches", new mongoose.Schema({}, { collection: "structure_patches" }));
-    await findAll(structure_patches, mongooseFilterForDayBefore(), processPatch);
+    await findAll(StructurePatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
       title: "✅ Structure Logs",
       text: `${result.structurePatchScanned} structure patches were scanned:\n ${printResult(result.event)}`,
