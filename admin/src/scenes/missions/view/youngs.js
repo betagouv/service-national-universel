@@ -217,8 +217,7 @@ export default function Youngs({ mission, applications, updateMission }) {
       value: "true",
       onSubmit: async () => {
         try {
-          const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
-            value: "true",
+          const { ok, code } = await api.post(`/application/multiaction/change-status/${status}`, {
             ids: youngSelected.map((y) => y._id),
           });
           if (!ok) {
