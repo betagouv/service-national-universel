@@ -139,6 +139,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
     updateMission(valuesToUpdate);
   };
 
+  useEffect(() => {
+    if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
+      setValues({ ...values, subPeriod: [] });
+    }
+  }, [values.period]);
+
   const onSubmitBottom = () => {
     setLoadingBottom(true);
     const error = {};
@@ -390,7 +396,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un ou plusieurs domaines"}
                     onChange={(e) => {
-                      setValues({ ...values, domains: e.value });
+                      setValues({ ...values, domains: e });
                     }}
                     value={[...values.domains]}
                   />
@@ -766,7 +772,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     isMulti
                     options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
                     placeholder={"Sélectionnez une ou plusieurs périodes"}
-                    onChange={(e) => setValues({ ...values, period: e.value })}
+                    onChange={(e) => setValues({ ...values, period: e })}
                     value={values.period}
                   />
                   {(editingBottom || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
@@ -782,7 +788,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                           return options.map((el) => ({ value: el, label: translate(el) }));
                         })()}
                         placeholder={"Sélectionnez une ou plusieurs périodes"}
-                        onChange={(e) => setValues({ ...values, subPeriod: e.value })}
+                        onChange={(e) => setValues({ ...values, subPeriod: e })}
                         value={values.subPeriod}
                       />
                     </div>
