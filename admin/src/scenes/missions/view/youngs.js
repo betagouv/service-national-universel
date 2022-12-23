@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { useHistory, NavLink } from "react-router-dom";
-import styled from "styled-components";
+import { NavLink } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-import { BsDownload } from "react-icons/bs";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
 import { apiURL } from "../../../config";
@@ -22,6 +20,7 @@ import {
   ES_NO_LIMIT,
   ROLES,
   translateApplication,
+  APPLICATION_STATUS,
 } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { DepartmentFilter } from "../../../components/filters";
@@ -33,7 +32,6 @@ import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import ModalExport from "../../../components/modals/ModalExport";
 import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
-import SpeakerPhone from "../../../assets/icons/SpeakerPhone";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
@@ -50,7 +48,6 @@ export default function Youngs({ mission, applications, updateMission }) {
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
-
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -75,6 +72,7 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
+    console.log(data._id);
     if (ok) setYoung(data);
   };
   const getDefaultQuery = () => {
@@ -248,51 +246,51 @@ export default function Youngs({ mission, applications, updateMission }) {
       items: [
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.WAITING_ACCEPTATION);
           },
           render: RenderText("Proposition en attente"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.WAITING_VALIDATION);
           },
           render: RenderText("Candidature en attente"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.CANCEL);
           },
           render: RenderText("Candidature annulée"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.VALIDATED);
           },
           render: RenderText("Candidature approuvée"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.REFUSED);
           },
           render: RenderText("Candidature non retenue"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.IN_PROGRESS);
           },
-          render: RenderText("Candidature en cours"),
+          render: RenderText("Mission en cours"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.ABANDON);
           },
-          render: RenderText("Candidature abandonnée"),
+          render: RenderText("Mission abandonnée"),
         },
         {
           action: async () => {
-            updateApplicationStatus();
+            updateApplicationStatus(APPLICATION_STATUS.DONE);
           },
-          render: RenderText("Candidature effectuée"),
+          render: RenderText("Mission effectuée"),
         },
       ],
     },
@@ -418,6 +416,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                               hit={hit}
                               currentTab={currentTab}
                               onClick={() => handleClick(hit)}
+                              opened={young?._id === hit.youngId}
                               selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                               onChangeApplication={updateMission}
                               onSelect={(newItem) =>
@@ -450,32 +449,34 @@ export default function Youngs({ mission, applications, updateMission }) {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab, opened }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
+  const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "";
+  const mainTextColor = selected ? "text-white" : "text-[#242526]";
   return (
-    <tr className={"hover:!bg-gray-100"} onClick={onClick}>
-      <td className={`pl-4 ml-2 rounded-l-lg`}>
+    <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
+      <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
         <div onClick={(e) => e.stopPropagation()}>
           <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(hit)} />
         </div>
       </td>
-      <td>
+      <td className={`${bgColor} ${mainTextColor}`}>
         <MultiLine>
-          <span className="font-bold text-black">{`${hit.youngFirstName} ${hit.youngLastName}`}</span>
-          <p>
+          <span className={`font-bold ${mainTextColor} text-black`}>{`${hit.youngFirstName} ${hit.youngLastName}`}</span>
+          <p className={`${mainTextColor}`}>
             {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
           </p>
         </MultiLine>
       </td>
-      <td>
-        <div className="font-normal text-xs">{formatDateFRTimezoneUTC(hit.createdAt)}</div>
+      <td className={`${bgColor}`}>
+        <div className={`font-normal text-xs ${mainTextColor}`}>{formatDateFRTimezoneUTC(hit.createdAt)}</div>
       </td>
       {currentTab !== "pending" && (
         <>
-          <td>
+          <td className={`${bgColor}`}>
             <div>{BadgeContract(hit.contractStatus, hit.status)}</div>
           </td>
-          <td>
+          <td className={`${bgColor}`}>
             {numberOfFiles > 0 && (
               <div className="flex flex-row justify-center items-center">
                 {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
@@ -487,10 +488,10 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
         </>
       )}
 
-      <td onClick={(e) => e.stopPropagation()}>
+      <td className={`${bgColor}`} onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
-      <td>
+      <td className={`${bgColor} rounded-r-lg mr-2`}>
         <NavLink
           to={`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`}
           className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
