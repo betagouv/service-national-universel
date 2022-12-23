@@ -1,22 +1,21 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { useHistory } from "react-router-dom";
+import { Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import { translate, ROLES, MISSION_STATUS } from "../../../utils";
-import TabList from "../../../components/views/TabList";
-import Tab from "../../../components/views/Tab";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import Badge from "../../../components/Badge";
-import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 
-export default function Wrapper({ mission, tab, children }) {
+import Bin from "../../../assets/Bin";
+import Duplicate from "../../../assets/Duplicate";
+import Clock from "../../../assets/Clock";
+
+export default function Wrapper({ mission, tab, children, getMission }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -57,76 +56,89 @@ export default function Wrapper({ mission, tab, children }) {
 
   if (!mission) return null;
   return (
-    <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
-      <Header>
-        <div style={{ flex: 1 }}>
-          <Title>
+    <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
+      <div className=" flex flex-wrap-reverse flex-row border-b border-gray-200 my-7 px-8 gap-4 justify-between">
+        <div className="flex flex-col justify-end">
+          <div className="text-2xl font-bold mb-7 ">
             {mission.name} {mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
-          </Title>
-          <TabList>
-            <Tab isActive={tab === "details"} onClick={() => history.push(`/mission/${mission._id}`)}>
+          </div>
+          <div className="flex flex-row gap-8">
+            <div
+              className={`cursor-pointer text-gray-400 text-sm ${tab === "details" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
+              onClick={() => history.push(`/mission/${mission._id}`)}>
               Détails
-            </Tab>
-            <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
-              <div className="flex items-center flex-nowrap">
-                {mission.pendingApplications >= mission.placesLeft * 5 && mission.placesLeft > 0 && <ExclamationCircle className="text-red-600 mr-2" />}
-                <span>Candidatures</span>
-              </div>
-            </Tab>
+            </div>
+            <div
+              className={`flex flex-row items-center gap-2 cursor-pointer text-gray-400 text-sm pb-4 ${tab === "youngs" && "text-blue-600 border-b-2 border-blue-600"}`}
+              onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+              {mission.pendingApplications >= mission.placesLeft * 5 ? (
+                <ExclamationCircle className="text-white" fill="red" />
+              ) : mission.pendingApplications > 1 ? (
+                <ExclamationCircle className="text-white" fill="orange" />
+              ) : null}
+              <div>Candidatures</div>
+            </div>
+
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 || mission.placesLeft < 1 ? (
-                <Tab isActive={tab === "propose-mission"} disabled>
+                <div className={`cursor-not-allowed text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`} disabled>
                   Proposer cette mission
-                </Tab>
+                </div>
               ) : (
-                <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
+                <div
+                  className={`cursor-pointer text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
+                  onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
                   Proposer cette mission
-                </Tab>
+                </div>
               )
             ) : null}
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
-              <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
-                Historique
-              </Tab>
+              <div
+                className={`cursor-pointer text-gray-400 text-sm ${tab === "historique" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
+                onClick={() => history.push(`/mission/${mission._id}/historique`)}>
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <Clock fill={tab === "historique" ? "#2563EB" : "#6B7280"} />
+                  Historique
+                </div>
+              </div>
             ) : null}
-          </TabList>
+          </div>
         </div>
-        <Row style={{ minWidth: "30%" }}>
-          <Col md={4}>
-            <BoxPlaces>
-              <table>
-                <tbody>
-                  <tr>
-                    <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{mission.placesLeft}</td>
-                    <td>
-                      <b>Places restantes</b>
-                      <br />
-                      <span style={{ color: "#999" }}>
-                        {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </BoxPlaces>
-          </Col>
-          <Col md={8}>
-            <Row>
-              <Col md={12} style={{ display: "flex", justifyContent: "flex-end", minHeight: "35px" }}>
-                <SelectStatusMission hit={mission} />
-              </Col>
-            </Row>
-            <Row style={{ marginTop: "0.5rem" }}>
-              <Link to={`/mission/${mission._id}/edit`}>
-                <PanelActionButton title="Modifier" icon="pencil" />
-              </Link>
-              <PanelActionButton onClick={onClickDuplicate} title="Dupliquer" icon="duplicate" />
-              <PanelActionButton onClick={onClickDelete} title="Supprimer" icon="bin" />
-            </Row>
-          </Col>
-        </Row>
-      </Header>
-      {children}
+        <div className="flex flex-row justify-center items-center gap-4">
+          <div className="flex flex-col text-right">
+            <div className="font-bold text-3xl">{mission.placesLeft}</div>
+            <div className="uppercase text-gray-500 text-xs">
+              {mission.placesLeft > 1 ? (
+                <>
+                  <div>places</div>
+                  <div>restantes</div>
+                </>
+              ) : (
+                <>
+                  <div>place</div>
+                  <div>restante</div>
+                </>
+              )}
+            </div>
+            <div className="flex flex-row justify-end">
+              <div className="text-gray-500">sur</div>
+              <div>&nbsp;{mission.placesTotal}</div>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <SelectStatusMission hit={mission} callback={getMission} />
+            <div className="flex items-center justify-between my-[15px]">
+              <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+                Supprimer
+              </Button>
+              <Button icon={<Duplicate fill="#6B7280" />} className="ml-[8px]" onClick={onClickDuplicate}>
+                Dupliquer
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mx-8">{children}</div>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -140,36 +152,28 @@ export default function Wrapper({ mission, tab, children }) {
     </div>
   );
 }
-
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  margin: 2rem 0 1rem 0;
-  align-items: flex-start;
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  border-radius: 8px;
-`;
-
-const BoxPlaces = styled(Box)`
-  padding: 0 1rem;
-  display: flex;
-  align-items: center;
-  h1 {
-    font-size: 3rem;
-    margin: 0;
+function Button({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel }) {
+  if (href) {
+    return (
+      <a
+        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        href={href}
+        target={target}
+        rel={rel}
+        onClick={onClick}>
+        {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
+        {children}
+      </a>
+    );
+  } else {
+    return (
+      <button
+        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        onClick={onClick}>
+        {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
+        {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
+        {children}
+      </button>
+    );
   }
-  p {
-    margin-left: 1rem;
-    font-size: 0.8rem;
-    color: black;
-    &.places {
-      color: #777;
-    }
-  }
-`;
+}
