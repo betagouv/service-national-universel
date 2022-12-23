@@ -1,3 +1,19 @@
+# [1.191.0](https://github.com/betagouv/service-national-universel/compare/v1.190.1...v1.191.0) (2022-12-23)
+
+
+### Bug Fixes
+
+* **admin:** fiche mission ([5a6d86a](https://github.com/betagouv/service-national-universel/commit/5a6d86a52a7a8805a9e476579d74ac706526e4fe))
+* **api:** move patch models to dedicated files (preventing multiple instances) ([1b69b0b](https://github.com/betagouv/service-national-universel/commit/1b69b0b556cdbd60ae7b340a0ddabcae306d6d36))
+* **api:** remove console.log ([71ca388](https://github.com/betagouv/service-national-universel/commit/71ca38877492ed7609692d71dc4ed4d42f6b29c9))
+
+
+### Features
+
+* **admin/api:** refonte visualition / edition Mission  ([#2150](https://github.com/betagouv/service-national-universel/issues/2150)) ([9135570](https://github.com/betagouv/service-national-universel/commit/91355706db0ccb5addf65465926b8e7888e6c04c))
+* **api:** Send mail change cohort ([#2163](https://github.com/betagouv/service-national-universel/issues/2163)) ([fe5b2fc](https://github.com/betagouv/service-national-universel/commit/fe5b2fc1367998b5138ee48b2db355d086810edb))
+* **lib:** Update inscription rate to 170% ([a9a4350](https://github.com/betagouv/service-national-universel/commit/a9a4350e2f0fc0ab84211b07dff261633dd49089))
+
 ## [1.190.1](https://github.com/betagouv/service-national-universel/compare/v1.190.0...v1.190.1) (2022-12-22)
 
 
