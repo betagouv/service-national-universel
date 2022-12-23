@@ -32,6 +32,7 @@ import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import ModalExport from "../../../components/modals/ModalExport";
 import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
@@ -47,7 +48,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const countAll = applications?.length;
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
-  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+  const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -208,13 +209,14 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   const updateApplicationStatus = (status) => {
     if (youngSelected.length === 0) return;
-
-    setModalPointagePresenceArrivee({
+    const isPlural = youngSelected.length > 1;
+    setModalMultiAction({
       isOpen: true,
-      values: youngSelected,
-      value: "true",
+      title: "Actions",
+      message: `Vous êtes sur le point de changer le statut des candidatures de ${youngSelected?.length} volontaire${isPlural ? "s" : ""}. Un email sera automatiquement envoyé.`,
       onSubmit: async () => {
         try {
+          console.log(status);
           const { ok, code } = await api.post(`/application/multiaction/change-status/${status}`, {
             ids: youngSelected.map((y) => y._id),
           });
@@ -300,6 +302,16 @@ export default function Youngs({ mission, applications, updateMission }) {
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
         <MissionView mission={mission} tab="youngs">
+          <ModalConfirm
+            isOpen={modalMultiAction?.isOpen}
+            title={modalMultiAction?.title}
+            message={modalMultiAction?.message}
+            onCancel={() => setModalMultiAction({ isOpen: false, onConfirm: null })}
+            onConfirm={() => {
+              modalMultiAction?.onSubmit();
+              setModalMultiAction({ isOpen: false, onConfirm: null });
+            }}
+          />
           <div className="flex flex-1">
             <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
             <TabItem

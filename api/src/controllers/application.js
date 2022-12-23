@@ -173,7 +173,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-router.post("/multiaction/change-status/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/multiaction/change-status/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"];
     const { error, value } = Joi.object({
