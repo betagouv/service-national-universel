@@ -461,6 +461,19 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session || session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
+    const emailsTo = [];
+    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    await sendTemplate(template, {
+      emailTo: emailsTo,
+      params: {
+        cohort: value.cohort,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+
     young.set(value);
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
