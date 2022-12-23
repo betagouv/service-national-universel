@@ -49,6 +49,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
+  const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -235,7 +236,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   };
   const RenderText = (text) => {
     return (
-      <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+      <div key={text} className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
         <div className="font-normal">
           Marquer en <span className="font-bold">{text}</span>
           {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
@@ -245,58 +246,74 @@ export default function Youngs({ mission, applications, updateMission }) {
   };
   const optionsActions = [
     {
-      items: [
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.WAITING_ACCEPTATION);
-          },
-          render: RenderText("Proposition en attente"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.WAITING_VALIDATION);
-          },
-          render: RenderText("Candidature en attente"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.CANCEL);
-          },
-          render: RenderText("Candidature annulée"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.VALIDATED);
-          },
-          render: RenderText("Candidature approuvée"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.REFUSED);
-          },
-          render: RenderText("Candidature non retenue"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.IN_PROGRESS);
-          },
-          render: RenderText("Mission en cours"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.ABANDON);
-          },
-          render: RenderText("Mission abandonnée"),
-        },
-        {
-          action: async () => {
-            updateApplicationStatus(APPLICATION_STATUS.DONE);
-          },
-          render: RenderText("Mission effectuée"),
-        },
-      ],
+      id: APPLICATION_STATUS.WAITING_ACCEPTATION,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.WAITING_ACCEPTATION);
+      },
+      render: RenderText("Proposition en attente"),
+    },
+    {
+      id: APPLICATION_STATUS.WAITING_VALIDATION,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.WAITING_VALIDATION);
+      },
+      render: RenderText("Candidature en attente"),
+    },
+    {
+      id: APPLICATION_STATUS.CANCEL,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.CANCEL);
+      },
+      render: RenderText("Candidature annulée"),
+    },
+    {
+      id: APPLICATION_STATUS.VALIDATED,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.VALIDATED);
+      },
+      render: RenderText("Candidature approuvée"),
+    },
+    {
+      id: APPLICATION_STATUS.REFUSED,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.REFUSED);
+      },
+      render: RenderText("Candidature non retenue"),
+    },
+    {
+      id: APPLICATION_STATUS.IN_PROGRESS,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.IN_PROGRESS);
+      },
+      render: RenderText("Mission en cours"),
+    },
+    {
+      id: APPLICATION_STATUS.ABANDON,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.ABANDON);
+      },
+      render: RenderText("Mission abandonnée"),
+    },
+    {
+      id: APPLICATION_STATUS.DONE,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.DONE);
+      },
+      render: RenderText("Mission effectuée"),
     },
   ];
+  useEffect(() => {
+    if (currentTab === "all") return;
+    filteredRoleActions();
+  }, [currentTab]);
+  const filteredRoleActions = () => {
+    if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      return setOptionsFilteredRole(optionsActions);
+    } else {
+      if (currentTab === "pending") return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id)));
+      else return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id)));
+    }
+  };
   if (!applications) return <Loader />;
   return (
     <div>
@@ -350,7 +367,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                     <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                   </div>
                   {currentTab !== "all" ? (
-                    <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={optionsActions} />
+                    <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
                   ) : (
                     <button
                       className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
