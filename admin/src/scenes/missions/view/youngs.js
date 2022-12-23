@@ -393,9 +393,12 @@ export default function Youngs({ mission, applications, updateMission }) {
                       <Table>
                         <thead>
                           <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2 text-start">
-                            <th className="w-1/12">
-                              <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
-                            </th>
+                            {currentTab !== "all" && (
+                              <th className="w-1/12">
+                                <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
+                              </th>
+                            )}
+
                             <th className="w-3/12">Volontaire</th>
                             <th className="w-2/12">A candidaté le</th>
                             {currentTab !== "pending" && (
@@ -455,11 +458,14 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
   return (
     <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
-      <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
-        <div onClick={(e) => e.stopPropagation()}>
-          <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(hit)} />
-        </div>
-      </td>
+      {currentTab !== "all" && (
+        <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(hit)} />
+          </div>
+        </td>
+      )}
+
       <td className={`${bgColor} ${mainTextColor}`}>
         <MultiLine>
           <span className={`font-bold ${mainTextColor} text-black`}>{`${hit.youngFirstName} ${hit.youngLastName}`}</span>
