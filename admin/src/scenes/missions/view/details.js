@@ -45,7 +45,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
-  const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
+  const thresholdPendingReached = mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5;
   const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
   const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor"];
 
