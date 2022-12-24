@@ -1,3 +1,12 @@
+## [1.191.1](https://github.com/betagouv/service-national-universel/compare/v1.191.0...v1.191.1) (2022-12-24)
+
+
+### Bug Fixes
+
+* **admin:** Cast to ObjectId failed for value "" ([8eb6cc2](https://github.com/betagouv/service-national-universel/commit/8eb6cc2d6da0f467aeea106f151d933a26a7dbba))
+* **admin:** pendingApplication Status ([4840792](https://github.com/betagouv/service-national-universel/commit/4840792240b813f466dda31342c293a29d4dc427))
+* **admin:** permission edition fiche mission ([fbb1864](https://github.com/betagouv/service-national-universel/commit/fbb1864515dccb082b5856ae1b2c422c1d273373))
+
 # [1.191.0](https://github.com/betagouv/service-national-universel/compare/v1.190.1...v1.191.0) (2022-12-23)
 
 
