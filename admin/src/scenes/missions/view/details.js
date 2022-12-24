@@ -343,7 +343,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={{ label: values.structureName }}
                     loadOptions={fetchStructures}
                     isDisabled={!editing}
-                    noOptionsMessage={"Aucune structure ne correspond à cette recherche"}
+                    noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
                     styles={{
                       dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       placeholder: (styles) => ({ ...styles, color: "black" }),
