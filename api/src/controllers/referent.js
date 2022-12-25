@@ -524,15 +524,17 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const emailsTo = [];
     if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
-      emailTo: emailsTo,
-      params: {
-        cohort,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-        cta: `${config.APP_URL}/change-cohort`,
-      },
-    });
+    if (emailsTo.length !== 0) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
+        emailTo: emailsTo,
+        params: {
+          cohort,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+          cta: `${config.APP_URL}/change-cohort`,
+        },
+      });
+    }
 
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
     await sendTemplate(template, {
