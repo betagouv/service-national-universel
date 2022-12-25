@@ -1,3 +1,10 @@
+## [1.191.2](https://github.com/betagouv/service-national-universel/compare/v1.191.1...v1.191.2) (2022-12-25)
+
+
+### Bug Fixes
+
+* **api:** Do not send if no parents allow SNU ([c2d82b2](https://github.com/betagouv/service-national-universel/commit/c2d82b2177b8384986017c9256ae1fa8fab4e346))
+
 ## [1.191.1](https://github.com/betagouv/service-national-universel/compare/v1.191.0...v1.191.1) (2022-12-24)
 
 
