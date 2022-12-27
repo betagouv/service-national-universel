@@ -1,3 +1,10 @@
+## [1.191.3](https://github.com/betagouv/service-national-universel/compare/v1.191.2...v1.191.3) (2022-12-27)
+
+
+### Bug Fixes
+
+* **admin:** mission visibility ([fa32e77](https://github.com/betagouv/service-national-universel/commit/fa32e775ce6377732e5c21c7ae1ce639194d0b39))
+
 ## [1.191.2](https://github.com/betagouv/service-national-universel/compare/v1.191.1...v1.191.2) (2022-12-25)
 
 
