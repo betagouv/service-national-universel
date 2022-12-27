@@ -152,3 +152,4 @@ const OBJ = mongoose.model(MODELNAME, Schema);
 if (ENVIRONMENT === "production") OBJ.syncIndexes();
 
 module.exports = OBJ;
+module.exports.Schema = Schema;

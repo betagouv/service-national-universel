@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
@@ -220,7 +221,7 @@ router.post("/test_route", async (req, res) => {
       {
         $lookup: {
           from: "pointderassemblements",
-          as: "pointderassemblements",
+          as: "pointDeRassemblements",
           let: {
             arrayOfMeetingPointsObjectIds: {
               $map: {
@@ -262,6 +263,24 @@ router.post("/test_route", async (req, res) => {
         $unwind: "$center",
       },
       {
+        $addFields: {
+          sessionObjectId: {
+            $toObjectId: "$sessionId",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "sessionphase1",
+          localField: "sessionObjectId",
+          foreignField: "_id",
+          as: "session",
+        },
+      },
+      {
+        $unwind: "$session",
+      },
+      {
         $lookup: {
           from: "youngs",
           let: {
@@ -287,7 +306,7 @@ router.post("/test_route", async (req, res) => {
       },
       {
         $addFields: {
-          youngsBusCount: {
+          youngCount: {
             $size: "$youngsBus",
           },
         },
@@ -303,11 +322,17 @@ router.post("/test_route", async (req, res) => {
           pipeline: [
             {
               $match: {
-                lineId: "$id",
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$lineId", "$$id"],
+                    },
+                  ],
+                },
               },
             },
           ],
-          as: "modificationbuses",
+          as: "modificationBuses",
         },
       },
       {
@@ -319,6 +344,9 @@ router.post("/test_route", async (req, res) => {
     );
 
     const data = await LigneBusModel.aggregate(pipeline).exec();
+
+    // * Create data into PlanTransport
+    await PlanTransportModel.create(data);
 
     // --- résultat
     return res.status(200).send({ ok: true, data: data });

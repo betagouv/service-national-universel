@@ -133,3 +133,4 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.Schema = Schema;
