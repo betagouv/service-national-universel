@@ -36,21 +36,6 @@ export default function List() {
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
-  const endpoint = {
-    url: `${apiURL}/ligne-de-bus/test_route`,
-    headers: { Authorization: `JWT ${api.getToken()}` },
-    method: "POST",
-    body: {},
-  };
-  console.log("🚀 ~ file: List.js:45 ~ endpoint", endpoint);
-
-  const searchCriteria = {
-    dataField: "title", // Field to search in
-    size: 10, // Number of items to display
-    sortBy: "asc", // Sort order
-    className: "list-container", // CSS class for list container
-  };
-
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport" }]} />
@@ -59,22 +44,8 @@ export default function List() {
           <Title>Plan de transport</Title>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
-        {/* <ReactiveBase url={`${apiURL}/planDeTransport/ligne-de-bus`} app="test_route" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
-        <ReactiveBase enableAppbase endpoint={endpoint}>
-          <ReactiveList
-            componentId="list"
-            // data={items}
-            {...searchCriteria}
-            render={({ data }) => (
-              <ul>
-                {data.map((item) => (
-                  <li key={item._id}>{item.title}</li>
-                ))}
-              </ul>
-            )}
-          />
-        </ReactiveBase>
-        {/* <ReactiveBase enableAppbase endpoint={endpoint}>
+
+        <ReactiveBase url={`${apiURL}/es`} app="plandetransport" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <div className="flex flex-1">
             <TabItem icon={<BsArrowRight />} title="Aller" onClick={() => setCurrentTab("aller")} active={currentTab === "aller"} />
             <TabItem icon={<BsArrowLeft />} title="Retour" onClick={() => setCurrentTab("retour")} active={currentTab === "retour"} />
@@ -135,10 +106,10 @@ export default function List() {
             </div>
             <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
               {/* Filter */}
-        {/* Sur la ligne - N° de ligne - Date du transport aller/retour - Taux de remplissage (100%-0%, le reste) Sur les points de rassemblement : - Région - Département -
+              {/* Sur la ligne - N° de ligne - Date du transport aller/retour - Taux de remplissage (100%-0%, le reste) Sur les points de rassemblement : - Région - Département -
               Commune (pour REF REG et DEP) - Nom Sur le centre : - Région - Département - Nom - Code Sur les demandes de modifications : - Demande de modification oui/non - Statut
               de la demande de modification (à instruire/validée/refusée) - Avis (favorable/défavorable) (pour MOD ONLY) */}
-        {/* <MultiDropdownList
+              {/* <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
                 placeholder="Séjours"
@@ -183,12 +154,11 @@ export default function List() {
                 size={1000}
                 // defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
               />
-              <DeleteFilters />
+              <DeleteFilters />*/}
             </div>
             <div className="reactive-result">
               <ReactiveListComponent
                 pageSize={10}
-                // ! Vérfier que l'on fait la query que pour 10 car on enchaine avec une query mongo
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
                 paginationAt="bottom"
@@ -211,15 +181,15 @@ export default function List() {
                 )}
               />
             </div>
-          </div> */}
-        {/* </ReactiveBase> */}
+          </div>
+        </ReactiveBase>
       </div>
     </>
   );
 }
 
 const Line = ({ hit }) => {
-  console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit.hit);
+  console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit);
   return (
     <>
       <hr />
@@ -233,13 +203,13 @@ const Line = ({ hit }) => {
         <div className="w-[30%]">
           {/* // Meeting points list */}
           <div className="flex gap-2">
-            {hit.meetingPointsIds.map((meetingPoint) => {
-              return <div className="text-sm font-medium">{meetingPoint}</div>;
+            {hit.pointDeRassemblements.map((meetingPoint) => {
+              return <div className="text-sm font-medium">{meetingPoint.department}</div>;
             })}
           </div>
         </div>
         <div className="w-[15%]">
-          <div className="flex gap-2">{hit.centerId}</div>
+          <div className="flex gap-2">{hit.center}</div>
         </div>
         <div className="w-[10%]">Cercle avec pourcentage</div>
         <div className="w-[5%]"></div>
