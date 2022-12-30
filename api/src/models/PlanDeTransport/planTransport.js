@@ -104,19 +104,51 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  session: {
-    type: SessionPhase1Schema,
+  // session: {
+  //   type: SessionPhase1Schema,
+  //   required: true,
+  //   documentation: {
+  //     description: "Session",
+  //   },
+  // },
+
+  centerId: {
+    type: String,
     required: true,
     documentation: {
-      description: "Session",
+      description: "ID du centre",
     },
   },
 
-  center: {
-    type: CohesionCenterSchema,
+  centerRegion: {
+    type: String,
     required: true,
     documentation: {
-      description: "Centre de destination",
+      description: "Region du centre",
+    },
+  },
+
+  centerDepartment: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Region du centre",
+    },
+  },
+
+  centerName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Region du centre",
+    },
+  },
+
+  centerCode: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Region du centre",
     },
   },
 

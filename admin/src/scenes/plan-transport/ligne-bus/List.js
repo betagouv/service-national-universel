@@ -4,6 +4,7 @@ import { TabItem, Title } from "../components/commons";
 import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
+import { FilterRow } from "../../../components/list";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
@@ -14,7 +15,24 @@ import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH"];
+const FILTERS = [
+  "SEARCH",
+  "LINE_NUMBER",
+  "DATE_ALLER",
+  "DATE_RETOUR",
+  "TAUX_REMPLISSAGE",
+  "REGION_PDR",
+  "DEPARTMENT_PDR",
+  "CITY_PDR",
+  "NAME_PDR",
+  "REGION_CENTER",
+  "DEPARTMENT_CENTER",
+  "NAME_CENTER",
+  "CODE_CENTER",
+  "MODIFICATION_ASKED",
+  "MODIFICATION_STATUS",
+  "MODIFICATION_OPINION",
+];
 
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
@@ -87,9 +105,9 @@ export default function List() {
                 <ExportComponent
                   title="Exporter"
                   defaultQuery={getExportQuery}
-                  exportTitle="Session"
+                  exportTitle="Plan de transport"
                   icon={<BsDownload className="text-gray-400" />}
-                  index="sessionphase1"
+                  index="plandetransport"
                   react={{ and: FILTERS }}
                   css={{
                     override: true,
@@ -105,56 +123,137 @@ export default function List() {
               </div>
             </div>
             <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
-              {/* Filter */}
-              {/* Sur la ligne - N° de ligne - Date du transport aller/retour - Taux de remplissage (100%-0%, le reste) Sur les points de rassemblement : - Région - Département -
-              Commune (pour REF REG et DEP) - Nom Sur le centre : - Région - Département - Nom - Code Sur les demandes de modifications : - Demande de modification oui/non - Statut
-              de la demande de modification (à instruire/validée/refusée) - Avis (favorable/défavorable) (pour MOD ONLY) */}
-              {/* <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Séjours"
-                componentId="COHORT"
-                dataField="cohorts.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                size={1000}
-                // defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
-              />
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Region"
-                componentId="REGION"
-                dataField="region.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                size={1000}
-                // defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-              />
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Département"
-                componentId="DEPARTMENT"
-                dataField="department.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                title=""
-                URLParams={true}
-                sortBy="asc"
-                showSearch={true}
-                searchPlaceholder="Rechercher..."
-                size={1000}
-                // defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
-              />
-              <DeleteFilters />*/}
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Ligne</div>
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Numéro de la ligne"
+                  componentId="LINE_NUMBER"
+                  dataField="busId.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Date aller"
+                  componentId="DATE_ALLER"
+                  dataField="departuredDate.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DATE_ALLER") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Date retour"
+                  componentId="DATE_RETOUR"
+                  dataField="returnDate.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DATE_RETOUR") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Taux de remplissage"
+                  componentId="TAUX_REMPLISSAGE"
+                  dataField="tauxDeRemplissage.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Points de rassemblement</div>
+                {/* Faire des test de filtres sur array de PDR
+                // "REGION_PDR", "DEPARTMENT_PDR", "CITY_PDR", "NAME_PDR"
+                */}
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Centre</div>
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Nom du centre"
+                  componentId="NAME_CENTER"
+                  dataField="centerName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "NAME_CENTER") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Région du centre"
+                  componentId="REGION_CENTER"
+                  dataField="centerRegion.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "REGION_CENTER") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Département du centre"
+                  componentId="DEPARTMENT_CENTER"
+                  dataField="centerDepartment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT_CENTER") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Département du centre"
+                  componentId="CODE_CENTER"
+                  dataField="centerCode.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CODE_CENTER") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Modifications de status</div>
+                {/* Faire des test de filtres sur array de modifications
+                // "MODIFICATION_ASKED", "MODIFICATION_STATUS", "MODIFICATION_OPINION"
+                */}
+              </FilterRow>
+              <DeleteFilters />
             </div>
             <div className="reactive-result">
               <ReactiveListComponent

@@ -169,7 +169,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.post("/test_route", async (req, res) => {
+router.post("/create_plan_de_transport", async (req, res) => {
   try {
     const { error: errorQuery, value: valueQuery } = Joi.object({
       offset: Joi.number().default(0),
@@ -194,6 +194,8 @@ router.post("/test_route", async (req, res) => {
       const regex = new RegExp(".*" + search + ".*", "gi");
       pipeline.push({ $match: { busId: regex } });
     }
+
+    // ! Ajouter la suppression de l'index ES + de la collection MONGO DB
 
     //Sur la ligne
     // - N° de ligne
@@ -264,21 +266,12 @@ router.post("/test_route", async (req, res) => {
       },
       {
         $addFields: {
-          sessionObjectId: {
-            $toObjectId: "$sessionId",
-          },
+          centerId: "$center._id",
+          centerName: "$center.name",
+          centerRegion: "$center.region",
+          centerDepartment: "$center.department",
+          centerCode: "$center.code",
         },
-      },
-      {
-        $lookup: {
-          from: "sessionphase1",
-          localField: "sessionObjectId",
-          foreignField: "_id",
-          as: "session",
-        },
-      },
-      {
-        $unwind: "$session",
       },
       {
         $lookup: {
@@ -335,6 +328,7 @@ router.post("/test_route", async (req, res) => {
           as: "modificationBuses",
         },
       },
+      // ! Ajouter le calcul du taux de remplissage
       {
         $skip: offset,
       },
