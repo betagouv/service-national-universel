@@ -195,6 +195,8 @@ router.post("/create_plan_de_transport", async (req, res) => {
       pipeline.push({ $match: { busId: regex } });
     }
 
+    await PlanTransportModel.deleteMany({});
+
     // ! Ajouter la suppression de l'index ES + de la collection MONGO DB
 
     //Sur la ligne
@@ -270,7 +272,7 @@ router.post("/create_plan_de_transport", async (req, res) => {
           centerName: "$center.name",
           centerRegion: "$center.region",
           centerDepartment: "$center.department",
-          centerCode: "$center.code",
+          centerCode: "$center.code2022",
         },
       },
       {
@@ -338,6 +340,14 @@ router.post("/create_plan_de_transport", async (req, res) => {
     );
 
     const data = await LigneBusModel.aggregate(pipeline).exec();
+    console.log("🚀 ~ file: ligne-de-bus.js:343 ~ router.post ~ data", data);
+
+    // data.map((d) => {
+    //   if (!d.centerCode) {
+    //     console.log(d);
+    //     throw new Error("Nope");
+    //   }
+    // });
 
     // * Create data into PlanTransport
     await PlanTransportModel.create(data);

@@ -146,7 +146,7 @@ const Schema = new mongoose.Schema({
 
   centerCode: {
     type: String,
-    required: true,
+    // required: true,
     documentation: {
       description: "Region du centre",
     },

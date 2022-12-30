@@ -3,7 +3,8 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import { TabItem, Title } from "../components/commons";
 import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
-import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
+import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveList, DateRange } from "@appbaseio/reactivesearch";
+import { translate } from "../../../utils";
 import { FilterRow } from "../../../components/list";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
@@ -14,6 +15,7 @@ import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
+import ArrowUp from "../../../assets/ArrowUp";
 
 const FILTERS = [
   "SEARCH",
@@ -139,33 +141,33 @@ export default function List() {
                   searchPlaceholder="Rechercher..."
                   size={1000}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Date aller"
+                <DateRange
                   componentId="DATE_ALLER"
-                  dataField="departuredDate.keyword"
+                  dataField="departuredDate"
+                  title="Date aller"
+                  placeholder={{
+                    start: "Date minimale",
+                    end: "Date maximale",
+                  }}
+                  queryFormat="date"
+                  URLParams={true}
                   react={{ and: FILTERS.filter((e) => e !== "DATE_ALLER") }}
-                  title=""
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  size={1000}
-                />
-                <MultiDropdownList
                   defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Date retour"
-                  componentId="DATE_RETOUR"
-                  dataField="returnDate.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "DATE_RETOUR") }}
-                  title=""
-                  URLParams={true}
                   sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  size={1000}
+                />
+                <DateRange
+                  componentId="DATE_RETOUR"
+                  dataField="returnDate"
+                  title="Date retour"
+                  placeholder={{
+                    start: "Date minimale",
+                    end: "Date maximale",
+                  }}
+                  queryFormat="date"
+                  URLParams={true}
+                  react={{ and: FILTERS.filter((e) => e !== "DATE_RETOUR") }}
+                  defaultQuery={getDefaultQuery}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -184,9 +186,62 @@ export default function List() {
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Points de rassemblement</div>
-                {/* Faire des test de filtres sur array de PDR
-                // "REGION_PDR", "DEPARTMENT_PDR", "CITY_PDR", "NAME_PDR"
-                */}
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Nom du point de rassemblement"
+                  componentId="NAME_PDR"
+                  dataField="pointDeRassemblements.name.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "NAME_PDR") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Région du point de rassemblement"
+                  componentId="REGION_PDR"
+                  dataField="pointDeRassemblements.region.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "REGION_PDR") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Département du point de rassemblement"
+                  componentId="DEPARTMENT_PDR"
+                  dataField="pointDeRassemblements.department.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT_PDR") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Ville du point de rassemblement"
+                  componentId="CITY_PDR"
+                  dataField="pointDeRassemblements.city.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "CITY_PDR") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Centre</div>
@@ -235,7 +290,7 @@ export default function List() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Département du centre"
+                  placeholder="Code du centre"
                   componentId="CODE_CENTER"
                   dataField="centerCode.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "CODE_CENTER") }}
@@ -249,9 +304,48 @@ export default function List() {
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Modifications de status</div>
-                {/* Faire des test de filtres sur array de modifications
-                // "MODIFICATION_ASKED", "MODIFICATION_STATUS", "MODIFICATION_OPINION"
-                */}
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Modification demandée"
+                  componentId="MODIFICATION_ASKED"
+                  dataField="modificationBuses.requestMessage.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_ASKED") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Status de la modification"
+                  componentId="MODIFICATION_STATUS"
+                  dataField="modificationBuses.status.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_STATUS") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Opinion sur la modification"
+                  componentId="MODIFICATION_OPINION"
+                  dataField="modificationBuses.opinion.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_OPINION") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
               </FilterRow>
               <DeleteFilters />
             </div>
@@ -266,14 +360,14 @@ export default function List() {
                   <div className="flex w-full flex-col mt-6 mb-2">
                     <hr />
                     <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full">
-                      <div className="w-[40%]">Lignes</div>
-                      <div className="w-[30%]">Points de rassemblements</div>
+                      <div className="w-[30%]">Lignes</div>
+                      <div className="w-[40%]">Points de rassemblements</div>
                       <div className="w-[15%]">Centres de destinations</div>
                       <div className="w-[10%]">Taux de remplissage</div>
                       <div className="w-[5%] h-1"></div>
                     </div>
                     {data?.map((hit) => {
-                      return <Line key={hit._id} hit={hit} />;
+                      return <Line key={hit._id} hit={hit} currentTab={currentTab} />;
                     })}
                     <hr />
                   </div>
@@ -287,32 +381,99 @@ export default function List() {
   );
 }
 
-const Line = ({ hit }) => {
+const Line = ({ hit, currentTab }) => {
   console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit);
   return (
     <>
       <hr />
       <div className="flex py-2 items-center px-4 hover:bg-gray-50">
-        <div className="w-[40%]">
+        <div className="w-[30%]">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{hit.busId}</div>
-            <div className="text-xs text-gray-400">Région départ > Région arrivée</div>
+            <div className="text-xs text-gray-400">
+              {currentTab === "aller" ? `${hit.pointDeRassemblements[0].region} > ${hit.centerRegion}` : `${hit.centerRegion} > ${hit.pointDeRassemblements[0].region}`}
+            </div>
           </div>
         </div>
-        <div className="w-[30%]">
+        <div className="w-[40%]">
           {/* // Meeting points list */}
           <div className="flex gap-2">
             {hit.pointDeRassemblements.map((meetingPoint) => {
-              return <div className="text-sm font-medium">{meetingPoint.department}</div>;
+              console.log("🚀 ~ file: List.js:310 ~ {hit.pointDeRassemblements.map ~ meetingPoint", meetingPoint);
+              return (
+                <TooltipMeetingPoint key={meetingPoint._id} meetingPoint={meetingPoint}>
+                  <a
+                    href={`/point-de-rassemblement/${meetingPoint._id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
+                    {meetingPoint.city}
+                    <ArrowUp />
+                  </a>
+                </TooltipMeetingPoint>
+              );
             })}
           </div>
         </div>
         <div className="w-[15%]">
-          <div className="flex gap-2">{hit.center}</div>
+          <div className="flex gap-2">
+            <TooltipCenter key={hit.centerId} name={hit.centerName} region={hit.centerRegion} department={hit.centerDepartment}>
+              <a
+                href={`/centre/${hit.centerId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center">
+                {hit.centerCode}
+                <ArrowUp />
+              </a>
+            </TooltipCenter>
+          </div>
         </div>
-        <div className="w-[10%]">Cercle avec pourcentage</div>
+        <div className="w-[10%]">25% - Cercle</div>
         <div className="w-[5%]"></div>
       </div>
     </>
+  );
+};
+
+const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
+  if (!meetingPoint) return children;
+
+  return (
+    <div className="relative flex flex-col items-center group" {...props}>
+      {children}
+      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center">
+        <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
+          <div className="flex">
+            <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">LigneToPoint.MeetingHour</div>
+            {/* <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600] mx-3">
+              <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="grey" />
+            </svg> */}
+            {/* //! Refaire le triangle qui pointe vers la droite */}
+            <div className="flex flex-col">
+              <div className="text-sm font-medium">{meetingPoint.name}</div>
+              <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
+            </div>
+            {/* Symbole train */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TooltipCenter = ({ children, name, region, department, ...props }) => {
+  return (
+    <div className="relative flex flex-col items-center group" {...props}>
+      {children}
+      <div className="absolute flex flex-col hidden group-hover:flex !top-8 mb-3 items-center">
+        <div className="relative py-3 px-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
+          <div className="flex flex-col">
+            <div className="text-sm font-medium">{`${name}`}</div>
+            <div className="text-xs text-gray-400">{`${region} • ${department}`}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
