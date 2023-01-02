@@ -10,7 +10,7 @@ const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
-const { getAvailableSessions } = require("./utils/cohort");
+const { getFilteredSessions } = require("./utils/cohort");
 
 class Auth {
   constructor(model) {
@@ -131,7 +131,7 @@ class Auth {
       console.log("count = ", countDocuments, typeof countDocuments, countDocuments > 0);
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const sessions = await getAvailableSessions(value);
+      const sessions = await getFilteredSessions(value);
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session || session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 

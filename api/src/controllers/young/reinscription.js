@@ -11,7 +11,7 @@ const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023REINSCRIPTION } = require("../../utils");
 const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
-const { getAvailableSessions } = require("../../utils/cohort");
+const { getFilteredSessions } = require("../../utils/cohort");
 
 router.put("/goToReinscription", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -139,13 +139,28 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const sessions = await getAvailableSessions(young);
+    const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.DOCUMENTS;
 
+    let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
+    const emailsTo = [];
+    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    if (emailsTo.length !== 0) {
+      await sendTemplate(template, {
+        emailTo: emailsTo,
+        params: {
+          cohort: value.cohort,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+          cta: `${config.APP_URL}/change-cohort`,
+        },
+      });
+    }
     young.set(value);
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

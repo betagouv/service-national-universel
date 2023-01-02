@@ -45,9 +45,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
-  const thresholdPendingReached = mission.pendingApplications >= mission.placesLeft * 5;
+  const thresholdPendingReached = mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5;
   const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
-  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor"];
+  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor", "visibility"];
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -138,6 +138,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
     if ((values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION") return setModalConfirmation(true);
     updateMission(valuesToUpdate);
   };
+
+  useEffect(() => {
+    if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
+      setValues({ ...values, subPeriod: [] });
+    }
+  }, [values.period]);
 
   const onSubmitBottom = () => {
     setLoadingBottom(true);
@@ -284,39 +290,35 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                 )}
               </div>
-              {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION ? (
-                <>
-                  {!editing ? (
-                    <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => setEditing(true)}
-                      disabled={loading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                      Modifier
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => {
-                          setEditing(false);
-                          setValues({ ...mission });
-                          setErrors({});
-                        }}
-                        disabled={loading}>
-                        Annuler
-                      </button>
-                      <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={onSubmit}
-                        disabled={loading}>
-                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-                        Enregistrer les changements
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : null}
+              {!editing ? (
+                <button
+                  className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setEditing(true)}
+                  disabled={loading}>
+                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                  Modifier
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      setEditing(false);
+                      setValues({ ...mission });
+                      setErrors({});
+                    }}
+                    disabled={loading}>
+                    Annuler
+                  </button>
+                  <button
+                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={onSubmit}
+                    disabled={loading}>
+                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                    Enregistrer les changements
+                  </button>
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap gap-14">
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
@@ -341,7 +343,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={{ label: values.structureName }}
                     loadOptions={fetchStructures}
                     isDisabled={!editing}
-                    noOptionsMessage={"Aucune structure ne correspond à cette recherche"}
+                    noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
                     styles={{
                       dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       placeholder: (styles) => ({ ...styles, color: "black" }),
@@ -390,7 +392,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un ou plusieurs domaines"}
                     onChange={(e) => {
-                      setValues({ ...values, domains: e.value });
+                      setValues({ ...values, domains: e });
                     }}
                     value={[...values.domains]}
                   />
@@ -668,39 +670,35 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
               </div>
-              {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION ? (
-                <>
-                  {!editingBottom ? (
-                    <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => setEdittingBottom(true)}
-                      disabled={loadingBottom}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                      Modifier
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => {
-                          setEdittingBottom(false);
-                          setValues({ ...mission });
-                          setErrorsBottom({});
-                        }}
-                        disabled={loading}>
-                        Annuler
-                      </button>
-                      <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={onSubmitBottom}
-                        disabled={loadingBottom}>
-                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-                        Enregistrer les changements
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : null}
+              {!editingBottom ? (
+                <button
+                  className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setEdittingBottom(true)}
+                  disabled={loadingBottom}>
+                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                  Modifier
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      setEdittingBottom(false);
+                      setValues({ ...mission });
+                      setErrorsBottom({});
+                    }}
+                    disabled={loading}>
+                    Annuler
+                  </button>
+                  <button
+                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={onSubmitBottom}
+                    disabled={loadingBottom}>
+                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                    Enregistrer les changements
+                  </button>
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap gap-12">
               <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
@@ -766,7 +764,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     isMulti
                     options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
                     placeholder={"Sélectionnez une ou plusieurs périodes"}
-                    onChange={(e) => setValues({ ...values, period: e.value })}
+                    onChange={(e) => setValues({ ...values, period: e })}
                     value={values.period}
                   />
                   {(editingBottom || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
@@ -782,7 +780,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                           return options.map((el) => ({ value: el, label: translate(el) }));
                         })()}
                         placeholder={"Sélectionnez une ou plusieurs périodes"}
-                        onChange={(e) => setValues({ ...values, subPeriod: e.value })}
+                        onChange={(e) => setValues({ ...values, subPeriod: e })}
                         value={values.subPeriod}
                       />
                     </div>

@@ -73,7 +73,7 @@ const {
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
-const { getAvailableSessions, getAllSessions } = require("../utils/cohort");
+const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -488,7 +488,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getAvailableSessions(young);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young);
     if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
@@ -521,8 +521,22 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       }
     }
 
+    const emailsTo = [];
+    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    if (emailsTo.length !== 0) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
+        emailTo: emailsTo,
+        params: {
+          cohort,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+          cta: `${config.APP_URL}/change-cohort`,
+        },
+      });
+    }
+
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
@@ -531,7 +545,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         message: validatedMessage.value,
         cohortPeriod: translateCohort(cohort),
       },
-      cc,
     });
 
     res.status(200).send({ ok: true, data: young });

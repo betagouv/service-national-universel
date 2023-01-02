@@ -1,3 +1,84 @@
+## [1.191.3](https://github.com/betagouv/service-national-universel/compare/v1.191.2...v1.191.3) (2022-12-27)
+
+
+### Bug Fixes
+
+* **admin:** mission visibility ([fa32e77](https://github.com/betagouv/service-national-universel/commit/fa32e775ce6377732e5c21c7ae1ce639194d0b39))
+
+## [1.191.2](https://github.com/betagouv/service-national-universel/compare/v1.191.1...v1.191.2) (2022-12-25)
+
+
+### Bug Fixes
+
+* **api:** Do not send if no parents allow SNU ([c2d82b2](https://github.com/betagouv/service-national-universel/commit/c2d82b2177b8384986017c9256ae1fa8fab4e346))
+
+## [1.191.1](https://github.com/betagouv/service-national-universel/compare/v1.191.0...v1.191.1) (2022-12-24)
+
+
+### Bug Fixes
+
+* **admin:** Cast to ObjectId failed for value "" ([8eb6cc2](https://github.com/betagouv/service-national-universel/commit/8eb6cc2d6da0f467aeea106f151d933a26a7dbba))
+* **admin:** pendingApplication Status ([4840792](https://github.com/betagouv/service-national-universel/commit/4840792240b813f466dda31342c293a29d4dc427))
+* **admin:** permission edition fiche mission ([fbb1864](https://github.com/betagouv/service-national-universel/commit/fbb1864515dccb082b5856ae1b2c422c1d273373))
+
+# [1.191.0](https://github.com/betagouv/service-national-universel/compare/v1.190.1...v1.191.0) (2022-12-23)
+
+
+### Bug Fixes
+
+* **admin:** fiche mission ([5a6d86a](https://github.com/betagouv/service-national-universel/commit/5a6d86a52a7a8805a9e476579d74ac706526e4fe))
+* **api:** move patch models to dedicated files (preventing multiple instances) ([1b69b0b](https://github.com/betagouv/service-national-universel/commit/1b69b0b556cdbd60ae7b340a0ddabcae306d6d36))
+* **api:** remove console.log ([71ca388](https://github.com/betagouv/service-national-universel/commit/71ca38877492ed7609692d71dc4ed4d42f6b29c9))
+
+
+### Features
+
+* **admin/api:** refonte visualition / edition Mission  ([#2150](https://github.com/betagouv/service-national-universel/issues/2150)) ([9135570](https://github.com/betagouv/service-national-universel/commit/91355706db0ccb5addf65465926b8e7888e6c04c))
+* **api:** Send mail change cohort ([#2163](https://github.com/betagouv/service-national-universel/issues/2163)) ([fe5b2fc](https://github.com/betagouv/service-national-universel/commit/fe5b2fc1367998b5138ee48b2db355d086810edb))
+* **lib:** Update inscription rate to 170% ([a9a4350](https://github.com/betagouv/service-national-universel/commit/a9a4350e2f0fc0ab84211b07dff261633dd49089))
+
+## [1.190.1](https://github.com/betagouv/service-national-universel/compare/v1.190.0...v1.190.1) (2022-12-22)
+
+
+### Bug Fixes
+
+* **app:** home jeune refusé [#2159](https://github.com/betagouv/service-national-universel/issues/2159) ([932f125](https://github.com/betagouv/service-national-universel/commit/932f12505afa3df2432ef1a03cab2ba680a68f35))
+
+# [1.190.0](https://github.com/betagouv/service-national-universel/compare/v1.189.0...v1.190.0) (2022-12-21)
+
+
+### Bug Fixes
+
+* **admin:** Bug historic ([547544d](https://github.com/betagouv/service-national-universel/commit/547544d7e1702643a764862ec418eb244adc1fbf))
+* **admin:** redirect support ([6184734](https://github.com/betagouv/service-national-universel/commit/6184734677597aff5f442c5f41bc3f95b8d31d88))
+* **api:** dsnj export async loop ([a3babb6](https://github.com/betagouv/service-national-universel/commit/a3babb68a846ce78db628b13bc31075797ff0b1c))
+* **api:** export date timezone error ([1247f68](https://github.com/betagouv/service-national-universel/commit/1247f6845fd0dd0a0109a0d420b0c447c6b8ccf7))
+* **lib:** add invite dsnj template ([bf1ca35](https://github.com/betagouv/service-national-universel/commit/bf1ca350213e9d5a4a1edd6b7f7347d8ff457cb3))
+* **lib:** cloture inscription date ([ed06d13](https://github.com/betagouv/service-national-universel/commit/ed06d135abe868d0e0071a32695c9c166dac3807))
+* **lib:** mapping Occitanie ([eaa81c5](https://github.com/betagouv/service-national-universel/commit/eaa81c5031cd586e6e159c1d743e6c371aea68c6))
+* cron for staging ([a18b900](https://github.com/betagouv/service-national-universel/commit/a18b9008217bc91a5a747be50c41fa71b0f2f9fb))
+* cron for staging ([0182357](https://github.com/betagouv/service-national-universel/commit/0182357bc3af1b8bc289150f08ed0ffc622b5aa3))
+
+
+### Features
+
+* **api/admin:** generate and download dsnj exports ([#2151](https://github.com/betagouv/service-national-universel/issues/2151)) ([5c0fef2](https://github.com/betagouv/service-national-universel/commit/5c0fef215dd062dc0a9fd7a5532c5958c90b3289))
+
+# [1.189.0](https://github.com/betagouv/service-national-universel/compare/v1.188.0...v1.189.0) (2022-12-20)
+
+
+### Bug Fixes
+
+* **admin:** filter corse department ([5dc9781](https://github.com/betagouv/service-national-universel/commit/5dc978127d4d416a1f1ced4e7967cbce911e2090))
+* **admin:** redirection vers export inscription + places restantes missions ([931c2da](https://github.com/betagouv/service-national-universel/commit/931c2daeb6e5ee19b519b381cb2040e92f33d594))
+* **api:** update date modification dossier ([#2157](https://github.com/betagouv/service-national-universel/issues/2157)) ([5887688](https://github.com/betagouv/service-national-universel/commit/58876880f46198352903a6b95db8a42ce7457395))
+
+
+### Features
+
+* **app:** home phase 1, en attente de validation, en attente de correction, liste complémentaire ([#2153](https://github.com/betagouv/service-national-universel/issues/2153)) ([ed7dbd4](https://github.com/betagouv/service-national-universel/commit/ed7dbd41d60fede39efd748389f9dff3f1eadb11))
+* **app:** Refonte préférences phase 2 ([#2144](https://github.com/betagouv/service-national-universel/issues/2144)) ([f2f4dac](https://github.com/betagouv/service-national-universel/commit/f2f4dac60d118649e5fd028f771387cb1529d65f))
+
 # [1.188.0](https://github.com/betagouv/service-national-universel/compare/v1.187.0...v1.188.0) (2022-12-19)
 
 

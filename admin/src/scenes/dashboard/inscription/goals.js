@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import { YOUNG_STATUS } from "snu-lib";
-import WithTooltip from "../../../components/WithTooltip";
 import ReactTooltip from "react-tooltip";
 
 export default function Goal({ filter }) {
@@ -52,9 +51,17 @@ export default function Goal({ filter }) {
   }
 
   async function fetchOpenApplications() {
+    const openApplicationStatus = [
+      YOUNG_STATUS.IN_PROGRESS,
+      YOUNG_STATUS.WAITING_VALIDATION,
+      YOUNG_STATUS.WAITING_CORRECTION,
+      YOUNG_STATUS.VALIDATED,
+      YOUNG_STATUS.WAITING_LIST,
+      YOUNG_STATUS.REINSCRIPTION,
+    ];
     const body = {
       query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: { status: { terms: { field: "status.keyword" } } },
+      aggs: { number_of_applications: { filter: { terms: { "status.keyword": openApplicationStatus } } } },
       size: 0,
     };
 
@@ -73,15 +80,7 @@ export default function Goal({ filter }) {
 
     const { responses } = await api.esQuery("young", body);
     if (responses.length) {
-      const m = api.getAggregations(responses[0]);
-      setOpenApplications(
-        (m[YOUNG_STATUS.IN_PROGRESS] || 0) +
-          (m[YOUNG_STATUS.WAITING_VALIDATION] || 0) +
-          (m[YOUNG_STATUS.WAITING_CORRECTION] || 0) +
-          (m[YOUNG_STATUS.VALIDATED] || 0) +
-          (m[YOUNG_STATUS.WAITING_LIST] || 0) +
-          (m[YOUNG_STATUS.REINSCRIPTION] || 0),
-      );
+      setOpenApplications(responses[0].aggregations.number_of_applications.doc_count);
     }
   }
 
@@ -177,7 +176,7 @@ export default function Goal({ filter }) {
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
             <CardTitle>
               <div data-tip="" data-for="tooltip-goal">
-                Taux d&apos;ouverture de dossiers (i)
+                Taux d&apos;ouverture de dossiers
               </div>
               <ReactTooltip id="tooltip-goal" className="bg-white shadow-xl opacity-100" arrowColor="white" place="top">
                 <div className="text-xs text-gray-700 w-[375px]">

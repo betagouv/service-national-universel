@@ -49,7 +49,7 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
-const { getAvailableSessions } = require("../../utils/cohort");
+const { getFilteredSessions } = require("../../utils/cohort");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -562,7 +562,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getAvailableSessions(young);
+    const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -606,15 +606,28 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         },
       });
     }
+    const emailsTo = [];
+    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    if (emailsTo.length !== 0) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
+        emailTo: emailsTo,
+        params: {
+          cohort,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+          cta: `${config.APP_URL}/change-cohort`,
+        },
+      });
+    }
+
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
         motif: cohortChangeReason,
         cohortPeriod: translateCohort(cohort),
       },
-      cc,
     });
 
     res.status(200).send({ ok: true, data: young });

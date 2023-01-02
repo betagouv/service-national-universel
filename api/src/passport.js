@@ -7,6 +7,7 @@ const Joi = require("joi");
 
 const Young = require("./models/young");
 const Referent = require("./models/referent");
+const { ROLES } = require("snu-lib");
 
 function getToken(req) {
   let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req);
@@ -44,6 +45,38 @@ module.exports = function () {
 
         const referent = await Referent.findById(value._id);
         if (referent) return done(null, referent);
+      } catch (error) {
+        capture(error);
+      }
+      return done(null, false);
+    }),
+  );
+
+  passport.use(
+    "admin",
+    new JwtStrategy(opts, async function (jwtPayload, done) {
+      try {
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        if (error) return done(null, false);
+
+        const referent = await Referent.findById(value._id);
+        if (referent && referent.role === ROLES.ADMIN) return done(null, referent);
+      } catch (error) {
+        capture(error);
+      }
+      return done(null, false);
+    }),
+  );
+
+  passport.use(
+    "dsnj",
+    new JwtStrategy(opts, async function (jwtPayload, done) {
+      try {
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        if (error) return done(null, false);
+
+        const referent = await Referent.findById(value._id);
+        if (referent && referent.role === ROLES.DSNJ) return done(null, referent);
       } catch (error) {
         capture(error);
       }

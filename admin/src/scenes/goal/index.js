@@ -85,33 +85,35 @@ export default function Goal() {
               onClick={() => {
                 setBlocsOpened(blocsOpened.includes(region) ? blocsOpened.filter((b) => b !== region) : [...blocsOpened, region]);
               }}>
-              {departements.map((department) => {
-                return (
-                  <Departement key={department}>
-                    <Row>
-                      <Col md={8}>
-                        <Row>
-                          <Col md={4} style={{ alignSelf: "center" }}>
-                            {department}
-                          </Col>
-                          <Col md={8}>
-                            <input
-                              onChange={(e) => {
-                                const val = e.target.value && !isNaN(Number(e.target.value)) ? Number(e.target.value) : "";
-                                setInscriptionGoals(inscriptionGoals.map((ig) => (ig.department === department ? { ...ig, max: val } : ig)));
-                              }}
-                              value={inscriptionGoals.find((ig) => ig.department === department)?.max || ""}
-                              className="form-control"
-                              style={{ width: "75px", display: "inline-block", marginRight: "1rem" }}
-                            />
-                            volontaires
-                          </Col>
-                        </Row>
-                      </Col>
-                    </Row>
-                  </Departement>
-                );
-              })}
+              {departements
+                .filter((departement) => departement !== "Corse")
+                .map((department) => {
+                  return (
+                    <Departement key={department}>
+                      <Row>
+                        <Col md={8}>
+                          <Row>
+                            <Col md={4} style={{ alignSelf: "center" }}>
+                              {department}
+                            </Col>
+                            <Col md={8}>
+                              <input
+                                onChange={(e) => {
+                                  const val = e.target.value && !isNaN(Number(e.target.value)) ? Number(e.target.value) : "";
+                                  setInscriptionGoals(inscriptionGoals.map((ig) => (ig.department === department ? { ...ig, max: val } : ig)));
+                                }}
+                                value={inscriptionGoals.find((ig) => ig.department === department)?.max || ""}
+                                className="form-control"
+                                style={{ width: "75px", display: "inline-block", marginRight: "1rem" }}
+                              />
+                              volontaires
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </Departement>
+                  );
+                })}
             </ToggleBloc>
           );
         })}

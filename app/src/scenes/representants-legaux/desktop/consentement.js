@@ -17,6 +17,7 @@ import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
 import plausibleEvent from "../../../services/plausible";
+import { regexPhoneFrenchCountries } from "../../../utils";
 
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
@@ -195,7 +196,7 @@ export default function Consentement({ step, parentId }) {
       validate("email", "invalid", !validator.isEmail(data.email));
     }
     if (validate("phone", "empty", validator.isEmpty(data.phone, { ignore_whitespace: true }))) {
-      validate("phone", "invalid", !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"]));
+      validate("phone", "invalid", !validator.matches(data.phone, regexPhoneFrenchCountries));
     }
 
     // --- address

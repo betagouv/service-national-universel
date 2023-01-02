@@ -71,7 +71,6 @@ export default function Wrapper({ mission, tab, children, getMission }) {
             <div
               className={`flex flex-row items-center gap-2 cursor-pointer text-gray-400 text-sm pb-4 ${tab === "youngs" && "text-blue-600 border-b-2 border-blue-600"}`}
               onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
-              {/* should it be red when no remaining places ?*/}
               {mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
               ) : mission.pendingApplications > 1 ? (
@@ -81,7 +80,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
             </div>
 
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
-              mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 || mission.placesLeft < 1 ? (
+              mission.visibility === "HIDDEN" || (mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5) || mission.placesLeft < 1 ? (
                 <div className={`cursor-not-allowed text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`} disabled>
                   Proposer cette mission
                 </div>

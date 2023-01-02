@@ -2,12 +2,12 @@ require("../../mongo");
 
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
-const mongoose = require("mongoose");
 const { isInRuralArea, getAge } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const YoungModel = require("../../models/young");
+const YoungPatchModel = require("./models/youngPatch");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
@@ -132,8 +132,7 @@ exports.handler = async () => {
   try {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
-    const young_patches = mongoose.model("young_patches", new mongoose.Schema({}, { collection: "young_patches" }));
-    await findAll(young_patches, mongooseFilterForDayBefore(), processPatch);
+    await findAll(YoungPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
       title: "✅ Young Logs",
       text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
