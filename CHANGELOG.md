@@ -1,3 +1,10 @@
+## [1.191.4](https://github.com/betagouv/service-national-universel/compare/v1.191.3...v1.191.4) (2023-01-02)
+
+
+### Bug Fixes
+
+* **api:** fetch parent structure only if exist ([d3b6f08](https://github.com/betagouv/service-national-universel/commit/d3b6f087805e1febad6ef4ac0232be5db551f9e4))
+
 ## [1.191.3](https://github.com/betagouv/service-national-universel/compare/v1.191.2...v1.191.3) (2022-12-27)
 
 
