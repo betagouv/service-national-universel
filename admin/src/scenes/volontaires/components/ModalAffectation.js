@@ -45,8 +45,8 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   };
 
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg shadow-xl p-2">
-      <div className="mb-4 px-8">
+    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg shadow-xl py-2 px-8">
+      <div className="mb-4 ">
         <div className="flex flex-row w-full justify-between gap-6 mt-6">
           <div className="w-1/3">
             <div className="h-1 bg-blue-600 rounded mb-2" />
@@ -121,7 +121,9 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
           onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
         />
       </div>
-      <div className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer">Retour</div>
+      <div onClick={onCancel} className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer">
+        Retour
+      </div>
     </ModalTailwind>
   );
 }
