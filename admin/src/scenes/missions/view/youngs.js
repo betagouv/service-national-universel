@@ -304,6 +304,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   ];
   useEffect(() => {
     if (currentTab === "all") return;
+    setYoungSelected([]);
     filteredRoleActions();
   }, [currentTab]);
   const filteredRoleActions = () => {
