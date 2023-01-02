@@ -19,6 +19,7 @@ import ModalTailwind from "../../../components/modals/ModalTailwind";
 export default function ModalAffectations({ isOpen, onCancel, young }) {
   const FILTERS = ["SEARCH"];
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
+  const [step, setStep] = useState(1);
   const getDefaultQuery = () => {
     return {
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
@@ -44,27 +45,42 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   };
 
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[512px] bg-white rounded-lg shadow-xl p-2">
-      <div className="mb-4">
-        <div className="mb-4 text-gray-900 text-md text-center font-medium">Sélectionnez votre centre</div>
-        <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className="flex items-center justify-center w-full">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              placeholder="Rechercher par mots clés, ville, code postal..."
-              componentId="SEARCH"
-              dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              style={{ marginRight: "1rem", flex: 1 }}
-              innerClass={{ input: "searchbox" }}
-              className="datasearch-searchfield shadow-sm w-2/3"
-              URLParams={true}
-              autosuggest={false}
-            />
+    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg shadow-xl p-2">
+      <div className="mb-4 px-8">
+        <div className="flex flex-row w-full justify-between gap-6 mt-6">
+          <div className="w-1/3">
+            <div className="h-1 bg-blue-600 rounded mb-2" />
+            <div className="uppercase text-xs text-blue-600">étape 1</div>
+            <div className="text-gray-900 font-medium text-xs">Le centre</div>
           </div>
+          <div className="w-1/3">
+            <div className={`h-1 ${step > 1 ? "bg-blue-600" : "bg-gray-200"} rounded mb-2`} />
+            <div className={`uppercase text-xs ${step > 1 ? "text-blue-600" : "text-gray-500"}`}>étape 2</div>
+            <div className="text-gray-900 font-medium text-xs">Le point de rassemblement</div>
+          </div>
+          <div className="w-1/3">
+            <div className={`h-1 ${step > 2 ? "bg-blue-600" : "bg-gray-200"} rounded mb-2`} />
+            <div className={`uppercase text-xs ${step > 2 ? "text-blue-600" : "text-gray-500"}`}>étape 3</div>
+            <div className="text-gray-900 font-medium text-xs">Résumé</div>
+          </div>
+        </div>
 
-          <div className="reactive-result">
+        <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre centre</div>
+        <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <DataSearch
+            defaultQuery={getDefaultQuery}
+            showIcon={false}
+            placeholder="Rechercher par mots clés, ville, code postal..."
+            componentId="SEARCH"
+            dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
+            react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+            style={{ marginRight: "1rem", flex: 1 }}
+            innerClass={{ input: "searchbox" }}
+            className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
+            URLParams={true}
+            autosuggest={false}
+          />
+          <div className="reactive-result w-full">
             <ReactiveListComponent
               defaultQuery={getDefaultQuery}
               scrollOnChange={false}
@@ -105,9 +121,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
           onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
         />
       </div>
-      <Footer>
-        <ModalButton onClick={onCancel}>Retour</ModalButton>
-      </Footer>
+      <div className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer">Retour</div>
     </ModalTailwind>
   );
 }
@@ -116,7 +130,7 @@ const HitCenter = ({ hit, onSend }) => {
   return (
     <>
       <hr />
-      <div className="flex flex-row gap-4 justify-center items-center w-full">
+      <div className="flex flex-row gap-4 justify-between items-center w-full px-2">
         <div className="w-1/2">
           <MultiLine>
             <span className="font-bold text-black">{hit.nameCentre}</span>
