@@ -1531,6 +1531,43 @@ function SectionConsentements({ young, onChange }) {
     }
   }
 
+  function confirmImageRightsChange(parentId, event) {
+    event.preventDefault();
+
+    const parent = {
+      firstName: young[`parent${parentId}FirstName`],
+      lastName: young[`parent${parentId}LastName`],
+    };
+
+    setConfirmModal({
+      title: "Modification de l’accord de droit à l’image",
+      message: (
+        <div>
+          Vous vous apprêtez à envoyer à {parent.firstName} {parent.lastName} une demande de modification de son accord de droit à l&apos;image.
+          <br />
+          Un email lui sera envoyé. Cela annulera l&apos;ancien accord.
+        </div>
+      ),
+      confirm: () => changeImagesRights(parentId),
+    });
+  }
+
+  async function changeImagesRights(parentId) {
+    console.log("TODO: change image rights: ", parentId);
+    try {
+      const result = await api.put(`/young/${young._id}/parent-image-rights-reset`, { parentId });
+      if (!result.ok) {
+        toastr.error("Erreur !", "Nous n'avons pu modifier le droit à l'image pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+      } else {
+        toastr.success("Le droit à l'image a été remis à zéro. Un email a été envoyé au représentant légal.");
+        onChange && onChange(result.data);
+      }
+    } catch (err) {
+      capture(err);
+      toastr.error("Erreur !", "Nous n'avons pu modifier le droit à l'image pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -1605,10 +1642,46 @@ function SectionConsentements({ young, onChange }) {
         <div className="mt-[16px] flex itemx-center justify-between">
           <div className="grow text-[#374151] text-[14px] leading-[20px]">
             <div className="font-bold">Droit à l&apos;image</div>
-            <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
+            <div className="flex items-center">
+              <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
+              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
+                <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
+                  Modifier
+                </a>
+              )}
+            </div>
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
+        {young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
+          <div className="mt-2 flex items-center justify-between">
+            <div
+              className="cursor-pointer italic text-[#1D4ED8]"
+              onClick={() => {
+                copyToClipboard(`${appURL}/representants-legaux/droit-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+              }}>
+              Copier le lien du formulaire
+            </div>
+            <BorderButton
+              mode="blue"
+              onClick={async () => {
+                try {
+                  const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                  if (response.ok) {
+                    toastr.success(translate("REMINDER_SENT"), "");
+                  } else {
+                    toastr.error(translate(response.code), "");
+                  }
+                } catch (error) {
+                  toastr.error(translate(error.code), "");
+                }
+              }}>
+              Relancer
+            </BorderButton>
+          </div>
+        )}
+
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
           <div className="mt-[16px] flex itemx-center justify-between">
             <div className="grow text-[#374151] text-[14px] leading-[20px]">
@@ -1662,7 +1735,14 @@ function SectionConsentements({ young, onChange }) {
               <div className="mt-[16px] flex items-center justify-between">
                 <div className="grow text-[#374151] text-[14px] leading-[20px]">
                   <div className="font-bold">Droit à l&apos;image</div>
-                  <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                  <div className="flex items-center">
+                    <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                      <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
+                        Modifier
+                      </a>
+                    )}
+                  </div>
                 </div>
                 {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
               </div>
