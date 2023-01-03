@@ -212,6 +212,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       <div
         onClick={() => {
           if (step === 1) return onCancel();
+          if (step === 2 && pdrOption !== "") return setPdrOption("");
           setStep((step) => step - 1);
         }}
         className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
