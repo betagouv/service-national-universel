@@ -1658,7 +1658,7 @@ function SectionConsentements({ young, onChange }) {
             <div
               className="cursor-pointer italic text-[#1D4ED8]"
               onClick={() => {
-                copyToClipboard(`${appURL}/representants-legaux/droit-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
                 toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
               }}>
               Copier le lien du formulaire
@@ -1732,20 +1732,50 @@ function SectionConsentements({ young, onChange }) {
               )}
             </div>
             {young.parent1AllowImageRights === "true" && (
-              <div className="mt-[16px] flex items-center justify-between">
-                <div className="grow text-[#374151] text-[14px] leading-[20px]">
-                  <div className="font-bold">Droit à l&apos;image</div>
-                  <div className="flex items-center">
-                    <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
-                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
-                      <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
-                        Modifier
-                      </a>
-                    )}
+              <>
+                <div className="mt-[16px] flex items-center justify-between">
+                  <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                    <div className="font-bold">Droit à l&apos;image</div>
+                    <div className="flex items-center">
+                      <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                        <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
+                          Modifier
+                        </a>
+                      )}
+                    </div>
                   </div>
+                  {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
                 </div>
-                {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
-              </div>
+                {young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div
+                      className="cursor-pointer italic text-[#1D4ED8]"
+                      onClick={() => {
+                        copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=2`);
+                        toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                      }}>
+                      Copier le lien du formulaire
+                    </div>
+                    <BorderButton
+                      mode="blue"
+                      onClick={async () => {
+                        try {
+                          const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 2 });
+                          if (response.ok) {
+                            toastr.success(translate("REMINDER_SENT"), "");
+                          } else {
+                            toastr.error(translate(response.code), "");
+                          }
+                        } catch (error) {
+                          toastr.error(translate(error.code), "");
+                        }
+                      }}>
+                      Relancer
+                    </BorderButton>
+                  </div>
+                )}
+              </>
             )}
             {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && !young.parent2AllowImageRights && (
               <div className="mt-2 flex items-center justify-between">

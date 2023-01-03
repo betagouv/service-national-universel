@@ -8,6 +8,7 @@ export const ABROAD = "Abroad";
 export const API_VERIFICATION = "/representants-legaux/data-verification";
 export const API_CONSENT = "/representants-legaux/consent";
 export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide";
+export const API_IMAGE_RIGHTS = "/representants-legaux/image-rights";
 
 // --- Docs on CDN
 export const CDN_BASE_URL =

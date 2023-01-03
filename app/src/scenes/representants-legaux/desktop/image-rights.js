@@ -2,25 +2,22 @@ import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
-import Navbar from "../components/Navbar";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/inscription/toggle";
-import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
+import { translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
-import Check from "../components/Check";
-import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, isReturningParent, CDN_BASE_URL } from "../commons";
+import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParent, API_IMAGE_RIGHTS } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
-import { BorderButton, PlainButton } from "../components/Buttons";
-import plausibleEvent from "../../../services/plausible";
+import { PlainButton } from "../components/Buttons";
 import { regexPhoneFrenchCountries } from "../../../utils";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 
-export default function Consentement({ step, parentId }) {
+export default function ImageRights({ parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
   const [errors, setErrors] = useState({});
@@ -42,16 +39,8 @@ export default function Consentement({ step, parentId }) {
     region: null,
     department: null,
     location: null,
-    allowSNU: null,
-    rightOlder: false,
-    personalData: false,
-    healthForm: false,
-    vaccination: false,
-    internalRules: false,
-    allowCovidAutotest: null,
     allowImageRights: null,
   });
-  // const [covidAutoTestExplanationShown, setCovidAutoTestExplanationShown] = useState(false);
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
 
   useEffect(() => {
@@ -89,7 +78,6 @@ export default function Consentement({ step, parentId }) {
 
       const confirmAddress = !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true });
 
-      const internalRules = stringToBoolean(young[`rulesParent${parentId}`]);
       setData({
         firstName: young[`parent${parentId}FirstName`] ? young[`parent${parentId}FirstName`] : "",
         lastName: young[`parent${parentId}LastName`] ? young[`parent${parentId}LastName`] : "",
@@ -99,24 +87,12 @@ export default function Consentement({ step, parentId }) {
         addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
         addressVerified: young.addressParent1Verified === "true",
         ...address,
-        allowSNU: stringToBoolean(young.parentAllowSNU),
-        rightOlder: internalRules,
-        personalData: internalRules,
-        healthForm: internalRules,
-        vaccination: internalRules,
-        internalRules,
-        // allowCovidAutotest: stringToBoolean(young[`parent${parentId}AllowCovidAutotest`]),
         allowImageRights: stringToBoolean(young[`parent${parentId}AllowImageRights`]),
       });
     }
   }, [young]);
 
   if (!young) return <Loader />;
-
-  // --- young
-  const youngFullname = young.firstName + " " + young.lastName;
-  const youngAge = getAge(young.birthDate);
-  const sessionDate = COHESION_STAY_LIMIT_DATE[young.cohort];
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -148,19 +124,9 @@ export default function Consentement({ step, parentId }) {
   };
 
   // --- ui
-  // function toggleCovidAutoTestExplanationShown(e) {
-  //   e.preventDefault();
-  //   setCovidAutoTestExplanationShown(!covidAutoTestExplanationShown);
-  // }
-
   function toggleImageRightsExplanationShown(e) {
     e.preventDefault();
     setImageRightsExplanationShown(!imageRightsExplanationShown);
-  }
-
-  function onPrevious() {
-    const route = parentId === 2 ? "verification-parent2" : "verification";
-    history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
   // --- submit
@@ -218,24 +184,7 @@ export default function Consentement({ step, parentId }) {
     }
 
     // --- accept
-    if (parentId === 1) {
-      validate("allowSNU", "not_choosen", data.allowSNU !== false && data.allowSNU !== true);
-
-      if (data.allowSNU) {
-        validate("rightOlder", "unchecked", data.rightOlder !== true);
-        if (youngAge < 15) {
-          validate("personalData", "unchecked", data.personalData !== true);
-        }
-        validate("healthForm", "unchecked", data.healthForm !== true);
-        validate("vaccination", "unchecked", data.vaccination !== true);
-        validate("internalRules", "unchecked", data.internalRules !== true);
-
-        // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
-        validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
-      }
-    } else {
-      validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
-    }
+    validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
 
     if (hasErrors) {
       return errors;
@@ -271,24 +220,14 @@ export default function Consentement({ step, parentId }) {
       [`parent${parentId}Email`]: validator.normalizeEmail(data.email),
       [`parent${parentId}Phone`]: data.phone.trim(),
       ...address,
+      [`parent${parentId}AllowImageRights`]: data.allowImageRights ? "true" : "false",
     };
 
-    if (parentId === 1) {
-      body.parentAllowSNU = data.allowSNU ? "true" : "false";
-      if (data.allowSNU) {
-        // body.parent1AllowCovidAutotest = data.allowCovidAutotest ? "true" : "false";
-        body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
-        body.rulesParent1 = "true";
-      }
-    } else {
-      body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
-    }
-
-    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
-    else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
+    // if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
+    // else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
 
     try {
-      const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=${parentId}`, body);
+      const { code, ok } = await api.post(API_IMAGE_RIGHTS + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
         setErrors({ global: "Une erreur s'est produite" + (code ? " : " + translate(code) : "") });
         return false;
@@ -302,19 +241,14 @@ export default function Consentement({ step, parentId }) {
   }
 
   function done() {
-    if (parentId === 1) {
-      history.push(`/representants-legaux/done?token=${token}`);
-    } else {
-      history.push(`/representants-legaux/done-parent2?token=${token}`);
-    }
+    history.push(`/representants-legaux/droits-image-done?token=${token}&parent=${parentId}`);
   }
 
   return (
     <>
-      <Navbar step={step} />
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
-          <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Apporter votre consentement</h1>
+          <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Modifier votre accord de droit à l’image</h1>
 
           <div className="text-[14px] leading-[20px] text-[#666666] mb-[32px] mt-2">
             <p>
@@ -386,138 +320,43 @@ export default function Consentement({ step, parentId }) {
             )}
           </div>
 
-          {parentId === 1 && (
-            <div className="py-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-              <AuthorizeBlock title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
-                <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-                réalisation d&apos;une mission d&apos;intérêt général.
-              </AuthorizeBlock>
-
-              {data.allowSNU && (
-                <div className="pt-[32px]">
-                  <div>
-                    Je, <b>{data.firstName + " " + data.lastName}</b>
-                    <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
-                      Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
-                    </Check>
-                    {youngAge < 15 && (
-                      <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                        J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                      </Check>
-                    )}
-                    <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                      cohésion (
-                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
-                        Télécharger la fiche sanitaire ici
-                      </a>
-                      ).
-                    </Check>
-                    <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
-                      M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP),
-                      et pour les volontaires résidents de Guyane, la fièvre jaune.
-                    </Check>
-                    <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
-                      Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
-                        Règlement Intérieur du SNU
-                      </a>
-                      .
-                    </Check>
+          <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+            <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
+              <div className="mb-3">
+                Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou des
+                préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur leurs
+                publications respectives.{" "}
+                {!imageRightsExplanationShown && (
+                  <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
+                    Lire plus
+                  </a>
+                )}
+              </div>
+              {imageRightsExplanationShown && (
+                <>
+                  <div className="mb-3">
+                    Cette autorisation est valable pour une utilisation : d’une durée de 5 ans à compter de la signature de la présente ; sur tous les supports d’information et de
+                    communication imprimés ou numériques à but non lucratif ; édités par les services de l’État ainsi que sur tous réseaux de communication, y compris télévisuels
+                    ou Internet ; de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle. Conformément aux
+                    dispositions légales en vigueur relatives au droit à l’image, le MENJS s’engage à ce que la publication et la diffusion de l’image ainsi que des commentaires
+                    l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des données (RGPD),
+                    entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la personne mineure et
+                    a le droit de demander à tout moment le retrait de celles-ci*.
                   </div>
-                </div>
+                  <div className="mb-3">La présente autorisation est consentie à titre gratuit.</div>
+                  <a className="underline" href="#" onClick={toggleImageRightsExplanationShown}>
+                    Lire moins
+                  </a>
+                </>
               )}
-            </div>
-          )}
-          {(data.allowSNU || parentId === 2) && (
-            <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
-              {/*<AuthorizeBlock
-                title="Utilisation d’autotests COVID"
-                value={data.allowCovidAutotest}
-                onChange={(e) => setData({ ...data, allowCovidAutotest: e })}
-                error={errors.allowCovidAutotest}>
-                <div className="mb-3">
-                  La réalisation d’autotests antigéniques sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de résultat positif, la
-                  communication communication communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées par
-                  ce dernier.{" "}
-                  {!covidAutoTestExplanationShown && (
-                    <a className="underline whitespace-nowrap" href="#" onClick={toggleCovidAutoTestExplanationShown}>
-                      Lire plus
-                    </a>
-                  )}
-                </div>
-                {covidAutoTestExplanationShown && (
-                  <>
-                    <div className="mb-3">
-                      Vous avez souhaité que votre enfant participe au séjour de cohésion du SNU. L’épidémie actuelle de COVID-19 nécessite de prendre des mesures de prévention et de
-                      santé publique pour :
-                      <ul className="list-disc ml-4">
-                        <li>Garantir la sécurité de tous, volontaires et cadres</li>
-                        <li>Permettre à chacun de participer à la totalité du séjour et éviter un éventuel retour à domicile ou un isolement en cas de contamination.</li>
-                      </ul>
-                    </div>
-                    <div className="mb-3">
-                      En complément du test PCR, antigénique ou autotest recommandé avant le départ en séjour, des autotests antigéniques sur prélèvement nasal pourront être réalisés
-                      durant le séjour en présence de signes évocateurs de la covid-19, de cas confirmés ou de cas contacts.
-                    </div>
-                    <h3>Protocole sanitaire de l’année 2022-2023</h3>
-                    <div className="mb-3">
-                      Durant le séjour de cohésion, des séances permettant la réalisation d’autotests pourraient être organisées en cas de nécessité, sous l’encadrement d’un
-                      infirmier ou d’un cadre formé à la réalisation du prélèvement. Ces tests permettant de vivre en collectivité dans des conditions de sécurité sont fortement
-                      recommandés mais non obligatoires. S’ils sont pratiqués, seuls seront concernés les volontaires ayant remis lors de leur inscription le consentement écrit
-                      représentant légal.
-                    </div>
-                    <div className="mb-3">
-                      Votre consentement est également requis pour que les résultats des autotests puissent être transmis au chef de centre et aux personnes habilitées par ce
-                      dernier, au directeur académique des services de l’éducation et à l’ARS en cas de résultat positif. Le consentement à la réalisation des autotests et à la
-                      transmission des données est recueilli par le biais du formulaire que vous trouverez ci-joint et qui est à téléverser depuis le compte volontaire.
-                    </div>
-                    <a className="underline" href="#" onClick={toggleCovidAutoTestExplanationShown}>
-                      Lire moins
-                    </a>
-                  </>
-                )}
-              </AuthorizeBlock>*/}
-              <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
-                <div className="mb-3">
-                  Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
-                  des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
-                  leurs publications respectives.{" "}
-                  {!imageRightsExplanationShown && (
-                    <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
-                      Lire plus
-                    </a>
-                  )}
-                </div>
-                {imageRightsExplanationShown && (
-                  <>
-                    <div className="mb-3">
-                      Cette autorisation est valable pour une utilisation : d’une durée de 5 ans à compter de la signature de la présente ; sur tous les supports d’information et
-                      de communication imprimés ou numériques à but non lucratif ; édités par les services de l’État ainsi que sur tous réseaux de communication, y compris
-                      télévisuels ou Internet ; de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle. Conformément
-                      aux dispositions légales en vigueur relatives au droit à l’image, le MENJS s’engage à ce que la publication et la diffusion de l’image ainsi que des
-                      commentaires l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des
-                      données (RGPD), entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la
-                      personne mineure et a le droit de demander à tout moment le retrait de celles-ci*.
-                    </div>
-                    <div className="mb-3">La présente autorisation est consentie à titre gratuit.</div>
-                    <a className="underline" href="#" onClick={toggleImageRightsExplanationShown}>
-                      Lire moins
-                    </a>
-                  </>
-                )}
-              </AuthorizeBlock>
-            </div>
-          )}
+            </AuthorizeBlock>
+          </div>
 
           <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
             {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
             <div className="flex justify-end ">
-              <BorderButton className="mr-2" onClick={onPrevious}>
-                Précédent
-              </BorderButton>
               <PlainButton onClick={onSubmit} spinner={saving}>
-                Je valide
+                Valider
               </PlainButton>
             </div>
           </div>

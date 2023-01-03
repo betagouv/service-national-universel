@@ -447,7 +447,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
     // await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
     //   emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
     //   params: {
-    //     cta: `${config.APP_URL}/representants-legaux/droit-image{parentId}?token=` + young[`parent${parentId}Inscription2023Token`],
+    //     cta: `${config.APP_URL}/representants-legaux/droits-image?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
     //     youngFirstName: young.firstName,
     //     youngName: young.lastName,
     //   },
@@ -493,7 +493,7 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
     // await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
     //   emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
     //   params: {
-    //     cta: `${config.APP_URL}/representants-legaux/droit-image{parentId}?token=` + young[`parent${parentId}Inscription2023Token`],
+    //     cta: `${config.APP_URL}/representants-legaux/droits-image?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
     //     youngFirstName: young.firstName,
     //     youngName: young.lastName,
     //   },
