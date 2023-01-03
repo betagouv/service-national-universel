@@ -74,7 +74,6 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
-    console.log(data._id);
     if (ok) setYoung(data);
   };
   const getDefaultQuery = () => {
