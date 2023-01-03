@@ -15,14 +15,24 @@ import { getResultLabel, translate, SENDINBLUE_TEMPLATES } from "../../../utils"
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
+import ChevronRight from "../../../assets/icons/ChevronRight";
 
 export default function ModalAffectations({ isOpen, onCancel, young }) {
   const FILTERS = ["SEARCH"];
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
+  const [center, setCenter] = useState(null);
   const [step, setStep] = useState(1);
+  const [pdrOption, setPdrOption] = useState("");
   const getDefaultQuery = () => {
     return {
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      track_total_hits: true,
+    };
+  };
+  const getDefaultQueryPdr = () => {
+    // cohorts
+    return {
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohorts.keyword": young.cohort } }] } },
       track_total_hits: true,
     };
   };
@@ -45,7 +55,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   };
 
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg shadow-xl py-2 px-8">
+    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg py-2 px-8">
       <div className="mb-4 ">
         <div className="flex flex-row w-full justify-between gap-6 mt-6">
           <div className="w-1/3">
@@ -65,54 +75,132 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
           </div>
         </div>
 
-        <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre centre</div>
-        <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <DataSearch
-            defaultQuery={getDefaultQuery}
-            showIcon={false}
-            placeholder="Rechercher par mots clés, ville, code postal..."
-            componentId="SEARCH"
-            dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
-            react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-            style={{ marginRight: "1rem", flex: 1 }}
-            innerClass={{ input: "searchbox" }}
-            className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
-            URLParams={true}
-            autosuggest={false}
-          />
-          <div className="reactive-result w-full">
-            <ReactiveListComponent
-              defaultQuery={getDefaultQuery}
-              scrollOnChange={false}
-              react={{ and: FILTERS }}
-              paginationAt="bottom"
-              showTopResultStats={false}
-              size={3}
-              render={({ data }) => (
-                <div className="flex flex-col justify-center items-center gap-4 w-full">
-                  {data.map((hit) => (
-                    <HitCenter
-                      key={hit._id}
-                      hit={hit}
-                      onSend={(center) =>
-                        setModal({
-                          isOpen: true,
-                          title: "Changement de centre",
-                          message: (
-                            <p>
-                              Voulez-vous affecter <b>{young.firstName}</b> au centre <b>{center.name}</b> au séjour de <b>{center.session}</b>.
-                            </p>
-                          ),
-                          onConfirm: () => handleAffectation(center),
-                        })
-                      }
-                    />
-                  ))}
+        {step === 1 && (
+          <>
+            <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre centre</div>
+            <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+              <DataSearch
+                defaultQuery={getDefaultQuery}
+                showIcon={false}
+                placeholder="Rechercher par mots clés, ville, code postal..."
+                componentId="SEARCH"
+                dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
+                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                style={{ marginRight: "1rem", flex: 1 }}
+                innerClass={{ input: "searchbox" }}
+                className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
+                URLParams={true}
+                autosuggest={false}
+              />
+              <div className="reactive-result w-full">
+                <ReactiveListComponent
+                  defaultQuery={getDefaultQuery}
+                  scrollOnChange={false}
+                  react={{ and: FILTERS }}
+                  paginationAt="bottom"
+                  showTopResultStats={false}
+                  size={3}
+                  render={({ data }) => (
+                    <div className="flex flex-col justify-center items-center gap-4 w-full">
+                      {data.map((hit) => (
+                        <HitCenter
+                          key={hit._id}
+                          hit={hit}
+                          onSend={() => {
+                            setStep(2);
+                            setCenter(hit);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+            </ReactiveBase>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            {pdrOption === "" && (
+              <>
+                <div className="my-4 text-gray-900 text-xl text-center font-medium">Choix du point de rassemblement</div>
+                <div className="flex flex-row flex-wrap gap-4 px-4">
+                  <div
+                    onClick={() => setPdrOption("ref-select")}
+                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                    <div className="text-sm w-5/6">
+                      <span className="font-bold">Je choisis</span> un point de rassemblement
+                    </div>
+                    <ChevronRight className="text-gray-400" width={8} height={16} />
+                  </div>
+                  <div className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                    <div className="text-sm w-5/6">
+                      <span className="font-bold">Je laisse {young.firstName} choisir</span> son point de rassemblement
+                    </div>
+                    <ChevronRight className="text-gray-400" width={8} height={16} />
+                  </div>
+                  <div className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                    <div className="text-sm w-5/6">
+                      {young.firstName} se rendra au centre et en reviendra <span className="font-bold">par ses propres moyens</span>
+                    </div>
+                    <ChevronRight className="text-gray-400" width={8} height={16} />
+                  </div>
+                  <div className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                    <div className="text-sm w-5/6">
+                      Plan de transport <span className="font-bold">transmis par les services locaux</span>
+                    </div>
+                    <ChevronRight className="text-gray-400" width={8} height={16} />
+                  </div>
                 </div>
-              )}
-            />
-          </div>
-        </ReactiveBase>
+              </>
+            )}
+            {pdrOption === "ref-select" && (
+              <>
+                <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre point de rassemblement</div>
+                <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+                  <DataSearch
+                    defaultQuery={getDefaultQueryPdr}
+                    showIcon={false}
+                    componentId="SEARCH"
+                    dataField={["name", "address", "region", "department", "code", "city", "zip"]}
+                    placeholder="Rechercher un point de rassemblement"
+                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                    URLParams={true}
+                    autosuggest={false}
+                    className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
+                    innerClass={{ input: "searchbox" }}
+                  />
+                  <div className="reactive-result w-full">
+                    <ReactiveListComponent
+                      defaultQuery={getDefaultQueryPdr}
+                      scrollOnChange={false}
+                      react={{ and: FILTERS }}
+                      paginationAt="bottom"
+                      showTopResultStats={false}
+                      size={3}
+                      render={({ data }) => (
+                        <div className="flex flex-col justify-center items-center gap-4 w-full">
+                          {data.map((hit) => (
+                            <HitPdr
+                              key={hit._id}
+                              hit={hit}
+                              onSend={() => {
+                                setStep(2);
+                                setCenter(hit);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    />
+                  </div>
+                </ReactiveBase>
+              </>
+            )}
+          </>
+        )}
+
         <ModalConfirm
           isOpen={modal.isOpen}
           onConfirm={modal.onConfirm}
@@ -121,7 +209,12 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
           onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
         />
       </div>
-      <div onClick={onCancel} className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer">
+      <div
+        onClick={() => {
+          if (step === 1) return onCancel();
+          setStep((step) => step - 1);
+        }}
+        className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
         Retour
       </div>
     </ModalTailwind>
@@ -152,16 +245,39 @@ const HitCenter = ({ hit, onSend }) => {
   );
 };
 
+const HitPdr = ({ hit, onSend }) => {
+  return (
+    <>
+      <hr />
+      <div className="flex flex-row gap-4 justify-between items-center w-full px-2">
+        <div className="w-1/2">
+          <MultiLine>
+            <span className="font-bold text-black">{hit.name}</span>
+            <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
+          </MultiLine>
+        </div>
+        <div className="w-1/4">
+          <div key={hit.cohort} className={`rounded-full text-xs font-medium leading-5 px-3 py-1 w-fit border-[1px] border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF]`}>
+            {hit.cohort}
+          </div>
+        </div>
+        <div className="cursor-pointer" onClick={onSend}>
+          <RightArrow />
+        </div>
+      </div>
+    </>
+  );
+};
 const RightArrow = () => {
   return (
     <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g filter="url(#filter0_d_3100_51832)">
         <rect x="2" y="1" width="38" height="38" rx="19" fill="#2563EB" />
-        <path d="M18.5 14.1667L24.3333 20L18.5 25.8334" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M18.5 14.1667L24.3333 20L18.5 25.8334" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </g>
       <defs>
-        <filter id="filter0_d_3100_51832" x="0" y="0" width="42" height="42" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <filter id="filter0_d_3100_51832" x="0" y="0" width="42" height="42" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
           <feOffset dy="1" />
           <feGaussianBlur stdDeviation="1" />
