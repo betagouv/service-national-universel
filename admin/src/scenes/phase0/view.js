@@ -1553,9 +1553,8 @@ function SectionConsentements({ young, onChange }) {
   }
 
   async function changeImagesRights(parentId) {
-    console.log("TODO: change image rights: ", parentId);
     try {
-      const result = await api.put(`/young/${young._id}/parent-image-rights-reset`, { parentId });
+      const result = await api.put(`/young-edition/${young._id}/parent-image-rights-reset`, { parentId });
       if (!result.ok) {
         toastr.error("Erreur !", "Nous n'avons pu modifier le droit à l'image pour ce représentant légal. Veuillez réessayer dans quelques instants.");
       } else {
@@ -1747,12 +1746,12 @@ function SectionConsentements({ young, onChange }) {
                   </div>
                   {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
                 </div>
-                {young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && (
+                {young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && young.parent2AllowImageRightsReset === "true" && (
                   <div className="mt-2 flex items-center justify-between">
                     <div
                       className="cursor-pointer italic text-[#1D4ED8]"
                       onClick={() => {
-                        copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=2`);
+                        copyToClipboard(`${appURL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}&parent=2`);
                         toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                       }}>
                       Copier le lien du formulaire
@@ -1777,34 +1776,38 @@ function SectionConsentements({ young, onChange }) {
                 )}
               </>
             )}
-            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && !young.parent2AllowImageRights && (
-              <div className="mt-2 flex items-center justify-between">
-                <div
-                  className="cursor-pointer italic text-[#1D4ED8]"
-                  onClick={() => {
-                    copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
-                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                  }}>
-                  Copier le lien du formulaire
-                </div>
-                <BorderButton
-                  mode="blue"
-                  onClick={async () => {
-                    try {
-                      const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                      if (response.ok) {
-                        toastr.success(translate("REMINDER_SENT"), "");
-                      } else {
-                        toastr.error(translate(response.code), "");
+            {young.parent1AllowSNU === "true" &&
+              young.parent1AllowImageRights === "true" &&
+              young.parent2AllowSNU !== "false" &&
+              !young.parent2AllowImageRights &&
+              young.parent2AllowImageRightsReset !== "true" && (
+                <div className="mt-2 flex items-center justify-between">
+                  <div
+                    className="cursor-pointer italic text-[#1D4ED8]"
+                    onClick={() => {
+                      copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                      toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                    }}>
+                    Copier le lien du formulaire
+                  </div>
+                  <BorderButton
+                    mode="blue"
+                    onClick={async () => {
+                      try {
+                        const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                        if (response.ok) {
+                          toastr.success(translate("REMINDER_SENT"), "");
+                        } else {
+                          toastr.error(translate(response.code), "");
+                        }
+                      } catch (error) {
+                        toastr.error(translate(error.code), "");
                       }
-                    } catch (error) {
-                      toastr.error(translate(error.code), "");
-                    }
-                  }}>
-                  Relancer
-                </BorderButton>
-              </div>
-            )}
+                    }}>
+                    Relancer
+                  </BorderButton>
+                </div>
+              )}
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
               young.status,
             ) ? (

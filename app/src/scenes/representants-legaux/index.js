@@ -102,6 +102,8 @@ export default function Index() {
             "/representants-legaux/verification",
             "/representants-legaux/consentement",
             "/representants-legaux/done",
+            "/representants-legaux/droits-image",
+            "/representants-legaux/droits-image-done",
           ]}
           component={() => (
             <Switch>
@@ -125,6 +127,8 @@ export default function Index() {
             "/representants-legaux/verification-parent2",
             "/representants-legaux/consentement-parent2",
             "/representants-legaux/done-parent2",
+            "/representants-legaux/droits-image2",
+            "/representants-legaux/droits-image-done2",
           ]}
           component={() => (
             <Switch>
@@ -133,8 +137,8 @@ export default function Index() {
                 <SentryRoute path="/representants-legaux/verification-parent2" component={() => <Step step={STEPS.VERIFICATION_PARENT2} />} />
                 <SentryRoute path="/representants-legaux/consentement-parent2" component={() => <Step step={STEPS.CONSENTEMENT_PARENT2} />} />
                 <SentryRoute path="/representants-legaux/done-parent2" component={() => <Step step={STEPS.DONE_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/droits-image" component={() => <Step step={STEPS.IMAGE_RIGHTS_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/droits-image-done" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE_PARENT2} />} />
+                <SentryRoute path="/representants-legaux/droits-image2" component={() => <Step step={STEPS.IMAGE_RIGHTS_PARENT2} />} />
+                <SentryRoute path="/representants-legaux/droits-image-done2" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE_PARENT2} />} />
               </RepresentantsLegauxContextProvider>
             </Switch>
           )}

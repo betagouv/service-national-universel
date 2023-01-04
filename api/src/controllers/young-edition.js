@@ -441,17 +441,20 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
 
     // --- reset parent image rights
     young[`parent${parentId}AllowImageRights`] = undefined;
+    if (parentId === 2) {
+      young.set({ parent2AllowImageRightsReset: "true" });
+    }
     await young.save();
 
     // --- send notification
-    // await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
-    //   emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
-    //   params: {
-    //     cta: `${config.APP_URL}/representants-legaux/droits-image?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
-    //     youngFirstName: young.firstName,
-    //     youngName: young.lastName,
-    //   },
-    // });
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
+      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
 
     // --- return updated young
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
@@ -490,14 +493,14 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
     }
 
     // --- send notification
-    // await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
-    //   emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
-    //   params: {
-    //     cta: `${config.APP_URL}/representants-legaux/droits-image?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
-    //     youngFirstName: young.firstName,
-    //     youngName: young.lastName,
-    //   },
-    // });
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
+      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
 
     return res.status(200).send({ ok: true });
   } catch (err) {

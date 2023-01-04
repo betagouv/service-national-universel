@@ -273,6 +273,78 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
   }
 });
 
+router.post("/consent-image-rights", tokenParentValidMiddleware, async (req, res) => {
+  try {
+    const { error: error_id, value: idstr } = Joi.string().valid("1", "2").required().validate(req.query.parent, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const id = parseInt(idstr);
+
+    // --- validate data
+    const consentBodySchema = Joi.object().keys({
+      [`parent${id}FirstName`]: validateFirstName().trim().required(),
+      [`parent${id}LastName`]: Joi.string().uppercase().required(),
+      [`parent${id}Email`]: Joi.string().lowercase().required(),
+      [`parent${id}Phone`]: Joi.string().required(),
+      [`parent${id}OwnAddress`]: Joi.string().valid("true", "false").required(),
+      [`parent${id}Address`]: Joi.string().allow(""),
+      [`parent${id}ComplementAddress`]: Joi.string().allow(""),
+      [`parent${id}Zip`]: Joi.string().allow(""),
+      [`parent${id}City`]: Joi.string().allow(""),
+      [`parent${id}Country`]: Joi.string().allow(""),
+      [`parent${id}CityCode`]: Joi.string().allow(""),
+      [`parent${id}Region`]: Joi.string().allow(""),
+      [`parent${id}Department`]: Joi.string().allow(""),
+      [`parent${id}Location`]: Joi.any(),
+      [`addressParent${id}Verified`]: Joi.string().valid("true", "false"),
+      [`parent${id}AllowImageRights`]: Joi.string().valid("true", "false").required(),
+    });
+    const result = consentBodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // --- check rights
+    const young = req.young;
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // --- update young
+    young.set(value);
+    if (young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false") {
+      young.set({ imageRight: young.parent1AllowImageRights });
+    } else {
+      young.set({ imageRight: young.parent1AllowImageRights === "true" && young.parent2AllowImageRights === "true" ? "true" : "false" });
+    }
+    if (id === 2) {
+      young.set({ parent2AllowImageRightsReset: "false" });
+    }
+    await young.save(fromUser(young, id));
+
+    // --- envoi notification parent 2 ?
+    if (id === 1 && value.parent1AllowImageRights === "true" && young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false") {
+      if (young.parent2Email !== null && young.parent2Email !== undefined && young.parent2Email.trim().length > 0) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_RESEND_IMAGERIGHT, {
+          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+    }
+
+    // --- result
+    return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/cni-invalide", tokenParentValidMiddleware, async (req, res) => {
   try {
     // --- validate data

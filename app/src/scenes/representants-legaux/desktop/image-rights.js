@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import Toggle from "../../../components/inscription/toggle";
 import { translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
-import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParent, API_IMAGE_RIGHTS } from "../commons";
+import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
@@ -45,7 +45,7 @@ export default function ImageRights({ parentId }) {
 
   useEffect(() => {
     if (young) {
-      if (isReturningParent(young, parentId)) {
+      if (isReturningParentForImageRights(young, parentId)) {
         return done();
       }
 
@@ -227,7 +227,7 @@ export default function ImageRights({ parentId }) {
     // else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
 
     try {
-      const { code, ok } = await api.post(API_IMAGE_RIGHTS + `?token=${token}&parent=${parentId}`, body);
+      const { code, ok } = await api.post(API_CONSENT_IMAGE_RIGHTS + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
         setErrors({ global: "Une erreur s'est produite" + (code ? " : " + translate(code) : "") });
         return false;
@@ -241,14 +241,14 @@ export default function ImageRights({ parentId }) {
   }
 
   function done() {
-    history.push(`/representants-legaux/droits-image-done?token=${token}&parent=${parentId}`);
+    history.push(`/representants-legaux/droits-image-done${parentId === "2" ? "2" : ""}?token=${token}&parent=${parentId}`);
   }
 
   return (
     <>
       <div className="bg-[#f9f6f2] flex justify-center py-10">
         <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
-          <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Modifier votre accord de droit à l’image</h1>
+          <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Modifier votre accord de droit à l&apos;image</h1>
 
           <div className="text-[14px] leading-[20px] text-[#666666] mb-[32px] mt-2">
             <p>
