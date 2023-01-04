@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungModel = require("../../models/young");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
@@ -181,6 +182,53 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- parameters & vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ cohort: Joi.string().required(), centerId: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { cohort, centerId } = valueParams;
+
+    const { error: errorQuery, value: valueQuery } = Joi.object({
+      offset: Joi.number().default(0),
+      limit: Joi.number().default(10),
+      filter: Joi.string().trim().allow("", null),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { offset, limit, filter } = valueQuery;
+    const regex = new RegExp(".*" + filter ? filter : "" + ".*", "gi");
+    const pipeline = [
+      { $match: { cohort: cohort, centerId: centerId } },
+      {
+        $addFields: {
+          convertedId: { $toString: "$_id" },
+        },
+      },
+      { $lookup: { from: "lignetopoints", localField: "convertedId", foreignField: "lineId", as: "lignetopoint" } },
+      {
+        $unwind: "$lignetopoint",
+      },
+      {
+        $addFields: {
+          meetingPointId: { $toObjectId: "$lignetopoint.meetingPointId" },
+        },
+      },
+      { $lookup: { from: "pointderassemblements", localField: "meetingPointId", foreignField: "_id", as: "meetingPoint" } },
+    ];
+    if (filter && filter.length > 0) {
+      pipeline.push({ $match: { $or: [{ name: regex }, { city: regex }, { department: regex }, { region: regex }] } });
+    }
+    const data = await LigneBusModel.aggregate(pipeline).exec();
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

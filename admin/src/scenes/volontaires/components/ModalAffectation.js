@@ -11,7 +11,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { getResultLabel, translate, SENDINBLUE_TEMPLATES, ES_NO_LIMIT } from "../../../utils";
+import { getResultLabel, translate, SENDINBLUE_TEMPLATES, ES_NO_LIMIT, formatStringDateWithDayTimezoneUTC } from "../../../utils";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
@@ -31,7 +31,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   const [currentPage, setCurrentPage] = useState(0);
   const [inputPdr, setInputPdr] = useState("");
   const [dataPdr, setDataPdr] = useState([]);
-  const [dataLigneBus, setDataLigneBus] = useState([]);
+  const [dataLigneToPoint, setDataLigneToPoint] = useState([]);
 
   useEffect(() => {
     if (pdrOption !== "ref-select") return;
@@ -82,8 +82,10 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       if (result.ok) {
         setCurrentPage(0);
         console.log(result);
-        setDataPdr(result.data.pdrListToCenterArray);
-        setDataLigneBus(result.data.ligneBusArray);
+        //setDataPdr(result.data.pdrListToCenterArray);
+        //setDataLigneBus(result.data.ligneBusArray);
+        setDataPdr(result.data.map((el) => el.meetingPoint[0]));
+        setDataLigneToPoint(result.data);
       } else {
         setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
       }
@@ -95,7 +97,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   }
 
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg py-2 px-8">
+    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[850px] bg-white rounded-lg py-2 px-8">
       <div className="mb-4 ">
         <div className="flex flex-row w-full justify-between gap-6 mt-6">
           <div className="w-1/3">
@@ -198,17 +200,16 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
             {pdrOption === "ref-select" && (
               <>
                 <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre point de rassemblement</div>
-                <input
-                  placeholder="Rechercher un point de rassemblement"
-                  className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
-                  value={inputPdr}
-                  onChange={(e) => setInputPdr(e.target.value)}
-                />
+                <div className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto">
+                  <input className="searchbox" placeholder="Rechercher un point de rassemblement" value={inputPdr} onChange={(e) => setInputPdr(e.target.value)} />
+                </div>
+
                 <div className="flex flex-col justify-center items-center gap-4 w-full">
-                  {dataLigneBus.map((hit) => (
+                  {dataPdr.map((hit) => (
                     <HitPdr
                       key={hit._id}
                       hit={hit}
+                      ligneBus={dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0]}
                       onSend={() => {
                         setStep(2);
                         setCenter(hit);
@@ -266,7 +267,7 @@ const HitCenter = ({ hit, onSend }) => {
   );
 };
 
-const HitPdr = ({ hit, onSend }) => {
+const HitPdr = ({ hit, onSend, ligneBus }) => {
   return (
     <>
       <hr />
@@ -274,12 +275,24 @@ const HitPdr = ({ hit, onSend }) => {
         <div className="w-1/2">
           <MultiLine>
             <span className="font-bold text-black">{hit.name}</span>
-            <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
+            <p>{`${hit.department || ""} • ${hit.address || ""}, ${hit.zip || ""} ${hit.city || ""}`}</p>
           </MultiLine>
         </div>
-        <div className="w-1/4">
-          <div key={hit.cohort} className={`rounded-full text-xs font-medium leading-5 px-3 py-1 w-fit border-[1px] border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF]`}>
-            {hit.cohort}
+        <div className="w-1/3 text-xs text-[#738297]">
+          Num. transport <span className="text-gray-900">{ligneBus?.busId}</span>
+        </div>
+        <div className="w-1/2 flex flex-col">
+          <div className="text-xs text-[#738297]">
+            Départ :{" "}
+            <span className="text-gray-900 capitalize">
+              {formatStringDateWithDayTimezoneUTC(ligneBus?.departuredDate)} {ligneBus?.lignetopoint.meetingHour}
+            </span>
+          </div>
+          <div className="text-xs text-[#738297]">
+            Retour :{" "}
+            <span className="text-gray-900 capitalize">
+              {formatStringDateWithDayTimezoneUTC(ligneBus?.returnDate)} {ligneBus?.lignetopoint.returnHour}
+            </span>
           </div>
         </div>
         <div className="cursor-pointer" onClick={onSend}>
