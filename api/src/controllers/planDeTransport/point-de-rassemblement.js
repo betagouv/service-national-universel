@@ -224,11 +224,15 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
         },
       },
       { $lookup: { from: "pointderassemblements", localField: "meetingPointId", foreignField: "_id", as: "meetingPoint" } },
+      {
+        $unwind: "$meetingPoint",
+      },
+      {
+        $match: { $or: [{ "meetingPoint.name": regex }, { "meetingPoint.city": regex }, { "meetingPoint.department": regex }, { "meetingPoint.region": regex }] },
+      },
     ];
-    if (filter && filter.length > 0) {
-      pipeline.push({ $match: { $or: [{ name: regex }, { city: regex }, { department: regex }, { region: regex }] } });
-    }
     const data = await LigneBusModel.aggregate(pipeline).exec();
+    console.log(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

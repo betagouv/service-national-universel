@@ -84,7 +84,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
         console.log(result);
         //setDataPdr(result.data.pdrListToCenterArray);
         //setDataLigneBus(result.data.ligneBusArray);
-        setDataPdr(result.data.map((el) => el.meetingPoint[0]));
+        setDataPdr(result.data.map((el) => el.meetingPoint));
         setDataLigneToPoint(result.data);
       } else {
         setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
