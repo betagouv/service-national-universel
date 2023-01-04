@@ -78,7 +78,6 @@ export default function ListPDR(props) {
     return all.map((data) => {
       let b = bus.find((option) => option?._id?.toString() === data.ligneId);
       let center = centers.find((option) => option?._id?.toString() === b?.centerId);
-      console.log("center", center);
       const allFields = {
         identity: {
           ID: data._id.toString(),
