@@ -17,6 +17,8 @@ import { toastr } from "react-redux-toastr";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
+import LinearIceBerg from "../../../assets/Linear-IceBerg";
+import LinearMap from "../../../assets/Linear-Map";
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -33,6 +35,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   const [inputPdr, setInputPdr] = useState("");
   const [dataPdr, setDataPdr] = useState([]);
   const [dataLigneToPoint, setDataLigneToPoint] = useState([]);
+  const [selectedPdr, setSelectedPdr] = useState(null);
 
   useEffect(() => {
     if (pdrOption !== "ref-select") return;
@@ -61,6 +64,10 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
         });
       return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
     }
+  };
+
+  const onSubmit = () => {
+    console.log("onSubmit", selectedPdr);
   };
 
   async function loadList() {
@@ -212,8 +219,8 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                               hit={hit}
                               ligneBus={dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0]}
                               onSend={() => {
-                                setStep(2);
-                                setCenter(hit);
+                                setStep(3);
+                                setSelectedPdr(hit);
                               }}
                             />
                           ))}
@@ -239,6 +246,40 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
           </>
         )}
 
+        {step === 3 && (
+          <div className="flex flex-col justify-center items-center">
+            <div className="mt-4 mb text-gray-900 text-xl text-center font-medium">
+              Vérifiez l&apos;affectation de {young.firstName} {young.lastName}
+            </div>
+            <div className="text-sm text-gray-500">Un email sera automatiquement envoyé au volontaire et à ses représentants légaux.</div>
+
+            <div className="flex flex-row gap-4 my-4">
+              <div className="w-1/2 flex flex-row gap-2 justify-center items-center mx-2">
+                <LinearIceBerg />
+                <div>
+                  <div className="font-bold text-gray-900 text-xl">Lieu d&apos;affectation</div>
+                  <div className="text-sm">
+                    {center.nameCentre}, {center.cityCentre} ({center.zipCentre}), {center.region}
+                  </div>
+                </div>
+              </div>
+              <div className="w-1/2 flex flex-row gap-2 justify-center items-center mx-2">
+                <LinearMap />
+                <div>
+                  <div className="font-bold text-gray-900 text-xl">Lieu de rassemblement</div>
+                  {pdrOption === "ref-select" ? (
+                    <div>
+                      {selectedPdr.name}, {selectedPdr.city} ({selectedPdr.zip}), {selectedPdr.region}
+                    </div>
+                  ) : (
+                    <div>Autre</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <ModalConfirm
           isOpen={modal.isOpen}
           onConfirm={modal.onConfirm}
@@ -247,14 +288,22 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
           onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
         />
       </div>
-      <div
-        onClick={() => {
-          if (step === 1) return onCancel();
-          if (step === 2 && pdrOption !== "") return setPdrOption("");
-          setStep((step) => step - 1);
-        }}
-        className="border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
-        Retour
+      <div className="flex flex-row gap-2 w-full">
+        <div
+          onClick={() => {
+            if (step === 1) return onCancel();
+            if (step === 2 && pdrOption !== "") return setPdrOption("");
+            setStep((step) => step - 1);
+          }}
+          className="flex-1 border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
+          Retour
+        </div>
+
+        {step === 3 && (
+          <div onClick={onSubmit} className="flex-1 border-[1px] rounded bg-blue-600 text-center py-2 text-sm font-medium text-white cursor-pointer mb-2">
+            Confirmer
+          </div>
+        )}
       </div>
     </ModalTailwind>
   );
