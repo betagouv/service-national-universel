@@ -64,6 +64,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
 
   async function loadList() {
     //setLoadingPdr(loadingPdr + 1);
+    setLoadingPdr(true);
     try {
       let url = "/point-de-rassemblement/ligneToPoint";
       url += "/" + young.cohort + "/" + center.cohesionCenterId;
@@ -82,9 +83,11 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       } else {
         setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
       }
+      setLoadingPdr(false);
     } catch (err) {
       //capture(err);
       setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+      setLoadingPdr(false);
     }
     //setLoadingPdr(loadingPdr - 1);
   }
@@ -198,17 +201,29 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                 </div>
 
                 <div className="flex flex-col justify-center items-center gap-4 w-full">
-                  {dataPdr.map((hit) => (
-                    <HitPdr
-                      key={hit._id}
-                      hit={hit}
-                      ligneBus={dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0]}
-                      onSend={() => {
-                        setStep(2);
-                        setCenter(hit);
-                      }}
-                    />
-                  ))}
+                  {loadingPdr ? (
+                    <div className="mt-2">Chargement ...</div>
+                  ) : (
+                    <>
+                      {dataPdr.length === 0 ? (
+                        <div className="mt-2">Aucun résultat.</div>
+                      ) : (
+                        <>
+                          {dataPdr.map((hit) => (
+                            <HitPdr
+                              key={hit._id}
+                              hit={hit}
+                              ligneBus={dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0]}
+                              onSend={() => {
+                                setStep(2);
+                                setCenter(hit);
+                              }}
+                            />
+                          ))}
+                        </>
+                      )}
+                    </>
+                  )}
                 </div>
               </>
             )}
