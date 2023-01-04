@@ -16,6 +16,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import ChevronRight from "../../../assets/icons/ChevronRight";
+import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -68,16 +69,12 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
     try {
       let url = "/point-de-rassemblement/ligneToPoint";
       url += "/" + young.cohort + "/" + center.cohesionCenterId;
-      console.log(center);
       url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
       url += "&filter=" + encodeURIComponent(inputPdr);
 
       const result = await api.get(url);
       if (result.ok) {
         setCurrentPage(0);
-        console.log(result);
-        //setDataPdr(result.data.pdrListToCenterArray);
-        //setDataLigneBus(result.data.ligneBusArray);
         setDataPdr(result.data.map((el) => el.meetingPoint));
         setDataLigneToPoint(result.data);
       } else {
@@ -200,7 +197,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                   <input className="searchbox" placeholder="Rechercher un point de rassemblement" value={inputPdr} onChange={(e) => setInputPdr(e.target.value)} />
                 </div>
 
-                <div className="flex flex-col justify-center items-center gap-4 w-full">
+                <div className="flex flex-col justify-start items-center gap-4 w-full h-[300px]">
                   {loadingPdr ? (
                     <div className="mt-2">Chargement ...</div>
                   ) : (
@@ -209,7 +206,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                         <div className="mt-2">Aucun résultat.</div>
                       ) : (
                         <>
-                          {dataPdr.map((hit) => (
+                          {dataPdr.slice(LIST_PAGE_LIMIT * currentPage, LIST_PAGE_LIMIT * currentPage + LIST_PAGE_LIMIT).map((hit) => (
                             <HitPdr
                               key={hit._id}
                               hit={hit}
@@ -220,6 +217,18 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                               }}
                             />
                           ))}
+                          <div className="flex flex-row gap-4 self-end">
+                            {currentPage > 0 && (
+                              <div className="border-[1px] p rounded border-gray-300 cursor-pointer" onClick={() => setCurrentPage((currentPage) => currentPage - 1)}>
+                                <BiChevronLeft className="text-gray-400" size={40} />
+                              </div>
+                            )}
+                            {LIST_PAGE_LIMIT * currentPage + LIST_PAGE_LIMIT < dataPdr.length && (
+                              <div className="border-[1px] p rounded border-gray-300 cursor-pointer" onClick={() => setCurrentPage((currentPage) => currentPage + 1)}>
+                                <BiChevronRight className="text-gray-400" size={40} />
+                              </div>
+                            )}
+                          </div>
                         </>
                       )}
                     </>
