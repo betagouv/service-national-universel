@@ -405,7 +405,9 @@ export default function View(props) {
                 ) : null}
               </div>
               <div className="flex flex-col items-center justify-center w-1/3  border-r-[1px] border-gray-200">
-                <div className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full">
+                <div
+                  className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full"
+                  onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${data._id.toString()}?cohort=${currentCohort}`)}>
                   Voir les volontaires (à venir)
                 </div>
                 <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full ">Liste des lignes de transports (à venir)</div>
