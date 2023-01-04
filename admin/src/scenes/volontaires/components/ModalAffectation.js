@@ -176,19 +176,35 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
                   </div>
-                  <div className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+
+                  <div
+                    onClick={() => {
+                      setPdrOption("young-select");
+                      setStep(3);
+                    }}
+                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
                     <div className="text-sm w-5/6">
                       <span className="font-bold">Je laisse {young.firstName} choisir</span> son point de rassemblement
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
                   </div>
-                  <div className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                  <div
+                    onClick={() => {
+                      setPdrOption("self-going");
+                      setStep(3);
+                    }}
+                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
                     <div className="text-sm w-5/6">
                       {young.firstName} se rendra au centre et en reviendra <span className="font-bold">par ses propres moyens</span>
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
                   </div>
-                  <div className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                  <div
+                    onClick={() => {
+                      setPdrOption("local");
+                      setStep(3);
+                    }}
+                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
                     <div className="text-sm w-5/6">
                       Plan de transport <span className="font-bold">transmis par les services locaux</span>
                     </div>
@@ -271,8 +287,12 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                     <div>
                       {selectedPdr.name}, {selectedPdr.city} ({selectedPdr.zip}), {selectedPdr.region}
                     </div>
+                  ) : pdrOption === "self-going" ? (
+                    <div>Le volontaire se rendra directement au centre et en reviendra par ses propres moyens.</div>
+                  ) : pdrOption === "local" ? (
+                    <div>Les informations de transport sont transmises par les services locaux.</div>
                   ) : (
-                    <div>Autre</div>
+                    <div>Le volontaire choisira lui-même son point de rassemblement.</div>
                   )}
                 </div>
               </div>
@@ -291,8 +311,12 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       <div className="flex flex-row gap-2 w-full">
         <div
           onClick={() => {
-            if (step === 1) return onCancel();
-            if (step === 2 && pdrOption !== "") return setPdrOption("");
+            if (step === 1) {
+              setPdrOption("");
+              return onCancel();
+            }
+            if (step === 2 && pdrOption === "ref-select") return setPdrOption("");
+            if (step === 3) setPdrOption("");
             setStep((step) => step - 1);
           }}
           className="flex-1 border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
