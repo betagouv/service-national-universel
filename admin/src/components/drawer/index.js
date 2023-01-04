@@ -135,14 +135,10 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
+      <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
       {environment !== "production" && (
         <>
           <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
-        </>
-      )}
-      {environment !== "production" && (
-        <>
-          <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
         </>
       )}
       <DrawerConnectToZammood title="Boîte de réception" history={history}>
@@ -253,15 +249,7 @@ function visitor({ onClick, from }) {
 }
 
 function dsnj({ onClick }) {
-  return (
-    <>
-      {environment !== "production" && (
-        <>
-          <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
-        </>
-      )}
-    </>
-  );
+  return <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />;
 }
 
 const Drawer = (props) => {
