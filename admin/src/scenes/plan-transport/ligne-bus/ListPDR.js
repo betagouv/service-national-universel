@@ -13,6 +13,7 @@ import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { DepartmentFilter, RegionFilter } from "../../../components/filters";
 import ModalExport from "../../../components/modals/ModalExport";
+import { BsDownload } from "react-icons/bs";
 
 const FILTERS = ["SEARCH", "LIGNE", "SESSION", "REGION", "DEPARTMENT"];
 
@@ -166,29 +167,32 @@ export default function ListPDR(props) {
 
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
-          <div className="flex items-stretch justify-between gap-2 bg-white py-2 px-4">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              componentId="SEARCH"
-              dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
-              placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              URLParams={true}
-              autosuggest={false}
-              className="datasearch-searchfield"
-              innerClass={{ input: "searchbox" }}
-            />
-            <div
-              className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-              onClick={() => setFilterVisible((e) => !e)}>
-              <FilterSvg className="text-gray-400" />
-              Filtres
+          <div className="flex items-stretch justify-between  bg-white py-2 px-4">
+            <div className="flex items-center gap-2">
+              <DataSearch
+                defaultQuery={getDefaultQuery}
+                showIcon={false}
+                componentId="SEARCH"
+                dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
+                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                URLParams={true}
+                autosuggest={false}
+                className="datasearch-searchfield"
+                innerClass={{ input: "searchbox" }}
+              />
+              <div
+                className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
+                onClick={() => setFilterVisible((e) => !e)}>
+                <FilterSvg className="text-gray-400" />
+                Filtres
+              </div>
             </div>
             <button
-              className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+              className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
               onClick={() => setIsExportOpen(true)}>
-              Exporter les volontaires
+              <BsDownload className="text-gray-400" />
+              Exporter
             </button>
             <ModalExport
               isOpen={isExportOpen}
