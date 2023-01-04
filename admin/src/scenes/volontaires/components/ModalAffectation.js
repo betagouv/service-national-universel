@@ -11,11 +11,13 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { getResultLabel, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { getResultLabel, translate, SENDINBLUE_TEMPLATES, ES_NO_LIMIT } from "../../../utils";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import ChevronRight from "../../../assets/icons/ChevronRight";
+
+const LIST_PAGE_LIMIT = 3;
 
 export default function ModalAffectations({ isOpen, onCancel, young }) {
   const FILTERS = ["SEARCH"];
@@ -23,6 +25,19 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   const [center, setCenter] = useState(null);
   const [step, setStep] = useState(1);
   const [pdrOption, setPdrOption] = useState("");
+
+  const [loadingPdr, setLoadingPdr] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [inputPdr, setInputPdr] = useState("");
+  const [dataPdr, setDataPdr] = useState([]);
+  const [dataLigneBus, setDataLigneBus] = useState([]);
+
+  useEffect(() => {
+    if (pdrOption !== "ref-select") return;
+    loadList();
+  }, [inputPdr, pdrOption]);
+
   const getDefaultQuery = () => {
     return {
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
@@ -53,6 +68,31 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
     }
   };
+
+  async function loadList() {
+    //setLoadingPdr(loadingPdr + 1);
+    try {
+      let url = "/point-de-rassemblement/ligneToPoint";
+      url += "/" + young.cohort + "/" + center.cohesionCenterId;
+      console.log(center);
+      url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
+      url += "&filter=" + encodeURIComponent(inputPdr);
+
+      const result = await api.get(url);
+      if (result.ok) {
+        setCurrentPage(0);
+        console.log(result);
+        setDataPdr(result.data.pdrListToCenterArray);
+        setDataLigneBus(result.data.ligneBusArray);
+      } else {
+        setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+      }
+    } catch (err) {
+      //capture(err);
+      setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+    }
+    //setLoadingPdr(loadingPdr - 1);
+  }
 
   return (
     <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[750px] bg-white rounded-lg py-2 px-8">
@@ -158,44 +198,24 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
             {pdrOption === "ref-select" && (
               <>
                 <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre point de rassemblement</div>
-                <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-                  <DataSearch
-                    defaultQuery={getDefaultQueryPdr}
-                    showIcon={false}
-                    componentId="SEARCH"
-                    dataField={["name", "address", "region", "department", "code", "city", "zip"]}
-                    placeholder="Rechercher un point de rassemblement"
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    URLParams={true}
-                    autosuggest={false}
-                    className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
-                    innerClass={{ input: "searchbox" }}
-                  />
-                  <div className="reactive-result w-full">
-                    <ReactiveListComponent
-                      defaultQuery={getDefaultQueryPdr}
-                      scrollOnChange={false}
-                      react={{ and: FILTERS }}
-                      paginationAt="bottom"
-                      showTopResultStats={false}
-                      size={3}
-                      render={({ data }) => (
-                        <div className="flex flex-col justify-center items-center gap-4 w-full">
-                          {data.map((hit) => (
-                            <HitPdr
-                              key={hit._id}
-                              hit={hit}
-                              onSend={() => {
-                                setStep(2);
-                                setCenter(hit);
-                              }}
-                            />
-                          ))}
-                        </div>
-                      )}
+                <input
+                  placeholder="Rechercher un point de rassemblement"
+                  className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
+                  value={inputPdr}
+                  onChange={(e) => setInputPdr(e.target.value)}
+                />
+                <div className="flex flex-col justify-center items-center gap-4 w-full">
+                  {dataLigneBus.map((hit) => (
+                    <HitPdr
+                      key={hit._id}
+                      hit={hit}
+                      onSend={() => {
+                        setStep(2);
+                        setCenter(hit);
+                      }}
                     />
-                  </div>
-                </ReactiveBase>
+                  ))}
+                </div>
               </>
             )}
           </>
