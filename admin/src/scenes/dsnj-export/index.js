@@ -43,12 +43,13 @@ const DSNJExport = () => {
       }
 
       // export available until 1 month after the cohort
-      dateEnd.setMonth(dateEnd.getMonth() + 1);
+      const exportsAvailableUntil = new Date(dateEnd.getTime());
+      exportsAvailableUntil.setMonth(exportsAvailableUntil.getMonth() + 1);
 
       return {
         id,
         dsnjExportDates,
-        exportsAvailableUntil: dateEnd,
+        exportsAvailableUntil,
       };
     });
     setCohorts(cohortList);
