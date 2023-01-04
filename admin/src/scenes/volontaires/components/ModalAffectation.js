@@ -44,13 +44,6 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       track_total_hits: true,
     };
   };
-  const getDefaultQueryPdr = () => {
-    // cohorts
-    return {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohorts.keyword": young.cohort } }] } },
-      track_total_hits: true,
-    };
-  };
   const handleAffectation = async (center) => {
     try {
       const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
