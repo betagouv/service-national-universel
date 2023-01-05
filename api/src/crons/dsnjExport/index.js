@@ -149,21 +149,22 @@ exports.handler = async () => {
     const exportsGenerated = {};
 
     for (const cohort of cohorts) {
-      const cohesionCenterExportDate = new Date(cohort.dsnjExportDates[EXPORT_COHESION_CENTERS]);
-      const youngBeforeSessionExportDate = new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]);
-      const youngAfterSessionExportDate = new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]);
+      if (!cohort.dsnjExportDates) return;
+      const cohesionCenterExportDate = cohort.dsnjExportDates[EXPORT_COHESION_CENTERS] ? new Date(cohort.dsnjExportDates[EXPORT_COHESION_CENTERS]) : undefined;
+      const youngBeforeSessionExportDate = cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION] ? new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]) : undefined;
+      const youngAfterSessionExportDate = cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION] ? new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]) : undefined;
       const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
       const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
 
-      if (cohesionCenterExportDate >= todayStart && cohesionCenterExportDate <= todayEnd) {
+      if (cohesionCenterExportDate && cohesionCenterExportDate >= todayStart && cohesionCenterExportDate <= todayEnd) {
         await generateCohesionCentersExport(cohort);
         addToSlackRapport(exportsGenerated, cohort.name, EXPORT_COHESION_CENTERS);
       }
-      if (youngBeforeSessionExportDate >= todayStart && youngBeforeSessionExportDate <= todayEnd) {
+      if (youngBeforeSessionExportDate && youngBeforeSessionExportDate >= todayStart && youngBeforeSessionExportDate <= todayEnd) {
         await generateYoungsExport(cohort);
         addToSlackRapport(exportsGenerated, cohort.name, EXPORT_YOUNGS_BEFORE_SESSION);
       }
-      if (youngAfterSessionExportDate >= todayStart && youngAfterSessionExportDate <= todayEnd) {
+      if (youngAfterSessionExportDate && youngAfterSessionExportDate >= todayStart && youngAfterSessionExportDate <= todayEnd) {
         await generateYoungsExport(cohort, true);
         addToSlackRapport(exportsGenerated, cohort.name, EXPORT_YOUNGS_AFTER_SESSION);
       }
