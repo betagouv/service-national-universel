@@ -15,7 +15,7 @@ import { DepartmentFilter, RegionFilter } from "../../../components/filters";
 import ModalExport from "../../../components/modals/ModalExport";
 import { BsDownload } from "react-icons/bs";
 
-const FILTERS = ["SEARCH", "LIGNE", "CENTERID", "CENTERNAME", "CENTERCITY", "REGION", "DEPARTMENT"];
+const FILTERS = ["SEARCH", "PDRID", "PDRNAME", "PDRCITY", "REGION", "DEPARTMENT"];
 
 const contactTypes = {
   email: "Adresse e-mail",
@@ -24,40 +24,21 @@ const contactTypes = {
 
 export default function ListPDR(props) {
   const id = props.match && props.match.params && props.match.params.id;
-  const cohort = new URLSearchParams(props.location.search).get("cohort");
-  const [PDR, setPDR] = React.useState();
   const [bus, setBus] = React.useState();
-  const [PDRDetails, setPDRDetails] = React.useState([]);
-  const [centers, setCenters] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [isExportOpen, setIsExportOpen] = React.useState(false);
   const history = useHistory();
 
   const fetchData = async () => {
-    if (!id || !cohort) return <div />;
+    if (!id) return <div />;
 
-    const { ok, code, data } = await api.get(`/point-de-rassemblement/${id}/bus/${cohort}`);
-    if (!ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des volontaires", translate(code));
-      return history.push(`/point-de-rassemblement/${id}`);
+    const { ok: okBus, code: codeBus, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
+    if (!okBus) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des volontaires", translate(codeBus));
+      return history.push(`/ligne-de-bus/${id}`);
     }
-
-    const centerIds = [];
-    for await (const b of data.bus) {
-      if (!b.centerId && centerIds.includes(b.centerId)) continue;
-      centerIds.push(b.centerId);
-      const { ok, code, data } = await api.get(`/cohesion-center/${b.centerId}`);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des centres de destinations", translate(code));
-        return history.push(`/point-de-rassemblement/${id}`);
-      }
-      setCenters((centers) => [...centers, data]);
-    }
-
-    setPDR(data.meetingPoint);
-    setBus(data.bus);
-    setPDRDetails(data.meetingPointsDetail);
+    setBus(reponseBus);
     setLoading(false);
   };
 
@@ -66,7 +47,7 @@ export default function ListPDR(props) {
   }, []);
 
   const getDefaultQuery = () => ({
-    query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [PDR?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+    query: { bool: { filter: [{ terms: { "ligneId.keyword": [bus?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
@@ -76,8 +57,9 @@ export default function ListPDR(props) {
   function transformVolontaires(data, values) {
     let all = data;
     return all.map((data) => {
-      let b = bus.find((option) => option?._id?.toString() === data.ligneId);
-      let center = centers.find((option) => option?._id?.toString() === b?.centerId);
+      let b = bus;
+      let center = bus.centerDetail;
+      let PDR = bus.meetingsPointsDetail.find((option) => option._id.toString() === data.meetingPointId);
       const allFields = {
         identity: {
           ID: data._id.toString(),
@@ -127,8 +109,8 @@ export default function ListPDR(props) {
           "Ville du point de rassemblement": PDR.city || "",
           "Département du point de rassemblement": PDR.department || "",
           "Région du point de rassemblement": PDR.region || "",
-          "Date et heure de départ (aller)": formatDateFR(b?.departuredDate) + " - " + PDRDetails.find((option) => option?.lineId === b?._id.toString())?.departureHour || "",
-          "Date et heure d’arrivée (retour)": formatDateFR(b?.returnDate) + " - " + PDRDetails.find((option) => option?.lineId === b?._id.toString())?.returnHour || "",
+          "Date et heure de départ (aller)": formatDateFR(b?.departuredDate) + " - " + PDR?.departureHour || "",
+          "Date et heure d’arrivée (retour)": formatDateFR(b?.returnDate) + " - " + PDR?.returnHour || "",
         },
         status: {
           "Statut général": translate(data.status),
@@ -153,10 +135,8 @@ export default function ListPDR(props) {
       <div className="py-8 flex items-center gap-4">
         <Title>Volontaires</Title>
         <div className="flex items-center gap-2 rounded-full bg-gray-200 py-1 px-2 leading-7">
-          <div className="text-gray-800 text-xs leading-5">
-            {PDR.address}, {PDR.zip}, {PDR.city}
-          </div>
-          <Link to={`/point-de-rassemblement/${PDR._id}`} target="_blank">
+          <div className="text-gray-800 text-xs leading-5">{bus.busId}</div>
+          <Link to={`/ligne-de-bus/${bus._id}`} target="_blank">
             <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
           </Link>
         </div>
@@ -205,13 +185,13 @@ export default function ListPDR(props) {
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              placeholder="Type"
-              componentId="LIGNE"
-              dataField="ligneId.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "LIGNE") }}
+              placeholder="ID du point de rassemblement"
+              componentId="PDRID"
+              dataField="meetingPointId.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "PDRID") }}
               renderItem={(e, count) => {
                 if (e === "Non renseigné") return `Non renseigné (${count})`;
-                return `${bus.find((option) => option._id.toString() === e)?.busId} (${count})`;
+                return `${bus.meetingsPointsDetail.find((option) => option.meetingPointId === e)?.code} (${count})`;
               }}
               title=""
               URLParams={true}
@@ -220,27 +200,26 @@ export default function ListPDR(props) {
               searchPlaceholder="Rechercher..."
               missingLabel="Non renseigné"
               renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Ligne";
+                if (Object.keys(items).length === 0) return "ID du point de rassemblement";
                 const translated = Object.keys(items).map((item) => {
                   if (item === "Non renseigné") return item;
-                  return bus.find((option) => option._id.toString() === item)?.busId;
+                  return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.code;
                 });
                 let value = translated.join(", ");
-                value = "Ligne : " + value;
+                value = "ID du point de rassemblement : " + value;
                 return <div>{value}</div>;
               }}
             />
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              placeholder="ID du centre de destination"
-              componentId="CENTERID"
-              dataField="sessionPhase1Id.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CENTERID") }}
+              placeholder="Nom du point de rassemblement"
+              componentId="PDRNAME"
+              dataField="meetingPointId.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "PDRNAME") }}
               renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Nom renseigné (${count})`;
-                let b = bus.find((option) => option?.sessionId?.toString() === e);
-                return `${b?.centerId} (${count})`;
+                if (e === "Non renseigné") return `Non renseigné (${count})`;
+                return `${bus.meetingsPointsDetail.find((option) => option.meetingPointId === e)?.name} (${count})`;
               }}
               title=""
               URLParams={true}
@@ -249,28 +228,26 @@ export default function ListPDR(props) {
               searchPlaceholder="Rechercher..."
               missingLabel="Non renseigné"
               renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "ID du centre de destination";
+                if (Object.keys(items).length === 0) return "Nom du point de rassemblement";
                 const translated = Object.keys(items).map((item) => {
                   if (item === "Non renseigné") return item;
-                  let b = bus.find((option) => option?.sessionId?.toString() === item);
-                  return b?.centerId;
+                  return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.name;
                 });
                 let value = translated.join(", ");
-                value = "ID du centre : " + value;
+                value = "Nom du point de rassemblement : " + value;
                 return <div>{value}</div>;
               }}
             />
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
-              placeholder="Nom du centre de destination"
-              componentId="CENTERNAME"
-              dataField="sessionPhase1Id.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CENTERNAME") }}
+              placeholder="Commune du point de rassemblement"
+              componentId="PDRCITY"
+              dataField="meetingPointId.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "PDRCITY") }}
               renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Nom renseigné (${count})`;
-                let b = bus.find((option) => option?.sessionId?.toString() === e);
-                return `${centers.find((option) => option._id.toString() === b.centerId)?.name} (${count})`;
+                if (e === "Non renseigné") return `Non renseigné (${count})`;
+                return `${bus.meetingsPointsDetail.find((option) => option.meetingPointId === e)?.city} (${count})`;
               }}
               title=""
               URLParams={true}
@@ -279,44 +256,13 @@ export default function ListPDR(props) {
               searchPlaceholder="Rechercher..."
               missingLabel="Non renseigné"
               renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Nom du centre de destination";
+                if (Object.keys(items).length === 0) return "Commune du point de rassemblement";
                 const translated = Object.keys(items).map((item) => {
                   if (item === "Non renseigné") return item;
-                  let b = bus.find((option) => option?.sessionId?.toString() === item);
-                  return centers.find((option) => option._id.toString() === b?.centerId)?.name;
+                  return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.city;
                 });
                 let value = translated.join(", ");
-                value = "Nom du centre : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Commune du centre de destination"
-              componentId="CENTERCITY"
-              dataField="sessionPhase1Id.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CENTERCITY") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Nom renseigné (${count})`;
-                let b = bus.find((option) => option?.sessionId?.toString() === e);
-                return `${centers.find((option) => option._id.toString() === b.centerId)?.city} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Commune du centre de destination";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  let b = bus.find((option) => option?.sessionId?.toString() === item);
-                  return centers.find((option) => option._id.toString() === b?.centerId)?.city;
-                });
-                let value = translated.join(", ");
-                value = "Commune du centre : " + value;
+                value = "Commune du point de rassemblement : " + value;
                 return <div>{value}</div>;
               }}
             />
@@ -343,12 +289,12 @@ export default function ListPDR(props) {
                 <div className="flex w-full flex-col mt-6 mb-2">
                   <hr />
                   <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
-                    <div className="w-[40%]">Volontaire</div>
-                    <div className="w-[20%]">Ligne</div>
-                    <div className="w-[40%]">Centre de destination</div>
+                    <div className="w-[33%]">Volontaire</div>
+                    <div className="w-[33%]">Point de rassemblement</div>
+                    <div className="w-[33%]">Centre de destination</div>
                   </div>
                   {data?.map((hit) => {
-                    return <Line key={hit._id} young={hit} bus={bus} centers={centers} cohort={cohort} />;
+                    return <Line key={hit._id} young={hit} bus={bus} />;
                   })}
                   <hr />
                 </div>
@@ -361,14 +307,18 @@ export default function ListPDR(props) {
   );
 }
 
-const Line = ({ young, bus, centers, cohort }) => {
-  const b = bus.find((option) => option._id.toString() === young.ligneId);
-  const c = centers.find((option) => option._id.toString() === b?.centerId);
+const Line = ({ young, bus }) => {
+  //   const b = bus.find((option) => option._id.toString() === young.ligneId);
+  //   const c = centers.find((option) => option._id.toString() === b?.centerId);
+
+  const p = bus.meetingsPointsDetail.find((option) => option._id.toString() === young.meetingPointId);
+  const c = bus.centerDetail;
+
   return (
     <>
       <hr />
       <div className="flex py-4 items-center px-4 hover:bg-gray-50 gap-6">
-        <div className="w-[40%] flex flex-col gap-1">
+        <div className="w-[33%] flex flex-col gap-1">
           <div className="text-base font-bold leading-6 text-gray-800">
             {young.firstName} {young.lastName}
           </div>
@@ -376,16 +326,22 @@ const Line = ({ young, bus, centers, cohort }) => {
             {young.department} • {young.region}
           </div>
         </div>
-        <div className="w-[20%] flex items-center gap-2">
-          <div className="text-gray-800 leading-6 text-sm">{b.busId}</div>
-          <Link to={`/ligne-de-bus/${b._id}`} target="_blank">
-            <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
-          </Link>
+        <div className="w-[33%] flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <div className="text-base font-medium leading-6 text-gray-800">{p.code}</div>
+            <Link to={`/point-de-rassemblement/${p._id}?cohort=${bus.cohort}`} target="_blank">
+              <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+            </Link>
+          </div>
+          <div className="text-sm leading-4 text-[#738297]">{p.name}</div>
+          <div className="text-sm leading-4 text-[#738297] font-light">
+            {p.zip} {p.city}
+          </div>
         </div>
-        <div className="w-[40%] flex flex-col gap-1">
+        <div className="w-[33%] flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className="text-base font-medium leading-6 text-gray-800">{c.code2022}</div>
-            <Link to={`/centre/${c._id}?cohorte=${cohort}`} target="_blank">
+            <Link to={`/centre/${c._id}?cohorte=${bus.cohort}`} target="_blank">
               <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
             </Link>
           </div>
