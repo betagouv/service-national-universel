@@ -1,3 +1,17 @@
+# [1.193.0](https://github.com/betagouv/service-national-universel/compare/v1.192.0...v1.193.0) (2023-01-05)
+
+
+### Bug Fixes
+
+* **api:** dsnj export cron script ([adea7c0](https://github.com/betagouv/service-national-universel/commit/adea7c0d017dff50eb7b85ed87f0826b67dbf6e5))
+* **api:** session isFull no longer required ([6afc200](https://github.com/betagouv/service-national-universel/commit/6afc20074c6a815639d89c5ed492473311d4f3cd))
+* **app:** open cohort even if it's full ([6f26886](https://github.com/betagouv/service-national-universel/commit/6f26886a1ada5d5da756a7f9848a7e14c7585400))
+
+
+### Features
+
+* **admin:** open new phase 2 ([449f6ed](https://github.com/betagouv/service-national-universel/commit/449f6ed6bfbb6252a61c656f3a2dd58acfa73c9c))
+
 # [1.192.0](https://github.com/betagouv/service-national-universel/compare/v1.191.4...v1.192.0) (2023-01-04)
 
 
