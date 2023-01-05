@@ -5,9 +5,9 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../ut
 import Banner from "./components/banner";
 import Default from "./default";
 import HomePhase2 from "./HomePhase2";
-import Refused from "./refused";
 import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
+import Affected from "./Affected";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingList from "./waitingList";
 import WaitingReinscription from "./WaitingReinscription";
@@ -61,7 +61,13 @@ export default () => {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-      if (young.status === YOUNG_STATUS.VALIDATED) return <ValidatedV2 />;
+      if (young.status === YOUNG_STATUS.VALIDATED) {
+        if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
+          return <Affected />;
+        } else {
+          return <ValidatedV2 />;
+        }
+      }
     }
     if (
       young.status === YOUNG_STATUS.VALIDATED &&
