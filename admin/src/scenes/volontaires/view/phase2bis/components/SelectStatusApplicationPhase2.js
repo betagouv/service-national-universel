@@ -7,37 +7,53 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import ModalConfirmWithMessage from "../../../../../components/modals/ModalConfirmWithMessage";
 import { APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../../utils";
 import styled from "styled-components";
+import ChevronDown from "../../../../../assets/icons/ChevronDown";
+import { BiChevronDown } from "react-icons/bi";
 
 export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
   const [modalDone, setModalDone] = useState({ isOpen: false, onConfirm: null });
+  const [dropDownOpen, setDropDownOpen] = useState(false);
+  const ref = React.useRef(null);
 
   const user = useSelector((state) => state.Auth.user);
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setDropDownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   const theme = {
     background: {
-      WAITING_VALIDATION: "rgb(224 242 254)",
-      WAITING_VERIFICATION: "rgb(224 242 254)",
-      WAITING_ACCEPTATION: "rgb(249 115 22)",
-      VALIDATED: "#71C784",
-      DONE: "#5694CD",
-      REFUSED: "#0B508F",
-      CANCEL: "#F4F4F4",
-      IN_PROGRESS: "rgb(79 70 229)",
-      ABANDON: "rgb(249 250 251)",
+      WAITING_VALIDATION: "blue-100",
+      WAITING_VERIFICATION: "blue-100",
+      WAITING_ACCEPTATION: "orange-500",
+      VALIDATED: "green-500",
+      DONE: "blue-500",
+      REFUSED: "blue-800",
+      CANCEL: "gray-100",
+      IN_PROGRESS: "indigo-600",
+      ABANDON: "gray-50",
     },
     text: {
-      WAITING_VALIDATION: "rgb(2 132 199)",
-      WAITING_VERIFICATION: "rgb(2 132 199)",
-      WAITING_ACCEPTATION: "#fff",
-      VALIDATED: "#fff",
-      DONE: "#fff",
-      REFUSED: "#fff",
-      CANCEL: "#6B6B6B",
-      IN_PROGRESS: "#fff",
-      ABANDON: "rgb(156 163 175)",
+      WAITING_VALIDATION: "blue-600",
+      WAITING_VERIFICATION: "blue-600",
+      WAITING_ACCEPTATION: "white",
+      VALIDATED: "white",
+      DONE: "white",
+      REFUSED: "white",
+      CANCEL: "gray-500",
+      IN_PROGRESS: "white",
+      ABANDON: "gray-400",
     },
   };
 
@@ -61,6 +77,7 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) =
   options = lookUpAuthorizedStatus({ status: application.status, role: user.role });
 
   const onClickStatus = (status) => {
+    setDropDownOpen(false);
     setModalConfirm({
       isOpen: true,
       title: "Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.",
@@ -97,25 +114,28 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) =
 
   return (
     <>
-      <ActionBox background={theme.background[application.status]} color={theme.text[application.status]}>
-        <UncontrolledDropdown setActiveFromChild>
-          <DropdownToggle tag="button">
-            {translateApplication(application.status)}
-            <Chevron color={theme.text[application.status]} />
-          </DropdownToggle>
-          <DropdownMenu>
+      <div ref={ref}>
+        <div className="inline-block" onClick={() => setDropDownOpen((dropDownOpen) => !dropDownOpen)}>
+          <div className={`bg-${theme.background[application.status]} text-${theme.text[application.status]} rounded flex flex-row items-center`}>
+            <div className="text-xs font-normal p-1">{translateApplication(application.status)}</div>
+            <BiChevronDown size={20} />
+          </div>
+        </div>
+        {dropDownOpen && (
+          <div className="absolute bg-white">
             {options
               .filter((e) => e !== application.status)
               .map((status) => {
                 return (
-                  <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
+                  <div key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
                     {translateApplication(status)}
-                  </DropdownItem>
+                  </div>
                 );
               })}
-          </DropdownMenu>
-        </UncontrolledDropdown>
-      </ActionBox>
+          </div>
+        )}
+      </div>
+
       <ModalConfirmWithMessage
         isOpen={modalRefuse.isOpen}
         title="Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer"
@@ -181,88 +201,8 @@ const lookUpAuthorizedStatus = ({ status, role }) => {
       case APPLICATION_STATUS.CANCEL:
       case APPLICATION_STATUS.DONE:
       case APPLICATION_STATUS.ABANDON:
-        return [];
       default:
         return [];
     }
   }
 };
-const Chevron = ({ ...props }) => {
-  return (
-    <ChevronContainer {...props}>
-      <svg viewBox="0 0 407.437 407.437">
-        <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-      </svg>
-    </ChevronContainer>
-  );
-};
-const ChevronContainer = styled.div`
-  margin-left: auto;
-  margin-left: 10px;
-  svg {
-    height: 10px;
-  }
-  svg polygon {
-    fill: ${({ color }) => `${color}`};
-  }
-`;
-
-const ActionBox = styled.div`
-  .dropdown-menu {
-    min-width: 0;
-    /* width: 400px; */
-    a,
-    div {
-      white-space: nowrap;
-      font-size: 14px;
-      padding: 5px 15px;
-    }
-  }
-  button {
-    ${({ background, color }) => `
-      background-color: ${background};
-      border: 1px solid ${background};
-      color: ${color};
-    `}
-    display: inline-flex;
-    align-items: center;
-    text-align: left;
-    border-radius: 4px;
-    padding: 5px 6px;
-    font-size: 12px;
-    font-weight: 400;
-    cursor: pointer;
-    outline: 0;
-    max-width: 300px;
-    .edit-icon {
-      height: 17px;
-      margin-right: 10px;
-      path {
-        fill: ${({ color }) => `${color}`};
-      }
-    }
-    .down-icon {
-      // margin-left: auto;
-      margin-left: 15px;
-      svg {
-        height: 10px;
-      }
-      svg polygon {
-        fill: ${({ color }) => `${color}`};
-      }
-    }
-  }
-  .dropdown-item {
-    background-color: transparent;
-    border: none;
-    color: #767676;
-    white-space: nowrap;
-    font-size: 14px;
-    padding: 5px 15px;
-    font-weight: 400;
-    width: 100%;
-    :hover {
-      background-color: #f3f3f3;
-    }
-  }
-`;
