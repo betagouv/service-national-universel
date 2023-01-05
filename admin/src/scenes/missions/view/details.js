@@ -28,6 +28,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { adminURL } from "../../../config";
+import ExternalLink from "../../../assets/icons/ExternalLink";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -460,35 +461,45 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="text-xs font-medium mb-2">
                     Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
                   </div>
-                  <CreatableSelect
-                    isDisabled={!editing || mission?.isJvaMission === "true"}
-                    options={referents}
-                    ref={referentSelectRef}
-                    error={errors.tutorId}
-                    styles={{
-                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
-                      control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: editing && mission?.isJvaMission === "true" ? "#E5E7EB" : "white" }),
-                      singleValue: (styles) => ({ ...styles, color: "black" }),
-                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
-                    }}
-                    noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
-                    placeholder={"Sélectionnez un tuteur"}
-                    onChange={(e) => {
-                      setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
-                    }}
-                    formatCreateLabel={() => {
-                      return (
-                        <div className="flex items-center gap-2 flex-col" onClick={() => setCreationTutor(true)}>
-                          <div className="text-sm">Le tuteur recherché n&apos;est pas dans la liste ?</div>
-                          <div className="font-medium text-blue-600 text-">Ajouter un nouveau tuteur</div>
-                        </div>
-                      );
-                    }}
-                    isValidNewOption={() => true}
-                    value={referents?.find((ref) => ref.value === values.tutorId)}
-                  />
+                  {!editing ? (
+                    <a target="_blank" rel="noreferrer" href={`${adminURL}/user/${referents?.find((ref) => ref.value === values.tutorId)?.value}`}>
+                      <div className="flex flex-row items-center gap-2 w-full border-[1px] border-[#D1D5DB] rounded p-2 cursor-pointer">
+                        <div className="ml-1">{referents?.find((ref) => ref.value === values.tutorId)?.label}</div>
+                        <ExternalLink />
+                      </div>
+                    </a>
+                  ) : (
+                    <CreatableSelect
+                      isDisabled={!editing || mission?.isJvaMission === "true"}
+                      options={referents}
+                      ref={referentSelectRef}
+                      error={errors.tutorId}
+                      styles={{
+                        dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                        placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
+                        control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: editing && mission?.isJvaMission === "true" ? "#E5E7EB" : "white" }),
+                        singleValue: (styles) => ({ ...styles, color: "black" }),
+                        multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                        indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                      }}
+                      noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
+                      placeholder={"Sélectionnez un tuteur"}
+                      onChange={(e) => {
+                        setValues({ ...values, tutorName: e.label, tutorId: e.value, tutor: e.tutor });
+                      }}
+                      formatCreateLabel={() => {
+                        return (
+                          <div className="flex items-center gap-2 flex-col" onClick={() => setCreationTutor(true)}>
+                            <div className="text-sm">Le tuteur recherché n&apos;est pas dans la liste ?</div>
+                            <div className="font-medium text-blue-600 text-">Ajouter un nouveau tuteur</div>
+                          </div>
+                        );
+                      }}
+                      isValidNewOption={() => true}
+                      value={referents?.find((ref) => ref.value === values.tutorId)}
+                    />
+                  )}
+
                   {editing && creationTutor && (
                     <div>
                       <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Créer un tuteur</div>
