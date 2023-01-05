@@ -58,7 +58,8 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) =
     try {
       const id = hit && hit._id;
       if (!id) return setApplication(null);
-      const { data } = await api.get(`/application/${id}`);
+      const { data, ok } = await api.get(`/application/${id}`);
+      if (!ok) return setApplication(null);
       setApplication(data);
     } catch (error) {
       console.log(error);
