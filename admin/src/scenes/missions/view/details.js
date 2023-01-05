@@ -27,6 +27,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { adminURL } from "../../../config";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -361,11 +362,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     error={errors.structureName}
                   />
                   {values.structureName && (
-                    <div
-                      onClick={() => history.push(`/structure/${values.structureId}/edit`)}
-                      className="border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
-                      Modifier la structure
-                    </div>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      href={`${adminURL}/structure/${values.structureId}/edit`}
+                      className="inline-block w-full border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
+                      Voir la structure
+                    </a>
                   )}
                 </div>
                 <div className="mt-4">
