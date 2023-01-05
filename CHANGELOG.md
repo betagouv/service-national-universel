@@ -1,3 +1,18 @@
+# [1.192.0](https://github.com/betagouv/service-national-universel/compare/v1.191.4...v1.192.0) (2023-01-04)
+
+
+### Bug Fixes
+
+* **admin:** cannot affect young ([d42a497](https://github.com/betagouv/service-national-universel/commit/d42a497be8fe7d0c127e160f2c85925bb75ddfb3))
+* **api:** autoValidationPhase1 si date cohort undefined ([b97beb5](https://github.com/betagouv/service-national-universel/commit/b97beb5ad78850bf3cabc521ab327d7a2dc867d5))
+* **lib:** buffer sejour vers l'infini et l'au dela ([ec5d99b](https://github.com/betagouv/service-national-universel/commit/ec5d99bf49ea58b5904240898885c0d1d43422da))
+
+
+### Features
+
+* **api:** Add support in mongoDB model to save messageUUID ([56806dc](https://github.com/betagouv/service-national-universel/commit/56806dc9da1401f27aac440870f231e6633be6db))
+* **api/admin:** MEP dsnj ([#2165](https://github.com/betagouv/service-national-universel/issues/2165)) ([503decb](https://github.com/betagouv/service-national-universel/commit/503decb32ae00db2aaf6ab412360b1a11a50af14))
+
 ## [1.191.4](https://github.com/betagouv/service-national-universel/compare/v1.191.3...v1.191.4) (2023-01-02)
 
 
