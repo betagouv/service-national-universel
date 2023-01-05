@@ -11,7 +11,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { getResultLabel, translate, SENDINBLUE_TEMPLATES, ES_NO_LIMIT, formatStringDateWithDayTimezoneUTC } from "../../../utils";
+import { getResultLabel, translate, SENDINBLUE_TEMPLATES, ES_NO_LIMIT, formatStringDateWithDayTimezoneUTC, sessions2023 } from "../../../utils";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
@@ -26,7 +26,7 @@ const LIST_PAGE_LIMIT = 3;
 export default function ModalAffectations({ isOpen, onCancel, young }) {
   const FILTERS = ["SEARCH"];
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
-  const [center, setCenter] = useState(null);
+  const [session, setSession] = useState(null);
   const [step, setStep] = useState(1);
   const [pdrOption, setPdrOption] = useState("");
 
@@ -37,6 +37,8 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   const [dataPdr, setDataPdr] = useState([]);
   const [dataLigneToPoint, setDataLigneToPoint] = useState([]);
   const [selectedPdr, setSelectedPdr] = useState(null);
+
+  const sessionObject = sessions2023.find((s) => s.name === young.cohort);
 
   useEffect(() => {
     if (pdrOption !== "ref-select") return;
@@ -49,15 +51,21 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       track_total_hits: true,
     };
   };
-  const handleAffectation = async (center) => {
+  const handleAffectation = async () => {
     try {
-      const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
-      const response = await api.post(`/session-phase1/${session.data._id}/assign-young/${young._id}`);
+      const response = await api.post(`/young/${young._id}/phase1/affectation`, {
+        centerId: session.cohesionCenterId,
+        sessionId: session._id,
+        pdrOption,
+        meetingPointId: selectedPdr?._id,
+      });
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
+      /*
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.PHASE_1_AFFECTATION}`);
       toastr.success(`${response.young.firstName} a été affecté(e) au centre ${center.name} !`);
       setModal((prevState) => ({ ...prevState, isOpen: false }));
       history.go(`/volontaire/${young._id}/phase!`);
+      */
     } catch (error) {
       if (error.code === "OPERATION_NOT_ALLOWED")
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
@@ -67,16 +75,12 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
     }
   };
 
-  const onSubmit = () => {
-    console.log("onSubmit", selectedPdr);
-  };
-
   async function loadList() {
     //setLoadingPdr(loadingPdr + 1);
     setLoadingPdr(true);
     try {
       let url = "/point-de-rassemblement/ligneToPoint";
-      url += "/" + young.cohort + "/" + center.cohesionCenterId;
+      url += "/" + young.cohort + "/" + session.cohesionCenterId;
       url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
       url += "&filter=" + encodeURIComponent(inputPdr);
 
@@ -151,7 +155,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                           hit={hit}
                           onSend={() => {
                             setStep(2);
-                            setCenter(hit);
+                            setSession(hit);
                           }}
                         />
                       ))}
@@ -276,7 +280,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                 <div>
                   <div className="font-bold text-gray-900 text-xl">Lieu d&apos;affectation</div>
                   <div className="text-sm">
-                    {center.nameCentre}, {center.cityCentre} ({center.zipCentre}), {center.region}
+                    {session.nameCentre}, {session.cityCentre} ({session.zipCentre}), {session.region}
                   </div>
                 </div>
               </div>
@@ -299,14 +303,14 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
               </div>
             </div>
             {selectedPdr && (
-              <div className="flex flex-row justify-center gap-6 mb-4">
+              <div className="flex flex-row justify-center gap-6 mb-2">
                 <div className="flex flex-row">
                   <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
                     <div className="text-orange-600 capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
                     <div className="text-gray-700 text-lg">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("D")}</div>
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Aller à {selectedPdr.ligneBus.lignetopoint.meetingHour}</div>
+                    <div className="text-gray-900 font-bold">Aller à {selectedPdr.ligneBus.lignetopoint.departureHour}</div>
                     <div className="text-gray-600 capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
@@ -318,6 +322,30 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Retour à {selectedPdr.ligneBus.lignetopoint.returnHour}</div>
                     <div className="text-gray-600 capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {pdrOption === "self-going" && (
+              <div className="flex flex-row justify-center gap-6 mb-2">
+                <div className="flex flex-row">
+                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
+                    <div className="text-orange-600 capitalize">{dayjs(sessionObject.dateStart).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(sessionObject.dateStart).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="flex flex-col items-start justify-center ml-2">
+                    <div className="text-gray-900 font-bold">Aller à 16h</div>
+                    <div className="text-gray-600 capitalize">{dayjs(sessionObject.dateStart).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
+                    <div className="text-orange-600 capitalize">{dayjs(sessionObject.dateEnd).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(sessionObject.dateEnd).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="flex flex-col items-start justify-center ml-2">
+                    <div className="text-gray-900 font-bold">Retour à 11h</div>
+                    <div className="text-gray-600 capitalize">{dayjs(sessionObject.dateEnd).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
               </div>
@@ -341,7 +369,10 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
               return onCancel();
             }
             if (step === 2 && pdrOption === "ref-select") return setPdrOption("");
-            if (step === 3) setPdrOption("");
+            if (step === 3) {
+              setSelectedPdr(null);
+              setPdrOption("");
+            }
             setStep((step) => step - 1);
           }}
           className="flex-1 border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
@@ -349,7 +380,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
         </div>
 
         {step === 3 && (
-          <div onClick={onSubmit} className="flex-1 border-[1px] rounded bg-blue-600 text-center py-2 text-sm font-medium text-white cursor-pointer mb-2">
+          <div onClick={handleAffectation} className="flex-1 border-[1px] rounded bg-blue-600 text-center py-2 text-sm font-medium text-white cursor-pointer mb-2">
             Confirmer
           </div>
         )}
@@ -400,7 +431,7 @@ const HitPdr = ({ hit, onSend, ligneBus }) => {
           <div className="text-xs text-[#738297]">
             Départ :{" "}
             <span className="text-gray-900 capitalize">
-              {formatStringDateWithDayTimezoneUTC(ligneBus?.departuredDate)} {ligneBus?.lignetopoint.meetingHour}
+              {formatStringDateWithDayTimezoneUTC(ligneBus?.departuredDate)} {ligneBus?.lignetopoint.departureHour}
             </span>
           </div>
           <div className="text-xs text-[#738297]">

@@ -12,6 +12,43 @@ const { ERRORS, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
+router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      centerId: Joi.string().required(),
+      sessionId: Joi.string().required(),
+      meetingPointId: Joi.string().optional().allow(null, ""),
+      id: Joi.string().required(),
+      pdrOption: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
+
+    const { id, sessionId, centerId, meetingPointId, pdrOption } = value;
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const session = await SessionPhase1Model.findById(sessionId);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (meetingPointId) {
+      const meetingPoint = session.meetingPoints.find((mp) => mp._id.toString() === meetingPointId);
+      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    console.log(id, sessionId, centerId, meetingPointId, pdrOption);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
