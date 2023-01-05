@@ -306,6 +306,10 @@ export default function Youngs({ mission, applications, updateMission }) {
     setYoungSelected([]);
     filteredRoleActions();
   }, [currentTab]);
+  useEffect(() => {
+    if (youngSelected.length === 0) return;
+    filteredRoleActions();
+  }, [youngSelected]);
   const filteredRoleActions = () => {
     if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
       return setOptionsFilteredRole(optionsActions);
