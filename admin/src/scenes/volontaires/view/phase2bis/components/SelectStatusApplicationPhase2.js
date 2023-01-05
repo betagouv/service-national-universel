@@ -3,11 +3,8 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import ModalConfirmWithMessage from "../../../../../components/modals/ModalConfirmWithMessage";
 import { APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../../utils";
-import styled from "styled-components";
-import ChevronDown from "../../../../../assets/icons/ChevronDown";
 import { BiChevronDown } from "react-icons/bi";
 
 export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) => {
