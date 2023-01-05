@@ -41,13 +41,19 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) =
     },
   };
 
-  useEffect(() => {
-    (async () => {
+  const fetchApplication = async () => {
+    try {
       const id = hit && hit._id;
       if (!id) return setApplication(null);
       const { data } = await api.get(`/application/${id}`);
       setApplication(data);
-    })();
+    } catch (error) {
+      console.log(error);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du statut de la candidature", translate(error.code));
+    }
+  };
+  useEffect(() => {
+    fetchApplication();
   }, [hit._id]);
 
   if (!application) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
