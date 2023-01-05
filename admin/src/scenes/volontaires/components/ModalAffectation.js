@@ -19,6 +19,7 @@ import ChevronRight from "../../../assets/icons/ChevronRight";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
+import dayjs from "dayjs";
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -236,7 +237,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                               ligneBus={dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0]}
                               onSend={() => {
                                 setStep(3);
-                                setSelectedPdr(hit);
+                                setSelectedPdr({ pdr: hit, ligneBus: dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0] });
                               }}
                             />
                           ))}
@@ -285,7 +286,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                   <div className="font-bold text-gray-900 text-xl">Lieu de rassemblement</div>
                   {pdrOption === "ref-select" ? (
                     <div>
-                      {selectedPdr.name}, {selectedPdr.city} ({selectedPdr.zip}), {selectedPdr.region}
+                      {selectedPdr.pdr.name}, {selectedPdr.pdr.city} ({selectedPdr.pdr.zip}), {selectedPdr.pdr.region}
                     </div>
                   ) : pdrOption === "self-going" ? (
                     <div>Le volontaire se rendra directement au centre et en reviendra par ses propres moyens.</div>
@@ -297,6 +298,30 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                 </div>
               </div>
             </div>
+            {selectedPdr && (
+              <div className="flex flex-row justify-center gap-6 mb-4">
+                <div className="flex flex-row">
+                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
+                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="flex flex-col items-start justify-center ml-2">
+                    <div className="text-gray-900 font-bold">Aller à {selectedPdr.ligneBus.lignetopoint.meetingHour}</div>
+                    <div className="text-gray-600 capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
+                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="flex flex-col items-start justify-center ml-2">
+                    <div className="text-gray-900 font-bold">Retour à {selectedPdr.ligneBus.lignetopoint.returnHour}</div>
+                    <div className="text-gray-600 capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
