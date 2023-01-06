@@ -616,6 +616,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  transportInfoGivenByLocal: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Les informations de transport sont transmises par les services locaux",
+    },
+  },
+
   // Legacy ?
   codeCenterTmp: {
     type: String,

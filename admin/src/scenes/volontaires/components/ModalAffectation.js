@@ -29,6 +29,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   const [session, setSession] = useState(null);
   const [step, setStep] = useState(1);
   const [pdrOption, setPdrOption] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [loadingPdr, setLoadingPdr] = useState(false);
   const [error, setError] = useState(null);
@@ -53,6 +54,7 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
   };
   const handleAffectation = async () => {
     try {
+      setLoading(true);
       const response = await api.post(`/young/${young._id}/phase1/affectation`, {
         centerId: session.cohesionCenterId,
         sessionId: session._id,
@@ -62,10 +64,10 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
       /*
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.PHASE_1_AFFECTATION}`);
-      toastr.success(`${response.young.firstName} a été affecté(e) au centre ${center.name} !`);
-      setModal((prevState) => ({ ...prevState, isOpen: false }));
-      history.go(`/volontaire/${young._id}/phase!`);
       */
+      setModal((prevState) => ({ ...prevState, isOpen: false }));
+      toastr.success(`L'affectation du jeune a bien été effectuée`);
+      history.go(`/volontaire/${young._id}/phase1`);
     } catch (error) {
       if (error.code === "OPERATION_NOT_ALLOWED")
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
@@ -276,7 +278,9 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
 
             <div className="flex flex-row gap-4 my-4">
               <div className="w-1/2 flex flex-row gap-2 justify-center items-center mx-2">
-                <LinearIceBerg />
+                <div>
+                  <LinearIceBerg />
+                </div>
                 <div>
                   <div className="font-bold text-gray-900 text-xl">Lieu d&apos;affectation</div>
                   <div className="text-sm">
@@ -285,7 +289,9 @@ export default function ModalAffectations({ isOpen, onCancel, young }) {
                 </div>
               </div>
               <div className="w-1/2 flex flex-row gap-2 justify-center items-center mx-2">
-                <LinearMap />
+                <div>
+                  <LinearMap fill-opacity={`${pdrOption !== "ref-select" && "0.5"}`} />
+                </div>
                 <div>
                   <div className="font-bold text-gray-900 text-xl">Lieu de rassemblement</div>
                   {pdrOption === "ref-select" ? (

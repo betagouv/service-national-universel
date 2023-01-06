@@ -8,18 +8,22 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");
-const { ERRORS, autoValidationSessionPhase1Young } = require("../../utils");
-const { serializeYoung } = require("../../utils/serializer");
+const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1 } = require("../../utils");
+const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
 router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const allowedKeys = ["self-going", "ref-select", "young-select", "local"];
     const { error, value } = Joi.object({
       centerId: Joi.string().required(),
       sessionId: Joi.string().required(),
       meetingPointId: Joi.string().optional().allow(null, ""),
       id: Joi.string().required(),
-      pdrOption: Joi.string().required(),
+      pdrOption: Joi.string()
+        .trim()
+        .required()
+        .valid(...allowedKeys),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -37,12 +41,39 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
     if (meetingPointId) {
       const meetingPoint = session.meetingPoints.find((mp) => mp._id.toString() === meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    console.log(id, sessionId, centerId, meetingPointId, pdrOption);
+    // should we link to bus ?
+    if (pdrOption === "self-going") young.set({ deplacementPhase1Autonomous: "true" });
+    else if (pdrOption === "ref-select") young.set({ deplacementPhase1Autonomous: "false", meetingPointId });
+    else if (pdrOption === "young-select") young.set({ deplacementPhase1Autonomous: "false" });
+    else young.set({ transportInfoGivenByLocal: "true", deplacementPhase1Autonomous: "false" });
+
+    // update youngs infos
+    young.set({
+      status: "VALIDATED",
+      statusPhase1: "AFFECTED",
+      sessionPhase1Id: sessionId,
+      cohesionCenterId: centerId,
+    });
+
+    await young.save({ fromUser: req.user });
+
+    // send email ? + sms ?
+
+    // update session infos
+    const data = await updatePlacesSessionPhase1(session, req.user);
+    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
+
+    return res.status(200).send({
+      data: serializeSessionPhase1(data, req.user),
+      young: serializeYoung(young, req.user),
+      ok: true,
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
