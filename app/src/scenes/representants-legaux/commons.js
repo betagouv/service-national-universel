@@ -8,6 +8,7 @@ export const ABROAD = "Abroad";
 export const API_VERIFICATION = "/representants-legaux/data-verification";
 export const API_CONSENT = "/representants-legaux/consent";
 export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide";
+export const API_CONSENT_IMAGE_RIGHTS = "/representants-legaux/consent-image-rights";
 
 // --- Docs on CDN
 export const CDN_BASE_URL =
@@ -111,6 +112,13 @@ export function booleanToString(val, defaultValue = null) {
 export function isReturningParent(young, parentId) {
   return (
     (parentId === 1 && (young.parentAllowSNU === "true" || young.parentAllowSNU === "false")) ||
+    (parentId === 2 && (young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false"))
+  );
+}
+
+export function isReturningParentForImageRights(young, parentId) {
+  return (
+    (parentId === 1 && (young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false")) ||
     (parentId === 2 && (young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false"))
   );
 }
