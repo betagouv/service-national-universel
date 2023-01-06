@@ -112,6 +112,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       delete checkedMission.hebergementPayant;
     }
 
+    if (mission.placesTotal !== checkedMission.placesTotal) {
+      if (mission.placesTotal < checkedMission.placesTotal) {
+        mission.placesLeft = mission.placesLeft + (checkedMission.placesTotal - mission.placesTotal);
+      } else if (checkedMission.placesTotal < mission.placesTotal) {
+        mission.placesLeft = mission.placesLeft - (mission.placesTotal - checkedMission.placesTotal);
+        if (mission.placesLeft < 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+    }
+
     const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });

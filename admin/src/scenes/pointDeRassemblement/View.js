@@ -32,6 +32,7 @@ export default function View(props) {
   const [editInfo, setEditInfo] = React.useState(false);
   const [editSession, setEditSession] = React.useState(false);
   const [currentCohort, setCurrentCohort] = React.useState("");
+  const [nbYoung, setNbYoung] = React.useState([]);
 
   const getPDR = async () => {
     try {
@@ -43,12 +44,25 @@ export default function View(props) {
         return history.push("/point-de-rassemblement");
       }
       setData({ ...reponsePDR, addressVerified: true });
+
+      let body = {
+        query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+        aggs: { cohort: { terms: { field: "cohort.keyword" } } },
+        size: 0,
+      };
+
+      const { responses } = await api.esQuery("young", body);
+
+      setNbYoung(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+
       return reponsePDR.cohorts;
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement");
     }
   };
+
+  console.log(nbYoung);
 
   React.useEffect(() => {
     (async () => {
@@ -405,8 +419,10 @@ export default function View(props) {
                 ) : null}
               </div>
               <div className="flex flex-col items-center justify-center w-1/3  border-r-[1px] border-gray-200">
-                <div className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full">
-                  Voir les volontaires (à venir)
+                <div
+                  className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full hover:underline cursor-pointer"
+                  onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${data._id.toString()}?cohort=${currentCohort}`)}>
+                  Voir les volontaires ({nbYoung.find((n) => n.cohort === currentCohort)?.count || 0})
                 </div>
                 <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full ">Liste des lignes de transports (à venir)</div>
               </div>

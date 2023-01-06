@@ -117,7 +117,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey]);
+    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
     const exportAvailableUntil = new Date(cohort.dateEnd);
     exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();

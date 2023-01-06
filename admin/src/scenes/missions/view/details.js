@@ -153,6 +153,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
     if (values.startAt < new Date()) error.startAt = "La date est incorrect";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
+    if (values.placesTotal < mission.placesTotal && mission.placesLeft - (mission.placesTotal - values.placesTotal) < 0)
+      error.placesTotal = "Il y a plus de candidatures que de places";
+
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) {
       toastr.error("Oups, le formulaire est imcomplet");
