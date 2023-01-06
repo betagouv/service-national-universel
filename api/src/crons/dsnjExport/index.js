@@ -8,7 +8,7 @@ const CohortModel = require("../../models/cohort");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const YoungModel = require("../../models/young");
-const { findCohesionCenterBySessionId, genderTranslation, situationTranslations, lookupTable, addToSlackRapport, printSlackInfo } = require("./utils");
+const { findCohesionCenterBySessionId, genderTranslation, situationTranslations, addToSlackRapport, printSlackInfo } = require("./utils");
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");
 
@@ -125,7 +125,7 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
         "Commune volontaire": city,
         "Téléphone volontaire": phone,
         "Statut professionnel": situationTranslations[situation] || situation,
-        "Code du centre": cohesionCenter.code2022,
+        "ID du centre": cohesionCenter._id.toString(),
         "Libellé du centre": cohesionCenter.name,
         "Date début session": cohort.dateStart,
         'Validation séjour (validation phase 1 ET présence JDM "oui")': afterSession ? (statusPhase1 === "DONE" && presenceJDM === "true" ? "Oui" : "Non") : "null",
@@ -133,10 +133,8 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
     },
   );
   const worksheet1 = XLSX.utils.json_to_sheet(formattedYoungs);
-  const worksheet2 = XLSX.utils.json_to_sheet(lookupTable);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet1, "Jeune", true);
-  XLSX.utils.book_append_sheet(workbook, worksheet2, "Table de correspondance", true);
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
   const encryptedBuffer = encrypt(buffer);
   const file = { mimetype: xlsxMimetype, encoding: "7bit", data: encryptedBuffer };

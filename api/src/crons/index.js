@@ -140,7 +140,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     youngPatches.handler();
   });
 
-  cron.schedule("50 8 * * *", () => {
+  cron.schedule("35 10 * * *", () => {
     dsnjExport.handler();
   });
 
