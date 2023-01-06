@@ -2,7 +2,7 @@ import React from "react";
 import { BsCheck2 } from "react-icons/bs";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function Select({ options, value, Icon = null, alignItems = "left", onChange }) {
+export default function Select({ options, value, Icon = null, alignItems = "left", onChange, disabled }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -30,12 +30,12 @@ export default function Select({ options, value, Icon = null, alignItems = "left
         <button
           className="flex justify-between items-center gap-3 bg-white border border-gray-300 px-3 py-3 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[300px]"
           style={{ fontFamily: "Marianne" }}
-          onClick={() => setOpen((e) => !e)}>
+          onClick={() => !disabled && setOpen((e) => !e)}>
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
             <span className="text-gray-700 font-medium text-sm whitespace-nowrap " dangerouslySetInnerHTML={{ __html: options.find((o) => o.value === value)?.label }} />
           </div>
-          <ChevronDown className="text-gray-400" />
+          {!disabled && <ChevronDown className="text-gray-400" />}
         </button>
 
         {/* display options */}

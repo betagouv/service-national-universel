@@ -139,7 +139,7 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   function goToNational() {
-    if (user.role === ROLES.ADMIN) {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
     }
   }

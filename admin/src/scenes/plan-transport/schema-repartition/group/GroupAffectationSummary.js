@@ -87,7 +87,7 @@ export default function GroupAffectationSummary({ group, className = "", onChang
           </>
         )}
       </div>
-      {user.role !== ROLES.REFERENT_DEPARTMENT && (
+      {![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && (
         <div className="flex items-end justify-center pt-[67px]">
           <BorderButton onClick={() => onChangeStep(GROUPSTEPS.MODIFICATION)} className="mr-[8px]">
             Annuler

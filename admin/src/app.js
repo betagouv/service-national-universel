@@ -232,6 +232,7 @@ const Home = () => {
 
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
+  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus"], default: "/schema-repartition" },
 };
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
@@ -243,7 +244,13 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
   }
 
-  if (limitedAccess[user.role] && !limitedAccess[user.role]?.authorised.includes(pathname)) {
+  const matchRoute = limitedAccess[user.role]?.authorised.find((route) => {
+    if (pathname.includes(route)) {
+      return true;
+    }
+  });
+
+  if (limitedAccess[user.role] && !matchRoute) {
     return <Redirect to={limitedAccess[user.role].default} />;
   }
 

@@ -416,6 +416,26 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
   }
 });
 
+router.get("/cohort/:cohort/hasValue", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+    }).validate({ ...req.params });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let { cohort } = value;
+
+    const ligne = await LigneBusModel.findOne({ cohort });
+
+    return res.status(200).send({ ok: true, data: !!ligne });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 async function getInfoBus(line) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
 
