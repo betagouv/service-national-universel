@@ -13,6 +13,8 @@ import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import Pencil from "../../../assets/icons/Pencil";
+
 import api from "../../../services/api";
 import {
   canAssignCohesionCenter,
@@ -47,6 +49,12 @@ export default function Phase1(props) {
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
   const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
   const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
+
+  // new useState
+  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [values, setValues] = useState({});
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -186,6 +194,50 @@ export default function Phase1(props) {
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
+        <div className="bg-white rounded">
+          <div className="mx-8 py-4">
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex flex-row items-center justify-center">
+                <div className="text-lg font-medium">Séjour de cohésion</div>
+                <div className={`flex flex-row items-center justify-center rounded-full border-[1px] border-gray-300 px-2 py-0.5 ml-3`}>
+                  {young.statusPhase1 === "AFFECTED" && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm" />}
+                  <div className="text-gray-500 text-xs ml-1">Affectée</div>
+                </div>
+              </div>
+              <>
+                {!editing ? (
+                  <button
+                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setEditing(true)}
+                    disabled={loading}>
+                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                    Modifier
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => {
+                        setEditing(false);
+                        setErrors({});
+                      }}
+                      disabled={loading}>
+                      Annuler
+                    </button>
+                    <button
+                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={onSubmit}
+                      disabled={loading}>
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                      Enregistrer les changements
+                    </button>
+                  </div>
+                )}
+              </>
+            </div>
+          </div>
+        </div>
+        {/*
         <Box>
           <article className="flex">
             <Bloc
@@ -266,6 +318,7 @@ export default function Phase1(props) {
                           </DownloadConvocationButton>
                         </>
                       ) : null} */}
+        {/*
                     </>
                   )}
                 </div>
@@ -305,7 +358,8 @@ export default function Phase1(props) {
               </Bloc>
             </Row>
           ) : null}
-        </Box>
+        </Box >
+        */}
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
