@@ -376,7 +376,6 @@ export default function Details({ center, setCenter, sessions }) {
                   onChange={(e) => setData({ ...data, code2022: e.target.value })}
                   value={data.code2022}
                   error={errors?.code2022}
-                  disabled={user.role !== "admin" && editInfo}
                 />
               </div>
             </div>
