@@ -1,6 +1,7 @@
 require("../../mongo");
 
 const XLSX = require("xlsx");
+const { getDepartmentNumber } = require("snu-lib");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const CohortModel = require("../../models/cohort");
@@ -25,18 +26,17 @@ const generateCohesionCentersExport = async (cohort) => {
     address: 1,
     city: 1,
     zip: 1,
-    departmentCode: 1,
     department: 1,
     region: 1,
     placesTotal: 1,
   });
-  const formattedCenters = cohesionCenters.map(({ _id, name, address, city, zip, departmentCode, department, region, placesTotal }) => ({
+  const formattedCenters = cohesionCenters.map(({ _id, name, address, city, zip, department, region, placesTotal }) => ({
     "ID du centre": _id.toString(),
     Nom: name,
     Adresse: address,
     Ville: city,
     "Code Postal": zip,
-    "N˚ Département": departmentCode,
+    "N˚ Département": getDepartmentNumber(department),
     Département: department,
     Région: region,
     "Places totales": placesTotal,
