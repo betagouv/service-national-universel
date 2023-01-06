@@ -1652,34 +1652,37 @@ function SectionConsentements({ young, onChange }) {
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
-        {young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
-          <div className="mt-2 flex items-center justify-between">
-            <div
-              className="cursor-pointer italic text-[#1D4ED8]"
-              onClick={() => {
-                copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
-                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-              }}>
-              Copier le lien du formulaire
-            </div>
-            <BorderButton
-              mode="blue"
-              onClick={async () => {
-                try {
-                  const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
-                  if (response.ok) {
-                    toastr.success(translate("REMINDER_SENT"), "");
-                  } else {
-                    toastr.error(translate(response.code), "");
+        {
+          /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
+          young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
+            <div className="mt-2 flex items-center justify-between">
+              <div
+                className="cursor-pointer italic text-[#1D4ED8]"
+                onClick={() => {
+                  copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                  toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                }}>
+                Copier le lien du formulaire
+              </div>
+              <BorderButton
+                mode="blue"
+                onClick={async () => {
+                  try {
+                    const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                    if (response.ok) {
+                      toastr.success(translate("REMINDER_SENT"), "");
+                    } else {
+                      toastr.error(translate(response.code), "");
+                    }
+                  } catch (error) {
+                    toastr.error(translate(error.code), "");
                   }
-                } catch (error) {
-                  toastr.error(translate(error.code), "");
-                }
-              }}>
-              Relancer
-            </BorderButton>
-          </div>
-        )}
+                }}>
+                Relancer
+              </BorderButton>
+            </div>
+          )
+        }
 
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
           <div className="mt-[16px] flex itemx-center justify-between">
@@ -1746,12 +1749,53 @@ function SectionConsentements({ young, onChange }) {
                   </div>
                   {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
                 </div>
-                {young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && young.parent2AllowImageRightsReset === "true" && (
+                {
+                  /* lien et relance du droit à l'image du parent 2 si parent2AllowImageRights n'a pas de valeur  et que le droit à l'image a été réinitialisé
+                   * on envoit alors vers le formulaire de modification du droit à l'image */
+                  young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && young.parent2AllowImageRightsReset === "true" && (
+                    <div className="mt-2 flex items-center justify-between">
+                      <div
+                        className="cursor-pointer italic text-[#1D4ED8]"
+                        onClick={() => {
+                          copyToClipboard(`${appURL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}&parent=2`);
+                          toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                        }}>
+                        Copier le lien du formulaire
+                      </div>
+                      <BorderButton
+                        mode="blue"
+                        onClick={async () => {
+                          try {
+                            const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 2 });
+                            if (response.ok) {
+                              toastr.success(translate("REMINDER_SENT"), "");
+                            } else {
+                              toastr.error(translate(response.code), "");
+                            }
+                          } catch (error) {
+                            toastr.error(translate(error.code), "");
+                          }
+                        }}>
+                        Relancer
+                      </BorderButton>
+                    </div>
+                  )
+                }
+              </>
+            )}
+            {
+              /* lien et relance du consentement (droit à l'image) du parent 2 si parent2AllowImageRights n'a jamais eu de valeur (première demande)
+               * on envoit alors vers le formulaire complet de consentement du parent 2 */
+              young.parent1AllowSNU === "true" &&
+                young.parent1AllowImageRights === "true" &&
+                young.parent2AllowSNU !== "false" &&
+                !young.parent2AllowImageRights &&
+                young.parent2AllowImageRightsReset !== "true" && (
                   <div className="mt-2 flex items-center justify-between">
                     <div
                       className="cursor-pointer italic text-[#1D4ED8]"
                       onClick={() => {
-                        copyToClipboard(`${appURL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}&parent=2`);
+                        copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
                         toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                       }}>
                       Copier le lien du formulaire
@@ -1760,7 +1804,7 @@ function SectionConsentements({ young, onChange }) {
                       mode="blue"
                       onClick={async () => {
                         try {
-                          const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 2 });
+                          const response = await api.get(`/young-edition/${young._id}/remider/2`);
                           if (response.ok) {
                             toastr.success(translate("REMINDER_SENT"), "");
                           } else {
@@ -1773,41 +1817,8 @@ function SectionConsentements({ young, onChange }) {
                       Relancer
                     </BorderButton>
                   </div>
-                )}
-              </>
-            )}
-            {young.parent1AllowSNU === "true" &&
-              young.parent1AllowImageRights === "true" &&
-              young.parent2AllowSNU !== "false" &&
-              !young.parent2AllowImageRights &&
-              young.parent2AllowImageRightsReset !== "true" && (
-                <div className="mt-2 flex items-center justify-between">
-                  <div
-                    className="cursor-pointer italic text-[#1D4ED8]"
-                    onClick={() => {
-                      copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
-                      toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                    }}>
-                    Copier le lien du formulaire
-                  </div>
-                  <BorderButton
-                    mode="blue"
-                    onClick={async () => {
-                      try {
-                        const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                        if (response.ok) {
-                          toastr.success(translate("REMINDER_SENT"), "");
-                        } else {
-                          toastr.error(translate(response.code), "");
-                        }
-                      } catch (error) {
-                        toastr.error(translate(error.code), "");
-                      }
-                    }}>
-                    Relancer
-                  </BorderButton>
-                </div>
-              )}
+                )
+            }
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
               young.status,
             ) ? (
