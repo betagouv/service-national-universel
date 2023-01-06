@@ -45,7 +45,6 @@ const printSlackInfo = (rapport) => {
 };
 
 module.exports = {
-  lookupTable,
   situationTranslations,
   genderTranslation,
   findCohesionCenterBySessionId,
