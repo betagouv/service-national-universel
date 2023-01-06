@@ -173,7 +173,80 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+router.post("/multiaction/change-status/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const allowedKeys = ["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"];
+    const { error, value } = Joi.object({
+      ids: Joi.array().items(Joi.string().required()).required(),
+    })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
 
+    const { errorKey, value: valueKey } = Joi.object({
+      key: Joi.string()
+        .trim()
+        .required()
+        .valid(...allowedKeys),
+    })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (errorKey) {
+      capture(errorKey);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    value.ids.map(async (id) => {
+      const application = await ApplicationObject.findById(id);
+      if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const young = await YoungObject.findById(application.youngId);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // A young can only update his own application.
+      if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      // - admin can update all applications
+      // - referent can update applications of their department/region
+      // - responsible and supervisor can update applications of their structures
+      if (isReferent(req.user)) {
+        if (!canCreateYoungApplication(req.user, young)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        if (req.user.role === ROLES.RESPONSIBLE) {
+          if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          if (application.structureId.toString() !== req.user.structureId.toString()) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          }
+        }
+        if (req.user.role === ROLES.SUPERVISOR) {
+          if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+          if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          }
+        }
+      }
+
+      application.set({ status: valueKey.key });
+      await application.save({ fromUser: req.user });
+
+      await updateYoungPhase2Hours(young, req.user);
+      await updateStatusPhase2(young, req.user);
+      await updateYoungStatusPhase2Contract(young, req.user);
+      await updateMission(application, req.user);
+    });
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.put("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateUpdateApplication(req.body, req.user);
