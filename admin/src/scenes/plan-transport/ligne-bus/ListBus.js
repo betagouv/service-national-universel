@@ -14,6 +14,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { DepartmentFilter, RegionFilter } from "../../../components/filters";
 import ModalExport from "../../../components/modals/ModalExport";
 import { BsDownload } from "react-icons/bs";
+import { capture } from "../../../sentry";
 
 const FILTERS = ["SEARCH", "PDRID", "PDRNAME", "PDRCITY", "REGION", "DEPARTMENT"];
 
@@ -31,15 +32,20 @@ export default function ListPDR(props) {
   const history = useHistory();
 
   const fetchData = async () => {
-    if (!id) return <div />;
+    try {
+      if (!id) return <div />;
 
-    const { ok: okBus, code: codeBus, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
-    if (!okBus) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des volontaires", translate(codeBus));
-      return history.push(`/ligne-de-bus/${id}`);
+      const { ok: okBus, code: codeBus, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
+      if (!okBus) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des volontaires", translate(codeBus));
+        return history.push(`/ligne-de-bus/${id}`);
+      }
+      setBus(reponseBus);
+      setLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la ligne de bus");
     }
-    setBus(reponseBus);
-    setLoading(false);
   };
 
   React.useEffect(() => {

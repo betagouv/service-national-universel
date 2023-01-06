@@ -14,6 +14,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { DepartmentFilter, RegionFilter } from "../../../components/filters";
 import ModalExport from "../../../components/modals/ModalExport";
 import { BsDownload } from "react-icons/bs";
+import { capture } from "../../../sentry";
 
 const FILTERS = ["SEARCH", "LIGNE", "CENTERID", "CENTERNAME", "CENTERCITY", "REGION", "DEPARTMENT"];
 
@@ -35,30 +36,35 @@ export default function ListPDR(props) {
   const history = useHistory();
 
   const fetchData = async () => {
-    if (!id || !cohort) return <div />;
+    try {
+      if (!id || !cohort) return <div />;
 
-    const { ok, code, data } = await api.get(`/point-de-rassemblement/${id}/bus/${cohort}`);
-    if (!ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des volontaires", translate(code));
-      return history.push(`/point-de-rassemblement/${id}`);
-    }
-
-    const centerIds = [];
-    for await (const b of data.bus) {
-      if (!b.centerId && centerIds.includes(b.centerId)) continue;
-      centerIds.push(b.centerId);
-      const { ok, code, data } = await api.get(`/cohesion-center/${b.centerId}`);
+      const { ok, code, data } = await api.get(`/point-de-rassemblement/${id}/bus/${cohort}`);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des centres de destinations", translate(code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des volontaires", translate(code));
         return history.push(`/point-de-rassemblement/${id}`);
       }
-      setCenters((centers) => [...centers, data]);
-    }
 
-    setPDR(data.meetingPoint);
-    setBus(data.bus);
-    setPDRDetails(data.meetingPointsDetail);
-    setLoading(false);
+      const centerIds = [];
+      for await (const b of data.bus) {
+        if (!b.centerId && centerIds.includes(b.centerId)) continue;
+        centerIds.push(b.centerId);
+        const { ok, code, data } = await api.get(`/cohesion-center/${b.centerId}`);
+        if (!ok) {
+          toastr.error("Oups, une erreur est survenue lors de la récupération de la liste des centres de destinations", translate(code));
+          return history.push(`/point-de-rassemblement/${id}`);
+        }
+        setCenters((centers) => [...centers, data]);
+      }
+
+      setPDR(data.meetingPoint);
+      setBus(data.bus);
+      setPDRDetails(data.meetingPointsDetail);
+      setLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement");
+    }
   };
 
   React.useEffect(() => {
