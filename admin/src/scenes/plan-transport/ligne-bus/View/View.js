@@ -18,12 +18,22 @@ export default function View(props) {
   const [dataForCheck, setDataForCheck] = React.useState(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
+  const [nbYoung, setNbYoung] = React.useState();
 
   const getBus = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return <div />;
       const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
+
+      let body = {
+        query: { bool: { filter: [{ terms: { "ligneId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "cohort.keyword": [reponseBus.cohort] } }] } },
+        size: 0,
+      };
+
+      const { responses } = await api.esQuery("young", body);
+
+      setNbYoung(responses[0].hits.total.value);
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
@@ -99,7 +109,7 @@ export default function View(props) {
             />
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
           <div className="flex gap-4 items-start">
             <div className="flex flex-col gap-4 w-1/2">
               {data.meetingsPointsDetail.map((pdr, index) => (
