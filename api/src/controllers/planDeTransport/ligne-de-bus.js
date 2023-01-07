@@ -307,6 +307,11 @@ router.post("/create_plan_de_transport", async (req, res) => {
         },
       },
       {
+        $addFields: {
+          fillingRate: { $divide: ["$youngsBus", "$youngCapacity"] },
+        },
+      },
+      {
         $lookup: {
           from: "modificationbuses",
           let: {
@@ -328,6 +333,13 @@ router.post("/create_plan_de_transport", async (req, res) => {
             },
           ],
           as: "modificationBuses",
+        },
+      },
+      // * Transform date into string format
+      {
+        $addFields: {
+          departureDateString: { $dateToString: { format: "%Y-%m-%d", date: "$departuredDate" } },
+          returnDateString: { $dateToString: { format: "%Y-%m-%d", date: "$returnDate" } },
         },
       },
       // ! Ajouter le calcul du taux de remplissage
