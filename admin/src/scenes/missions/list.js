@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ReactiveBase, MultiDropdownList, DataSearch, ReactiveComponent } from "@appbaseio/reactivesearch";
+import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveComponent } from "@appbaseio/reactivesearch";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
-import api from "../../services/api";
-import { apiURL, supportURL } from "../../config";
-import Panel from "./panel";
-import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES, translateVisibilty } from "../../utils";
-import SelectStatusMission from "../../components/selectStatusMission";
-import VioletButton from "../../components/buttons/VioletButton";
-import Loader from "../../components/Loader";
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, Help, HelpText, LockIcon } from "../../components/list";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
 import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
-import LockedSvg from "../../assets/lock.svg";
+import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translatePhase2 } from "snu-lib";
 import UnlockedSvg from "../../assets/lock-open.svg";
+import LockedSvg from "../../assets/lock.svg";
+import Breadcrumbs from "../../components/Breadcrumbs";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
+import VioletButton from "../../components/buttons/VioletButton";
+import { DepartmentFilter, RegionFilter } from "../../components/filters";
+import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
+import { Filter, FilterRow, Header, Help, HelpText, LockIcon, MultiLine, ResultTable, Table, Title } from "../../components/list";
+import Loader from "../../components/Loader";
+import ModalExport from "../../components/modals/ModalExport";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
+import SelectAction from "../../components/SelectAction";
+import SelectStatusMission from "../../components/selectStatusMission";
+import { apiURL, supportURL } from "../../config";
+import api from "../../services/api";
+import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, getFilterLabel, ROLES, translate, translateVisibilty } from "../../utils";
+import Panel from "./panel";
+
 const FILTERS = [
   "DOMAIN",
   "SEARCH",
@@ -35,9 +40,8 @@ const FILTERS = [
   "HEBERGEMENT",
   "HEBERGEMENT_PAYANT",
 ];
-import Breadcrumbs from "../../components/Breadcrumbs";
-import { missionExportFields } from "snu-lib";
-import ModalExport from "../../components/modals/ModalExport";
+
+const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
 export default function List() {
   const [mission, setMission] = useState(null);
@@ -51,6 +55,7 @@ export default function List() {
     setInfosClick(!infosClick);
   };
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isExportCandidatureOpen, setIsExportCandidatureOpen] = useState(false);
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -93,7 +98,6 @@ export default function List() {
     }
     if (["structureInfo", "structureLocation"].some((e) => selectedFields.includes(e))) {
       const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
-      console.log("🚀 ~ file: list.js ~ line 80 ~ transform ~ structureIds", structureIds);
       const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
       if (responses?.length) {
         const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
@@ -177,6 +181,239 @@ export default function List() {
     });
   }
 
+  async function transformCandidature(data, selectedFields) {
+    let all = data;
+
+    // Add tutor info
+    if (selectedFields.includes("missionTutor")) {
+      const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
+      if (tutorIds?.length) {
+        const queryTutor = {
+          query: { ids: { type: "_doc", values: tutorIds } },
+          track_total_hits: true,
+          size: ES_NO_LIMIT,
+        };
+        const resultTutor = await api.post(`/es/referent/export`, {
+          ...queryTutor,
+          fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "missionTutor")?.fields,
+        });
+        if (resultTutor?.data?.length) {
+          all = data.map((item) => ({ ...item, tutor: resultTutor?.data?.find((e) => e._id === item.tutorId) }));
+        }
+      }
+    }
+
+    // Add structure info
+    let structureCategorie = ["structureInfo", "structureLocation"];
+    if (structureCategorie.some((e) => selectedFields.includes(e))) {
+      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
+      const queryStructure = {
+        query: { ids: { type: "_doc", values: structureIds } },
+        track_total_hits: true,
+        size: ES_NO_LIMIT,
+      };
+
+      let fieldsToExportsStructure = [];
+
+      selectedFields.forEach((selected) => {
+        if (structureCategorie.includes(selected)) {
+          let fields = missionCandidatureExportFields.find((f) => f.id === selected)?.fields;
+          fieldsToExportsStructure = [...fieldsToExportsStructure, ...fields];
+        }
+      });
+
+      const resultStructure = await api.post(`/es/structure/export`, {
+        ...queryStructure,
+        fieldsToExport: fieldsToExportsStructure,
+      });
+
+      if (resultStructure?.data?.length) {
+        all = all.map((item) => ({ ...item, structure: resultStructure?.data?.find((e) => e._id === item.structureId) }));
+      }
+    }
+
+    let youngCategorie = ["representative2", "representative1", "location", "address", "imageRight", "contact", "identity", "status"];
+    let fieldsToExportsYoung = [];
+
+    selectedFields.forEach((selected) => {
+      if (youngCategorie.includes(selected)) {
+        let fields = missionCandidatureExportFields.find((f) => f.id === selected)?.fields;
+        fieldsToExportsYoung = [...fieldsToExportsYoung, ...fields];
+      }
+    });
+
+    //If we want to export young info or application
+    if ([...youngCategorie, "application"].some((e) => selectedFields.includes(e))) {
+      // Add applications info
+      const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
+      const queryApplication = {
+        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
+        track_total_hits: true,
+        size: ES_NO_LIMIT,
+      };
+
+      const resultApplications = await api.post(`/es/application/export`, {
+        ...queryApplication,
+        fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+      });
+      if (resultApplications?.data?.length) {
+        all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
+      }
+
+      let youngIds = [];
+      all.forEach((item) => {
+        if (item.candidatures?.length) {
+          youngIds = [...youngIds, ...item.candidatures.map((e) => e.youngId)];
+        }
+      });
+      youngIds = [...new Set(youngIds.filter((e) => e))];
+
+      const queryYoung = {
+        query: { ids: { type: "_doc", values: youngIds } },
+        track_total_hits: true,
+        size: ES_NO_LIMIT,
+      };
+
+      const resultYoungs = await api.post(`/es/young/export`, {
+        ...queryYoung,
+        fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
+      });
+      if (resultYoungs?.data?.length) {
+        all = all.map((item) => {
+          if (item.candidatures?.length) {
+            item.candidatures = item.candidatures.map((e) => ({ ...e, young: resultYoungs?.data?.find((y) => y._id === e.youngId) }));
+          }
+          return item;
+        });
+      }
+    }
+    all = all.filter((data) => data.candidatures.length);
+
+    let result = [];
+
+    all.forEach((data) => {
+      if (!data.structure) {
+        data.structure = {};
+        data.structure.types = [];
+      }
+      return data?.candidatures?.map((application) => {
+        const allFields = {
+          identity: {
+            ID: application?.young?._id?.toString(),
+            Prénom: application?.young?.firstName,
+            Nom: application?.young?.lastName,
+            Sexe: translate(application?.young?.gender),
+            Cohorte: application?.young?.cohort,
+            "Date de naissance": formatDateFRTimezoneUTC(application?.young?.birthdateAt),
+          },
+          contact: {
+            Email: application?.young?.email,
+            Téléphone: application?.young?.phone,
+          },
+          imageRight: {
+            "Droit à l’image": translate(application?.young?.imageRight),
+          },
+          address: {
+            "Issu de QPV": translate(application?.young?.qpv),
+            "Adresse postale": application?.young?.address,
+            "Code postal": application?.young?.zip,
+            Ville: application?.young?.city,
+            Pays: application?.young?.country,
+          },
+          location: {
+            Département: application?.young?.department,
+            Académie: application?.young?.academy,
+            Région: application?.young?.region,
+          },
+          application: {
+            "Statut de la candidature": translate(application?.status),
+            "Choix - Ordre de la candidature": application?.priority,
+            "Candidature créée lé": formatLongDateUTC(application?.createdAt),
+            "Candidature mise à jour le": formatLongDateUTC(application?.updatedAt),
+            "Statut du contrat d'engagement": translate(application?.contractStatus),
+            "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + application[option]?.length, 0) !== 0}`),
+            "Statut du dossier d'éligibilité PM": translate(application?.young?.statusMilitaryPreparationFiles),
+          },
+          missionInfo: {
+            "ID de la mission": data._id.toString(),
+            "Titre de la mission": data.name,
+            "Date du début": formatDateFRTimezoneUTC(data.startAt),
+            "Date de fin": formatDateFRTimezoneUTC(data.endAt),
+            "Domaine d'action principal": translate(data.mainDomain),
+            "Préparation militaire": translate(data.isMilitaryPreparation),
+          },
+          missionTutor: {
+            "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",
+            "Nom du tuteur": data.tutor?.lastName,
+            "Prénom du tuteur": data.tutor?.firstName,
+            "Email du tuteur": data.tutor?.email,
+            "Portable du tuteur": data.tutor?.mobile,
+            "Téléphone du tuteur": data.tutor?.phone,
+          },
+          missionlocation: {
+            "Adresse de la mission": data.address,
+            "Code postal de la mission": data.zip,
+            "Ville de la mission": data.city,
+            "Département de la mission": data.department,
+            "Région de la mission": data.region,
+          },
+          structureInfo: {
+            "Id de la structure": data.structureId,
+            "Nom de la structure": data.structure.name,
+            "Statut juridique de la structure": data.structure.legalStatus,
+            "Type(s) de structure": data.structure.types.toString(),
+            "Sous-type de structure": data.structure.sousType,
+            "Présentation de la structure": data.structure.description,
+          },
+          structureLocation: {
+            "Adresse de la structure": data.structure.address,
+            "Code postal de la structure": data.structure.zip,
+            "Ville de la structure": data.structure.city,
+            "Département de la structure": data.structure.department,
+            "Région de la structure": data.structure.region,
+          },
+          status: {
+            "Statut général": translate(application?.young?.status),
+            "Statut Phase 2": translatePhase2(application?.young?.statusPhase2),
+            "Dernier statut le": formatLongDateFR(application?.young?.lastStatusAt),
+          },
+          representative1: {
+            "Statut représentant légal 1": translate(application?.young?.parent1Status),
+            "Prénom représentant légal 1": application?.young?.parent1FirstName,
+            "Nom représentant légal 1": application?.young?.parent1LastName,
+            "Email représentant légal 1": application?.young?.parent1Email,
+            "Téléphone représentant légal 1": application?.young?.parent1Phone,
+            "Adresse représentant légal 1": application?.young?.parent1Address,
+            "Code postal représentant légal 1": application?.young?.parent1Zip,
+            "Ville représentant légal 1": application?.young?.parent1City,
+            "Département représentant légal 1": application?.young?.parent1Department,
+            "Région représentant légal 1": application?.young?.parent1Region,
+          },
+          representative2: {
+            "Statut représentant légal 2": translate(application?.young?.parent2Status),
+            "Prénom représentant légal 2": application?.young?.parent2FirstName,
+            "Nom représentant légal 2": application?.young?.parent2LastName,
+            "Email représentant légal 2": application?.young?.parent2Email,
+            "Téléphone représentant légal 2": application?.young?.parent2Phone,
+            "Adresse représentant légal 2": application?.young?.parent2Address,
+            "Code postal représentant légal 2": application?.young?.parent2Zip,
+            "Ville représentant légal 2": application?.young?.parent2City,
+            "Département représentant légal 2": application?.young?.parent2Department,
+            "Région représentant légal 2": application?.young?.parent2Region,
+          },
+        };
+
+        let fields = {};
+        for (const element of selectedFields) {
+          let key;
+          for (key in allFields[element]) fields[key] = allFields[element][key];
+        }
+        result = [...result, fields];
+      });
+    });
+    return result;
+  }
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Missions" }]} />
@@ -194,11 +431,41 @@ export default function List() {
                   </VioletButton>
                 </Link>
               ) : null}
-              <button
-                className="rounded-md py-2 px-4 ml-2 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
-                onClick={() => setIsExportOpen(true)}>
-                Exporter les missions
-              </button>
+
+              <SelectAction
+                title="Exporter"
+                alignItems="right"
+                buttonClassNames="cursor-pointer text-white bg-blue-600"
+                textClassNames="text-sm"
+                rightIconClassNames="text-white opacity-70"
+                optionsGroup={[
+                  {
+                    items: [
+                      {
+                        action: () => {
+                          setIsExportOpen(true);
+                        },
+                        render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de missions</div>,
+                      },
+                      {
+                        action: () => {
+                          setIsExportCandidatureOpen(true);
+                        },
+                        render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de candidatures</div>,
+                      },
+                    ],
+                  },
+                ]}
+              />
+              <ModalExport
+                isOpen={isExportCandidatureOpen}
+                setIsOpen={setIsExportCandidatureOpen}
+                index="mission"
+                transform={transformCandidature}
+                exportFields={missionCandidatureExportFields}
+                filters={FILTERS}
+                getExportQuery={getExportQuery}
+              />
               <ModalExport
                 isOpen={isExportOpen}
                 setIsOpen={setIsExportOpen}
