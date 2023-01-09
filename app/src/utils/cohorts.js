@@ -6,7 +6,7 @@ let cohortsCachedAt = null;
 
 export async function cohortsInit() {
   try {
-    const result = await api.get("/cohorts");
+    const result = await api.get("/cohort");
     if (!result.ok) {
       capture("Unable to load global cohorts data");
     } else {
@@ -22,17 +22,17 @@ export function isCohortsInitialized() {
   return cohortsCachedAt !== null;
 }
 
-export function getCohort(id) {
+export function getCohort(name) {
   if (isCohortsInitialized()) {
-    return cohorts.find((c) => c.snuId === id);
+    return cohorts.find((c) => c.name === name);
   } else {
     return undefined;
   }
 }
 
-export function cohortAssignmentAnnouncementsIsOpen(cohortId) {
+export function cohortAssignmentAnnouncementsIsOpen(cohortName) {
   if (isCohortsInitialized()) {
-    const cohort = getCohort(cohortId);
+    const cohort = getCohort(cohortName);
     if (cohort) {
       return cohort.assignmentAnnouncementsOpen === "true";
     }
