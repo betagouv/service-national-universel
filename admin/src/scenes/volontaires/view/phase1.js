@@ -256,7 +256,7 @@ export default function Phase1(props) {
                     readOnly={!editing}
                     type="select"
                     setSelected={(val) => setValues({ ...values, youngPhase1Agreement: val })}
-                    selected={values?.youngPhase1Agreement === "true" ? "true" : "false"}
+                    selected={values.youngPhase1Agreement}
                     options={[
                       { label: "Oui", value: "true" },
                       { label: "Non", value: "false" },
@@ -301,7 +301,7 @@ export default function Phase1(props) {
                     if (!editing) return;
                     setModalPointageDepart({ isOpen: true });
                   }}
-                  className={`flex-1 min-w-[250px] border-gray-300 border-[1px] rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"}`}>
+                  className={`flex-1 min-w-[250px] border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"}`}>
                   <ArrowCircleRight width={16} height={16} className="text-gray-400 group-hover:scale-105 mx-2 mr-3" />
                   {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
                 </div>
