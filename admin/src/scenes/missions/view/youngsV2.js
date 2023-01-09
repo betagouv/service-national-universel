@@ -221,7 +221,11 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   function getExportFields() {
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
-      return applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+      const filtered = applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+      // remove Issu de QPV field for responsible and supervisor
+      const filterAdress = filtered.find((e) => e.id === "address");
+      filterAdress.desc = filterAdress.desc.filter((e) => e !== "Issu de QPV");
+      return filtered.map((e) => (e.id !== "address" ? e : filterAdress));
     } else return applicationExportFields.filter((e) => !["missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
   }
 
