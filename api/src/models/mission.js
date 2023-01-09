@@ -315,7 +315,6 @@ const Schema = new mongoose.Schema({
 
   placesStatus: {
     type: String,
-    default: [],
     enum: ["FULL", "EMPTY", "MIDDLE"],
     documentation: {
       description: "Cahmps pour Filtrer sur une mission pleine, vide, ayant au moin une places de prise ",
