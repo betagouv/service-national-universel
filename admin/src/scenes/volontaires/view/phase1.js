@@ -350,7 +350,7 @@ export default function Phase1(props) {
                 {editing && (
                   <div
                     onClick={() => {
-                      setModalAffectation({ isOpen: true, center: cohesionCenter, sesison: young.sessionPhase1Id });
+                      setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
                     }}
                     className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
                     {meetingPoint ? (
@@ -527,7 +527,7 @@ export default function Phase1(props) {
         onCancel={() => setModalAffectation({ isOpen: false })}
         young={young}
         center={modalAffectations?.center}
-        session={modal?.session}
+        sessionId={modalAffectations?.sessionId}
       />
     </>
   );

@@ -46,6 +46,22 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     loadList();
   }, [inputPdr, pdrOption]);
 
+  useEffect(() => {
+    if (!center) return;
+    (async () => {
+      try {
+        const { data, ok } = await api.get("/session-phase1/" + sessionId);
+        if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(data.code));
+        setSession(data);
+        setStep(2);
+        setPdrOption("ref-select");
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la session", e);
+        console.log(e);
+      }
+    })();
+  }, [center]);
+
   const getDefaultQuery = () => {
     return {
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
