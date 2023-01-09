@@ -36,9 +36,10 @@ import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
 import Select from "../../../components/Select2";
+import TailwindSelect from "../../../components/TailwindSelect";
 import YoungHeader from "../../phase0/components/YoungHeader";
-import Field from "../components/Field.js";
-
+import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
+import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
@@ -55,7 +56,7 @@ export default function Phase1(props) {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [values, setValues] = useState({});
+  const [values, setValues] = useState(props.young);
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -208,6 +209,7 @@ export default function Phase1(props) {
               onClick={() => {
                 setEditing(false);
                 setErrors({});
+                setValues(young);
               }}
               disabled={loading}>
               Annuler
@@ -244,57 +246,80 @@ export default function Phase1(props) {
             </div>
             <div className="mt-3">
               <div className="text-xs text-gray-900 font-medium">Présence</div>
-              <div className="flex flex-row gap-4 items-center mt-2 flex-wrap">
-                <Field
-                  name="status"
-                  label="Confirmation de la participation"
-                  className="flex-1 min-w-[250px]"
-                  readOnly={!editing}
-                  type="select"
-                  handleChange={(e) => console.log(e)}
-                  options={[
-                    { label: "Oui", value: true },
-                    { label: "Non", value: false },
-                  ]}
-                />
-                <Field
-                  name="status"
-                  label="Confirmation de la participation"
-                  readOnly={!editing}
-                  className="flex-1 min-w-[250px]"
-                  type="select"
-                  handleChange={(e) => console.log(e)}
-                  options={[
-                    { label: "Oui", value: true },
-                    { label: "Non", value: false },
-                  ]}
-                />
-                <Field
-                  name="status"
-                  label="Confirmation de la participation"
-                  readOnly={!editing}
-                  className="flex-1 min-w-[250px]"
-                  type="select"
-                  handleChange={(e) => console.log(e)}
-                  options={[
-                    { label: "Oui", value: true },
-                    { label: "Non", value: false },
-                  ]}
-                />
-                <Field
-                  name="status"
-                  label="Confirmation de la participation"
-                  readOnly={!editing}
-                  className="flex-1 min-w-[250px]"
-                  type="select"
-                  handleChange={(e) => console.log(e)}
-                  options={[
-                    { label: "Oui", value: true },
-                    { label: "Non", value: false },
-                  ]}
-                />
+              <div className="flex flex-row gap-4 mt-2 flex-wrap w-full items-stretch">
+                <div className="flex-1 min-w-[250px]">
+                  <TailwindSelect
+                    name="youngPhase1Agreement"
+                    label="Confirmation de la participation"
+                    className="flex-1 min-w-[250px]"
+                    readOnly={!editing}
+                    type="select"
+                    setSelected={(val) => setValues({ ...values, youngPhase1Agreement: val })}
+                    selected={values?.youngPhase1Agreement === "true" ? "true" : "false"}
+                    options={[
+                      { label: "Oui", value: "true" },
+                      { label: "Non", value: "false" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1 min-w-[250px]">
+                  <TailwindSelect
+                    name="cohesionStayPresence"
+                    label="Présence à l'arrivée"
+                    readOnly={!editing}
+                    type="select"
+                    className="flex-1 min-w-[250px]"
+                    icon={<SpeakerPhone className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
+                    setSelected={(val) => setValues({ ...values, cohesionStayPresence: val })}
+                    selected={values.cohesionStayPresence}
+                    options={[
+                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                      { label: "Présent", value: "true" },
+                      { label: "Absent", value: "false" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1 min-w-[250px]">
+                  <TailwindSelect
+                    name="presenceJDM"
+                    label="Présence JDM"
+                    readOnly={!editing}
+                    type="select"
+                    icon={<BadgeCheck className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
+                    setSelected={(val) => setValues({ ...values, presenceJDM: val })}
+                    selected={values.presenceJDM}
+                    options={[
+                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                      { label: "Présent", value: "true" },
+                      { label: "Absent", value: "false" },
+                    ]}
+                  />
+                </div>
+                <div
+                  onClick={() => {
+                    if (!editing) return;
+                    setModalPointageDepart({ isOpen: true });
+                  }}
+                  className={`flex-1 min-w-[250px] border-gray-300 border-[1px] rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"}`}>
+                  <ArrowCircleRight width={16} height={16} className="text-gray-400 group-hover:scale-105 mx-2 mr-3" />
+                  {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
+                </div>
               </div>
             </div>
+            {cohesionCenter && (
+              <div className="mt-4">
+                <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
+                <div className="flex flex-col gap-2">
+                  <Field title="Code centre" value={cohesionCenter.code2022} />
+                  <Field title="Nom" value={cohesionCenter.name} />
+                  <Field title="Code postal" value={cohesionCenter.zip} />
+                  <Field title="Ville" value={cohesionCenter.city} />
+                </div>
+                <div>
+                  <div>Changer l&apos;affectation</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/*
@@ -457,20 +482,12 @@ export default function Phase1(props) {
   );
 }
 
-const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled, tw }) => {
+const Field = ({ title, value }) => {
   return (
-    <section
-      className={`w-full p-12 ${borderTop ? "border-t-2 border-[#f4f5f7]" : ""} ${borderBottom ? "border-b-2 border-[#f4f5f7]" : ""} ${
-        borderRight ? "border-r-2 border-[#f4f5f7]" : ""
-      } ${disabled ? "bg-[#f9f9f9]" : "bg-transparent"} ${tw}`}>
-      <div className="flex w-full">
-        <BoxTitle>
-          <div>{title}</div>
-          <div>{titleRight}</div>
-        </BoxTitle>
-      </div>
-      {children}
-    </section>
+    <div key={title} className="border-[1px] flex flex-col border-gray-300 p-2 rounded">
+      <div className="text-gray-500 text-xs">{title}</div>
+      <div className="text-gray-800 text-sm">{value}</div>
+    </div>
   );
 };
 
