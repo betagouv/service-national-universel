@@ -31,6 +31,16 @@ const Schema = new mongoose.Schema({
       description: "Dates when DSNJ export are generated",
     },
   },
+
+  assignmentAnnouncementsOpen: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description:
+        "Si true, les affectations sont 'révélées' au jeune. Sinon, le jeune doit avoir l'impression qu'il est toujours dans un état d'attente d'affectation même si il a été affecté.",
+    },
+  },
+
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
