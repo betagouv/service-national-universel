@@ -40,6 +40,7 @@ import TailwindSelect from "../../../components/TailwindSelect";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
 import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
+import Refresh from "../../../assets/icons/Refresh";
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
@@ -307,17 +308,39 @@ export default function Phase1(props) {
               </div>
             </div>
             {cohesionCenter && (
-              <div className="mt-4">
+              <div className="mt-4 w-full">
                 <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 mb-4">
                   <Field title="Code centre" value={cohesionCenter.code2022} />
                   <Field title="Nom" value={cohesionCenter.name} />
                   <Field title="Code postal" value={cohesionCenter.zip} />
                   <Field title="Ville" value={cohesionCenter.city} />
                 </div>
-                <div>
-                  <div>Changer l&apos;affectation</div>
+                {editing && (
+                  <div
+                    onClick={() => setModalAffectation({ isOpen: true })}
+                    className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                    <Refresh />
+                    <div>Changer l&apos;affectation</div>
+                  </div>
+                )}
+              </div>
+            )}
+            {meetingPoint && (
+              <div className="mt-4 w-full">
+                <div className="text-xs text-gray-900 font-medium mb-2">Point de rassemblement</div>
+                <div className="flex flex-col gap-2 mb-4">
+                  <Field title="Adresse" value={meetingPoint?.departureAddress} />
+                  <Field title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
+                  <Field title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
+                  <Field title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
                 </div>
+                {editing && (
+                  <div onClick={() => null} className="flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                    <Refresh />
+                    <div>Changer le point de rassemblement</div>
+                  </div>
+                )}
               </div>
             )}
           </div>
