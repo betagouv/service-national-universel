@@ -140,7 +140,7 @@ export default function National() {
         <div className="py-8 flex items-center justify-between">
           <div className="flex flex-col gap-3">
             <Title>Table de répartition</Title>
-            {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>}
+            {user.role == ROLES.ADMIN && <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>}
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
@@ -284,29 +284,24 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
     };
   }, []);
 
-  //Because Dom Tom can assign young to the same region
-  const DOMTOM = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Mayotte", "Polynésie française", "Nouvelle-Calédonie"];
-  const isDomTom = DOMTOM.includes(region);
-
   const onChange = (fromRegion, toRegion) => {
     if (assignRegion.filter((e) => e.toRegion === toRegion)?.length !== 0) onDelete(fromRegion, toRegion);
     else onCreate(fromRegion, toRegion);
   };
+
   return (
     <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2 h-60 overflow-y-auto">
-      {regionList
-        .filter((e) => isDomTom || e !== region)
-        .map((r, i) => {
-          return (
-            <div key={r + i} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
-              <div className="flex items-center gap-2 text-gray-700 text-sm">
-                <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} readOnly />
-                {r}
-              </div>
-              <div className="text-sm text-gray-500 uppercase">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>
+      {regionList.map((r, i) => {
+        return (
+          <div key={r + i} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
+            <div className="flex items-center gap-2 text-gray-700 text-sm">
+              <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} readOnly />
+              {r}
             </div>
-          );
-        })}
+            <div className="text-sm text-gray-500 uppercase">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>
+          </div>
+        );
+      })}
     </div>
   );
 };
