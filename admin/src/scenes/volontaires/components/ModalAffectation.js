@@ -23,7 +23,7 @@ import dayjs from "dayjs";
 
 const LIST_PAGE_LIMIT = 3;
 
-export default function ModalAffectations({ isOpen, onCancel, young }) {
+export default function ModalAffectations({ isOpen, onCancel, young, center = null, sessionId = null }) {
   const FILTERS = ["SEARCH"];
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
   const [session, setSession] = useState(null);
