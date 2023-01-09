@@ -244,7 +244,56 @@ export default function Phase1(props) {
             </div>
             <div className="mt-3">
               <div className="text-xs text-gray-900 font-medium">Présence</div>
-              <Field />
+              <div className="flex flex-row gap-4 items-center mt-2 flex-wrap">
+                <Field
+                  name="status"
+                  label="Confirmation de la participation"
+                  className="flex-1 min-w-[250px]"
+                  readOnly={!editing}
+                  type="select"
+                  handleChange={(e) => console.log(e)}
+                  options={[
+                    { label: "Oui", value: true },
+                    { label: "Non", value: false },
+                  ]}
+                />
+                <Field
+                  name="status"
+                  label="Confirmation de la participation"
+                  readOnly={!editing}
+                  className="flex-1 min-w-[250px]"
+                  type="select"
+                  handleChange={(e) => console.log(e)}
+                  options={[
+                    { label: "Oui", value: true },
+                    { label: "Non", value: false },
+                  ]}
+                />
+                <Field
+                  name="status"
+                  label="Confirmation de la participation"
+                  readOnly={!editing}
+                  className="flex-1 min-w-[250px]"
+                  type="select"
+                  handleChange={(e) => console.log(e)}
+                  options={[
+                    { label: "Oui", value: true },
+                    { label: "Non", value: false },
+                  ]}
+                />
+                <Field
+                  name="status"
+                  label="Confirmation de la participation"
+                  readOnly={!editing}
+                  className="flex-1 min-w-[250px]"
+                  type="select"
+                  handleChange={(e) => console.log(e)}
+                  options={[
+                    { label: "Oui", value: true },
+                    { label: "Non", value: false },
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </div>
