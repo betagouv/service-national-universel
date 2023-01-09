@@ -32,9 +32,8 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  assignmentAnnouncementsOpen: {
-    type: String,
-    enum: ["true", "false"],
+  isAssignmentAnnouncementsOpenForYoung: {
+    type: Boolean,
     documentation: {
       description:
         "Si true, les affectations sont 'révélées' au jeune. Sinon, le jeune doit avoir l'impression qu'il est toujours dans un état d'attente d'affectation même si il a été affecté.",

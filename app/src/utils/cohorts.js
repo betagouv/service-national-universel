@@ -30,11 +30,11 @@ export function getCohort(name) {
   }
 }
 
-export function cohortAssignmentAnnouncementsIsOpen(cohortName) {
+export function cohortAssignmentAnnouncementsIsOpenForYoung(cohortName) {
   if (isCohortsInitialized()) {
     const cohort = getCohort(cohortName);
     if (cohort) {
-      return cohort.assignmentAnnouncementsOpen === "true";
+      return cohort.isAssignmentAnnouncementsOpenForYoung === true;
     }
   }
 
