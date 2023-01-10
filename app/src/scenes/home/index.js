@@ -13,6 +13,7 @@ import WaitingList from "./waitingList";
 import WaitingReinscription from "./WaitingReinscription";
 import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
+import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -62,7 +63,7 @@ export default () => {
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
       if (young.status === YOUNG_STATUS.VALIDATED) {
-        if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
+        if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
           return <Affected />;
         } else {
           return <ValidatedV2 />;
