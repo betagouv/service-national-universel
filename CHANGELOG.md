@@ -1,3 +1,11 @@
+# [1.196.0](https://github.com/betagouv/service-national-universel/compare/v1.195.0...v1.196.0) (2023-01-10)
+
+
+### Features
+
+* **api/admin:** Compte transporteur + Front compte transporteur ([#2169](https://github.com/betagouv/service-national-universel/issues/2169)) ([2b4da67](https://github.com/betagouv/service-national-universel/commit/2b4da6737ab3c8f1e8f1140e51f9dd7be50fe6b0))
+* **api/app:** indicateur d'ouverture des affectations sur les cohortes en base de données ([#2170](https://github.com/betagouv/service-national-universel/issues/2170)) ([8e57cc6](https://github.com/betagouv/service-national-universel/commit/8e57cc655225a757cb2bf1d3f42de9183e6237c6))
+
 # [1.195.0](https://github.com/betagouv/service-national-universel/compare/v1.194.0...v1.195.0) (2023-01-09)
 
 
