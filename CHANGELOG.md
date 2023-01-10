@@ -1,3 +1,20 @@
+# [1.195.0](https://github.com/betagouv/service-national-universel/compare/v1.194.0...v1.195.0) (2023-01-09)
+
+
+### Bug Fixes
+
+* **admin:** Size of status aggregations was limited to 10 ([d7ff57d](https://github.com/betagouv/service-national-universel/commit/d7ff57de21e5d8022ee7d66bfa67139d15054ca0))
+* **api:** dsnj export date ([f0c1155](https://github.com/betagouv/service-national-universel/commit/f0c1155ac3b8324abd5dc21e361a22ba997a034a))
+* **api:** fix cron hour ([9611690](https://github.com/betagouv/service-national-universel/commit/96116907725dd38e2098b90a4f2777ca9f0cea25))
+* **api:** reminder correction request ([ef07b12](https://github.com/betagouv/service-national-universel/commit/ef07b12708ec65bc7b76bb3ef41cbe99372959b8))
+* **lib:** Etranger can be eligible ([d8bf876](https://github.com/betagouv/service-national-universel/commit/d8bf8766c42ce75f04094a143558860817f1729f))
+* **lib:** fermeture IDF buffer back to 1.7 for fev ([26f972e](https://github.com/betagouv/service-national-universel/commit/26f972eecc22dff9430cd2c89a694ff95e922823))
+
+
+### Features
+
+* **admin:** open depart region for assignation ([8fd4034](https://github.com/betagouv/service-national-universel/commit/8fd40343ca5eaad3e46291a73a0c7463266210b4))
+
 # [1.194.0](https://github.com/betagouv/service-national-universel/compare/v1.193.0...v1.194.0) (2023-01-06)
 
 

@@ -154,12 +154,10 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     const requests = young.correctionRequests ? young.correctionRequests : [];
 
     for (const request of requests) {
-      if (request.status === "SENT") {
-        found = true;
-        request.moderatorId = req.user._id;
-        request.status = "REMINDED";
-        request.remindedAt = Date.now();
-      }
+      found = true;
+      request.moderatorId = req.user._id;
+      request.status = "REMINDED";
+      request.remindedAt = Date.now();
     }
 
     if (found) {
