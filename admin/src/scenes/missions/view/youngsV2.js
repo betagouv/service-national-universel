@@ -17,6 +17,7 @@ import {
   formatLongDateUTCWithoutTime,
   getFilterLabel,
   translate,
+  translateApplicationFileType,
   getAge,
   ES_NO_LIMIT,
   ROLES,
@@ -35,7 +36,7 @@ import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "DOCUMENTS"];
+const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "DOCUMENTS", "FILES_TYPE"];
 
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
@@ -433,16 +434,31 @@ export default function Youngs({ mission, applications, updateMission }) {
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
                     componentId="CONTRACT_STATUS"
-                    dataField="fields.contractAvenantFiles"
+                    dataField="contractStatus.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
                     renderItem={(e, count) => {
-                      return `${translateApplication(e)} (${count})`;
+                      return `${translate(e)} (${count})`;
                     }}
                     title=""
                     URLParams={true}
                     showSearch={false}
                     renderLabel={(items) => getFilterLabel(items, "Statut contrat")}
                   />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="FILES_TYPE"
+                    dataField="filesType.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "FILES_TYPE") }}
+                    renderItem={(e, count) => {
+                      return `${translateApplicationFileType(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Pièces jointes")}
+                  />
+                  {/*filesType */}
                   <DeleteFilters />
                 </div>
 
