@@ -164,7 +164,7 @@ export default function List() {
                     className="dropdown-filter"
                     placeholder="Date aller"
                     componentId="DATE_ALLER"
-                    dataField="departureDateString.keyword"
+                    dataField="departureString.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
                     title=""
                     URLParams={true}
@@ -178,7 +178,7 @@ export default function List() {
                     className="dropdown-filter"
                     placeholder="Date retour"
                     componentId="DATE_RETOUR"
-                    dataField="returnDateString.keyword"
+                    dataField="returnString.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
                     title=""
                     URLParams={true}
@@ -207,7 +207,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Nom du point de rassemblement"
+                    placeholder="Nom"
                     componentId="NAME_PDR"
                     dataField="pointDeRassemblements.name.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "NAME_PDR") }}
@@ -221,7 +221,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Région du point de rassemblement"
+                    placeholder="Région"
                     componentId="REGION_PDR"
                     dataField="pointDeRassemblements.region.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "REGION_PDR") }}
@@ -235,7 +235,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Département du point de rassemblement"
+                    placeholder="Département"
                     componentId="DEPARTMENT_PDR"
                     dataField="pointDeRassemblements.department.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT_PDR") }}
@@ -249,7 +249,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Ville du point de rassemblement"
+                    placeholder="Ville"
                     componentId="CITY_PDR"
                     dataField="pointDeRassemblements.city.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "CITY_PDR") }}
@@ -266,7 +266,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Nom du centre"
+                    placeholder="Nom"
                     componentId="NAME_CENTER"
                     dataField="centerName.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "NAME_CENTER") }}
@@ -280,7 +280,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Région du centre"
+                    placeholder="Région"
                     componentId="REGION_CENTER"
                     dataField="centerRegion.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "REGION_CENTER") }}
@@ -294,7 +294,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Département du centre"
+                    placeholder="Département"
                     componentId="DEPARTMENT_CENTER"
                     dataField="centerDepartment.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT_CENTER") }}
@@ -308,7 +308,7 @@ export default function List() {
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
-                    placeholder="Code du centre"
+                    placeholder="Code"
                     componentId="CODE_CENTER"
                     dataField="centerCode.keyword"
                     react={{ and: FILTERS.filter((e) => e !== "CODE_CENTER") }}
@@ -406,7 +406,7 @@ export default function List() {
 const Line = ({ hit, currentTab }) => {
   console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit);
 
-  const meetingPoints = currentTab === "aller" ? hit.pointDeRassemblements : hit.pointDeRassemblements.revert();
+  const meetingPoints = currentTab === "aller" ? hit.pointDeRassemblements : hit.pointDeRassemblements.slice().reverse();
 
   return (
     <>
@@ -426,9 +426,9 @@ const Line = ({ hit, currentTab }) => {
             {meetingPoints.map((meetingPoint) => {
               console.log("🚀 ~ file: List.js:310 ~ {hit.pointDeRassemblements.map ~ meetingPoint", meetingPoint);
               return (
-                <TooltipMeetingPoint key={meetingPoint.id} meetingPoint={meetingPoint}>
+                <TooltipMeetingPoint key={meetingPoint.copyId} meetingPoint={meetingPoint}>
                   <a
-                    href={`/point-de-rassemblement/${meetingPoint.id}`}
+                    href={`/point-de-rassemblement/${meetingPoint.copyId}`}
                     target="_blank"
                     rel="noreferrer"
                     className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
@@ -454,7 +454,7 @@ const Line = ({ hit, currentTab }) => {
             </TooltipCenter>
           </div>
         </div>
-        <div className="w-[10%]">25% - Cercle</div>
+        <div className="w-[10%]">{hit.fillingRate} - Cercle</div>
         <div className="w-[5%]"></div>
       </div>
     </>

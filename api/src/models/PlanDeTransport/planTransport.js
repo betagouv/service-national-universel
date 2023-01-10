@@ -4,29 +4,31 @@ const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const ModificationBusSchema = require("./modificationBus").Schema;
-const PointDeRassemblementSchema = require("./pointDeRassemblement").Schema;
+const PointDeRassemblementModel = require("./pointDeRassemblement");
 const SessionPhase1Schema = require("../sessionPhase1").Schema;
 const CohesionCenterSchema = require("../cohesionCenter").Schema;
 const MODELNAME = "plandetransport";
 
-const EnrichedPointDeRassemblementSchema = new mongoose.Schema({
-  PointDeRassemblementSchema,
-  // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ou de dupliquer l'id
-  id: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Duplication de l'ID du schema",
+const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminator(
+  "Enriched",
+  new mongoose.Schema({
+    // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ou de dupliquer l'id
+    copyId: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Duplication de l'ID du schema",
+      },
     },
-  },
-  meetingHour: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Heure de convocation lié à ce spécifique bus et point de rassemblement",
+    meetingHour: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Heure de convocation lié à ce spécifique bus et point de rassemblement",
+      },
     },
-  },
-});
+  }),
+).schema;
 
 const Schema = new mongoose.Schema({
   cohort: {
@@ -46,16 +48,16 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  departuredDate: {
-    type: Date,
+  departureString: {
+    type: String,
     required: true,
     documentation: {
       description: "Date de départ",
     },
   },
 
-  returnDate: {
-    type: Date,
+  returnString: {
+    type: String,
     required: true,
     documentation: {
       description: "Date de retour",
@@ -78,8 +80,8 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  tauxDeRemplissage: {
-    type: Number,
+  fillingRate: {
+    type: String,
     documentation: {
       description: "Taux de remplissage de la ligne",
     },
