@@ -161,6 +161,8 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
 
+    // ! PlanDeTransport save here !
+
     if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
       let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
       let sentTo = [
@@ -234,6 +236,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
+
+    // ! PlanDeTransport save here !
+
     await updateCenterDependencies(center, req.user);
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
@@ -305,6 +310,9 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       oldCenter.waitingList.splice(i, 1);
       await oldCenter.save({ fromUser: req.user });
     }
+
+    // ! PlanDeTransport save here !
+
     // update center infos
     if (bus) await updatePlacesBus(bus);
 

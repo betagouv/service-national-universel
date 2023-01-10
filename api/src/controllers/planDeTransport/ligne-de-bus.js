@@ -93,6 +93,32 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       meetingPointsId: meetingPoints.map((mp) => mp.meetingPointId),
     });
 
+    // ! PlanDeTransport save here !
+
+    // const center = await cohesionCenterModel.findById(centerId);
+
+    // const planDeTransport = await PlanTransportModel.create({
+    //   cohort,
+    //   busId,
+    //   departuredDate,
+    //   returnDate,
+    //   youngCapacity,
+    //   totalCapacity,
+    //   followerCapacity,
+    //   travelTime,
+    //   km,
+    //   lunchBreak,
+    //   lunchBreakReturn,
+    //   centerId,
+    //   centerRegion: center?.region,
+    //   centerDepartment: center?.department,
+    //   centerName: center?.name,
+    //   centerCode: center?.code2022,
+    //   centerArrivalTime,
+    //   centerDepartureTime,
+    //   pointDeRassemblements: meetingPoints,
+    // });
+
     const ligneToBus = [];
 
     for await (const mp of meetingPoints) {
@@ -159,6 +185,10 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     });
 
     await ligne.save({ fromUser: req.user });
+
+    // ! PlanDeTransport save here !
+
+    // planDeTransport.set({ busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn });
 
     const infoBus = await getInfoBus(ligne);
 
@@ -308,7 +338,7 @@ router.post("/create_plan_de_transport", async (req, res) => {
       },
       {
         $addFields: {
-          fillingRate: { $divide: ["$youngsBus", "$youngCapacity"] },
+          fillingRate: { $divide: ["$youngCount", "$youngCapacity"] },
         },
       },
       {
@@ -397,6 +427,8 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     await ligne.save({ fromUser: req.user });
 
+    // ! PlanDeTransport save here !
+
     const infoBus = await getInfoBus(ligne);
 
     return res.status(200).send({ ok: true, data: infoBus });
@@ -455,6 +487,8 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
       });
       await ligneToPoint.save({ fromUser: req.user });
     }
+
+    // ! PlanDeTransport save here !
 
     const infoBus = await getInfoBus(ligne);
 

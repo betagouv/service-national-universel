@@ -54,6 +54,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       location,
     });
 
+    // ! PlanDeTransport save here !
+
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
     capture(error);
@@ -94,6 +96,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
 
+    // ! PlanDeTransport save here !
+
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
@@ -130,6 +134,8 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
 
+    // ! PlanDeTransport save here !
+
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
@@ -163,6 +169,8 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
 
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
+
+    // ! PlanDeTransport save here !
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
@@ -207,6 +215,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const now = new Date();
     pointDeRassemblement.set({ deletedAt: now });
     await pointDeRassemblement.save({ fromUser: req.user });
+
+    // ! PlanDeTransport save here !
 
     return res.status(200).send({ ok: true });
   } catch (error) {
