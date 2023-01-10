@@ -333,7 +333,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Aller à {selectedPdr.ligneBus.lignetopoint.departureHour}</div>
-                    <div className="text-gray-600 capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
                 <div className="flex flex-row">
@@ -343,7 +343,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Retour à {selectedPdr.ligneBus.lignetopoint.returnHour}</div>
-                    <div className="text-gray-600 capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Aller à 16h</div>
-                    <div className="text-gray-600 capitalize">{dayjs(sessionObject.dateStart).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(sessionObject.dateStart).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
                 <div className="flex flex-row">
@@ -367,7 +367,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Retour à 11h</div>
-                    <div className="text-gray-600 capitalize">{dayjs(sessionObject.dateEnd).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(sessionObject.dateEnd).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
               </div>
