@@ -9,6 +9,25 @@ const SessionPhase1Schema = require("../sessionPhase1").Schema;
 const CohesionCenterSchema = require("../cohesionCenter").Schema;
 const MODELNAME = "plandetransport";
 
+const EnrichedPointDeRassemblementSchema = new mongoose.Schema({
+  PointDeRassemblementSchema,
+  // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ou de dupliquer l'id
+  id: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Duplication de l'ID du schema",
+    },
+  },
+  meetingHour: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Heure de convocation lié à ce spécifique bus et point de rassemblement",
+    },
+  },
+});
+
 const Schema = new mongoose.Schema({
   cohort: {
     type: String,
@@ -168,18 +187,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // ! Récuperer tous les champs utiles
-  // ! Regarder comment choper l'id !
-  // ! Solution arrayOfMeetingpointsObjectId
   pointDeRassemblements: {
-    type: [PointDeRassemblementSchema],
+    type: [EnrichedPointDeRassemblementSchema],
     required: true,
     documentation: {
       description: "Liste des points de rassemblement",
     },
   },
 
-  // ! Récuperer tous les champs utiles
   modificationBuses: {
     type: [ModificationBusSchema],
     required: true,

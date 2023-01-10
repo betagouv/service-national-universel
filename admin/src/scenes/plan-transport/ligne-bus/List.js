@@ -9,12 +9,13 @@ import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT } from "snu-lib";
+import { ES_NO_LIMIT, ROLES } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ArrowUp from "../../../assets/ArrowUp";
+import { useSelector } from "react-redux";
 
 const FILTERS = [
   "SEARCH",
@@ -45,6 +46,7 @@ const cohortDictionary = {
 };
 
 export default function List() {
+  const { user } = useSelector((state) => state.Auth);
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [currentTab, setCurrentTab] = React.useState("aller");
   const history = useHistory();
@@ -349,20 +351,22 @@ export default function List() {
                     searchPlaceholder="Rechercher..."
                     size={1000}
                   />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Opinion sur la modification"
-                    componentId="MODIFICATION_OPINION"
-                    dataField="modificationBuses.opinion.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_OPINION") }}
-                    title=""
-                    URLParams={true}
-                    sortBy="asc"
-                    showSearch={true}
-                    searchPlaceholder="Rechercher..."
-                    size={1000}
-                  />
+                  {user.role === ROLES.ADMIN && (
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Opinion sur la modification"
+                      componentId="MODIFICATION_OPINION"
+                      dataField="modificationBuses.opinion.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_OPINION") }}
+                      title=""
+                      URLParams={true}
+                      sortBy="asc"
+                      showSearch={true}
+                      searchPlaceholder="Rechercher..."
+                      size={1000}
+                    />
+                  )}
                 </div>
                 <DeleteFilters />
               </div>
@@ -401,6 +405,9 @@ export default function List() {
 
 const Line = ({ hit, currentTab }) => {
   console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit);
+
+  const meetingPoints = currentTab === "aller" ? hit.pointDeRassemblements : hit.pointDeRassemblements.revert();
+
   return (
     <>
       <hr />
@@ -416,12 +423,12 @@ const Line = ({ hit, currentTab }) => {
         <div className="w-[40%]">
           {/* // Meeting points list */}
           <div className="flex gap-2">
-            {hit.pointDeRassemblements.map((meetingPoint) => {
+            {meetingPoints.map((meetingPoint) => {
               console.log("🚀 ~ file: List.js:310 ~ {hit.pointDeRassemblements.map ~ meetingPoint", meetingPoint);
               return (
-                <TooltipMeetingPoint key={meetingPoint._id} meetingPoint={meetingPoint}>
+                <TooltipMeetingPoint key={meetingPoint.id} meetingPoint={meetingPoint}>
                   <a
-                    href={`/point-de-rassemblement/${meetingPoint._id}`}
+                    href={`/point-de-rassemblement/${meetingPoint.id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
@@ -463,7 +470,7 @@ const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
       <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center">
         <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
           <div className="flex">
-            <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">LigneToPoint.MeetingHour</div>
+            <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">{meetingPoint.meetingHour}</div>
             {/* <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600] mx-3">
               <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="grey" />
             </svg> */}
