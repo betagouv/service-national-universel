@@ -41,7 +41,7 @@ import RepresentantsLegaux from "./scenes/representants-legaux";
 import SupportCenter from "./scenes/support-center";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import { appURL, environment, maintenance } from "./config";
+import { appURL, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
 import { toastr } from "react-redux-toastr";
@@ -52,6 +52,7 @@ import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
+import { cohortsInit } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -82,6 +83,8 @@ export default function App() {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
+
+          await cohortsInit();
         }
       } catch (e) {
         console.log(e);
@@ -99,7 +102,7 @@ export default function App() {
         <ScrollToTop />
         <GoogleTags />
         <div className="main">
-          {maintenance & !localStorage?.getItem("override_maintenance") ? (
+          {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
             </Switch>
