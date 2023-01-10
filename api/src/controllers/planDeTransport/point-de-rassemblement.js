@@ -3,12 +3,15 @@ const router = express.Router();
 const passport = require("passport");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const YoungModel = require("../../models/young");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
+const { COHORTS } = require("snu-lib");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -182,6 +185,32 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorCohort, value: checkedCohort } = Joi.string()
+      .required()
+      .valid(...COHORTS)
+      .validate(req.params.cohort);
+
+    if (errorId || errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const lignes = await LigneBusModel.find({ cohort: checkedCohort, meetingPointsIds: checkedId });
+    if (!lignes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const meetingPointsDetail = await LigneToPointModel.find({ lineId: { $in: lignes.map((l) => l._id) }, meetingPointId: checkedId });
+
+    return res.status(200).send({ ok: true, data: { bus: lignes, meetingPoint: data, meetingPointsDetail } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -224,7 +224,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (req.user.role !== ROLES.ADMIN) {
       delete value.centerDesignation;
-      delete value.code2022;
     }
     value.pmr = value.pmr ? "true" : "false";
     const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });

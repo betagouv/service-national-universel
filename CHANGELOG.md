@@ -1,3 +1,60 @@
+# [1.195.0](https://github.com/betagouv/service-national-universel/compare/v1.194.0...v1.195.0) (2023-01-09)
+
+
+### Bug Fixes
+
+* **admin:** Size of status aggregations was limited to 10 ([d7ff57d](https://github.com/betagouv/service-national-universel/commit/d7ff57de21e5d8022ee7d66bfa67139d15054ca0))
+* **api:** dsnj export date ([f0c1155](https://github.com/betagouv/service-national-universel/commit/f0c1155ac3b8324abd5dc21e361a22ba997a034a))
+* **api:** fix cron hour ([9611690](https://github.com/betagouv/service-national-universel/commit/96116907725dd38e2098b90a4f2777ca9f0cea25))
+* **api:** reminder correction request ([ef07b12](https://github.com/betagouv/service-national-universel/commit/ef07b12708ec65bc7b76bb3ef41cbe99372959b8))
+* **lib:** Etranger can be eligible ([d8bf876](https://github.com/betagouv/service-national-universel/commit/d8bf8766c42ce75f04094a143558860817f1729f))
+* **lib:** fermeture IDF buffer back to 1.7 for fev ([26f972e](https://github.com/betagouv/service-national-universel/commit/26f972eecc22dff9430cd2c89a694ff95e922823))
+
+
+### Features
+
+* **admin:** open depart region for assignation ([8fd4034](https://github.com/betagouv/service-national-universel/commit/8fd40343ca5eaad3e46291a73a0c7463266210b4))
+
+# [1.194.0](https://github.com/betagouv/service-national-universel/compare/v1.193.0...v1.194.0) (2023-01-06)
+
+
+### Bug Fixes
+
+* **admin:** dsnj export date time ([1001765](https://github.com/betagouv/service-national-universel/commit/100176547b5fe44d572fbab56c2323b736ce7df4))
+* **admin:** ref can change code centre in edit mode ([738cc41](https://github.com/betagouv/service-national-universel/commit/738cc4139d057f781c4685f7a7f00f60717fd6b5))
+* **api:** dsnj export final fixes ([#2168](https://github.com/betagouv/service-national-universel/issues/2168)) ([0ad90dd](https://github.com/betagouv/service-national-universel/commit/0ad90dd2a4f7f055e0f8575e77bba07ee2a5e63b))
+* **api:** export date available from ([2353603](https://github.com/betagouv/service-national-universel/commit/23536037b63d30568b4b95ef53b2a892685d13fc))
+* **api:** remove lookup table from export ([c624496](https://github.com/betagouv/service-national-universel/commit/c624496d0fbe9a7dc0745c253476f47f693ee678))
+* **api/admin:** places restantes edition mission ([5ffc525](https://github.com/betagouv/service-national-universel/commit/5ffc525746f6d4de652f496d3409af2f2b06d0e6))
+* **app:** proposition de sejour ([a75f426](https://github.com/betagouv/service-national-universel/commit/a75f426e571af1b2c1011b6ec87833c1681403fa))
+* **app/lib:** fermeture sejour fevrier ([55d6f6c](https://github.com/betagouv/service-national-universel/commit/55d6f6cdbea9c55969ee30e2873f9281828c3481))
+
+
+### Features
+
+* **admin:** liste jeunes + export  ([#2167](https://github.com/betagouv/service-national-universel/issues/2167)) ([ea8260c](https://github.com/betagouv/service-national-universel/commit/ea8260cd46ebd7072d07eaad91eb7229aea41e75))
+* **admin:** Refonte page candidatures (fiche mission) ([#2164](https://github.com/betagouv/service-national-universel/issues/2164)) ([df55fd1](https://github.com/betagouv/service-national-universel/commit/df55fd1e61130e463df1d0f89f87398186727f8c))
+* **admin/app/api:** Droit à l'image - modification  ([#2166](https://github.com/betagouv/service-national-universel/issues/2166)) ([ede51e5](https://github.com/betagouv/service-national-universel/commit/ede51e58ca5e28701ed5840c3a2df8cea0dc87d8))
+
+
+### Reverts
+
+* Revert "Revert "fix(admin): open code centre ref creation"" ([9061947](https://github.com/betagouv/service-national-universel/commit/90619476c9fe10445347f9493daa0c446dce07d8))
+
+# [1.193.0](https://github.com/betagouv/service-national-universel/compare/v1.192.0...v1.193.0) (2023-01-05)
+
+
+### Bug Fixes
+
+* **api:** dsnj export cron script ([adea7c0](https://github.com/betagouv/service-national-universel/commit/adea7c0d017dff50eb7b85ed87f0826b67dbf6e5))
+* **api:** session isFull no longer required ([6afc200](https://github.com/betagouv/service-national-universel/commit/6afc20074c6a815639d89c5ed492473311d4f3cd))
+* **app:** open cohort even if it's full ([6f26886](https://github.com/betagouv/service-national-universel/commit/6f26886a1ada5d5da756a7f9848a7e14c7585400))
+
+
+### Features
+
+* **admin:** open new phase 2 ([449f6ed](https://github.com/betagouv/service-national-universel/commit/449f6ed6bfbb6252a61c656f3a2dd58acfa73c9c))
+
 # [1.192.0](https://github.com/betagouv/service-national-universel/compare/v1.191.4...v1.192.0) (2023-01-04)
 
 

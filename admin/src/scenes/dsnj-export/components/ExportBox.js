@@ -16,7 +16,7 @@ const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, e
   if (availableUntil < now) {
     return <DatePicker className="flex-1" value={availableUntil} disabled label="Indisponible depuis le" />;
   }
-  if (availableFrom < now) {
+  if (availableFrom && availableFrom.setHours(0, 0, 0, 0) < now) {
     return (
       <>
         <DatePicker className="flex-1" value={availableUntil} disabled label="Disponible jusqu’au" />
