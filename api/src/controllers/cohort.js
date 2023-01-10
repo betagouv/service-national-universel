@@ -83,7 +83,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
   }
 });
 
-router.get("/", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (_, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (_, res) => {
   try {
     const cohorts = await CohortModel.find({});
     return res.status(200).send({ ok: true, data: cohorts });
