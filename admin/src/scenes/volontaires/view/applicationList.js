@@ -97,7 +97,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
                   "Nom de la mission": data.missionName,
                   "Département de la mission": data.missionDepartment,
                   "Région de la mission": data.missionRegion,
-                  "Candidature créée lé": data.createdAt,
+                  "Candidature créée le": data.createdAt,
                   "Candidature mise à jour le": data.updatedAt,
                   "Statut de la candidature": translate(data.status),
                   Tuteur: data.tutorName,
