@@ -168,6 +168,9 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // ! Récuperer tous les champs utiles
+  // ! Regarder comment choper l'id !
+  // ! Solution arrayOfMeetingpointsObjectId
   pointDeRassemblements: {
     type: [PointDeRassemblementSchema],
     required: true,
@@ -176,6 +179,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // ! Récuperer tous les champs utiles
   modificationBuses: {
     type: [ModificationBusSchema],
     required: true,
