@@ -186,7 +186,7 @@ export default function List() {
                       "Nom de la mission": data.missionName,
                       "Département de la mission": data.missionDepartment,
                       "Région de la mission": data.missionRegion,
-                      "Candidature créée lé": data.createdAt,
+                      "Candidature créée le": data.createdAt,
                       "Candidature mise à jour le": data.updatedAt,
                       "Statut de la candidature": translate(data.status),
                       Tuteur: data.tutorName,
@@ -329,7 +329,7 @@ export default function List() {
                                       "Région de la mission": data.missionRegion,
                                     },
                                     candidature: {
-                                      "Candidature créée lé": data.createdAt,
+                                      "Candidature créée le": data.createdAt,
                                       "Candidature mise à jour le": data.updatedAt,
                                       "Statut de la candidature": translate(data.status),
                                       Tuteur: data.tutorName,

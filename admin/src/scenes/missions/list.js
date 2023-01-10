@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
-import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translatePhase2 } from "snu-lib";
+import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translatePhase2 } from "snu-lib";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import LockedSvg from "../../assets/lock.svg";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -122,7 +122,7 @@ export default function List() {
         },
         status: {
           "Statut de la mission": translate(data.status),
-          "Créée lé": formatLongDateFR(data.createdAt),
+          "Créée le": formatLongDateFR(data.createdAt),
           "Mise à jour le": formatLongDateFR(data.updatedAt),
           "Commentaire sur le statut": data.statusComment,
         },
@@ -326,9 +326,9 @@ export default function List() {
             Région: application?.young?.region,
           },
           application: {
-            "Statut de la candidature": translate(application?.status),
+            "Statut de la candidature": translateApplication(application?.status),
             "Choix - Ordre de la candidature": application?.priority,
-            "Candidature créée lé": formatLongDateUTC(application?.createdAt),
+            "Candidature créée le": formatLongDateUTC(application?.createdAt),
             "Candidature mise à jour le": formatLongDateUTC(application?.updatedAt),
             "Statut du contrat d'engagement": translate(application?.contractStatus),
             "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + application[option]?.length, 0) !== 0}`),
@@ -361,7 +361,7 @@ export default function List() {
             "Id de la structure": data.structureId,
             "Nom de la structure": data.structure.name,
             "Statut juridique de la structure": data.structure.legalStatus,
-            "Type(s) de structure": data.structure.types.toString(),
+            "Type de structure": data.structure.types.toString(),
             "Sous-type de structure": data.structure.sousType,
             "Présentation de la structure": data.structure.description,
           },

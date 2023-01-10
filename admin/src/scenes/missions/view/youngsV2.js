@@ -132,7 +132,7 @@ export default function Youngs({ mission, applications, updateMission }) {
         application: {
           "Statut de la candidature": translate(data.status),
           "Choix - Ordre de la candidature": data.priority,
-          "Candidature créée lé": formatLongDateUTC(data.createdAt),
+          "Candidature créée le": formatLongDateUTC(data.createdAt),
           "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
           "Statut du contrat d'engagement": translate(data.young.statusPhase2Contract),
           "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
