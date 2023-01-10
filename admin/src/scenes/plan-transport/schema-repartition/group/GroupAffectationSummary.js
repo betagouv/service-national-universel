@@ -35,7 +35,7 @@ export default function GroupAffectationSummary({ group, className = "", onChang
 
   return (
     <GroupBox className={className}>
-      <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)} noBack={user.role === ROLES.REFERENT_DEPARTMENT}>
+      <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)} noBack={[ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)}>
         <div className="grow flex items-center justify-between">
           <div className="">Récapitulatif</div>
           <div className="flex items-center text-base text-gray-900">
