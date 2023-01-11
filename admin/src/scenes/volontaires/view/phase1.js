@@ -14,6 +14,7 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import Pencil from "../../../assets/icons/Pencil";
+import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
 import {
@@ -42,8 +43,12 @@ import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
 import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
 import Refresh from "../../../assets/icons/Refresh";
 import ChevronDown from "../../../assets/icons/ChevronDown.js";
-import { BiChevronDown, BsDownload, AiOutlineMail } from "react-icons/bi";
+import { BiChevronDown } from "react-icons/bi";
+import { CiMail } from "react-icons/ci";
+import { BsDownload } from "react-icons/bs";
 import MailOpenIcon from "../../../components/MailOpenIcon";
+import { capture } from "../../../sentry";
+
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
@@ -79,6 +84,27 @@ export default function Phase1(props) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
       console.log(e);
     }
+  };
+  const sendMail = async () => {
+    try {
+      setLoading(true);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/certificate/1/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
+      });
+      setLoading(false);
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      setLoading(false);
+      toastr.error("Erreur lors de l'envoie du document", e.message);
+    }
+  };
+  const onClickPdf = async () => {
+    await downloadPDF({
+      url: `/young/${young._id}/documents/certificate/1`,
+      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
+    });
   };
 
   useEffect(() => {
@@ -156,7 +182,19 @@ export default function Phase1(props) {
                   // icon={young.statusPhase1 === "AFFECTED" && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm mr-1" />}
                   color={YOUNG_STATUS_COLORS[young.statusPhase1]}
                 />
-                {young.statusPhase1 === "DONE" && <AttestationSelect />}
+                {young.statusPhase1 === "DONE" && (
+                  <AttestationSelect
+                    onClickPdf={onClickPdf}
+                    onClickMail={() =>
+                      setModal({
+                        isOpen: true,
+                        title: "Envoie de document par mail",
+                        message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
+                        onConfirm: sendMail,
+                      })
+                    }
+                  />
+                )}
                 {young.statusPhase1 === "NOT_DONE" && (
                   <div className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">Dispenser le volontaire du séjour</div>
                 )}
@@ -493,24 +531,51 @@ const Details = ({ title, value, to }) => {
   );
 };
 
-const AttestationSelect = () => {
-  const sendMail = () => {};
-  const downloadAttestation = () => {};
+const AttestationSelect = ({ onClickMail, onClickPdf }) => {
+  const ref = React.useRef();
   const [open, setOpen] = useState(false);
-  const options = [
-    { icon: <MailOpenIcon />, label: "Télécharger", onClick: () => downloadAttestation() },
-    { icon: <MailOpenIcon />, label: "Envoyer par mail", onClick: () => sendMail() },
-  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="cursor-pointer flex flex-row justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-3 py-2 ml-2">
+    <div className="relative" ref={ref}>
+      <div
+        onClick={() => setOpen((open) => !open)}
+        className="cursor-pointer flex flex-row justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-3 py-2 ml-2">
         <div className="text-xs font-medium">Attestation de réalisation phase 1</div>
         <BiChevronDown />
       </div>
-      <div className="flex flex-col items-center justify-center relative">
-        {options.map((val) => (
-          <div key={val.label}>{val.label}</div>
-        ))}
+      <div
+        className={`absolute ${
+          open ? "flex" : "hidden"
+        } flex-col items-center justify-center bg-white border-[1px] border-gray-300 rounded-md text-gray-700 z-10 mt-2 overflow-hidden`}>
+        <div
+          onClick={() => {
+            onClickPdf();
+            setOpen(false);
+          }}
+          className="flex flex-row justify-start items-center gap-2 w-64 py-2.5 px-2 border-b-[1px] hover:text-white hover:bg-blue-600 cursor-pointer">
+          <BsDownload />
+          <div>Télécharger</div>
+        </div>
+        <div
+          className="flex flex-row justify-start items-center gap-2 w-64 py-2.5 px-2 hover:text-white hover:bg-blue-600 cursor-pointer"
+          onClick={() => {
+            onClickMail();
+            setOpen(false);
+          }}>
+          <CiMail />
+          <div>Envoyer par mail</div>
+        </div>
       </div>
     </div>
   );
