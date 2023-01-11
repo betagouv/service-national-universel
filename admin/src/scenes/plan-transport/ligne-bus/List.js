@@ -15,6 +15,7 @@ import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ArrowUp from "../../../assets/ArrowUp";
+import Train from "../../../assets/train";
 import { useSelector } from "react-redux";
 
 const FILTERS = [
@@ -476,21 +477,20 @@ const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
   return (
     <div className="relative flex flex-col items-center group" {...props}>
       {children}
-      <div className="absolute group-hover:flex !top-8 mb-3 items-center">
+      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center">
         <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
-          <div className="flex">
+          <div className="flex items-center justify-between w-[524px]">
             <div className="flex items-center">
               <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">{meetingPoint.meetingHour}</div>
               <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
-                <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="grey" />
+                <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="#F5F5F5" />
               </svg>
+              <div className="flex flex-col ml-1">
+                <div className="text-sm font-medium">{meetingPoint.name}</div>
+                <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
+              </div>
             </div>
-            {/* //! Refaire le triangle qui pointe vers la droite */}
-            <div className="flex flex-col">
-              <div className="text-sm font-medium">{meetingPoint.name}</div>
-              <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
-            </div>
-            {/* Symbole train */}
+            <Train />
           </div>
         </div>
       </div>
