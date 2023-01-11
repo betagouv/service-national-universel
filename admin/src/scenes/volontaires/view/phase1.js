@@ -126,6 +126,7 @@ export default function Phase1(props) {
 
   const onSubmit = async (newValue) => {
     setYoung(newValue);
+    setValues(newValue);
 
     // on ferme les modales
     setModalPointagePresenceArrivee({ isOpen: false, value: null });
@@ -154,13 +155,6 @@ export default function Phase1(props) {
               }}
               disabled={loading}>
               Annuler
-            </button>
-            <button
-              className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={onSubmit}
-              disabled={loading}>
-              <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-              Enregistrer les changements
             </button>
           </div>
         )}
@@ -220,6 +214,7 @@ export default function Phase1(props) {
                   />
                 </div>
                 <div className="flex-1 min-w-[250px]">
+                  {console.log(young.cohesionStayPresence)}
                   <TailwindSelect
                     name="cohesionStayPresence"
                     label="Présence à l'arrivée"
@@ -227,7 +222,7 @@ export default function Phase1(props) {
                     type="select"
                     className="flex-1 min-w-[250px]"
                     icon={<SpeakerPhone className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
-                    setSelected={(val) => setValues({ ...values, cohesionStayPresence: val })}
+                    setSelected={({ value }) => setModalPointagePresenceArrivee({ isOpen: true, value })}
                     selected={values.cohesionStayPresence}
                     options={[
                       { label: "Non renseigné", value: "", disabled: true, hidden: true },
@@ -243,7 +238,7 @@ export default function Phase1(props) {
                     readOnly={!editing}
                     type="select"
                     icon={<BadgeCheck className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
-                    setSelected={(val) => setValues({ ...values, presenceJDM: val })}
+                    setSelected={({ value }) => setModalPointagePresenceJDM({ isOpen: true, value })}
                     selected={values.presenceJDM}
                     options={[
                       { label: "Non renseigné", value: "", disabled: true, hidden: true },
@@ -264,11 +259,23 @@ export default function Phase1(props) {
               </div>
             </div>
 
+            {young.departSejourAt ? (
+              <div className="bg-blue-100 text-blue-600 px-3 py-2 rounded mt-4 flex flex-row items-center">
+                <div className="font-bold w-1/2">{young.departSejourMotif}</div>
+                {young.departSejourMotifComment ? (
+                  <div className="w-1/2 flex flex-row justify-start items-center gap-2">
+                    <ImQuotesLeft />
+                    <div>{young.departSejourMotifComment}</div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             {cohesionCenter ? (
               <div className="flex flex-row items-center justify-center gap-10">
                 <div className="mt-4 w-full">
                   <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
-                  <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex flex-col gap-3 mb-4">
                     <Field title="Code centre" value={cohesionCenter.code2022} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
@@ -285,9 +292,9 @@ export default function Phase1(props) {
                 </div>
                 <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
                   <div className="text-xs text-gray-900 font-medium mb-2">Point de rassemblement</div>
-                  <div className="flex flex-col gap-2 mb-4 text-sm text-gray-800">
+                  <div className="flex flex-col gap-3 mb-4 text-sm text-gray-800 w-full ">
                     {meetingPoint ? (
-                      <div>
+                      <div className="flex flex-col gap-3">
                         <Field title="Adresse" value={meetingPoint?.departureAddress} />
                         <Field title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
                         <Field title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />

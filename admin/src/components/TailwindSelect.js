@@ -23,7 +23,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                   <div className={`flex flex-col w-full `}>
                     <label className="text-xs leading-4 text-gray-500">{label}</label>
                     <div className="flex items-center justify-between w-full">
-                      <span className="block truncate">{selected?.label}</span>
+                      <span className="block truncate">{options.find((e) => e.value === selected)?.label}</span>
                       <span className="pointer-events-none flex items-center pr-2">
                         {!readOnly && (
                           <>
