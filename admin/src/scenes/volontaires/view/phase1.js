@@ -61,14 +61,28 @@ export default function Phase1(props) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState(props.young);
+  const [displayCenterButton, setDisplayCenterButton] = useState(false);
 
-  const displayCenterButton = () => {
-    if (young.status !== "Validated" || young.status !== "WAITING_LIST") return false;
-    if (user.role === ROLES.ADMIN) return true;
-    if (user.role === ROLES.REFERENT_REGION && user.region === young.region) return true;
+  const getDisplayCenterButton = async () => {
+    console.log("ok ?", young.status);
+    if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") return setDisplayCenterButton(false);
+    if (user.role === ROLES.ADMIN) return setDisplayCenterButton(true);
+    try {
+      const { ok, data } = await api.get("/cohort/" + young.cohort);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+        return setDisplayCenterButton(false);
+      }
+      if (!data || !data[0]?.manualAffectionOpenForReferent) return setDisplayCenterButton(false);
+      if (user.role === ROLES.REFERENT_REGION && user.region === young.region) return setDisplayCenterButton(true);
+    } catch (e) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+      console.log(e);
+    }
   };
 
   useEffect(() => {
+    getDisplayCenterButton();
     if (!young?.sessionPhase1Id) return;
     (async () => {
       const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
