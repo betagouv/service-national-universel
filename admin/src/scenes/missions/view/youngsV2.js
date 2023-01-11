@@ -441,6 +441,8 @@ export default function Youngs({ mission, applications, updateMission }) {
                     URLParams={true}
                     showSearch={false}
                     renderLabel={(items) => getFilterLabel(items, "Pièces jointes")}
+                    showMissing={true}
+                    missingLabel="Aucune pièce jointe"
                   />
                   {/*filesType */}
                   <DeleteFilters />
