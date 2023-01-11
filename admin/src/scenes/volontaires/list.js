@@ -483,7 +483,8 @@ export default function VolontaireList() {
                   }}
                   title=""
                   URLParams={true}
-                  a
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
                 />
                 <MultiDropdownList
