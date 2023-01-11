@@ -36,7 +36,7 @@ import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "DOCUMENTS", "FILES_TYPE"];
+const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "FILES_TYPE"];
 
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
