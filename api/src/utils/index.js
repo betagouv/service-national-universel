@@ -698,7 +698,6 @@ const updateYoungApplicationFilesType = async (application, user) => {
       listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
     }
     application.set({ filesType: currentListFiles });
-    console.log(application);
     await application.save({ fromUser: user });
   });
   young.set({ phase2ApplicationFilesType: listFiles });
