@@ -81,23 +81,7 @@ export default function Youngs({ mission, applications, updateMission }) {
     if (ok) setYoung(data);
   };
   const getDefaultQuery = () => {
-    const body = {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [{ term: { "missionId.keyword": mission._id } }],
-        },
-      },
-      script_fields: {
-        contractAvenantFiles: {
-          script: {
-            lang: "painless",
-            source: "doc.containsKey('contractAvenantFiles') && doc['contractAvenantFiles.keyword'].length > 0 ? 'contractAvenantFiles' : ''",
-          },
-        },
-      },
-      size: ES_NO_LIMIT,
-    };
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "missionId.keyword": mission._id } }] } }, size: ES_NO_LIMIT };
     if (currentTab === "pending") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
     } else if (currentTab === "follow") {
