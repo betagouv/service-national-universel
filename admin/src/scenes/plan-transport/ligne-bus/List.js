@@ -192,7 +192,7 @@ export default function List() {
                     className="dropdown-filter"
                     placeholder="Taux de remplissage"
                     componentId="TAUX_REMPLISSAGE"
-                    dataField="fillingRate.keyword"
+                    dataField="fillingRate"
                     react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
                     title=""
                     URLParams={true}
@@ -426,9 +426,9 @@ const Line = ({ hit, currentTab }) => {
             {meetingPoints.map((meetingPoint) => {
               console.log("🚀 ~ file: List.js:310 ~ {hit.pointDeRassemblements.map ~ meetingPoint", meetingPoint);
               return (
-                <TooltipMeetingPoint key={meetingPoint.copyId} meetingPoint={meetingPoint}>
+                <TooltipMeetingPoint key={meetingPoint.meetingPointId} meetingPoint={meetingPoint}>
                   <a
-                    href={`/point-de-rassemblement/${meetingPoint.copyId}`}
+                    href={`/point-de-rassemblement/${meetingPoint.meetingPointId}`}
                     target="_blank"
                     rel="noreferrer"
                     className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
@@ -454,7 +454,7 @@ const Line = ({ hit, currentTab }) => {
             </TooltipCenter>
           </div>
         </div>
-        <div className="w-[10%]">{hit.fillingRate} - Cercle</div>
+        <div className="w-[10%]">{hit.fillingRate}% - Cercle</div>
         <div className="w-[5%]"></div>
       </div>
     </>

@@ -13,7 +13,7 @@ const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminat
   "Enriched",
   new mongoose.Schema({
     // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ou de dupliquer l'id
-    copyId: {
+    meetingPointId: {
       type: String,
       required: true,
       documentation: {
@@ -81,7 +81,7 @@ const Schema = new mongoose.Schema({
   },
 
   fillingRate: {
-    type: String,
+    type: Number,
     documentation: {
       description: "Taux de remplissage de la ligne",
     },
