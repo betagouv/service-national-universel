@@ -1,3 +1,20 @@
+# [1.197.0](https://github.com/betagouv/service-national-universel/compare/v1.196.0...v1.197.0) (2023-01-11)
+
+
+### Bug Fixes
+
+* **admin:**  add search bar for original cohort list ([6310753](https://github.com/betagouv/service-national-universel/commit/6310753b6fdde4d7d32488dec8585f7912f25957))
+* **admin:** add new cohort for head-center ([d0cd3f4](https://github.com/betagouv/service-national-universel/commit/d0cd3f4509f7d73072d747a7b7f70548cd26e99e))
+* **admin:** add search bar for cohort list ([4a9c192](https://github.com/betagouv/service-national-universel/commit/4a9c1921477d1ec7363676c7fb9f1a1ae73e7ee5))
+* **admin:** il est tard j'ai oublié un truc ([1f94050](https://github.com/betagouv/service-national-universel/commit/1f9405000fcfffd11c10070e9e40aa7061802d61))
+* **admin:** notify young when validated/refused/waiting_list ([1cca3ba](https://github.com/betagouv/service-national-universel/commit/1cca3ba10d842db0fdedd7d27cb3031131eb6772))
+* **sentry:** Ignore some errors provoqued by extensions ([fee418b](https://github.com/betagouv/service-national-universel/commit/fee418bccf65de89fffd65839c34952ac5e70a75))
+
+
+### Features
+
+* **admin:** synchro mission new fields ([730f8c6](https://github.com/betagouv/service-national-universel/commit/730f8c6773acd7c7c69177cc80ade576625a2f6e))
+
 # [1.196.0](https://github.com/betagouv/service-national-universel/compare/v1.195.0...v1.196.0) (2023-01-10)
 
 
