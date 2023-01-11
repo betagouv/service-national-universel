@@ -307,64 +307,74 @@ export default function Phase1(props) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-row items-center justify-center gap-10">
-              {cohesionCenter && (
-                <>
-                  <div className="mt-4 w-full">
-                    <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
-                    <div className="flex flex-col gap-2 mb-4">
-                      <Field title="Code centre" value={cohesionCenter.code2022} />
-                      <Field title="Nom" value={cohesionCenter.name} />
-                      <Field title="Code postal" value={cohesionCenter.zip} />
-                      <Field title="Ville" value={cohesionCenter.city} />
-                    </div>
-                    {editing && (
-                      <div
-                        onClick={() => setModalAffectation({ isOpen: true })}
-                        className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
-                        <Refresh />
-                        <div>Changer l&apos;affectation</div>
-                      </div>
-                    )}
+
+            {cohesionCenter ? (
+              <div className="flex flex-row items-center justify-center gap-10">
+                <div className="mt-4 w-full">
+                  <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
+                  <div className="flex flex-col gap-2 mb-4">
+                    <Field title="Code centre" value={cohesionCenter.code2022} />
+                    <Field title="Nom" value={cohesionCenter.name} />
+                    <Field title="Code postal" value={cohesionCenter.zip} />
+                    <Field title="Ville" value={cohesionCenter.city} />
                   </div>
-                </>
-              )}
-              <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
-                <div className="text-xs text-gray-900 font-medium mb-2">Point de rassemblement</div>
-                <div className="flex flex-col gap-2 mb-4 text-sm text-gray-800">
-                  {meetingPoint ? (
-                    <div>
-                      <Field title="Adresse" value={meetingPoint?.departureAddress} />
-                      <Field title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
-                      <Field title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
-                      <Field title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+                  {editing && (
+                    <div
+                      onClick={() => setModalAffectation({ isOpen: true })}
+                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                      <Refresh />
+                      <div>Changer l&apos;affectation</div>
                     </div>
-                  ) : young?.transportInfoGivenByLocal === "true" ? (
-                    <div>Les informations de transport seront transmises par les services locaux.</div>
-                  ) : young?.deplacementPhase1Autonomous === "true" ? (
-                    <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
-                  ) : (
-                    <div>{young.firstName} n’a pas encore confirmé son point de rassemblement.</div>
                   )}
                 </div>
-                {editing && (
-                  <div
-                    onClick={() => {
-                      setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
-                    }}
-                    className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
+                  <div className="text-xs text-gray-900 font-medium mb-2">Point de rassemblement</div>
+                  <div className="flex flex-col gap-2 mb-4 text-sm text-gray-800">
                     {meetingPoint ? (
-                      <>
-                        <Refresh />
-                        <div>Changer le point de rassemblement</div>
-                      </>
+                      <div>
+                        <Field title="Adresse" value={meetingPoint?.departureAddress} />
+                        <Field title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
+                        <Field title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
+                        <Field title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+                      </div>
+                    ) : young?.transportInfoGivenByLocal === "true" ? (
+                      <div>Les informations de transport seront transmises par les services locaux.</div>
+                    ) : young?.deplacementPhase1Autonomous === "true" ? (
+                      <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
                     ) : (
-                      <div>Choisir un point de rassemblement</div>
+                      <div>{young.firstName} n’a pas encore confirmé son point de rassemblement.</div>
                     )}
                   </div>
-                )}
+                  {editing && (
+                    <div
+                      onClick={() => {
+                        setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
+                      }}
+                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                      {meetingPoint ? (
+                        <>
+                          <Refresh />
+                          <div>Changer le point de rassemblement</div>
+                        </>
+                      ) : (
+                        <div>Choisir un point de rassemblement</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col my-52 gap-4 items-center justify-center">
+                <div className="font-bold text-gray-900 text-base">Ce volontaire n&apos;est affecté à aucun centre</div>
+                <div
+                  className="bg-blue-600 px-4 rounded text-white py-2 cursor-pointer"
+                  onClick={() => {
+                    setModalAffectation({ isOpen: true });
+                  }}>
+                  Affecter dans un centre
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/*
