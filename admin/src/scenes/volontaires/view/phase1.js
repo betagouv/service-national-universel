@@ -33,6 +33,7 @@ import {
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
+import ModalDispense from "../components/ModalDispense";
 import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
@@ -60,7 +61,7 @@ export default function Phase1(props) {
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
   const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
   const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
-
+  const [modalDispense, setModalDispense] = useState({ isOpen: false });
   // new useState
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -190,7 +191,11 @@ export default function Phase1(props) {
                   />
                 )}
                 {young.statusPhase1 === "NOT_DONE" && (
-                  <div className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">Dispenser le volontaire du séjour</div>
+                  <div
+                    onClick={() => setModalDispense({ isOpen: true })}
+                    className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">
+                    Dispenser le volontaire du séjour
+                  </div>
                 )}
               </div>
               <EditTop />
@@ -505,6 +510,7 @@ export default function Phase1(props) {
         center={modalAffectations?.center}
         sessionId={modalAffectations?.sessionId}
       />
+      <ModalDispense isOpen={modalDispense?.isOpen} onSubmit={onSubmit} onCancel={() => setModalDispense({ isOpen: false })} />
     </>
   );
 }
