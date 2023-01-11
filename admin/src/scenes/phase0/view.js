@@ -18,6 +18,7 @@ import {
   GRADES,
   getAge,
   ROLES,
+  SENDINBLUE_TEMPLATES,
 } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
@@ -208,6 +209,20 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
 
       await api.put(`/referent/young/${young._id}`, body);
       if (action === "WAITING_LIST") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
+
+      //Notify young
+      switch (state) {
+        case "REFUSED":
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
+          break;
+        case "WAITING_LIST":
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
+          break;
+        case "VALIDATED":
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+          break;
+      }
+
       toastr.success("Votre action a été enregistrée.");
       onChange && onChange();
     } catch (err) {
