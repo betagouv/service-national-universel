@@ -62,6 +62,12 @@ export default function Phase1(props) {
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState(props.young);
 
+  const displayCenterButton = () => {
+    if (young.status !== "Validated" || young.status !== "WAITING_LIST") return false;
+    if (user.role === ROLES.ADMIN) return true;
+    if (user.role === ROLES.REFERENT_REGION && user.region === young.region) return true;
+  };
+
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
     (async () => {
@@ -77,115 +83,6 @@ export default function Phase1(props) {
       setMeetingPoint(data);
     })();
   }, []);
-
-  const getMeetingPoint = (young) => {
-    if (young.meetingPointId)
-      return (
-        <>
-          <Details title="Adresse" value={meetingPoint?.departureAddress} />
-          <Details title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
-          <Details title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
-          <Details title="N˚&nbsp;transport" to={`/point-de-rassemblement/${meetingPoint?._id}/edit`} value={meetingPoint?.busExcelId} />
-        </>
-      );
-    if (young.deplacementPhase1Autonomous === "true")
-      return (
-        <>
-          <i>{`${young.firstName} se rend au centre par ses propres moyens.`}</i>
-        </>
-      );
-    return (
-      <div>
-        <i>{`Aucun point de rassemblement n'a été confirmé pour ${young.firstName}`}</i>
-      </div>
-    );
-  };
-
-  const getCohesionStay = (young) => {
-    if (!cohesionCenter) return <i>Aucun centre renseigné</i>;
-    if (young.statusPhase1 === "DONE")
-      return (
-        <>
-          <p>{young.firstName} a réalisé son séjour de cohésion.</p>
-          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
-          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
-          <Details title="Ville" value={cohesionCenter.city} />
-          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
-        </>
-      );
-    if (young.statusPhase1 === "NOT_DONE")
-      return (
-        <>
-          <p>{young.firstName} n&apos;a pas réalisé son séjour de cohésion.</p>
-          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
-          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
-          <Details title="Ville" value={cohesionCenter.city} />
-          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
-        </>
-      );
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
-      return (
-        <p>
-          Le volontaire a été dispensé de séjour de cohésion.
-          <br />
-          {young.statusPhase1Motif
-            ? `Motif :
-          ${young.statusPhase1Motif === YOUNG_STATUS_PHASE1_MOTIF.OTHER ? ` ${young.statusPhase1MotifDetail}` : ` ${translate(young.statusPhase1Motif)}`}`
-            : null}
-        </p>
-      );
-    }
-    if ((young.statusPhase1 === "CANCEL" || young.statusPhase1 === "EXEMPTED") && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
-    if (young.statusPhase1 === "AFFECTED")
-      return (
-        <>
-          <p className="text-base mb-1">{young.firstName} a été affecté(e) au centre :</p>
-          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
-          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
-          <Details title="Ville" value={cohesionCenter.city} />
-          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
-        </>
-      );
-    if (young.statusPhase1 === "WAITING_AFFECTATION")
-      return (
-        <>
-          <p>{young.firstName} est en attente d&apos;affectation à un centre de cohésion</p>
-          {canAssignCohesionCenter(user, young) ? <AssignCenter young={young} onAffect={props.onChange} /> : null}
-        </>
-      );
-    if (young.statusPhase1 === "WAITING_LIST")
-      return (
-        <>
-          <p className="text-base mb-1">{young.firstName} est sur liste d&apos;attente au centre :</p>
-          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
-          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
-          <Details title="Ville" value={cohesionCenter.city} />
-          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
-        </>
-      );
-    if (young.statusPhase1 === "WAITING_ACCEPTATION")
-      return (
-        <>
-          <p>
-            {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
-          </p>
-          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
-          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
-          <Details title="Ville" value={cohesionCenter.city} />
-          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
-        </>
-      );
-    if (young.statusPhase1 === "WITHDRAWN")
-      return (
-        <>
-          <p>{young.firstName} s&apos;est désisté(e) du séjour de cohésion.</p>
-          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
-          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
-          <Details title="Ville" value={cohesionCenter.city} />
-          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
-        </>
-      );
-  };
 
   const onSubmit = async (newValue) => {
     setYoung(newValue);
@@ -246,6 +143,9 @@ export default function Phase1(props) {
                   color={YOUNG_STATUS_COLORS[young.statusPhase1]}
                 />
                 {young.statusPhase1 === "DONE" && <AttestationSelect />}
+                {young.statusPhase1 === "NOT_DONE" && (
+                  <div className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">Dispenser le volontaire du séjour</div>
+                )}
               </div>
               <EditTop />
             </div>
@@ -370,13 +270,15 @@ export default function Phase1(props) {
             ) : (
               <div className="flex flex-col my-52 gap-4 items-center justify-center">
                 <div className="font-bold text-gray-900 text-base">Ce volontaire n&apos;est affecté à aucun centre</div>
-                <div
-                  className="bg-blue-600 px-4 rounded text-white py-2 cursor-pointer"
-                  onClick={() => {
-                    setModalAffectation({ isOpen: true });
-                  }}>
-                  Affecter dans un centre
-                </div>
+                {displayCenterButton && (
+                  <div
+                    className="bg-blue-600 px-4 rounded text-white py-2 cursor-pointer"
+                    onClick={() => {
+                      setModalAffectation({ isOpen: true });
+                    }}>
+                    Affecter dans un centre
+                  </div>
+                )}
               </div>
             )}
           </div>
