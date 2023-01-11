@@ -45,6 +45,12 @@ const cohortDictionary = {
   "Juillet 2023": "Séjour du 4 au 16 Juillet 2023",
 };
 
+const translateFillingRate = (e) => {
+  if (e == 0) return "Vide";
+  if (e == 100) return "Rempli";
+  return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
+};
+
 export default function List() {
   const { user } = useSelector((state) => state.Auth);
   const [filterVisible, setFilterVisible] = React.useState(false);
@@ -194,6 +200,9 @@ export default function List() {
                     componentId="TAUX_REMPLISSAGE"
                     dataField="fillingRate"
                     react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
+                    renderItem={(e, count) => {
+                      return `${translateFillingRate(e)} (${count})`;
+                    }}
                     title=""
                     URLParams={true}
                     sortBy="asc"
@@ -467,13 +476,15 @@ const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
   return (
     <div className="relative flex flex-col items-center group" {...props}>
       {children}
-      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center">
+      <div className="absolute group-hover:flex !top-8 mb-3 items-center">
         <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
           <div className="flex">
-            <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">{meetingPoint.meetingHour}</div>
-            {/* <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600] mx-3">
-              <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="grey" />
-            </svg> */}
+            <div className="flex items-center">
+              <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">{meetingPoint.meetingHour}</div>
+              <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
+                <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="grey" />
+              </svg>
+            </div>
             {/* //! Refaire le triangle qui pointe vers la droite */}
             <div className="flex flex-col">
               <div className="text-sm font-medium">{meetingPoint.name}</div>
