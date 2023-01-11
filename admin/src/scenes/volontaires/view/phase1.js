@@ -41,6 +41,9 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
 import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
 import Refresh from "../../../assets/icons/Refresh";
+import ChevronDown from "../../../assets/icons/ChevronDown.js";
+import { BiChevronDown, BsDownload, AiOutlineMail } from "react-icons/bi";
+import MailOpenIcon from "../../../components/MailOpenIcon";
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
@@ -242,6 +245,7 @@ export default function Phase1(props) {
                   // icon={young.statusPhase1 === "AFFECTED" && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm mr-1" />}
                   color={YOUNG_STATUS_COLORS[young.statusPhase1]}
                 />
+                {young.statusPhase1 === "DONE" && <AttestationSelect />}
               </div>
               <EditTop />
             </div>
@@ -569,5 +573,28 @@ const Details = ({ title, value, to }) => {
         <p className="detail-text">{value}</p>
       )}
     </section>
+  );
+};
+
+const AttestationSelect = () => {
+  const sendMail = () => {};
+  const downloadAttestation = () => {};
+  const [open, setOpen] = useState(false);
+  const options = [
+    { icon: <MailOpenIcon />, label: "Télécharger", onClick: () => downloadAttestation() },
+    { icon: <MailOpenIcon />, label: "Envoyer par mail", onClick: () => sendMail() },
+  ];
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <div className="cursor-pointer flex flex-row justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-3 py-2 ml-2">
+        <div className="text-xs font-medium">Attestation de réalisation phase 1</div>
+        <BiChevronDown />
+      </div>
+      <div className="flex flex-col items-center justify-center relative">
+        {options.map((val) => (
+          <div key={val.label}>{val.label}</div>
+        ))}
+      </div>
+    </div>
   );
 };
