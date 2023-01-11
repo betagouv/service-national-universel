@@ -6,12 +6,11 @@ import Navbar from "../components/Navbar";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../inscription2023/components/RadioButton";
-import RadioButton from "../components/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/inscription/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import Check from "../components/Check";
-import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, booleanToString, isReturningParent, CDN_BASE_URL } from "../commons";
+import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
@@ -20,6 +19,7 @@ import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
 import plausibleEvent from "../../../services/plausible";
 import { regexPhoneFrenchCountries } from "../../../utils";
+import AuthorizeBlock from "../components/AuthorizeBlock";
 
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
@@ -511,24 +511,5 @@ export default function Consentement({ step, parentId }) {
       <Footer marginBottom="mb-[88px]" />
       <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide" />
     </>
-  );
-}
-
-function AuthorizeBlock({ title, value, onChange, children, className, error }) {
-  const options = [
-    { value: "true", label: "J'autorise" },
-    { value: "false", label: "Je n'autorise pas" },
-  ];
-
-  function onValueChange(e) {
-    onChange(e === "true");
-  }
-
-  return (
-    <div className={className}>
-      <RadioButton label={title} options={options} onChange={onValueChange} value={booleanToString(value)} />
-      {error && <ErrorMessage className="mb-2">{error}</ErrorMessage>}
-      <div>{children}</div>
-    </div>
   );
 }

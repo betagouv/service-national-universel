@@ -12,6 +12,7 @@ const Schema = new mongoose.Schema({
   subject: { type: String },
   date: { type: Date, default: Date.now },
   messageId: { type: String },
+  messageUuid: { type: String },
   templateId: { type: String },
   tags: [{ type: String }],
   reason: { type: String },

@@ -140,13 +140,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     youngPatches.handler();
   });
 
+  cron.schedule("30 03 * * *", () => {
+    dsnjExport.handler();
+  });
+
   cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
-  });
-}
-
-if (ENVIRONMENT === "staging") {
-  cron.schedule("30 3 * * *", () => {
-    dsnjExport.handler();
   });
 }

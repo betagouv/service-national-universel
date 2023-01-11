@@ -6,6 +6,11 @@
  *   PUT   /young-edition/:id/situationparents    -> Modifie les données du jeune qui se trouvent dans la deuxième section de la page du jeune (Détails).
  *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune sur une phase.
  *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
+ *   PUT   /young-edition/:id/parent-image-rights-reset
+ *                                                -> Remet à undefined le consentement de droit à l'image d'un parent en lui renvoyant une notification pour le redonner.
+ *   GET   /young-edition/:id/remider/:idParent   -> Relance la notification de consentement pour le parent 1 ou 2
+ *   GET   /young-edition/:id/reminder-parent-image-rights/:idParent
+ *                                                -> Relance la notification de consentement au droit à l'image pour le parent 1 ou 2
  */
 
 const express = require("express");
@@ -17,11 +22,12 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_SMS } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_SMS, canEditYoung } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate, sendSMS } = require("../sendinblue");
 const { format } = require("date-fns");
 const config = require("../config");
+const YoungObject = require("../models/young");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -398,6 +404,103 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
         });
       }
     }
+
+    return res.status(200).send({ ok: true });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // checks data
+    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (paramError) {
+      capture(paramError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const youngId = paramValue.id;
+
+    const { error: bodyError, value: bodyValue } = Joi.object({ parentId: Joi.number().valid(1, 2).required() }).validate(req.body, { stripUnknown: true });
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const parentId = bodyValue.parentId;
+
+    // --- get young & verify rights
+    const young = await YoungObject.findById(youngId);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- reset parent image rights
+    young[`parent${parentId}AllowImageRights`] = undefined;
+    if (parentId === 2) {
+      young.set({ parent2AllowImageRightsReset: "true" });
+    }
+    await young.save();
+
+    // --- send notification
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
+      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+
+    // --- return updated young
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // checks data
+    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (paramError) {
+      capture(paramError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const youngId = paramValue.id;
+
+    const { error: bodyError, value: bodyValue } = Joi.object({ parentId: Joi.number().valid(1, 2).required() }).validate(req.body, { stripUnknown: true });
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const parentId = bodyValue.parentId;
+
+    // --- get young & verify rights
+    const young = await YoungObject.findById(youngId);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    // --- Check and resend notification
+    if (young[`parent${parentId}AllowImageRights`] === "true" || young[`parent${parentId}AllowImageRights`] === "false") {
+      return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+    }
+
+    // --- send notification
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
+      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
 
     return res.status(200).send({ ok: true });
   } catch (err) {

@@ -1,18 +1,3 @@
-const lookupTable = [
-  { Situation: "En voie générale ou technologique", "Statut professionnel": "Scolarisé" },
-  { Situation: "En voie professionnelle (hors apprentissage)", "Statut professionnel": "Scolarisé" },
-  { Situation: "En enseignement adapté", "Statut professionnel": "Scolarisé" },
-  { Situation: "En apprentissage", "Statut professionnel": "Scolarisé" },
-  { Situation: "Salarié(e)", "Statut professionnel": "Actif" },
-  { Situation: "Indépendant(e)", "Statut professionnel": "Actif" },
-  { Situation: "Auto-entrepreneur", "Statut professionnel": "Actif" },
-  { Situation: "En ESAT, CAT ou en entreprise adaptée", "Statut professionnel": "Actif" },
-  { Situation: "Inscrit(e) à Pole emploi", "Statut professionnel": "En recherche d'emploi" },
-  { Situation: "Inscrit(e) à la Mission locale", "Statut professionnel": "En recherche d'emploi" },
-  { Situation: "Inscrit(e) à Cap emploi", "Statut professionnel": "En recherche d'emploi" },
-  { Situation: "Inscrit(e) nulle part", "Statut professionnel": "En recherche d'emploi" },
-];
-
 const situationTranslations = {
   GENERAL_SCHOOL: "Scolarisé",
   PROFESSIONAL_SCHOOL: "Scolarisé",
@@ -60,7 +45,6 @@ const printSlackInfo = (rapport) => {
 };
 
 module.exports = {
-  lookupTable,
   situationTranslations,
   genderTranslation,
   findCohesionCenterBySessionId,

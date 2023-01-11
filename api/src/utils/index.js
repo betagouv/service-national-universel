@@ -598,6 +598,9 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
+
+  if (!dateDeValidation[sessionPhase1.cohort] || !dateDeValidationTerminale[sessionPhase1.cohort]) return;
+
   const now = new Date();
   if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {

@@ -371,7 +371,7 @@ export default function Phase1(props) {
               </section>
             </Bloc>
             <Bloc title="Détails" borderBottom disabled={disabled}>
-              {canAssignCohesionCenter(user, young) &&
+              {/* {canAssignCohesionCenter(user, young) &&
               (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
                 <div className="flex items-center hover:underline hover:text-blue-600 cursor-pointer mb-4" onClick={() => setModalAffectation({ isOpen: true })}>
                   <AiOutlinePlus className="text-blue-800 mr-2 border-[1px] border-blue-800 rounded-full h-4 w-4" />
@@ -388,7 +388,8 @@ export default function Phase1(props) {
                     </div>
                   </div>
                 )
-              )}
+              )} */}
+        {/*
               {getCohesionStay(young)}
               <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
               <p className="text-base my-1">Point de rassemblement :</p>
