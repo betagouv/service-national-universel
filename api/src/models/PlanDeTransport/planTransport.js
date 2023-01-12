@@ -5,8 +5,6 @@ const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const ModificationBusSchema = require("./modificationBus").Schema;
 const PointDeRassemblementModel = require("./pointDeRassemblement");
-const SessionPhase1Schema = require("../sessionPhase1").Schema;
-const CohesionCenterSchema = require("../cohesionCenter").Schema;
 const MODELNAME = "plandetransport";
 
 const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminator(
