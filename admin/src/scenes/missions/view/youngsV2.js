@@ -195,7 +195,7 @@ export default function Youngs({ mission, applications, updateMission }) {
           "Région représentant légal 2": data.young.parent2Region,
         },
       };
-      let fields = { ID: data._id, youngId: data.youngId };
+      let fields = { "ID de la candidature": data._id, "ID du volontaire": data.youngId };
       for (const element of values) {
         let key;
         for (key in allFields[element]) fields[key] = allFields[element][key];
