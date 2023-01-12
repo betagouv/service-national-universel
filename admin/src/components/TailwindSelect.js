@@ -20,18 +20,16 @@ export default function Select({ options, selected, setSelected, label, readOnly
                     error ? "border-red-500" : "border-gray-300"
                   } bg-white py-2 px-2.5 items-center`}>
                   {icon ? icon : null}
-                  <div className={`flex flex-col w-full `}>
-                    <label className="text-xs leading-4 text-gray-500">{label}</label>
-                    <div className="flex items-center justify-between w-full">
-                      <span className="block truncate">{options.find((e) => e.value === selected)?.label}</span>
-                      <span className="pointer-events-none flex items-center pr-2">
-                        {!readOnly && (
-                          <>
-                            {open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}
-                          </>
-                        )}
-                      </span>
+                  <div className={`flex flex-row w-full items-center justify-center `}>
+                    <div className="flex flex-col justify-center w-full">
+                      <div className="text-xs text-gray-500">{label}</div>
+                      <div className="">{options.find((e) => e.value === selected)?.label}</div>
                     </div>
+                    <span className="pointer-events-none flex items-center pr-2">
+                      {!readOnly && (
+                        <>{open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}</>
+                      )}
+                    </span>
                   </div>
                 </div>
                 {error ? <div className="text-[#EF4444]">{error}</div> : null}

@@ -69,10 +69,9 @@ export default function Phase1(props) {
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState(props.young);
   const [displayCenterButton, setDisplayCenterButton] = useState(false);
-  const [lineBus, setLineBus] = useState();
 
   const getDisplayCenterButton = async () => {
-    if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") return setDisplayCenterButton(false);
+    if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 !== "WAITING_AFFECTATION") return setDisplayCenterButton(false);
     if (user.role === ROLES.ADMIN) return setDisplayCenterButton(true);
     try {
       const { ok, data } = await api.get("/cohort/" + young.cohort);
