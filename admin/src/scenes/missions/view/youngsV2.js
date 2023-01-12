@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { NavLink } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import ReactTooltip from "react-tooltip";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
 import { apiURL } from "../../../config";
@@ -16,6 +17,7 @@ import {
   formatLongDateUTCWithoutTime,
   getFilterLabel,
   translate,
+  translateApplicationFileType,
   getAge,
   ES_NO_LIMIT,
   ROLES,
@@ -34,7 +36,7 @@ import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
+const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "FILES_TYPE"];
 
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
@@ -50,6 +52,8 @@ export default function Youngs({ mission, applications, updateMission }) {
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
   const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
+  const history = useHistory();
+
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -78,7 +82,6 @@ export default function Youngs({ mission, applications, updateMission }) {
   };
   const getDefaultQuery = () => {
     const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "missionId.keyword": mission._id } }] } }, size: ES_NO_LIMIT };
-
     if (currentTab === "pending") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
     } else if (currentTab === "follow") {
@@ -192,7 +195,7 @@ export default function Youngs({ mission, applications, updateMission }) {
           "Région représentant légal 2": data.young.parent2Region,
         },
       };
-      let fields = { ID: data._id, youngId: data.youngId };
+      let fields = { "ID de la candidature": data._id, "ID du volontaire": data.youngId };
       for (const element of values) {
         let key;
         for (key in allFields[element]) fields[key] = allFields[element][key];
@@ -203,7 +206,11 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   function getExportFields() {
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
-      return applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+      const filtered = applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+      // remove Issu de QPV field for responsible and supervisor
+      const filterAdress = filtered.find((e) => e.id === "address");
+      filterAdress.desc = filterAdress.desc.filter((e) => e !== "Issu de QPV");
+      return filtered.map((e) => (e.id !== "address" ? e : filterAdress));
     } else return applicationExportFields.filter((e) => !["missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
   }
 
@@ -407,6 +414,37 @@ export default function Youngs({ mission, applications, updateMission }) {
                     renderLabel={(items) => getFilterLabel(items, "Statut")}
                   />
                   <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="CONTRACT_STATUS"
+                    dataField="contractStatus.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut contrat")}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="FILES_TYPE"
+                    dataField="filesType.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "FILES_TYPE") }}
+                    renderItem={(e, count) => {
+                      return `${translateApplicationFileType(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Pièces jointes")}
+                    showMissing={true}
+                    missingLabel="Aucune pièce jointe"
+                  />
+                  {/*filesType */}
                   <DeleteFilters />
                 </div>
 
@@ -450,6 +488,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                             <Hit
                               key={hit._id}
                               hit={hit}
+                              history={history}
                               currentTab={currentTab}
                               onClick={() => handleClick(hit)}
                               opened={young?._id === hit.youngId}
@@ -485,7 +524,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab, opened }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab, opened, history }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "";
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
@@ -531,11 +570,16 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
       <td className={`${bgColor} rounded-r-lg mr-2`}>
-        <NavLink
-          to={`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`}
-          className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
+        <ReactTooltip id="tooltip-delete" className="bg-white shadow text-black rounded-xl" arrowColor="white" disable={false}>
+          <div className="text-[black]">Voir l&apos;espace candidature</div>
+        </ReactTooltip>
+        <div
+          data-tip=""
+          className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300"
+          onClick={() => history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`)}
+          data-for="tooltip-delete">
           <Eye width={16} height={16} />
-        </NavLink>
+        </div>
       </td>
     </tr>
   );
