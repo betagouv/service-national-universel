@@ -93,7 +93,6 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   async function transform(data, values) {
     let all = data;
-    console.log(data, values);
     if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
       const youngIds = [...new Set(data.map((item) => item.youngId))];
       if (youngIds?.length) {
@@ -122,14 +121,14 @@ export default function Youngs({ mission, applications, updateMission }) {
         },
         address: {
           "Issu de QPV": translate(data.young.qpv),
-          "Adresse postale": data.young.address,
-          "Code postal": data.young.zip,
-          Ville: data.young.city,
-          Pays: data.young.country,
+          "Adresse postale du volontaire": data.young.address,
+          "Code postal du volontaire": data.young.zip,
+          "Ville du volontaire": data.young.city,
+          "Pays du volontaire": data.young.country,
         },
         location: {
           Département: data.young.department,
-          Académie: data.young.academy,
+          "Académie du volontaire": data.young.academy,
           "Région du volontaire": data.young.region,
         },
         application: {
@@ -195,10 +194,15 @@ export default function Youngs({ mission, applications, updateMission }) {
           "Région représentant légal 2": data.young.parent2Region,
         },
       };
+      if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+        delete allFields.address["Issu de QPV"];
+      }
       let fields = { "ID de la candidature": data._id, "ID du volontaire": data.youngId };
       for (const element of values) {
         let key;
-        for (key in allFields[element]) fields[key] = allFields[element][key];
+        for (key in allFields[element]) {
+          fields[key] = allFields[element][key];
+        }
       }
       return fields;
     });
