@@ -1,8 +1,15 @@
+/**
+ * /young/phase1
+ *
+ * ROUTES
+ *   POST  /young/:youngId/phase1/dispense        -> Passe le statut d'un jeune en dispensé
+ */
+
 const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const { canEditPresenceYoung } = require("snu-lib/roles");
+const { canEditPresenceYoung, ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const { capture } = require("../../sentry");
@@ -74,6 +81,41 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       young: serializeYoung(young, req.user),
       ok: true,
     });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      statusPhase1MotifDetail: Joi.string().required(),
+      statusPhase1Motif: Joi.string().required(),
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
+
+    const { statusPhase1MotifDetail, statusPhase1Motif, id } = value;
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canEditPresenceYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    // passage en dispensé unqiuement si séjour non réalisé
+    if (req.user.role !== ROLES.ADMIN && young.statusPhase1 !== "NOT_DONE") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set({ statusPhase1MotifDetail, statusPhase1Motif, statusPhase1: "EXEMPTED" });
+    await young.save({ fromUser: req.user });
+    console.log(young);
+    return res.status(200).send({ data: serializeYoung(young, req.user), ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
