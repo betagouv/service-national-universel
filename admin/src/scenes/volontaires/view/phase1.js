@@ -120,7 +120,7 @@ export default function Phase1(props) {
 
     if (!young.meetingPointId || !young.ligneId) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/point-de-rassemblement/ligneToPoint/${young?.meetingPointId}/${young?.ligneId}`);
+      const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
       if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
       setMeetingPoint(data);
       console.log(data);

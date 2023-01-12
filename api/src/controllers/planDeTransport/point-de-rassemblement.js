@@ -192,7 +192,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 // get 1 meetingPoint info with meetingPoint Id and Bus Id as params
-router.get("/ligneToPoint/:pdrId/:busId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/fullInfo/:pdrId/:busId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorParams, value: valueParams } = Joi.object({ pdrId: Joi.string().required(), busId: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
