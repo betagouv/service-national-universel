@@ -3,8 +3,7 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import { TabItem, Title } from "../components/commons";
 import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
-import { DataSearch, MultiDropdownList, ReactiveBase, DateRange } from "@appbaseio/reactivesearch";
-import { translate } from "../../../utils";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
@@ -17,6 +16,7 @@ import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ArrowUp from "../../../assets/ArrowUp";
 import Train from "../../../assets/train";
 import { useSelector } from "react-redux";
+import Comment from "../../../assets/comment";
 
 const FILTERS = [
   "SEARCH",
@@ -38,6 +38,14 @@ const FILTERS = [
   "MODIFICATION_OPINION",
 ];
 
+const cohortList = [
+  { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
+  { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
+  { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
+  { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
+  { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
+];
+
 const cohortDictionary = {
   "Février 2023 - C": "Séjour du 19 Février au 3 Mars 2023",
   "Avril 2023 - A": "Séjour du 9 au 21 Avril 2023",
@@ -54,12 +62,20 @@ const translateFillingRate = (e) => {
 
 export default function List() {
   const { user } = useSelector((state) => state.Auth);
+  const [cohort, setCohort] = React.useState("Février 2023 - C");
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [currentTab, setCurrentTab] = React.useState("aller");
   const history = useHistory();
 
   const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
+    return {
+      query: {
+        bool: {
+          filter: [{ term: { "cohort.keyword": cohort } }],
+        },
+      },
+      track_total_hits: true,
+    };
   };
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -71,24 +87,7 @@ export default function List() {
         <ReactiveBase url={`${apiURL}/es`} app="plandetransport" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <div className="py-8 flex items-center justify-between">
             <Title>Plan de transport</Title>
-            {/* Rewrite style of multidropdown as Select */}
-            {/* <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} /> */}
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Choix du séjour"
-              componentId="COHORT"
-              dataField="cohort.keyword"
-              renderItem={(e, count) => {
-                return cohortDictionary[e];
-              }}
-              react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-              title=""
-              URLParams={true}
-              sortBy="asc"
-              showSearch={false}
-              size={1000}
-            />
+            <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
           </div>
 
           <div className="flex flex-1">
@@ -397,7 +396,7 @@ export default function List() {
                       <div className="w-[40%]">Points de rassemblements</div>
                       <div className="w-[15%]">Centres de destinations</div>
                       <div className="w-[10%]">Taux de remplissage</div>
-                      <div className="w-[5%] h-1"></div>
+                      <div className="w-[5%]">Comments</div>
                     </div>
                     {data?.map((hit) => {
                       return <Line key={hit._id} hit={hit} currentTab={currentTab} />;
@@ -419,6 +418,10 @@ const Line = ({ hit, currentTab }) => {
 
   const meetingPoints = currentTab === "aller" ? hit.pointDeRassemblements : hit.pointDeRassemblements.slice().reverse();
 
+  const hasPendingModification = hit.modificationBuses?.some((modification) => modification.status === "PENDING");
+
+  if (hit.modificationBuses) console.log("🚀 ~ file: List.js:423 ~ hasPendingModification", hit.modificationBuses);
+
   return (
     <>
       <hr />
@@ -432,10 +435,8 @@ const Line = ({ hit, currentTab }) => {
           </div>
         </div>
         <div className="w-[40%]">
-          {/* // Meeting points list */}
           <div className="flex gap-2">
             {meetingPoints.map((meetingPoint) => {
-              console.log("🚀 ~ file: List.js:310 ~ {hit.pointDeRassemblements.map ~ meetingPoint", meetingPoint);
               return (
                 <TooltipMeetingPoint key={meetingPoint.meetingPointId} meetingPoint={meetingPoint}>
                   <a
@@ -465,8 +466,14 @@ const Line = ({ hit, currentTab }) => {
             </TooltipCenter>
           </div>
         </div>
-        <div className="w-[10%]">{hit.fillingRate}% - Cercle</div>
-        <div className="w-[5%]"></div>
+        <div className="w-[10%]">{hit.fillingRate}%</div>
+        <div className="w-[5%] flex justify-center">
+          {hit.modificationBuses?.length > 0 ? (
+            <div className={`flex p-1 rounded-full ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}>
+              <Comment stroke={hasPendingModification && "white"} />
+            </div>
+          ) : null}
+        </div>
       </div>
     </>
   );
