@@ -8,7 +8,7 @@ import { ModalContainer } from "../../components/modals/Modal";
 import ExportFieldCard from "../ExportFieldCard";
 import { translateIndexes } from "snu-lib";
 
-export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery }) {
+export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery, exportTitle = "" }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
@@ -73,7 +73,7 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
               handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
               title={`Exporter les ${translateIndexes(index)}`}
               defaultQuery={getExportQuery}
-              exportTitle={capitalizeFirstLetter(translateIndexes(index))}
+              exportTitle={exportTitle || capitalizeFirstLetter(translateIndexes(index))}
               index={index}
               react={{ and: filters }}
               transform={(data) => transform(data, selectedFields)}
