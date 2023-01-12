@@ -97,7 +97,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
                   "Nom de la mission": data.missionName,
                   "Département de la mission": data.missionDepartment,
                   "Région de la mission": data.missionRegion,
-                  "Candidature créée lé": data.createdAt,
+                  "Candidature créée le": data.createdAt,
                   "Candidature mise à jour le": data.updatedAt,
                   "Statut de la candidature": translate(data.status),
                   Tuteur: data.tutorName,
@@ -201,9 +201,8 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
               placeholder="Nombre d'heures"
               onConfirm={async (duration) => {
                 try {
-                  const value = duration.target.value;
                   var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
-                  if (re.test(value) || !value) {
+                  if (re.test(duration) || !duration) {
                     const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
                     if (!ok) {
                       toastr.error("Une erreur s'est produite :", translate(code));

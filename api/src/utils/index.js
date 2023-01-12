@@ -598,6 +598,9 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
+
+  if (!dateDeValidation[sessionPhase1.cohort] || !dateDeValidationTerminale[sessionPhase1.cohort]) return;
+
   const now = new Date();
   if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
@@ -675,13 +678,28 @@ const updateYoungApplicationFilesType = async (application, user) => {
   const young = await YoungModel.findById(application.youngId);
   const applications = await ApplicationModel.find({ youngId: application.youngId });
 
-  const listFiles = applications.reduce((prev, acc) => {
-    if (acc.contractAvenantFiles.length !== 0 && !prev.includes("contractAvenantFiles")) prev.push("contractAvenantFiles");
-    if (acc.justificatifsFiles.length !== 0 && !prev.includes("justificatifsFiles")) prev.push("justificatifsFiles");
-    if (acc.feedBackExperienceFiles.length !== 0 && !prev.includes("feedBackExperienceFiles")) prev.push("feedBackExperienceFiles");
-    if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
-    return prev;
-  }, []);
+  const listFiles = [];
+  applications.map(async (application) => {
+    const currentListFiles = [];
+    if (application.contractAvenantFiles.length > 0) {
+      currentListFiles.push("contractAvenantFiles");
+      listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
+    }
+    if (application.justificatifsFiles.length > 0) {
+      currentListFiles.push("justificatifsFiles");
+      listFiles.indexOf("justificatifsFiles") === -1 && listFiles.push("justificatifsFiles");
+    }
+    if (application.feedBackExperienceFiles.length > 0) {
+      currentListFiles.push("feedBackExperienceFiles");
+      listFiles.indexOf("feedBackExperienceFiles") === -1 && listFiles.push("feedBackExperienceFiles");
+    }
+    if (application.othersFiles.length > 0) {
+      currentListFiles.push("othersFiles");
+      listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
+    }
+    application.set({ filesType: currentListFiles });
+    await application.save({ fromUser: user });
+  });
   young.set({ phase2ApplicationFilesType: listFiles });
   await young.save({ fromUser: user });
 };

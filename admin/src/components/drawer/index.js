@@ -135,14 +135,10 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
+      <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
       {environment !== "production" && (
         <>
           <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
-        </>
-      )}
-      {environment !== "production" && (
-        <>
-          <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
         </>
       )}
       <DrawerConnectToZammood title="Boîte de réception" history={history}>
@@ -253,13 +249,14 @@ function visitor({ onClick, from }) {
 }
 
 function dsnj({ onClick }) {
+  return <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />;
+}
+
+function transporter({ onClick }) {
   return (
     <>
-      {environment !== "production" && (
-        <>
-          <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
-        </>
-      )}
+      <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
     </>
   );
 }
@@ -329,7 +326,7 @@ const Drawer = (props) => {
         <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
             <ul className="divide-y divide-slate-700 min-w-[220px]">
-              {user.role !== ROLES.DSNJ && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
+              {![ROLES.DSNJ, ROLES.TRANSPORTER].includes(user.role) && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
@@ -338,6 +335,7 @@ const Drawer = (props) => {
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
               {user.role === ROLES.DSNJ && dsnj({ user, onClick: handleClick, from })}
+              {user.role === ROLES.TRANSPORTER && transporter({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>
@@ -345,7 +343,7 @@ const Drawer = (props) => {
         <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
           <div>
             <ul className="divide-y divide-slate-700">
-              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+              {![ROLES.DSNJ, ROLES.TRANSPORTER].includes(user.role) && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
@@ -353,6 +351,7 @@ const Drawer = (props) => {
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
+              {user.role === ROLES.TRANSPORTER && transporter({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>

@@ -6,12 +6,14 @@ import { SentryRoute } from "../../../sentry";
 import api from "../../../services/api";
 import Details from "./details";
 import Youngs from "./youngs";
+import YoungsV2 from "./youngsV2";
 import Historic from "./history";
 import ProposeMission from "./propose-mission";
 import { toastr } from "react-redux-toastr";
 import { translate, ROLES } from "../../../utils";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import { environment } from "../../../config";
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Missions");
@@ -81,7 +83,12 @@ export default function Index({ ...props }) {
     <>
       <Breadcrumbs items={[{ label: "Missions", to: "/mission" }, { label: "Fiche de la mission" }]} />
       <Switch>
-        <SentryRoute path="/mission/:id/youngs" component={() => <Youngs mission={mission} updateMission={fetchMission} applications={applications} />} />
+        {environment === "production" ? (
+          <SentryRoute path="/mission/:id/youngs" component={() => <Youngs mission={mission} updateMission={fetchMission} applications={applications} />} />
+        ) : (
+          <SentryRoute path="/mission/:id/youngs" component={() => <YoungsV2 mission={mission} updateMission={fetchMission} applications={applications} />} />
+        )}
+
         <SentryRoute path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
         <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} updateMission={fetchMission} />} />
         <SentryRoute path="/mission/:id" component={() => <Details getMission={fetchMission} mission={mission} setMission={setMission} structure={structure} tutor={tutor} />} />

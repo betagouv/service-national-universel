@@ -60,8 +60,8 @@ async function getPlaces(sessions, region) {
     {
       $group: {
         _id: "$cohort",
-        candidates: { $sum: { $cond: [{ $in: ["$status", ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "WAITING_LIST", "REINSCRIPTION"]] }, "$status", 1] } },
-        validated: { $sum: { $cond: [{ $in: ["$status", ["VALIDATED"]] }, "$status", 1] } },
+        candidates: { $sum: { $cond: [{ $in: ["$status", ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "WAITING_LIST", "REINSCRIPTION"]] }, 1, 0] } },
+        validated: { $sum: { $cond: [{ $in: ["$status", ["VALIDATED"]] }, 1, 0] } },
       },
     },
   ]);

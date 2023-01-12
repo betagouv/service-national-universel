@@ -345,9 +345,12 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const structure = await StructureObject.findById(user.structureId);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const parent = await StructureObject.findById(structure.networkId);
-
-      filter.push({ terms: { _id: [structure._id.toString(), parent?._id?.toString()].filter((e) => e) } });
+      let idsArray = [structure._id.toString()];
+      if (structure.networkId !== "") {
+        const parent = await StructureObject.findById(structure.networkId);
+        idsArray.push(parent?._id?.toString());
+      }
+      filter.push({ terms: { _id: idsArray.filter((e) => e) } });
     }
 
     // A supervisor can only see their structures (all network).

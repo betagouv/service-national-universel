@@ -153,7 +153,7 @@ export default function StepEligibilite() {
         return history.push("/reinscription/noneligible");
       }
 
-      const sessionsFiltered = res.data.filter((e) => e.goalReached === false && e.isFull === false);
+      const sessionsFiltered = res.data.filter((e) => e.goalReached === false); //&& e.isFull === false --> voir si on le rajoute
       if (sessionsFiltered.length === 0) {
         setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
         setLoading(false);

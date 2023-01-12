@@ -15,7 +15,7 @@ export default function Status({ filter }) {
     (async () => {
       const body = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
-        aggs: { status: { terms: { field: "status.keyword" } } },
+        aggs: { status: { terms: { field: "status.keyword", size: 20 } } },
         size: 0,
       };
 

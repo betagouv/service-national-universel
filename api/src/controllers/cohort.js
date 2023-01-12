@@ -83,7 +83,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
   }
 });
 
-router.get("/", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (_, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (_, res) => {
   try {
     const cohorts = await CohortModel.find({});
     return res.status(200).send({ ok: true, data: cohorts });
@@ -117,7 +117,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey]);
+    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
     const exportAvailableUntil = new Date(cohort.dateEnd);
     exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();

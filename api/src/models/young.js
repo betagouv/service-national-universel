@@ -1174,6 +1174,13 @@ const Schema = new mongoose.Schema({
       description: "Le parent 2 donne les droits à l'image de son enfant.",
     },
   },
+  parent2AllowImageRightsReset: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "L'admin a réinitialiser l'information de droits à l'image du parent 2.",
+    },
+  },
 
   parent2ContactPreference: {
     type: String,

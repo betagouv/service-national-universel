@@ -3,7 +3,7 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate } from "snu-lib";
+import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 
@@ -41,8 +41,9 @@ export default function WaitingCorrectionV2() {
                           {correction?.message ? <div className="text-sm text-gray-600 font-normal">{correction.message}</div> : null}
                         </div>
                         <button
-                          className="text-blue-600 font-medium border-[1px] border-blue-600 px-2 py-2 text-sm hover:text-white hover:bg-blue-600 rounded-lg"
-                          onClick={() => history.push(redirectToCorrection(correction.field))}>
+                          className="text-blue-600 font-medium border-[1px] border-blue-600 px-2 py-2 text-sm hover:text-white hover:bg-blue-600 rounded-lg disabled:opacity-50 dissabled:cursor-not-allowed disabled:bg-gray-100"
+                          onClick={() => history.push(redirectToCorrection(correction.field))}
+                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort)}>
                           Corriger
                         </button>
                       </div>
