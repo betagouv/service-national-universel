@@ -570,7 +570,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
       <td className={`${bgColor} rounded-r-lg mr-2`}>
-        <ReactTooltip id="tooltip-delete" className="bg-white shadow text-black rounded-xl" arrowColor="white" disable={false}>
+        <ReactTooltip id="tooltip-delete" className="bg-white shadow-sm text-black" arrowColor="white" disable={false}>
           <div className="text-[black]">Voir l&apos;espace candidature</div>
         </ReactTooltip>
         <div
