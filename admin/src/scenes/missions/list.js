@@ -670,7 +670,7 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut de candidature", "Statut de candidature")}
                   showMissing
-                  missingLabel="Non renseigné"
+                  missingLabel="Aucune candidature ni proposition"
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
