@@ -362,6 +362,12 @@ export default function Phase1(props) {
             )}
           </div>
         </div>
+        <div className="bg-white rounded mt-4">
+          <div className="mx-8 py-4">
+            <div className="text-lg font-medium mr-2">Documents</div>
+            <DocumentPhase1 young={young} />
+          </div>
+        </div>
         {/*
         <Box>
           <article className="flex">
