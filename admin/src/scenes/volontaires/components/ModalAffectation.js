@@ -47,7 +47,10 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   }, [inputPdr, pdrOption]);
 
   useEffect(() => {
-    if (!center) return;
+    if (!center) {
+      setPdrOption("");
+      return setStep(1);
+    }
     (async () => {
       try {
         const { data, ok } = await api.get("/session-phase1/" + sessionId);
@@ -64,6 +67,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 
   const getDefaultQuery = () => {
     return {
+      // query sur les sessions qui ont des places dispos
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
       track_total_hits: true,
     };
@@ -75,7 +79,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         centerId: session.cohesionCenterId,
         sessionId: session._id,
         pdrOption,
-        meetingPointId: selectedPdr?._id,
+        meetingPointId: selectedPdr?.pdr._id,
+        ligneId: selectedPdr?.ligneBus._id,
       });
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
       /*

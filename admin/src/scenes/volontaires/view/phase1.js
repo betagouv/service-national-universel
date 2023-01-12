@@ -49,6 +49,7 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import { capture } from "../../../sentry";
+import dayjs from "dayjs";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -68,9 +69,9 @@ export default function Phase1(props) {
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState(props.young);
   const [displayCenterButton, setDisplayCenterButton] = useState(false);
+  const [lineBus, setLineBus] = useState();
 
   const getDisplayCenterButton = async () => {
-    console.log("ok ?", young.status);
     if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") return setDisplayCenterButton(false);
     if (user.role === ROLES.ADMIN) return setDisplayCenterButton(true);
     try {
@@ -117,11 +118,12 @@ export default function Phase1(props) {
       setCohesionCenter(data);
     })();
 
-    if (!young.meetingPointId) return;
+    if (!young.meetingPointId || !young.ligneId) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/meeting-point/${young?.meetingPointId}`);
+      const { data, code, ok } = await api.get(`/point-de-rassemblement/ligneToPoint/${young?.meetingPointId}/${young?.ligneId}`);
       if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
       setMeetingPoint(data);
+      console.log(data);
     })();
   }, []);
 
@@ -276,10 +278,10 @@ export default function Phase1(props) {
             ) : null}
 
             {cohesionCenter ? (
-              <div className="flex flex-row items-center justify-center gap-10">
+              <div className="flex flex-row items-center justify-center gap-10 mt-4">
                 <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
                   <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
-                  <div className="flex flex-col gap-3 mb-4 w-full">
+                  <div className="flex flex-col gap-4 mb-4 w-full">
                     <Field title="Code centre" value={cohesionCenter.code2022} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
@@ -288,7 +290,7 @@ export default function Phase1(props) {
                   {editing && (
                     <div
                       onClick={() => setModalAffectation({ isOpen: true })}
-                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
                       <Refresh />
                       <div>Changer l&apos;affectation</div>
                     </div>
@@ -296,13 +298,19 @@ export default function Phase1(props) {
                 </div>
                 <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
                   <div className="text-xs text-gray-900 font-medium mb-2">Point de rassemblement</div>
-                  <div className="flex flex-col gap-3 mb-4 text-sm text-gray-800 w-full ">
+                  <div className="flex flex-col gap-4 mb-4 text-sm text-gray-800 w-full ">
                     {meetingPoint ? (
-                      <div className="flex flex-col gap-3">
-                        <Field title="Adresse" value={meetingPoint?.departureAddress} />
-                        <Field title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
-                        <Field title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
-                        <Field title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+                      <div className="flex flex-col gap-4">
+                        <Field title="Adresse" value={meetingPoint?.pointDeRassemblement.address} />
+                        <Field
+                          title="Heure&nbsp;de&nbsp;départ"
+                          value={dayjs(meetingPoint?.bus.departuredDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
+                        />
+                        <Field
+                          title="Heure&nbsp;de&nbsp;retour"
+                          value={dayjs(meetingPoint?.bus.returnDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
+                        />
+                        <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} />
                       </div>
                     ) : young?.transportInfoGivenByLocal === "true" ? (
                       <div>Les informations de transport seront transmises par les services locaux.</div>
@@ -317,7 +325,7 @@ export default function Phase1(props) {
                       onClick={() => {
                         setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
                       }}
-                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2">
+                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
                       {meetingPoint ? (
                         <>
                           <Refresh />
@@ -520,26 +528,6 @@ const Field = ({ title, value }) => {
       <div className="text-gray-500 text-xs">{title}</div>
       <div className="text-gray-800 text-sm h-[20px]">{value}</div>
     </div>
-  );
-};
-
-const Details = ({ title, value, to }) => {
-  if (!value) return <div />;
-  if (typeof value === "function") value = value();
-  return (
-    <section className="detail grid grid-cols-2 mb-2">
-      <p className="detail-title text-[#738297]">{title}&nbsp;:</p>
-      {to ? (
-        <p className="group detail-text">
-          <a href={to} target="_blank" rel="noreferrer" className="flex items-center gap-1 group-hover:underline">
-            {value}
-            <MdOutlineOpenInNew />
-          </a>
-        </p>
-      ) : (
-        <p className="detail-text">{value}</p>
-      )}
-    </section>
   );
 };
 

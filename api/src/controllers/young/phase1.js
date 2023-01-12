@@ -8,6 +8,7 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1 } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
@@ -19,6 +20,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       centerId: Joi.string().required(),
       sessionId: Joi.string().required(),
       meetingPointId: Joi.string().optional().allow(null, ""),
+      ligneId: Joi.string().optional().allow(null, ""),
       id: Joi.string().required(),
       pdrOption: Joi.string()
         .trim()
@@ -32,7 +34,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
 
-    const { id, sessionId, centerId, meetingPointId, pdrOption } = value;
+    const { id, sessionId, centerId, meetingPointId, pdrOption, ligneId } = value;
 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -43,19 +45,17 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
     if (meetingPointId) {
-      const meetingPoint = session.meetingPoints.find((mp) => mp._id.toString() === meetingPointId);
+      const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-
     // should we link to bus ?
     if (pdrOption === "self-going") young.set({ deplacementPhase1Autonomous: "true" });
-    else if (pdrOption === "ref-select") young.set({ deplacementPhase1Autonomous: "false", meetingPointId });
+    else if (pdrOption === "ref-select") young.set({ deplacementPhase1Autonomous: "false", meetingPointId, ligneId });
     else if (pdrOption === "young-select") young.set({ deplacementPhase1Autonomous: "false" });
     else young.set({ transportInfoGivenByLocal: "true", deplacementPhase1Autonomous: "false" });
-
     // update youngs infos
     young.set({
-      status: "VALIDATED",
+      // status: "VALIDATED",
       statusPhase1: "AFFECTED",
       sessionPhase1Id: sessionId,
       cohesionCenterId: centerId,

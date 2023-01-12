@@ -190,6 +190,29 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+router.get("/ligneToPoint/:pdrId/:busId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorParams, value: valueParams } = Joi.object({ pdrId: Joi.string().required(), busId: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { pdrId, busId } = valueParams;
+
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(pdrId);
+    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const bus = await LigneBusModel.findById(busId);
+    if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const ligneToPoint = await LigneToPointModel.findOne({ meetingPointId: pdrId, lineId: busId });
+    if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: { pointDeRassemblement, bus, ligneToPoint } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- parameters & vérification
@@ -234,7 +257,6 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
       },
     ];
     const data = await LigneBusModel.aggregate(pipeline).exec();
-    console.log(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
