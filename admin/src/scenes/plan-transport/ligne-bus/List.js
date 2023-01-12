@@ -71,6 +71,8 @@ export default function List() {
         <ReactiveBase url={`${apiURL}/es`} app="plandetransport" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <div className="py-8 flex items-center justify-between">
             <Title>Plan de transport</Title>
+            {/* Rewrite style of multidropdown as Select */}
+            {/* <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} /> */}
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
@@ -87,7 +89,6 @@ export default function List() {
               showSearch={false}
               size={1000}
             />
-            {/* <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} /> */}
           </div>
 
           <div className="flex flex-1">
