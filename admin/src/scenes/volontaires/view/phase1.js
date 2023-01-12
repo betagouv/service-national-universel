@@ -219,7 +219,6 @@ export default function Phase1(props) {
                   />
                 </div>
                 <div className="flex-1 min-w-[250px]">
-                  {console.log(young.cohesionStayPresence)}
                   <TailwindSelect
                     name="cohesionStayPresence"
                     label="Présence à l'arrivée"
@@ -228,7 +227,7 @@ export default function Phase1(props) {
                     className="flex-1 min-w-[250px]"
                     icon={<SpeakerPhone className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
                     setSelected={({ value }) => setModalPointagePresenceArrivee({ isOpen: true, value })}
-                    selected={values.cohesionStayPresence}
+                    selected={values.cohesionStayPresence || ""}
                     options={[
                       { label: "Non renseigné", value: "", disabled: true, hidden: true },
                       { label: "Présent", value: "true" },
@@ -244,7 +243,7 @@ export default function Phase1(props) {
                     type="select"
                     icon={<BadgeCheck className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
                     setSelected={({ value }) => setModalPointagePresenceJDM({ isOpen: true, value })}
-                    selected={values.presenceJDM}
+                    selected={values.presenceJDM || ""}
                     options={[
                       { label: "Non renseigné", value: "", disabled: true, hidden: true },
                       { label: "Présent", value: "true" },
@@ -278,9 +277,9 @@ export default function Phase1(props) {
 
             {cohesionCenter ? (
               <div className="flex flex-row items-center justify-center gap-10">
-                <div className="mt-4 w-full">
+                <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
                   <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
-                  <div className="flex flex-col gap-3 mb-4">
+                  <div className="flex flex-col gap-3 mb-4 w-full">
                     <Field title="Code centre" value={cohesionCenter.code2022} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
@@ -519,7 +518,7 @@ const Field = ({ title, value }) => {
   return (
     <div key={title} className="border-[1px] flex flex-col border-gray-300 p-2 rounded">
       <div className="text-gray-500 text-xs">{title}</div>
-      <div className="text-gray-800 text-sm">{value}</div>
+      <div className="text-gray-800 text-sm h-[20px]">{value}</div>
     </div>
   );
 };
