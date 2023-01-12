@@ -21,7 +21,6 @@ import { PlainButton } from "../components/Buttons";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ArrowUp from "../../../assets/ArrowUp";
 import Train from "../../../assets/train";
-import { useSelector } from "react-redux";
 import Comment from "../../../assets/comment";
 
 const FILTERS = [
@@ -52,14 +51,6 @@ const cohortList = [
   { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
 ];
 
-const cohortDictionary = {
-  "Février 2023 - C": "Séjour du 19 Février au 3 Mars 2023",
-  "Avril 2023 - A": "Séjour du 9 au 21 Avril 2023",
-  "Avril 2023 - B": "Séjour du 16 au 28 Avril 2023",
-  "Juin 2023": "Séjour du 11 au 23 Juin 2023",
-  "Juillet 2023": "Séjour du 4 au 16 Juillet 2023",
-};
-
 const translateFillingRate = (e) => {
   if (e == 0) return "Vide";
   if (e == 100) return "Rempli";
@@ -71,7 +62,6 @@ export default function List() {
   const [cohort, setCohort] = React.useState("Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
-  const { user } = useSelector((state) => state.Auth);
   const history = useHistory();
 
   const getPlanDetransport = async () => {
@@ -86,15 +76,6 @@ export default function List() {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
     }
-  const getDefaultQuery = () => {
-    return {
-      query: {
-        bool: {
-          filter: [{ term: { "cohort.keyword": cohort } }],
-        },
-      },
-      track_total_hits: true,
-    };
   };
 
   React.useEffect(() => {
@@ -136,24 +117,25 @@ export default function List() {
 }
 
 const ReactiveList = ({ cohort, history }) => {
+  const { user } = useSelector((state) => state.Auth);
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [currentTab, setCurrentTab] = React.useState("aller");
 
   const getDefaultQuery = () => {
     return {
-      query: { bool: { filter: [{ terms: { "cohort.keyword": [cohort] } }] } },
+      query: {
+        bool: {
+          filter: [{ term: { "cohort.keyword": cohort } }],
+        },
+      },
       track_total_hits: true,
     };
   };
-        <ReactiveBase url={`${apiURL}/es`} app="plandetransport" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className="py-8 flex items-center justify-between">
-            <Title>Plan de transport</Title>
-            <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
-          </div>
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
   return (
-    <ReactiveBase url={`${apiURL}/es`} app="lignebus" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+    <ReactiveBase url={`${apiURL}/es`} app="plandetransport" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="flex flex-1">
         <TabItem icon={<BsArrowRight />} title="Aller" onClick={() => setCurrentTab("aller")} active={currentTab === "aller"} />
         <TabItem icon={<BsArrowLeft />} title="Retour" onClick={() => setCurrentTab("retour")} active={currentTab === "retour"} />
@@ -212,7 +194,239 @@ const ReactiveList = ({ cohort, history }) => {
             />
           </div>
         </div>
-        <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>{/* Filter */}</div>
+        <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center">
+              <div className="uppercase text-xs text-snu-purple-800 mr-2">Ligne de bus</div>
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Numéro de la ligne"
+                componentId="LINE_NUMBER"
+                dataField="busId.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Date aller"
+                componentId="DATE_ALLER"
+                dataField="departureString.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Date retour"
+                componentId="DATE_RETOUR"
+                dataField="returnString.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Taux de remplissage"
+                componentId="TAUX_REMPLISSAGE"
+                dataField="fillingRate"
+                react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
+                renderItem={(e, count) => {
+                  return `${translateFillingRate(e)} (${count})`;
+                }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+            </div>
+            <div className="flex items-center">
+              <div className="uppercase text-xs text-snu-purple-800 mr-2">Points de rassemblement</div>
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Nom"
+                componentId="NAME_PDR"
+                dataField="pointDeRassemblements.name.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "NAME_PDR") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Région"
+                componentId="REGION_PDR"
+                dataField="pointDeRassemblements.region.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "REGION_PDR") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Département"
+                componentId="DEPARTMENT_PDR"
+                dataField="pointDeRassemblements.department.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT_PDR") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Ville"
+                componentId="CITY_PDR"
+                dataField="pointDeRassemblements.city.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "CITY_PDR") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+            </div>
+            <div className="flex items-center">
+              <div className="uppercase text-xs text-snu-purple-800 mr-2">Centre</div>
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Nom"
+                componentId="NAME_CENTER"
+                dataField="centerName.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "NAME_CENTER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Région"
+                componentId="REGION_CENTER"
+                dataField="centerRegion.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "REGION_CENTER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Département"
+                componentId="DEPARTMENT_CENTER"
+                dataField="centerDepartment.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT_CENTER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Code"
+                componentId="CODE_CENTER"
+                dataField="centerCode.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "CODE_CENTER") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+            </div>
+            <div className="flex items-center">
+              <div className="uppercase text-xs text-snu-purple-800 mr-2">Modifications de status</div>
+
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Modification demandée"
+                componentId="MODIFICATION_ASKED"
+                dataField="modificationBuses.requestMessage.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_ASKED") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Status de la modification"
+                componentId="MODIFICATION_STATUS"
+                dataField="modificationBuses.status.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_STATUS") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+              />
+              {user.role === ROLES.ADMIN && (
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Opinion sur la modification"
+                  componentId="MODIFICATION_OPINION"
+                  dataField="modificationBuses.opinion.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_OPINION") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                />
+              )}
+            </div>
+            <DeleteFilters />
+          </div>
+        </div>
         <div className="reactive-result">
           <ReactiveListComponent
             pageSize={50}
@@ -231,7 +445,7 @@ const ReactiveList = ({ cohort, history }) => {
                   <div className="w-[5%] h-1"></div>
                 </div>
                 {data?.map((hit) => {
-                  return <Line key={hit._id} />;
+                  return <Line key={hit._id} hit={hit} currentTab={currentTab} />;
                 })}
                 <hr />
               </div>
@@ -241,7 +455,7 @@ const ReactiveList = ({ cohort, history }) => {
       </div>
     </ReactiveBase>
   );
-
+};
 
 const Line = ({ hit, currentTab }) => {
   console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit);
@@ -252,7 +466,6 @@ const Line = ({ hit, currentTab }) => {
 
   if (hit.modificationBuses) console.log("🚀 ~ file: List.js:423 ~ hasPendingModification", hit.modificationBuses);
 
-const Line = () => {
   return (
     <>
       <hr />
