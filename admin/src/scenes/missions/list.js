@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
-import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translatePhase2 } from "snu-lib";
+import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translateMission, translatePhase2 } from "snu-lib";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import LockedSvg from "../../assets/lock.svg";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -39,6 +39,8 @@ const FILTERS = [
   "VISIBILITY",
   "HEBERGEMENT",
   "HEBERGEMENT_PAYANT",
+  "PLACESTATUS",
+  "APPLICATIONSTATUS",
 ];
 
 const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
@@ -635,6 +637,40 @@ export default function List() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Hébergement Payant")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Place occupées"
+                  componentId="PLACESTATUS"
+                  dataField="placesStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PLACESTATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateMission(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Place occupées", "Place occupées")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Place occupées"
+                  componentId="APPLICATIONSTATUS"
+                  dataField="applicationStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "APPLICATIONSTATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut de candidature", "Statut de candidature")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
