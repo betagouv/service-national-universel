@@ -190,6 +190,8 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+// get meetingPoint info with a single meetingPoint Id and Bus Id
 router.get("/ligneToPoint/:pdrId/:busId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorParams, value: valueParams } = Joi.object({ pdrId: Joi.string().required(), busId: Joi.string().required() }).validate(req.params, {
@@ -213,6 +215,8 @@ router.get("/ligneToPoint/:pdrId/:busId", passport.authenticate("referent", { se
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+// get all available meetingPoints with cohort and centerId as params
 router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- parameters & vérification
