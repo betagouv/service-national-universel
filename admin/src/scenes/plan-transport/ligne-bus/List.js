@@ -147,8 +147,8 @@ const ReactiveList = ({ cohort, history }) => {
               defaultQuery={getDefaultQuery}
               showIcon={false}
               componentId="SEARCH"
-              dataField={["name", "address", "region", "department", "code", "city", "zip"]}
-              placeholder="Rechercher un point de rassemblement"
+              dataField={["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"]}
+              placeholder="Rechercher une ligne (numéro, ville, region)"
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               URLParams={true}
               autosuggest={false}
@@ -429,7 +429,7 @@ const ReactiveList = ({ cohort, history }) => {
         </div>
         <div className="reactive-result">
           <ReactiveListComponent
-            pageSize={50}
+            pageSize={20}
             defaultQuery={getDefaultQuery}
             react={{ and: FILTERS }}
             paginationAt="bottom"
@@ -438,8 +438,8 @@ const ReactiveList = ({ cohort, history }) => {
               <div className="flex w-full flex-col mt-6 mb-2">
                 <hr />
                 <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full">
-                  <div className="w-[40%]">Lignes</div>
-                  <div className="w-[30%]">Points de rassemblements</div>
+                  <div className="w-[30%]">Lignes</div>
+                  <div className="w-[40%]">Points de rassemblements</div>
                   <div className="w-[15%]">Centres de destinations</div>
                   <div className="w-[10%]">Taux de remplissage</div>
                   <div className="w-[5%] h-1"></div>
