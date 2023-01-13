@@ -93,31 +93,31 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       meetingPointsId: meetingPoints.map((mp) => mp.meetingPointId),
     });
 
-    // ! PlanDeTransport save here !
+    // * Copy to PlanDeTransport !
 
-    // const center = await cohesionCenterModel.findById(centerId);
+    const center = await cohesionCenterModel.findById(centerId);
 
-    // const planDeTransport = await PlanTransportModel.create({
-    //   cohort,
-    //   busId,
-    //   departuredDate,
-    //   returnDate,
-    //   youngCapacity,
-    //   totalCapacity,
-    //   followerCapacity,
-    //   travelTime,
-    //   km,
-    //   lunchBreak,
-    //   lunchBreakReturn,
-    //   centerId,
-    //   centerRegion: center?.region,
-    //   centerDepartment: center?.department,
-    //   centerName: center?.name,
-    //   centerCode: center?.code2022,
-    //   centerArrivalTime,
-    //   centerDepartureTime,
-    //   pointDeRassemblements: meetingPoints,
-    // });
+    await PlanTransportModel.create({
+      cohort,
+      busId,
+      departuredDate,
+      returnDate,
+      youngCapacity,
+      totalCapacity,
+      followerCapacity,
+      travelTime,
+      km,
+      lunchBreak,
+      lunchBreakReturn,
+      centerId,
+      centerRegion: center?.region,
+      centerDepartment: center?.department,
+      centerName: center?.name,
+      centerCode: center?.code2022,
+      centerArrivalTime,
+      centerDepartureTime,
+      pointDeRassemblements: meetingPoints,
+    });
 
     const ligneToBus = [];
 
