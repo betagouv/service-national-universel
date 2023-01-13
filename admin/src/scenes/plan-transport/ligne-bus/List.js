@@ -20,8 +20,12 @@ import { useSelector } from "react-redux";
 import { PlainButton } from "../components/Buttons";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ArrowUp from "../../../assets/ArrowUp";
-import Train from "../../../assets/train";
+import Train from "./components/Icons/Train";
+import Bus from "../../../assets/icons/Bus";
+import Fusee from "../../../assets/icons/Fusee";
 import Comment from "../../../assets/comment";
+import Avion from "../../../assets/icons/Avion";
+import { getTransportIcon } from "../util";
 
 const FILTERS = [
   "SEARCH",
@@ -482,7 +486,7 @@ const Line = ({ hit, currentTab }) => {
           <div className="flex gap-2">
             {meetingPoints.map((meetingPoint) => {
               return (
-                <TooltipMeetingPoint key={meetingPoint.meetingPointId} meetingPoint={meetingPoint}>
+                <TooltipMeetingPoint key={meetingPoint.meetingPointId} meetingPoint={meetingPoint} currentTab={currentTab}>
                   <a
                     href={`/point-de-rassemblement/${meetingPoint.meetingPointId}`}
                     target="_blank"
@@ -523,7 +527,7 @@ const Line = ({ hit, currentTab }) => {
   );
 };
 
-const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
+const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) => {
   if (!meetingPoint) return children;
 
   return (
@@ -533,7 +537,9 @@ const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
         <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
           <div className="flex items-center justify-between w-[524px]">
             <div className="flex items-center">
-              <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">{meetingPoint.meetingHour}</div>
+              <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">
+                {currentTab === "aller" ? meetingPoint.meetingHour : meetingPoint.returnHour}
+              </div>
               <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
                 <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="#F5F5F5" />
               </svg>
@@ -542,7 +548,7 @@ const TooltipMeetingPoint = ({ children, meetingPoint, ...props }) => {
                 <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
               </div>
             </div>
-            <Train />
+            {getTransportIcon(meetingPoint.transportType)}
           </div>
         </div>
       </div>

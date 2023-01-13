@@ -1,3 +1,9 @@
+import React from "react";
+import Avion from "../../assets/icons/Avion";
+import Bus from "../../assets/icons/Bus";
+import Fusee from "../../assets/icons/Fusee";
+import Train from "./ligne-bus/components/Icons/Train";
+
 export function formatRate(value, total, fractionDigit = 0, allowMoreThan100 = false) {
   if (total === 0 || total === undefined || total === null || value === undefined || value === null) {
     return "-";
@@ -17,6 +23,19 @@ export const cohortList = [
   { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
   { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
 ];
+
+export const getTransportIcon = (transportType) => {
+  switch (transportType) {
+    case "bus":
+      return <Bus />;
+    case "train":
+      return <Train />;
+    case "avion":
+      return <Avion />;
+    default:
+      return <Fusee />;
+  }
+};
 
 export function parseQuery(query) {
   let result = {};
