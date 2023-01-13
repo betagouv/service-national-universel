@@ -23,7 +23,6 @@ export default function StepsAffected({ young, center }) {
 
   return (
     <>
-      {/* Desktop view */}
       <section className="flex flex-col mb-5 mt-4 md:mt-0">
         <article className="mb-3">
           <div className="flex md:hidden flex-row items-center">
@@ -33,7 +32,7 @@ export default function StepsAffected({ young, center }) {
               </div>
             )}
             <div className="flex flex-col">
-              <h1 className="text-base leading-7">4 étapes pour continuer</h1>
+              <h1 className="text-xl md:text-base font-bold md:font-normal leading-7">4 étapes pour continuer</h1>
               <p className="text-sm text-gray-500 leading-5">{nbvalid} de 4 tâches réalisées</p>
             </div>
           </div>
@@ -50,9 +49,6 @@ export default function StepsAffected({ young, center }) {
           </div>
         </article>
         <hr className="hidden md:flex text-gray-200 -mx-20" />
-        {/* <div className="flex flex-col ">
-          <StepRules young={young} />
-        </div> */}
         <div className="flex flex-col ">
           <StepPDR young={young} center={center} />
         </div>

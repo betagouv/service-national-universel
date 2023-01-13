@@ -63,7 +63,6 @@ export default function Drawer(props) {
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     if (young.statusPhase1) {
-      console.log("drawer test phase 1.");
       if (young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED || cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
         setStatus1(young.statusPhase1);
       } else {

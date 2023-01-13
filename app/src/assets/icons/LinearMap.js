@@ -1,9 +1,9 @@
 import * as React from "react";
 
 export default function LinearMap(props) {
-  if (props.gray) {
+  if (props.gray === "true") {
     return (
-      <svg width={38} height={38} viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width={38} height={38} viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
         <path
           d="M30.9752 14.8437V29.7381C30.9752 28.5631 31.9512 27.6093 33.1535 27.6093C34.3558 27.6093 35.3318 28.5631 35.3318 29.7381C35.3318 30.9131 34.3558 31.8669 33.1535 31.8669H4.85019C3.64785 31.8669 2.67188 30.9131 2.67188 29.7381C2.67188 28.5631 3.64785 27.6093 4.85019 27.6093C6.05254 27.6093 7.02851 28.5631 7.02851 29.7381V14.8437H30.9752Z"
           fill="#B7B7B7"

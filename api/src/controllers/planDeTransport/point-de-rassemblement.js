@@ -25,7 +25,6 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
     if (!cohesionCenter) {
       return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    console.log("cohesionCenter Id: ", cohesionCenter._id);
 
     // get all meeting points to cohesion from schema de répartition center with bus
     const schemaMeetingPoints = await SchemaDeRepartitionModel.aggregate([
@@ -50,7 +49,6 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
 
     // get all buses to cohesion center using previous meeting points, find used meeting points with hours and get a new meeting point list
     const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
-    console.log("mpoint ids: ", schemaMeetingPointIds);
     const meetingPoints = await LigneToPointModel.aggregate([
       { $match: { meetingPointId: { $in: schemaMeetingPointIds } } },
       {
