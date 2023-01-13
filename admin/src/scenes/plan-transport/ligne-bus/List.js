@@ -200,7 +200,7 @@ const ReactiveList = ({ cohort, history }) => {
         </div>
         <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
           <div className="flex flex-col gap-2">
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-2">
               <div className="uppercase text-xs text-snu-purple-800 mr-2">Ligne de bus</div>
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -262,7 +262,7 @@ const ReactiveList = ({ cohort, history }) => {
                 size={1000}
               />
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-2">
               <div className="uppercase text-xs text-snu-purple-800 mr-2">Points de rassemblement</div>
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -321,7 +321,7 @@ const ReactiveList = ({ cohort, history }) => {
                 size={1000}
               />
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-2">
               <div className="uppercase text-xs text-snu-purple-800 mr-2">Centre</div>
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -380,7 +380,7 @@ const ReactiveList = ({ cohort, history }) => {
                 size={1000}
               />
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-2">
               <div className="uppercase text-xs text-snu-purple-800 mr-2">Modifications de status</div>
 
               <MultiDropdownList
@@ -462,8 +462,7 @@ const ReactiveList = ({ cohort, history }) => {
 };
 
 const Line = ({ hit, currentTab }) => {
-  console.log("🚀 ~ file: List.js:194 ~ Line ~ hit", hit);
-
+  const history = useHistory();
   const meetingPoints = currentTab === "aller" ? hit.pointDeRassemblements : hit.pointDeRassemblements.slice().reverse();
 
   const hasPendingModification = hit.modificationBuses?.some((modification) => modification.status === "PENDING");
@@ -473,8 +472,8 @@ const Line = ({ hit, currentTab }) => {
   return (
     <>
       <hr />
-      <div className="flex py-2 items-center px-4 hover:bg-gray-50">
-        <div className="w-[30%]">
+      <div className="flex py-6 items-center px-4 hover:bg-gray-50">
+        <div className="w-[30%] cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${hit._id.toString()}`)}>
           <div className="flex flex-col">
             <div className="text-sm font-medium">{hit.busId}</div>
             <div className="text-xs text-gray-400">
@@ -491,7 +490,7 @@ const Line = ({ hit, currentTab }) => {
                     href={`/point-de-rassemblement/${meetingPoint.meetingPointId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
+                    className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
                     {meetingPoint.city}
                     <ArrowUp />
                   </a>
@@ -507,17 +506,37 @@ const Line = ({ hit, currentTab }) => {
                 href={`/centre/${hit.centerId}`}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:scale-105 cursor-pointer gap-2 text-sm font-medium flex justify-center px-2 py-1 items-center">
+                className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center">
                 {hit.centerCode}
                 <ArrowUp />
               </a>
             </TooltipCenter>
           </div>
         </div>
-        <div className="w-[10%]">{hit.fillingRate}%</div>
+        <div className="w-[10%] flex gap-4 items-center">
+          <div className="text-sm font-normal">{hit.fillingRate}%</div>
+          <div className="flex flex-col items-center">
+            <svg className="-rotate-90 w-9 h-9" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#F0F0F0" strokeDashoffset={`calc(100 - 0)`} strokeWidth="15" />
+              <circle
+                className="percent fifty"
+                strokeDasharray={100}
+                strokeDashoffset={`calc(100 - ${Math.round(hit.fillingRate)})`}
+                cx="60"
+                cy="60"
+                r="40"
+                fill="none"
+                stroke="#1E40AF"
+                strokeWidth="15"
+                pathLength="100"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+        </div>
         <div className="w-[5%] flex justify-center">
           {hit.modificationBuses?.length > 0 ? (
-            <div className={`flex p-1 rounded-full ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}>
+            <div className={`flex p-2 rounded-full ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}>
               <Comment stroke={hasPendingModification && "white"} />
             </div>
           ) : null}
@@ -531,10 +550,10 @@ const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) =
   if (!meetingPoint) return children;
 
   return (
-    <div className="relative flex flex-col items-center group" {...props}>
+    <div className="relative flex flex-col items-center group " {...props}>
       {children}
-      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center">
-        <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
+      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center left-0">
+        <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
           <div className="flex items-center justify-between w-[524px]">
             <div className="flex items-center">
               <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">
@@ -560,8 +579,8 @@ const TooltipCenter = ({ children, name, region, department, ...props }) => {
   return (
     <div className="relative flex flex-col items-center group" {...props}>
       {children}
-      <div className="absolute flex flex-col hidden group-hover:flex !top-8 mb-3 items-center">
-        <div className="relative py-3 px-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-sm z-[500] rounded-lg">
+      <div className="absolute flex-col hidden group-hover:flex !top-8 mb-3 items-center left-0">
+        <div className="relative py-3 px-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{`${name}`}</div>
             <div className="text-xs text-gray-400">{`${region} • ${department}`}</div>
