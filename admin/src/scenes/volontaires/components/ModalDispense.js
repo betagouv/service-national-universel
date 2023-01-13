@@ -68,7 +68,7 @@ export default function ModalDispense({ isOpen, onCancel, youngId, onSuccess }) 
         <div className="cursor-pointer w-1/2 border-[1px] border-gray-300 text-center py-2 rounded" onClick={onCancel}>
           Retour
         </div>
-        <div onClick={onSubmit} className={`${disabled ? "opacity-70" : "cursor-pointer"} w-1/2 border-[1px] bg-blue-600 text-white text-center py-2 rounded`}>
+        <div onClick={onSubmit} className={`${disabled ? "opacity-60" : "cursor-pointer"} w-1/2 border-[1px] bg-blue-600 text-white text-center py-2 rounded`}>
           Valider
         </div>
       </div>

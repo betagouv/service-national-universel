@@ -68,7 +68,12 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   const getDefaultQuery = () => {
     return {
       // query sur les sessions qui ont des places dispos
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }, { range: { placesLeft: { gt: 0 } } }],
+        },
+      },
       track_total_hits: true,
     };
   };
