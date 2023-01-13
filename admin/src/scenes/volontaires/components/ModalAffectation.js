@@ -41,6 +41,9 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 
   const sessionObject = sessions2023.find((s) => s.name === young.cohort);
 
+  // true à J - 12 du départ
+  const youngSelectDisabled = !dayjs(sessionObject?.dateStart).subtract(12, "day").isAfter(dayjs());
+
   useEffect(() => {
     if (pdrOption !== "ref-select") return;
     loadList();
@@ -210,12 +213,16 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                     <ChevronRight className="text-gray-400" width={8} height={16} />
                   </div>
 
+                  {/* disable j-12 du depart en sejour */}
                   <div
                     onClick={() => {
+                      if (youngSelectDisabled) return;
                       setPdrOption("young-select");
                       setStep(3);
                     }}
-                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
+                    className={`flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg ${
+                      youngSelectDisabled ? "bg-gray-100 cursor-not-allowed" : "cursor-pointer"
+                    } hover:bg-gray-100`}>
                     <div className="text-sm w-5/6">
                       <span className="font-bold">Je laisse {young.firstName} choisir</span> son point de rassemblement
                     </div>
