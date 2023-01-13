@@ -40,7 +40,7 @@ async function getQPV(postcode, commune, adresse) {
         return res.json();
       })
       .then((json) => {
-        if (!json.reponses) {
+        if (!json?.reponses) {
           // capture(`Cant find ${postcode}, ${commune}, ${addresseFormated}`);
           return resolve(false);
         }
