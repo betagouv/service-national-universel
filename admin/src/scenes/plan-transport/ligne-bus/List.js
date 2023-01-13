@@ -455,6 +455,8 @@ const ReactiveList = ({ cohort, history }) => {
                 renderItem={(e, count) => {
                   return `${translate(e)} (${count})`;
                 }}
+                showMissing
+                missingLabel="Non renseigné"
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -480,8 +482,11 @@ const ReactiveList = ({ cohort, history }) => {
                   return <div>{value}</div>;
                 }}
                 renderItem={(e, count) => {
+                  if (e === "Non renseigné") return `Non renseigné (${count})`;
                   return `${translateStatus(e)} (${count})`;
                 }}
+                showMissing
+                missingLabel="Non renseigné"
               />
               {user.role === ROLES.ADMIN && (
                 <MultiDropdownList
@@ -501,6 +506,8 @@ const ReactiveList = ({ cohort, history }) => {
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
               )}
             </div>
