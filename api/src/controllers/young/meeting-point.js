@@ -1,14 +1,18 @@
+/**
+ * GET /young/:id/meeting-point           -> récupère le détail du PDR du jeune (id)
+ * PUT /young/:id/meeting-point/cancel    -> reset le choix du PDR du jeune (id)
+ * PUT /young/:id/meeting-point           -> enregistre le choix du PDR du jeune (id)
+ * GET /young/:id/meeting-point/all       -> retourne la liste de tous les meeting points possibles du jeune (id)
+ */
 const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { canEditYoung } = require("snu-lib/roles");
-
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
-const MeetingPointModel = require("../../models/meetingPoint");
-const BusModel = require("../../models/bus");
-const { ERRORS, updatePlacesBus, isYoung, isReferent } = require("../../utils");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const { ERRORS, isYoung, isReferent } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
 
@@ -23,7 +27,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const data = await MeetingPointModel.findOne({ _id: young.meetingPointId, deletedAt: { $exists: false } });
+    const data = await PointDeRassemblementModel.findOne({ _id: young.meetingPointId, deletedAt: { $exists: false } });
 
     return res.status(200).send({ ok: true, data: data ? serializeMeetingPoint(data) : null });
   } catch (error) {
@@ -47,13 +51,14 @@ router.put("/cancel", passport.authenticate("referent", { session: false, failWi
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
-    const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
+    // const oldMeetingPoint = await PointDeRassemblementModel.findById(young.meetingPointId);
+    // const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
+    // TODO: est-ce qu'on doit mettre à jour la capacité des bus ?
 
     young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
     await young.save({ fromUser: req.user });
 
-    if (oldBus) await updatePlacesBus(oldBus);
+    // if (oldBus) await updatePlacesBus(oldBus);
 
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
@@ -89,24 +94,26 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let bus = null;
+    // let bus = null;
 
     //choosing a meetingPoint
     if (meetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(meetingPointId);
+      // const meetingPoint = await MeetingPointModel.findById(meetingPointId);
+      const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      bus = await BusModel.findById(meetingPoint.busId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (bus.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      // bus = await BusModel.findById(meetingPoint.busId);
+      // if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // if (bus.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      // TODO: est-ce qu'on doit vérifier la capacité des bus ?
     }
-    const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
-    const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
+    // const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+    // const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
 
     young.set({ meetingPointId, deplacementPhase1Autonomous });
     await young.save({ fromUser: req.user });
 
-    if (bus) await updatePlacesBus(bus);
-    if (oldBus) await updatePlacesBus(oldBus);
+    // if (bus) await updatePlacesBus(bus);
+    // if (oldBus) await updatePlacesBus(oldBus);
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);

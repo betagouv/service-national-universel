@@ -12,17 +12,6 @@ const { ERRORS, isYoung, isReferent } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
 
-router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await MeetingPointModel.find({ deletedAt: { $exists: false } });
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.get("/center/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);

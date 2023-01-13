@@ -17,7 +17,7 @@ import plausibleEvent from "../../../../services/plausible";
 import { capture } from "../../../../sentry";
 import { translate } from "snu-lib";
 
-export default function StepAgreement({ young }) {
+export default function StepConvocation({ young }) {
   const [showConvocation, setShowConvocation] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
   const [valid, setValid] = useState(false);
@@ -73,7 +73,7 @@ export default function StepAgreement({ young }) {
           <div className="flex flex-1 flex-col mx-3">
             <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre convocation</h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une pièce d&apos;identité valide.
+              Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une <span className="text-bold">pièce d&apos;identité valide</span>.
             </p>
           </div>
         </div>

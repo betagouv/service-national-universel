@@ -2,17 +2,12 @@ import React, { useEffect, useState } from "react";
 import { BsArrowUpShort } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
-import { youngCanChangeSession } from "snu-lib";
-import edit from "../../assets/editIcon.svg";
 import Iceberg from "../../assets/Iceberg.js";
 import { AlertBoxInformation } from "../../components/Content";
 import { supportURL } from "../../config";
 import api from "../../services/api";
 import { translate, translateCohort } from "../../utils";
-import ConvocationDetails from "./components/ConvocationDetails";
 import StepsAffected from "./components/StepsAffected";
-import Files from "./Files";
 import { RiErrorWarningLine } from "react-icons/ri";
 
 export default function Affected() {
@@ -81,37 +76,39 @@ export default function Affected() {
           <div>
             <section className="content">
               <section>
-                <article className="flex flex-col items-center lg:flex-row lg:items-center">
+                <article className="flex flex-col items-between lg:flex-row lg:items-center">
                   <div className="hidden md:flex flex-col mb-4">
                     <h1 className="text-5xl">Mon séjour de cohésion</h1>
                     <div className="flex flex-row items-center">
                       <h1 className="text-5xl">
                         <strong>{translateCohort(young.cohort)}</strong>
                       </h1>
-                      {youngCanChangeSession(young) ? (
+                      {/* youngCanChangeSession(young) ? (
                         <Link to="/changer-de-sejour">
                           <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
                         </Link>
-                      ) : null}
+                      ) : null */}
                     </div>
                   </div>
                   <div className="flex md:hidden flex-col mb-4">
                     <h1 className="text-sm text-gray-600 ">Séjour {translateCohort(young.cohort)}</h1>
                   </div>
-                  <div className="flex flex-1 flex-row items-start justify-center">
-                    <Iceberg className="w-16 h-16 md:w-24 md:h-24 mr-4" />
-                    <article>
-                      <h1 className="font-bold text-xl leading-7">Votre lieu d&apos;affectation</h1>
-                      <p className="text-sm leading-5">
-                        {center?.name}, {center?.city}
-                      </p>
-                      <p className="text-sm leading-5">
-                        ({center?.zip}), {center?.department}
-                      </p>
-                    </article>
+                  <div className="flex flex-1 flex-row items-start justify-end">
+                    <div className="bg-gray-50 rounded-2xl flex py-2 px-8">
+                      <Iceberg className="w-16 h-16 md:w-24 md:h-24 mr-4" />
+                      <article>
+                        <h1 className="font-bold text-xl leading-7">Votre lieu d&apos;affectation</h1>
+                        <p className="text-sm leading-5">
+                          {center?.name}, {center?.city}
+                        </p>
+                        <p className="text-sm leading-5">
+                          ({center?.zip}), {center?.department}
+                        </p>
+                      </article>
+                    </div>
                   </div>
                 </article>
-                <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
+                {/* <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} /> */}
               </section>
               <StepsAffected young={young} center={center} meetingPoint={meetingPoint} />
 
@@ -148,12 +145,14 @@ export default function Affected() {
                       <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
                     </div>
                   </a>
+                </div>
+                <div className="flex flex-col lg:flex-row w-full justify-between items-stretch gap-4">
                   <a
-                    href={`${supportURL}/base-de-connaissance/mon-affectation-lieu-de-sejour`}
+                    href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur-2022-2023.pdf"
                     target="_blank"
                     rel="noreferrer"
                     className="flex w-full justify-between items-start border-[1px] border-gray-200 rounded-lg pl-4">
-                    <span className="py-3 font-bold text-base pr-4 flex-1">J&apos;ai des questions sur mon affectation</span>
+                    <span className="py-3 font-bold text-base pr-4 flex-1">Lire le règlement intérieur</span>
                     <div>
                       <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
                     </div>
@@ -161,9 +160,9 @@ export default function Affected() {
                 </div>
               </div>
               {/* Files */}
-              <div className="bg-white py-6 -mx-6 px-4 rounded-lg">
+              {/* <div className="bg-white py-6 -mx-6 px-4 rounded-lg">
                 <Files young={young} />
-              </div>
+              </div>*/}
             </section>
           </div>
         </div>
