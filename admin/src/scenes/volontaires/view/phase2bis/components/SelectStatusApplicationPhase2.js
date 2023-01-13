@@ -7,7 +7,7 @@ import ModalConfirmWithMessage from "../../../../../components/modals/ModalConfi
 import { APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../../utils";
 import { BiChevronDown } from "react-icons/bi";
 
-export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) => {
+export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dropdownClassName = "" }) => {
   const [application, setApplication] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
@@ -112,15 +112,15 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback }) =
 
   return (
     <>
-      <div ref={ref}>
+      <div ref={ref} className={`relative ${options.length > 1 && "cursor-pointer"}`}>
         <div className="inline-block" onClick={() => setDropDownOpen((dropDownOpen) => !dropDownOpen)}>
           <div className={`bg-${theme.background[application.status]} text-${theme.text[application.status]} rounded flex flex-row items-center`}>
             <div className="text-xs font-normal p-1">{translateApplication(application.status)}</div>
-            <BiChevronDown size={20} />
+            {options.length > 1 && <BiChevronDown size={20} />}
           </div>
         </div>
         {dropDownOpen && (
-          <div className="absolute bg-white">
+          <div className={"absolute bg-white z-10 " + dropdownClassName}>
             {options
               .filter((e) => e !== application.status)
               .map((status) => {

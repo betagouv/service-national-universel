@@ -304,6 +304,23 @@ const Schema = new mongoose.Schema({
     },
   },
   jvaRawData: mongoose.Schema.Types.Mixed,
+
+  applicationStatus: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des statuts des candidatures de phase 2 pour la mission",
+    },
+  },
+
+  placesStatus: {
+    type: String,
+    enum: ["FULL", "EMPTY", "ONE_OR_MORE"],
+    default: "EMPTY",
+    documentation: {
+      description: "Champs pour filtrer sur une mission pleine, vide, ayant au moin une places de prise ",
+    },
+  },
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {

@@ -3,7 +3,7 @@ import People from "../../../assets/icons/People";
 import Plus from "../../../assets/icons/Plus";
 import { GroupSummary } from "../components/commons";
 import { useSelector } from "react-redux";
-import { ROLES } from "snu-lib";
+import { ROLES, TRANSPORT } from "snu-lib";
 
 export default function GroupSelector({ title, groups, youngsCount, intradepartmental, className = "", onSelect, cohort, department, region, selectedGroup }) {
   const { user } = useSelector((state) => state.Auth);
@@ -46,7 +46,7 @@ export default function GroupSelector({ title, groups, youngsCount, intradepartm
         {groups.map((group) => (
           <GroupBox key={group._id} group={group} onSelect={onSelectGroup} selected={selectedGroup && selectedGroup._id === group._id} />
         ))}
-        {user.role !== ROLES.REFERENT_DEPARTMENT && (
+        {![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && (
           <div className="p-[8px]">
             <div className="border-[1px] border-dashed border-[#D1D5DB] rounded-[8px] flex flex-column items-center justify-center py-[45px]">
               <div

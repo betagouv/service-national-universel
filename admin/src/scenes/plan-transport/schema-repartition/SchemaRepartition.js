@@ -139,7 +139,7 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   function goToNational() {
-    if (user.role === ROLES.ADMIN) {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
     }
   }
@@ -265,7 +265,7 @@ export default function SchemaRepartition({ region, department }) {
             <BoxAffectation className="grow mt-[8px]" summary={summary} loading={loading} />
           </div>
           <BoxDisponibilite className="grow mx-[16px]" summary={summary} loading={loading} isNational={isNational} />
-          <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} />
+          <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} user={user} />
         </div>
         {isDepartmental ? (
           <>
@@ -281,7 +281,7 @@ export default function SchemaRepartition({ region, department }) {
             <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
           </>
         ) : (
-          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} />
+          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} user={user} />
         )}
       </div>
     </div>
@@ -373,7 +373,7 @@ function BoxDisponibilite({ summary, className = "", loading, isNational }) {
   );
 }
 
-function BoxCentres({ summary, className = "", loading, isNational, isDepartmental }) {
+function BoxCentres({ summary, className = "", loading, isNational, isDepartmental, user }) {
   return (
     <Box className={`overflow-hidden ${className}`}>
       <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />
@@ -400,14 +400,16 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
           ))}
         </ul>
       )}
-      <Link to="/table-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
-        Table de répartition <ChevronRight className="ml-[5px]" />
-      </Link>
+      {user.role !== ROLES.TRANSPORTER && (
+        <Link to="/table-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
+          Table de répartition <ChevronRight className="ml-[5px]" />
+        </Link>
+      )}
     </Box>
   );
 }
 
-function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort }) {
+function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort, user }) {
   function goToRow(row) {
     onGoToRow && onGoToRow(row);
   }
@@ -466,14 +468,16 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                           {formatRate(row.intradepartmentalAssigned, row.intradepartmental)} affectés
                         </Badge>
                       )}
-                      <Link
-                        to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohort)}
-                        className="ml-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}>
-                        <ExternalLink className="text-[#9CA3AF]" />
-                      </Link>
+                      {user.role !== ROLES.TRANSPORTER && (
+                        <Link
+                          to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohort)}
+                          className="ml-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}>
+                          <ExternalLink className="text-[#9CA3AF]" />
+                        </Link>
+                      )}
                     </div>
                   )}
                 </td>
