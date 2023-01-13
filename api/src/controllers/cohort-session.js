@@ -41,8 +41,16 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
         }
         young = body;
       }
+      const { error: errorQuery, value: query } = Joi.object({
+        getAllSessions: Joi.boolean().default(false),
+      }).validate(req.query, {
+        stripUnknown: true,
+      });
 
-      const bypassFilter = user.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL;
+      if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      const bypassFilter =
+        (user.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && query.getAllSessions);
       const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young);
       if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
       return res.send({ ok: true, data: sessions });
