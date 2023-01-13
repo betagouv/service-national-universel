@@ -1,6 +1,6 @@
 import React from "react";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { TabItem, Title } from "../components/commons";
+import { TabItem, Title, translateStatus } from "../components/commons";
 import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, getFilterLabel, ROLES, translate } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -215,20 +215,29 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Numéro de ligne", "Numéro de ligne")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
+
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
                 placeholder="Date aller"
                 componentId="DATE_ALLER"
                 dataField="departureString.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
+                react={{ and: FILTERS.filter((e) => e !== "DATE_ALLER") }}
                 title=""
                 URLParams={true}
                 sortBy="asc"
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Date aller", "Date aller")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -236,13 +245,17 @@ const ReactiveList = ({ cohort, history }) => {
                 placeholder="Date retour"
                 componentId="DATE_RETOUR"
                 dataField="returnString.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "LINE_NUMBER") }}
+                react={{ and: FILTERS.filter((e) => e !== "DATE_RETOUR") }}
                 title=""
                 URLParams={true}
                 sortBy="asc"
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Date retour", "Date retour")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -253,6 +266,16 @@ const ReactiveList = ({ cohort, history }) => {
                 react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
                 renderItem={(e, count) => {
                   return `${translateFillingRate(e)} (${count})`;
+                }}
+                renderLabel={(items) => {
+                  if (Object.keys(items).length === 0) return "Taux de remplissage";
+                  const translated = Object.keys(items).map((item) => {
+                    if (item === "Non renseigné") return item;
+                    return translateFillingRate(item);
+                  });
+                  let value = translated.join(", ");
+                  value = "Taux de remplissage : " + value;
+                  return <div>{value}</div>;
                 }}
                 title=""
                 URLParams={true}
@@ -277,6 +300,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Nom", "Nom")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -291,6 +318,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -305,6 +336,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -319,6 +354,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Ville", "Ville")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
             </div>
             <div className="flex items-center gap-x-2">
@@ -336,6 +375,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Nom", "Nom")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -350,6 +393,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -364,6 +411,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -378,6 +429,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
             </div>
             <div className="flex items-center gap-x-2">
@@ -396,6 +451,10 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Modification demandée", "Modification demandée")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -410,6 +469,19 @@ const ReactiveList = ({ cohort, history }) => {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
+                renderLabel={(items) => {
+                  if (Object.keys(items).length === 0) return "Status de la modification";
+                  const translated = Object.keys(items).map((item) => {
+                    if (item === "Non renseigné") return item;
+                    return translateStatus(item);
+                  });
+                  let value = translated.join(", ");
+                  value = "Status de la modification : " + value;
+                  return <div>{value}</div>;
+                }}
+                renderItem={(e, count) => {
+                  return `${translateStatus(e)} (${count})`;
+                }}
               />
               {user.role === ROLES.ADMIN && (
                 <MultiDropdownList
@@ -425,6 +497,10 @@ const ReactiveList = ({ cohort, history }) => {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                   size={1000}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Opinion sur la modification", "Opinion sur la modification")}</div>}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
                 />
               )}
             </div>
