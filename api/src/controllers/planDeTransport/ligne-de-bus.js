@@ -94,7 +94,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     });
 
     // * Copy to PlanDeTransport !
-
     const center = await cohesionCenterModel.findById(centerId);
 
     await PlanTransportModel.create({
