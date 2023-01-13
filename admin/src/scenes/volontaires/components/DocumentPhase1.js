@@ -71,9 +71,7 @@ export default function DocumentPhase1(props) {
     }
   };
 
-  const needModal = (e) => {
-    const value = e.target.value;
-    const name = e.target.name;
+  const needModal = (value, name) => {
     setLoading(true);
     setState(name, value);
     handleChange({ value, name });
@@ -101,12 +99,12 @@ export default function DocumentPhase1(props) {
       <article className="flex items-start justify-between gap-6">
         <div className="flex flex-col justify-center items-center basis-1/4">
           <section className="bg-gray-50 rounded-lg m-2 flex flex-col items-center justify-start p-4 h-[300px] w-full">
-            <div className="flex row justify-center mx-2 mb-3 w-full">
+            <div className=" mx-2 mb-3 w-full">
               <Select
-                name="youngPhase1Agreement"
+                name="cohesionStayMedical"
                 type="select"
                 setSelected={({ value }) => {
-                  needModal(value);
+                  needModal(value, "cohesionStayMedical");
                 }}
                 selected={statusCohesionStayMedical}
                 options={medicalFileOptions}

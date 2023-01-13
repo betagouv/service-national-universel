@@ -362,12 +362,17 @@ export default function Phase1(props) {
             )}
           </div>
         </div>
-        <div className="bg-white rounded mt-4">
-          <div className="mx-8 py-4">
-            <div className="text-lg font-medium mr-2">Documents</div>
-            <DocumentPhase1 young={young} />
+        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
+        young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
+        young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
+          <div className="bg-white rounded mt-4">
+            <div className="mx-8 py-4">
+              <div className="text-lg font-medium mr-2">Documents</div>
+              <DocumentPhase1 young={young} />
+            </div>
           </div>
-        </div>
+        ) : null}
+
         {/*
         <Box>
           <article className="flex">
