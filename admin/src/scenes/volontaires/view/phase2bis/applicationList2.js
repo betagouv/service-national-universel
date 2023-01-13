@@ -163,17 +163,16 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <div className="flex basis-[35%] justify-end">
             {/* statut */}
             <div onClick={(e) => e.stopPropagation()}>
-              <div>
-                <SelectStatusApplicationPhase2
-                  hit={hit}
-                  callback={(status) => {
-                    if (status === "VALIDATED") {
-                      history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-                    }
-                    onChangeApplication && onChangeApplication();
-                  }}
-                />
-              </div>
+              <SelectStatusApplicationPhase2
+                hit={hit}
+                callback={(status) => {
+                  if (status === "VALIDATED") {
+                    history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+                  }
+                  onChangeApplication && onChangeApplication();
+                }}
+                dropdownClassName="right-3"
+              />
             </div>
           </div>
           {/* end statut */}
