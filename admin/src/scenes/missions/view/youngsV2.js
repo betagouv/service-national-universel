@@ -127,7 +127,7 @@ export default function Youngs({ mission, applications, updateMission }) {
           "Pays du volontaire": data.young.country,
         },
         location: {
-          Département: data.young.department,
+          "Département du volontaire": data.young.department,
           "Académie du volontaire": data.young.academy,
           "Région du volontaire": data.young.region,
         },
