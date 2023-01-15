@@ -5,6 +5,7 @@ const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeR
 const YoungModel = require("../../models/young");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -97,8 +98,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
-    // Update ligneBus as well
+    const planDeTransport = await PlanTransportModel.find({ meetingPoints: { $elemMatch: { meetingPointId: id } } });
+
+    for await (const p of planDeTransport) {
+      const meetingPoint = p.meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === id);
+      meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
+      await p.save({ fromUser: req.user });
+    }
+
+    await planDeTransport.save({ fromUser: req.user });
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 

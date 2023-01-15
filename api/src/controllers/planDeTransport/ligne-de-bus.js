@@ -11,6 +11,7 @@ const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo, canEditL
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
+const { ObjectId } = require("mongodb");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -93,10 +94,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       meetingPointsId: meetingPoints.map((mp) => mp.meetingPointId),
     });
 
-    // * Copy to PlanDeTransport !
     const center = await cohesionCenterModel.findById(centerId);
 
     await PlanTransportModel.create({
+      _id: bus._id,
       cohort,
       busId,
       departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
@@ -187,7 +188,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     await ligne.save({ fromUser: req.user });
 
     // ! Gerer logique si il y a deja des inscrits
-    const planDeTransport = await PlanTransportModel.findOne({ busId: busId });
+    const planDeTransport = await PlanTransportModel.findById(id);
     planDeTransport.set({
       busId,
       departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
@@ -294,7 +295,17 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
       await ligneToPoint.save({ fromUser: req.user });
     }
 
-    // ! PlanDeTransport save here !
+    // * Update planDeTransport
+    const planDeTransport = await PlanTransportModel.findById(id);
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(newMeetingPointId));
+    const meetingPoint = planDeTransport.meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === meetingPointId);
+    meetingPoint.set({
+      meetingPointId: newMeetingPointId,
+      ...pointDeRassemblement,
+      ...ligneToPoint,
+    });
+
+    await planDeTransport.save({ fromUser: req.user });
 
     const infoBus = await getInfoBus(ligne);
 

@@ -45,6 +45,14 @@ const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminat
 ).schema;
 
 const Schema = new mongoose.Schema({
+  ligneDeBusId: {
+    type: String,
+    unique: true,
+    required: true,
+    documentation: {
+      description: "Id de la ligne de bus",
+    },
+  },
   cohort: {
     type: String,
     required: true,
@@ -250,6 +258,8 @@ Schema.plugin(patchHistory, {
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
+
+Schema.index({ ligneDeBusId: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

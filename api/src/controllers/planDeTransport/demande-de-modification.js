@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -14,6 +15,7 @@ const {
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
 } = require("snu-lib");
+const { ObjectId } = require("mongodb");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -31,7 +33,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const line = await LigneBusModel.findById(lineId);
     if (!line) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await ModificationBusModel.create({
+    const modificationBus = await ModificationBusModel.create({
       lineId: line._id.toString(),
       lineName: line.busId,
       cohort: line.cohort,
@@ -41,7 +43,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       requestUserRole: req.user.role,
     });
 
-    // ! PlanDeTransport save here !
+    const planDeTransport = await PlanTransportModel.findOne({ ligneDeBusId: line._id.toString() });
+    planDeTransport.modificationBuses.push(modificationBus);
+    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -73,9 +77,13 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
       statusDate: new Date(),
     });
 
-    // ! PlanDeTransport save here !
-
     await modif.save({ fromUser: req.user });
+
+    const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
+    s;
+    const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
+    modificationBus.set({ ...modif });
+    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -109,7 +117,10 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
 
     await modif.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
+    const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
+    const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
+    modificationBus.set({ ...modif });
+    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -140,7 +151,10 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
 
     await modif.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
+    const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
+    const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
+    modificationBus.set({ ...modif });
+    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {

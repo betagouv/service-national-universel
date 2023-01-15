@@ -4,6 +4,7 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -257,6 +258,16 @@ const updateCenterDependencies = async (center, fromUser) => {
     });
     await sessions[i].save({ fromUser });
   }
+  const plansDeTransport = await PlanTransportModel.find({ centerId: center._id });
+  plansDeTransport.forEach(async (planDeTransport) => {
+    planDeTransport.set({
+      centerDepartment: center.department,
+      centerRegion: center.region,
+      centerCode: center.code2022,
+      centerName: center.name,
+    });
+    await planDeTransport.save({ fromUser });
+  });
 };
 
 const deleteCenterDependencies = async (center, fromUser) => {

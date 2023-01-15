@@ -234,9 +234,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
-    // Update ligneBus as well
-
     await updateCenterDependencies(center, req.user);
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
@@ -309,7 +306,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       oldCenter.waitingList.splice(i, 1);
       await oldCenter.save({ fromUser: req.user });
     }
-
     // update center infos
     if (bus) await updatePlacesBus(bus);
 
