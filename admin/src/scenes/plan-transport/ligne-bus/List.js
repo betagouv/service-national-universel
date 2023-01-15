@@ -20,11 +20,7 @@ import { useSelector } from "react-redux";
 import { PlainButton } from "../components/Buttons";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 import ArrowUp from "../../../assets/ArrowUp";
-import Train from "./components/Icons/Train";
-import Bus from "../../../assets/icons/Bus";
-import Fusee from "../../../assets/icons/Fusee";
-import Comment from "../../../assets/comment";
-import Avion from "../../../assets/icons/Avion";
+import Comment from "../../../assets/Comment";
 import { getTransportIcon } from "../util";
 
 const FILTERS = [
@@ -56,8 +52,8 @@ const cohortList = [
 ];
 
 const translateFillingRate = (e) => {
-  if (e == 0) return "Vide";
-  if (e == 100) return "Rempli";
+  if (e === 0) return "Vide";
+  if (e === 100) return "Rempli";
   return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
 };
 

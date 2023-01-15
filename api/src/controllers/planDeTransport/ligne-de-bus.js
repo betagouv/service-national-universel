@@ -99,10 +99,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     await PlanTransportModel.create({
       cohort,
       busId,
-      departuredDate,
-      returnDate,
+      departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
       youngCapacity,
       totalCapacity,
+      fillingRate: 0,
       followerCapacity,
       travelTime,
       km,
@@ -185,9 +186,20 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
     await ligne.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
-
-    // planDeTransport.set({ busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn });
+    // ! Gerer logique si il y a deja des inscrits
+    const planDeTransport = await PlanTransportModel.findOne({ busId: busId });
+    planDeTransport.set({
+      busId,
+      departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      youngCapacity,
+      totalCapacity,
+      fillingRate: 0, // ! A revoir
+      followerCapacity,
+      travelTime,
+      lunchBreak,
+      lunchBreakReturn,
+    });
 
     const infoBus = await getInfoBus(ligne);
 
@@ -222,8 +234,6 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     });
 
     await ligne.save({ fromUser: req.user });
-
-    // ! PlanDeTransport save here !
 
     const infoBus = await getInfoBus(ligne);
 

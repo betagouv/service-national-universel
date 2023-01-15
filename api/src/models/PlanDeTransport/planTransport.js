@@ -10,12 +10,12 @@ const MODELNAME = "plandetransport";
 const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminator(
   "Enriched",
   new mongoose.Schema({
-    // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ou de dupliquer l'id
+    // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ElasticMongoose ou de dupliquer l'id
     meetingPointId: {
       type: String,
       required: true,
       documentation: {
-        description: "Duplication de l'ID du schema",
+        description: "Champ contenant l'ID du MeetingPoint",
       },
     },
     meetingHour: {
@@ -56,6 +56,7 @@ const Schema = new mongoose.Schema({
 
   busId: {
     type: String,
+    unique: true,
     required: true,
     documentation: {
       description: "Numero de bus",
@@ -167,7 +168,7 @@ const Schema = new mongoose.Schema({
     type: String,
     required: true,
     documentation: {
-      description: "Region du centre",
+      description: "Département du centre",
     },
   },
 
@@ -175,7 +176,7 @@ const Schema = new mongoose.Schema({
     type: String,
     required: true,
     documentation: {
-      description: "Region du centre",
+      description: "Nom du centre",
     },
   },
 
@@ -183,7 +184,7 @@ const Schema = new mongoose.Schema({
     type: String,
     // required: true,
     documentation: {
-      description: "Region du centre",
+      description: "Code du centre",
     },
   },
 

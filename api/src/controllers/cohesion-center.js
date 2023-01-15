@@ -161,8 +161,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
-
     if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
       let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
       let sentTo = [
@@ -237,6 +235,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await center.save({ fromUser: req.user });
 
     // ! PlanDeTransport save here !
+    // Update ligneBus as well
 
     await updateCenterDependencies(center, req.user);
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
@@ -247,6 +246,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 //To update for new affectation
+// ! For new affectation, think about PlanDeTransport as well !
 router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
@@ -309,8 +309,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       oldCenter.waitingList.splice(i, 1);
       await oldCenter.save({ fromUser: req.user });
     }
-
-    // ! PlanDeTransport save here !
 
     // update center infos
     if (bus) await updatePlacesBus(bus);

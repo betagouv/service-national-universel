@@ -57,8 +57,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       location,
     });
 
-    // ! PlanDeTransport save here !
-
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
     capture(error);
@@ -100,6 +98,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await pointDeRassemblement.save({ fromUser: req.user });
 
     // ! PlanDeTransport save here !
+    // Update ligneBus as well
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
@@ -137,8 +136,6 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
-
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
@@ -172,8 +169,6 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
 
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
-
-    // ! PlanDeTransport save here !
 
     return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
@@ -245,7 +240,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     pointDeRassemblement.set({ deletedAt: now });
     await pointDeRassemblement.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
+    // ! What we do here if the point de rassemblement is link to ligneToPoint ? lingneToBus ? planDeTransport ?
 
     return res.status(200).send({ ok: true });
   } catch (error) {

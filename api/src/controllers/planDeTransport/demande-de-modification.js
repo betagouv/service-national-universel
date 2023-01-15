@@ -173,8 +173,6 @@ router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false
 
     await modif.save({ fromUser: req.user });
 
-    // ! PlanDeTransport save here !
-
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -203,8 +201,6 @@ router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session
     modif.set({ tagIds: tags.filter((tag) => tag !== tagId) });
 
     await modif.save({ fromUser: req.user });
-
-    // ! PlanDeTransport save here !
 
     return res.status(200).send({ ok: true });
   } catch (error) {
