@@ -59,14 +59,15 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     }
     // should we link to bus ?
     if (pdrOption === "self-going") young.set({ deplacementPhase1Autonomous: "true" });
-    else if (pdrOption === "ref-select") young.set({ deplacementPhase1Autonomous: "false", meetingPointId, ligneId });
-    else if (pdrOption === "young-select") young.set({ deplacementPhase1Autonomous: "false" });
+    else if (pdrOption === "ref-select" || pdrOption === "young-select") young.set({ deplacementPhase1Autonomous: "false" });
     else young.set({ transportInfoGivenByLocal: "true", deplacementPhase1Autonomous: "false" });
     // update youngs infos
     young.set({
       statusPhase1: "AFFECTED",
       sessionPhase1Id: sessionId,
       cohesionCenterId: centerId,
+      meetingPointId: pdrOption === "ref-select" ? meetingPointId : undefined,
+      ligneId: pdrOption === "ref-select" ? ligneId : undefined,
     });
 
     await young.save({ fromUser: req.user });
