@@ -305,7 +305,9 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     meetingPoint.set({
       meetingPointId: newMeetingPointId,
       ...pointDeRassemblement._doc,
-      ...ligneToPoint._doc,
+      meetingHour: ligneToPoint.meetingHour,
+      returnHour: ligneToPoint.returnHour,
+      transportType: ligneToPoint.transportType,
     });
 
     await planDeTransport.save({ fromUser: req.user });
