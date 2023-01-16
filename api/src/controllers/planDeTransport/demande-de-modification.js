@@ -43,8 +43,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       requestUserRole: req.user.role,
     });
 
-    const planDeTransport = await PlanTransportModel.findOne({ ligneDeBusId: line._id.toString() });
-    planDeTransport.modificationBuses.push(modificationBus);
+    const planDeTransport = await PlanTransportModel.findById(line._id);
+    if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [modificationBus];
+    else planDeTransport.modificationBuses.push(modificationBus);
+
     await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
@@ -80,7 +82,6 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
     await modif.save({ fromUser: req.user });
 
     const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
-    s;
     const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
     modificationBus.set({ ...modif });
     await planDeTransport.save({ fromUser: req.user });

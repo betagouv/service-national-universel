@@ -45,14 +45,6 @@ const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminat
 ).schema;
 
 const Schema = new mongoose.Schema({
-  ligneDeBusId: {
-    type: String,
-    unique: true,
-    required: true,
-    documentation: {
-      description: "Id de la ligne de bus",
-    },
-  },
   cohort: {
     type: String,
     required: true,

@@ -52,8 +52,8 @@ const cohortList = [
 ];
 
 const translateFillingRate = (e) => {
-  if (e === 0) return "Vide";
-  if (e === 100) return "Rempli";
+  if (e == 0) return "Vide";
+  if (e == 100) return "Rempli";
   return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
 };
 
@@ -542,11 +542,14 @@ const ReactiveList = ({ cohort, history }) => {
 
 const Line = ({ hit, currentTab }) => {
   const history = useHistory();
-  const meetingPoints = currentTab === "aller" ? hit.pointDeRassemblements : hit.pointDeRassemblements.slice().reverse();
+
+  const meetingPoints =
+    currentTab === "aller"
+      ? //sort meetingPoints by meetingHour
+        hit.pointDeRassemblements.sort((a, b) => a.meetingHour.replace(":", "") - b.meetingHour.replace(":", ""))
+      : hit.pointDeRassemblements.sort((a, b) => a.returnHour.replace(":", "") - b.returnHour.replace(":", ""));
 
   const hasPendingModification = hit.modificationBuses?.some((modification) => modification.status === "PENDING");
-
-  if (hit.modificationBuses) console.log("🚀 ~ file: List.js:423 ~ hasPendingModification", hit.modificationBuses);
 
   return (
     <>
