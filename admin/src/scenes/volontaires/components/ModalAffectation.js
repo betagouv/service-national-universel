@@ -69,7 +69,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(data.code));
         setSession(data);
         setStep(2);
-        setPdrOption("ref-select");
+        setPdrOption("");
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la session", e);
         console.log(e);
