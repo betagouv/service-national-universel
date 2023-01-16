@@ -75,7 +75,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (cohort.isAssignmentAnnouncementsOpenForYoung) {
+    if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
       await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
     }
