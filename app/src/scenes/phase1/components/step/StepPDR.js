@@ -84,7 +84,7 @@ export default function StepPDR({ young, center }) {
   }
 
   function chooseMeetingPoint(meetingPoint) {
-    saveChoice({ meetingPointId: meetingPoint._id });
+    saveChoice({ meetingPointId: meetingPoint._id, ligneId: meetingPoint.busLineId });
   }
 
   function chooseGoAlone() {
@@ -93,7 +93,7 @@ export default function StepPDR({ young, center }) {
 
   async function saveChoice(choice) {
     try {
-      const result = await api.put(`/young/${young._id}/meeting-point`, choice);
+      const result = await api.put(`/young/${young._id}/point-de-rassemblement`, choice);
       if (result.ok) {
         toastr.success("Votre choix est enregistré");
         dispatch(setYoung(result.data));
@@ -194,7 +194,7 @@ export default function StepPDR({ young, center }) {
           ) : (
             <div className="flex items-center justify-center h-9 w-9 rounded-full border-[1px] bg-white border-gray-200 text-gray-700">1</div>
           )}
-          <div className="flex flex-1 flex-col ml-3">
+          <div className="flex flex-1 flex-col ml-3  mr-8 mt-4">
             <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>
               {young.meetingPointId || young.deplacementPhase1Autonomous === "true"
                 ? "Lieu de rassemblement"
@@ -358,7 +358,7 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             {cohort && (
               <div className="flex flex-col md:flex-row md:items-center mt-4">
-                <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={cohort.dateStart} className="mb-4 md:mb-0 md:mr-4" />
+                <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={cohort.dateStart} className="mb-[16px] md:mb-0 md:mr-4" />
                 <CenterSchedule type="Retour" hour={ALONE_DEPARTURE_HOUR} date={cohort.dateEnd} />
               </div>
             )}
@@ -403,7 +403,7 @@ function MeetingPointGoAloneMobile({ center, young, onChoose, choosed, expired }
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             {cohort && (
               <div className="flex flex-col md:flex-row md:items-center mt-4">
-                <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={cohort.dateStart} className="mb-4 md:mb-0 md:mr-4" />
+                <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={cohort.dateStart} className="mb-[16px] md:mb-0 md:mr-4" />
                 <CenterSchedule type="Retour" hour={ALONE_DEPARTURE_HOUR} date={cohort.dateEnd} />
               </div>
             )}
@@ -424,13 +424,13 @@ function MeetingPointGoAloneMobile({ center, young, onChoose, choosed, expired }
   );
 }
 
-function CenterSchedule({ type, hour, date, className }) {
+function CenterSchedule({ type, hour, date, className = 0 }) {
   return (
     <div className={`border-l-[3px] border-l-blue-700 border-l-solid pl-3 ${className}`}>
       <div className="text-sm text-gray-800 font-bold">
         {type} à {hour}
       </div>
-      <div className="text-sm text-gray-500 mt-2">
+      <div className="text-sm text-gray-500 mt-2:">
         <span className="capitalize">{dayjs(date).locale("fr").format("dddd")}</span> <span>{dayjs(date).locale("fr").format("D MMMM")}</span>
       </div>
     </div>

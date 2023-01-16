@@ -2,7 +2,6 @@
  * GET /young/:id/meeting-point           -> récupère le détail du PDR du jeune (id)
  * PUT /young/:id/meeting-point/cancel    -> reset le choix du PDR du jeune (id)
  * PUT /young/:id/meeting-point           -> enregistre le choix du PDR du jeune (id)
- * GET /young/:id/meeting-point/all       -> retourne la liste de tous les meeting points possibles du jeune (id)
  */
 const express = require("express");
 const passport = require("passport");

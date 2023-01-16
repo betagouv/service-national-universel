@@ -76,7 +76,7 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
         },
       },
       { $unwind: "$pdr" },
-      { $replaceRoot: { newRoot: { $mergeObjects: ["$pdr", { meetingHour: "$meetingHour", returnHour: "$returnHour" }] } } },
+      { $replaceRoot: { newRoot: { $mergeObjects: ["$pdr", { meetingHour: "$meetingHour", returnHour: "$returnHour", busLineId: "$lignebus._id" }] } } },
     ]);
 
     // return meeting points
