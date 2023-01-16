@@ -1,3 +1,15 @@
+## [1.198.1](https://github.com/betagouv/service-national-universel/compare/v1.198.0...v1.198.1) (2023-01-13)
+
+
+### Bug Fixes
+
+* **admin:** dropdown overflow phase2 ([fcfd1de](https://github.com/betagouv/service-national-universel/commit/fcfd1de055f1c12ba9013f024cfc34ca86d735d6))
+* **admin:** ref can validate young ([387f7f5](https://github.com/betagouv/service-national-universel/commit/387f7f56970e00bb905820607f98254366ce4af0))
+* **admin:** typo export phase 2 ([0d8b854](https://github.com/betagouv/service-national-universel/commit/0d8b8544e237401bb54b977cdf72596c8ec78525))
+* **api:** async function should have try/catch ([ab94275](https://github.com/betagouv/service-national-universel/commit/ab942751824de9991e1e5533551f2c8b31863fba))
+* **api:** Fix crash api ?? ([211f808](https://github.com/betagouv/service-national-universel/commit/211f808bc7af67f5101a544decf22560d4d1145c))
+* **bdc:** hide updatedAt date and display updated at banner ([fe14fea](https://github.com/betagouv/service-national-universel/commit/fe14feab181495eccda5dd7df5a8686e694f9288))
+
 # [1.198.0](https://github.com/betagouv/service-national-universel/compare/v1.197.0...v1.198.0) (2023-01-12)
 
 
