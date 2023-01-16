@@ -63,7 +63,6 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     else young.set({ transportInfoGivenByLocal: "true", deplacementPhase1Autonomous: "false" });
     // update youngs infos
     young.set({
-      // status: "VALIDATED",
       statusPhase1: "AFFECTED",
       sessionPhase1Id: sessionId,
       cohesionCenterId: centerId,
@@ -71,7 +70,8 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     await young.save({ fromUser: req.user });
 
-    // send email ? + sms ?
+    let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
 
     // update session infos
     const data = await updatePlacesSessionPhase1(session, req.user);

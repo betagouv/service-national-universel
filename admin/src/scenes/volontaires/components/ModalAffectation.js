@@ -112,7 +112,6 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     try {
       let url = "/point-de-rassemblement/ligneToPoint";
       url += "/" + young.cohort + "/" + session.cohesionCenterId;
-      url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
       url += "&filter=" + encodeURIComponent(inputPdr);
 
       const result = await api.get(url);

@@ -227,14 +227,12 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     const { cohort, centerId } = valueParams;
 
     const { error: errorQuery, value: valueQuery } = Joi.object({
-      offset: Joi.number().default(0),
-      limit: Joi.number().default(10),
       filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { offset, limit, filter } = valueQuery;
+    const { filter } = valueQuery;
     const regex = new RegExp(".*" + filter ? filter : "" + ".*", "gi");
     const pipeline = [
       { $match: { cohort: cohort, centerId: centerId } },
