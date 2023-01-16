@@ -38,11 +38,20 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   const [dataPdr, setDataPdr] = useState([]);
   const [dataLigneToPoint, setDataLigneToPoint] = useState([]);
   const [selectedPdr, setSelectedPdr] = useState(null);
+  const [sessionSearch, setSessionSearch] = useState("");
 
   const sessionObject = sessions2023.find((s) => s.name === young.cohort);
 
   // true à J - 12 du départ
   const youngSelectDisabled = !dayjs(sessionObject?.dateStart).subtract(12, "day").isAfter(dayjs());
+
+  const closeModal = () => {
+    setInputPdr("");
+    setPdrOption("");
+    setStep(1);
+    setSessionSearch("");
+    onCancel();
+  };
 
   useEffect(() => {
     if (pdrOption !== "ref-select") return;
@@ -133,7 +142,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   }
 
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[850px] bg-white rounded-lg py-2 px-8">
+    <ModalTailwind centered isOpen={isOpen} onClose={closeModal} className="w-[850px] bg-white rounded-lg py-2 px-8">
       <div className="mb-4 ">
         <div className="flex flex-row w-full justify-between gap-6 mt-6">
           <div className="w-1/3">
@@ -160,6 +169,10 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
               <DataSearch
                 defaultQuery={getDefaultQuery}
                 showIcon={false}
+                value={sessionSearch}
+                onChange={(value, triggerQuery, event) => {
+                  setSessionSearch(value);
+                }}
                 placeholder="Rechercher par mots clés, ville, code postal..."
                 componentId="SEARCH"
                 dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
@@ -405,9 +418,11 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
           onClick={() => {
             if (step === 1) {
               setPdrOption("");
-              return onCancel();
+              return closeModal();
             }
             if (step === 2 && pdrOption === "ref-select") return setPdrOption("");
+            if (step === 2 && pdrOption === "" && center) return closeModal();
+
             if (step === 3) {
               setSelectedPdr(null);
               setPdrOption("");
