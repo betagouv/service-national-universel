@@ -1,53 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { AiOutlinePlus } from "react-icons/ai";
 import { ImQuotesLeft } from "react-icons/im";
-import { MdOutlineOpenInNew, MdOutlineWarningAmber } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Row } from "reactstrap";
-import Download from "../../../assets/Download.js";
-import Envelop from "../../../assets/Envelop.js";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import Badge from "../../../components/Badge";
-import { Box, BoxTitle } from "../../../components/box";
-import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import Pencil from "../../../assets/icons/Pencil";
 import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
-import {
-  canAssignCohesionCenter,
-  formatDateFR,
-  formatStringLongDate,
-  ROLES,
-  translate,
-  translateCohort,
-  translatePhase1,
-  YOUNG_STATUS_COLORS,
-  YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS_PHASE1_MOTIF,
-  isTemporaryAffected,
-} from "../../../utils";
+import { formatDateFR, ROLES, translate, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
 import ModalDispense from "../components/ModalDispense";
-import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
-import Select from "../../../components/Select2";
 import TailwindSelect from "../../../components/TailwindSelect";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
 import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
 import Refresh from "../../../assets/icons/Refresh";
-import ChevronDown from "../../../assets/icons/ChevronDown.js";
 import { BiChevronDown } from "react-icons/bi";
 import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
-import MailOpenIcon from "../../../components/MailOpenIcon";
 import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 
@@ -56,7 +32,6 @@ export default function Phase1(props) {
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
   const [cohesionCenter, setCohesionCenter] = useState();
-  const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
@@ -66,7 +41,6 @@ export default function Phase1(props) {
   // new useState
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
   const [values, setValues] = useState(props.young);
   const [displayCenterButton, setDisplayCenterButton] = useState(false);
 
@@ -126,7 +100,16 @@ export default function Phase1(props) {
     })();
   }, []);
 
-  const onSubmit = async (newValue) => {
+  const onSubmit = async () => {
+    try {
+    } catch (e) {
+      capture(e);
+      setLoading(false);
+      toastr.error("Erreur lors de la mise à jour du jeune", e.message);
+    }
+  };
+
+  const onSuccess = async (newValue) => {
     setYoung(newValue);
     setValues(newValue);
 
@@ -152,7 +135,6 @@ export default function Phase1(props) {
               className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => {
                 setEditing(false);
-                setErrors({});
                 setValues(young);
               }}
               disabled={loading}>
@@ -511,21 +493,21 @@ export default function Phase1(props) {
       <ModalPointagePresenceArrivee
         isOpen={modalPointagePresenceArrivee?.isOpen}
         onCancel={() => setModalPointagePresenceArrivee({ isOpen: false, value: null })}
-        onSubmit={onSubmit}
+        onSubmit={onSuccess}
         value={modalPointagePresenceArrivee?.value}
         young={young}
       />
       <ModalPointagePresenceJDM
         isOpen={modalPointagePresenceJDM?.isOpen}
         onCancel={() => setModalPointagePresenceJDM({ isOpen: false, value: null })}
-        onSubmit={onSubmit}
+        onSubmit={onSuccess}
         value={modalPointagePresenceJDM?.value}
         young={young}
       />
       <ModalPointageDepart
         isOpen={modalPointageDepart?.isOpen}
         onCancel={() => setModalPointageDepart({ isOpen: false, value: null })}
-        onSubmit={onSubmit}
+        onSubmit={onSuccess}
         value={modalPointageDepart?.value}
         young={young}
       />
@@ -539,7 +521,7 @@ export default function Phase1(props) {
       <ModalDispense
         isOpen={modalDispense?.isOpen}
         youngId={young?._id}
-        onSubmit={onSubmit}
+        onSubmit={onSuccess}
         onCancel={() => setModalDispense({ isOpen: false })}
         onSuccess={(young) => {
           setModalDispense({ isOpen: false });
