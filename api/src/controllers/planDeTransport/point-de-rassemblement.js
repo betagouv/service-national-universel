@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
@@ -226,6 +227,8 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { cohort, centerId } = valueParams;
 
+    console.log(centerId);
+
     const { error: errorQuery, value: valueQuery } = Joi.object({
       filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
@@ -234,6 +237,30 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { filter } = valueQuery;
     const regex = new RegExp(".*" + filter ? filter : "" + ".*", "gi");
+
+    // get all meeting points to cohesion from schema de répartition center with bus
+    const schemaMeetingPoints = await SchemaDeRepartitionModel.aggregate([
+      { $match: { cohort: cohort, centerId: centerId } },
+      { $unwind: "$gatheringPlaces" },
+      {
+        $addFields: { meetingPointId: { $toObjectId: "$gatheringPlaces" } },
+      },
+      {
+        $lookup: {
+          from: "pointderassemblements",
+          localField: "meetingPointId",
+          foreignField: "_id",
+          as: "meetingPoint",
+        },
+      },
+      { $unwind: "$meetingPoint" },
+      {
+        $replaceRoot: { newRoot: "$meetingPoint" },
+      },
+    ]);
+    const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
+
+    //doublon de pdr ? optimiser ?
     const pipeline = [
       { $match: { cohort: cohort, centerId: centerId } },
       {
@@ -250,6 +277,7 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
           meetingPointId: { $toObjectId: "$lignetopoint.meetingPointId" },
         },
       },
+      { $match: { "lignetopoint.meetingPointId": { $in: schemaMeetingPointIds } } },
       { $lookup: { from: "pointderassemblements", localField: "meetingPointId", foreignField: "_id", as: "meetingPoint" } },
       {
         $unwind: "$meetingPoint",
