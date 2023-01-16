@@ -551,8 +551,6 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  showMissing
-                  missingLabel="Non"
                   renderLabel={(items) => getFilterLabel(items, "Note interne", "Note interne")}
                 />
               </FilterRow>
