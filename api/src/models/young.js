@@ -1815,7 +1815,16 @@ const Schema = new mongoose.Schema({
   notes: {
     type: [Note],
     documentation: {
-      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
+      description: "Liste des notes faites sur le dossier du jeune.",
+    },
+  },
+
+  hasNotes: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      documentation: "Le volontaire a des notes",
     },
   },
 

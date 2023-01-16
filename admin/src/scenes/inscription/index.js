@@ -64,6 +64,7 @@ const FILTERS = [
   "SAME_DEPARTMENT",
   "PMR",
   "ALLERGIES",
+  "NOTES",
 ];
 
 export default function Inscription() {
@@ -375,6 +376,21 @@ export default function Inscription() {
                 <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Note interne"
+                  componentId="NOTES"
+                  dataField="hasNotes.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "NOTES") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Note interne", "Note interne")}
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
