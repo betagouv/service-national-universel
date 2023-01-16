@@ -98,15 +98,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
 
-    const planDeTransport = await PlanTransportModel.find({ meetingPoints: { $elemMatch: { meetingPointId: id } } });
+    const planDeTransport = await PlanTransportModel.find({ "pointDeRassemblements.meetingPointId": id });
 
     for await (const p of planDeTransport) {
-      const meetingPoint = p.meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === id);
+      const meetingPoint = p.pointDeRassemblements.find((meetingPoint) => {
+        return meetingPoint.meetingPointId === id;
+      });
       meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
       await p.save({ fromUser: req.user });
     }
-
-    await planDeTransport.save({ fromUser: req.user });
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
