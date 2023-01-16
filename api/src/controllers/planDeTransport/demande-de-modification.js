@@ -17,6 +17,13 @@ const {
 } = require("snu-lib");
 const { ObjectId } = require("mongodb");
 
+const updateModificationDependencies = async (modif, fromUser) => {
+  const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
+  const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id);
+  modificationBus.set({ ...modif });
+  await planDeTransport.save({ fromUser });
+};
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -81,10 +88,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     await modif.save({ fromUser: req.user });
 
-    const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
-    const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
-    modificationBus.set({ ...modif });
-    await planDeTransport.save({ fromUser: req.user });
+    await updateModificationDependencies(modif, req.user);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -118,10 +122,7 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
 
     await modif.save({ fromUser: req.user });
 
-    const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
-    const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
-    modificationBus.set({ ...modif });
-    await planDeTransport.save({ fromUser: req.user });
+    await updateModificationDependencies(modif, req.user);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -152,10 +153,7 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
 
     await modif.save({ fromUser: req.user });
 
-    const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(id) });
-    const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === id);
-    modificationBus.set({ ...modif });
-    await planDeTransport.save({ fromUser: req.user });
+    await updateModificationDependencies(modif, req.user);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
