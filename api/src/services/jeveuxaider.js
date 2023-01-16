@@ -67,7 +67,7 @@ router.get("/getToken", async (req, res) => {
 
     const { api_key, email } = value;
 
-    if (!email || !api_key || api_key.toString() !== config.JVA_API_KEY.toString()) {
+    if (!email || !api_key || api_key.toString() !== config.JVA_TOKEN.toString()) {
       return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
     }
 
@@ -95,7 +95,7 @@ router.get("/actions", async (req, res) => {
 
     const { api_key, email } = value;
 
-    if (!email || !api_key || api_key.toString() !== config.JVA_API_KEY.toString()) {
+    if (!email || !api_key || api_key.toString() !== config.JVA_TOKEN.toString()) {
       return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
     }
 
