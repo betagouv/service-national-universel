@@ -1664,7 +1664,7 @@ function SectionConsentements({ young, onChange }) {
         </div>
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
-          young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
+          (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
             <div className="mt-2 flex items-center justify-between">
               <div
                 className="cursor-pointer italic text-[#1D4ED8]"
