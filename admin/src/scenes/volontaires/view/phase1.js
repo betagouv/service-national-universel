@@ -100,13 +100,22 @@ export default function Phase1(props) {
     })();
   }, []);
 
-  const onSubmit = async () => {
+  const onConfirmationYoungAgreement = async (value) => {
+    setLoading(true);
     try {
-    } catch (e) {
-      capture(e);
-      setLoading(false);
-      toastr.error("Erreur lors de la mise à jour du jeune", e.message);
+      const { data, ok, code } = await api.post(`/young/${young._id}/phase1/youngPhase1Agreement`, { value });
+      if (!ok) {
+        toastr.error("Oups, une erreur s'est produite", translate(code));
+        setLoading(false);
+        return;
+      }
+      toastr.success("Le statut du jeune a bien été mis à jour");
+      setValues(data);
+      setYoung(data);
+    } catch (error) {
+      toastr.error("Oups, une erreur s'est produite", translate(error.code));
     }
+    setLoading(false);
   };
 
   const onSuccess = async (newValue) => {
@@ -139,13 +148,6 @@ export default function Phase1(props) {
               }}
               disabled={loading}>
               Annuler
-            </button>
-            <button
-              className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={onSubmit}
-              disabled={loading}>
-              <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-              Enregistrer les changements
             </button>
           </div>
         )}
@@ -200,9 +202,16 @@ export default function Phase1(props) {
                     className="flex-1 min-w-[250px]"
                     readOnly={!editing}
                     type="select"
-                    setSelected={({ value }) => {
-                      setValues({ ...values, youngPhase1Agreement: value });
-                    }}
+                    setSelected={({ value }) =>
+                      setModal({
+                        isOpen: true,
+                        title: "Confirmation de la participation",
+                        message: `Êtes-vous sûr de vouloir modifier la confirmation de participation de ${young.firstName} ${young.lastName} à  ${
+                          value === "true" ? "oui" : "non"
+                        }`,
+                        onConfirm: () => onConfirmationYoungAgreement(value),
+                      })
+                    }
                     selected={values.youngPhase1Agreement}
                     options={[
                       { label: "Oui", value: "true" },
@@ -354,131 +363,6 @@ export default function Phase1(props) {
             </div>
           </div>
         ) : null}
-
-        {/*
-        <Box>
-          <article className="flex">
-            <Bloc
-              title="Séjour de cohésion"
-              titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}
-              borderRight
-              borderBottom>
-              <section className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-gray-500">Présence à l&apos;arrivée</div>
-                  <Select
-                    options={[
-                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                      { label: "Présent", value: "true" },
-                      { label: "Absent", value: "false" },
-                    ]}
-                    onChange={setModalPointagePresenceArrivee}
-                    value={young.cohesionStayPresence || ""}
-                    placeholder={young.cohesionStayPresence === "true" ? "Présent" : "Absent"}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-gray-500">Présence JDM</div>
-                  <Select
-                    options={[
-                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                      { label: "Présent", value: "true" },
-                      { label: "Absent", value: "false" },
-                    ]}
-                    onChange={setModalPointagePresenceJDM}
-                    value={young.presenceJDM || ""}
-                    placeholder={young.presenceJDM === "true" ? "Présent" : "Absent"}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-gray-500">Départ {young.departSejourMotif ? `(${young.departSejourMotif})` : ""}</div>
-                  <div
-                    className="flex gap-1 items-center group cursor-pointer min-h-[37px]"
-                    onClick={(e) => {
-                      setModalPointageDepart({
-                        isOpen: true,
-                        value: e.target.value,
-                      });
-                    }}>
-                    <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
-                    <div className="group-hover:underline">{!young.departSejourAt ? "Renseigner un départ" : formatDateFR(young.departSejourAt)}</div>
-                  </div>
-                </div>
-                {young.departSejourMotifComment ? (
-                  <div className="flex gap-2 bg-blue-50 rounded-lg p-2 text-blue-700">
-                    <ImQuotesLeft />
-                    <div className="flex-1">{young.departSejourMotifComment}</div>
-                  </div>
-                ) : null}
-                <div className="mt-4">
-                  {young.statusPhase1 === "DONE" ? (
-                    <>
-                      <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
-                      <section className="flex mt-3">
-                        <DownloadAttestationButton young={young} uri="1" className="mr-2">
-                          <Download color="#5145cd" className="mr-2" />
-                          Télécharger
-                        </DownloadAttestationButton>
-                        <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                          <Envelop color="#5145cd" className="mr-2" />
-                          Envoyer par mail
-                        </MailAttestationButton>
-                      </section>
-                    </>
-                  ) : (
-                    <>
-                      {/* {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
-                        <>
-                          <p className="text-gray-500 mb-[22px]">Convocation au séjour :</p>
-                          <DownloadConvocationButton young={young} uri="cohesion">
-                            <Download color="#5145cd" className="mr-2" />
-                            Télécharger
-                          </DownloadConvocationButton>
-                        </>
-                      ) : null} */}
-        {/*
-                    </>
-                  )}
-                </div>
-              </section>
-            </Bloc>
-            <Bloc title="Détails" borderBottom disabled={disabled}>
-              {/* {canAssignCohesionCenter(user, young) &&
-              (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
-                <div className="flex items-center hover:underline hover:text-blue-600 cursor-pointer mb-4" onClick={() => setModalAffectation({ isOpen: true })}>
-                  <AiOutlinePlus className="text-blue-800 mr-2 border-[1px] border-blue-800 rounded-full h-4 w-4" />
-                  Affecter dans un centre
-                </div>
-              ) : (
-                isTemporaryAffected(young) && (
-                  <div className="flex bg-yellow-100 gap-x-1 font-bold my-1 rounded-lg p-2">
-                    <div className="flex items-center gap-x-2 ">
-                      <MdOutlineWarningAmber className="text-xl ml-2 text-yellow-600" />
-                      <div className="flex flex-1 text-yellow-600">
-                        Le jeune est déjà préaffecté à un centre ! L&apos;affectation manuelle est désactivée temporairement pour ce jeune.
-                      </div>
-                    </div>
-                  </div>
-                )
-              )} */}
-        {/*
-              {getCohesionStay(young)}
-              <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
-              <p className="text-base my-1">Point de rassemblement :</p>
-              {getMeetingPoint(young)}
-            </Bloc>
-          </article>
-          {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
-          young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
-          young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
-            <Row>
-              <Bloc title="Documents" disabled={disabled}>
-                <DocumentPhase1 young={young} />
-              </Bloc>
-            </Row>
-          ) : null}
-        </Box >
-        */}
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}

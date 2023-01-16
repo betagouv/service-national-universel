@@ -192,7 +192,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
 
 router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
+    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement"];
     const { error, value } = Joi.object({
       value: Joi.string().trim().valid("true", "false").required(),
       key: Joi.string()
@@ -225,8 +225,11 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
 
     await young.save({ fromUser: req.user });
 
-    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+    if (key !== "youngPhase1Agreement") {
+      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+    }
 
     if (key === "cohesionStayPresence" && newValue === "true") {
       let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
