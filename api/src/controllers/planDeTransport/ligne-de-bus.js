@@ -299,13 +299,13 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     // * Update planDeTransport
     const planDeTransport = await PlanTransportModel.findById(id);
     const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(newMeetingPointId));
-    const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => meetingPoint.meetingPointId === meetingPointId);
+    const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
+      return meetingPoint.meetingPointId === meetingPointId;
+    });
     meetingPoint.set({
       meetingPointId: newMeetingPointId,
-      ...pointDeRassemblement,
-      meetingHour: ligneToPoint.meetingHour,
-      returnHour: ligneToPoint.returnHour,
-      transportType: ligneToPoint.transportType,
+      ...pointDeRassemblement._doc,
+      ...ligneToPoint._doc,
     });
 
     await planDeTransport.save({ fromUser: req.user });
