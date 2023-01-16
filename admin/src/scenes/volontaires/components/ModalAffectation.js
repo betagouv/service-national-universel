@@ -177,7 +177,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   react={{ and: FILTERS }}
                   paginationAt="bottom"
                   showTopResultStats={false}
-                  size={3}
+                  pageSize={3}
                   render={({ data }) => (
                     <div className="flex flex-col justify-center items-center gap-4 w-full">
                       {data.map((hit) => (
