@@ -92,6 +92,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { id, name, address, city, zip, department, region, location } = value;
 
+    // * Update slave PlanTransport
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -107,6 +108,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
       await p.save({ fromUser: req.user });
     }
+    // * End update slave PlanTransport
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 

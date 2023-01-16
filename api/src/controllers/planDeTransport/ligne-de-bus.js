@@ -94,8 +94,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       meetingPointsId: meetingPoints.map((mp) => mp.meetingPointId),
     });
 
+    // * Update slave PlanTransport
     const center = await cohesionCenterModel.findById(centerId);
-
     await PlanTransportModel.create({
       _id: bus._id,
       cohort,
@@ -119,6 +119,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerDepartureTime,
       pointDeRassemblements: meetingPoints,
     });
+    // * End update slave PlanTransport
 
     const ligneToBus = [];
 
@@ -187,6 +188,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
     await ligne.save({ fromUser: req.user });
 
+    // * Update slave PlanTransport
     // ! Gerer logique si il y a deja des inscrits
     const planDeTransport = await PlanTransportModel.findById(id);
     planDeTransport.set({
@@ -202,6 +204,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       lunchBreakReturn,
     });
     await planDeTransport.save({ fromUser: req.user });
+    // * End update slave PlanTransport
 
     const infoBus = await getInfoBus(ligne);
 
@@ -296,7 +299,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
       await ligneToPoint.save({ fromUser: req.user });
     }
 
-    // * Update planDeTransport
+    // * Update slave PlanTransport
     const planDeTransport = await PlanTransportModel.findById(id);
     const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(newMeetingPointId));
     const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
@@ -311,6 +314,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     });
 
     await planDeTransport.save({ fromUser: req.user });
+    // * End update slave PlanTransport
 
     const infoBus = await getInfoBus(ligne);
 
