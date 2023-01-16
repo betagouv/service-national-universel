@@ -16,6 +16,7 @@ const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const CohortModel = require("../../models/cohort");
 const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1 } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
@@ -70,10 +71,16 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       ligneId: pdrOption === "ref-select" ? ligneId : undefined,
     });
 
-    await young.save({ fromUser: req.user });
+    // mail only if isAssignmentAnnouncementsOpenForYoung
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
+    if (cohort.isAssignmentAnnouncementsOpenForYoung) {
+      let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
+    }
+
+    await young.save({ fromUser: req.user });
 
     // update session infos
     const data = await updatePlacesSessionPhase1(session, req.user);
