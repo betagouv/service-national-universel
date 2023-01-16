@@ -1,3 +1,17 @@
+# [1.199.0](https://github.com/betagouv/service-national-universel/compare/v1.198.1...v1.199.0) (2023-01-16)
+
+
+### Bug Fixes
+
+* **api:** Fix JVA_TOKEN ([8b59fef](https://github.com/betagouv/service-national-universel/commit/8b59fef165eaf82496e736dbef0975945e1cd5d3))
+* **api:** Fix token ([366a8be](https://github.com/betagouv/service-national-universel/commit/366a8be92a113eb39464d2e95f4927dfb13ab3eb))
+
+
+### Features
+
+* **admin/api:** filtre hasNotes ([#2176](https://github.com/betagouv/service-national-universel/issues/2176)) ([4a91dce](https://github.com/betagouv/service-national-universel/commit/4a91dcecdc7a31dc83348fd56748ea933a6f3080))
+* **api:** Fix security issue JVA token ([3137455](https://github.com/betagouv/service-national-universel/commit/313745564f750eea9332f40b2469964bf295fbe2))
+
 ## [1.198.1](https://github.com/betagouv/service-national-universel/compare/v1.198.0...v1.198.1) (2023-01-13)
 
 
