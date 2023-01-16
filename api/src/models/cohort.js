@@ -42,7 +42,7 @@ const Schema = new mongoose.Schema({
   manualAffectionOpenForReferent: {
     type: Boolean,
     documentation: {
-      description: "Si true, les referents régoinnaux peuvent manuellement affecter un jeune à un centre",
+      description: "Si true, les referents régionaux peuvent manuellement affecter un jeune à un centre",
     },
   },
 
