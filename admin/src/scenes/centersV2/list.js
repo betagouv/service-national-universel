@@ -12,7 +12,7 @@ import { COHESION_STAY_START, COHORTS } from "snu-lib";
 
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
-import { FilterButton, TabItem, Badge } from "./components/commons";
+import { FilterButton, TabItem, Badge } from "../../components/commons";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import Breadcrumbs from "../../components/Breadcrumbs";

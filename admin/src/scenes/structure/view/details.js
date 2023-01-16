@@ -8,7 +8,8 @@ import styled from "styled-components";
 import Avatar from "../../../components/Avatar";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
-import ModalChangeTutor from "../../../components/modals/ModalChangeTutor";
+import Breadcrumbs from "../../../components/Breadcrumbs";
+import { Title } from "../../../components/commons";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../../components/modals/ModalReferentDeleted";
 import SocialIcons from "../../../components/SocialIcons";
@@ -16,9 +17,11 @@ import api from "../../../services/api";
 import { canDeleteReferent, copyToClipboard, ES_NO_LIMIT, htmlCleaner, ROLES, translate } from "../../../utils";
 import DeleteBtnComponent from "../components/DeleteBtnComponent";
 import Invite from "../components/invite";
+import Menu from "../components/Menu";
 import StructureView from "./wrapper";
 
 export default function DetailsView({ structure }) {
+  const [data, setData] = useState(structure);
   const [referents, setReferents] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
@@ -91,85 +94,98 @@ export default function DetailsView({ structure }) {
   if (!structure) return <div />;
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <StructureView structure={structure} tab="details">
-        <Box>
-          <Row>
-            <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="La structure" titleRight={<SocialIcons value={structure} />}>
-                <Details title="Présentation" value={structure.description} />
-                <Details title="Statut Juridique" value={translate(structure.legalStatus)} />
-                <Details title="Type" value={structure.types?.map(translate)?.join(", ")} />
-                <Details title="Sous-type" value={translate(structure.sousType)} />
-                <Details title="Adresse" value={structure.address} />
-                <Details title="Ville" value={structure.city} />
-                <Details title="Code Postal" value={structure.zip} />
-                <Details title="Dép." value={structure.department} />
-                <Details title="Région" value={structure.region} />
-                {user.role === ROLES.ADMIN && structure.location?.lat && structure.location?.lon ? (
-                  <Details title="GPS" value={`${structure.location?.lat} , ${structure.location?.lon}`} copy />
-                ) : null}
-                <Details title="Siret" value={structure.siret} />
-                {parentStructure ? (
-                  <div className="detail">
-                    <div className="detail-title">Réseau national&nbsp;:</div>
-                    <div className="detail-text">
-                      <Badge text={parentStructure.name} color="#5245cc" />
-                    </div>
-                  </div>
-                ) : null}
-                <Details
-                  title="Tête de réseau"
-                  value={structure.isNetwork === "true" ? "Cette structure est une tête de réseau" : "Cette structure n'est pas une tête de réseau"}
-                />
-              </Bloc>
-            </Col>
-            <Col md={6}>
-              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-                <Wrapper>
-                  <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
-                  {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
-                  {referents.map((referent) => (
-                    <div className="flex items-center justify-between mt-4" key={referent._id}>
-                      <Link to={`/user/${referent._id}`} className="flex items-center">
-                        <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                        <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
-                      </Link>
-                      {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, structure }) && (
-                        <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
-                      )}
-                    </div>
-                  ))}
-                  <ModalConfirm
-                    isOpen={modal?.isOpen}
-                    title={modal?.title}
-                    message={modal?.message}
-                    onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-                    onConfirm={() => {
-                      modal?.onConfirm();
-                      setModal({ isOpen: false, onConfirm: null });
-                    }}
-                  />
-                </Wrapper>
-              </Row>
-              <Invite structure={structure} onSent={getReferents} />
-            </Col>
-          </Row>
-        </Box>
-      </StructureView>
-      <ModalChangeTutor
-        isOpen={modalTutor?.isOpen}
-        title={modalTutor?.title}
-        message={modalTutor?.message}
-        tutor={modalTutor?.value}
-        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modalTutor?.onConfirm();
-          setModalTutor({ isOpen: false, onConfirm: null });
-        }}
-      />
-      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
+    <div className="flex flex-col m-8 gap-6">
+      <div className="flex items-center justify-between">
+        <Title>{data.name}</Title>
+        <button>Nouvelle mission</button>
+      </div>
+      <Menu id={data._id} />
+      <div className="flex">
+        <div>Représentant de la structure</div>
+        <div>L&apos;équipe</div>
+      </div>
+      <div>Content</div>
     </div>
+
+    // <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+    //   <StructureView structure={structure} tab="details">
+    //     <Box>
+    //       <Row>
+    //         <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+    //           <Bloc title="La structure" titleRight={<SocialIcons value={structure} />}>
+    //             <Details title="Présentation" value={structure.description} />
+    //             <Details title="Statut Juridiqueuh" value={translate(structure.legalStatus)} />
+    //             <Details title="Type" value={structure.types?.map(translate)?.join(", ")} />
+    //             <Details title="Sous-type" value={translate(structure.sousType)} />
+    //             <Details title="Adresse" value={structure.address} />
+    //             <Details title="Ville" value={structure.city} />
+    //             <Details title="Code Postal" value={structure.zip} />
+    //             <Details title="Dép." value={structure.department} />
+    //             <Details title="Région" value={structure.region} />
+    //             {user.role === ROLES.ADMIN && structure.location?.lat && structure.location?.lon ? (
+    //               <Details title="GPS" value={`${structure.location?.lat} , ${structure.location?.lon}`} copy />
+    //             ) : null}
+    //             <Details title="Siret" value={structure.siret} />
+    //             {parentStructure ? (
+    //               <div className="detail">
+    //                 <div className="detail-title">Réseau national&nbsp;:</div>
+    //                 <div className="detail-text">
+    //                   <Badge text={parentStructure.name} color="#5245cc" />
+    //                 </div>
+    //               </div>
+    //             ) : null}
+    //             <Details
+    //               title="Tête de réseau"
+    //               value={structure.isNetwork === "true" ? "Cette structure est une tête de réseau" : "Cette structure n'est pas une tête de réseau"}
+    //             />
+    //           </Bloc>
+    //         </Col>
+    //         <Col md={6}>
+    //           <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+    //             <Wrapper>
+    //               <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
+    //               {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
+    //               {referents.map((referent) => (
+    //                 <div className="flex items-center justify-between mt-4" key={referent._id}>
+    //                   <Link to={`/user/${referent._id}`} className="flex items-center">
+    //                     <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+    //                     <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
+    //                   </Link>
+    //                   {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, structure }) && (
+    //                     <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
+    //                   )}
+    //                 </div>
+    //               ))}
+    //               <ModalConfirm
+    //                 isOpen={modal?.isOpen}
+    //                 title={modal?.title}
+    //                 message={modal?.message}
+    //                 onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+    //                 onConfirm={() => {
+    //                   modal?.onConfirm();
+    //                   setModal({ isOpen: false, onConfirm: null });
+    //                 }}
+    //               />
+    //             </Wrapper>
+    //           </Row>
+    //           <Invite structure={structure} onSent={getReferents} />
+    //         </Col>
+    //       </Row>
+    //     </Box>
+    //   </StructureView>
+    //   <ModalChangeTutor
+    //     isOpen={modalTutor?.isOpen}
+    //     title={modalTutor?.title}
+    //     message={modalTutor?.message}
+    //     tutor={modalTutor?.value}
+    //     onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+    //     onConfirm={() => {
+    //       modalTutor?.onConfirm();
+    //       setModalTutor({ isOpen: false, onConfirm: null });
+    //     }}
+    //   />
+    //   <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
+    // </div>
   );
 }
 

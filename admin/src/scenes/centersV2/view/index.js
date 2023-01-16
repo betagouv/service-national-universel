@@ -148,8 +148,8 @@ export default function Index({ ...props }) {
       {/* SESSION COMPONENT : */}
       {sessions.length > 0 ? (
         <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex justify-between items-center border-bottom px-4">
-            <div className="flex justify-left items-center">
+          <div className="bg-red-500 flex justify-between items-center border-bottom px-4">
+            <div className="bg-green-500 flex justify-left items-center">
               {(sessions || []).map((item, index) => (
                 <div
                   key={index}
