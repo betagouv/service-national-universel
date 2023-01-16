@@ -25,11 +25,8 @@ router.get("/signin", async (req, res) => {
 
     const { token_jva } = value;
 
-    if (!token_jva || token_jva.toString() !== config.JVA_TOKEN.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
-    }
-
     const { _id } = jwt.verify(token_jva, config.secret);
+    if (!_id) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
 
     const user = await ReferentModel.findById(_id);
 
@@ -85,6 +82,7 @@ router.get("/getToken", async (req, res) => {
   }
 });
 
+// ! Route appelée uniquement par le back de JVA donc pas de problème d'exposition du token
 router.get("/actions", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), api_key: Joi.string().required() }).validate(req.query);
