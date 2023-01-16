@@ -44,6 +44,8 @@ export default function Phase1(props) {
   const [values, setValues] = useState(props.young);
   const [displayCenterButton, setDisplayCenterButton] = useState(false);
 
+  const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
+
   const getDisplayCenterButton = async () => {
     if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 !== "WAITING_AFFECTATION") return setDisplayCenterButton(false);
     if (user.role === ROLES.ADMIN) return setDisplayCenterButton(true);
@@ -53,6 +55,7 @@ export default function Phase1(props) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
         return setDisplayCenterButton(false);
       }
+      setCohortOpenForAffection(data[0]?.manualAffectionOpenForReferent);
       if (!data || !data[0]?.manualAffectionOpenForReferent) return setDisplayCenterButton(false);
       if (user.role === ROLES.REFERENT_REGION && user.region === young.region) return setDisplayCenterButton(true);
     } catch (e) {
@@ -286,7 +289,7 @@ export default function Phase1(props) {
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
                   </div>
-                  {editing && (
+                  {(user.role === ROLES.ADMIN || (user.role === ROLES.REFERENT_REGION && user.region === young.region && cohortOpenForAffectation)) && editing && (
                     <div
                       onClick={() => setModalAffectation({ isOpen: true })}
                       className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
@@ -319,7 +322,7 @@ export default function Phase1(props) {
                       <div>{young.firstName} n’a pas encore confirmé son point de rassemblement.</div>
                     )}
                   </div>
-                  {editing && (
+                  {(user.role === ROLES.ADMIN || (user.role === ROLES.REFERENT_REGION && user.region === young.region && cohortOpenForAffectation)) && editing && (
                     <div
                       onClick={() => {
                         setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });

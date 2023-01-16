@@ -46,6 +46,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // check if referent is allowed to edit this young --> Todo with cohort
     if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // verification nombre de place ?
