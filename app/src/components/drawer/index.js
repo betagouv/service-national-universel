@@ -16,11 +16,11 @@ import {
 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
-import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
 import HelpButton from "../buttons/HelpButton";
 import plausibleEvent from "../../services/plausible";
+import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 
 export default function Drawer(props) {
   const [open, setOpen] = useState();
@@ -62,7 +62,16 @@ export default function Drawer(props) {
     // ou les status lié au moment de son désistement
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
-    young.statusPhase1 && setStatus1(young.statusPhase1);
+    if (young.statusPhase1) {
+      if (
+        (young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && young.statusPhase1 !== YOUNG_STATUS_PHASE1.WAITING_LIST) ||
+        cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)
+      ) {
+        setStatus1(young.statusPhase1);
+      } else {
+        setStatus1(YOUNG_STATUS_PHASE1.WAITING_AFFECTATION);
+      }
+    }
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
       setStatus2(YOUNG_STATUS_PHASE2.WITHDRAWN);
       setStatus3(YOUNG_STATUS_PHASE3.WITHDRAWN);
@@ -107,10 +116,10 @@ export default function Drawer(props) {
         <Header>
           <Logos>
             <a href="https://www.snu.gouv.fr/">
-              <img src={require("../../assets/fr.png")} />
+              <img src={require("../../assets/fr.png")} alt="" />
             </a>
             <a href="https://www.snu.gouv.fr/">
-              <img src={require("../../assets/logo-snu.png")} />
+              <img src={require("../../assets/logo-snu.png")} alt="" />
             </a>
             <Close onClick={() => props.onOpen(false)}>&times;</Close>
           </Logos>
@@ -205,7 +214,7 @@ export default function Drawer(props) {
             {isDiagorienteReady() && (
               <DiagorienteButton>
                 <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
-                  <img src={require("../../assets/logo-diagoriente-white.png")} />
+                  <img src={require("../../assets/logo-diagoriente-white.png")} alt="" />
                   Outil d&apos;aide à l&apos;orientation
                 </NavLink>
               </DiagorienteButton>
@@ -434,7 +443,6 @@ const MyNav = styled.ul`
 const Close = styled.div`
   font-size: 32px;
   color: #666;
-  padding: 0 15px 20px;
   display: none;
   width: 45px;
   padding: 0 15px;
