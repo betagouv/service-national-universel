@@ -63,7 +63,10 @@ export default function Drawer(props) {
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     if (young.statusPhase1) {
-      if (young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED || cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+      if (
+        (young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && young.statusPhase1 !== YOUNG_STATUS_PHASE1.WAITING_LIST) ||
+        cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)
+      ) {
         setStatus1(young.statusPhase1);
       } else {
         setStatus1(YOUNG_STATUS_PHASE1.WAITING_AFFECTATION);

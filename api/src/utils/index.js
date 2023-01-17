@@ -319,9 +319,7 @@ async function updateSeatsTakenInBusLine(busline) {
       $and: [
         {
           status: "VALIDATED",
-          meetingPointId: {
-            $in: busline.meetingPointsIds,
-          },
+          ligneId: busline._id.toString(),
         },
         {
           $or: [{ statusPhase1: { $in: ["AFFECTED", "DONE"] } }, { statusPhase1Tmp: { $in: ["AFFECTED", "DONE"] } }],
