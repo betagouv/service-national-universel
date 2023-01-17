@@ -48,8 +48,6 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // manuel affection for REFERENT TODO
-
     // check if referent is allowed to edit this young --> Todo with cohort
     if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -83,8 +81,8 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       cohesionCenterId: centerId,
       deplacementPhase1Autonomous: pdrOption === "self-going" ? "true" : "false",
       transportInfoGivenByLocal: pdrOption === "local" ? "true" : "false",
-      meetingPointId: pdrOption === "ref-select" ? meetingPointId : undefined,
-      ligneId: pdrOption === "ref-select" ? ligneId : undefined,
+      meetingPointId: meetingPointId ? meetingPointId : undefined,
+      ligneId: ligneId ? ligneId : undefined,
     });
 
     if (cohort?.isAssignmentAnnouncementsOpenForYoung) {

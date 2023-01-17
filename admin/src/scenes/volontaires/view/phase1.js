@@ -328,7 +328,7 @@ export default function Phase1(props) {
                         setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
                       }}
                       className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
-                      {meetingPoint ? (
+                      {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
                         <>
                           <Refresh />
                           <div>Changer le point de rassemblement</div>
