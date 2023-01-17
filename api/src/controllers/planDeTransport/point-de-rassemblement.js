@@ -227,8 +227,6 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { cohort, centerId } = valueParams;
 
-    console.log(centerId);
-
     const { error: errorQuery, value: valueQuery } = Joi.object({
       filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
@@ -260,7 +258,36 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     ]);
     const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
 
+    const ligneToPoint = await LigneToPointModel.find({ meetingPointId: { $in: schemaMeetingPointIds }, deletedAt: { $exists: false } });
+
+    const ligneBusIds = ligneToPoint.map((l) => l.lineId.toString());
+    const ligneBus = await LigneBusModel.find({ _id: { $in: ligneBusIds } });
+
+    const finalMeettingPoints = [];
+    ligneBus.map((l) => {
+      l.meetingPointsIds.map((m) => {
+        if (schemaMeetingPointIds.includes(m) && !finalMeettingPoints.includes(m)) finalMeettingPoints.push(m);
+      });
+    });
+
+    const finalMeettingPointsObjects = await PointDeRassemblementModel.find({
+      _id: { $in: finalMeettingPoints },
+      $or: [{ name: { $regex: regex } }, { city: { $regex: regex } }, { department: { $regex: regex } }, { region: { $regex: regex } }],
+    });
+
+    //build final Array since client wait for ligneToPoint + meetingPoint + ligneBus
+
+    const data = [];
+    finalMeettingPointsObjects.map((m) => {
+      const ligneToPointFiltered = ligneToPoint.find((l) => l.meetingPointId === m._id.toString());
+      const ligneBusFiltered = ligneBus.find((l) => l._id.toString() === ligneToPointFiltered.lineId);
+      data.push({ meetingPoint: m, ligneToPoint: ligneToPointFiltered, ligneBus: ligneBusFiltered });
+    });
+
+    return res.status(200).send({ ok: true, data });
+
     //doublon de pdr ? optimiser ?
+    /*
     const pipeline = [
       { $match: { cohort: cohort, centerId: centerId } },
       {
@@ -277,17 +304,18 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
           meetingPointId: { $toObjectId: "$lignetopoint.meetingPointId" },
         },
       },
-      { $match: { "lignetopoint.meetingPointId": { $in: schemaMeetingPointIds } } },
       { $lookup: { from: "pointderassemblements", localField: "meetingPointId", foreignField: "_id", as: "meetingPoint" } },
       {
         $unwind: "$meetingPoint",
       },
       {
-        $match: { $or: [{ "meetingPoint.name": regex }, { "meetingPoint.city": regex }, { "meetingPoint.department": regex }, { "meetingPoint.region": regex }] },
+        $match: {
+          $or: [{ "meetingPoint.name": regex }, { "meetingPoint.city": regex }, { "meetingPoint.department": regex }, { "meetingPoint.region": regex }],
+          // "meetingPoint._id": { $in: schemaMeetingPointIds },
+        },
       },
     ];
-    const data = await LigneBusModel.aggregate(pipeline).exec();
-    return res.status(200).send({ ok: true, data });
+    */
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

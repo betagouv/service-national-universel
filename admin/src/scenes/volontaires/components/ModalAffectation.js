@@ -97,7 +97,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         sessionId: session._id,
         pdrOption,
         meetingPointId: selectedPdr?.pdr._id,
-        ligneId: selectedPdr?.ligneBus._id,
+        ligneId: selectedPdr?.data.ligneBus._id,
       });
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
       /*
@@ -119,6 +119,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     //setLoadingPdr(loadingPdr + 1);
     setLoadingPdr(true);
     try {
+      console.log(session);
       let url = "/point-de-rassemblement/ligneToPoint";
       url += "/" + young.cohort + "/" + session.cohesionCenterId;
       url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
@@ -286,10 +287,10 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                             <HitPdr
                               key={hit._id}
                               hit={hit}
-                              ligneBus={dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0]}
+                              data={dataLigneToPoint.filter((e) => e.meetingPoint._id === hit._id)[0]}
                               onSend={() => {
                                 setStep(3);
-                                setSelectedPdr({ pdr: hit, ligneBus: dataLigneToPoint.filter((e) => e.meetingPointId === hit._id)[0] });
+                                setSelectedPdr({ pdr: hit, data: dataLigneToPoint.filter((e) => e.meetingPoint._id === hit._id)[0] });
                               }}
                             />
                           ))}
@@ -358,22 +359,22 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
               <div className="flex flex-row justify-center gap-6 mb-2">
                 <div className="flex flex-row">
                   <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("D")}</div>
+                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("D")}</div>
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Aller à {selectedPdr.ligneBus.lignetopoint.departureHour}</div>
-                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-900 font-bold">Aller à {selectedPdr?.data.ligneToPoint.departureHour}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
                 <div className="flex flex-row">
                   <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("D")}</div>
+                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("D")}</div>
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Retour à {selectedPdr.ligneBus.lignetopoint.returnHour}</div>
-                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-900 font-bold">Retour à {selectedPdr?.data.ligneToPoint.returnHour}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
               </div>
@@ -467,7 +468,7 @@ const HitCenter = ({ hit, onSend }) => {
   );
 };
 
-const HitPdr = ({ hit, onSend, ligneBus }) => {
+const HitPdr = ({ hit, onSend, data }) => {
   return (
     <>
       <hr />
@@ -479,19 +480,19 @@ const HitPdr = ({ hit, onSend, ligneBus }) => {
           </MultiLine>
         </div>
         <div className="w-1/3 text-xs text-[#738297]">
-          Num. transport <span className="text-gray-900">{ligneBus?.busId}</span>
+          Num. transport <span className="text-gray-900">{data?.ligneBus.busId}</span>
         </div>
         <div className="w-1/2 flex flex-col">
           <div className="text-xs text-[#738297]">
             Départ :{" "}
             <span className="text-gray-900 capitalize">
-              {formatStringDateWithDayTimezoneUTC(ligneBus?.departuredDate)} {ligneBus?.lignetopoint.departureHour}
+              {formatStringDateWithDayTimezoneUTC(data?.ligneBus.departuredDate)} {data?.ligneToPoint.departureHour}
             </span>
           </div>
           <div className="text-xs text-[#738297]">
             Retour :{" "}
             <span className="text-gray-900 capitalize">
-              {formatStringDateWithDayTimezoneUTC(ligneBus?.returnDate)} {ligneBus?.lignetopoint.returnHour}
+              {formatStringDateWithDayTimezoneUTC(data?.ligneBus?.returnDate)} {data?.ligneToPoint.returnHour}
             </span>
           </div>
         </div>
