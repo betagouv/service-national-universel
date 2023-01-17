@@ -356,7 +356,7 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     const ligneBusIds = ligneToPoint.map((l) => l.lineId.toString());
     let ligneBus = await LigneBusModel.find({ _id: { $in: ligneBusIds } });
 
-    // filter uniquement sur les bus dispos
+    // filter uniquement sur les bus avec des places dispos
     ligneBus = ligneBus.filter((l) => l.youngSeatsTaken < l.youngCapacity);
 
     const finalMeettingPoints = [];
