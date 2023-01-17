@@ -255,14 +255,16 @@ export default function Phase1(props) {
                     ]}
                   />
                 </div>
-                <div
-                  onClick={() => {
-                    if (!editing) return;
-                    setModalPointageDepart({ isOpen: true });
-                  }}
-                  className={`flex-1 min-w-[250px] border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"}`}>
-                  <ArrowCircleRight width={16} height={16} className="text-gray-400 group-hover:scale-105 mx-2 mr-3" />
-                  {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
+                <div className="flex-1 min-w-[250px] items-stretch">
+                  <div
+                    onClick={() => {
+                      if (!editing) return;
+                      setModalPointageDepart({ isOpen: true });
+                    }}
+                    className={` border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"} h-full`}>
+                    <ArrowCircleRight width={16} height={16} className="text-gray-400 group-hover:scale-105 mx-2 mr-3" />
+                    {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
+                  </div>
                 </div>
               </div>
             </div>
