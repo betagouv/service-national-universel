@@ -38,6 +38,23 @@ const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/tra
 const mime = require("mime-types");
 const patches = require("./patches");
 
+const canUpdateApplication = async (user, application, young, structures) => {
+  // - admin can update all applications
+  // - referent can update applications of their department/region
+  // - responsible and supervisor can update applications of their structures
+  if (user.role === ROLES.ADMIN) return true;
+  if (isYoung(user) && application.youngId.toString() !== user._id.toString()) return false;
+  if (isReferent(user)) {
+    if (!canCreateYoungApplication(user, young)) return false;
+    if (user.role === ROLES.RESPONSIBLE && (!user.structureId || application.structureId.toString() !== user.structureId.toString())) return false;
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return false;
+      if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) return false;
+    }
+  }
+  return true;
+};
+
 async function updateMission(app, fromUser) {
   try {
     const mission = await MissionObject.findById(app.missionId);
@@ -211,43 +228,28 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    for (const id of value.ids) {
-      const application = await ApplicationObject.findById(id);
-      if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const applications = await ApplicationObject.find({ _id: { $in: value.ids } });
+    if (!applications || applications?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    //check toutes les perms pour chaque application
 
+    // if supervisor store structures --> avoid multiple mongoDb calls
+    let structures;
+    if (req.user.role === ROLES.SUPERVISOR) {
+      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+    }
+
+    for (const application of applications) {
       const young = await YoungObject.findById(application.youngId);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // A young can only update his own application.
-      if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-
-      // - admin can update all applications
-      // - referent can update applications of their department/region
-      // - responsible and supervisor can update applications of their structures
-      if (isReferent(req.user)) {
-        if (!canCreateYoungApplication(req.user, young)) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
-        if (req.user.role === ROLES.RESPONSIBLE) {
-          if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-          if (application.structureId.toString() !== req.user.structureId.toString()) {
-            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-          }
-        }
-        if (req.user.role === ROLES.SUPERVISOR) {
-          if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-          const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-          if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
-            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-          }
-        }
+      if (!canUpdateApplication(req.user, application, young, structures)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
 
-    value.ids.map(async (id) => {
-      const application = await ApplicationObject.findById(id);
+    applications.map(async (application) => {
       const young = await YoungObject.findById(application.youngId);
 
       application.set({ status: valueKey.key });
