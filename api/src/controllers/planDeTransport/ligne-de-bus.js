@@ -82,6 +82,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       departuredDate,
       returnDate,
       youngCapacity,
+      youngSeatsTaken: 0,
       totalCapacity,
       followerCapacity,
       travelTime,

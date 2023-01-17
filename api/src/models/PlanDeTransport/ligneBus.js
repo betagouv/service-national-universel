@@ -68,7 +68,7 @@ const Schema = new mongoose.Schema({
     required: true,
     default: 0,
     documentation: {
-      description: "Nombre de ",
+      description: "Nombre de jeunes",
     },
   },
 
