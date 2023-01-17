@@ -5,7 +5,7 @@ import Select from "../components/Select";
 import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import api from "../../../services/api";
-import { apiURL } from "../../../config";
+import { apiURL, environment } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
 import { ES_NO_LIMIT, getFilterLabel, ROLES, translate } from "snu-lib";
@@ -99,7 +99,7 @@ export default function List() {
           <div className="flex flex-col items-center justify-center pt-12 gap-4 w-[450px] m-auto">
             <img src={Excel} alt="Excel" className="w-32 bg-[#f4f5f7]" />
             <div className="font-bold text-2xl leading-7 text-gray-800">Aucun document importé</div>
-            {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
+            {environment !== "production" && [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
               <>
                 <div className="text-gray-800 text-sm leading-5 text-center">
                   Importez votre plan de transport au format .xls (fichier Excel) afin de voir apparaître ici le plan de transport.
@@ -163,12 +163,12 @@ const ReactiveList = ({ cohort, history }) => {
             </div>
           </div>
           <div className="flex gap-2 items-center">
-            <button
+            {/* <button
               className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
               onClick={() => history.push("/ligne-de-bus/historique")}>
               <History className="text-gray-400" />
               Historique
-            </button>
+            </button> */}
             <button
               className="text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
               onClick={() => history.push("/ligne-de-bus/demande-de-modification")}>
