@@ -18,7 +18,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const CohortModel = require("../../models/cohort");
-const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine } = require("../../utils");
+const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, isReferent } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -48,12 +48,20 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // manuel affection for REFERENT TODO
+
     // check if referent is allowed to edit this young --> Todo with cohort
     if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // mail only if isAssignmentAnnouncementsOpenForYoung
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (isReferent(req.user) && !cohort.manualAffectionOpenForReferent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 
@@ -78,10 +86,6 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       meetingPointId: pdrOption === "ref-select" ? meetingPointId : undefined,
       ligneId: pdrOption === "ref-select" ? ligneId : undefined,
     });
-
-    // mail only if isAssignmentAnnouncementsOpenForYoung
-    const cohort = await CohortModel.findOne({ name: session.cohort });
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
