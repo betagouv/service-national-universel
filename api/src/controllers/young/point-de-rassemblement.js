@@ -9,6 +9,7 @@ const YoungModel = require("../../models/young");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const { serializeYoung } = require("../../utils/serializer");
+const { validateId } = require("../../utils/validator");
 
 router.put("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -72,4 +73,23 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
   }
 });
 
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const data = await PointDeRassemblementModel.findOne({ _id: young.meetingPointId, deletedAt: { $exists: false } });
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 module.exports = router;
