@@ -59,7 +59,10 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
 
     const notes = young.notes ? [...young.notes, newNote] : [newNote];
 
-    young.set({ notes });
+    young.set({
+      notes,
+      hasNotes: notes.length > 0 ? "true" : "false",
+    });
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -158,7 +161,10 @@ router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: 
 
     const updatedNotes = young.notes.filter((currentNote) => !(currentNote._id.toString() === noteId));
 
-    young.set({ notes: updatedNotes });
+    young.set({
+      notes: updatedNotes,
+      hasNotes: updatedNotes.length > 0 ? "true" : "false",
+    });
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

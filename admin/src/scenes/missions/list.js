@@ -467,7 +467,8 @@ export default function List() {
                 exportFields={missionCandidatureExportFields}
                 filters={FILTERS}
                 getExportQuery={getExportQuery}
-                exportTitle="Candidatures"
+                exportTitle="candidatures"
+                showTotalHits={false}
               />
               <ModalExport
                 isOpen={isExportOpen}

@@ -29,7 +29,7 @@ const {
   CELLAR_KEYSECRET_SUPPORT,
   PUBLIC_BUCKET_NAME_SUPPORT,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { SUB_ROLES } = require("snu-lib/roles");
@@ -323,6 +323,30 @@ const updatePlacesBus = async (bus) => {
   }
   return bus;
 };
+
+async function updateSeatsTakenInBusLine(busline) {
+  try {
+    const seatsTaken = await YoungModel.count({
+      $and: [
+        {
+          status: "VALIDATED",
+          ligneId: busline._id.toString(),
+        },
+        {
+          $or: [{ statusPhase1: { $in: ["AFFECTED", "DONE"] } }, { statusPhase1Tmp: { $in: ["AFFECTED", "DONE"] } }],
+        },
+      ],
+    });
+    if (busline.youngSeatsTaken !== seatsTaken) {
+      busline.set({ youngSeatsTaken: seatsTaken });
+      await busline.save();
+      await busline.index();
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return busline;
+}
 
 const sendAutoCancelMeetingPoint = async (young) => {
   const cc = [];
@@ -739,7 +763,8 @@ const ERRORS = {
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
   EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
-  EMAIL_OR_TOKEN_INVALID: "EMAIL_OR_TOKEN_INVALID",
+  EMAIL_OR_API_KEY_INVALID: "EMAIL_OR_API_KEY_INVALID",
+  TOKEN_INVALID: "TOKEN_INVALID",
   PASSWORD_INVALID: "PASSWORD_INVALID",
   EMAIL_INVALID: "EMAIL_INVALID",
   EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
@@ -811,6 +836,7 @@ module.exports = {
   updateCenterDependencies,
   deleteCenterDependencies,
   updatePlacesBus,
+  updateSeatsTakenInBusLine,
   sendAutoCancelMeetingPoint,
   listFiles,
   deleteFile,

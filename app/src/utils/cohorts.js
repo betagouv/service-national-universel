@@ -1,6 +1,7 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-
+import { sessions2023 } from "snu-lib";
+import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;
 
@@ -39,4 +40,22 @@ export function cohortAssignmentAnnouncementsIsOpenForYoung(cohortName) {
   }
 
   return false;
+}
+
+export function getMeetingPointChoiceLimitDateForCohort(cohortName) {
+  const cohort = getCohortDetail(cohortName);
+  if (cohort && cohort.dateStart) {
+    return dayjs(cohort.dateStart).subtract(12, "day").toDate();
+  } else {
+    return null;
+  }
+}
+
+export function canChooseMeetingPointForCohort(cohortName) {
+  const limitDate = getMeetingPointChoiceLimitDateForCohort(cohortName);
+  return limitDate && dayjs().isBefore(limitDate);
+}
+
+export function getCohortDetail(cohortName) {
+  return sessions2023.find((c) => c.name === cohortName);
 }

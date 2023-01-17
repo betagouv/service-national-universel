@@ -38,10 +38,7 @@ export default function StepUpload() {
           : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
       }
       for (const file of files) {
-        if (file.size > 5000000) {
-          capture(`Fichier trop volumineux : ${file.size}.`);
-          return { error: `Ce fichier ${files.name} est trop volumineux.` };
-        }
+        if (file.size > 5000000) return { error: `Ce fichier ${files.name} est trop volumineux.` };
       }
       const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
       if (res.code === "FILE_CORRUPTED")

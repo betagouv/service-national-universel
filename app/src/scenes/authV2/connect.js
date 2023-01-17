@@ -6,6 +6,7 @@ import { Redirect } from "react-router-dom";
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
+import { cohortsInit } from "../../utils/cohorts";
 
 export default function Connect({ location }) {
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,7 @@ export default function Connect({ location }) {
 
     if (!data) return;
     dispatch(setYoung(data));
+    await cohortsInit();
   }
 
   if (loading) return <Loader />;

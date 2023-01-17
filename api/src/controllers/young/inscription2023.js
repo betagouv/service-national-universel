@@ -127,10 +127,10 @@ router.put("/noneligible", passport.authenticate("young", { session: false, fail
 });
 
 router.put("/coordinates/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  const { error: typeError, value: type } = checkParameter(req.params.type);
-  if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
   try {
+    const { error: typeError, value: type } = checkParameter(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const young = await YoungObject.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

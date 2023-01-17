@@ -616,6 +616,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  transportInfoGivenByLocal: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Les informations de transport sont transmises par les services locaux",
+    },
+  },
+
   // Legacy ?
   codeCenterTmp: {
     type: String,
@@ -1815,7 +1823,16 @@ const Schema = new mongoose.Schema({
   notes: {
     type: [Note],
     documentation: {
-      description: "Liste des demandes de corrections faites sur le dossier du jeune.",
+      description: "Liste des notes faites sur le dossier du jeune.",
+    },
+  },
+
+  hasNotes: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      documentation: "Le volontaire a des notes",
     },
   },
 

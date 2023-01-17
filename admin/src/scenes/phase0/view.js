@@ -74,7 +74,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [action, setAction] = useState();
 
   useEffect(() => {
-    console.log("VolontairePhase0View: ", young);
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
       setOldCohort(dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
@@ -99,7 +98,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   }
 
   async function onCorrectionRequestChange(fieldName, message, reason) {
-    console.log("cor change", fieldName, message, reason);
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
@@ -378,10 +376,10 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
 
   async function validate() {
     try {
-      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?getAllSessions=true`);
       if (!res.ok) throw new Error(res);
       const session = res.data.find(({ name }) => name === young.cohort);
-      if (session.isFull) {
+      if (session?.isFull) {
         return setConfirmModal({
           icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
           title: "Objectif d'inscription régional atteint",
@@ -577,7 +575,6 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   }
 
   function onLocalChange(field, value) {
-    console.log("on the local change: ", field, value);
     setData({ ...data, [field]: value });
   }
 
@@ -629,7 +626,6 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     result = validateEmpty(data, "city", errors) && result;
     result = validateEmpty(data, "country", errors) && result;
 
-    console.log("Errors: ", errors);
     setErrors(errors);
     return result;
   }
@@ -1096,7 +1092,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   }
 
   function onLocalChange(field, value) {
-    console.log("on the local change: ", field, value);
     const newData = { ...data, [field]: value };
     if (field === "situation") {
       newData.employed = youngEmployedSituationOptions.includes(value) ? "true" : "false";
@@ -1119,7 +1114,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     if (validate()) {
       try {
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
-        console.log("RESULT = ", result);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
@@ -1159,7 +1153,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       }
     }
 
-    console.log("Errors: ", errors);
     setErrors(errors);
     return result;
   }
@@ -1183,7 +1176,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     onStartRequest("");
   }
 
-  const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
+  const situationOptions = Object.keys(YOUNG_SITUATIONS)
+    .map((s) => ({ value: s, label: translate(s) }))
+    .filter((s) => s.value !== YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL);
   const gradeOptions = Object.keys(GRADES)
     .filter((g) => g !== GRADES.NOT_SCOLARISE)
     .map((g) => ({ value: g, label: translateGrade(g) }));
@@ -1669,7 +1664,7 @@ function SectionConsentements({ young, onChange }) {
         </div>
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
-          young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
+          (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
             <div className="mt-2 flex items-center justify-between">
               <div
                 className="cursor-pointer italic text-[#1D4ED8]"

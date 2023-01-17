@@ -8,7 +8,7 @@ import { ModalContainer } from "../../components/modals/Modal";
 import ExportFieldCard from "../ExportFieldCard";
 import { translateIndexes } from "snu-lib";
 
-export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery, exportTitle = "" }) {
+export default function ModalExport({ isOpen, setIsOpen, index, transform, exportFields, filters, getExportQuery, exportTitle = "", showTotalHits = true }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
@@ -49,7 +49,7 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
                   Tout déselectionner
                 </div>
               )}
-              {filters && (
+              {filters && showTotalHits && (
                 <StateProvider
                   render={({ searchState }) => {
                     return <div className="mr-2">{searchState.result.hits?.total} résultats</div>;
@@ -71,9 +71,9 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
           <div className="flex w-full">
             <ExportComponent
               handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
-              title={`Exporter les ${translateIndexes(index)}`}
+              title={`Exporter les ${exportTitle || translateIndexes(index)}`}
               defaultQuery={getExportQuery}
-              exportTitle={exportTitle || capitalizeFirstLetter(translateIndexes(index))}
+              exportTitle={exportTitle ? capitalizeFirstLetter(exportTitle) : capitalizeFirstLetter(translateIndexes(index))}
               index={index}
               react={{ and: filters }}
               transform={(data) => transform(data, selectedFields)}
