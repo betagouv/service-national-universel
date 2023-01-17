@@ -118,6 +118,7 @@ const Wrapper = ({ children }) => {
           Vous visualisez la base de connaissance en tant que {translateRoleBDC[seeAs]}, pour retourner à votre vue cliquez ici
         </button>
       )}
+      <div className="rounded-none border-none bg-red-500 text-center font-normal">Base de connaissances mise à jour le 12 janvier 2023</div>
       <main className="flex-1 bg-[#F3F4F6] print:bg-transparent">{children}</main>
       <footer className="wrapper flex w-full flex-col gap-6 bg-white print:hidden ">
         <div className="wrapper flex w-full flex-col gap-6">

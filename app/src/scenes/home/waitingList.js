@@ -21,19 +21,21 @@ export default function WaitingList() {
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
               <div className="text-[#242526] font-bold text-xl mt-2">Vous êtes inscrit sur liste complémentaire pour le séjour {COHESION_STAY_LIMIT_DATE[young.cohort]}.</div>
-              <div className="text-blue-600 text-sm leading-5 hover:underline cursor-pointer" onClick={() => history.push("/changer-de-sejour")}>
-                Changer de séjour &gt;
-              </div>
+
               <hr className="text-gray-200" />
               <div className="flex items-center gap-5">
                 <div className="flex items-center justify-center p-2 h-8 w-8 rounded-full bg-gray-100">
                   <Check className="text-gray-600" />
                 </div>
                 <div className="text-[#6B7280] text-sm leading-5 flex-1">
-                  Votre dossier a été traité. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel.
+                  Votre dossier a été traité. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel. Vous
+                  pouvez également vous positionner sur un autre séjour dès maintenant.
                 </div>
               </div>
               <hr className="text-gray-200" />
+              <div className="text-blue-600 text-sm leading-5 hover:underline cursor-pointer" onClick={() => history.push("/changer-de-sejour")}>
+                Changer de séjour &gt;
+              </div>
             </div>
             <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
           </div>
@@ -55,19 +57,21 @@ export default function WaitingList() {
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
             <div className="text-[#242526] font-bold text-lg mt-3">Vous êtes inscrit sur liste complémentaire pour le séjour {COHESION_STAY_LIMIT_DATE[young.cohort]}.</div>
-            <div className="text-blue-600 text-sm leading-5 " onClick={() => history.push("/changer-de-sejour")}>
-              Changer de séjour &gt;
-            </div>
+
             <hr className="text-gray-200 mt-3" />
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center p-2 h-8 w-8 rounded-full bg-gray-100">
                 <Check className="text-gray-600" />
               </div>
               <div className="text-[#738297] text-sm flex-1">
-                Votre dossier a été traité. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel.
+                Votre dossier a été traité. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel. Vous
+                pouvez également vous positionner sur un autre séjour dès maintenant.
               </div>
             </div>
             <hr className="text-gray-200" />
+            <div className="text-blue-600 text-sm leading-5 " onClick={() => history.push("/changer-de-sejour")}>
+              Changer de séjour &gt;
+            </div>
 
             <div className="flex justify-center mt-20">
               <a

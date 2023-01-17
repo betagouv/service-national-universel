@@ -316,6 +316,7 @@ const Schema = new mongoose.Schema({
   placesStatus: {
     type: String,
     enum: ["FULL", "EMPTY", "ONE_OR_MORE"],
+    default: "EMPTY",
     documentation: {
       description: "Champs pour filtrer sur une mission pleine, vide, ayant au moin une places de prise ",
     },

@@ -17,19 +17,18 @@ const { ERRORS, checkStatusContract } = require("../utils");
 
 router.get("/signin", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
+    const { error, value } = Joi.object({ token_jva: Joi.string().required() }).validate(req.query);
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    const { token, email } = value;
+    const { token_jva } = value;
 
-    if (!email || !token || token.toString() !== config.JVA_TOKEN.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
-    }
+    const { _id } = jwt.verify(token_jva, config.secret);
+    if (!_id) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
 
-    const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
+    const user = await ReferentModel.findById(_id);
 
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
@@ -55,24 +54,53 @@ router.get("/signin", async (req, res) => {
   }
 });
 
-router.get("/actions", async (req, res) => {
+router.get("/getToken", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), api_key: Joi.string().required() }).validate(req.query);
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    const { token, email } = value;
+    const { api_key, email } = value;
 
-    if (!email || !token || token.toString() !== config.JVA_TOKEN.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (!email || !api_key || api_key.toString() !== config.JVA_TOKEN.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
     }
 
     const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // si l'utilisateur n'existe pas, on bloque
-    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
+
+    const token_jva = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+
+    return res.status(200).send({ ok: true, data: { token_jva } });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+// ! Route appelée uniquement par le back de JVA donc pas de problème d'exposition du token
+router.get("/actions", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), api_key: Joi.string().required() }).validate(req.query);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const { api_key, email } = value;
+
+    if (!email || !api_key || api_key.toString() !== config.JVA_TOKEN.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
+    }
+
+    const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
+
+    // si l'utilisateur n'existe pas, on bloque
+    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
 
     const structure = await StructureModel.findById(user.structureId);
 
