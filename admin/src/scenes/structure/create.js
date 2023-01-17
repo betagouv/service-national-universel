@@ -404,13 +404,7 @@ export default function Create() {
             </Row>
           </Box>
           {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
-          <Header style={{ justifyContent: "space-between" }}>
-            <a
-              href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3507?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-              target="_blank"
-              rel="noreferrer">
-              <img className="w-32" src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
-            </a>
+          <Header style={{ justifyContent: "flex-end" }}>
             <LoadingButton onClick={() => handleSubmit()} color={"#5245cc"} textColor={"#fff"} loading={isLoading}>
               Enregistrer la structure
             </LoadingButton>
