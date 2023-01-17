@@ -132,25 +132,25 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                 </div>
               </div>
               <div className="flex flex-row items-center flex-1 md:!justify-center pb-3 md:!pb-0 my-3">
-                <Calendar date={getDepartureMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3" />
+                <Calendar date={getDepartureMeetingDate()?.split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3" />
                 <div className="flex flex-col">
-                  <div className="font-bold text-sm whitespace-nowrap">Aller à{getDepartureMeetingDate().split(",")[1]}</div>
+                  <div className="font-bold text-sm whitespace-nowrap">Aller à{getDepartureMeetingDate()?.split(",")[1]}</div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
                     {getDepartureMeetingDate()
-                      .split(/[,\s]+/)
+                      ?.split(/[,\s]+/)
                       .slice(0, 3)
                       .join(" ")}
                   </div>
                 </div>
                 {/* FIXME Hot fix sale pour juillet */}
-                <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
+                <Calendar date={getReturnMeetingDate()?.split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
                 <div className="flex flex-col">
                   <div className="flex gap-x-1">
-                    <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                    <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate()?.split(",")[1]}</div>
                   </div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
                     {getReturnMeetingDate()
-                      .split(/[,\s]+/)
+                      ?.split(/[,\s]+/)
                       .slice(0, 3)
                       .join(" ")}
                   </div>

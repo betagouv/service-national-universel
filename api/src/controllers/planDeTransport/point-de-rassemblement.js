@@ -13,6 +13,100 @@ const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { COHORTS } = require("snu-lib");
+const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
+const { getCohesionCenterFromSession } = require("./commons");
+
+/**
+ * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
+ */
+router.get("/available", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // verify cohesion center
+    let cohesionCenter = req.user.sessionPhase1Id ? await getCohesionCenterFromSession(req.user.sessionPhase1Id) : null;
+    if (!cohesionCenter) {
+      return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // get all meeting points to cohesion from schema de répartition center with bus
+    const schemaMeetingPoints = await SchemaDeRepartitionModel.aggregate([
+      { $match: { cohort: req.user.cohort, centerId: cohesionCenter._id.toString() } },
+      { $unwind: "$gatheringPlaces" },
+      {
+        $addFields: { meetingPointId: { $toObjectId: "$gatheringPlaces" } },
+      },
+      {
+        $lookup: {
+          from: "pointderassemblements",
+          localField: "meetingPointId",
+          foreignField: "_id",
+          as: "meetingPoint",
+        },
+      },
+      { $unwind: "$meetingPoint" },
+      {
+        $replaceRoot: { newRoot: "$meetingPoint" },
+      },
+    ]);
+
+    // get all buses to cohesion center using previous meeting points, find used meeting points with hours and get a new meeting point list
+    const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
+    const meetingPoints = await LigneToPointModel.aggregate([
+      { $match: { meetingPointId: { $in: schemaMeetingPointIds } } },
+      {
+        $addFields: { lineId: { $toObjectId: "$lineId" } },
+      },
+      {
+        $lookup: {
+          from: "lignebuses",
+          localField: "lineId",
+          foreignField: "_id",
+          as: "lignebus",
+        },
+      },
+      { $unwind: "$lignebus" },
+      { $match: { "lignebus.cohort": req.user.cohort, "lignebus.centerId": cohesionCenter._id.toString() } },
+      {
+        $addFields: { meetingPointId: { $toObjectId: "$meetingPointId" } },
+      },
+      {
+        $lookup: {
+          from: "pointderassemblements",
+          localField: "meetingPointId",
+          foreignField: "_id",
+          as: "pdr",
+        },
+      },
+      { $unwind: "$pdr" },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$pdr",
+              {
+                meetingHour: "$meetingHour",
+                returnHour: "$returnHour",
+                busLineId: "$lignebus._id",
+                youngSeatsTaken: "$lignebus.youngSeatsTaken",
+                youngCapacity: "$lignebus.youngCapacity",
+              },
+            ],
+          },
+        },
+      },
+    ]);
+
+    // on ne garde que les bus avec de la place restante.
+    const availableMeetingPoints = meetingPoints.filter((mp) => {
+      return mp.youngSeatsTaken < mp.youngCapacity;
+    });
+
+    // return meeting points
+    return res.status(200).send({ ok: true, data: availableMeetingPoints });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
