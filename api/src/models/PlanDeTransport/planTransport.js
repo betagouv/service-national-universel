@@ -87,9 +87,10 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  youngCount: {
+  youngSeatsTaken: {
     type: Number,
     required: true,
+    default: 0,
     documentation: {
       description: "Nombre de jeunes",
     },

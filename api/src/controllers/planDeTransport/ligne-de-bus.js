@@ -197,7 +197,6 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
       youngCapacity,
       totalCapacity,
-      fillingRate: 0, // ! A revoir
       followerCapacity,
       travelTime,
       lunchBreak,

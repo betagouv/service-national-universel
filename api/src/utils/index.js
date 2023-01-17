@@ -34,6 +34,7 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { SUB_ROLES } = require("snu-lib/roles");
 const { getAge } = require("snu-lib/date");
+const { capture } = require("../sentry");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -341,9 +342,17 @@ async function updateSeatsTakenInBusLine(busline) {
       busline.set({ youngSeatsTaken: seatsTaken });
       await busline.save();
       await busline.index();
+
+      // Do the same update with planTransport
+      const planTransport = await PlanTransportModel.findById(busline._id);
+      if (!planTransport) throw new Error("PlanTransport not found");
+      planTransport.set({ youngSeatsTaken: seatsTaken, fillingRate: Math.round((seatsTaken / planTransport.youngCapacity) * 100) });
+      await planTransport.save();
+      await planTransport.index();
     }
   } catch (e) {
     console.log(e);
+    capture(e);
   }
   return busline;
 }
