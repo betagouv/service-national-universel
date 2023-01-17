@@ -273,9 +273,9 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       }
     }
 
-    applications.map(async (app) => {
-      const application = await ApplicationObject.findById(app._id);
-      const young = app.young;
+    value.ids.map(async (id) => {
+      const application = await ApplicationObject.findById(id);
+      const young = await YoungObject.findById(application.youngId);
 
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
