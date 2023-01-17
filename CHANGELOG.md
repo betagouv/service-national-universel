@@ -1,3 +1,17 @@
+# [1.200.0](https://github.com/betagouv/service-national-universel/compare/v1.199.0...v1.200.0) (2023-01-17)
+
+
+### Bug Fixes
+
+* **api:** optimisation multiaction application ([#2178](https://github.com/betagouv/service-national-universel/issues/2178)) ([bf1871f](https://github.com/betagouv/service-national-universel/commit/bf1871f7f84a068d843febb7842abd4a4e3a227c))
+* **api:** Synchronously check data ([1038f9d](https://github.com/betagouv/service-national-universel/commit/1038f9d1c3a2fb2eb99decaa88d2617e9fed0587))
+
+
+### Features
+
+* **admin/api:** Refonte fiche volontaire phase 1 ([4d9b91c](https://github.com/betagouv/service-national-universel/commit/4d9b91cee6033d444500ad3d7c9fe90c67751b93))
+* **api/app:** Choix du PDR côté jeune affecté ([#2173](https://github.com/betagouv/service-national-universel/issues/2173)) ([e3105f7](https://github.com/betagouv/service-national-universel/commit/e3105f70c54633642a52fe310de588510814034a))
+
 # [1.199.0](https://github.com/betagouv/service-national-universel/compare/v1.198.1...v1.199.0) (2023-01-16)
 
 
