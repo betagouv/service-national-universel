@@ -97,8 +97,8 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
 
     //update Bus infos
-    // if (bus) await updateSeatsTakenInBusLine(bus);
-    // if (oldBus) await updateSeatsTakenInBusLine(oldBus);
+    if (bus) await updateSeatsTakenInBusLine(bus);
+    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
 
     return res.status(200).send({
       data: serializeSessionPhase1(data, req.user),
