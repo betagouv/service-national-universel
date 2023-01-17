@@ -375,7 +375,7 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
       const ligneBusFiltered = ligneBus.find((l) => l._id.toString() === ligneToPointFiltered.lineId);
 
       // filter uniquement sur les bus avec des places dispos
-      if (ligneBusFiltered.youngSeatsTaken < ligneBusFiltered.youngCapacity) {
+      if (ligneBusFiltered && ligneBusFiltered.youngSeatsTaken < ligneBusFiltered.youngCapacity) {
         data.push({ meetingPoint: m, ligneToPoint: ligneToPointFiltered, ligneBus: ligneBusFiltered });
       }
     });
