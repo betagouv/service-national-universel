@@ -13,7 +13,6 @@ const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { COHORTS } = require("snu-lib");
-const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const { getCohesionCenterFromSession } = require("./commons");
 
 /**
