@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
+const { ObjectId } = require("mongodb");
 
 const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
@@ -228,8 +229,30 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const applications = await ApplicationObject.find({ _id: { $in: value.ids } });
-    if (!applications || applications?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Transform ids to ObjectId
+    value.ids = value.ids.map((id) => ObjectId(id));
+
+    const pipeline = [
+      { $match: { _id: { $in: [value.ids] } } },
+      {
+        $addFields: {
+          youngObjectId: {
+            $toObjectId: "$youngId",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "youngs",
+          localField: "youngObjectId",
+          foreignField: "_id",
+          as: "young",
+        },
+      },
+    ];
+
+    const applications = await ApplicationObject.aggregate(pipeline).exec();
+    if (!applications || applications?.length !== value.ids?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     //check toutes les perms pour chaque application
 
     // if supervisor store structures --> avoid multiple mongoDb calls
@@ -240,7 +263,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     }
 
     for (const application of applications) {
-      const young = await YoungObject.findById(application.youngId);
+      const young = application.young;
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // A young can only update his own application.
@@ -250,7 +273,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     }
 
     applications.map(async (application) => {
-      const young = await YoungObject.findById(application.youngId);
+      const young = application.young;
 
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
