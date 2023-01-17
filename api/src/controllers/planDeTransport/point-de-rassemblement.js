@@ -76,11 +76,31 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
         },
       },
       { $unwind: "$pdr" },
-      { $replaceRoot: { newRoot: { $mergeObjects: ["$pdr", { meetingHour: "$meetingHour", returnHour: "$returnHour", busLineId: "$lignebus._id" }] } } },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$pdr",
+              {
+                meetingHour: "$meetingHour",
+                returnHour: "$returnHour",
+                busLineId: "$lignebus._id",
+                youngSeatsTaken: "$lignebus.youngSeatsTaken",
+                youngCapacity: "$lignebus.youngCapacity",
+              },
+            ],
+          },
+        },
+      },
     ]);
 
+    // on ne garde que les bus avec de la place restante.
+    const availableMeetingPoints = meetingPoints.filter((mp) => {
+      return mp.youngSeatsTaken < mp.youngCapacity;
+    });
+
     // return meeting points
-    return res.status(200).send({ ok: true, data: meetingPoints });
+    return res.status(200).send({ ok: true, data: availableMeetingPoints });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
