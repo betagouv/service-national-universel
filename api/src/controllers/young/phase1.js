@@ -1,16 +1,150 @@
+/**
+ * /young/phase1
+ *
+ * ROUTES
+ *   POST  /young/:youngId/phase1/dispense        -> Passe le statut d'un jeune en dispensé
+ */
+
 const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const { canEditPresenceYoung } = require("snu-lib/roles");
+const { canEditPresenceYoung, ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");
-const { ERRORS, autoValidationSessionPhase1Young } = require("../../utils");
-const { serializeYoung } = require("../../utils/serializer");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const CohortModel = require("../../models/cohort");
+const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, isReferent } = require("../../utils");
+const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
+
+router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const allowedKeys = ["self-going", "ref-select", "young-select", "local"];
+    const { error, value } = Joi.object({
+      centerId: Joi.string().required(),
+      sessionId: Joi.string().required(),
+      meetingPointId: Joi.string().optional().allow(null, ""),
+      ligneId: Joi.string().optional().allow(null, ""),
+      id: Joi.string().required(),
+      pdrOption: Joi.string()
+        .trim()
+        .required()
+        .valid(...allowedKeys),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
+
+    const { id, sessionId, centerId, meetingPointId, pdrOption, ligneId } = value;
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // check if referent is allowed to edit this young --> Todo with cohort
+    if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // verification nombre de place ?
+    const session = await SessionPhase1Model.findById(sessionId);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // mail only if isAssignmentAnnouncementsOpenForYoung
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (isReferent(req.user) && !cohort.manualAffectionOpenForReferent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
+
+    let bus = null;
+    if (meetingPointId) {
+      const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
+      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      bus = await LigneBusModel.findById(ligneId);
+      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
+
+    // update youngs infos
+    young.set({
+      statusPhase1: "AFFECTED",
+      sessionPhase1Id: sessionId,
+      cohesionCenterId: centerId,
+      deplacementPhase1Autonomous: pdrOption === "self-going" ? "true" : "false",
+      transportInfoGivenByLocal: pdrOption === "local" ? "true" : "false",
+      meetingPointId: meetingPointId ? meetingPointId : undefined,
+      ligneId: ligneId ? ligneId : undefined,
+    });
+
+    if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+      let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
+    }
+
+    await young.save({ fromUser: req.user });
+
+    // update session infos
+    const data = await updatePlacesSessionPhase1(session, req.user);
+    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
+
+    //update Bus infos
+    if (bus) await updateSeatsTakenInBusLine(bus);
+    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
+
+    return res.status(200).send({
+      data: serializeSessionPhase1(data, req.user),
+      young: serializeYoung(young, req.user),
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      statusPhase1MotifDetail: Joi.string().required(),
+      statusPhase1Motif: Joi.string().required(),
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    }
+
+    const { statusPhase1MotifDetail, statusPhase1Motif, id } = value;
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canEditPresenceYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    // passage en dispensé unqiuement si séjour non réalisé
+    if (req.user.role !== ROLES.ADMIN && young.statusPhase1 !== "NOT_DONE") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set({ statusPhase1MotifDetail, statusPhase1Motif, statusPhase1: "EXEMPTED" });
+    await young.save({ fromUser: req.user });
+    console.log(young);
+    return res.status(200).send({ data: serializeYoung(young, req.user), ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -81,7 +215,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
 
 router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
+    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement"];
     const { error, value } = Joi.object({
       value: Joi.string().trim().valid("true", "false").required(),
       key: Joi.string()
@@ -114,8 +248,11 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
 
     await young.save({ fromUser: req.user });
 
-    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+    if (key !== "youngPhase1Agreement") {
+      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+    }
 
     if (key === "cohesionStayPresence" && newValue === "true") {
       let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
