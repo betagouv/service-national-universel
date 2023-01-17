@@ -233,7 +233,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     //check toutes les perms pour chaque application
 
     // if supervisor store structures --> avoid multiple mongoDb calls
-    let structures;
+    let structures = null;
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
