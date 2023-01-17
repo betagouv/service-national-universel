@@ -211,7 +211,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    value.ids.map(async (id) => {
+    for (const id of value.ids) {
       const application = await ApplicationObject.findById(id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -244,6 +244,11 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
           }
         }
       }
+    }
+
+    value.ids.map(async (id) => {
+      const application = await ApplicationObject.findById(id);
+      const young = await YoungObject.findById(application.youngId);
 
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
