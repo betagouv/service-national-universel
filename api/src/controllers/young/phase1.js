@@ -16,8 +16,9 @@ const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const CohortModel = require("../../models/cohort");
-const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1 } = require("../../utils");
+const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -53,11 +54,20 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
+
+    let bus = null;
     if (meetingPointId) {
       const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      bus = await LigneBusModel.findById(ligneId);
+      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
+    const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
+
     // should we link to bus ?
     if (pdrOption === "self-going") young.set({ deplacementPhase1Autonomous: "true" });
     else if (pdrOption === "ref-select" || pdrOption === "young-select") young.set({ deplacementPhase1Autonomous: "false" });
@@ -85,6 +95,10 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     // update session infos
     const data = await updatePlacesSessionPhase1(session, req.user);
     if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
+
+    //update Bus infos
+    if (bus) await updateSeatsTakenInBusLine(bus);
+    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
 
     return res.status(200).send({
       data: serializeSessionPhase1(data, req.user),
