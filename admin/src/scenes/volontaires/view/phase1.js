@@ -47,7 +47,6 @@ export default function Phase1(props) {
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
 
   const getDisplayCenterButton = async () => {
-    if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 !== "WAITING_AFFECTATION") return setDisplayCenterButton(false);
     if (user.role === ROLES.ADMIN) return setDisplayCenterButton(true);
     try {
       const { ok, data } = await api.get("/cohort/" + young.cohort);
@@ -55,8 +54,9 @@ export default function Phase1(props) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
         return setDisplayCenterButton(false);
       }
-      setCohortOpenForAffection(data[0]?.manualAffectionOpenForReferent);
-      if (!data || !data[0]?.manualAffectionOpenForReferent) return setDisplayCenterButton(false);
+      setCohortOpenForAffection(data?.manualAffectionOpenForReferent);
+      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 !== "WAITING_AFFECTATION") return setDisplayCenterButton(false);
+      if (!data || !data?.manualAffectionOpenForReferent) return setDisplayCenterButton(false);
       if (user.role === ROLES.REFERENT_REGION && user.region === young.region) return setDisplayCenterButton(true);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
