@@ -26,6 +26,7 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import { capture } from "../../../sentry";
 import dayjs from "dayjs";
+import { environment } from "../../../config";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -47,6 +48,10 @@ export default function Phase1(props) {
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
 
   const getDisplayCenterButton = async () => {
+    if (environment === "production") {
+      setCohortOpenForAffection(false);
+      return setDisplayCenterButton(false);
+    }
     if (user.role === ROLES.ADMIN) return setDisplayCenterButton(true);
     try {
       const { ok, data } = await api.get("/cohort/" + young.cohort);
