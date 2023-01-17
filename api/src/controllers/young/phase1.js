@@ -68,15 +68,13 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
 
-    // should we link to bus ?
-    if (pdrOption === "self-going") young.set({ deplacementPhase1Autonomous: "true" });
-    else if (pdrOption === "ref-select" || pdrOption === "young-select") young.set({ deplacementPhase1Autonomous: "false" });
-    else young.set({ transportInfoGivenByLocal: "true", deplacementPhase1Autonomous: "false" });
     // update youngs infos
     young.set({
       statusPhase1: "AFFECTED",
       sessionPhase1Id: sessionId,
       cohesionCenterId: centerId,
+      deplacementPhase1Autonomous: pdrOption === "self-going" ? "true" : "false",
+      transportInfoGivenByLocal: pdrOption === "local" ? "true" : "false",
       meetingPointId: pdrOption === "ref-select" ? meetingPointId : undefined,
       ligneId: pdrOption === "ref-select" ? ligneId : undefined,
     });
