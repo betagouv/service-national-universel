@@ -369,7 +369,6 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     });
 
     //build final Array since client wait for ligneToPoint + meetingPoint + ligneBus
-
     const data = [];
     finalMeettingPointsObjects.map((m) => {
       const ligneToPointFiltered = ligneToPoint.find((l) => l.meetingPointId === m._id.toString());
@@ -378,37 +377,6 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     });
 
     return res.status(200).send({ ok: true, data });
-
-    //doublon de pdr ? optimiser ?
-    /*
-    const pipeline = [
-      { $match: { cohort: cohort, centerId: centerId } },
-      {
-        $addFields: {
-          convertedId: { $toString: "$_id" },
-        },
-      },
-      { $lookup: { from: "lignetopoints", localField: "convertedId", foreignField: "lineId", as: "lignetopoint" } },
-      {
-        $unwind: "$lignetopoint",
-      },
-      {
-        $addFields: {
-          meetingPointId: { $toObjectId: "$lignetopoint.meetingPointId" },
-        },
-      },
-      { $lookup: { from: "pointderassemblements", localField: "meetingPointId", foreignField: "_id", as: "meetingPoint" } },
-      {
-        $unwind: "$meetingPoint",
-      },
-      {
-        $match: {
-          $or: [{ "meetingPoint.name": regex }, { "meetingPoint.city": regex }, { "meetingPoint.department": regex }, { "meetingPoint.region": regex }],
-          // "meetingPoint._id": { $in: schemaMeetingPointIds },
-        },
-      },
-    ];
-    */
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
