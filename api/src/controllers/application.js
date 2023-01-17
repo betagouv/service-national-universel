@@ -233,7 +233,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     value.ids = value.ids.map((id) => ObjectId(id));
 
     const pipeline = [
-      { $match: { _id: { $in: [value.ids] } } },
+      { $match: { _id: { $in: value.ids } } },
       {
         $addFields: {
           youngObjectId: {
@@ -249,6 +249,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
           as: "young",
         },
       },
+      { $unwind: "$young" },
     ];
 
     const applications = await ApplicationObject.aggregate(pipeline).exec();
@@ -272,8 +273,9 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       }
     }
 
-    applications.map(async (application) => {
-      const young = application.young;
+    applications.map(async (app) => {
+      const application = await ApplicationObject.findById(app._id);
+      const young = app.young;
 
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
