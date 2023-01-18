@@ -1,3 +1,21 @@
+# [1.201.0](https://github.com/betagouv/service-national-universel/compare/v1.200.0...v1.201.0) (2023-01-18)
+
+
+### Bug Fixes
+
+* **admin:** modal JDM / presence + young status ([71369e7](https://github.com/betagouv/service-national-universel/commit/71369e740354b217dd59e36f42c96fe22a25bb5a))
+* **admin:** update mission location when verifying address ([adec268](https://github.com/betagouv/service-national-universel/commit/adec2686f42fb3b15af6bfad4ec7478ddd3233b1))
+* **admin/api:** Plan de transport : Safe division by 0 + rename fillingRate to not mix with inscription fillingRate ([6832f2e](https://github.com/betagouv/service-national-universel/commit/6832f2e335c6a0c7c7ca414407587e5153059411))
+* **app:** Retours sur la phase 1 ecran Affecté ([#2180](https://github.com/betagouv/service-national-universel/issues/2180)) ([0ec2307](https://github.com/betagouv/service-national-universel/commit/0ec23072ca4b2f33deb43013e9b302ac06b794b6))
+* **app:** Retours sur la phase 1 ecran Affecté (suite) ([#2182](https://github.com/betagouv/service-national-universel/issues/2182)) ([008e03a](https://github.com/betagouv/service-national-universel/commit/008e03a71cedbc996916e0d600e7a1757e60be92))
+
+
+### Features
+
+* **admin:** modification contrat quand envoyé ([c23e62c](https://github.com/betagouv/service-national-universel/commit/c23e62ccc99ff917b2a3113622250f6ee9c303d0))
+* **admin:** Plan de transport ([#2152](https://github.com/betagouv/service-national-universel/issues/2152)) ([3bffa1b](https://github.com/betagouv/service-national-universel/commit/3bffa1b0663be424752fe022ca7349bd9024165a))
+* **kb:** comment last updated banner ([3352cfc](https://github.com/betagouv/service-national-universel/commit/3352cfc47a379318238e007d42be508db2a69d46))
+
 # [1.200.0](https://github.com/betagouv/service-national-universel/compare/v1.199.0...v1.200.0) (2023-01-17)
 
 
