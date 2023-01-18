@@ -136,17 +136,8 @@ const render = async (young) => {
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
-      .replace(
-        /{{MEETING_DATE_RETURN}}/g,
-        sanitizeAll(
-          getReturnMeetingDate(meetingPoint)
-            ?.split(/[,\s]+/)
-            .slice(0, 3)
-            .join(" "),
-        ),
-      )
-      .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint)?.split(",")[1]))
-
+      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr })))
+      .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
@@ -156,7 +147,7 @@ const render = async (young) => {
   }
 };
 
-// todo ⚠️ not updates because no Février 2022 ⚠️
+// todo ⚠️ not updates because no Février 2023⚠️
 const renderDOMTOM = async (young) => {
   try {
     if (!["Février 2022", "Juin 2022", "Juillet 2022"].includes(young.cohort)) throw `young ${young.id} unauthorized`;
