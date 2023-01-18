@@ -8,6 +8,7 @@ import { setYoung } from "../../redux/auth/actions";
 import api from "../../services/api";
 import DownloadButton from "./components/DownloadButton";
 import { Logo, SuccessMessage } from "./components/printable";
+import { CDN_BASE_URL } from "../representants-legaux/commons";
 
 export default function MedicalFile({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young);
@@ -58,7 +59,7 @@ export default function MedicalFile({ isOpen, onCancel }) {
               {young.cohesionStayMedicalFileReceived !== "true" ? (
                 <div className="flex flex-col items-center px-4 py-8 border-2 border-dashed border-gray-300 rounded">
                   <FileIcon filled={true} icon="sanitaire" />
-                  <a target="blank" href="https://cellar-c2.services.clever-cloud.com/cni-bucket-staging/file/fiche-sanitaire-2023.pdf" onClick={updateDocumentInformation}>
+                  <a target="blank" href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} onClick={updateDocumentInformation}>
                     <DownloadButton text={young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau la fiche sanitaire" : "Télécharger la fiche sanitaire"} />
                   </a>
                 </div>
