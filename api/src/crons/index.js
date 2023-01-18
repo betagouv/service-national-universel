@@ -15,7 +15,6 @@ const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
-const syncContactSupportTemp = require("./syncContactSupport_temp");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
 const deleteInactiveRefs = require("./deleteInactiveRefs");
 const applicationPatches = require("./patch/application");
@@ -147,11 +146,5 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
-  });
-}
-
-if (ENVIRONMENT === "staging") {
-  cron.schedule("0 9 * * *", () => {
-    syncContactSupportTemp.handler();
   });
 }
