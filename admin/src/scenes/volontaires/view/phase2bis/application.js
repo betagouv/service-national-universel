@@ -237,23 +237,33 @@ export default function Phase2Application({ young, onChange }) {
               <div className="p-4">
                 <div className="bg-gray-50 rounded-lg  px-10 py-6">
                   <div className="flex justify-between">
-                    <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-                    {contractStatus === "DRAFT" ? (
-                      <div className="text-xs font-normal px-2  bg-orange-500 text-white rounded-sm items-center flex space-x-1">
-                        <Bell />
-                        <div>Contrat en brouillon</div>
-                      </div>
-                    ) : null}
-                    {contractStatus === "VALIDATED" ? (
-                      <div className="text-xs font-normal px-2  bg-green-400 rounded-sm items-center flex space-x-1">
-                        <Check className="text-white" />
-                        <div className="text-white">Contrat signé</div>
-                      </div>
-                    ) : null}
+                    <div className="flex flex-row items-center justify-center gap-4">
+                      <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+                      {contractStatus === "SENT" ? (
+                        <div
+                          onClick={() => {
+                            history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
+                          }}
+                          className="flex flex-row items-center justify-center gap-2 text-blue-500 text-xs cursor-pointer">
+                          <Pencil width={14} height={14} />
+                          <div>Modifier le contrat</div>
+                        </div>
+                      ) : null}
+                    </div>
                     {contractStatus === "SENT" ? (
                       <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
                         <AiFillClockCircle className="text-sky-500" />
                         <div>Contrat envoyé</div>
+                      </div>
+                    ) : contractStatus === "DRAFT" ? (
+                      <div className="text-xs font-normal px-2  bg-orange-500 text-white rounded-sm items-center flex space-x-1">
+                        <Bell />
+                        <div>Contrat en brouillon</div>
+                      </div>
+                    ) : contractStatus === "VALIDATED" ? (
+                      <div className="text-xs font-normal px-2  bg-green-400 rounded-sm items-center flex space-x-1">
+                        <Check className="text-white" />
+                        <div className="text-white">Contrat signé</div>
                       </div>
                     ) : null}
                   </div>
