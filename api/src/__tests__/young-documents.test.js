@@ -12,6 +12,10 @@ const { createBusHelper } = require("./helpers/bus");
 const getNewBusFixture = require("./fixtures/bus");
 const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+
+const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
+const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
+
 const { createSessionPhase1 } = require("./helpers/sessionPhase1");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 
@@ -106,8 +110,7 @@ describe("Young", () => {
     it("should return the convocation", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
-      const bus = await createBusHelper(getNewBusFixture());
-      const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), busId: bus._id });
+      const { pdr, bus } = await createPointDeRassemblementWithBus(getNewPointDeRassemblementFixture(), cohesionCenter._id, sessionPhase1._id);
       const departmentService = await createDepartmentServiceHelper({
         ...getNewDepartmentServiceFixture(),
         department: "lol",
@@ -116,8 +119,10 @@ describe("Young", () => {
         ...getNewYoungFixture(),
         statusPhase1: "AFFECTED",
         sessionPhase1Id: sessionPhase1._id,
-        meetingPointId: meetingPoint._id,
+        meetingPointId: pdr._id,
+        ligneId: bus._id,
         department: departmentService.department,
+        cohort: bus.cohort,
       });
 
       const res = await request(getAppHelper())
