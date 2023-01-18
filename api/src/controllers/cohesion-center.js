@@ -233,6 +233,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     center.set({ ...center, ...value });
     await center.save({ fromUser: req.user });
+
     await updateCenterDependencies(center, req.user);
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
@@ -242,6 +243,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 //To update for new affectation
+// ! For new affectation, think about PlanDeTransport as well !
 router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })

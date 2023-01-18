@@ -3,7 +3,46 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
-const MODELNAME = "lignebus";
+const ModificationBusSchema = require("./modificationBus").Schema;
+const PointDeRassemblementModel = require("./pointDeRassemblement");
+const MODELNAME = "plandetransport";
+
+const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminator(
+  "Enriched",
+  new mongoose.Schema({
+    // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ElasticMongoose ou de dupliquer l'id
+    meetingPointId: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Champ contenant l'ID du MeetingPoint",
+      },
+    },
+    meetingHour: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Heure de convocation lié à ce spécifique bus et point de rassemblement",
+      },
+    },
+    returnHour: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Heure de retour",
+      },
+    },
+
+    transportType: {
+      type: String,
+      required: true,
+      enum: ["train", "bus", "fusée", "avion"],
+      documentation: {
+        description: "Type de transport",
+      },
+    },
+  }),
+).schema;
 
 const Schema = new mongoose.Schema({
   cohort: {
@@ -17,22 +56,23 @@ const Schema = new mongoose.Schema({
 
   busId: {
     type: String,
+    unique: true,
     required: true,
     documentation: {
       description: "Numero de bus",
     },
   },
 
-  departuredDate: {
-    type: Date,
+  departureString: {
+    type: String,
     required: true,
     documentation: {
       description: "Date de départ",
     },
   },
 
-  returnDate: {
-    type: Date,
+  returnString: {
+    type: String,
     required: true,
     documentation: {
       description: "Date de retour",
@@ -44,6 +84,22 @@ const Schema = new mongoose.Schema({
     required: true,
     documentation: {
       description: "Capacité de jeunes",
+    },
+  },
+
+  youngSeatsTaken: {
+    type: Number,
+    required: true,
+    default: 0,
+    documentation: {
+      description: "Nombre de jeunes",
+    },
+  },
+
+  fillingRate: {
+    type: Number,
+    documentation: {
+      description: "Taux de remplissage de la ligne",
     },
   },
 
@@ -60,15 +116,6 @@ const Schema = new mongoose.Schema({
     required: true,
     documentation: {
       description: "Capacité d'accompagnateurs",
-    },
-  },
-
-  youngSeatsTaken: {
-    type: Number,
-    required: true,
-    default: 0,
-    documentation: {
-      description: "Nombre de jeunes",
     },
   },
 
@@ -94,19 +141,51 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  sessionId: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Session",
-    },
-  },
+  // session: {
+  //   type: SessionPhase1Schema,
+  //   required: true,
+  //   documentation: {
+  //     description: "Session",
+  //   },
+  // },
 
   centerId: {
     type: String,
     required: true,
     documentation: {
-      description: "Centre de destination",
+      description: "ID du centre",
+    },
+  },
+
+  centerRegion: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Region du centre",
+    },
+  },
+
+  centerDepartment: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Département du centre",
+    },
+  },
+
+  centerName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Nom du centre",
+    },
+  },
+
+  centerCode: {
+    type: String,
+    // required: true,
+    documentation: {
+      description: "Code du centre",
     },
   },
 
@@ -126,11 +205,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  meetingPointsIds: {
-    type: [String],
+  pointDeRassemblements: {
+    type: [EnrichedPointDeRassemblementSchema],
     required: true,
     documentation: {
       description: "Liste des points de rassemblement",
+    },
+  },
+
+  modificationBuses: {
+    type: [ModificationBusSchema],
+    required: true,
+    documentation: {
+      description: "Liste des modifications de lignes",
     },
   },
 
@@ -164,6 +251,8 @@ Schema.plugin(patchHistory, {
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
+
+Schema.index({ ligneDeBusId: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

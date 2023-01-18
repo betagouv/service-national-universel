@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -14,6 +15,14 @@ const {
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
 } = require("snu-lib");
+const { ObjectId } = require("mongodb");
+
+const updateModificationDependencies = async (modif, fromUser) => {
+  const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
+  const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id);
+  modificationBus.set({ ...modif });
+  await planDeTransport.save({ fromUser });
+};
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -31,7 +40,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const line = await LigneBusModel.findById(lineId);
     if (!line) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await ModificationBusModel.create({
+    const modificationBus = await ModificationBusModel.create({
       lineId: line._id.toString(),
       lineName: line.busId,
       cohort: line.cohort,
@@ -40,6 +49,12 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       requestUserName: req.user.firstName + " " + req.user.lastName,
       requestUserRole: req.user.role,
     });
+
+    const planDeTransport = await PlanTransportModel.findById(line._id);
+    if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [modificationBus];
+    else planDeTransport.modificationBuses.push(modificationBus);
+
+    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -73,6 +88,8 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     await modif.save({ fromUser: req.user });
 
+    await updateModificationDependencies(modif, req.user);
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -105,6 +122,8 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
 
     await modif.save({ fromUser: req.user });
 
+    await updateModificationDependencies(modif, req.user);
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -133,6 +152,8 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
     modif.set({ messages: [...messages, { message, userId: req.user._id.toString(), userName: req.user.firstName + " " + req.user.lastName, date: new Date() }] });
 
     await modif.save({ fromUser: req.user });
+
+    await updateModificationDependencies(modif, req.user);
 
     return res.status(200).send({ ok: true });
   } catch (error) {

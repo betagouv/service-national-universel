@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
@@ -10,6 +11,7 @@ const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo, canEditL
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
+const { ObjectId } = require("mongodb");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -80,6 +82,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       departuredDate,
       returnDate,
       youngCapacity,
+      youngSeatsTaken: 0,
       totalCapacity,
       followerCapacity,
       travelTime,
@@ -91,6 +94,33 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerDepartureTime,
       meetingPointsId: meetingPoints.map((mp) => mp.meetingPointId),
     });
+
+    // * Update slave PlanTransport
+    const center = await cohesionCenterModel.findById(centerId);
+    await PlanTransportModel.create({
+      _id: bus._id,
+      cohort,
+      busId,
+      departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      youngCapacity,
+      totalCapacity,
+      fillingRate: 0,
+      followerCapacity,
+      travelTime,
+      km,
+      lunchBreak,
+      lunchBreakReturn,
+      centerId,
+      centerRegion: center?.region,
+      centerDepartment: center?.department,
+      centerName: center?.name,
+      centerCode: center?.code2022,
+      centerArrivalTime,
+      centerDepartureTime,
+      pointDeRassemblements: meetingPoints,
+    });
+    // * End update slave PlanTransport
 
     const ligneToBus = [];
 
@@ -158,6 +188,24 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     });
 
     await ligne.save({ fromUser: req.user });
+
+    // * Update slave PlanTransport
+    // ! Gerer logique si il y a deja des inscrits
+    const planDeTransport = await PlanTransportModel.findById(id);
+    planDeTransport.set({
+      busId,
+      departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      fillingRate: Math.floor((planDeTransport.youngSeatsTaken / planDeTransport.youngCapacity) * 100),
+      youngCapacity,
+      totalCapacity,
+      followerCapacity,
+      travelTime,
+      lunchBreak,
+      lunchBreakReturn,
+    });
+    await planDeTransport.save({ fromUser: req.user });
+    // * End update slave PlanTransport
 
     const infoBus = await getInfoBus(ligne);
 
@@ -251,6 +299,23 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
       });
       await ligneToPoint.save({ fromUser: req.user });
     }
+
+    // * Update slave PlanTransport
+    const planDeTransport = await PlanTransportModel.findById(id);
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(newMeetingPointId));
+    const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
+      return meetingPoint.meetingPointId === meetingPointId;
+    });
+    meetingPoint.set({
+      meetingPointId: newMeetingPointId,
+      ...pointDeRassemblement._doc,
+      meetingHour: ligneToPoint.meetingHour,
+      returnHour: ligneToPoint.returnHour,
+      transportType: ligneToPoint.transportType,
+    });
+
+    await planDeTransport.save({ fromUser: req.user });
+    // * End update slave PlanTransport
 
     const infoBus = await getInfoBus(ligne);
 
