@@ -49,7 +49,19 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const thresholdPendingReached = mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5;
   const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
-  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor", "visibility"];
+  const valuesToUpdate = [
+    ...valuesToCheck,
+    "structureId",
+    "addressVerified",
+    "duration",
+    "contraintes",
+    "domains",
+    "hebergement",
+    "hebergementPayant",
+    "tutor",
+    "visibility",
+    "location",
+  ];
 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -199,6 +211,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       addressVerified: true,
       region: suggestion.region,
       department: suggestion.department,
+      location: suggestion.location,
       address: isConfirmed ? suggestion.address : values.address,
       zip: isConfirmed ? suggestion.zip : values.zip,
       city: isConfirmed ? suggestion.city : values.city,
