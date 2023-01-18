@@ -111,7 +111,9 @@ export default function StepPDR({ young, center }) {
   return (
     <>
       {/* Desktop */}
-      <div className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`} onClick={() => setOpenedDesktop(enabled ? !openedDesktop : false)}>
+      <div
+        className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`}
+        onClick={() => setOpenedDesktop(enabled && young.transportInfoGivenByLocal !== "true" ? !openedDesktop : false)}>
         <div className="flex lex-row py-4 items-center">
           {valid ? (
             <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
@@ -147,7 +149,7 @@ export default function StepPDR({ young, center }) {
           </div>
         </div>
         {openedDesktop && <CohortDateSummary cohortName={young.cohort} className="ml-4" />}
-        {enabled ? (
+        {enabled && young.transportInfoGivenByLocal !== "true" ? (
           <div className="flex items-center justify-center bg-gray-100 h-9 w-9 rounded-full hover:scale-110 ml-4">
             {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}
           </div>
@@ -167,6 +169,7 @@ export default function StepPDR({ young, center }) {
                 onChoose={chooseGoAlone}
                 choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
+                meetingPointsCount={meetingPoints.length}
               />
             </div>
           ) : (
@@ -182,7 +185,7 @@ export default function StepPDR({ young, center }) {
         className={`md:hidden flex items-center border-[1px] mb-3 ml-4 rounded-xl min-h-[144px] cursor-pointer relative ${
           valid ? "border-green-500 bg-green-50" : !young.meetingPointId || young.deplacementPhase1Autonomous !== "true" ? "border-blue-600" : "bg-white"
         } `}
-        onClick={() => setOpenedMobile(enabled ? !openedMobile : false)}>
+        onClick={() => setOpenedMobile(enabled && young.transportInfoGivenByLocal !== "true" ? !openedMobile : false)}>
         {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && (
           <LinearMap gray={(!young.meetingPointId).toString()} className="absolute top-[10px] right-[10px]" />
         )}
@@ -324,7 +327,7 @@ function Schedule({ type, children, className }) {
   );
 }
 
-function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired }) {
+function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired, meetingPointsCount }) {
   const [opened, setOpened] = useState(false);
   const [cohort, setCohort] = useState(null);
 
@@ -333,8 +336,10 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
   }, [young]);
 
   useEffect(() => {
-    const handleClickOutside = () => {
-      setOpened(false);
+    const handleClickOutside = (e) => {
+      if (!e || !e.target || e.target.getAttribute("id") !== "toggle-button") {
+        setOpened(false);
+      }
     };
     document.addEventListener("click", handleClickOutside, true);
     return () => {
@@ -342,7 +347,9 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
     };
   }, []);
 
-  function toggleMore() {
+  function toggleMore(e) {
+    e.stopPropagation();
+    console.log("setOpened: ", !opened);
     setOpened(!opened);
   }
 
@@ -350,10 +357,13 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
     <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
       <LinearMap gray="true" />
       <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en revient par mes propres moyens</div>
-      <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative">
+      <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative" id="toggle-button">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (
-          <div className="mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] md:right-[-120px] text-left">
+          <div
+            className={`mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] text-left ${
+              meetingPointsCount === 0 ? "md:left-[-70px]" : "md:right-[-120px]"
+            }`}>
             <div className="text-sm md:text-lg text-[#242526] font-bold md:whitespace-nowrap">Rendez vous directement à votre lieu d’affectation</div>
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             {cohort && (

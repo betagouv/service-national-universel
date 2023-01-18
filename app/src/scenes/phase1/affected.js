@@ -11,12 +11,14 @@ import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import StepsAffected from "./components/StepsAffected";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { Link } from "react-router-dom";
+import Loader from "../../components/Loader";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const getMeetingPoint = async () => {
     const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement`);
@@ -27,14 +29,22 @@ export default function Affected() {
   useEffect(() => {
     if (!young.sessionPhase1Id) return;
     (async () => {
+      setLoading(true);
       const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
       if (!ok) return toastr.error("error", translate(code));
       setCenter(data);
       getMeetingPoint();
+      setLoading(false);
     })();
   }, [young]);
 
-  if (!center && !meetingPoint) {
+  if (loading) {
+    return (
+      <div className="my-12 mx-10 w-full">
+        <Loader />
+      </div>
+    );
+  } else if (!center && !meetingPoint) {
     return (
       <div className="my-12 mx-10 w-full">
         <div className="max-w-[80rem] rounded-xl shadow my-0 md:mx-auto px-4 md:!px-8 lg:!px-16 py-8 relative overflow-hidden justify-between bg-gray-50 md:bg-white mb-4">
