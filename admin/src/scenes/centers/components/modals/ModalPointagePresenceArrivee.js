@@ -8,8 +8,16 @@ import { translate } from "../../../../utils";
 export default function ModalPointagePresenceArrivee({ isOpen, onSubmit, onCancel, value, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const getTitle = () => `Marquer ${young.firstName} ${value === "true" ? "présent(e)" : "absent(e)"}`;
-  const getMessage = () => `Vous êtes sur le point de marquer ${young.firstName} ${value === "true" ? "présent(e)" : "absent(e)"} au séjour de cohésion.`;
+  const getTitle = () => {
+    if (value === "true") return `Marquer ${young.firstName} présent(e)`;
+    if (value === "false") return `Marquer ${young.firstName} absent(e)`;
+    return "Marquer la présence en non renseigné";
+  };
+  const getMessage = () => {
+    if (value === "true") return `Vous êtes sur le point de marquer ${young.firstName} présent(e) au séjour de cohésion.`;
+    if (value === "false") return `Vous êtes sur le point de marquer ${young.firstName} absent(e) au séjour de cohésion.`;
+    return `Vous êtes sur le point de marquer la présence de ${young.firstName} au séjour de cohésion en non renseigné.`;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +48,7 @@ export default function ModalPointagePresenceArrivee({ isOpen, onSubmit, onCance
           <SpeakerPhone width={36} height={36} />
         </div>
         <div className="m-4">
-          <div className="flex items-center justify-center text-gray-900 text-xl font-medium">{getTitle()}</div>
+          <div className="flex items-center text-center justify-center text-gray-900 text-xl font-medium">{getTitle()}</div>
           <div className="flex items-center justify-center text-gray-500 text-base font-normal text-center">{getMessage()}</div>
         </div>
         <div className="flex p-4 gap-2">

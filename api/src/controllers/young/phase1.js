@@ -75,6 +75,12 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
 
     // update youngs infos
+    if (young.status === "WAITING_LIST") {
+      young.set({ status: "VALIDATED" });
+    }
+
+    console.log("euh ?? ", young.statusPhase1, young.status);
+
     young.set({
       statusPhase1: "AFFECTED",
       sessionPhase1Id: sessionId,
@@ -217,7 +223,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement"];
     const { error, value } = Joi.object({
-      value: Joi.string().trim().valid("true", "false").required(),
+      value: Joi.string().trim().valid("true", "false", "").required(),
       key: Joi.string()
         .trim()
         .required()
@@ -240,8 +246,8 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
-      young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
+    if ((key === "cohesionStayPresence" || key === "presenceJDM") && newValue == "") {
+      young[key] = undefined;
     } else {
       young.set({ [key]: newValue });
     }
