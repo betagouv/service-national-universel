@@ -167,6 +167,7 @@ export default function StepPDR({ young, center }) {
                 onChoose={chooseGoAlone}
                 choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
+                meetingPointsCount={meetingPoints.length}
               />
             </div>
           ) : (
@@ -324,7 +325,7 @@ function Schedule({ type, children, className }) {
   );
 }
 
-function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired }) {
+function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired, meetingPointsCount }) {
   const [opened, setOpened] = useState(false);
   const [cohort, setCohort] = useState(null);
 
@@ -357,7 +358,10 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
       <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative" id="toggle-button">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (
-          <div className="mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] md:right-[-120px] text-left">
+          <div
+            className={`mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] text-left ${
+              meetingPointsCount === 0 ? "md:left-[-70px]" : "md:right-[-120px]"
+            }`}>
             <div className="text-sm md:text-lg text-[#242526] font-bold md:whitespace-nowrap">Rendez vous directement à votre lieu d’affectation</div>
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             {cohort && (
