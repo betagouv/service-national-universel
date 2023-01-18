@@ -217,7 +217,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
           </p>
         </div>
         <div className="flex flex-col mt-8 gap-4">
-          {user.role === ROLES.ADMIN && editPdr && (
+          {user.role === ROLES.ADMIN && editPdr && !volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount && (
             <div className="relative">
               <div
                 ref={refContainer}
