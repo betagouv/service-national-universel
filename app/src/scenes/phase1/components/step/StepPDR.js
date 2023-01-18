@@ -36,7 +36,7 @@ export default function StepPDR({ young, center }) {
 
   useEffect(() => {
     if (young) {
-      setValid((young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true");
+      setValid((young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true");
       setEnabled(true);
       setCohort(getCohortDetail(young.cohort));
 
