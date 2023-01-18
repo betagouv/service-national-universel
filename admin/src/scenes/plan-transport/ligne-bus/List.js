@@ -51,7 +51,7 @@ const cohortList = [
   { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
 ];
 
-const translateFillingRate = (e) => {
+const translateLineFillingRate = (e) => {
   if (e == 0) return "Vide";
   if (e == 100) return "Rempli";
   return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
@@ -258,16 +258,16 @@ const ReactiveList = ({ cohort, history }) => {
                 className="dropdown-filter"
                 placeholder="Taux de remplissage"
                 componentId="TAUX_REMPLISSAGE"
-                dataField="fillingRate"
+                dataField="lineFillingRate"
                 react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
                 renderItem={(e, count) => {
-                  return `${translateFillingRate(e)} (${count})`;
+                  return `${translateLineFillingRate(e)} (${count})`;
                 }}
                 renderLabel={(items) => {
                   if (Object.keys(items).length === 0) return "Taux de remplissage";
                   const translated = Object.keys(items).map((item) => {
                     if (item === "Non renseigné") return item;
-                    return translateFillingRate(item);
+                    return translateLineFillingRate(item);
                   });
                   let value = translated.join(", ");
                   value = "Taux de remplissage : " + value;
@@ -596,14 +596,14 @@ const Line = ({ hit, currentTab }) => {
           </div>
         </div>
         <div className="w-[10%] flex gap-4 items-center">
-          <div className="text-sm font-normal">{hit.fillingRate}%</div>
+          <div className="text-sm font-normal">{hit.lineFillingRate}%</div>
           <div className="flex flex-col items-center">
             <svg className="-rotate-90 w-9 h-9" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="40" fill="none" stroke="#F0F0F0" strokeDashoffset={`calc(100 - 0)`} strokeWidth="15" />
               <circle
                 className="percent fifty"
                 strokeDasharray={100}
-                strokeDashoffset={`calc(100 - ${Math.round(hit.fillingRate)})`}
+                strokeDashoffset={`calc(100 - ${Math.round(hit.lineFillingRate)})`}
                 cx="60"
                 cy="60"
                 r="40"

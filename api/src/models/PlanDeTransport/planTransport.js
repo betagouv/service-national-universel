@@ -96,7 +96,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  fillingRate: {
+  lineFillingRate: {
     type: Number,
     documentation: {
       description: "Taux de remplissage de la ligne",
