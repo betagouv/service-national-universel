@@ -18,7 +18,7 @@ const options = [
   { label: "Bus", value: "bus" },
   { label: "Train", value: "train" },
   { label: "Avion", value: "avion" },
-  { label: "Fusée", value: "fusée" },
+  // { label: "Fusée", value: "fusée" },
 ];
 
 const keys = ["code", "name", "city", "zip", "department", "region"];

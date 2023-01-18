@@ -6,6 +6,7 @@ const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeR
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -185,11 +186,23 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { id, name, address, city, zip, department, region, location } = value;
 
+    // * Update slave PlanTransport
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
+
+    const planDeTransport = await PlanTransportModel.find({ "pointDeRassemblements.meetingPointId": id });
+
+    for await (const p of planDeTransport) {
+      const meetingPoint = p.pointDeRassemblements.find((meetingPoint) => {
+        return meetingPoint.meetingPointId === id;
+      });
+      meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
+      await p.save({ fromUser: req.user });
+    }
+    // * End update slave PlanTransport
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
@@ -432,6 +445,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const now = new Date();
     pointDeRassemblement.set({ deletedAt: now });
     await pointDeRassemblement.save({ fromUser: req.user });
+
+    // ! What we do here if the point de rassemblement is link to ligneToPoint ? lingneToBus ? planDeTransport ?
 
     return res.status(200).send({ ok: true });
   } catch (error) {

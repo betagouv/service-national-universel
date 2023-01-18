@@ -4,6 +4,7 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
+const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -33,6 +34,7 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { SUB_ROLES } = require("snu-lib/roles");
 const { getAge } = require("snu-lib/date");
+const { capture } = require("../sentry");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -257,6 +259,16 @@ const updateCenterDependencies = async (center, fromUser) => {
     });
     await sessions[i].save({ fromUser });
   }
+  const plansDeTransport = await PlanTransportModel.find({ centerId: center._id });
+  plansDeTransport.forEach(async (planDeTransport) => {
+    planDeTransport.set({
+      centerDepartment: center.department,
+      centerRegion: center.region,
+      centerCode: center.code2022,
+      centerName: center.name,
+    });
+    await planDeTransport.save({ fromUser });
+  });
 };
 
 const deleteCenterDependencies = async (center, fromUser) => {
@@ -330,9 +342,17 @@ async function updateSeatsTakenInBusLine(busline) {
       busline.set({ youngSeatsTaken: seatsTaken });
       await busline.save();
       await busline.index();
+
+      // Do the same update with planTransport
+      const planTransport = await PlanTransportModel.findById(busline._id);
+      if (!planTransport) throw new Error("PlanTransport not found");
+      planTransport.set({ youngSeatsTaken: seatsTaken, fillingRate: Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
+      await planTransport.save();
+      await planTransport.index();
     }
   } catch (e) {
     console.log(e);
+    capture(e);
   }
   return busline;
 }

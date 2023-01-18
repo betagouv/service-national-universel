@@ -621,6 +621,35 @@ router.post("/lignebus/:action(_msearch|export)", passport.authenticate(["refere
   }
 });
 
+router.post("/plandetransport/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
+    filter.push({
+      bool: {
+        must_not: {
+          exists: {
+            field: "deletedAt",
+          },
+        },
+      },
+    });
+
+    if (!canSearchLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("plandetransport", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "plandetransport", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/bus/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
