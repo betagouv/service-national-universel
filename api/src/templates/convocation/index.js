@@ -38,45 +38,7 @@ function getBottom() {
   return getSignedUrl("convocation/bottom.png");
 }
 
-// ! WARNING : Change date also in app/src/scenes/phase1/components/Convocation.js
-const departureMeetingDate = {
-  2021: "lundi 20 février, 14:00",
-  "Février 2022": "dimanche 13 février, 16:00",
-  "Juin 2022": "dimanche 12 juin, 16:00",
-  "Juillet 2022": "dimanche 03 juillet, 16:00",
-};
-
-const departureMeetingDateException = {
-  2021: "lundi 20 février, 14:00",
-  "Février 2022": "dimanche 13 février, 16:00",
-  "Juin 2022": "mercredi 15 juin, 10:00",
-  "Juillet 2022": "mercredi 06 juillet, 10:00",
-};
-
-const returnMeetingDate = {
-  2021: "mardi 02 juillet, 14:00",
-  "Février 2022": "vendredi 25 février, 11:00",
-  "Juin 2022": "vendredi 24 juin, 11:00",
-  "Juillet 2022": "vendredi 15 juillet, 11:00",
-};
-
-const COHESION_STAY_DATE_STRING = {
-  2021: "20 février au 02 juillet 2021  ",
-  "Février 2022": "13 février au 25 février 2022",
-  "Juin 2022": "12 juin au 24 juin 2022",
-  "Juillet 2022": "03 juillet au 15 juillet 2022",
-};
-
 const render = async (young) => {
-  const getDepartureMeetingDate = (meetingPoint) => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint)
-      return young.grade !== "Terminale" ? departureMeetingDate[young.cohort] : departureMeetingDateException[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
-    return meetingPoint.departureAtString;
-  };
-  const getReturnMeetingDate = (meetingPoint) => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
-    return meetingPoint.returnAtString;
-  };
   const getMeetingAddress = (meetingPoint, center) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
     return meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city;
@@ -161,31 +123,33 @@ const renderDOMTOM = async (young) => {
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesionDOMTOM.html"), "utf8");
-    return html
-      .replace(
-        /{{CONTACTS}}/g,
-        sanitizeAll(
-          contacts
-            .map((contact) => {
-              return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
-            })
-            .join(""),
-        ),
-      )
-      .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
-      .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-      .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
-      .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
-      .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
-      .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
-      .replace(/{{CITY}}/g, sanitizeAll(young.city))
-      .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(COHESION_STAY_DATE_STRING[young.cohort]))
-      .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
-      .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
-      .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
-      .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
+    return (
+      html
+        .replace(
+          /{{CONTACTS}}/g,
+          sanitizeAll(
+            contacts
+              .map((contact) => {
+                return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+              })
+              .join(""),
+          ),
+        )
+        .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
+        .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+        .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+        .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
+        .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
+        .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
+        .replace(/{{CITY}}/g, sanitizeAll(young.city))
+        //.replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(COHESION_STAY_DATE_STRING[young.cohort]))
+        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
+        .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
+        .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
+        .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+        .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+        .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()))
+    );
   } catch (e) {
     throw e;
   }
