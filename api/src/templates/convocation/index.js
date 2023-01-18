@@ -5,9 +5,18 @@ const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const SessionPhase1 = require("../../models/sessionPhase1");
 const MeetingPointModel = require("../../models/meetingPoint");
+const CohortModel = require("../../models/cohort");
 const BusModel = require("../../models/bus");
+
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+
 const DepartmentServiceModel = require("../../models/departmentService");
 const { formatStringDate, formatStringDateTimezoneUTC } = require("snu-lib");
+
+const datefns = require("date-fns");
+var { fr } = require("date-fns/locale");
 
 const isFromDOMTOM = (young) => {
   return (
@@ -70,7 +79,7 @@ const render = async (young) => {
   };
   const getMeetingAddress = (meetingPoint, center) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    return meetingPoint.departureAddress;
+    return meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city;
   };
 
   try {
@@ -80,8 +89,18 @@ const render = async (young) => {
     if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
     const center = await CohesionCenterModel.findById(session.cohesionCenterId);
     if (!center) throw `center ${session.cohesionCenterId} not found for young ${young._id} - session ${session._id}`;
-    const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
-    const bus = await BusModel.findById(meetingPoint?.busId);
+
+    const meetingPoint = await PointDeRassemblementModel.findById(young.meetingPointId);
+    let ligneToPoint = null;
+    let ligneBus = null;
+
+    if (meetingPoint && young.ligneId) {
+      ligneBus = await LigneBusModel.findById(young.ligneId);
+      ligneToPoint = await LigneToPointModel.findOne({ lineId: young.ligneId, meetingPointId: young.meetingPointId });
+    }
+
+    const cohort = await CohortModel.findOne({ name: young.cohort });
+
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
@@ -105,33 +124,28 @@ const render = async (young) => {
       .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
       .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
       .replace(/{{CITY}}/g, sanitizeAll(young.city))
-      .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(COHESION_STAY_DATE_STRING[young.cohort]))
+      .replace(
+        /{{COHESION_STAY_DATE_STRING}}/g,
+        sanitizeAll(datefns.format(new Date(cohort?.dateStart), "dd MMMM", { locale: fr }) + " au " + datefns.format(new Date(cohort?.dateEnd), "dd MMMM yyyy", { locale: fr })),
+      )
       .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(
-        /{{MEETING_DATE}}/g,
-        sanitizeAll(
-          `<b>Le</b> ${getDepartureMeetingDate(meetingPoint)
-            .split(/[,\s]+/)
-            .slice(0, 3)
-            .join(" ")}`,
-        ),
-      )
-      .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${getDepartureMeetingDate(meetingPoint).split(",")[1]}`))
+      .replace(/{{MEETING_DATE}}/g, sanitizeAll(`<b>Le</b> ${datefns.format(new Date(cohort?.dateStart), "EEEE dd MMMM", { locale: fr })}`))
+      .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
-      .replace(/{{TRANSPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
       .replace(
         /{{MEETING_DATE_RETURN}}/g,
         sanitizeAll(
           getReturnMeetingDate(meetingPoint)
-            .split(/[,\s]+/)
+            ?.split(/[,\s]+/)
             .slice(0, 3)
             .join(" "),
         ),
       )
-      .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint).split(",")[1]))
+      .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint)?.split(",")[1]))
 
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
