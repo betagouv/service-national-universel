@@ -12,7 +12,7 @@ export default function StepsAffected({ young, center }) {
   useEffect(() => {
     if (young) {
       let nb = 0;
-      if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") nb++;
+      if (young.meetingPointId || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true") nb++;
       if (young.youngPhase1Agreement === "true") nb++;
       if (young.convocationFileDownload === "true") nb++;
       if (young.cohesionStayMedicalFileDownload === "true") nb++;
