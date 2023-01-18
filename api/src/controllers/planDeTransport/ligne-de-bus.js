@@ -196,7 +196,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       busId,
       departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
       returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
-      fillingRate: Math.floor((planTransport.youngSeatsTaken / planTransport.youngCapacity) * 100) }),
+      fillingRate: Math.floor((planDeTransport.youngSeatsTaken / planDeTransport.youngCapacity) * 100),
       youngCapacity,
       totalCapacity,
       followerCapacity,
