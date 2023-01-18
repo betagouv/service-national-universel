@@ -333,8 +333,10 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
   }, [young]);
 
   useEffect(() => {
-    const handleClickOutside = () => {
-      setOpened(false);
+    const handleClickOutside = (e) => {
+      if (!e || !e.target || e.target.getAttribute("id") !== "toggle-button") {
+        setOpened(false);
+      }
     };
     document.addEventListener("click", handleClickOutside, true);
     return () => {
@@ -342,7 +344,9 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
     };
   }, []);
 
-  function toggleMore() {
+  function toggleMore(e) {
+    e.stopPropagation();
+    console.log("setOpened: ", !opened);
     setOpened(!opened);
   }
 
@@ -350,7 +354,7 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired 
     <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
       <LinearMap gray="true" />
       <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en revient par mes propres moyens</div>
-      <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative">
+      <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative" id="toggle-button">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (
           <div className="mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] md:right-[-120px] text-left">
