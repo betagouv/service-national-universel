@@ -7,7 +7,7 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
-const { ERRORS } = require("../../utils");
+const { ERRORS, isYoung } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
@@ -293,6 +293,13 @@ router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"
     });
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { pdrId, busId } = valueParams;
+
+    // young can only get his own meetingPoint info
+    if (isYoung(req.user)) {
+      const young = await YoungModel.findById(req.user._id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (young.meetingPointId !== pdrId || young.ligneId !== busId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(pdrId);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
