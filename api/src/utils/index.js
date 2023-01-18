@@ -346,7 +346,7 @@ async function updateSeatsTakenInBusLine(busline) {
       // Do the same update with planTransport
       const planTransport = await PlanTransportModel.findById(busline._id);
       if (!planTransport) throw new Error("PlanTransport not found");
-      planTransport.set({ youngSeatsTaken: seatsTaken, fillingRate: Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
+      planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
       await planTransport.save();
       await planTransport.index();
     }
