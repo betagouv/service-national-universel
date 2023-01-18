@@ -292,7 +292,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               value={data?.busArrivalHour}
               error={errors?.busArrivalHour}
               readOnly={!editPdr}
-              disabled={editPdr && user.role !== ROLES.ADMIN}
+              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
             <Field
               label="Heure de convocation"
@@ -315,7 +315,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               value={data?.departureHour}
               error={errors?.departureHour}
               readOnly={!editPdr}
-              disabled={editPdr && user.role !== ROLES.ADMIN}
+              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
             <Field
               label="Heure d’arrivée"
@@ -324,7 +324,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               value={data.returnHour}
               error={errors?.returnHour}
               readOnly={!editPdr}
-              disabled={editPdr && user.role !== ROLES.ADMIN}
+              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
           </div>
         </div>
