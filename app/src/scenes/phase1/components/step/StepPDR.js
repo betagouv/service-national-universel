@@ -111,7 +111,9 @@ export default function StepPDR({ young, center }) {
   return (
     <>
       {/* Desktop */}
-      <div className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`} onClick={() => setOpenedDesktop(enabled ? !openedDesktop : false)}>
+      <div
+        className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`}
+        onClick={() => setOpenedDesktop(enabled && young.transportInfoGivenByLocal !== "true" ? !openedDesktop : false)}>
         <div className="flex lex-row py-4 items-center">
           {valid ? (
             <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
@@ -147,7 +149,7 @@ export default function StepPDR({ young, center }) {
           </div>
         </div>
         {openedDesktop && <CohortDateSummary cohortName={young.cohort} className="ml-4" />}
-        {enabled ? (
+        {enabled && young.transportInfoGivenByLocal !== "true" ? (
           <div className="flex items-center justify-center bg-gray-100 h-9 w-9 rounded-full hover:scale-110 ml-4">
             {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}
           </div>
@@ -183,7 +185,7 @@ export default function StepPDR({ young, center }) {
         className={`md:hidden flex items-center border-[1px] mb-3 ml-4 rounded-xl min-h-[144px] cursor-pointer relative ${
           valid ? "border-green-500 bg-green-50" : !young.meetingPointId || young.deplacementPhase1Autonomous !== "true" ? "border-blue-600" : "bg-white"
         } `}
-        onClick={() => setOpenedMobile(enabled ? !openedMobile : false)}>
+        onClick={() => setOpenedMobile(enabled && young.transportInfoGivenByLocal !== "true" ? !openedMobile : false)}>
         {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && (
           <LinearMap gray={(!young.meetingPointId).toString()} className="absolute top-[10px] right-[10px]" />
         )}
