@@ -6,10 +6,6 @@ const { createYoungHelper, notExistingYoungId } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
 const { createDepartmentServiceHelper } = require("./helpers/departmentService");
-const { createMeetingPointHelper } = require("./helpers/meetingPoint");
-const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
-const { createBusHelper } = require("./helpers/bus");
-const getNewBusFixture = require("./fixtures/bus");
 const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 
