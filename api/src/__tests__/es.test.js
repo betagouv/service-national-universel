@@ -267,9 +267,9 @@ describe("Es", () => {
     });
   });
 
-  describe("POST /es/meetingpoint/_msearch", () => {
+  describe("POST /es/pointderassemblement/_msearch", () => {
     it("should return 200", async () => {
-      let res = await msearch("meetingpoint", buildMsearchQuery("meetingpoint", matchAll));
+      let res = await msearch("pointderassemblement", buildMsearchQuery("pointderassemblement", matchAll));
       expect(res.statusCode).toEqual(200);
     });
     it("should not be authorized to head center, responsible and supervisor", async () => {
@@ -277,7 +277,7 @@ describe("Es", () => {
       let res;
       for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
         passport.user.role = role;
-        res = await msearch("meetingpoint", buildMsearchQuery("meetingpoint", matchAll));
+        res = await msearch("pointderassemblement", buildMsearchQuery("pointderassemblement", matchAll));
         expect(res.statusCode).toEqual(403);
       }
       passport.user.role = ROLES.ADMIN;
