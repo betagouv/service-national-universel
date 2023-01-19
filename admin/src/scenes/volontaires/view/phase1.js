@@ -48,10 +48,6 @@ export default function Phase1(props) {
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
 
   const getDisplayCenterButton = async () => {
-    if (environment === "production") {
-      setCohortOpenForAffection(false);
-      return setDisplayCenterButton(false);
-    }
     if (user.role === ROLES.ADMIN) {
       setCohortOpenForAffection(true);
       return setDisplayCenterButton(true);
