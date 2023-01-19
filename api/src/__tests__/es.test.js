@@ -149,11 +149,11 @@ describe("Es", () => {
       });
     });
   });
-  describe("POST /es/meetingpoint/_msearch", () => {
+  describe("POST /es/pointderassemblement/_msearch", () => {
     it("Should call msearch with correct index", async () => {
-      const body = buildMsearchQuery("meetingpoint", matchAll);
-      const res = await msearch("meetingpoint", body);
-      const expectedBody = buildMsearchQuery("meetingpoint", {
+      const body = buildMsearchQuery("pointderassemblement", matchAll);
+      const res = await msearch("pointderassemblement", body);
+      const expectedBody = buildMsearchQuery("pointderassemblement", {
         query: {
           bool: {
             must: { match_all: {} },
@@ -172,7 +172,7 @@ describe("Es", () => {
         },
       });
       expect(res.statusCode).toEqual(200);
-      expect(esClient.msearch).toHaveBeenCalledWith({ body: expectedBody, index: "meetingpoint" });
+      expect(esClient.msearch).toHaveBeenCalledWith({ body: expectedBody, index: "pointderassemblement" });
     });
   });
 
