@@ -34,6 +34,7 @@ const FILTERS = [
   "DEPARTMENT_PDR",
   "CITY_PDR",
   "NAME_PDR",
+  "CODE_PDR",
   "REGION_CENTER",
   "DEPARTMENT_CENTER",
   "NAME_CENTER",
@@ -183,7 +184,7 @@ const ReactiveList = ({ cohort, history }) => {
               defaultQuery={getExportQuery}
               exportTitle="Session"
               icon={<BsDownload className="text-gray-400" />}
-              index="sessionphase1"
+              index="plandetransport"
               react={{ and: FILTERS }}
               css={{
                 override: true,
@@ -355,6 +356,24 @@ const ReactiveList = ({ cohort, history }) => {
                 searchPlaceholder="Rechercher..."
                 size={1000}
                 renderLabel={(items) => <div>{getFilterLabel(items, "Ville", "Ville")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Code"
+                componentId="CODE_PDR"
+                dataField="pointDeRassemblements.code.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "CODE_PDR") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
                 renderItem={(e, count) => {
                   return `${translate(e)} (${count})`;
                 }}
