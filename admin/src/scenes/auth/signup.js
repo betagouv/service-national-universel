@@ -35,7 +35,8 @@ export default function Signup() {
 
   return (
     <div className="flex flex-1 flex-col bg-gray-50">
-      <ModalInfo isOpen={newUser} message="Utilisateur et structure créés avec succès." onClose={() => dispatch(setUser(newUser))}>
+      <ModalInfo isOpen={newUser} message="Utilisateur et structure créés avec succès." onClose={() => dispatch(setUser(newUser))} closeText="Continuer">
+        <p>Cette procédure vous a-t-elle donné satisfaction ?</p>
         <a
           href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3507?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
           target="_blank"
@@ -94,7 +95,7 @@ export default function Signup() {
 
               <div className="mx-auto flex w-full gap-4 my-4">
                 {/* left form */}
-                <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-xl bg-white p-4 shadow-xl">
+                <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-lg bg-white p-4 shadow-xl">
                   <h2 className="text-base font-normal text-brand-grey m-0">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -190,7 +191,7 @@ export default function Signup() {
                 </form>
 
                 {/* right form */}
-                <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-xl bg-white p-4 shadow-xl">
+                <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-lg bg-white p-4 shadow-xl">
                   <h2 className="text-base font-normal text-brand-grey m-0">INFORMATIONS SUR LA STRUCTURE</h2>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
