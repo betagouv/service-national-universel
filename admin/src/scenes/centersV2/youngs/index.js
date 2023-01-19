@@ -269,12 +269,9 @@ export default function CenterYoungIndex() {
       };
       const youngs = await esYoungBySession(filter);
 
-      // TODO : query on Point de Rassemblement
-      /*
-      let resultMeetingPoints = await api.get(`/meeting-point/center/${id}`);
-      const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
-      */
-      const meetingPoints = [];
+      let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
+      const meetingPoints = response ? response.data.meetingPoints : [];
+      const ligneBus = response ? response.data.ligneBus : [];
 
       for (const young of youngs) {
         const tempYoung = {
@@ -303,21 +300,27 @@ export default function CenterYoungIndex() {
           parent2Status: young.parent2Status,
           statusPhase1: young.statusPhase1,
           meetingPointId: young.meetingPointId,
+          ligneId: young.ligneId,
         };
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
         } else {
           const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
           if (youngMeetingPoint) {
-            if (!result[youngMeetingPoint.busExcelId]) {
-              result[youngMeetingPoint.busExcelId] = {};
-              result[youngMeetingPoint.busExcelId]["youngs"] = [];
-              result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
+            if (!result[young.ligneId]) {
+              result[young.ligneId] = {};
+              result[young.ligneId]["youngs"] = [];
+              result[young.ligneId]["ligneBus"] = [];
+              result[young.ligneId]["meetingPoint"] = [];
             }
-            if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
-              result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
+            if (!result[young.ligneId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[young.ligneId]["meetingPoint"].push(youngMeetingPoint);
             }
-            result[youngMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+            if (!result[young.ligneId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+              result[young.ligneId]["ligneBus"].push(youngLigneBus);
+            }
+            result[young.ligneId]["youngs"].push(tempYoung);
           }
         }
       }
@@ -327,6 +330,8 @@ export default function CenterYoungIndex() {
           name: key != "noMeetingPoint" ? key : "Autonome",
           data: result[key].youngs.map((young) => {
             const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
+            const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+            console.log(young.ligneId);
             return {
               _id: young._id,
               Cohorte: young.cohort,
@@ -353,9 +358,9 @@ export default function CenterYoungIndex() {
               "Téléphone représentant légal 2": young.parent2Phone,
               "Statut représentant légal 2": translate(young.parent2Status),
               "Id du point de rassemblement": young.meetingPointId,
-              "Adresse point de rassemblement": meetingPoint?.departureAddress,
-              "Date aller": meetingPoint?.departureAtString,
-              "Date retour": meetingPoint?.returnAtString,
+              "Adresse point de rassemblement": meetingPoint?.address,
+              "Date aller": ligneBus?.departuredDate,
+              "Date retour": ligneBus?.returnDate,
             };
           }),
         };
@@ -498,16 +503,17 @@ const transformData = async ({ data, centerId }) => {
 
   let resultCenter = await api.get(`/cohesion-center/${centerId}`);
   const center = resultCenter ? resultCenter.data : {};
-  /* TODO on pdr
-  let resultMeetingPoints = await api.get(`/meeting-point/center/${centerId}`);
-  const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
-  */
-  const meetingPoints = [];
+
+  let response = await api.get(`/point-de-rassemblement/center/${centerId}/cohort/${all[0].cohort}`);
+  const meetingPoints = response ? response.data.meetingPoints : [];
+  const ligneBus = response ? response.data.ligneBus : [];
 
   return all.map((data) => {
     let meetingPoint = {};
+    let bus = {};
     if (data.meetingPointId && meetingPoints) {
       meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+      bus = ligneBus.find((lb) => lb._id === data?.ligneId);
       if (!meetingPoint) meetingPoint = {};
     }
     return {
@@ -607,10 +613,10 @@ const transformData = async ({ data, centerId }) => {
       "Région du centre": center.region || "",
       "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
       "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-      "Bus n˚": meetingPoint?.busExcelId,
-      "Adresse point de rassemblement": meetingPoint?.departureAddress,
-      "Date aller": meetingPoint?.departureAtString,
-      "Date retour": meetingPoint?.returnAtString,
+      "Bus n˚": bus?.busId,
+      "Adresse point de rassemblement": meetingPoint?.address,
+      "Date aller": bus?.departuredDate,
+      "Date retour": bus?.returnDate,
     };
   });
 };
