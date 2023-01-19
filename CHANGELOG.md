@@ -1,3 +1,25 @@
+# [1.202.0](https://github.com/betagouv/service-national-universel/compare/v1.201.0...v1.202.0) (2023-01-19)
+
+
+### Bug Fixes
+
+* **admin:** chef de centre can add team member ([18b92fe](https://github.com/betagouv/service-national-universel/commit/18b92fe00b6608a0a0bf3a14bf9e899e329e9391))
+* **admin:** disabled status phase 1 Affected ([1d9022a](https://github.com/betagouv/service-national-universel/commit/1d9022a8cc1c79e5b5d521c59eaff818763e89bf))
+* **admin:** Vue PDR : fix de l'erreur sur le filtre par défaut de département ([#2187](https://github.com/betagouv/service-national-universel/issues/2187)) ([b1cfbf7](https://github.com/betagouv/service-national-universel/commit/b1cfbf7246af61c97b184138a7f9895e3fe37c17))
+* **admin:** Vue PDR : problème de valeur par défaut des filtres de région et département pour les référents ([#2186](https://github.com/betagouv/service-national-universel/issues/2186)) ([7c5f30f](https://github.com/betagouv/service-national-universel/commit/7c5f30fbb9a823aa26035b2bbcafa59b86582df1))
+* **api:** fix autorisation affectation admin pdr ([31c1720](https://github.com/betagouv/service-national-universel/commit/31c172091e4d0bf35eac4cbe5eaca48ed4b07c6c))
+* **app:** Update fiche sanitaire ecran affecté ([#2183](https://github.com/betagouv/service-national-universel/issues/2183)) ([a607399](https://github.com/betagouv/service-national-universel/commit/a607399fc55c299f8be29b40a714948e406b40a1))
+
+
+### Features
+
+* **admin:** cannot edit mission if ARCHIVED ([b833c5c](https://github.com/betagouv/service-national-universel/commit/b833c5ce40865cbe9d0c27ac3cd952d0cc65bc12))
+* **admin:** modal affectation can search center by department and region ([e536790](https://github.com/betagouv/service-national-universel/commit/e536790e1b274eafd156ace8e97d6f355808357b))
+* **admin:** open affectation phase 1 for admin ([85ce3a5](https://github.com/betagouv/service-national-universel/commit/85ce3a5088e0fe99879978d2a92e820cf849d745))
+* **admin/api:** open plan de transport moderateur prod ([#2181](https://github.com/betagouv/service-national-universel/issues/2181)) ([17a26cb](https://github.com/betagouv/service-national-universel/commit/17a26cb4334709a40a12bf3799a723e440dfc409))
+* **admin/api:** update convocation ([#2179](https://github.com/betagouv/service-national-universel/issues/2179)) ([0570f01](https://github.com/betagouv/service-national-universel/commit/0570f013bec62818e8e8ac9c7c33a0f6d4d40657))
+* **api:** complétion des notifications de déménagement aux référents ([#2184](https://github.com/betagouv/service-national-universel/issues/2184)) ([5974a68](https://github.com/betagouv/service-national-universel/commit/5974a6850cc7514d2f4d8b283c025b1352441f43))
+
 # [1.201.0](https://github.com/betagouv/service-national-universel/compare/v1.200.0...v1.201.0) (2023-01-18)
 
 
