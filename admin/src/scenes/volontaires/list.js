@@ -129,10 +129,14 @@ export default function VolontaireList() {
         if (!center) center = {};
       }
       let meetingPoint = {};
+
+      // Todo replace with PDR
+      /* 
       if (data.meetingPointId && meetingPoints) {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         if (!meetingPoint) meetingPoint = {};
       }
+      */
       if (!data.domains) data.domains = [];
       if (!data.periodRanking) data.periodRanking = [];
       const allFields = {
@@ -323,10 +327,12 @@ export default function VolontaireList() {
       const { data } = await api.get("/cohesion-center");
       setCenters(data);
     })();
+    /* replace with PDR
     (async () => {
       const { data } = await api.get("/meeting-point/all");
       setMeetingPoints(data);
     })();
+    */
     (async () => {
       const { data } = await api.get("/session-phase1/");
       setSessionsPhase1(data);

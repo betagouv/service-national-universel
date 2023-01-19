@@ -269,6 +269,7 @@ export default function CenterYoungIndex() {
       };
       const youngs = await esYoungBySession(filter);
 
+      // TODO : query on Point de Rassemblement
       let resultMeetingPoints = await api.get(`/meeting-point/center/${id}`);
       const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
 
