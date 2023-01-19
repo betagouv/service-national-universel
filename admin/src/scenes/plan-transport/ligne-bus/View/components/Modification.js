@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
 import React from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { ROLES, translate } from "snu-lib";
 import Loader from "../../../../../components/Loader";
 import { capture } from "../../../../../sentry";
 import api from "../../../../../services/api";
@@ -14,6 +15,7 @@ import View from "../../modificationPanel/View";
 export default function Modification({ demandeDeModification, getModification }) {
   const [panel, setPanel] = React.useState({ open: false });
   const [tagsOptions, setTagsOptions] = React.useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   const getTags = async () => {
     try {
@@ -57,14 +59,18 @@ export default function Modification({ demandeDeModification, getModification })
       <div className="mt-4 flex flex-col overflow-y-auto gap-4 max-h-[300px]">
         {demandeDeModification.map((modification, index) => (
           <div key={index} className=" flex flex-col gap-2 mr-1">
-            <div className="group relative flex flex-col gap-2 rounded-xl bg-[#F6F7F9] w-full p-4 cursor-pointer" onClick={() => setPanel({ open: true, modification })}>
-              <div className="absolute top-0 right-0 w-full h-full rounded-xl bg-black opacity-70 hidden group-hover:flex items-center justify-center transition duration-300 ease-in-out">
-                <div className="text-white text-base font-bold leading-6 hover:underline">Voir la demande</div>
-                <div className="absolute bottom-3 right-5 text-white text-sm leading-6 flex items-center gap-1">
-                  <Chat className="text-white" />
-                  {modification?.messages.length} Commentaire(s)
+            <div
+              className={`group relative flex flex-col gap-2 rounded-xl bg-[#F6F7F9] w-full p-4 ${[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) ? "cursor-pointer" : ""}`}
+              onClick={() => [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && setPanel({ open: true, modification })}>
+              {[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
+                <div className="absolute top-0 right-0 w-full h-full rounded-xl bg-black opacity-70 hidden group-hover:flex items-center justify-center transition duration-300 ease-in-out">
+                  <div className="text-white text-base font-bold leading-6 hover:underline">Voir la demande</div>
+                  <div className="absolute bottom-3 right-5 text-white text-sm leading-6 flex items-center gap-1">
+                    <Chat className="text-white" />
+                    {modification?.messages.length} Commentaire(s)
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="flex justify-start">
                 <Quote className="text-gray-400" />
               </div>
@@ -73,12 +79,13 @@ export default function Modification({ demandeDeModification, getModification })
                 <Quote className="text-gray-400 rotate-180" />
               </div>
             </div>
+
             <div className="flex justify-between py-1">
               <div className="flex gap-2 items-center">
                 <div className={`flex items-center justify-center text-white text-xs rounded-full h-[22px] px-3 ${getStatusClass(modification.status)}`}>
                   {translateStatus(modification.status)}
                 </div>
-                {modification?.opinion && (
+                {modification?.opinion && [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
                   <div className="flex items-center justify-center text-white text-xs rounded-full h-[22px] w-[22px] bg-[#3D5B85]">
                     <Thumbs className={`text-white h-3 w-3 ${modification.opinion === "false" && "rotate-180"}`} />
                   </div>
