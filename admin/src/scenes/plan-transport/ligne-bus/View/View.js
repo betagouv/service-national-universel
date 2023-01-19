@@ -13,6 +13,7 @@ import Loader from "../../../../components/Loader";
 import { ROLES, translate } from "snu-lib";
 import Creation from "../modificationPanel/Creation";
 import { useSelector } from "react-redux";
+import { environment } from "../../../../config";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -95,7 +96,7 @@ export default function View(props) {
             <Title>{data.busId}</Title>
             <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{data.cohort}</div>
           </div>
-          {user.role !== ROLES.REFERENT_DEPARTMENT && (
+          {user.role !== ROLES.REFERENT_DEPARTMENT && environment !== "production" && (
             <button
               className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
               onClick={() => setPanelOpen(true)}>
