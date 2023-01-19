@@ -302,25 +302,26 @@ export default function CenterYoungIndex() {
           meetingPointId: young.meetingPointId,
           ligneId: young.ligneId,
         };
+        // TODO : transportInfoGivenByLocal
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
         } else {
           const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
           const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
           if (youngMeetingPoint) {
-            if (!result[young.ligneId]) {
-              result[young.ligneId] = {};
-              result[young.ligneId]["youngs"] = [];
-              result[young.ligneId]["ligneBus"] = [];
-              result[young.ligneId]["meetingPoint"] = [];
+            if (!result[youngLigneBus.busId]) {
+              result[youngLigneBus.busId] = {};
+              result[youngLigneBus.busId]["youngs"] = [];
+              result[youngLigneBus.busId]["ligneBus"] = [];
+              result[youngLigneBus.busId]["meetingPoint"] = [];
             }
-            if (!result[young.ligneId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
-              result[young.ligneId]["meetingPoint"].push(youngMeetingPoint);
+            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
             }
-            if (!result[young.ligneId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
-              result[young.ligneId]["ligneBus"].push(youngLigneBus);
+            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
             }
-            result[young.ligneId]["youngs"].push(tempYoung);
+            result[youngLigneBus.busId]["youngs"].push(tempYoung);
           }
         }
       }
