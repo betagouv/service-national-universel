@@ -1,15 +1,12 @@
 require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
-const getNewBusFixture = require("./fixtures/bus");
-const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
-const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
+
+const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
+const { createPointDeRassemblementHelper } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 
 const getNewYoungFixture = require("./fixtures/young");
 const getAppHelper = require("./helpers/app");
-const { createBusHelper } = require("./helpers/bus");
-const { createCohesionCenter, notExistingCohesionCenterId } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { createMeetingPointHelper, notExistingMeetingPointId } = require("./helpers/meetingPoint");
 const { createYoungHelper } = require("./helpers/young");
 
 jest.mock("../sendinblue", () => ({
@@ -29,11 +26,37 @@ describe("Meeting point", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      const res = await request(getAppHelper())
-        .get("/meeting-point/" + notExistingMeetingPointId)
-        .send();
+      const res = await request(getAppHelper()).get("/point-de-rassemblement/available").send();
       expect(res.status).toBe(404);
       passport.user = previous;
+    });
+  });
+
+  describe("PUT /point-de-rassemblement/:id", () => {
+    it("should return 404 when point-de-rassemblement does not exist", async () => {
+      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
+      const res = await request(getAppHelper())
+        .get("/point-de-rassemblement/" + notExistingPdrId)
+        .send();
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe("PUT /point-de-rassemblement/delete/cohort/:id", () => {
+    it("should return 404 when point-de-rassemblement does not exist", async () => {
+      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
+      const res = await request(getAppHelper())
+        .get("/point-de-rassemblement/detete/cohort/" + notExistingPdrId)
+        .send();
+      expect(res.status).toBe(404);
+    });
+    it("should return 403 when youngs are still linked to point-de-rassemblement", async () => {
+      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
+      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id });
+      const res = await request(getAppHelper())
+        .get("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
+        .send();
+      expect(res.status).toBe(403);
     });
   });
 });
