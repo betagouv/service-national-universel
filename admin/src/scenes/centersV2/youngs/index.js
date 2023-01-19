@@ -270,8 +270,11 @@ export default function CenterYoungIndex() {
       const youngs = await esYoungBySession(filter);
 
       // TODO : query on Point de Rassemblement
+      /*
       let resultMeetingPoints = await api.get(`/meeting-point/center/${id}`);
       const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
+      */
+      const meetingPoints = [];
 
       for (const young of youngs) {
         const tempYoung = {
@@ -495,8 +498,11 @@ const transformData = async ({ data, centerId }) => {
 
   let resultCenter = await api.get(`/cohesion-center/${centerId}`);
   const center = resultCenter ? resultCenter.data : {};
+  /* TODO on pdr
   let resultMeetingPoints = await api.get(`/meeting-point/center/${centerId}`);
   const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
+  */
+  const meetingPoints = [];
 
   return all.map((data) => {
     let meetingPoint = {};
