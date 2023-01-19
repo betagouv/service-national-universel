@@ -31,7 +31,7 @@ export default function Menu({ id }) {
   };
 
   return (
-    <>
+    <div className="flex justify-between items-center border-bottom my-6">
       <ModalConfirmDelete
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
@@ -39,18 +39,16 @@ export default function Menu({ id }) {
         title="Êtes-vous sûr(e) de vouloir supprimer cette structure ?"
         message="Cette action est irréversible."
       />
-      <div className="flex justify-between items-center border-bottom my-6">
-        <nav className="flex items-center gap-10 w-full mx-8">
-          {tabs.map((tab) => (
-            <Link key={tab.label} to={tab.src} className={`pb-4 cursor-pointer ${activeTab.label === tab.label && "text-blue-600 border-b-2 border-blue-600"}`}>
-              {tab.label}
-            </Link>
-          ))}
-          <Button icon={<Bin fill="red" />} onClick={() => setIsOpen(true)} className="mb-auto ml-auto">
-            Supprimer
-          </Button>
-        </nav>
-      </div>
-    </>
+      <nav className="flex items-center gap-10 w-full mx-8 text-gray-500">
+        {tabs.map((tab) => (
+          <Link key={tab.label} to={tab.src} className={`pb-4 cursor-pointer ${activeTab.label === tab.label && "text-blue-600 border-b-2 border-blue-600"}`}>
+            {tab.label}
+          </Link>
+        ))}
+        <Button icon={<Bin fill="red" />} onClick={() => setIsOpen(true)} className="mb-auto ml-auto">
+          Supprimer
+        </Button>
+      </nav>
+    </div>
   );
 }

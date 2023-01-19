@@ -57,7 +57,7 @@ export default function Informations({ structure }) {
     try {
       const { ok, code, data: resData } = await API.put(`/structure/${structure._id}`, data);
       if (!ok) {
-        setErrors(resData.errors);
+        setErrors(code);
         return toastr.error("Oups, une erreur est survenue pendant la mise à jour de la structure :", translate(code));
       }
       toastr.success("Structure mise à jour avec succès");
@@ -197,10 +197,7 @@ export default function Informations({ structure }) {
               options={typesOptions}
               selected={typesOptions.filter((e) => data.types.includes(e.value))}
               error={errors?.types}
-              setSelected={(e) => {
-                console.log("🚀 ~ file: Informations.js:169 ~ e", e);
-                setData({ ...data, types: e.map((e) => e.value) });
-              }}
+              setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
             />
             <Field
               readOnly={!isEditing}
@@ -210,7 +207,7 @@ export default function Informations({ structure }) {
               error={errors?.siret}
             />
 
-            <div className="space-y-2 my-4">
+            <div className="space-y-2 my-3">
               <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
               <p className="text-xs font-medium leading-4 text-gray-400">
                 Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au superviseur
@@ -226,9 +223,48 @@ export default function Informations({ structure }) {
               />
             </div>
 
-            <div className="flex justify-between">
-              <p>Tête de réseau</p>
-              <Toggle value={data.isNetworkHead} onChange={(e) => setData({ ...data, isNetworkHead: e })} disabled={!isEditing} />
+            <div className="flex justify-between my-3">
+              <p className="text-gray-500">Tête de réseau</p>
+              <div className="flex gap-2 items-center">
+                <Toggle value={data.isNetworkHead === "true"} onChange={(e) => setData({ ...data, isNetworkHead: e.toString() })} disabled={!isEditing} />
+                {data.isNetworkHead ? "Oui" : "Non"}
+              </div>
+            </div>
+
+            <div className="flex justify-between my-3">
+              <p className="text-gray-500">Préparation militaire</p>
+              <div className="flex gap-2 items-center">
+                <Toggle value={data.isMilitaryPreparation === "true"} onChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
+                {data.isMilitaryPreparation ? "Oui" : "Non"}
+              </div>
+            </div>
+
+            <div className="space-y-2 my-3">
+              <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Field
+                  readOnly={!isEditing}
+                  label="Site Internet"
+                  onChange={(e) => setData({ ...data, website: e.target.value })}
+                  value={data.website || ""}
+                  error={errors?.website}
+                />
+                <Field
+                  readOnly={!isEditing}
+                  label="Facebook"
+                  onChange={(e) => setData({ ...data, facebook: e.target.value })}
+                  value={data.facebook || ""}
+                  error={errors?.facebook}
+                />
+                <Field readOnly={!isEditing} label="Twitter" onChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} error={errors?.twitter} />
+                <Field
+                  readOnly={!isEditing}
+                  label="Instagram"
+                  onChange={(e) => setData({ ...data, instagram: e.target.value })}
+                  value={data.instagram || ""}
+                  error={errors?.instagram}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -24,9 +24,10 @@ import Field from "../../centersV2/components/Field";
 import EditButton from "../components/EditButton";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Informations from "../components/Informations";
+import CardContacts from "../components/cards/CardContacts";
 
 export default function DetailsView({ structure }) {
-  const [referents, setReferents] = useState([]);
+  // const [referents, setReferents] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
@@ -56,58 +57,71 @@ export default function DetailsView({ structure }) {
     });
   };
 
-  const onConfirmDelete = async (target) => {
+  // const getReferents = async () => {
+  //   if (!structure) return;
+  //   const { responses: referentResponses } = await api.esQuery("referent", {
+  //     query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+  //     size: ES_NO_LIMIT,
+  //   });
+  //   if (structure.networkId) {
+  //     const { responses: structureResponses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } });
+
+  //     if (structureResponses.length) {
+  //       const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+  //       setParentStructure(structures.length ? structures[0] : null);
+  //     }
+  //   } else {
+  //     setParentStructure(null);
+  //   }
+  //   if (referentResponses.length) {
+  //     setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+  //   }
+  // };
+
+  const getReferents = async () => {
+    if (!structure) return;
+    const { responses } = await api.esQuery("referent", {
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+      size: ES_NO_LIMIT,
+    });
+    if (responses.length) return responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+  };
+
+  const createReferent = async (referentData) => {
+    try {
+      const { ok, code, data } = await api.post(`/referent`, referentData);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      return data;
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la création du profil :", translate(e.code));
+    }
+  };
+
+  const deleteReferent = async (target) => {
     try {
       const { ok, code } = await api.remove(`/referent/${target._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(target);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      setReferents(referents.filter((referent) => referent._id !== target._id));
-      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
     }
   };
 
-  const getReferents = async () => {
-    if (!structure) return;
-    const { responses: referentResponses } = await api.esQuery("referent", {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-      size: ES_NO_LIMIT,
-    });
-    if (structure.networkId) {
-      const { responses: structureResponses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } });
-
-      if (structureResponses.length) {
-        const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
-      }
-    } else {
-      setParentStructure(null);
-    }
-    if (referentResponses.length) {
-      setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-    }
-  };
-
-  useEffect(() => {
-    getReferents();
-  }, [structure]);
-
   if (!structure) return <div />;
 
   return (
     <>
-      {/* {JSON.stringify(data)} */}
-      <header className="flex items-center justify-between m-8">
+      <header className="flex items-center justify-between mx-8 my-6">
         <Title>{structure.name}</Title>
         <Button>Nouvelle mission</Button>
       </header>
       <Menu id={structure._id} />
       <section className="flex mx-8 gap-4">
         <div className="bg-white rounded-lg overflow-hidden px-4 py-2 shadow-lg">Représentant de la structure</div>
-        <div className="bg-white rounded-lg overflow-hidden px-4 py-2 shadow-lg">L&apos;équipe</div>
+        <CardContacts getContacts={getReferents} createContact={createReferent} deleteContact={deleteReferent} />
       </section>
       <Informations structure={structure} />
     </>

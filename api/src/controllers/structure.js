@@ -90,7 +90,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
-    if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (errorStructure) {
+      console.log("🚀 ~ file: structure.js:94 ~ router.put ~ errorStructure", errorStructure);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
 
     structure.set(checkedStructure);
     await structure.save({ fromUser: req.user });
