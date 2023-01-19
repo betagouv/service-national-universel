@@ -157,7 +157,7 @@ export default function List() {
                 showSearch={true}
                 searchPlaceholder="Rechercher..."
                 size={1000}
-                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
                 renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
               />
               <DeleteFilters />
