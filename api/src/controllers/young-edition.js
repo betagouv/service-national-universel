@@ -85,8 +85,6 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    console.log("SAVE VALUE: ", value);
-    console.log("body: ", req.body);
 
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);

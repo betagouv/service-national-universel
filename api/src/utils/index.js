@@ -612,7 +612,7 @@ const getCcOfYoung = ({ template, young }) => {
   return cc;
 };
 
-async function notifDepartmentChange(department, template, young) {
+async function notifDepartmentChange(department, template, young, extraParams = {}) {
   const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
   for (let referent of referents) {
     await sendTemplate(template, {
@@ -621,6 +621,7 @@ async function notifDepartmentChange(department, template, young) {
         youngFirstName: young.firstName,
         youngLastName: young.lastName,
         cta: `${ADMIN_URL}/volontaire/${young._id}`,
+        ...extraParams,
       },
     });
   }

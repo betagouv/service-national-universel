@@ -393,8 +393,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
-      await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young);
-      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
+      await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: newYoung.department });
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
