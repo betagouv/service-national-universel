@@ -17,7 +17,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
-const { ERRORS } = require("../utils");
+const { ERRORS, notifDepartmentChange } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
@@ -106,6 +106,12 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     }
 
     if (value.birthdateAt) value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
+
+    // test de déménagement.
+    if (young.department !== value.department && value.department !== null && value.department !== undefined && young.department !== null && young.department !== undefined) {
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
