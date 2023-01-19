@@ -122,6 +122,13 @@ export default function VolontaireList() {
         }
       }
     }
+
+    const response = await api.get("/ligne-de-bus/all");
+    const meetingPoints = response ? response.data.meetingPoints : [];
+    const ligneBus = response ? response.data.ligneBus : [];
+
+    //setMeetingPoints(data);
+
     return all.map((data) => {
       let center = {};
       if (data.sessionPhase1Id && centers && sessionsPhase1) {
@@ -129,7 +136,11 @@ export default function VolontaireList() {
         if (!center) center = {};
       }
       let meetingPoint = {};
-
+      let bus = {};
+      if (data.meetingPointId && meetingPoints) {
+        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+        bus = ligneBus.find((lb) => lb._id === data.ligneId);
+      }
       // Todo replace with PDR
       /* 
       if (data.meetingPointId && meetingPoints) {
@@ -253,10 +264,10 @@ export default function VolontaireList() {
         phase1Transport: {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
           // "Transport géré hors plateforme": // Doublon?
-          "Bus n˚": meetingPoint?.busExcelId,
-          "Adresse point de rassemblement": meetingPoint?.departureAddress,
-          "Date aller": meetingPoint?.departureAtString,
-          "Date retour": meetingPoint?.returnAtString,
+          "Bus n˚": bus?.busId,
+          "Adresse point de rassemblement": meetingPoint?.address,
+          "Date aller": bus?.departuredDate,
+          "Date retour": bus?.returnDate,
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
@@ -327,12 +338,6 @@ export default function VolontaireList() {
       const { data } = await api.get("/cohesion-center");
       setCenters(data);
     })();
-    /* replace with PDR
-    (async () => {
-      const { data } = await api.get("/meeting-point/all");
-      setMeetingPoints(data);
-    })();
-    */
     (async () => {
       const { data } = await api.get("/session-phase1/");
       setSessionsPhase1(data);
