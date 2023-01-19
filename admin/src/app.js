@@ -203,7 +203,6 @@ const Home = () => {
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
             {/* Ligne de bus */}
             <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
-
             {/* Schéma de répartition */}
             <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />

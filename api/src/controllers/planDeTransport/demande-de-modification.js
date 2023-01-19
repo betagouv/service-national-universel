@@ -19,7 +19,7 @@ const { ObjectId } = require("mongodb");
 
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
-  const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id);
+  const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id.toString());
   modificationBus.set({ ...modif });
   await planDeTransport.save({ fromUser });
 };

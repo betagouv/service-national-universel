@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import Thumbs from "./components/Icons/Thumbs";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
+import { useSelector } from "react-redux";
 
 const FILTERS = ["SEARCH", "LIGNE", "TAGS", "STATUS", "OPINION", "ROLE"];
 
@@ -31,6 +32,7 @@ export default function ListeDemandeModif() {
   const [cohort, setCohort] = React.useState("Février 2023 - C");
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [tagsOptions, setTagsOptions] = React.useState([]);
+  const user = useSelector((state) => state.Auth.user);
 
   const getTags = async () => {
     try {
@@ -161,35 +163,37 @@ export default function ListeDemandeModif() {
                   return <div>{value}</div>;
                 }}
               />
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Avis"
-                componentId="OPINION"
-                dataField="opinion.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "OPINION") }}
-                renderItem={(e, count) => {
-                  if (e === "Non renseigné") return `Non renseigné (${count})`;
-                  if (e === "true") return `Favorable (${count})`;
-                  if (e === "false") return `Défavorable (${count})`;
-                }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-                showMissing
-                missingLabel="Non renseigné"
-                renderLabel={(items) => {
-                  if (Object.keys(items).length === 0) return "Avis";
-                  const translated = Object.keys(items).map((item) => {
-                    if (item === "Non renseigné") return item;
-                    if (item === "true") return "Favorable";
-                    if (item === "false") return "Défavorable";
-                  });
-                  let value = translated.join(", ");
-                  value = "Avis : " + value;
-                  return <div>{value}</div>;
-                }}
-              />
+              {[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Avis"
+                  componentId="OPINION"
+                  dataField="opinion.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "OPINION") }}
+                  renderItem={(e, count) => {
+                    if (e === "Non renseigné") return `Non renseigné (${count})`;
+                    if (e === "true") return `Favorable (${count})`;
+                    if (e === "false") return `Défavorable (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  showMissing
+                  missingLabel="Non renseigné"
+                  renderLabel={(items) => {
+                    if (Object.keys(items).length === 0) return "Avis";
+                    const translated = Object.keys(items).map((item) => {
+                      if (item === "Non renseigné") return item;
+                      if (item === "true") return "Favorable";
+                      if (item === "false") return "Défavorable";
+                    });
+                    let value = translated.join(", ");
+                    value = "Avis : " + value;
+                    return <div>{value}</div>;
+                  }}
+                />
+              )}
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
@@ -224,7 +228,7 @@ export default function ListeDemandeModif() {
                       <div className="w-[18%]">Auteur</div>
                     </div>
                     {data?.map((hit) => {
-                      return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} />;
+                      return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} user={user} />;
                     })}
                     <hr />
                   </div>
@@ -238,7 +242,7 @@ export default function ListeDemandeModif() {
   );
 }
 
-const Line = ({ modification, tagsOptions }) => {
+const Line = ({ modification, tagsOptions, user }) => {
   const history = useHistory();
   const [open, setOpen] = React.useState(false);
   const refContainer = React.useRef(null);
@@ -308,7 +312,7 @@ const Line = ({ modification, tagsOptions }) => {
           <div className={`flex items-center justify-center text-white text-sm rounded-full py-1 px-3 whitespace-nowrap ${getStatusClass(modification.status)}`}>
             {translateStatus(modification.status)}
           </div>
-          {modification?.opinion && (
+          {modification?.opinion && [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
             <div className="flex items-center justify-center text-white text-sm rounded-full p-2 bg-[#3D5B85]">
               <Thumbs className={`text-white h-4 w-4 ${modification.opinion === "false" && "rotate-180"}`} />
             </div>
