@@ -127,8 +127,6 @@ export default function VolontaireList() {
     const meetingPoints = response ? response.data.meetingPoints : [];
     const ligneBus = response ? response.data.ligneBus : [];
 
-    //setMeetingPoints(data);
-
     return all.map((data) => {
       let center = {};
       if (data.sessionPhase1Id && centers && sessionsPhase1) {
@@ -141,13 +139,7 @@ export default function VolontaireList() {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         bus = ligneBus.find((lb) => lb._id === data.ligneId);
       }
-      // Todo replace with PDR
-      /* 
-      if (data.meetingPointId && meetingPoints) {
-        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-        if (!meetingPoint) meetingPoint = {};
-      }
-      */
+
       if (!data.domains) data.domains = [];
       if (!data.periodRanking) data.periodRanking = [];
       const allFields = {
