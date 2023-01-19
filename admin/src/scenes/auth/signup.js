@@ -2,7 +2,7 @@ import { Field, Formik } from "formik";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, Redirect, useHistory } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import validator from "validator";
 
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -16,10 +16,11 @@ import { requiredMessage } from "../../components/errorMessage";
 import { adminURL } from "../../config";
 import { capture } from "../../sentry";
 import { getDepartmentByZip, getRegionByZip, legalStatus, regexPhoneFrenchCountries, sousTypesStructure, translate, typesStructure } from "../../utils";
+import ModalInfo from "../../components/modals/ModalInfo";
 
 export default function Signup() {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const [newUser, setNewUser] = React.useState(null);
 
   const user = useSelector((state) => state.Auth.user);
   if (user) return <Redirect to="/" />;
@@ -34,6 +35,16 @@ export default function Signup() {
 
   return (
     <div className="flex flex-1 flex-col bg-gray-50">
+      <ModalInfo isOpen={newUser} message="Utilisateur et structure créés avec succès." onClose={() => dispatch(setUser(newUser))} closeText="Continuer">
+        <p>Cette procédure vous a-t-elle donné satisfaction ?</p>
+        <a
+          href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3507?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+          target="_blank"
+          rel="noreferrer"
+          className="">
+          <img className="w-32" src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
+        </a>
+      </ModalInfo>
       <Header />
       <Formik
         validateOnChange={false}
@@ -53,14 +64,13 @@ export default function Signup() {
               if (code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
               return toastr.error("Un problème est survenu lors de la création de votre compte.", translate(code));
             }
-            dispatch(setUser(user));
+            setNewUser(user);
             if (token) api.setToken(token);
             const structureId = await createStructure(values?.structure);
             const responseResponsableUpdated = await api.put("/referent", { structureId });
             if (!responseResponsableUpdated.ok)
               return toastr.error("Une erreur s'est produite lors de l'affiliation de la structure :", translate(responseResponsableUpdated.code));
-            dispatch(setUser(responseResponsableUpdated.data));
-            history.push("/");
+            setNewUser(responseResponsableUpdated.data);
           } catch (e) {
             if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
             capture(e);
@@ -71,20 +81,23 @@ export default function Signup() {
         }}>
         {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
           return (
-            <div className="flex flex-col items-center p-8">
-              <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-2">Inscrivez votre structure d&apos;accueil</h1>
-              <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">A destination des structures souhaitant accueillir des volontaires</h2>
-              <p className="mb-8 text-center text-sm text-brand-grey">
-                Vous avez déjà un compte ?{" "}
-                <Link to="/auth" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
-                  Connectez-vous
-                </Link>
-              </p>
-              <div className="mx-auto mb-6 flex max-w-screen-lg gap-8">
+            <div className="p-8 mx-auto w-[1100px]">
+              <div className="text-center space-y-4 text-brand-grey">
+                <h1 className="text-3xl font-bold text-brand-black">Inscrivez votre structure d&apos;accueil</h1>
+                <p>A destination des structures souhaitant accueillir des volontaires</p>
+                <p>
+                  Vous avez déjà un compte ?{" "}
+                  <Link to="/auth" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+                    Connectez-vous.
+                  </Link>
+                </p>
+              </div>
+
+              <div className="mx-auto flex w-full gap-4 my-4">
                 {/* left form */}
-                <form onSubmit={handleSubmit} className="grid flex-1 grid-cols-2 gap-y-4 gap-x-2">
-                  <h2 className="mb-8 text-base font-normal text-brand-grey col-span-2 mb-0 text-center">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
-                  <div className="col-span-2">
+                <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-lg bg-white p-4 shadow-xl">
+                  <h2 className="text-base font-normal text-brand-grey m-0">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
+                  <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>ADRESSE EMAIL
                     </label>
@@ -100,58 +113,60 @@ export default function Signup() {
                     />
                     <p className="text-xs text-red-500">{errors.user?.email}</p>
                   </div>
-                  <div>
-                    <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                      <span className="mr-1 text-red-500">*</span>Prénom
-                    </label>
-                    <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est obligatoire"}
-                      name="user.firstName"
-                      id="firstName"
-                      value={values.user.firstName}
-                      onChange={handleChange}
-                      placeholder="Prénom"
-                      haserror={errors.user?.firstName}
-                    />
-                    <p className="text-xs text-red-500">{errors.user?.firstName}</p>
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                      <span className="mr-1 text-red-500">*</span>Nom
-                    </label>
-                    <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est obligatoire"}
-                      name="user.lastName"
-                      id="lastName"
-                      value={values.user.lastName}
-                      onChange={handleChange}
-                      placeholder="Nom"
-                      haserror={errors.user?.lastName}
-                    />
-                    <p className="text-xs text-red-500">{errors.user?.lastName}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <div className="mb-2">
-                      <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                        <span className="mr-1 text-red-500">*</span>Téléphone
+                  <div className="flex w-full gap-4">
+                    <div className="w-1/2">
+                      <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        <span className="mr-1 text-red-500">*</span>Prénom
                       </label>
                       <Field
                         className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                        name="user.phone"
-                        type="tel"
-                        id="phone"
-                        value={values.user.phone}
+                        validate={(v) => !v && "Ce champ est obligatoire"}
+                        name="user.firstName"
+                        id="firstName"
+                        value={values.user.firstName}
                         onChange={handleChange}
-                        placeholder="06/02 00 00 00 00"
-                        validate={(v) =>
-                          (!v && requiredMessage) ||
-                          (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
-                        }
+                        placeholder="Prénom"
+                        haserror={errors.user?.firstName}
                       />
-                      <p className="text-xs text-red-500">{errors.user?.phone}</p>
+                      <p className="text-xs text-red-500">{errors.user?.firstName}</p>
                     </div>
+                    <div className="w-1/2">
+                      <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        <span className="mr-1 text-red-500">*</span>Nom
+                      </label>
+                      <Field
+                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                        validate={(v) => !v && "Ce champ est obligatoire"}
+                        name="user.lastName"
+                        id="lastName"
+                        value={values.user.lastName}
+                        onChange={handleChange}
+                        placeholder="Nom"
+                        haserror={errors.user?.lastName}
+                      />
+                      <p className="text-xs text-red-500">{errors.user?.lastName}</p>
+                    </div>
+                  </div>
+                  <div className="mb-2">
+                    <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>Téléphone
+                    </label>
+                    <Field
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      name="user.phone"
+                      type="tel"
+                      id="phone"
+                      value={values.user.phone}
+                      onChange={handleChange}
+                      placeholder="06/02 00 00 00 00"
+                      validate={(v) =>
+                        (!v && requiredMessage) ||
+                        (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                      }
+                    />
+                    <p className="text-xs text-red-500">{errors.user?.phone}</p>
+                  </div>
+                  <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>Mot de passe
                     </label>
@@ -159,7 +174,7 @@ export default function Signup() {
                     <PasswordEye autoComplete="new-password" value={values.user.password} onChange={handleChange} name="user.password" />
                     <p className="text-xs text-red-500">{errors.user?.password}</p>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>Confirmation mot de passe
                     </label>
@@ -176,8 +191,8 @@ export default function Signup() {
                 </form>
 
                 {/* right form */}
-                <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
-                  <h2 className="mb-8 text-base font-normal text-brand-grey mb-0 text-center">INFORMATIONS SUR LA STRUCTURE</h2>
+                <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-lg bg-white p-4 shadow-xl">
+                  <h2 className="text-base font-normal text-brand-grey m-0">INFORMATIONS SUR LA STRUCTURE</h2>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>NOM DE LA STRUCTURE
@@ -342,7 +357,7 @@ export default function Signup() {
                 </form>
               </div>
 
-              <div className="mb-6">
+              <div className="my-6">
                 <div className="flex items-center gap-2">
                   <Field
                     className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
@@ -368,11 +383,7 @@ export default function Signup() {
                 </div>
                 <p className="text-xs text-red-500">{errors.user?.acceptCGU}</p>
               </div>
-              <LoadingButton
-                className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
-                loading={isSubmitting}
-                type="submit"
-                onClick={handleSubmit}>
+              <LoadingButton className="!rounded-xl border-0 py-2 px-5 text-base font-medium transition-colors" loading={isSubmitting} type="submit" onClick={handleSubmit}>
                 S&apos;inscrire
               </LoadingButton>
             </div>
