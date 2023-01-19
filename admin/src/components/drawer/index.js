@@ -132,15 +132,12 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
-      {environment !== "production" && (
-        <>
-          <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
-        </>
-      )}
+
       <DrawerConnectToZammood title="Boîte de réception" history={history}>
         {!tickets ? (
           <div />
@@ -196,6 +193,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       ) : (
         <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       )}
+      {/* <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} /> */}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
 
