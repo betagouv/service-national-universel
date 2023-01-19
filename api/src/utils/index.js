@@ -339,6 +339,8 @@ async function updateSeatsTakenInBusLine(busline) {
       ],
     });
     if (busline.youngSeatsTaken !== seatsTaken) {
+      console.log(`bus ${busline.id}: total ${busline.youngCapacity}, left from ${busline.youngSeatsTaken} to ${seatsTaken}`);
+
       busline.set({ youngSeatsTaken: seatsTaken });
       await busline.save();
       await busline.index();
