@@ -8,7 +8,7 @@ const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
-const { ERRORS } = require("../../utils");
+const { ERRORS, isYoung } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
@@ -299,13 +299,20 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 // get 1 meetingPoint info with meetingPoint Id and Bus Id as params
-router.get("/fullInfo/:pdrId/:busId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorParams, value: valueParams } = Joi.object({ pdrId: Joi.string().required(), busId: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
     });
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { pdrId, busId } = valueParams;
+
+    // young can only get his own meetingPoint info
+    if (isYoung(req.user)) {
+      const young = await YoungModel.findById(req.user._id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (young.meetingPointId !== pdrId || young.ligneId !== busId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(pdrId);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
