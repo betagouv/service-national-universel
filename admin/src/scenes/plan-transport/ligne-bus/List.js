@@ -60,7 +60,8 @@ const translateLineFillingRate = (e) => {
 
 export default function List() {
   const { user } = useSelector((state) => state.Auth);
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
+  const urlParams = new URLSearchParams(window.location.search);
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
