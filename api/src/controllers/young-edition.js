@@ -489,8 +489,8 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
     }
 
     // --- reset parent allow snu
-    young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined });
-    if (young.parent2Id) young.set({ parent2AllowSnu: undefined });
+    young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined, status: YOUNG_STATUS.IN_PROGRESS, parent1ValidationDate: undefined });
+    if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
     await young.save();
 
     // --- send notification
