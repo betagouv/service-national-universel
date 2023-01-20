@@ -50,7 +50,7 @@ export default function Convocation() {
 
   useEffect(() => {
     // À changer par la suite ? Notamment le isFromDOMTOM() ?
-    if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") return console.log("unauthorized");
+    if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") return console.log("unauthorized");
     getCenter();
     setCohort(getCohortDetail(young.cohort));
     young.meetingPointId && getMeetingPoint();
@@ -62,7 +62,7 @@ export default function Convocation() {
     return meetingPoint.pointDeRassemblement.address + " " + meetingPoint.pointDeRassemblement.zip + " " + meetingPoint.pointDeRassemblement.city;
   };
 
-  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") {
+  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {
     return (
       <Warning>
         ⚠️ Impossible d&apos;afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
@@ -111,34 +111,40 @@ export default function Convocation() {
           </>
         ) : (
           <>
-            <ConvocText>
-              Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
-              <div className="text-center">
-                <div>
-                  <b>Le </b> {dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
-                </div>
-                <div>
-                  <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
-                </div>
-                <div>
-                  <b>Au </b>
-                  {getMeetingAddress()}
-                </div>
-                <div>
-                  {meetingPoint?.bus ? (
-                    <>
-                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              </div>
-            </ConvocText>
-            <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
-              Attention à bien respecter l&apos;horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de cohésion. Votre représentant légal doit rester
-              jusqu&apos;à votre prise en charge par les accompagnateurs
-            </ConvocText>
+            {young.transportInfoGivenByLocal === "true" ? (
+              <ConvocText>Les informations de transport vous sont transmises par les serivces locaux.</ConvocText>
+            ) : (
+              <>
+                <ConvocText>
+                  Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
+                  <div className="text-center">
+                    <div>
+                      <b>Le </b> {dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
+                    </div>
+                    <div>
+                      <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
+                    </div>
+                    <div>
+                      <b>Au </b>
+                      {getMeetingAddress()}
+                    </div>
+                    <div>
+                      {meetingPoint?.bus ? (
+                        <>
+                          <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
+                </ConvocText>
+                <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
+                  Attention à bien respecter l&apos;horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de cohésion. Votre représentant légal doit rester
+                  jusqu&apos;à votre prise en charge par les accompagnateurs
+                </ConvocText>
+              </>
+            )}
           </>
         )}
         <ConvocText>Il vous est demandé de vous présenter avec :</ConvocText>
