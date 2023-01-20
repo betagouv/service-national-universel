@@ -468,6 +468,77 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
   }
 });
 
+router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // checks data
+    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (paramError) {
+      capture(paramError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const youngId = paramValue.id;
+
+    // --- get young & verify rights
+    const young = await YoungObject.findById(youngId);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- reset parent allow snu
+    young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined });
+    if (young.parent2Id) young.set({ parent2AllowSnu: undefined });
+    await young.save();
+
+    // --- send notification
+    // parent 1
+    if (young.parent1ContactPreference === "phone") {
+      await sendSMS(
+        young.parent1Phone,
+        SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
+        SENDINBLUE_SMS.PARENT1_CONSENT.tag,
+      );
+    } else {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
+    }
+    // parent 2
+    if (young.parent2Id) {
+      if (young.parent2ContactPreference === "phone") {
+        await sendSMS(
+          young.parent2Phone,
+          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
+          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
+        );
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
+      }
+    }
+
+    // --- return updated young
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // checks data

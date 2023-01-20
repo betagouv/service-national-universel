@@ -1577,7 +1577,7 @@ function SectionConsentements({ young, onChange }) {
     }
   }
 
-  function openParentAllowSNUModal() {
+  function openParentsAllowSNUModal() {
     setConfirmModal({
       icon: <Warning />,
       title: "Annulation du refus de consentement",
@@ -1588,18 +1588,17 @@ function SectionConsentements({ young, onChange }) {
           Ils recevront un email de relance pour leur demander de confirmer leur consentement.
         </div>
       ),
-      confirm: resetParentAllowSNU,
+      confirm: resetParentsAllowSNU,
     });
   }
 
-  async function resetParentAllowSNU() {
+  async function resetParentsAllowSNU() {
     try {
-      const result = await api.put(`/young-edition/${young._id}`, { parentAllowSNU: null, status: "IN_PROGRESS" });
+      let result = await api.put(`/young-edition/${young._id}/parent-allow-snu-reset`);
       if (!result.ok) {
-        toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+        toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour les représentants légaux. Veuillez réessayer dans quelques instants.");
       } else {
-        const res = api.post(`/send-mail/parent-allow-snu`, { youngId: young._id });
-        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal.");
+        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal 1.");
         onChange && onChange(result.data);
       }
     } catch (err) {
@@ -1643,10 +1642,14 @@ function SectionConsentements({ young, onChange }) {
             <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
-        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
-        <button onClick={openParentAllowSNUModal} className="text-[#161616] text-[14px] leading-[20px] underline mt-[16px]">
-          Annuler le refus de consentement
-        </button>
+        <div className="flex items-center gap-8">
+          <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+          {young.parentAllowSNU === "false" && (
+            <button onClick={openParentsAllowSNUModal} className="mt-2 mb-6 text-blue-600 underline">
+              Annuler le refus de consentement
+            </button>
+          )}
+        </div>
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
           <b>
             {young.firstName} {young.lastName}
