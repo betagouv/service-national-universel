@@ -137,14 +137,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
     });
-    if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
+    if (mission?.isJvaMission === "false" && !values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
 
     setErrors(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est imcomplet");
+      toastr.error("Oups, le formulaire est incomplet");
       return setLoading(false);
     }
 
@@ -170,7 +170,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est imcomplet");
+      toastr.error("Oups, le formulaire est incomplet");
       return setLoadingBottom(false);
     }
     updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
