@@ -212,6 +212,10 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     };
 
     const youngs = await YoungModel.find(body);
+    if (!youngs) {
+      capture("No young found with body: " + JSON.stringify(body));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
 
     let html = `<!DOCTYPE html>
   <html lang="en">
