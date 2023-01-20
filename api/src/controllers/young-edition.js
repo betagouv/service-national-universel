@@ -268,18 +268,16 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     await young.save({ fromUser: req.user });
 
     // --- update statusPhase 1 deendencies
-    if (value.statusPhase1 === "WITHDRAWN") {
-      // if they had a cohesion center, we check if we need to update the places taken / left
-      if (young.sessionPhase1Id) {
-        const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-        if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-      }
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
+    }
 
-      // if they had a bus, we check if we need to update the places taken / left in the bus
-      if (young.ligneId) {
-        const bus = await LigneDeBusModel.findById(young.ligneId);
-        if (bus) await updateSeatsTakenInBusLine(bus);
-      }
+    // if they had a bus, we check if we need to update the places taken / left in the bus
+    if (young.ligneId) {
+      const bus = await LigneDeBusModel.findById(young.ligneId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
     // --- result
