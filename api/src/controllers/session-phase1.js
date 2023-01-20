@@ -184,35 +184,36 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: id } = validateId(req.params.id);
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  }
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
-  const { errorBody } = Joi.object({
-    options: Joi.object().allow(null, {}),
-  }).validate({ ...req.body }, { stripUnknown: true });
-  if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { errorBody } = Joi.object({
+      options: Joi.object().allow(null, {}),
+    }).validate({ ...req.body }, { stripUnknown: true });
+    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-  const session = await SessionPhase1Model.findById(id);
-  if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const session = await SessionPhase1Model.findById(id);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
-  if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
-    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-  }
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
-  const body = {
-    sessionPhase1Id: session._id,
-    statusPhase1: "DONE",
-  };
+    const body = {
+      sessionPhase1Id: session._id,
+      statusPhase1: "DONE",
+    };
 
-  const youngs = await YoungModel.find(body);
+    const youngs = await YoungModel.find(body);
 
-  let html = `<!DOCTYPE html>
+    let html = `<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
@@ -225,7 +226,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     </body>
 </html>`;
 
-  const subHtml = `
+    const subHtml = `
   <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
     <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
       <div class="container">
@@ -240,33 +241,37 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       </div>
     </div>`;
 
-  const d = COHESION_STAY_END[youngs[0].cohort];
-  const ministresData = getMinistres(d);
-  const template = ministresData.template;
-  const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-  const data = [];
-  for (const young of youngs) {
-    data.push(
-      subHtml
-        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
-        .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
-        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
-        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
-        .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
-        .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-        .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
-        .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
-    );
+    const d = COHESION_STAY_END[youngs[0].cohort];
+    const ministresData = getMinistres(d);
+    const template = ministresData.template;
+    const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
+    const data = [];
+    for (const young of youngs) {
+      data.push(
+        subHtml
+          .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
+          .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+          .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
+          .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
+          .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
+          .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+          .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
+          .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
+      );
+    }
+
+    const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
+
+    const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
+
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-
-  const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
-
-  const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
-
-  res.contentType("application/pdf");
-  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-  res.set("Cache-Control", "public, max-age=1");
-  res.send(buffer);
 });
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
