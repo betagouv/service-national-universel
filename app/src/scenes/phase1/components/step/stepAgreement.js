@@ -22,7 +22,9 @@ export default function StepAgreement({ young }) {
   useEffect(() => {
     if (young) {
       setValid(young.youngPhase1Agreement === "true");
-      setEnabled(young.meetingPointId || young.deplacementPhase1Autonomous === "true");
+      setEnabled(
+        (young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true",
+      );
     }
   }, [young]);
 
