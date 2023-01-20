@@ -196,13 +196,14 @@ const ReactiveList = ({ cohort, history }) => {
                 return all.map((data) => {
                   let pdrs = {};
                   data.pointDeRassemblements.map((pdr, index) => {
-                    pdrs[`N° DU DEPARTEMENT DU PDR ${index}`] = getDepartmentByZip(pdr.zip);
-                    pdrs[`ID PDR ${index}`] = pdr.id;
-                    pdrs[`TYPE DE TRANSPORT PDR ${index}`] = pdr.transportType;
-                    pdrs[`NOM + ADRESSE DU PDR ${index}`] = pdr.name + " / " + pdr.address;
-                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${index}`] = pdr.busArrivalHour;
-                    pdrs[`HEURE DE DEPART DU PDR ${index}`] = pdr.departureHour;
-                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${index}`] = pdr.returnHour;
+                    const num = index + 1;
+                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = getDepartmentByZip(pdr.zip);
+                    pdrs[`ID PDR ${num}`] = pdr.meetingPointId;
+                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr.transportType;
+                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr.name + " / " + pdr.address;
+                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr.busArrivalHour;
+                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr.meetingHour;
+                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr.returnHour;
                   });
 
                   return {
