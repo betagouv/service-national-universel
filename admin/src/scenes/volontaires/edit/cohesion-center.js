@@ -41,7 +41,7 @@ export default function CohesionCenter({ values, handleChange }) {
 
   const onConfirmCancel = async () => {
     try {
-      // ! Mais du coup ?
+      // ! Mais du coup a supprimer plus tard
       const { code, ok } = await api.post(`/young/${values._id}/session-phase1/cancel`);
       if (!ok) return toastr.error("error", translate(code));
       toastr.success("Annulation de l'affectation au centre de cohésion");

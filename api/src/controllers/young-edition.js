@@ -261,8 +261,6 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // ? Faire descendre du bus si on passe le jeune à désister
-
     // --- update young
     young.set(value);
     await young.save({ fromUser: req.user });
