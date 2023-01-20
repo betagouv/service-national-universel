@@ -114,6 +114,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerId,
       centerRegion: center?.region,
       centerDepartment: center?.department,
+      centerZip: center?.zip,
+      centerAddress: center?.address,
       centerName: center?.name,
       centerCode: center?.code2022,
       centerArrivalTime,
@@ -309,6 +311,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     meetingPoint.set({
       meetingPointId: newMeetingPointId,
       ...pointDeRassemblement._doc,
+      busArrivalHour: ligneToPoint.busArrivalHour,
       meetingHour: ligneToPoint.meetingHour,
       returnHour: ligneToPoint.returnHour,
       transportType: ligneToPoint.transportType,

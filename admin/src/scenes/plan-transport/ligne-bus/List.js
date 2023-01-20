@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { apiURL, environment } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT, getFilterLabel, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber, getFilterLabel, ROLES, translate } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -34,6 +34,7 @@ const FILTERS = [
   "DEPARTMENT_PDR",
   "CITY_PDR",
   "NAME_PDR",
+  "CODE_PDR",
   "REGION_CENTER",
   "DEPARTMENT_CENTER",
   "NAME_CENTER",
@@ -59,7 +60,8 @@ const translateLineFillingRate = (e) => {
 
 export default function List() {
   const { user } = useSelector((state) => state.Auth);
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
+  const urlParams = new URLSearchParams(window.location.search);
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
@@ -91,7 +93,16 @@ export default function List() {
       <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <Title>Plan de transport</Title>
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select
+            options={cohortList}
+            value={cohort}
+            onChange={(e) => {
+              setCohort(e);
+              history.replace({
+                search: null,
+              });
+            }}
+          />
         </div>
         {hasValue ? (
           <ReactiveList cohort={cohort} history={history} />
@@ -181,18 +192,50 @@ const ReactiveList = ({ cohort, history }) => {
             <ExportComponent
               title="Exporter"
               defaultQuery={getExportQuery}
-              exportTitle="Session"
+              exportTitle="Plan_de_transport"
               icon={<BsDownload className="text-gray-400" />}
-              index="sessionphase1"
+              index="plandetransport"
               react={{ and: FILTERS }}
               css={{
                 override: true,
                 button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
                 loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
               }}
-              transform={(all) => {
+              transform={async (data) => {
+                let all = data;
                 return all.map((data) => {
-                  return { ...data };
+                  let pdrs = {};
+                  data.pointDeRassemblements.map((pdr, index) => {
+                    const num = index + 1;
+                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = getDepartmentNumber(pdr.department);
+                    pdrs[`ID PDR ${num}`] = pdr.meetingPointId;
+                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr.transportType;
+                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr.name + " / " + pdr.address;
+                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr.busArrivalHour;
+                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr.meetingHour;
+                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr.returnHour;
+                  });
+
+                  return {
+                    "NUMERO DE LIGNE": data.busId,
+                    "DATE DE TRANSPORT ALLER": data.departureString,
+                    "DATE DE TRANSPORT RETOUR": data.returnString,
+                    ...pdrs,
+                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
+                    "ID CENTRE": data.centerId,
+                    "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
+                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
+                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+
+                    // * followerCapacity !== Total des followers mais c'est la sémantique ici
+                    "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
+
+                    "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
+                    "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
+                    "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
+                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
+                    "TEMPS DE ROUTE": data.travelTime,
+                  };
                 });
               }}
             />
@@ -355,6 +398,24 @@ const ReactiveList = ({ cohort, history }) => {
                 searchPlaceholder="Rechercher..."
                 size={1000}
                 renderLabel={(items) => <div>{getFilterLabel(items, "Ville", "Ville")}</div>}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
+              />
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Code"
+                componentId="CODE_PDR"
+                dataField="pointDeRassemblements.code.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "CODE_PDR") }}
+                title=""
+                URLParams={true}
+                sortBy="asc"
+                showSearch={true}
+                searchPlaceholder="Rechercher..."
+                size={1000}
+                renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
                 renderItem={(e, count) => {
                   return `${translate(e)} (${count})`;
                 }}
