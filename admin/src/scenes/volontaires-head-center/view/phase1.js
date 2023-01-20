@@ -23,9 +23,9 @@ import {
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
 } from "../../../utils";
-import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
-import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
-import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
+import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
+import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
+import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import WrapperPhase1 from "./wrapper";
 
