@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { apiURL, environment } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT, getFilterLabel, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentByZip, getFilterLabel, ROLES, translate } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -191,9 +191,40 @@ const ReactiveList = ({ cohort, history }) => {
                 button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
                 loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
               }}
-              transform={(all) => {
+              transform={async (data) => {
+                let all = data;
                 return all.map((data) => {
-                  return { ...data };
+                  let pdrs = {};
+                  data.pointDeRassemblements.map((pdr, index) => {
+                    pdrs[`N° DU DEPARTEMENT DU PDR ${index}`] = getDepartmentByZip(pdr.zip);
+                    pdrs[`ID PDR ${index}`] = pdr.id;
+                    pdrs[`TYPE DE TRANSPORT PDR ${index}`] = pdr.transportType;
+                    pdrs[`NOM + ADRESSE DU PDR ${index}`] = pdr.name + " / " + pdr.address;
+                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${index}`] = pdr.busArrivalHour;
+                    pdrs[`HEURE DE DEPART DU PDR ${index}`] = pdr.departureHour;
+                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${index}`] = pdr.returnHour;
+                  });
+
+                  return {
+                    "NUMERO DE LIGNE": data.busId,
+                    "DATE DE TRANSPORT ALLER": data.departureString,
+                    "DATE DE TRANSPORT RETOUR": data.returnString,
+                    ...pdrs,
+                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentByZip(data.centerZip),
+                    "ID CENTRE": data.centerId,
+                    "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
+                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
+                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+
+                    // * followerCapacity !== Total des followers mais c'est la sémantique ici
+                    "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
+
+                    "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
+                    "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
+                    "PAUSE DÉJEUNER ALLER": data.lunchBreak,
+                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn,
+                    "TEMPS DE ROUTE": data.travelTime,
+                  };
                 });
               }}
             />

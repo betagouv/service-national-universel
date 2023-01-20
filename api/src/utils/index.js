@@ -264,6 +264,8 @@ const updateCenterDependencies = async (center, fromUser) => {
     planDeTransport.set({
       centerDepartment: center.department,
       centerRegion: center.region,
+      centerZip: center?.zip,
+      centerAddress: center?.address,
       centerCode: center.code2022,
       centerName: center.name,
     });
