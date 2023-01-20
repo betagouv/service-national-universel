@@ -86,6 +86,16 @@ export default function List() {
   }, []);
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
+  const getExportsFields = () => {
+    let filtered = missionCandidatureExportFields;
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+      const filterAdress = missionCandidatureExportFields.find((e) => e.id === "address");
+      filterAdress.desc = filterAdress.desc.filter((e) => e !== "Issu de QPV");
+      filtered = filtered.map((e) => (e.id !== "address" ? e : filterAdress));
+    }
+    return filtered;
+  };
+
   async function transform(data, selectedFields) {
     let all = data;
     if (selectedFields.includes("tutor")) {
@@ -317,15 +327,15 @@ export default function List() {
           },
           address: {
             "Issu de QPV": translate(application?.young?.qpv),
-            "Adresse postale": application?.young?.address,
-            "Code postal": application?.young?.zip,
-            Ville: application?.young?.city,
-            Pays: application?.young?.country,
+            "Adresse postale du volontaire": application?.young?.address,
+            "Code postal du volontaire": application?.young?.zip,
+            "Ville du volontaire": application?.young?.city,
+            "Pays du volontaire": application?.young?.country,
           },
           location: {
-            Département: application?.young?.department,
-            Académie: application?.young?.academy,
-            Région: application?.young?.region,
+            "Département du volontaire": application?.young?.department,
+            "Académie du volontaire": application?.young?.academy,
+            "Région du volontaire": application?.young?.region,
           },
           application: {
             "Statut de la candidature": translateApplication(application?.status),
@@ -404,7 +414,9 @@ export default function List() {
             "Région représentant légal 2": application?.young?.parent2Region,
           },
         };
-
+        if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+          delete allFields.address["Issu de QPV"];
+        }
         let fields = {};
         for (const element of selectedFields) {
           let key;
@@ -426,45 +438,48 @@ export default function List() {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
-                <Link to={`/mission/create/${user.structureId}`}>
-                  <VioletButton>
-                    <p>Nouvelle mission</p>
-                  </VioletButton>
-                </Link>
-              ) : null}
+              <div className="flex flex-row items-center justify-center gap-4">
+                {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
+                  <Link to={`/mission/create/${user.structureId}`}>
+                    <VioletButton>
+                      <p>Nouvelle mission</p>
+                    </VioletButton>
+                  </Link>
+                ) : null}
 
-              <SelectAction
-                title="Exporter"
-                alignItems="right"
-                buttonClassNames="cursor-pointer text-white bg-blue-600"
-                textClassNames="text-sm"
-                rightIconClassNames="text-white opacity-70"
-                optionsGroup={[
-                  {
-                    items: [
-                      {
-                        action: () => {
-                          setIsExportOpen(true);
+                <SelectAction
+                  title="Exporter"
+                  alignItems="right"
+                  buttonClassNames="cursor-pointer text-white bg-blue-600"
+                  textClassNames="text-sm"
+                  rightIconClassNames="text-white opacity-70"
+                  optionsGroup={[
+                    {
+                      items: [
+                        {
+                          action: () => {
+                            setIsExportOpen(true);
+                          },
+                          render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de missions</div>,
                         },
-                        render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de missions</div>,
-                      },
-                      {
-                        action: () => {
-                          setIsExportCandidatureOpen(true);
+                        {
+                          action: () => {
+                            setIsExportCandidatureOpen(true);
+                          },
+                          render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de candidatures</div>,
                         },
-                        render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de candidatures</div>,
-                      },
-                    ],
-                  },
-                ]}
-              />
+                      ],
+                    },
+                  ]}
+                />
+              </div>
+
               <ModalExport
                 isOpen={isExportCandidatureOpen}
                 setIsOpen={setIsExportCandidatureOpen}
                 index="mission"
                 transform={transformCandidature}
-                exportFields={missionCandidatureExportFields}
+                exportFields={getExportsFields()}
                 filters={FILTERS}
                 getExportQuery={getExportQuery}
                 exportTitle="candidatures"
