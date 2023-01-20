@@ -32,6 +32,8 @@ import WrapperPhase1 from "./wrapper";
 export default function Phase1(props) {
   const [young, setYoung] = useState(props.young);
   const [meetingPoint, setMeetingPoint] = useState();
+  const [ligneBus, setLigneBus] = useState();
+  const [ligneToPoint, setLigneToPoint] = useState();
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const disabled = PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[props.young?.cohort].getTime() > Date.now();
@@ -47,11 +49,13 @@ export default function Phase1(props) {
       setCohesionCenter(data);
     })();
 
-    if (!young.meetingPointId) return;
+    if (!young.meetingPointId || !young.ligneId) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/meeting-point/${young?.meetingPointId}`);
+      const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
       if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
-      setMeetingPoint(data);
+      setMeetingPoint(data.pointDeRassemblement);
+      setLigneBus(data.bus);
+      setLigneToPoint(data.ligneToPoint);
     })();
   }, []);
 
@@ -59,16 +63,22 @@ export default function Phase1(props) {
     if (young.meetingPointId)
       return (
         <>
-          <Details title="Adresse" value={meetingPoint?.departureAddress} />
-          <Details title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
-          <Details title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
-          <Details title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+          <Details title="Adresse" value={meetingPoint?.address + ", " + meetingPoint?.city + ", " + meetingPoint?.zip} />
+          <Details title="Heure&nbsp;de&nbsp;départ" value={ligneToPoint?.departureHour} />
+          <Details title="Heure&nbsp;de&nbsp;retour" value={ligneToPoint?.returnHour} />
+          <Details title="N˚&nbsp;transport" value={ligneBus?.busId} />
         </>
       );
-    if (young.deplacementPhase1Autonomous === "true")
+    if (young?.deplacementPhase1Autonomous === "true")
       return (
         <>
           <i>{`${young.firstName} se rend au centre par ses propres moyens.`}</i>
+        </>
+      );
+    if (young?.transportInfoGivenByLocal === "true")
+      return (
+        <>
+          <i>Les informations de transport sont transmises par les services locaux</i>
         </>
       );
     return (
