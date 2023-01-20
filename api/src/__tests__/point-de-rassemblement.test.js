@@ -21,13 +21,13 @@ afterAll(dbClose);
 
 describe("Meeting point", () => {
   describe("GET /point-de-rassemblement/available", () => {
-    it("should return 404 when young has no sessionPhase1Id", async () => {
+    it("should return 400 when young has no sessionPhase1Id", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture() });
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
       const res = await request(getAppHelper()).get("/point-de-rassemblement/available").send();
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
       passport.user = previous;
     });
   });
@@ -54,8 +54,9 @@ describe("Meeting point", () => {
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
       const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id });
       const res = await request(getAppHelper())
-        .get("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
+        .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id, { cohort: "Février 2023 - C" })
         .send();
+      console.log(res.code);
       expect(res.status).toBe(403);
     });
   });
