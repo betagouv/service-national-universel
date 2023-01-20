@@ -10,6 +10,9 @@ import { translate, htmlCleaner } from "../../../utils";
 import { Hero, Content } from "../../../components/Content";
 import { supportURL } from "../../../config";
 
+import { getCohortDetail } from "../../../utils/cohorts";
+import dayjs from "dayjs";
+
 export default function Convocation() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
@@ -17,6 +20,7 @@ export default function Convocation() {
   const [meetingPoint, setMeetingPoint] = useState();
   const [center, setCenter] = useState();
   const [service, setService] = useState();
+  const [cohort, setCohort] = useState();
 
   const isFromDOMTOM = () => {
     return (
@@ -29,7 +33,7 @@ export default function Convocation() {
   };
 
   const getMeetingPoint = async () => {
-    const { data, code, ok } = await api.get(`/meeting-point/${young.meetingPointId}`);
+    const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young.meetingPointId}/${young.ligneId}`);
     if (!ok) return toastr.error("error", translate(code));
     setMeetingPoint(data);
   };
@@ -48,51 +52,14 @@ export default function Convocation() {
     // À changer par la suite ? Notamment le isFromDOMTOM() ?
     if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") return console.log("unauthorized");
     getCenter();
+    setCohort(getCohortDetail(young.cohort));
     young.meetingPointId && getMeetingPoint();
     getService();
   }, [young]);
 
-  // ! WARNING : Change date also in api/src/templates/convocation/index.js
-  const departureMeetingDate = {
-    2021: "lundi 20 février, 14:00",
-    "Février 2022": "dimanche 13 février, 16:00",
-    "Juin 2022": "dimanche 12 juin, 16:00",
-    "Juillet 2022": "dimanche 03 juillet, 16:00",
-  };
-
-  const departureMeetingDateException = {
-    2021: "lundi 20 février, 14:00",
-    "Février 2022": "dimanche 13 février, 16:00",
-    "Juin 2022": "mercredi 15 juin, 10:00",
-    "Juillet 2022": "mercredi 06 juillet, 10:00",
-  };
-
-  const returnMeetingDate = {
-    2021: "mardi 02 juillet, 14:00",
-    "Février 2022": "vendredi 25 février, 11:00",
-    "Juin 2022": "vendredi 24 juin, 11:00",
-    "Juillet 2022": "vendredi 15 juillet, 11:00",
-  };
-
-  const COHESION_STAY_DATE_STRING = {
-    2021: "20 février au 02 juillet 2021  ",
-    "Février 2022": "13 février au 25 février 2022",
-    "Juin 2022": "12 juin au 24 juin 2022",
-    "Juillet 2022": "03 juillet au 15 juillet 2022",
-  };
-
   const getMeetingAddress = () => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    return meetingPoint.departureAddress;
-  };
-  const getDepartureMeetingDate = () => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint)
-      return young.grade !== "Terminale" ? departureMeetingDate[young.cohort] : departureMeetingDateException[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
-    return meetingPoint.departureAtString;
-  };
-  const getReturnMeetingDate = () => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
-    return meetingPoint.returnAtString;
+    return meetingPoint.pointDeRassemblement.address + " " + meetingPoint.pointDeRassemblement.zip + " " + meetingPoint.pointDeRassemblement.city;
   };
 
   if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") {
@@ -130,7 +97,8 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>
           Je suis heureuse de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
-          <b>du {COHESION_STAY_DATE_STRING[young.cohort]}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
+          <b>du {dayjs(new Date(cohort?.dateStart)).locale("fr").format("DD MMMM") + " au " + dayjs(new Date(cohort?.dateEnd)).locale("fr").format("DD MMMM YYYY")}</b>, a été
+          retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
         {isFromDOMTOM() ? (
           <>
@@ -147,14 +115,10 @@ export default function Convocation() {
               Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
               <div className="text-center">
                 <div>
-                  <b>Le </b>{" "}
-                  {getDepartureMeetingDate()
-                    .split(/[,\s]+/)
-                    .slice(0, 3)
-                    .join(" ")}
+                  <b>Le </b> {dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
                 </div>
                 <div>
-                  <b>A </b> {getDepartureMeetingDate().split(",")[1]}
+                  <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
                 </div>
                 <div>
                   <b>Au </b>
@@ -163,7 +127,7 @@ export default function Convocation() {
                 <div>
                   {meetingPoint?.bus ? (
                     <>
-                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.idExcel}`}
+                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
                     </>
                   ) : (
                     ""
@@ -192,12 +156,8 @@ export default function Convocation() {
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
         {!isFromDOMTOM() ? (
           <ConvocText>
-            Le <b>retour de votre séjour </b>est prévu le {getReturnMeetingDate().split(",")[1]} à{" "}
-            {getReturnMeetingDate()
-              .split(/[,\s]+/)
-              .slice(0, 3)
-              .join(" ")}
-            , au même endroit que le jour du départ en centre.
+            Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
+            {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre.
           </ConvocText>
         ) : null}
         <ConvocText>

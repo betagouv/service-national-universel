@@ -59,7 +59,8 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isReferent(req.user) && !cohort.manualAffectionOpenForReferent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN && isReferent(req.user) && !cohort.manualAffectionOpenForReferent)
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 

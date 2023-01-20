@@ -1,3 +1,43 @@
+# [1.202.0](https://github.com/betagouv/service-national-universel/compare/v1.201.0...v1.202.0) (2023-01-19)
+
+
+### Bug Fixes
+
+* **admin:** chef de centre can add team member ([18b92fe](https://github.com/betagouv/service-national-universel/commit/18b92fe00b6608a0a0bf3a14bf9e899e329e9391))
+* **admin:** disabled status phase 1 Affected ([1d9022a](https://github.com/betagouv/service-national-universel/commit/1d9022a8cc1c79e5b5d521c59eaff818763e89bf))
+* **admin:** Vue PDR : fix de l'erreur sur le filtre par défaut de département ([#2187](https://github.com/betagouv/service-national-universel/issues/2187)) ([b1cfbf7](https://github.com/betagouv/service-national-universel/commit/b1cfbf7246af61c97b184138a7f9895e3fe37c17))
+* **admin:** Vue PDR : problème de valeur par défaut des filtres de région et département pour les référents ([#2186](https://github.com/betagouv/service-national-universel/issues/2186)) ([7c5f30f](https://github.com/betagouv/service-national-universel/commit/7c5f30fbb9a823aa26035b2bbcafa59b86582df1))
+* **api:** fix autorisation affectation admin pdr ([31c1720](https://github.com/betagouv/service-national-universel/commit/31c172091e4d0bf35eac4cbe5eaca48ed4b07c6c))
+* **app:** Update fiche sanitaire ecran affecté ([#2183](https://github.com/betagouv/service-national-universel/issues/2183)) ([a607399](https://github.com/betagouv/service-national-universel/commit/a607399fc55c299f8be29b40a714948e406b40a1))
+
+
+### Features
+
+* **admin:** cannot edit mission if ARCHIVED ([b833c5c](https://github.com/betagouv/service-national-universel/commit/b833c5ce40865cbe9d0c27ac3cd952d0cc65bc12))
+* **admin:** modal affectation can search center by department and region ([e536790](https://github.com/betagouv/service-national-universel/commit/e536790e1b274eafd156ace8e97d6f355808357b))
+* **admin:** open affectation phase 1 for admin ([85ce3a5](https://github.com/betagouv/service-national-universel/commit/85ce3a5088e0fe99879978d2a92e820cf849d745))
+* **admin/api:** open plan de transport moderateur prod ([#2181](https://github.com/betagouv/service-national-universel/issues/2181)) ([17a26cb](https://github.com/betagouv/service-national-universel/commit/17a26cb4334709a40a12bf3799a723e440dfc409))
+* **admin/api:** update convocation ([#2179](https://github.com/betagouv/service-national-universel/issues/2179)) ([0570f01](https://github.com/betagouv/service-national-universel/commit/0570f013bec62818e8e8ac9c7c33a0f6d4d40657))
+* **api:** complétion des notifications de déménagement aux référents ([#2184](https://github.com/betagouv/service-national-universel/issues/2184)) ([5974a68](https://github.com/betagouv/service-national-universel/commit/5974a6850cc7514d2f4d8b283c025b1352441f43))
+
+# [1.201.0](https://github.com/betagouv/service-national-universel/compare/v1.200.0...v1.201.0) (2023-01-18)
+
+
+### Bug Fixes
+
+* **admin:** modal JDM / presence + young status ([71369e7](https://github.com/betagouv/service-national-universel/commit/71369e740354b217dd59e36f42c96fe22a25bb5a))
+* **admin:** update mission location when verifying address ([adec268](https://github.com/betagouv/service-national-universel/commit/adec2686f42fb3b15af6bfad4ec7478ddd3233b1))
+* **admin/api:** Plan de transport : Safe division by 0 + rename fillingRate to not mix with inscription fillingRate ([6832f2e](https://github.com/betagouv/service-national-universel/commit/6832f2e335c6a0c7c7ca414407587e5153059411))
+* **app:** Retours sur la phase 1 ecran Affecté ([#2180](https://github.com/betagouv/service-national-universel/issues/2180)) ([0ec2307](https://github.com/betagouv/service-national-universel/commit/0ec23072ca4b2f33deb43013e9b302ac06b794b6))
+* **app:** Retours sur la phase 1 ecran Affecté (suite) ([#2182](https://github.com/betagouv/service-national-universel/issues/2182)) ([008e03a](https://github.com/betagouv/service-national-universel/commit/008e03a71cedbc996916e0d600e7a1757e60be92))
+
+
+### Features
+
+* **admin:** modification contrat quand envoyé ([c23e62c](https://github.com/betagouv/service-national-universel/commit/c23e62ccc99ff917b2a3113622250f6ee9c303d0))
+* **admin:** Plan de transport ([#2152](https://github.com/betagouv/service-national-universel/issues/2152)) ([3bffa1b](https://github.com/betagouv/service-national-universel/commit/3bffa1b0663be424752fe022ca7349bd9024165a))
+* **kb:** comment last updated banner ([3352cfc](https://github.com/betagouv/service-national-universel/commit/3352cfc47a379318238e007d42be508db2a69d46))
+
 # [1.200.0](https://github.com/betagouv/service-national-universel/compare/v1.199.0...v1.200.0) (2023-01-17)
 
 

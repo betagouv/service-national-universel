@@ -169,7 +169,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                 }}
                 placeholder="Rechercher par mots clés, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
+                dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre", "department", "region"]}
                 react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 style={{ marginRight: "1rem", flex: 1 }}
                 innerClass={{ input: "searchbox" }}

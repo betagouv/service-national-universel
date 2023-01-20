@@ -27,7 +27,7 @@ import {
   translatePhase1,
 } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
-import ModalExportMail from "../../centers/components/modals/ModalExportMail";
+import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";

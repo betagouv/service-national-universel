@@ -10,9 +10,9 @@ import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
 import { formatDateFR, ROLES, translate, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
-import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
-import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
-import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
+import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
+import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
+import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
 import ModalDispense from "../components/ModalDispense";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
@@ -26,7 +26,6 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import { capture } from "../../../sentry";
 import dayjs from "dayjs";
-import { environment } from "../../../config";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -48,10 +47,6 @@ export default function Phase1(props) {
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
 
   const getDisplayCenterButton = async () => {
-    if (environment === "production") {
-      setCohortOpenForAffection(false);
-      return setDisplayCenterButton(false);
-    }
     if (user.role === ROLES.ADMIN) {
       setCohortOpenForAffection(true);
       return setDisplayCenterButton(true);

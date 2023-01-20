@@ -29,6 +29,7 @@ import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
+import { MISSION_STATUS } from "snu-lib";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -48,10 +49,24 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
   const thresholdPendingReached = mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5;
-  const valuesToCheck = ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
-  const valuesToUpdate = [...valuesToCheck, "structureId", "addressVerified", "duration", "contraintes", "domains", "hebergement", "hebergementPayant", "tutor", "visibility"];
+  const valuesToCheck =
+    mission?.isJvaMission === "true"
+      ? ["name", "structureName", "description", "actions", "format"]
+      : ["name", "structureName", "mainDomain", "address", "zip", "city", "description", "actions", "format", "tutorId"];
+  const valuesToUpdate = [
+    ...valuesToCheck,
+    "structureId",
+    "addressVerified",
+    "duration",
+    "contraintes",
+    "domains",
+    "hebergement",
+    "hebergementPayant",
+    "tutor",
+    "visibility",
+    "location",
+  ];
 
-  const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
   const referentSelectRef = useRef();
@@ -125,14 +140,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
     });
-    if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
+    if (mission?.isJvaMission === "false" && !values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
 
     setErrors(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est imcomplet");
+      toastr.error("Oups, le formulaire est incomplet");
       return setLoading(false);
     }
 
@@ -158,7 +173,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est imcomplet");
+      toastr.error("Oups, le formulaire est incomplet");
       return setLoadingBottom(false);
     }
     updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
@@ -199,6 +214,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       addressVerified: true,
       region: suggestion.region,
       department: suggestion.department,
+      location: suggestion.location,
       address: isConfirmed ? suggestion.address : values.address,
       zip: isConfirmed ? suggestion.zip : values.zip,
       city: isConfirmed ? suggestion.city : values.city,
@@ -295,34 +311,38 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                 )}
               </div>
-              {!editing ? (
-                <button
-                  className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => setEditing(true)}
-                  disabled={loading}>
-                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                  Modifier
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => {
-                      setEditing(false);
-                      setValues({ ...mission });
-                      setErrors({});
-                    }}
-                    disabled={loading}>
-                    Annuler
-                  </button>
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={onSubmit}
-                    disabled={loading}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-                    Enregistrer les changements
-                  </button>
-                </div>
+              {mission.status !== MISSION_STATUS.ARCHIVED && (
+                <>
+                  {!editing ? (
+                    <button
+                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setEditing(true)}
+                      disabled={loading}>
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      Modifier
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setEditing(false);
+                          setValues({ ...mission });
+                          setErrors({});
+                        }}
+                        disabled={loading}>
+                        Annuler
+                      </button>
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={onSubmit}
+                        disabled={loading}>
+                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        Enregistrer les changements
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <div className="flex flex-wrap gap-14">
@@ -687,34 +707,38 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
               </div>
-              {!editingBottom ? (
-                <button
-                  className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => setEdittingBottom(true)}
-                  disabled={loadingBottom}>
-                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                  Modifier
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => {
-                      setEdittingBottom(false);
-                      setValues({ ...mission });
-                      setErrorsBottom({});
-                    }}
-                    disabled={loading}>
-                    Annuler
-                  </button>
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={onSubmitBottom}
-                    disabled={loadingBottom}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
-                    Enregistrer les changements
-                  </button>
-                </div>
+              {mission.status !== MISSION_STATUS.ARCHIVED && (
+                <>
+                  {!editingBottom ? (
+                    <button
+                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setEdittingBottom(true)}
+                      disabled={loadingBottom}>
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      Modifier
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setEdittingBottom(false);
+                          setValues({ ...mission });
+                          setErrorsBottom({});
+                        }}
+                        disabled={loading}>
+                        Annuler
+                      </button>
+                      <button
+                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={onSubmitBottom}
+                        disabled={loadingBottom}>
+                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        Enregistrer les changements
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <div className="flex flex-wrap gap-12">

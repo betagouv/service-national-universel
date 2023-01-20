@@ -17,7 +17,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
-const { ERRORS } = require("../utils");
+const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
@@ -28,6 +28,8 @@ const { sendTemplate, sendSMS } = require("../sendinblue");
 const { format } = require("date-fns");
 const config = require("../config");
 const YoungObject = require("../models/young");
+const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
+const SessionPhase1Model = require("../models/sessionPhase1");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -85,8 +87,6 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    console.log("SAVE VALUE: ", value);
-    console.log("body: ", req.body);
 
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
@@ -108,6 +108,12 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     }
 
     if (value.birthdateAt) value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
+
+    // test de déménagement.
+    if (young.department !== value.department && value.department !== null && value.department !== undefined && young.department !== null && young.department !== undefined) {
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -214,7 +220,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- validate data
     const bodySchema = Joi.object().keys({
-      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"),
+      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN"), // "WAITING_LIST"
       statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"),
       statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"),
     });
@@ -258,6 +264,19 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     // --- update young
     young.set(value);
     await young.save({ fromUser: req.user });
+
+    // --- update statusPhase 1 deendencies
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
+    }
+
+    // if they had a bus, we check if we need to update the places taken / left in the bus
+    if (young.ligneId) {
+      const bus = await LigneDeBusModel.findById(young.ligneId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
+    }
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

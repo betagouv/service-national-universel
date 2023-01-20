@@ -15,13 +15,12 @@ const YoungModel = require("../models/young");
 const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
-const MeetingPointModel = require("../models/meetingPoint");
-const BusModel = require("../models/bus");
 const StructureModel = require("../models/structure");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
 const CohesionCenterModel = require("../models/cohesionCenter");
+const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 
 const { getQPV, getDensity } = require("../geo");
 const config = require("../config");
@@ -34,7 +33,6 @@ const {
   deleteFile,
   validatePassword,
   updatePlacesSessionPhase1,
-  updatePlacesBus,
   ERRORS,
   isYoung,
   inSevenDays,
@@ -43,6 +41,7 @@ const {
   getCcOfYoung,
   notifDepartmentChange,
   STEPS2023REINSCRIPTION,
+  updateSeatsTakenInBusLine,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
@@ -393,8 +392,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
-      await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young);
-      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
+      await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: newYoung.department });
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
@@ -492,10 +491,11 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
-    const oldMeetingPointId = young.meetingPointId;
+    const oldBusId = young.ligneId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
       young.set({ sessionPhase1Id: undefined });
       young.set({ meetingPointId: undefined });
+      young.set({ ligneId: undefined });
     }
 
     // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
@@ -513,12 +513,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
-    if (oldMeetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
-      if (meetingPoint) {
-        const bus = await BusModel.findById(meetingPoint.busId);
-        if (bus) await updatePlacesBus(bus);
-      }
+    if (oldBusId) {
+      const bus = await LigneDeBusModel.findById(oldBusId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
     const emailsTo = [];

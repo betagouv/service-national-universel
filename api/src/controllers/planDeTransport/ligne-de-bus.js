@@ -290,7 +290,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
     if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.role === ROLES.ADMIN) {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
       ligneToPoint.set({
         transportType,
         meetingHour,
