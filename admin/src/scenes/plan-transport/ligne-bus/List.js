@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { apiURL, environment } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT, getDepartmentByZip, getFilterLabel, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber, getFilterLabel, ROLES, translate } from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -183,7 +183,7 @@ const ReactiveList = ({ cohort, history }) => {
             <ExportComponent
               title="Exporter"
               defaultQuery={getExportQuery}
-              exportTitle="Session"
+              exportTitle="Plan_de_transport"
               icon={<BsDownload className="text-gray-400" />}
               index="plandetransport"
               react={{ and: FILTERS }}
@@ -198,7 +198,7 @@ const ReactiveList = ({ cohort, history }) => {
                   let pdrs = {};
                   data.pointDeRassemblements.map((pdr, index) => {
                     const num = index + 1;
-                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = getDepartmentByZip(pdr.zip);
+                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = getDepartmentNumber(pdr.department);
                     pdrs[`ID PDR ${num}`] = pdr.meetingPointId;
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr.transportType;
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr.name + " / " + pdr.address;
@@ -212,7 +212,7 @@ const ReactiveList = ({ cohort, history }) => {
                     "DATE DE TRANSPORT ALLER": data.departureString,
                     "DATE DE TRANSPORT RETOUR": data.returnString,
                     ...pdrs,
-                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentByZip(data.centerZip),
+                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
                     "ID CENTRE": data.centerId,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
                     "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
@@ -223,8 +223,8 @@ const ReactiveList = ({ cohort, history }) => {
 
                     "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
                     "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
-                    "PAUSE DÉJEUNER ALLER": data.lunchBreak,
-                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn,
+                    "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
+                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
                     "TEMPS DE ROUTE": data.travelTime,
                   };
                 });
