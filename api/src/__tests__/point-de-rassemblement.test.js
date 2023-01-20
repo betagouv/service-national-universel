@@ -64,6 +64,13 @@ describe("Meeting point", () => {
         .send({ cohort: "Février 2023 - C" });
       expect(res.status).toBe(403);
     });
+    it("should return 200 ", async () => {
+      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
+      const res = await request(getAppHelper())
+        .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
+        .send({ cohort: "Février 2023 - C" });
+      expect(res.status).toBe(200);
+    });
   });
   describe("GET /point-de-rassemblement/fullInfo/:pdrId/:busId", () => {
     it("should return 403 when young try to fetch another pdr than his", async () => {
