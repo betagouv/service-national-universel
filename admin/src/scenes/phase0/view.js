@@ -1577,6 +1577,37 @@ function SectionConsentements({ young, onChange }) {
     }
   }
 
+  function openParentAllowSNUModal() {
+    setConfirmModal({
+      icon: <Warning />,
+      title: "Annulation du refus de consentement",
+      message: (
+        <div>
+          Vous vous apprêtez à annuler le refus de consentement des représentants légaux de {young.firstName} {young.lastName}.
+          <br />
+          Ils recevront un email de relance pour leur demander de confirmer leur consentement.
+        </div>
+      ),
+      confirm: resetParentAllowSNU,
+    });
+  }
+
+  async function resetParentAllowSNU() {
+    try {
+      const result = await api.put(`/young-edition/${young._id}`, { parentAllowSNU: null, status: "IN_PROGRESS" });
+      if (!result.ok) {
+        toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+      } else {
+        const res = api.post(`/send-mail/parent-allow-snu`, { youngId: young._id });
+        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal.");
+        onChange && onChange(result.data);
+      }
+    } catch (err) {
+      capture(err);
+      toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -1613,6 +1644,9 @@ function SectionConsentements({ young, onChange }) {
           )}
         </div>
         <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+        <button onClick={openParentAllowSNUModal} className="text-[#161616] text-[14px] leading-[20px] underline mt-[16px]">
+          Annuler le refus de consentement
+        </button>
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
           <b>
             {young.firstName} {young.lastName}
