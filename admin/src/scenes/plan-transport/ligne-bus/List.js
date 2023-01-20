@@ -93,7 +93,16 @@ export default function List() {
       <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <Title>Plan de transport</Title>
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select
+            options={cohortList}
+            value={cohort}
+            onChange={(e) => {
+              setCohort(e);
+              history.replace({
+                search: null,
+              });
+            }}
+          />
         </div>
         {hasValue ? (
           <ReactiveList cohort={cohort} history={history} />
