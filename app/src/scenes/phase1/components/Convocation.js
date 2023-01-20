@@ -161,10 +161,18 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
         {!isFromDOMTOM() ? (
-          <ConvocText>
-            Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
-            {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre.
-          </ConvocText>
+          <>
+            {young.transportInfoGivenByLocal === "true" ? (
+              <ConvocText>
+                Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")}
+              </ConvocText>
+            ) : (
+              <ConvocText>
+                Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
+                {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre.
+              </ConvocText>
+            )}
+          </>
         ) : null}
         <ConvocText>
           <b>
