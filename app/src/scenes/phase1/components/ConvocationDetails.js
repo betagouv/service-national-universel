@@ -97,6 +97,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
 
   async function confirmAutonomous() {
     setIsLoading(true);
+    // ! Mais du coup ?
     const { data, code, ok } = await api.post(`/young/${young._id}/deplacementPhase1Autonomous`);
     if (!ok) {
       setIsLoading(false);
