@@ -119,23 +119,6 @@ export default function IndexPhase2Mobile() {
 
       {/* BEGIN LINKS */}
       <div className="mx-3 mt-10 space-y-4">
-        {referentManagerPhase2 ? (
-          <div
-            className="border border-gray-200 rounded-lg py-2 px-3 flex flex-col justify-around w-full"
-            onClick={() => {
-              copyToClipboard(referentManagerPhase2.email);
-              toastr.info("L'email de votre référent a été copié dans le presse-papier");
-              // setCopied(true);
-            }}>
-            <div className="flex items-center justify-between">
-              <div className="font-bold">Contacter mon référent</div>
-              <MdOutlineContentCopy className="text-gray-400 cursor-pointer" />
-            </div>
-            <div className="text-[13px] text-gray-600">
-              {referentManagerPhase2.firstName} {referentManagerPhase2.lastName} - {referentManagerPhase2.email}
-            </div>
-          </div>
-        ) : null}
         <div className="flex border-[1px] border-gray-200 rounded-lg cursor-pointer">
           <a
             href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`}
