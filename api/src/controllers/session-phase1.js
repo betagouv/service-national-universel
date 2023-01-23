@@ -338,7 +338,6 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
       sessionId: sessionPhase1._id,
     });
 
-    console.log(`${ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`);
     //Send emails to share session
     for (const email of value.emails) {
       await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
