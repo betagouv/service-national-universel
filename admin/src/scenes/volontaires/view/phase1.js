@@ -153,7 +153,7 @@ export default function Phase1(props) {
                 setValues(young);
               }}
               disabled={loading}>
-              Annuler
+              Fermer
             </button>
           </div>
         )}
@@ -188,7 +188,7 @@ export default function Phase1(props) {
                     }
                   />
                 )}
-                {young.statusPhase1 === "NOT_DONE" && (
+                {young.statusPhase1 === "NOT_DONE" && user.role !== ROLES.HEAD_CENTER && (
                   <div
                     onClick={() => setModalDispense({ isOpen: true })}
                     className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">

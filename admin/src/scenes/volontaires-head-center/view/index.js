@@ -3,9 +3,10 @@ import { Switch } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
-import Details from "./Details";
-import Wrapper from "./wrapper";
-import Phase1 from "./phase1";
+import VolontairePhase0View from "../../phase0/view";
+import Phase1 from "../../volontaires/view/phase1";
+
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export default function VolontaireHeadCenter({ ...props }) {
   const [young, setYoung] = useState();
@@ -22,15 +23,22 @@ export default function VolontaireHeadCenter({ ...props }) {
   if (!young) return <div />;
   return (
     <Switch>
-      <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
+      <SentryRoute
+        path="/volontaire/:id/phase1"
+        component={() => (
+          <>
+            <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: "Fiche du volontaire" }]} />
+            <Phase1 young={young} />
+          </>
+        )}
+      />
       <SentryRoute
         path="/volontaire/:id"
         component={() => (
-          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-            <Wrapper young={young} tab="details">
-              <Details young={young} />
-            </Wrapper>
-          </div>
+          <>
+            <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: "Fiche du volontaire" }]} />
+            <VolontairePhase0View young={young} globalMode="readonly" />
+          </>
         )}
       />
     </Switch>

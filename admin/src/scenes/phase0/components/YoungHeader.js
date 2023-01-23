@@ -205,12 +205,12 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           <Title>
             <div className="mr-[15px]">
               <div className="flex items-center">
-                {getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
+                {user.role !== ROLES.HEAD_CENTER && getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
                 {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}
               </div>
             </div>
             <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
-            {young.status !== YOUNG_STATUS.DELETED && (
+            {young.status !== YOUNG_STATUS.DELETED && user.role !== ROLES.HEAD_CENTER && (
               <>
                 <ChangeCohortPen young={young} onChange={onChange} />
                 {young.originalCohort && <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />}
@@ -221,7 +221,9 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
             <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               <div className="flex items-center">
                 Dossier d&apos;inscription
-                {getNotesByPhase(PHASE_INSCRIPTION).length > 0 && <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />}
+                {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
+                  <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
+                )}
               </div>
             </Tab>
             {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
@@ -231,68 +233,76 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                     Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
                   </div>
                 </Tab>
-                <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
-                  <div className="flex items-center">
-                    Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
-                  </div>
-                </Tab>
-                <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
-                  <div className="flex items-center">
-                    Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
-                  </div>
-                </Tab>
+                {user.role !== ROLES.HEAD_CENTER && (
+                  <>
+                    <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+                      <div className="flex items-center">
+                        Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                      </div>
+                    </Tab>
+                    <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+                      <div className="flex items-center">
+                        Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                      </div>
+                    </Tab>
+                  </>
+                )}
               </>
             )}
-            <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
-              <div className="flex items-center">
-                <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
-                Historique
-              </div>
-            </Tab>
+            {user.role !== ROLES.HEAD_CENTER && (
+              <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
+                <div className="flex items-center">
+                  <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                  Historique
+                </div>
+              </Tab>
+            )}
             {canViewEmailHistory(user) ? (
               <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
                 Notifications
               </Tab>
             ) : null}
-            {canViewNotes(user) && (
+            {user.role !== ROLES.HEAD_CENTER && canViewNotes(user) && (
               <Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
                 {`(${young.notes?.length || 0}) Notes internes`}
               </Tab>
             )}
           </TabList>
         </div>
-        <div className="w-[300px] self-end">
-          <div className="relative mb-[15px]">
-            <div className="absolute top-[-45px]">
-              {young.status === YOUNG_STATUS.VALIDATED && user.role === ROLES.ADMIN && <PhaseStatusSelector young={young} onChange={onChange} />}
+        {user.role !== ROLES.HEAD_CENTER && (
+          <div className="w-[300px] self-end">
+            <div className="relative mb-[15px]">
+              <div className="absolute top-[-45px]">
+                {young.status === YOUNG_STATUS.VALIDATED && user.role === ROLES.ADMIN && <PhaseStatusSelector young={young} onChange={onChange} />}
+              </div>
             </div>
+            <Field
+              mode="edition"
+              name="status"
+              label={translate(phase)}
+              value={young.status}
+              transformer={translate}
+              type="select"
+              options={statusOptions}
+              onChange={onSelectStatus}
+              className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
+            />
+            {young.status !== YOUNG_STATUS.DELETED && (
+              <div className="flex items-center justify-between my-[15px]">
+                <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+                  Supprimer
+                </Button>
+                <Button
+                  className="ml-[8px]"
+                  icon={<TakePlace className="text-[#6B7280]" />}
+                  href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
+                  onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                  Prendre sa place
+                </Button>
+              </div>
+            )}
           </div>
-          <Field
-            mode="edition"
-            name="status"
-            label={translate(phase)}
-            value={young.status}
-            transformer={translate}
-            type="select"
-            options={statusOptions}
-            onChange={onSelectStatus}
-            className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
-          />
-          {young.status !== YOUNG_STATUS.DELETED && (
-            <div className="flex items-center justify-between my-[15px]">
-              <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
-                Supprimer
-              </Button>
-              <Button
-                className="ml-[8px]"
-                icon={<TakePlace className="text-[#6B7280]" />}
-                href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
-                onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                Prendre sa place
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
       {confirmModal && (
         <ConfirmationModal
