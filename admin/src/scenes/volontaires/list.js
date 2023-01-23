@@ -89,6 +89,7 @@ const FILTERS = [
   "DEPART_MOTIF",
   "APPLICATION_FILES_TYPE",
   "NOTES",
+  "MEETING_INFO",
 ];
 
 export default function VolontaireList() {
@@ -783,6 +784,22 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut phase 1")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="MEETING_INFO"
+                  dataField="hasMeetingInformation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MEETING_INFO") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Confirmation PDR", "Confirmation PDR")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
