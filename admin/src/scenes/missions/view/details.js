@@ -64,6 +64,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
     "hebergementPayant",
     "tutor",
     "visibility",
+    "region",
+    "department",
     "location",
   ];
 
