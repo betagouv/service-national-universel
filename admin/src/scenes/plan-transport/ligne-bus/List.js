@@ -203,18 +203,24 @@ const ReactiveList = ({ cohort, history }) => {
               }}
               transform={async (data) => {
                 let all = data;
+
+                // Get the length of the longest array of PDRs
+                const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
+
                 return all.map((data) => {
                   let pdrs = {};
-                  data.pointDeRassemblements.map((pdr, index) => {
-                    const num = index + 1;
-                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = getDepartmentNumber(pdr.department);
-                    pdrs[`ID PDR ${num}`] = pdr.meetingPointId;
-                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr.transportType;
-                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr.name + " / " + pdr.address;
-                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr.busArrivalHour;
-                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr.meetingHour;
-                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr.returnHour;
-                  });
+
+                  for (let i = 0; i < maxPDRs; i++) {
+                    const pdr = data.pointDeRassemblements?.[i];
+                    const num = i + 1;
+                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
+                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
+                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
+                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
+                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.meetingHour || "";
+                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
+                  }
 
                   return {
                     "NUMERO DE LIGNE": data.busId,
@@ -606,6 +612,7 @@ const ReactiveList = ({ cohort, history }) => {
 };
 
 const Line = ({ hit, currentTab }) => {
+  console.log("🚀 ~ file: List.js:615 ~ Line ~ hit", hit);
   const history = useHistory();
 
   const meetingPoints =
