@@ -20,7 +20,8 @@ const { ObjectId } = require("mongodb");
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
   const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id.toString());
-  modificationBus.set({ ...modif });
+  const copyModif = JSON.parse(JSON.stringify(modif));
+  modificationBus.set({ ...copyModif });
   await planDeTransport.save({ fromUser });
 };
 
@@ -51,8 +52,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     });
 
     const planDeTransport = await PlanTransportModel.findById(line._id);
-    if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [modificationBus];
-    else planDeTransport.modificationBuses.push(modificationBus);
+    const copyModif = JSON.parse(JSON.stringify(modificationBus));
+    if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [copyModif];
+    else planDeTransport.modificationBuses.push(copyModif);
 
     await planDeTransport.save({ fromUser: req.user });
 

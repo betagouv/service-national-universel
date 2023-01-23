@@ -624,6 +624,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  hasMeetingInformation: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Le volontaire a été informé du lieu de rencontre",
+    },
+  },
+
   // Legacy ?
   codeCenterTmp: {
     type: String,

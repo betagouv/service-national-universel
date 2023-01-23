@@ -90,6 +90,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       transportInfoGivenByLocal: pdrOption === "local" ? "true" : "false",
       meetingPointId: meetingPointId ? meetingPointId : undefined,
       ligneId: ligneId ? ligneId : undefined,
+      hasMeetingInformation: pdrOption !== "young-select" ? "true" : "false",
     });
 
     if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
