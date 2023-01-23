@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ModalContacts from "../modals/ModalContacts";
 import { Spinner } from "reactstrap";
 
-export default function CardContacts({ getContacts, createContact, deleteContact }) {
+export default function CardContacts({ structure, getContacts, createContact, updateContact, deleteContact }) {
   const [isOpen, setIsOpen] = useState(false);
   const [contacts, setContacts] = useState([]);
   console.log("🚀 ~ file: CardContacts.js:9 ~ CardContacts ~ contacts", contacts);
@@ -29,13 +29,22 @@ export default function CardContacts({ getContacts, createContact, deleteContact
         {contacts.map((contact, index) => {
           if (index < 6)
             return (
-              <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white`}>
-                {getInitials(contact.contactName)}
+              <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-xs border-2 border-white`}>
+                {getInitials(contact.firstName + " " + contact.lastName)}
               </div>
             );
         })}
       </div>
-      <ModalContacts isOpen={isOpen} setIsOpen={setIsOpen} contacts={contacts} getContacts={getContacts} createContact={createContact} deleteContact={deleteContact} />
+      <ModalContacts
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        structure={structure}
+        contacts={contacts}
+        setContacts={setContacts}
+        updateContact={updateContact}
+        createContact={createContact}
+        deleteContact={deleteContact}
+      />
     </div>
   );
 }

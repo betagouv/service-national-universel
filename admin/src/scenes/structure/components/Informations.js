@@ -9,34 +9,19 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Field from "../../centersV2/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
+import { legalStatus, typesStructure } from "../../../utils";
+import { getNetworkOptions } from "../structureUtils";
 
 export default function Informations({ structure }) {
   const [data, setData] = useState(structure);
-  console.log("🚀 ~ file: Informations.js:14 ~ Informations ~ data", data);
+  console.log("🚀 ~ file: Informations.js:17 ~ Informations ~ data", data);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const legalStatusOptions = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"].map((e) => ({ label: translate(e), value: e }));
-  const typesOptions = [
-    "Collectivité territoriale",
-    "Etablissement scolaire",
-    "Etablissement public de santé",
-    "Corps en uniforme",
-    "Service de l'Etat",
-    "Autre établissement public",
-    "Etablissement de santé privée d'intérêt collectif à but non lucratif",
-    "Entreprise agréée ESUS",
-    "Autre structure privée à but non lucratif",
-    "Agrément Jeunesse et Education Populaire",
-    "Agrément Service Civique",
-    "Association complémentaire de l'enseignement public",
-    "Associations d'usagers du système de santé",
-    "Association sportive affiliée à une fédération sportive agréée par l'Etat",
-    "Agrément des associations de protection de l'environnement",
-    "Association agréée de sécurité civile",
-    "Autre agrément",
-  ].map((e) => ({ label: e, value: e }));
+  const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
+  const structureTypesOptions = typesStructure[data.legalStatus].map((e) => ({ label: e, value: e }));
+
   const [networkOptions, setNetworkOptions] = useState([]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
@@ -71,33 +56,15 @@ export default function Informations({ structure }) {
     }
   };
 
-  //   const getParentStructure = async () => {
-  //     try {
-  //       const { responses: structureResponses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } });
-  //       if (structureResponses.length) {
-  //         const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-  //         setParentStructure(structures.length ? structures[0] : null);
-  //       }
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   };
-
-  const getNetworkOptions = async () => {
-    try {
-      const { data } = await API.get("/structure/networks");
-      if (data.length) setNetworkOptions(data.map((e) => ({ label: e.name, value: e._id })));
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   return (
     <div className="bg-white mx-8 my-6 p-8 rounded-lg shadow-lg shadow-neutral-100/50">
       <div className="flex justify-between w-full">
         <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
         <EditButton
-          onClick={() => getNetworkOptions()}
+          onClick={async () => {
+            const options = await getNetworkOptions();
+            setNetworkOptions(options);
+          }}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           isLoading={isLoading}
@@ -194,8 +161,8 @@ export default function Informations({ structure }) {
             <MultiSelect
               label="Sélectionnez un ou plusieurs agrééments"
               readOnly={!isEditing}
-              options={typesOptions}
-              selected={typesOptions.filter((e) => data.types.includes(e.value))}
+              options={structureTypesOptions}
+              selected={structureTypesOptions.filter((e) => data.types.includes(e.value))}
               error={errors?.types}
               setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
             />
