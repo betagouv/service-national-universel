@@ -8,6 +8,8 @@
  *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
  *   PUT   /young-edition/:id/parent-image-rights-reset
  *                                                -> Remet à undefined le consentement de droit à l'image d'un parent en lui renvoyant une notification pour le redonner.
+ *   PUT   /young-edition/:id/parent-allow-snu-reset
+ *                                                -> Remet à undefined le consentement de participation des deux parents en leur renvoyant une notification pour le redonner.
  *   GET   /young-edition/:id/remider/:idParent   -> Relance la notification de consentement pour le parent 1 ou 2
  *   GET   /young-edition/:id/reminder-parent-image-rights/:idParent
  *                                                -> Relance la notification de consentement au droit à l'image pour le parent 1 ou 2
