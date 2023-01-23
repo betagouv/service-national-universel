@@ -9,7 +9,7 @@ const config = require("../../config");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023REINSCRIPTION } = require("../../utils");
-const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { getFilteredSessions } = require("../../utils/cohort");
 
@@ -20,6 +20,24 @@ router.put("/goToReinscription", passport.authenticate("young", { session: false
 
     young.set({ reinscriptionStep2023: STEPS2023REINSCRIPTION.ELIGIBILITE });
     young.set({ status: YOUNG_STATUS.REINSCRIPTION });
+    young.set({
+      cohesionCenterId: undefined,
+      sessionPhase1Id: undefined,
+      meetingPointId: undefined,
+      ligneId: undefined,
+      deplacementPhase1Autonomous: undefined,
+      transportInfoGivenByLocal: undefined,
+      cohesionStayPresence: undefined,
+      presenceJDM: undefined,
+      departInform: undefined,
+      departSejourAt: undefined,
+      departSejourMotif: undefined,
+      departSejourMotifComment: undefined,
+      youngPhase1Agreement: "false",
+      hasMeetingInformation: undefined,
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+      cohesionStayMedicalFileReceived: undefined,
+    });
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

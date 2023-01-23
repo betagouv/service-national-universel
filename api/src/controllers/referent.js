@@ -493,9 +493,23 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
-      young.set({ sessionPhase1Id: undefined });
-      young.set({ meetingPointId: undefined });
-      young.set({ ligneId: undefined });
+      young.set({
+        cohesionCenterId: undefined,
+        sessionPhase1Id: undefined,
+        meetingPointId: undefined,
+        ligneId: undefined,
+        deplacementPhase1Autonomous: undefined,
+        transportInfoGivenByLocal: undefined,
+        cohesionStayPresence: undefined,
+        presenceJDM: undefined,
+        departInform: undefined,
+        departSejourAt: undefined,
+        departSejourMotif: undefined,
+        departSejourMotifComment: undefined,
+        youngPhase1Agreement: "false",
+        hasMeetingInformation: undefined,
+        cohesionStayMedicalFileReceived: undefined,
+      });
     }
 
     // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
