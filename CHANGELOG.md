@@ -1,3 +1,49 @@
+# [1.203.0](https://github.com/betagouv/service-national-universel/compare/v1.202.0...v1.203.0) (2023-01-20)
+
+
+### Bug Fixes
+
+* **admin:** export application issu de QPV ([13a6c9f](https://github.com/betagouv/service-national-universel/commit/13a6c9f391639c7813d881ec99dbbebd2d913514))
+* **admin:** formulaire incomplet isJva mission ([85b6705](https://github.com/betagouv/service-national-universel/commit/85b67050805571c89f245a9fe8793986100d42ea))
+* **admin:** formulaire incomplet_2 isJva mission ([2fa4d8e](https://github.com/betagouv/service-national-universel/commit/2fa4d8e545eb12d8527e1d3a602e30e1343d3c8a))
+* **admin:** Pb nb pdr inconsistant excel ([#2197](https://github.com/betagouv/service-national-universel/issues/2197)) ([bbc085b](https://github.com/betagouv/service-national-universel/commit/bbc085b7227e48e670787d624a4ec239e062709e))
+* **api:** Check if we find youngs before continue ([0b3e43e](https://github.com/betagouv/service-national-universel/commit/0b3e43e994ff016894f29246e02be30926109a42))
+* **api:** missing try catch ([83b28b0](https://github.com/betagouv/service-national-universel/commit/83b28b0230f592f39e715c3c532006b7ba055a87))
+* **app:** Phase 1 Jeunse Affecté : problème d'activation des étapes ([#2192](https://github.com/betagouv/service-national-universel/issues/2192)) ([ef62d85](https://github.com/betagouv/service-national-universel/commit/ef62d8535b7b1494baa8192d5ca24f539cfa180f))
+
+
+### Features
+
+* **admin:** delete old centers ([#2190](https://github.com/betagouv/service-national-universel/issues/2190)) ([f0d450c](https://github.com/betagouv/service-national-universel/commit/f0d450cfc885320cc7bd9bde738f2732e9bb6984))
+* **admin:** delete old meeting points ([#2191](https://github.com/betagouv/service-national-universel/issues/2191)) ([6413334](https://github.com/betagouv/service-national-universel/commit/6413334aefa48435c0e8f2be7600fafa1c0b5e85))
+* **admin:** update dashboard ([1ff96c0](https://github.com/betagouv/service-national-universel/commit/1ff96c0c2d23b977ff3d6a901735c9b968548990))
+* **admin/api:** Excel plan de transport + 2/3 fix  ([#2189](https://github.com/betagouv/service-national-universel/issues/2189)) ([c0cc5e5](https://github.com/betagouv/service-national-universel/commit/c0cc5e5548ea93ba6b29b712693becd6cc509feb))
+* **admin/app:** remove phase2 referent manager email ([#2193](https://github.com/betagouv/service-national-universel/issues/2193)) ([d1e9aee](https://github.com/betagouv/service-national-universel/commit/d1e9aee757968eb2463eeeac7219d94b6ae97b97))
+* **api/admin:** update place bus if young WITHDRAW or change cohort ([#2188](https://github.com/betagouv/service-national-universel/issues/2188)) ([f7094ce](https://github.com/betagouv/service-national-universel/commit/f7094ce188ebee373ace334849f09ddbf0fa6be6))
+* **app:** add license to young contact questions ([0f7a6fb](https://github.com/betagouv/service-national-universel/commit/0f7a6fbcc9342c588c9a2a985add5c44a9684dc3))
+
+# [1.202.0](https://github.com/betagouv/service-national-universel/compare/v1.201.0...v1.202.0) (2023-01-19)
+
+
+### Bug Fixes
+
+* **admin:** chef de centre can add team member ([18b92fe](https://github.com/betagouv/service-national-universel/commit/18b92fe00b6608a0a0bf3a14bf9e899e329e9391))
+* **admin:** disabled status phase 1 Affected ([1d9022a](https://github.com/betagouv/service-national-universel/commit/1d9022a8cc1c79e5b5d521c59eaff818763e89bf))
+* **admin:** Vue PDR : fix de l'erreur sur le filtre par défaut de département ([#2187](https://github.com/betagouv/service-national-universel/issues/2187)) ([b1cfbf7](https://github.com/betagouv/service-national-universel/commit/b1cfbf7246af61c97b184138a7f9895e3fe37c17))
+* **admin:** Vue PDR : problème de valeur par défaut des filtres de région et département pour les référents ([#2186](https://github.com/betagouv/service-national-universel/issues/2186)) ([7c5f30f](https://github.com/betagouv/service-national-universel/commit/7c5f30fbb9a823aa26035b2bbcafa59b86582df1))
+* **api:** fix autorisation affectation admin pdr ([31c1720](https://github.com/betagouv/service-national-universel/commit/31c172091e4d0bf35eac4cbe5eaca48ed4b07c6c))
+* **app:** Update fiche sanitaire ecran affecté ([#2183](https://github.com/betagouv/service-national-universel/issues/2183)) ([a607399](https://github.com/betagouv/service-national-universel/commit/a607399fc55c299f8be29b40a714948e406b40a1))
+
+
+### Features
+
+* **admin:** cannot edit mission if ARCHIVED ([b833c5c](https://github.com/betagouv/service-national-universel/commit/b833c5ce40865cbe9d0c27ac3cd952d0cc65bc12))
+* **admin:** modal affectation can search center by department and region ([e536790](https://github.com/betagouv/service-national-universel/commit/e536790e1b274eafd156ace8e97d6f355808357b))
+* **admin:** open affectation phase 1 for admin ([85ce3a5](https://github.com/betagouv/service-national-universel/commit/85ce3a5088e0fe99879978d2a92e820cf849d745))
+* **admin/api:** open plan de transport moderateur prod ([#2181](https://github.com/betagouv/service-national-universel/issues/2181)) ([17a26cb](https://github.com/betagouv/service-national-universel/commit/17a26cb4334709a40a12bf3799a723e440dfc409))
+* **admin/api:** update convocation ([#2179](https://github.com/betagouv/service-national-universel/issues/2179)) ([0570f01](https://github.com/betagouv/service-national-universel/commit/0570f013bec62818e8e8ac9c7c33a0f6d4d40657))
+* **api:** complétion des notifications de déménagement aux référents ([#2184](https://github.com/betagouv/service-national-universel/issues/2184)) ([5974a68](https://github.com/betagouv/service-national-universel/commit/5974a6850cc7514d2f4d8b283c025b1352441f43))
+
 # [1.201.0](https://github.com/betagouv/service-national-universel/compare/v1.200.0...v1.201.0) (2023-01-18)
 
 

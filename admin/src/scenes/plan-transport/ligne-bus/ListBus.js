@@ -320,14 +320,21 @@ const Line = ({ young, bus }) => {
   const p = bus.meetingsPointsDetail.find((option) => option._id.toString() === young.meetingPointId);
   const c = bus.centerDetail;
 
+  if (!p || !c) {
+    capture("Problem with bus line");
+    return null;
+  }
+
   return (
     <>
       <hr />
       <div className="flex py-4 items-center px-4 hover:bg-gray-50 gap-6">
         <div className="w-[33%] flex flex-col gap-1">
-          <div className="text-base font-bold leading-6 text-gray-800">
-            {young.firstName} {young.lastName}
-          </div>
+          <Link to={`/volontaire/${young._id}`} target="_blank">
+            <div className="text-base font-bold leading-6 text-gray-800">
+              {young.firstName} {young.lastName}
+            </div>
+          </Link>
           <div className="text-sm leading-4 text-[#738297]">
             {young.department} • {young.region}
           </div>

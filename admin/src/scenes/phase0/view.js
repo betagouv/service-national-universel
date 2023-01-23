@@ -1138,8 +1138,11 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if ((data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") && !validator.matches(data.phone, regexPhoneFrenchCountries)) {
-        errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone valide.";
+      if (
+        (data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") &&
+        !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])
+      ) {
+        errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide.";
         result = false;
       }
       result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
