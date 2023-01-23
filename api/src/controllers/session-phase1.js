@@ -8,6 +8,7 @@ const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
+const ReferentModel = require("../models/referent");
 const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
@@ -27,7 +28,7 @@ const {
   ROLES,
 } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
-const { validateSessionPhase1, validateId } = require("../utils/validator");
+const { validateSessionPhase1, validateId, validateHeadOfCenterCohortChange } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
@@ -446,6 +447,60 @@ router.post("/check-token/:token", async (req, res) => {
     } else {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (sessionPhase1.headCenterId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error: errorIdHeadCenter, value: checkedIdHeadCenter } = validateId(req.body.id);
+    if (errorIdHeadCenter) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const referent = await ReferentModel.findById(checkedIdHeadCenter);
+    if (referent.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Cannot be head of center in more than one centers for the same cohort
+    const overlappingSessionPhase1 = await SessionPhase1Model.find({ cohort: sessionPhase1.cohort, headCenterId: checkedIdHeadCenter });
+    if (overlappingSessionPhase1.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    sessionPhase1.set({ headCenterId: checkedIdHeadCenter });
+    await sessionPhase1.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    sessionPhase1.set({ headCenterId: undefined });
+    await sessionPhase1.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
