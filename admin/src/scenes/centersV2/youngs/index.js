@@ -266,6 +266,10 @@ export default function CenterYoungIndex() {
           youngs: [],
           meetingPoint: [],
         },
+        transportInfoGivenByLocal: {
+          youngs: [],
+          meetingPoint: [],
+        },
       };
       const youngs = await esYoungBySession(filter);
 
@@ -302,9 +306,10 @@ export default function CenterYoungIndex() {
           meetingPointId: young.meetingPointId,
           ligneId: young.ligneId,
         };
-        // TODO : transportInfoGivenByLocal
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
+        } else if (young.transportInfoGivenByLocal === "true") {
+          result.transportInfoGivenByLocal.youngs.push(tempYoung);
         } else {
           const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
           const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
@@ -327,8 +332,13 @@ export default function CenterYoungIndex() {
       }
       // Transform data into array of objects before excel converts
       const formatedRep = Object.keys(result).map((key) => {
+        let name;
+        if (key === "noMeetingPoint") name = "Autonome";
+        else if (key === "transportInfoGivenByLocal") name = "Services locaux";
+        else name = key;
+        console.log(name, result[key]);
         return {
-          name: key != "noMeetingPoint" ? key : "Autonome",
+          name: name,
           data: result[key].youngs.map((young) => {
             const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
             const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
@@ -614,6 +624,7 @@ const transformData = async ({ data, centerId }) => {
       "Région du centre": center.region || "",
       "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
       "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
+      "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
       "Bus n˚": bus?.busId,
       "Adresse point de rassemblement": meetingPoint?.address,
       "Date aller": bus?.departuredDate,
