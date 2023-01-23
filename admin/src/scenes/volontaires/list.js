@@ -129,8 +129,8 @@ export default function VolontaireList() {
 
     return all.map((data) => {
       let center = {};
-      if (data.sessionPhase1Id && centers && sessionsPhase1) {
-        center = centers.find((c) => sessionsPhase1.find((sessionPhase1) => sessionPhase1._id === data.sessionPhase1Id)?.cohesionCenterId === c._id);
+      if (data.cohesionCenterId && centers && sessionsPhase1) {
+        center = centers.find((c) => c._id === data.cohesionCenterId);
         if (!center) center = {};
       }
       let meetingPoint = {};
