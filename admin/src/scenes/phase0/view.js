@@ -1580,6 +1580,36 @@ function SectionConsentements({ young, onChange }) {
     }
   }
 
+  function openParentsAllowSNUModal() {
+    setConfirmModal({
+      icon: <Warning />,
+      title: "Annulation du refus de consentement",
+      message: (
+        <div>
+          Vous vous apprêtez à annuler le refus de consentement des représentants légaux de {young.firstName} {young.lastName}.
+          <br />
+          Ils recevront un email de relance pour leur demander de confirmer leur consentement.
+        </div>
+      ),
+      confirm: resetParentsAllowSNU,
+    });
+  }
+
+  async function resetParentsAllowSNU() {
+    try {
+      let result = await api.put(`/young-edition/${young._id}/parent-allow-snu-reset`);
+      if (!result.ok) {
+        toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour les représentants légaux. Veuillez réessayer dans quelques instants.");
+      } else {
+        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal 1.");
+        onChange && onChange(result.data);
+      }
+    } catch (err) {
+      capture(err);
+      toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -1615,7 +1645,14 @@ function SectionConsentements({ young, onChange }) {
             <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
-        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+        <div className="flex items-center gap-8">
+          <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+          {young.parentAllowSNU === "false" && (
+            <button onClick={openParentsAllowSNUModal} className="mt-2 mb-6 text-blue-600 underline">
+              Annuler le refus de consentement
+            </button>
+          )}
+        </div>
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
           <b>
             {young.firstName} {young.lastName}
