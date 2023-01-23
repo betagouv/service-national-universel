@@ -462,6 +462,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
+//check if meetingPoint is in a schema
 router.get("/:id/in-schema", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- vérification
