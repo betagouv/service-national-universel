@@ -395,18 +395,12 @@ router.post("/check-token/:token", async (req, res) => {
       for (const young of youngs) {
         const tempYoung = {
           _id: young._id,
-          cohort: young.cohort,
           firstName: young.firstName,
           lastName: young.lastName,
           email: young.email,
           phone: young.phone,
-          address: young.address,
-          zip: young.zip,
           city: young.city,
           department: young.department,
-          region: young.region,
-          birthdateAt: young.birthdateAt,
-          gender: young.gender,
           parent1FirstName: young.parent1FirstName,
           parent1LastName: young.parent1LastName,
           parent1Email: young.parent1Email,
@@ -419,7 +413,6 @@ router.post("/check-token/:token", async (req, res) => {
           parent2Status: young.parent2Status,
           statusPhase1: young.statusPhase1,
           meetingPointId: young.meetingPointId,
-          ligneId: young.ligneId,
         };
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
