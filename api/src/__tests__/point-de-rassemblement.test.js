@@ -72,6 +72,30 @@ describe("Meeting point", () => {
       expect(res.status).toBe(200);
     });
   });
+  describe("DELETE /point-de-rassemblement/:id", () => {
+    it("should return 404 when point-de-rassemblement does not exist", async () => {
+      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
+      const res = await request(getAppHelper())
+        .delete("/point-de-rassemblement/" + notExistingPdrId)
+        .send();
+      expect(res.status).toBe(404);
+    });
+    it("should return 403 when youngs are still linked to point-de-rassemblement", async () => {
+      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
+      await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id });
+      const res = await request(getAppHelper())
+        .delete("/point-de-rassemblement/" + pointDeRassemblement._id)
+        .send();
+      expect(res.status).toBe(403);
+    });
+    it("should return 200 ", async () => {
+      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
+      const res = await request(getAppHelper())
+        .delete("/point-de-rassemblement/" + pointDeRassemblement._id)
+        .send();
+      expect(res.status).toBe(200);
+    });
+  });
   describe("GET /point-de-rassemblement/fullInfo/:pdrId/:busId", () => {
     it("should return 403 when young try to fetch another pdr than his", async () => {
       const pointDeRassemblemenYoung = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
