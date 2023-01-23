@@ -462,4 +462,28 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
+router.get("/:id/in-schema", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id } = valueParams;
+
+    if (!canUpdateMeetingPoint(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- update
+    const schema = await SchemaDeRepartitionModel.findOne({ gatheringPlaces: id });
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data: schema ? true : false });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
