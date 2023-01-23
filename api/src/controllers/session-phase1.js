@@ -306,66 +306,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ youngId: Joi.string().required(), sessionId: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { youngId, sessionId } = value;
-    const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const session = await SessionPhase1Model.findById(sessionId);
-    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
-
-    if (!canAssignCohesionCenter(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // update youngs infos
-    young.set({
-      status: "VALIDATED",
-      statusPhase1: "AFFECTED",
-      sessionPhase1Id: sessionId,
-    });
-
-    //if the young has already a meetingPoint and therefore a place taken in a bus
-    let bus = null;
-    if (young.meetingPointId) {
-      console.log(`affecting ${young.id} but is already in meetingPoint ${young.meetingPointId}`);
-      const meetingPoint = await MeetingPointObject.findById(young.meetingPointId);
-      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      bus = await BusObject.findById(meetingPoint.busId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      console.log(`${young.id} is in bus ${bus.idExcel}`);
-    }
-
-    // if young has confirmed their meetingPoint, we will cancel it
-    if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") {
-      young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
-    }
-
-    await young.save({ fromUser: req.user });
-
-    // update session infos
-    const data = await updatePlacesSessionPhase1(session, req.user);
-    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
-    if (bus) await updatePlacesBus(bus);
-
-    return res.status(200).send({
-      data: serializeSessionPhase1(data, req.user),
-      young: serializeYoung(young, req.user),
-      ok: true,
-    });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/:sessionId/share", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
