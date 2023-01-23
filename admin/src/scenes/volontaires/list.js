@@ -255,7 +255,7 @@ export default function VolontaireList() {
         },
         phase1Transport: {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-          // "Transport géré hors plateforme": // Doublon?
+          "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
           "Bus n˚": bus?.busId,
           "Adresse point de rassemblement": meetingPoint?.address,
           "Date aller": bus?.departuredDate,
