@@ -6,12 +6,13 @@ const crypto = require("crypto");
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
+const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
-const MeetingPointObject = require("../models/meetingPoint");
-const BusObject = require("../models/bus");
+const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS } = require("../utils");
 const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
 
 const {
@@ -20,19 +21,19 @@ const {
   canSearchSessionPhase1,
   canViewSessionPhase1,
   canDownloadYoungDocuments,
-  canAssignCohesionCenter,
   canShareSessionPhase1,
   canCreateOrUpdateCohesionCenter,
   isReferentOrAdmin,
   ROLES,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
-const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
+const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
 const { COHESION_STAY_END } = require("snu-lib");
+
+const datefns = require("date-fns");
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
@@ -323,13 +324,21 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
 
     if (!canShareSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    //Create token
+    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const startAt = datefns.subDays(new Date(cohort.dateStart), 7);
+    const endDate = datefns.addDays(new Date(cohort.dateEnd), 7);
+
     const sessionToken = await sessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
-      startAt: START_DATE_PHASE1[sessionPhase1.cohort],
-      expireAt: END_DATE_PHASE1[sessionPhase1.cohort],
+      startAt: startAt,
+      expireAt: endDate,
       sessionId: sessionPhase1._id,
     });
 
+    console.log(`${ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`);
     //Send emails to share session
     for (const email of value.emails) {
       await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
@@ -369,19 +378,35 @@ router.post("/check-token/:token", async (req, res) => {
           youngs: [],
           meetingPoint: [],
         },
+        transportInfoGivenByLocal: {
+          youngs: [],
+          meetingPoint: [],
+        },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-      const meetingPoints = await MeetingPointObject.find({ centerId: sessionPhase1.cohesionCenterId });
+
+      const ligneBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId });
+
+      let arrayMeetingPoints = [];
+      ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
+
+      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
 
       for (const young of youngs) {
         const tempYoung = {
           _id: young._id,
+          cohort: young.cohort,
           firstName: young.firstName,
           lastName: young.lastName,
           email: young.email,
           phone: young.phone,
+          address: young.address,
+          zip: young.zip,
           city: young.city,
           department: young.department,
+          region: young.region,
+          birthdateAt: young.birthdateAt,
+          gender: young.gender,
           parent1FirstName: young.parent1FirstName,
           parent1LastName: young.parent1LastName,
           parent1Email: young.parent1Email,
@@ -394,25 +419,29 @@ router.post("/check-token/:token", async (req, res) => {
           parent2Status: young.parent2Status,
           statusPhase1: young.statusPhase1,
           meetingPointId: young.meetingPointId,
+          ligneId: young.ligneId,
         };
-
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
+        } else if (young.transportInfoGivenByLocal === "true") {
+          result.transportInfoGivenByLocal.youngs.push(tempYoung);
         } else {
-          const tempMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-
-          if (tempMeetingPoint) {
-            if (!result[tempMeetingPoint.busExcelId]) {
-              result[tempMeetingPoint.busExcelId] = {};
-              result[tempMeetingPoint.busExcelId]["youngs"] = [];
-              result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
+          const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+          if (youngMeetingPoint) {
+            if (!result[youngLigneBus.busId]) {
+              result[youngLigneBus.busId] = {};
+              result[youngLigneBus.busId]["youngs"] = [];
+              result[youngLigneBus.busId]["ligneBus"] = [];
+              result[youngLigneBus.busId]["meetingPoint"] = [];
             }
-
-            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === tempMeetingPoint._id.toString())) {
-              result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
+            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
             }
-
-            result[tempMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+            }
+            result[youngLigneBus.busId]["youngs"].push(tempYoung);
           }
         }
       }
