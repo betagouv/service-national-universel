@@ -84,7 +84,7 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, getContacts
   if (!contacts) return <Spinner />;
 
   return (
-    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} headerText="Mes contacts convocation" onCancel={onCancel}>
+    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} headerText="L'équipe" onCancel={onCancel}>
       <div className="flex flex-col w-full pt-2">
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b"></div>
         {!edit ? (

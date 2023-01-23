@@ -19,7 +19,7 @@ import ModalConfirm from "./modals/ModalConfirm";
 import HistoricComponent from "./views/Historic";
 import { capture } from "../sentry";
 
-export default function Contract({ young, admin }) {
+export default function Contract({ young }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -35,96 +35,108 @@ export default function Contract({ young, admin }) {
   const [tutor, setTutor] = useState(null);
   const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
+  const [structureManager, setStructureManager] = useState(null);
+
   const [loadings, setLoadings] = useState({
     saveButton: false,
     submitButton: false,
   });
 
-  useEffect(() => {
-    const getApplication = async () => {
-      if (!young) return;
-      // todo : why not just
-      // let { ok, data, code } = await api.get(`/application/${applicationId}`);
-      let { ok, data, code } = await api.get(`/young/${young._id}/application`);
+  const getApplication = async () => {
+    if (!young) return;
+    // todo : why not just
+    // let { ok, data, code } = await api.get(`/application/${applicationId}`);
+    let { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
+    const currentApplication = data.find((e) => e._id === applicationId);
+
+    if (currentApplication.contractId) {
+      ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
       if (!ok) {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
       }
-      const currentApplication = data.find((e) => e._id === applicationId);
+      setContract(data);
+    }
+    setApplication(currentApplication);
+  };
 
-      if (currentApplication.contractId) {
-        ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
-        if (!ok) {
-          capture(code);
-          return toastr.error("Oups, une erreur est survenue", code);
-        }
-        setContract(data);
-      }
-      setApplication(currentApplication);
-    };
-    getApplication();
-  }, []);
+  const getMission = async () => {
+    if (!application) return;
+    const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
+    return setMission(data);
+  };
 
-  useEffect(() => {
-    const getMission = async () => {
-      if (!application) return;
-      const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
+  const getTutor = async () => {
+    try {
+      if (!application || !(application.tutorId || application.tutor?._id)) return setTutor({});
+      const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
       if (!ok) {
-        capture(code);
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      return setMission(data);
-    };
-    getMission();
-  }, [application]);
-
-  useEffect(() => {
-    const getTutor = async () => {
-      try {
-        if (!application || !(application.tutorId || application.tutor?._id)) return setTutor({});
-        const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
-        if (!ok) {
-          toastr.warning(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
-          return setTutor({});
-        }
-        return setTutor(data);
-      } catch (e) {
+        toastr.warning(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
         return setTutor({});
       }
-    };
-    getTutor();
-  }, [application]);
+      return setTutor(data);
+    } catch (e) {
+      return setTutor({});
+    }
+  };
+
+  const getManagerDepartment = async () => {
+    try {
+      if (!young) return;
+      const { ok, data, code } = await api.get(`/department-service/${young.department}`);
+      if (!ok) {
+        toastr.warning(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
+        return setManagerDepartment({});
+      }
+      if (data.representantEtat && Object.keys(data.representantEtat).length) return setManagerDepartment(data.representantEtat);
+      else setManagerDepartment({});
+    } catch (e) {
+      setManagerDepartment({});
+    }
+  };
+
+  const getStructure = async () => {
+    if (!application) return;
+    const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
+    return setStructure(data);
+  };
+
+  const getStructureManager = async () => {
+    if (!application) return;
+    const { ok, data, code } = await api.get(`/referent/${structure.structureManagerId}`);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
+    return setStructureManager(data);
+  };
 
   useEffect(() => {
-    const getManagerDepartment = async () => {
-      try {
-        if (!young) return;
-        const { ok, data, code } = await api.get(`/department-service/${young.department}`);
-        if (!ok) {
-          toastr.warning(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
-          return setManagerDepartment({});
-        }
-        if (data.representantEtat && Object.keys(data.representantEtat).length) return setManagerDepartment(data.representantEtat);
-        else setManagerDepartment({});
-      } catch (e) {
-        setManagerDepartment({});
-      }
-    };
-    getManagerDepartment();
+    getApplication();
   }, [young]);
 
   useEffect(() => {
-    const getStructure = async () => {
-      if (!application) return;
-      const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
-      if (!ok) {
-        capture(code);
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      return setStructure(data);
-    };
+    getMission();
+    getTutor();
+    getManagerDepartment();
     getStructure();
   }, [application]);
+
+  useEffect(() => {
+    getStructureManager();
+  }, [structure]);
 
   const onSubmit = async (values) => {
     try {
@@ -142,6 +154,7 @@ export default function Contract({ young, admin }) {
         missionDuration: values.missionDuration?.toString(),
         youngId: young._id,
         structureId: structure._id,
+        representativeId: structure.representativeId,
         applicationId: application._id,
         missionId: mission._id,
         tutorId: tutor?._id,
@@ -185,6 +198,7 @@ export default function Contract({ young, admin }) {
       youngDepartment: young.department,
       youngEmail: young.email,
       youngPhone: young.phone,
+
       parent1FirstName: young.parent1FirstName,
       parent1LastName: young.parent1LastName,
       parent1Address: young.parent1OwnAddress === "true" ? young.parent1Address : young.address,
@@ -192,6 +206,7 @@ export default function Contract({ young, admin }) {
       parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
       parent1Phone: young.parent1Phone,
       parent1Email: young.parent1Email,
+
       parent2FirstName: young.parent2FirstName,
       parent2LastName: young.parent2LastName,
       parent2Address: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Address : young.address) : "",
@@ -199,6 +214,7 @@ export default function Contract({ young, admin }) {
       parent2Department: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Department : young.department) : "",
       parent2Phone: young.parent2Phone,
       parent2Email: young.parent2Email,
+
       missionName: mission.name,
       missionObjective: mission.description,
       missionAction: mission.actions,
@@ -209,17 +225,27 @@ export default function Contract({ young, admin }) {
       missionZip: mission.zip || "",
       missionDuration: mission.duration || "",
       missionFrequence: mission.frequence || "",
+
       date: dateForDatePicker(new Date()),
+
       projectManagerFirstName: managerDepartment?.firstName || "",
       projectManagerLastName: managerDepartment?.lastName || "",
       projectManagerRole: managerDepartment?.role || "Chef de Projet départemental",
       projectManagerEmail: managerDepartment?.email || "",
-      structureManagerFirstName: tutor?.firstName || "",
-      structureManagerLastName: tutor?.lastName || "",
-      structureManagerRole: "Tuteur de mission",
-      structureManagerEmail: tutor?.email || "",
+
+      structureManagerFirstName: structureManager?.firstName || "",
+      structureManagerLastName: structureManager?.lastName || "",
+      structureManagerRole: "Représentant de la structure",
+      structureManagerEmail: structureManager?.email || "",
+
+      tutorFirstName: tutor?.firstName || "",
+      tutorLastName: tutor?.lastName || "",
+      tutorRole: "Tuteur de mission",
+      tutorEmail: tutor?.email || "",
+
       structureSiret: structure?.siret || "",
       structureName: structure?.name || "",
+
       sendMessage: false,
     };
   }
@@ -514,8 +540,8 @@ export default function Contract({ young, admin }) {
                           <p>Les horaires du volontaire pour la présente mission sont :</p>
                           <ContractField name="missionFrequence" placeholder="Du lundi au vendredi" as="textarea" context={context} />
                           Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission
-                          <ContractField name="structureManagerFirstName" placeholder="Prénom" context={context} />
-                          <ContractField name="structureManagerLastName" placeholder="Nom" context={context} />
+                          <ContractField name="tutorFirstName" placeholder="Prénom" context={context} />
+                          <ContractField name="tutorLastName" placeholder="Nom" context={context} />
                           de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que,
                           le cas échéant, d’un accompagnement renforcé.
                         </div>

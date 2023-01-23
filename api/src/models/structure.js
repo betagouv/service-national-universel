@@ -269,6 +269,13 @@ const Schema = new mongoose.Schema({
   },
   jvaRawData: mongoose.Schema.Types.Mixed,
 
+  structureManagerId: {
+    type: String,
+    documentation: {
+      description: "Identifiant du représentant de la structure",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
