@@ -1,3 +1,17 @@
+# [1.204.0](https://github.com/betagouv/service-national-universel/compare/v1.203.0...v1.204.0) (2023-01-23)
+
+
+### Bug Fixes
+
+* **api:** Use deep copy ([6900c9f](https://github.com/betagouv/service-national-universel/commit/6900c9f5a45eedce7bd267cab37c155d31d730db))
+
+
+### Features
+
+* **admin:** add button to reset parental consent ([#2195](https://github.com/betagouv/service-national-universel/issues/2195)) ([2645f40](https://github.com/betagouv/service-national-universel/commit/2645f400090bd839661361fd6efd4a4bae64314f))
+* **api:** Ajouts de tests sur les PDR ([#2198](https://github.com/betagouv/service-national-universel/issues/2198)) ([469574a](https://github.com/betagouv/service-national-universel/commit/469574a0b00246337cbfa07a9c9e541ef0ddfdda))
+* **api/admin:** add  hasMeetingInformation ([cd10fb3](https://github.com/betagouv/service-national-universel/commit/cd10fb32fce4dce33a6a96d5ee4ea1908ab5388f))
+
 # [1.203.0](https://github.com/betagouv/service-national-universel/compare/v1.202.0...v1.203.0) (2023-01-20)
 
 
