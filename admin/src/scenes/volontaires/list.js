@@ -26,6 +26,7 @@ import {
   ES_NO_LIMIT,
   ROLES,
   formatDateFRTimezoneUTC,
+  formatDateFR,
   colors,
   getLabelWithdrawnReason,
   departmentLookUp,
@@ -98,7 +99,6 @@ export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
-  const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
@@ -123,17 +123,24 @@ export default function VolontaireList() {
         }
       }
     }
+
+    const response = await api.get("/ligne-de-bus/all");
+    const meetingPoints = response ? response.data.meetingPoints : [];
+    const ligneBus = response ? response.data.ligneBus : [];
+
     return all.map((data) => {
       let center = {};
-      if (data.sessionPhase1Id && centers && sessionsPhase1) {
-        center = centers.find((c) => sessionsPhase1.find((sessionPhase1) => sessionPhase1._id === data.sessionPhase1Id)?.cohesionCenterId === c._id);
+      if (data.cohesionCenterId && centers && sessionsPhase1) {
+        center = centers.find((c) => c._id === data.cohesionCenterId);
         if (!center) center = {};
       }
       let meetingPoint = {};
+      let bus = {};
       if (data.meetingPointId && meetingPoints) {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-        if (!meetingPoint) meetingPoint = {};
+        bus = ligneBus.find((lb) => lb._id === data.ligneId);
       }
+
       if (!data.domains) data.domains = [];
       if (!data.periodRanking) data.periodRanking = [];
       const allFields = {
@@ -249,11 +256,11 @@ export default function VolontaireList() {
         },
         phase1Transport: {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-          // "Transport géré hors plateforme": // Doublon?
-          "Bus n˚": meetingPoint?.busExcelId,
-          "Adresse point de rassemblement": meetingPoint?.departureAddress,
-          "Date aller": meetingPoint?.departureAtString,
-          "Date retour": meetingPoint?.returnAtString,
+          "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
+          "Bus n˚": bus?.busId,
+          "Adresse point de rassemblement": meetingPoint?.address,
+          "Date aller": formatDateFR(bus?.departuredDate),
+          "Date retour": formatDateFR(bus?.returnDate),
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
@@ -323,10 +330,6 @@ export default function VolontaireList() {
     (async () => {
       const { data } = await api.get("/cohesion-center");
       setCenters(data);
-    })();
-    (async () => {
-      const { data } = await api.get("/meeting-point/all");
-      setMeetingPoints(data);
     })();
     (async () => {
       const { data } = await api.get("/session-phase1/");

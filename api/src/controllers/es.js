@@ -535,35 +535,6 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
   }
 });
 
-router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    let filter = [];
-    filter.push({
-      bool: {
-        must_not: {
-          exists: {
-            field: "deletedAt",
-          },
-        },
-      },
-    });
-
-    if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("meetingpoint", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await esClient.msearch({ index: "meetingpoint", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(response.body);
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/pointderassemblement/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;

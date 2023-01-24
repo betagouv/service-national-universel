@@ -40,7 +40,7 @@ export default function List({ data }) {
         data[currentTab].meetingPoint.map((meet) => {
           return {
             value: meet._id,
-            label: [meet?.departureAddress, meet?.departureZip, meet?.departureCity, meet?.departureDepartment].filter((e) => e).join(", "),
+            label: [meet?.address, meet?.zip, meet?.city, meet?.department].filter((e) => e).join(", "),
           };
         }),
       );
@@ -86,7 +86,7 @@ export default function List({ data }) {
                         </>
                       ) : (
                         <>
-                          <FaBus /> {bus}
+                          <FaBus /> {bus === "transportInfoGivenByLocal" ? "Services locaux" : bus}
                           <span className="text-xs">({data[bus]?.youngs?.length})</span>
                         </>
                       )}
@@ -122,7 +122,7 @@ export default function List({ data }) {
                 };
               })}
             />
-            {currentTab !== "noMeetingPoint" ? (
+            {currentTab !== "noMeetingPoint" && currentTab !== "transportInfoGivenByLocal" ? (
               <Select
                 Icon={<FilterSvg className="text-gray-400" />}
                 value={filter?.meetingPoint || ""}
