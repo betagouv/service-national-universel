@@ -286,7 +286,7 @@ export default function View(props) {
                   <div data-tip="" data-for="tooltip-edit-disabled">
                     {pdrInSchema && user.role !== ROLES.ADMIN && (
                       <ReactTooltip id="tooltip-edit-disabled" className="bg-white shadow-xl drop-shadow-sm rounded-xl" arrowColor="white" disable={false}>
-                        <div className="text-red-400 text-center">
+                        <div className="text-gray-700 text-center">
                           Action impossible : point de rassemblement utilisé dans un schéma de répartition. <br />
                           Rapprochez-vous de la Sous-Direction
                         </div>
