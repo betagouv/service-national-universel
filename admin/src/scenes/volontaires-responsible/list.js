@@ -90,11 +90,20 @@ export default function List() {
       checkboxRef.current.indeterminate = false;
     }
   }, [youngSelected]);
-  const getDefaultQuery = () => ({
-    query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } },
-    sort: [{ "youngLastName.keyword": "asc" }],
-    track_total_hits: true,
-  });
+
+  const getDefaultQuery = () => {
+    const body = {
+      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
+      sort: [{ "youngLastName.keyword": "asc" }],
+      size: ES_NO_LIMIT,
+    };
+    if (currentTab === "pending") {
+      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
+    } else if (currentTab === "follow") {
+      body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
+    }
+    return body;
+  };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function appendMissions(structure) {
