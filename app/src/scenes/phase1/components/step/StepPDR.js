@@ -43,7 +43,7 @@ export default function StepPDR({ young, center }) {
       const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
       if (date) {
         setPdrChoiceLimitDate(dayjs(date).locale("fr").format("D MMMM YYYY"));
-        setPdrChoiceExpired(date < new Date());
+        setPdrChoiceExpired(dayjs(date).isBefore(new Date()));
       } else {
         setPdrChoiceLimitDate("-");
         setPdrChoiceExpired(false);
@@ -349,7 +349,6 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired,
 
   function toggleMore(e) {
     e.stopPropagation();
-    console.log("setOpened: ", !opened);
     setOpened(!opened);
   }
 

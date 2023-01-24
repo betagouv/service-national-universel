@@ -48,6 +48,13 @@ const Schema = new mongoose.Schema({
 
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
+  pdrChoiceLimitDate: {
+    type: Date,
+    documentation: {
+      description: "Date limite de choix du PDR par le jeune",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
