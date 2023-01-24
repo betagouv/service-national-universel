@@ -17,7 +17,7 @@ import {
   colors,
   translate,
   formatPhoneNumberFR,
-} from "../../utils";
+} from "snu-lib";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -101,10 +101,14 @@ export default function VolontairePanel({ onChange, value }) {
             <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-            </a>
-            <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+            {user.role !== ROLES.HEAD_CENTER && (
+              <>
+                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                </a>
+                <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+              </>
+            )}
           </div>
           <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
           <Link to={`/user?DEPARTMENT=%5B"${young.department}"%5D&ROLE=%5B"${ROLES.REFERENT_DEPARTMENT}"%5D`}>

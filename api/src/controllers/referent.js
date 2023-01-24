@@ -1116,7 +1116,9 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+    const session = await SessionPhase1.findById(young.sessionPhase1Id);
+
+    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
