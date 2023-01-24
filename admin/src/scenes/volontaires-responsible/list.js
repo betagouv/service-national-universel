@@ -1,43 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import plausibleEvent from "../../services/plausible";
 
-import SelectStatusApplication from "../../components/selectStatusApplication";
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
-import Chevron from "../../components/Chevron";
-import ContractLink from "../../components/ContractLink";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import { Table, MultiLine } from "../../components/list";
 import {
   translate,
   translateApplication,
   getFilterLabel,
-  formatStringLongDate,
-  formatStringDateTimezoneUTC,
   getAge,
   ES_NO_LIMIT,
   ROLES,
-  translateContractStatus,
   formatLongDateUTCWithoutTime,
-  translateApplicationFileType,
   department2region,
   region2department,
   formatLongDateUTC,
   formatDateFRTimezoneUTC,
+  APPLICATION_STATUS,
 } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { ModalContainer } from "../../components/modals/Modal";
-import ModalButton from "../../components/buttons/ModalButton";
-import { Formik, Field } from "formik";
-import { Modal } from "reactstrap";
 
 import { applicationExportFields } from "snu-lib/excelExports";
 
@@ -47,6 +34,7 @@ import CursorClick from "../../assets/icons/CursorClick";
 import ModalExport from "../../components/modals/ModalExport";
 import { DepartmentFilter, RegionFilter } from "../../components/filters";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import ExclamationCircle from "../../assets/icons/ExclamationCircle";
 
 const FILTERS = ["SEARCH", "MISSION_NAME", "STATUS", "TUTOR", "DEPARTMENT", "REGION"];
 
@@ -59,7 +47,7 @@ export default function List() {
   const [young, setYoung] = useState();
   const [applications, setApplications] = useState([]);
   const countAll = applications?.length;
-  const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
+  const countPending = missions?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
   const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
@@ -138,6 +126,83 @@ export default function List() {
   useEffect(() => {
     initMissions(user.structureId);
   }, []);
+  const RenderText = (text) => {
+    return (
+      <div key={text} className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+        <div className="font-normal">
+          Marquer en <span className="font-bold">{text}</span>
+          {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+        </div>
+      </div>
+    );
+  };
+  const updateApplicationStatus = (status) => {
+    if (youngSelected.length === 0) return;
+    const isPlural = youngSelected.length > 1;
+    setModalMultiAction({
+      isOpen: true,
+      title: "Actions",
+      message: `Vous êtes sur le point de changer le statut des candidatures de ${youngSelected?.length} volontaire${isPlural ? "s" : ""}. Un email sera automatiquement envoyé.`,
+      onSubmit: async () => {
+        try {
+          console.log(status);
+          const { ok, code } = await api.post(`/application/multiaction/change-status/${status}`, {
+            ids: youngSelected.map((y) => y._id),
+          });
+          if (!ok) {
+            toastr.error("Oups, une erreur s'est produite", translate(code));
+            return;
+          }
+          history.go(0);
+        } catch (e) {
+          console.log(e);
+          toastr.error("Oups, une erreur s'est produite", translate(e.code));
+          return;
+        }
+      },
+    });
+  };
+  const optionsActions = [
+    {
+      id: APPLICATION_STATUS.VALIDATED,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.VALIDATED);
+      },
+      render: RenderText("Candidature approuvée"),
+    },
+    {
+      id: APPLICATION_STATUS.REFUSED,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.REFUSED);
+      },
+      render: RenderText("Candidature non retenue"),
+    },
+    {
+      id: APPLICATION_STATUS.IN_PROGRESS,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.IN_PROGRESS);
+      },
+      render: RenderText("Mission en cours"),
+    },
+    {
+      id: APPLICATION_STATUS.ABANDON,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.ABANDON);
+      },
+      render: RenderText("Mission abandonnée"),
+    },
+    {
+      id: APPLICATION_STATUS.DONE,
+      action: async () => {
+        updateApplicationStatus(APPLICATION_STATUS.DONE);
+      },
+      render: RenderText("Mission effectuée"),
+    },
+  ];
+  const filteredRoleActions = () => {
+    if (currentTab === "pending") return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id)));
+    else return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id)));
+  };
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
@@ -274,6 +339,15 @@ export default function List() {
       return fields;
     });
   }
+  useEffect(() => {
+    if (currentTab === "all") return;
+    setYoungSelected([]);
+    filteredRoleActions();
+  }, [currentTab]);
+  useEffect(() => {
+    if (youngSelected.length === 0) return;
+    filteredRoleActions();
+  }, [youngSelected]);
 
   if (!missions) return <Loader />;
   return (
@@ -296,14 +370,11 @@ export default function List() {
           <TabItem
             count={countPending}
             icon={
-              /*
-              mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
+              missions.some((mission) => mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5) ? (
                 <ExclamationCircle className="text-white" fill="red" />
-              ) : mission.pendingApplications > 1 ? (
+              ) : missions.some((mission) => mission.pendingApplications > 0) ? (
                 <ExclamationCircle className="text-white" fill="orange" />
               ) : null
-              */
-              null
             }
             title="À traiter"
             onClick={() => setCurrentTab("pending")}
@@ -395,7 +466,7 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" placeholder="Départment du volontaire" />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" placeholder="Département du volontaire" />
                 <RegionFilter
                   customQuery={function (value, props) {
                     let departmentArray = [];

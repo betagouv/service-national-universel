@@ -351,7 +351,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               icon={
                 mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                   <ExclamationCircle className="text-white" fill="red" />
-                ) : mission.pendingApplications > 1 ? (
+                ) : mission.pendingApplications > 0 ? (
                   <ExclamationCircle className="text-white" fill="orange" />
                 ) : null
               }
