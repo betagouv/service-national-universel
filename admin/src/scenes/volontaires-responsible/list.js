@@ -43,10 +43,10 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import SelectAction from "../../components/SelectAction";
 import CursorClick from "../../assets/icons/CursorClick";
 import ModalExport from "../../components/modals/ModalExport";
-import { DepartmentFilter } from "../../components/filters";
+import { DepartmentFilter, RegionFilter } from "../../components/filters";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "CONTRACT_STATUS"];
+const FILTERS = ["SEARCH", "MISSION_NAME", "STATUS", "TUTOR", "DEPARTMENT", "REGION"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -354,6 +354,34 @@ export default function List() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
+                  componentId="MISSION_NAME"
+                  dataField="missionName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MISSION_NAME") }}
+                  renderItem={(e, count) => {
+                    return `${e} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Mission")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="TUTOR"
+                  dataField="tutorName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
+                  renderItem={(e, count) => {
+                    return `${e} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Tuteur")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
@@ -365,38 +393,8 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="CONTRACT_STATUS"
-                  dataField="contractStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut contrat")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="FILES_TYPE"
-                  dataField="filesType.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "FILES_TYPE") }}
-                  renderItem={(e, count) => {
-                    return `${translateApplicationFileType(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Pièces jointes")}
-                  showMissing={true}
-                  missingLabel="Aucune pièce jointe"
-                />
-                {/*filesType */}
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" placeholder="Départment du volontaire" />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngRegion.keyword" placeholder="Région du volontaire" />
                 <DeleteFilters />
               </div>
 
@@ -423,16 +421,9 @@ export default function List() {
                           )}
 
                           <th className="w-3/12">Volontaire</th>
-                          <th className="w-2/12">A candidaté le</th>
-                          {currentTab !== "pending" && (
-                            <>
-                              <th className="w-1/12">Contrat</th>
-                              <th className="w-1/12">Documents</th>
-                            </>
-                          )}
-
+                          <th className="w-4/12">Mission</th>
+                          {currentTab !== "pending" && <th className="w-1/12">Contrat et Documents</th>}
                           <th className="w-3/12">Statut candidature</th>
-                          <th className="w-1/12">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -440,8 +431,8 @@ export default function List() {
                           <Hit
                             key={hit._id}
                             hit={hit}
-                            history={history}
                             currentTab={currentTab}
+                            mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
                             onClick={() => handleClick(hit)}
                             opened={young?._id === hit.youngId}
                             selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
@@ -476,7 +467,7 @@ export default function List() {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab, opened, history }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab, opened, mission }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "";
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
@@ -499,14 +490,24 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
         </MultiLine>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>{formatDateFRTimezoneUTC(hit.createdAt)}</div>
+        <div className="flex flex-row gap-4 items-center">
+          <div>
+            {mission.isJvaMission === "true" ? (
+              <img src={require("../../assets/JVA_round.png")} width="36" height="36" className="group-hover:scale-105 mx-auto min-w-[36px]" />
+            ) : (
+              <img src={require("../../assets/logo-snu.png")} width="36" height="36" className="group-hover:scale-105 mx-auto min-w-[36px]" />
+            )}
+          </div>
+          <div className="flex flex-col items-start">
+            <div className="font-bold text-sm">{mission.name}</div>
+            <div className={`text-xs ${selected ? "text-white" : "text-[#718096]"}`}>A candidaté le {formatDateFRTimezoneUTC(hit.createdAt)}</div>
+          </div>
+        </div>
       </td>
       {currentTab !== "pending" && (
-        <>
-          <td className={`${bgColor}`}>
+        <td className={`${bgColor}`}>
+          <div className="flex flex-row gap-2 justify-start items-start">
             <div>{BadgeContract(hit.contractStatus, hit.status)}</div>
-          </td>
-          <td className={`${bgColor}`}>
             {numberOfFiles > 0 && (
               <div className="flex flex-row justify-center items-center">
                 {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
@@ -514,8 +515,8 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
                 <PaperClip />
               </div>
             )}
-          </td>
-        </>
+          </div>
+        </td>
       )}
 
       <td className={`${bgColor}`} onClick={(e) => e.stopPropagation()}>
