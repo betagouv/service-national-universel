@@ -269,10 +269,38 @@ const Schema = new mongoose.Schema({
   },
   jvaRawData: mongoose.Schema.Types.Mixed,
 
-  structureManagerId: {
-    type: String,
-    documentation: {
-      description: "Identifiant du représentant de la structure",
+  structureManager: {
+    type: {
+      firstName: {
+        type: String,
+        documentation: {
+          description: "Prénom du représentant de l'état",
+        },
+      },
+      lastName: {
+        type: String,
+        documentation: {
+          description: "Nom du représentant de l'état",
+        },
+      },
+      mobile: {
+        type: String,
+        documentation: {
+          description: "Téléphone du représentant de l'état",
+        },
+      },
+      email: {
+        type: String,
+        documentation: {
+          description: "Mail du représentant de l'état",
+        },
+      },
+      role: {
+        type: String,
+        documentation: {
+          description: "Rôle du représentant de l'état",
+        },
+      },
     },
   },
 

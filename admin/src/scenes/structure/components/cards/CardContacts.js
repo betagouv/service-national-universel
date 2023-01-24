@@ -1,30 +1,22 @@
 import React, { useEffect, useState } from "react";
 import ModalContacts from "../modals/ModalContacts";
-import { Spinner } from "reactstrap";
+import { getInitials, getReferents } from "../../../../utils";
 
-export default function CardContacts({ structure, getContacts, createContact, updateContact, deleteContact }) {
+export default function CardContacts({ structure }) {
   const [isOpen, setIsOpen] = useState(false);
   const [contacts, setContacts] = useState([]);
-  console.log("🚀 ~ file: CardContacts.js:9 ~ CardContacts ~ contacts", contacts);
 
   useEffect(() => {
-    getContacts().then((contacts) => setContacts(contacts));
+    getReferents(structure._id).then((contacts) => setContacts(contacts));
   }, []);
 
-  const getInitials = (word) =>
-    (word || "UK")
-      .match(/\b(\w)/g)
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
-
-  if (!contacts.length) return <Spinner />;
+  if (!contacts.length) return <div />;
   return (
     <div className="bg-white rounded-lg shadow-sm hover:cursor-pointer items-center hover:scale-105 w-64 px-7 py-6" onClick={() => setIsOpen(true)}>
-      <div className="font-bold mb-1 text-sm">L&apos;équipe</div>
-      <div className="text-gray-500 text-xs">
+      <p className="mb-1 text-sm">L&apos;équipe</p>
+      <p className="text-gray-500 text-xs">
         {contacts.length} responsable{contacts.length > 1 && "s"}
-      </div>
+      </p>
       <div className="flex flex-row mt-4 -space-x-2">
         {contacts.map((contact, index) => {
           if (index < 6)
@@ -35,16 +27,7 @@ export default function CardContacts({ structure, getContacts, createContact, up
             );
         })}
       </div>
-      <ModalContacts
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        structure={structure}
-        contacts={contacts}
-        setContacts={setContacts}
-        updateContact={updateContact}
-        createContact={createContact}
-        deleteContact={deleteContact}
-      />
+      <ModalContacts isOpen={isOpen} setIsOpen={setIsOpen} structure={structure} contacts={contacts} setContacts={setContacts} />
     </div>
   );
 }

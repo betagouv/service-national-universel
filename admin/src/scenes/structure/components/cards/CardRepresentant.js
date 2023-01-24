@@ -1,54 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle, HiPhone, HiPlus } from "react-icons/hi";
+import { HiCheckCircle, HiPhone } from "react-icons/hi";
 import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import ModalRepresentant from "../modals/ModalRepresentant";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../services/api";
 
-export default function CardRepresentant({ representant, getService, department, idServiceDep }) {
+export default function CardRepresentant({ structure }) {
+  const [representant, setRepresentant] = useState(structure.structureManager || null);
   const [copied, setCopied] = React.useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const handleShowModal = () => setIsOpen(true);
 
-  useEffect(() => {
-    if (copied) {
-      setTimeout(() => setCopied(false), 3000);
-    }
-  }, [copied]);
-
   const onSubmit = async (value) => {
     try {
-      const { ok } = await api.post(`/department-service/${idServiceDep}/representant`, value);
-      if (!ok) return toastr.error("Une erreur s'est produite lors de la mise a jour du représentant de l’État");
-      toastr.success("Le représentant de l’État a été mis à jour ");
-      await getService();
+      const { ok, code, data } = await api.post(`/structure/${structure._id}/representant`, value);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la mise a jour du représentant de la structure : ", translate(code));
+      toastr.success("Le représentant de la structure a été mis à jour ");
+      setRepresentant(data.structureManager);
       setIsOpen(false);
     } catch (e) {
-      return toastr.error("Oups, une erreur est survenue lors de la mise a jour du représentant de l’État : ", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue lors de la mise a jour du représentant de la structure : ", translate(e.code));
+    }
+  };
+
+  const onDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/structure/${structure._id}/representant`);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Le représentant a bien été supprimé");
+      setRepresentant(null);
+    } catch (e) {
+      return toastr.error("Une erreur s'est produite :", translate(e.code));
     }
   };
 
   return (
     <>
       {representant ? (
-        <div className="flex flex-col max-w-xs rounded-lg bg-white shadow-sm mr-4 hover:cursor-pointer hover:scale-105" onClick={handleShowModal}>
-          <div className="flex flex-1 flex-col px-7 py-6 ">
-            <div className="text-sm font-bold mb-1">Représentant de l’État</div>
-            <div className="text-xs text-gray-500">
+        <div className="w-96 rounded-lg bg-white shadow-sm hover:cursor-pointer hover:scale-105" onClick={handleShowModal}>
+          <div className="px-4 py-3 space-y-1">
+            <p className="text-sm">Représentant de la structure</p>
+            <p className="text-sm text-gray-500">
               {representant.firstName} {representant.lastName}
-            </div>
+            </p>
+            <p className="text-xs text-gray-500">{representant.role}</p>
           </div>
 
-          <div className=" flex flex-row border-t-[1px] border-gray-200 py-2">
-            {representant.mobile ? (
-              <>
-                <div className="flex flex-1 flex-row justify-center items-center border-r-[1px] border-gray-200 my-2 px-2">
-                  <HiPhone className="text-gray-400" />
-                  <div className="pl-2 text-gray-700 whitespace-nowrap text-xs">{formatPhoneNumberFR(representant.mobile)}</div>
-                </div>
-              </>
-            ) : null}
+          <div className="flex border-t-[1px] border-gray-200 px-3 py-2">
+            {representant.mobile && (
+              <div className="flex items-center border-r-[1px] border-gray-200 pr-2">
+                <HiPhone className="text-gray-400" />
+                <div className="pl-2 text-gray-700 whitespace-nowrap text-xs">{formatPhoneNumberFR(representant.mobile)}</div>
+              </div>
+            )}
             <div className={`flex flex-2 my-2 px-2 truncate ${!representant.mobile ? "items-center justify-center w-full" : ""}`}>
               <div className="pr-2 flex-row text-gray-700 truncate text-xs">{representant.email}</div>
               <div
@@ -56,6 +61,7 @@ export default function CardRepresentant({ representant, getService, department,
                 onClick={() => {
                   copyToClipboard(representant.email);
                   setCopied(true);
+                  setTimeout(() => setCopied(false), 3000);
                 }}>
                 {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
               </div>
@@ -63,22 +69,14 @@ export default function CardRepresentant({ representant, getService, department,
           </div>
         </div>
       ) : (
-        <div className="flex flex-col rounded-lg bg-white shadow-sm mr-4">
-          <div className="flex flex-1 flex-col px-7 justify-center">
-            <div className="text-bold mb-1 text-sm">Représentant de l’État</div>
-            <div className="text-gray-500 text-xs">Non renseigné</div>
-            <div className=" flex flex-row pt-4">
-              <div
-                className="flex border-dashed border-indigo-700 rounded-lg bg-white border-grey-200 border-[1px] shadow-sm mx-auto px-2 py-1 items-center justify-center hover:cursor-pointer hover:scale-105"
-                onClick={handleShowModal}>
-                <HiPlus className="text-indigo-300" />
-                <div className="pl-2 text-indigo-700 text-xs">Ajouter un représentant</div>
-              </div>
-            </div>
-          </div>
+        <div className="w-96 p-4 rounded-lg bg-white shadow-sm hover:scale-105 flex flex-col justify-between">
+          <p className="text-sm">Représentant de la structure</p>
+          <button className="rounded-lg border-[1px] bg-blue-600 border-blue-600 text-[#ffffff] hover:bg-white hover:text-[#2563eb] text-xs p-2" onClick={handleShowModal}>
+            Renseigner
+          </button>
         </div>
       )}
-      <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} representant={representant} department={department} />
+      <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} representant={representant} structure={structure} />
     </>
   );
 }

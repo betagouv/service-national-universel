@@ -14,7 +14,6 @@ import { getNetworkOptions } from "../structureUtils";
 
 export default function Informations({ structure }) {
   const [data, setData] = useState(structure);
-  console.log("🚀 ~ file: Informations.js:17 ~ Informations ~ data", data);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -57,7 +56,7 @@ export default function Informations({ structure }) {
   };
 
   return (
-    <div className="bg-white mx-8 my-6 p-8 rounded-lg shadow-lg shadow-neutral-100/50">
+    <main className="bg-white mx-8 my-6 p-8 rounded-lg shadow-lg shadow-neutral-100/50">
       <div className="flex justify-between w-full">
         <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
         <EditButton
@@ -236,6 +235,6 @@ export default function Informations({ structure }) {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

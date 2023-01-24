@@ -1,29 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Footer } from "../../../../components/modals/Modal";
 import ModalForm from "../../../../components/modals/ModalForm";
 import ModalButton from "../../../../components/buttons/ModalButton";
-import { HiInformationCircle } from "react-icons/hi";
+import { HiInformationCircle, HiOutlineTrash } from "react-icons/hi";
 
-export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, representant, department }) {
+export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete, representant, structure }) {
   const onCancel = () => setIsOpen(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(representant || {});
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
-
-  useEffect(() => {
-    if (representant) {
-      setData({
-        firstName: representant.firstName,
-        lastName: representant.lastName,
-        mobile: representant.mobile,
-        email: representant.email,
-        role: representant.role,
-      });
-    } else setData({});
-  }, [representant]);
 
   const handleSubmit = async (e) => {
     setIsLoading(true);
@@ -32,10 +20,20 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
     setIsLoading(false);
   };
 
+  const handleDelete = async () => {
+    setIsLoading(true);
+    await onDelete();
+    setIsOpen(false);
+    setIsLoading(false);
+  };
+
   return (
-    <ModalForm isOpen={isOpen} headerText={`Représentant de l’État ${department}`} onCancel={onCancel} classNameModal="max-w-3xl">
+    <ModalForm isOpen={isOpen} headerText={`Représentant de la structure ${structure.name}`} onCancel={onCancel} classNameModal="max-w-3xl">
       <form className="w-full" onSubmit={handleSubmit}>
-        <div className="flex items-center justify-center text-gray-500 text-sm">Contrat d’engagement</div>
+        <p className="text-gray-500 text-sm mx-8 my-4">
+          Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
+          votre structure.
+        </p>
         <div className="flex flex-row items-center bg-blue-50 rounded-lg mx-8 my-4 py-3 px-2">
           <HiInformationCircle className="text-blue-400 pr-2 h-8 w-8" />
           <div className="text-blue-800 text-sm">Attention les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
@@ -82,6 +80,14 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
               Rôle
             </label>
             <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="role" id="role" onChange={handleChange} value={data.role} />
+          </div>
+          <div className="h-full flex flex-col items-end">
+            <button disabled={isLoading} className="my-auto border-b-[1px] border-b-transparent hover:border-red-500" type="button" onClick={handleDelete}>
+              <div className="w-full flex flex-row justify-center items-center text-red-500">
+                <HiOutlineTrash className="text-red-300 text-lg mr-2" />
+                Supprimer le contact
+              </div>
+            </button>
           </div>
         </div>
         <Footer>

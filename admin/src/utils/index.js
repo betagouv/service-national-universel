@@ -2,7 +2,7 @@ import passwordValidator from "password-validator";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
-import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
+import { ES_NO_LIMIT, formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
 export * from "snu-lib";
@@ -308,3 +308,45 @@ export function formatHistory(data, role) {
   }
   return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
 }
+
+export const getInitials = (word) =>
+  (word || "UK")
+    .match(/\b(\w)/g)
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+export const getNetworkOptions = async () => {
+  try {
+    const { data } = await api.get("/structure/networks");
+    if (data.length) return data.map((e) => ({ label: e.name, value: e._id }));
+    return [];
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getParentStructure = async (networkId) => {
+  try {
+    const { responses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: networkId } }] } } });
+    if (responses.length) {
+      const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+      if (structures.length) return structures[0];
+      return null;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getReferents = async (structureId) => {
+  try {
+    const { responses } = await api.esQuery("referent", {
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structureId } }] } },
+      size: ES_NO_LIMIT,
+    });
+    if (responses.length) return responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+  } catch (e) {
+    console.log(e);
+  }
+};
