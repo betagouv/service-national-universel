@@ -28,6 +28,8 @@ import {
   translateContractStatus,
   formatLongDateUTCWithoutTime,
   translateApplicationFileType,
+  department2region,
+  region2department,
   formatLongDateUTC,
   formatDateFRTimezoneUTC,
 } from "../../utils";
@@ -394,7 +396,53 @@ export default function List() {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" placeholder="Départment du volontaire" />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngRegion.keyword" placeholder="Région du volontaire" />
+                <RegionFilter
+                  customQuery={function (value, props) {
+                    console.log(value, props);
+                    let departmentArray = [];
+                    if (Array.isArray(value)) {
+                      value?.map((e) => {
+                        departmentArray = departmentArray.concat(region2department[e]);
+                      });
+                    }
+                    console.log(value, departmentArray);
+
+                    const body = {
+                      query: {
+                        bool: {
+                          must: { match_all: {} },
+                          filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }],
+                        },
+                      },
+                      sort: [{ "youngLastName.keyword": "asc" }],
+                      size: ES_NO_LIMIT,
+                    };
+                    if (departmentArray.length > 0) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": departmentArray } });
+                    if (currentTab === "pending") {
+                      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
+                    } else if (currentTab === "follow") {
+                      body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
+                    }
+                    return body;
+                  }}
+                  transformData={(data) => {
+                    const newData = [];
+                    data.map((d) => {
+                      const region = department2region[d.key];
+                      const val = newData.find((e) => e.key === region);
+                      if (val) {
+                        newData[newData.indexOf(val)].doc_count += d.doc_count;
+                      } else {
+                        newData.push({ key: region, doc_count: d.doc_count });
+                      }
+                    });
+                    return newData;
+                  }}
+                  defaultQuery={getDefaultQuery}
+                  filters={FILTERS}
+                  dataField="youngDepartment.keyword"
+                  placeholder="Région du volontaire"
+                />
                 <DeleteFilters />
               </div>
 
