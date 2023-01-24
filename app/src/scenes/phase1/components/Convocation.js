@@ -169,7 +169,7 @@ export default function Convocation() {
             ) : (
               <ConvocText>
                 Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
-                {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre.
+                {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre SNU.
               </ConvocText>
             )}
           </>
@@ -182,15 +182,18 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>
           Afin que votre séjour se déroule dans les meilleures conditions, nous vous rappelons que chaque volontaire, lors de son inscription, s&apos;est engagé à respecter le{" "}
-          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank" rel="noreferrer">
-            règlement intérieur
-          </a>{" "}
+          <b>
+            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank" rel="noreferrer">
+              règlement intérieur
+            </a>
+          </b>{" "}
           du centre
         </ConvocText>
         <ConvocText>Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.</ConvocText>
         <Sign>
-          Emmanuelle PÉRÈS <br />
-          La directrice de la jeunesse, de l&apos;éducation populaire et de la vie associative, déléguée interministérielle à la jeunesse
+          Yves BOERO
+          <br />
+          Le directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative par intérim
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire dans la section «&nbsp;Séjour&nbsp;de&nbsp;cohésion&nbsp;» ou le{" "}
