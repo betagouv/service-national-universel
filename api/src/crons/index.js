@@ -140,7 +140,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     youngPatches.handler();
   });
 
-  cron.schedule("25 9 * * *", () => {
+  cron.schedule("50 9 * * *", () => {
     youngPatches.handler();
   });
 
