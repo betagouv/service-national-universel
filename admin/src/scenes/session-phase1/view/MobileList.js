@@ -74,7 +74,6 @@ export default function MobileList({ data }) {
           onChange={(bus) => {
             setCurrentTab(bus);
             setFilter({ search: "", status: "", meetingPoint: "" });
-            console.log(bus);
           }}
           value={currentTab}
           options={
