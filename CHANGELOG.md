@@ -1,3 +1,24 @@
+# [1.205.0](https://github.com/betagouv/service-national-universel/compare/v1.204.0...v1.205.0) (2023-01-24)
+
+
+### Bug Fixes
+
+* **admin:** phase 1 head center ([#2196](https://github.com/betagouv/service-national-universel/issues/2196)) ([1ff6115](https://github.com/betagouv/service-national-universel/commit/1ff61159d03582fcab803b8b518b3caae356a721))
+* **admin:** remove SD contact on new session ([92e3d7c](https://github.com/betagouv/service-national-universel/commit/92e3d7c20fdb634ab75febce9f6137806029481d))
+* **admin:** update region and department values ([c2c3681](https://github.com/betagouv/service-national-universel/commit/c2c368115043d85a87f9853dbfcb7f20b852fbd2))
+* **api:** remove duplicated young patch cron ([735bc81](https://github.com/betagouv/service-national-universel/commit/735bc81532f4313dc3b3f962829b5cc5afc701de))
+* **api:** signup invite referent ([33e0d5c](https://github.com/betagouv/service-national-universel/commit/33e0d5c8ec3e43fe76af8cfb2a809dca86c34cab))
+* **api/admin:** clean meetingPoint ([18a552e](https://github.com/betagouv/service-national-universel/commit/18a552e04f8ec4c07f464ea5a95e321c5562dab7))
+
+
+### Features
+
+* **admin:** panel list demande de modifications ([#2199](https://github.com/betagouv/service-national-universel/issues/2199)) ([7827acb](https://github.com/betagouv/service-national-universel/commit/7827acbf840668cac4c98349ecd169def2bcb664))
+* **admin:** update open Affectation for ref / admin ([#2204](https://github.com/betagouv/service-national-universel/issues/2204)) ([a8ee914](https://github.com/betagouv/service-national-universel/commit/a8ee914678c8316a1f5b08da2b0ffa14d87930b6))
+* **api:** reset phase 1 if young change cohort or reinscription ([#2200](https://github.com/betagouv/service-national-universel/issues/2200)) ([ae846f1](https://github.com/betagouv/service-national-universel/commit/ae846f16230f1a5ddf53923860185e276dfac2cb))
+* **api,admin:** Ajout du champs pdrChoiceLimitDate dans le modèle cohort. ([#2205](https://github.com/betagouv/service-national-universel/issues/2205)) ([808aac9](https://github.com/betagouv/service-national-universel/commit/808aac93c155e565a0b35f3672b6f331a252944d))
+* **api/admin:** disabled edit PDR if PDR in schema ([#2202](https://github.com/betagouv/service-national-universel/issues/2202)) ([9bacd3d](https://github.com/betagouv/service-national-universel/commit/9bacd3de551e62cdb56ab15f784dec3e775a4a62))
+
 # [1.204.0](https://github.com/betagouv/service-national-universel/compare/v1.203.0...v1.204.0) (2023-01-23)
 
 
