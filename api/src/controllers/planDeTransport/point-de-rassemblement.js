@@ -108,6 +108,38 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
   }
 });
 
+/**
+ * Récupère les points de rassemblements pour un centre de cohésion avec cohort
+ */
+router.get("/center/:centerId/cohort/:cohortId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      centerId: Joi.string().required(),
+      cohortId: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { centerId, cohortId } = value;
+
+    if (!canViewMeetingPoints(req.user, { centerId, cohortId })) {
+      return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    const ligneBus = await LigneBusModel.find({ cohort: cohortId, centerId: centerId });
+
+    let arrayMeetingPoints = [];
+    ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
+
+    const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
+
+    return res.status(200).send({ ok: true, data: { meetingPoints, ligneBus } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -456,6 +488,31 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     // ! What we do here if the point de rassemblement is link to ligneToPoint ? lingneToBus ? planDeTransport ?
 
     return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+//check if meetingPoint is in a schema
+router.get("/:id/in-schema", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- vérification
+    const { error: errorParams, value: valueParams } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
+      stripUnknown: true,
+    });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id } = valueParams;
+
+    if (!canViewMeetingPoints(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- update
+    const schema = await SchemaDeRepartitionModel.findOne({ gatheringPlaces: id });
+
+    // --- résultat
+    return res.status(200).send({ ok: true, data: schema ? true : false });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

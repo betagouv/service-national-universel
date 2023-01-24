@@ -1,6 +1,7 @@
 const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getDepartmentByZip, departmentLookUp, department2region, getRegionByZip } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 
 function getRegionForEligibility(young) {
   let region = young.schooled ? young.schoolRegion : young.region;
@@ -28,9 +29,10 @@ async function getFilteredSessions(young) {
         ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEnDate > Date.now())),
   );
 
-  for (let session of sessions) session.isEligible = true;
-  const sessionsWithPlaces = await getPlaces(sessions, region);
-  return sessionsWithPlaces;
+  for (let session of sessions) {
+    session.isEligible = true;
+  }
+  return getPlaces(sessions, region);
 }
 
 async function getAllSessions(young) {
@@ -38,8 +40,7 @@ async function getAllSessions(young) {
   const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
-    if (availableSessions.includes(session)) session.isEligible = true;
-    else session.isEligible = false;
+    session.isEligible = availableSessions.includes(session);
   }
   return sessionsWithPlaces;
 }
@@ -78,7 +79,22 @@ async function getPlaces(sessions, region) {
   return sessions;
 }
 
+async function getCohortsEndAfter(date) {
+  try {
+    return CohortModel.find({ dateEnd: { $gte: date } });
+  } catch (err) {
+    return [];
+  }
+}
+
+async function getCohortNamesEndAfter(date) {
+  const cohorts = await getCohortsEndAfter(date);
+  return cohorts.map((cohort) => cohort.name);
+}
+
 module.exports = {
   getFilteredSessions,
   getAllSessions,
+  getCohortNamesEndAfter,
+  getCohortsEndAfter,
 };

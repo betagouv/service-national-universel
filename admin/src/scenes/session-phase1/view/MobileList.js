@@ -42,7 +42,7 @@ export default function MobileList({ data }) {
         data[currentTab].meetingPoint.map((meet) => {
           return {
             value: meet._id,
-            label: [meet?.departureAddress, meet?.departureZip, meet?.departureCity, meet?.departureDepartment].filter((e) => e).join(", "),
+            label: [meet?.address, meet?.zip, meet?.city, meet?.department].filter((e) => e).join(", "),
           };
         }),
       );
@@ -113,7 +113,7 @@ export default function MobileList({ data }) {
               };
             })}
           />
-          {currentTab !== "noMeetingPoint" ? (
+          {currentTab !== "noMeetingPoint" && currentTab !== "transportInfoGivenByLocal" ? (
             <SelectFilter
               Icon={<FilterSvg className="text-gray-400" />}
               value={filter?.meetingPoint || ""}

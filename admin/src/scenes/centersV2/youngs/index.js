@@ -24,6 +24,7 @@ import {
   ROLES,
   translate,
   translateFileStatusPhase1,
+  formatDateFR,
   translatePhase1,
 } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
@@ -266,11 +267,16 @@ export default function CenterYoungIndex() {
           youngs: [],
           meetingPoint: [],
         },
+        transportInfoGivenByLocal: {
+          youngs: [],
+          meetingPoint: [],
+        },
       };
       const youngs = await esYoungBySession(filter);
 
-      let resultMeetingPoints = await api.get(`/meeting-point/center/${id}`);
-      const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
+      let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
+      const meetingPoints = response ? response.data.meetingPoints : [];
+      const ligneBus = response ? response.data.ligneBus : [];
 
       for (const young of youngs) {
         const tempYoung = {
@@ -299,30 +305,45 @@ export default function CenterYoungIndex() {
           parent2Status: young.parent2Status,
           statusPhase1: young.statusPhase1,
           meetingPointId: young.meetingPointId,
+          ligneId: young.ligneId,
         };
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
+        } else if (young.transportInfoGivenByLocal === "true") {
+          result.transportInfoGivenByLocal.youngs.push(tempYoung);
         } else {
           const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
           if (youngMeetingPoint) {
-            if (!result[youngMeetingPoint.busExcelId]) {
-              result[youngMeetingPoint.busExcelId] = {};
-              result[youngMeetingPoint.busExcelId]["youngs"] = [];
-              result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
+            if (!result[youngLigneBus.busId]) {
+              result[youngLigneBus.busId] = {};
+              result[youngLigneBus.busId]["youngs"] = [];
+              result[youngLigneBus.busId]["ligneBus"] = [];
+              result[youngLigneBus.busId]["meetingPoint"] = [];
             }
-            if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
-              result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
+            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
             }
-            result[youngMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+            }
+            result[youngLigneBus.busId]["youngs"].push(tempYoung);
           }
         }
       }
       // Transform data into array of objects before excel converts
       const formatedRep = Object.keys(result).map((key) => {
+        let name;
+        if (key === "noMeetingPoint") name = "Autonome";
+        else if (key === "transportInfoGivenByLocal") name = "Services locaux";
+        else name = key;
+        console.log(name, result[key]);
         return {
-          name: key != "noMeetingPoint" ? key : "Autonome",
+          name: name,
           data: result[key].youngs.map((young) => {
             const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
+            const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+            console.log(young.ligneId);
             return {
               _id: young._id,
               Cohorte: young.cohort,
@@ -349,9 +370,9 @@ export default function CenterYoungIndex() {
               "Téléphone représentant légal 2": young.parent2Phone,
               "Statut représentant légal 2": translate(young.parent2Status),
               "Id du point de rassemblement": young.meetingPointId,
-              "Adresse point de rassemblement": meetingPoint?.departureAddress,
-              "Date aller": meetingPoint?.departureAtString,
-              "Date retour": meetingPoint?.returnAtString,
+              "Adresse point de rassemblement": meetingPoint?.address,
+              "Date aller": formatDateFR(ligneBus?.departuredDate),
+              "Date retour": formatDateFR(ligneBus?.returnDate),
             };
           }),
         };
@@ -494,13 +515,17 @@ const transformData = async ({ data, centerId }) => {
 
   let resultCenter = await api.get(`/cohesion-center/${centerId}`);
   const center = resultCenter ? resultCenter.data : {};
-  let resultMeetingPoints = await api.get(`/meeting-point/center/${centerId}`);
-  const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
+
+  let response = await api.get(`/point-de-rassemblement/center/${centerId}/cohort/${all[0].cohort}`);
+  const meetingPoints = response ? response.data.meetingPoints : [];
+  const ligneBus = response ? response.data.ligneBus : [];
 
   return all.map((data) => {
     let meetingPoint = {};
+    let bus = {};
     if (data.meetingPointId && meetingPoints) {
       meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+      bus = ligneBus.find((lb) => lb._id === data?.ligneId);
       if (!meetingPoint) meetingPoint = {};
     }
     return {
@@ -600,10 +625,11 @@ const transformData = async ({ data, centerId }) => {
       "Région du centre": center.region || "",
       "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
       "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-      "Bus n˚": meetingPoint?.busExcelId,
-      "Adresse point de rassemblement": meetingPoint?.departureAddress,
-      "Date aller": meetingPoint?.departureAtString,
-      "Date retour": meetingPoint?.returnAtString,
+      "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
+      "Bus n˚": bus?.busId,
+      "Adresse point de rassemblement": meetingPoint?.address,
+      "Date aller": bus?.departuredDate,
+      "Date retour": bus?.returnDate,
     };
   });
 };
