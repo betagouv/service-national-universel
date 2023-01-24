@@ -59,7 +59,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canAssignManually(req.user, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canAssignManually(req.user, young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 

@@ -9,7 +9,7 @@ import Pencil from "../../../assets/icons/Pencil";
 import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
-import { formatDateFR, ROLES, translate, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
+import { formatDateFR, ROLES, translate, canAssignManually, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
 import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
@@ -24,7 +24,7 @@ import Refresh from "../../../assets/icons/Refresh";
 import { BiChevronDown } from "react-icons/bi";
 import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
-import { capture } from "../../../sentry";
+import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
 
 export default function Phase1(props) {
@@ -42,28 +42,23 @@ export default function Phase1(props) {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(props.young);
-  const [displayCenterButton, setDisplayCenterButton] = useState(false);
 
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
 
   const getDisplayCenterButton = async () => {
-    if (user.role === ROLES.ADMIN) {
-      setCohortOpenForAffection(true);
-      return setDisplayCenterButton(true);
-    }
     try {
+      if ((young.status === "VALIDATED" && young.status === "WAITING_LIST") || young.statusPhase1 === "WAITING_AFFECTATION") return setCohortOpenForAffection(false);
       const { ok, data } = await api.get("/cohort/" + young.cohort);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-        return setDisplayCenterButton(false);
+        captureMessage("Oups, une erreur est survenue lors de la récupération de la cohorte : " + JSON.stringify(data));
+        return setCohortOpenForAffection(false);
       }
-      setCohortOpenForAffection(data?.manualAffectionOpenForReferent);
-      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 !== "WAITING_AFFECTATION") return setDisplayCenterButton(false);
-      if (!data || !data?.manualAffectionOpenForReferent) return setDisplayCenterButton(false);
-      if (user.role === ROLES.REFERENT_REGION && user.region === young.region) return setDisplayCenterButton(true);
+      console.log("🚀 ~ file: phase1.js:62 ~ getDisplayCenterButton ~ user, young, data", user, young, data);
+      return setCohortOpenForAffection(canAssignManually(user, young, data));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-      console.log(e);
+      capture(e);
     }
   };
   const sendMail = async () => {
@@ -89,6 +84,7 @@ export default function Phase1(props) {
   };
 
   useEffect(() => {
+    console.log("🚀 ~ file: phase1.js:62 ~ useEffect ~ young", young);
     getDisplayCenterButton();
     if (!young?.sessionPhase1Id) return;
     (async () => {
@@ -294,7 +290,7 @@ export default function Phase1(props) {
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
                   </div>
-                  {(user.role === ROLES.ADMIN || (user.role === ROLES.REFERENT_REGION && user.region === young.region)) && cohortOpenForAffectation && editing && (
+                  {cohortOpenForAffectation && editing && (
                     <div
                       onClick={() => setModalAffectation({ isOpen: true })}
                       className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
@@ -327,7 +323,7 @@ export default function Phase1(props) {
                       <div>{young.firstName} n’a pas encore confirmé son point de rassemblement.</div>
                     )}
                   </div>
-                  {(user.role === ROLES.ADMIN || (user.role === ROLES.REFERENT_REGION && user.region === young.region)) && cohortOpenForAffectation && editing && (
+                  {cohortOpenForAffectation && editing && (
                     <div
                       onClick={() => {
                         setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
@@ -348,7 +344,7 @@ export default function Phase1(props) {
             ) : (
               <div className="flex flex-col my-52 gap-4 items-center justify-center">
                 <div className="font-bold text-gray-900 text-base">Ce volontaire n&apos;est affecté à aucun centre</div>
-                {displayCenterButton && (
+                {cohortOpenForAffectation && (
                   <div
                     className="bg-blue-600 px-4 rounded text-white py-2 cursor-pointer"
                     onClick={() => {
