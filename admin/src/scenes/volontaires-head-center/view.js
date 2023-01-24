@@ -22,25 +22,12 @@ export default function VolontaireHeadCenter({ ...props }) {
 
   if (!young) return <div />;
   return (
-    <Switch>
-      <SentryRoute
-        path="/volontaire/:id/phase1"
-        component={() => (
-          <>
-            <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: "Fiche du volontaire" }]} />
-            <Phase1 young={young} />
-          </>
-        )}
-      />
-      <SentryRoute
-        path="/volontaire/:id"
-        component={() => (
-          <>
-            <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: "Fiche du volontaire" }]} />
-            <VolontairePhase0View young={young} globalMode="readonly" />
-          </>
-        )}
-      />
-    </Switch>
+    <>
+      <Breadcrumbs items={[{ label: "Volontaires", to: `/centre/${young.cohesionCenterId}/${young.sessionPhase1Id}/general` }, { label: "Fiche du volontaire" }]} />
+      <Switch>
+        <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
+        <SentryRoute path="/volontaire/:id" component={() => <VolontairePhase0View young={young} globalMode="readonly" />} />
+      </Switch>
+    </>
   );
 }

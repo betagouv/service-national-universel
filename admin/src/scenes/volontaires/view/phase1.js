@@ -164,7 +164,7 @@ export default function Phase1(props) {
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
-        <div className="bg-white rounded">
+        <div className="bg-white rounded mt-[30px] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <div className="mx-8 py-4">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-row items-center justify-center">
