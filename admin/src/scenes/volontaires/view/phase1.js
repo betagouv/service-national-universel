@@ -47,7 +47,7 @@ export default function Phase1(props) {
 
   const getDisplayCenterButton = async () => {
     try {
-      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 === "WAITING_AFFECTATION") return setCohortOpenForAffection(false);
+      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 !== "WAITING_AFFECTATION") return setCohortOpenForAffection(false);
       const { ok, data } = await api.get("/cohort/" + young.cohort);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
