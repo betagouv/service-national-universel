@@ -9,8 +9,7 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Field from "../../centersV2/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
-import { legalStatus, typesStructure } from "../../../utils";
-import { getNetworkOptions } from "../structureUtils";
+import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 
 export default function Informations({ structure }) {
   const [data, setData] = useState(structure);
