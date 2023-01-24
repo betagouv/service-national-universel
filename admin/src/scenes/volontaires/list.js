@@ -26,6 +26,7 @@ import {
   ES_NO_LIMIT,
   ROLES,
   formatDateFRTimezoneUTC,
+  formatDateFR,
   colors,
   getLabelWithdrawnReason,
   departmentLookUp,
@@ -97,7 +98,6 @@ export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
-  const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
@@ -258,8 +258,8 @@ export default function VolontaireList() {
           "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
           "Bus n˚": bus?.busId,
           "Adresse point de rassemblement": meetingPoint?.address,
-          "Date aller": bus?.departuredDate,
-          "Date retour": bus?.returnDate,
+          "Date aller": formatDateFR(bus?.departuredDate),
+          "Date retour": formatDateFR(bus?.returnDate),
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",

@@ -24,6 +24,7 @@ import {
   ROLES,
   translate,
   translateFileStatusPhase1,
+  formatDateFR,
   translatePhase1,
 } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
@@ -370,8 +371,8 @@ export default function CenterYoungIndex() {
               "Statut représentant légal 2": translate(young.parent2Status),
               "Id du point de rassemblement": young.meetingPointId,
               "Adresse point de rassemblement": meetingPoint?.address,
-              "Date aller": ligneBus?.departuredDate,
-              "Date retour": ligneBus?.returnDate,
+              "Date aller": formatDateFR(ligneBus?.departuredDate),
+              "Date retour": formatDateFR(ligneBus?.returnDate),
             };
           }),
         };
