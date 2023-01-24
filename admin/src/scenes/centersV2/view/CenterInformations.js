@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
-import { Title } from "../../../components/commons";
+import { Title } from "../components/commons";
 import { canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
 import { canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";

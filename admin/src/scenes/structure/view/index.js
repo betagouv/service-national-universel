@@ -4,7 +4,7 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
-import Details from "./details";
+import Details from "./detailsV2";
 import Missions from "./missions";
 import Historic from "./history";
 import Breadcrumbs from "../../../components/Breadcrumbs";
