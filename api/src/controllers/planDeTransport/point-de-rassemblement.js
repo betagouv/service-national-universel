@@ -472,7 +472,7 @@ router.get("/:id/in-schema", passport.authenticate("referent", { session: false,
     if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id } = valueParams;
 
-    if (!canUpdateMeetingPoint(req.user)) {
+    if (!canViewMeetingPoints(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
