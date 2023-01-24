@@ -89,8 +89,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
       let sentTo = [
         { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
-        { email: "christelle.bignon@jeunesse-sports.gouv.fr", name: "Christelle Bignon" },
-        { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
         { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
       ];
 
@@ -165,8 +163,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
       let sentTo = [
         { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
-        { email: "christelle.bignon@jeunesse-sports.gouv.fr", name: "Christelle Bignon" },
-        { email: "faiza.mahieddine@jeunesse-sports.gouv.fr", name: "Faiza Mahieddine" },
         { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
       ];
       await sendTemplate(template, {
