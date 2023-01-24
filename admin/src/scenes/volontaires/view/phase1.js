@@ -84,7 +84,6 @@ export default function Phase1(props) {
   };
 
   useEffect(() => {
-    console.log("🚀 ~ file: phase1.js:62 ~ useEffect ~ young", young);
     getDisplayCenterButton();
     if (!young?.sessionPhase1Id) return;
     (async () => {
