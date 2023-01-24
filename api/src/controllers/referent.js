@@ -179,7 +179,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
-      phone: Joi.string(),
+      phone: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
