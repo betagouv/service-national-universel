@@ -2,7 +2,6 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch, canViewBus, canSearchLigneBus } = require("snu-lib/roles");
-const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
 const { region2department, department2region } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
 const esClient = require("../es");
@@ -24,6 +23,8 @@ const {
 const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
 const Joi = require("joi");
+const datesub = require("date-fns/sub");
+const { getCohortNamesEndAfter } = require("../utils/cohort");
 
 // Routes accessible for youngs and referent
 router.post("/mission/:action(_msearch|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -125,8 +126,8 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
         { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
         { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
       );
-      const visibleCohorts = COHORTS.filter((cohort) => PHASE1_HEADCENTER_ACCESS_LIMIT[cohort] > Date.now());
-      if (visibleCohorts.length) {
+      const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+      if (visibleCohorts.length > 0) {
         filter.push({ terms: { "cohort.keyword": visibleCohorts } });
       } else {
         // Tried that to specify when there's just no data or when the head center has no longer access
@@ -293,8 +294,8 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
     if (user.role === ROLES.HEAD_CENTER) {
       const sessionsPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const visibleCohorts = COHORTS.filter((cohort) => PHASE1_HEADCENTER_ACCESS_LIMIT[cohort] > Date.now());
-      if (visibleCohorts.length) {
+      const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+      if (visibleCohorts.length > 0) {
         filter.push({ terms: { "cohort.keyword": visibleCohorts } });
       } else {
         // Tried that to specify when there's just no data or when the head center has no longer access
@@ -526,35 +527,6 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "sessionphase1", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(response.body);
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    let filter = [];
-    filter.push({
-      bool: {
-        must_not: {
-          exists: {
-            field: "deletedAt",
-          },
-        },
-      },
-    });
-
-    if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("meetingpoint", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await esClient.msearch({ index: "meetingpoint", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

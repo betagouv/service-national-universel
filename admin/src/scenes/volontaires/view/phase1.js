@@ -10,9 +10,9 @@ import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
 import { formatDateFR, ROLES, translate, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
-import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
-import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
-import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
+import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
+import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
+import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
 import ModalDispense from "../components/ModalDispense";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
@@ -26,7 +26,6 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import { capture } from "../../../sentry";
 import dayjs from "dayjs";
-import { environment } from "../../../config";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -154,7 +153,7 @@ export default function Phase1(props) {
                 setValues(young);
               }}
               disabled={loading}>
-              Annuler
+              Fermer
             </button>
           </div>
         )}
@@ -165,7 +164,7 @@ export default function Phase1(props) {
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
-        <div className="bg-white rounded">
+        <div className="bg-white rounded mt-[30px] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <div className="mx-8 py-4">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-row items-center justify-center">
@@ -189,7 +188,7 @@ export default function Phase1(props) {
                     }
                   />
                 )}
-                {young.statusPhase1 === "NOT_DONE" && (
+                {young.statusPhase1 === "NOT_DONE" && user.role !== ROLES.HEAD_CENTER && (
                   <div
                     onClick={() => setModalDispense({ isOpen: true })}
                     className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">

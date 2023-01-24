@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
-export default function Participation({ cohesionStayPresence, youngPhase1Agreement, filter, getLink, total, presenceJDM, departInform, departSejourMotif }) {
+export default function Participation({ cohesionStayPresence, youngPhase1Agreement, filter, getLink, total, presenceJDM, departInform, departSejourMotif, hasMeetingInformation }) {
   return (
     <React.Fragment>
       <Subtitle>Participations au séjour de cohésion</Subtitle>
@@ -178,6 +178,37 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
                 <CardValue>{total - youngPhase1Agreement["true"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((total - youngPhase1Agreement["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+      </Row>
+      <Subtitle>Confirmation du point de rassemblement</Subtitle>
+      <Row>
+        <Col md={6} xl={4} k="cohesionStayPresence_true">
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&MEETING_INFO=%5B"true"%5D'] })}>
+            <Card borderBottomColor="#6BC663">
+              <CardTitle>Point de rassemblement confirmé</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{hasMeetingInformation["true"] || 0}</CardValue>
+                <CardPercentage>
+                  {total ? `${(((hasMeetingInformation["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+        <Col md={6} xl={4} k="cohesionStayPresence_false">
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&MEETING_INFO=%5B"false"%2C"Non+renseigné"%5D'] })}>
+            <Card borderBottomColor="#EF4036">
+              <CardTitle>Point de rassemblement non confirmé</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{total - hasMeetingInformation["true"] || 0}</CardValue>
+                <CardPercentage>
+                  {total ? `${(((total - hasMeetingInformation["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>

@@ -2,7 +2,8 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import ReactTooltip from "react-tooltip";
+import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -33,6 +34,30 @@ export default function View(props) {
   const [editSession, setEditSession] = React.useState(false);
   const [currentCohort, setCurrentCohort] = React.useState("");
   const [nbYoung, setNbYoung] = React.useState([]);
+  const [lines, setLines] = React.useState([]);
+  const [pdrInSchema, setPdrInSchema] = React.useState(false);
+
+  const setYoungsFromES = async (id) => {
+    let body = {
+      query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+      aggs: { cohort: { terms: { field: "cohort.keyword" } } },
+      size: 0,
+    };
+
+    const { responses } = await api.esQuery("young", body);
+    setNbYoung(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+  };
+
+  const setLinesFromES = async (id) => {
+    let body = {
+      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": [id] } }] } },
+      aggs: { cohort: { terms: { field: "cohort.keyword" } } },
+      size: 0,
+    };
+
+    const { responses } = await api.esQuery("lignebus", body);
+    setLines(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+  };
 
   const getPDR = async () => {
     try {
@@ -45,15 +70,16 @@ export default function View(props) {
       }
       setData({ ...reponsePDR, addressVerified: true });
 
-      let body = {
-        query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
-        aggs: { cohort: { terms: { field: "cohort.keyword" } } },
-        size: 0,
-      };
+      //check if pdr is in schema
+      const { ok: okSchema, code: codeSchema, data: reponseSchema } = await api.get(`/point-de-rassemblement/${reponsePDR._id.toString()}/in-schema`);
+      if (!okSchema) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", codeSchema);
+        return history.push("/point-de-rassemblement");
+      }
+      setPdrInSchema(reponseSchema);
 
-      const { responses } = await api.esQuery("young", body);
-
-      setNbYoung(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+      await setYoungsFromES(id);
+      await setLinesFromES(id);
 
       return reponsePDR.cohorts;
     } catch (e) {
@@ -62,17 +88,11 @@ export default function View(props) {
     }
   };
 
-  console.log(nbYoung);
-
   React.useEffect(() => {
     (async () => {
       if (mount.current === false) {
         const cohorts = await getPDR();
-        if (urlParams.get("cohort")) {
-          setCurrentCohort(urlParams.get("cohort"));
-        } else {
-          setCurrentCohort(cohorts[0]);
-        }
+        setCurrentCohort(urlParams.get("cohort") || cohorts[0]);
         mount.current = true;
       }
     })();
@@ -263,13 +283,23 @@ export default function View(props) {
             {canUpdateMeetingPoint(user) ? (
               <>
                 {!editInfo ? (
-                  <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => setEditInfo(true)}
-                    disabled={isLoading}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
-                    Modifier
-                  </button>
+                  <div data-tip="" data-for="tooltip-edit-disabled">
+                    {pdrInSchema && user.role !== ROLES.ADMIN && (
+                      <ReactTooltip id="tooltip-edit-disabled" className="bg-white shadow-xl drop-shadow-sm rounded-xl" arrowColor="white" disable={false}>
+                        <div className="text-gray-700 text-center">
+                          Action impossible : point de rassemblement utilisé dans un schéma de répartition. <br />
+                          Rapprochez-vous de la Sous-Direction
+                        </div>
+                      </ReactTooltip>
+                    )}
+                    <button
+                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setEditInfo(true)}
+                      disabled={isLoading || (pdrInSchema && user.role !== ROLES.ADMIN)}>
+                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      Modifier
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <button
@@ -424,7 +454,11 @@ export default function View(props) {
                   onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${data._id.toString()}?cohort=${currentCohort}`)}>
                   Voir les volontaires ({nbYoung.find((n) => n.cohort === currentCohort)?.count || 0})
                 </div>
-                <div className="flex text-sm  h-1/2 items-center justify-center font-medium leading-4 text-gray-900 w-full ">Liste des lignes de transports (à venir)</div>
+                <div
+                  className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full hover:underline cursor-pointer"
+                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&CODE_PDR=%5B"${data.code}"%5D`)}>
+                  Liste des lignes de transports ({lines.find((l) => l.cohort === currentCohort)?.count || 0})
+                </div>
               </div>
               <div className="flex items-center justify-center w-1/3 p-4">
                 <Field

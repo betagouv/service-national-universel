@@ -6,12 +6,13 @@ const crypto = require("crypto");
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
+const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
-const MeetingPointObject = require("../models/meetingPoint");
-const BusObject = require("../models/bus");
+const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS } = require("../utils");
 const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
 
 const {
@@ -20,19 +21,19 @@ const {
   canSearchSessionPhase1,
   canViewSessionPhase1,
   canDownloadYoungDocuments,
-  canAssignCohesionCenter,
   canShareSessionPhase1,
   canCreateOrUpdateCohesionCenter,
   isReferentOrAdmin,
   ROLES,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
-const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
+const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
 const { COHESION_STAY_END } = require("snu-lib");
+
+const datefns = require("date-fns");
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
@@ -184,35 +185,40 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: id } = validateId(req.params.id);
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  }
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
-  const { errorBody } = Joi.object({
-    options: Joi.object().allow(null, {}),
-  }).validate({ ...req.body }, { stripUnknown: true });
-  if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { errorBody } = Joi.object({
+      options: Joi.object().allow(null, {}),
+    }).validate({ ...req.body }, { stripUnknown: true });
+    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-  const session = await SessionPhase1Model.findById(id);
-  if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const session = await SessionPhase1Model.findById(id);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
-  if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
-    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-  }
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
-  const body = {
-    sessionPhase1Id: session._id,
-    statusPhase1: "DONE",
-  };
+    const body = {
+      sessionPhase1Id: session._id,
+      statusPhase1: "DONE",
+    };
 
-  const youngs = await YoungModel.find(body);
+    const youngs = await YoungModel.find(body);
+    if (!youngs) {
+      capture("No young found with body: " + JSON.stringify(body));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
 
-  let html = `<!DOCTYPE html>
+    let html = `<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
@@ -225,7 +231,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     </body>
 </html>`;
 
-  const subHtml = `
+    const subHtml = `
   <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
     <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
       <div class="container">
@@ -240,33 +246,37 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       </div>
     </div>`;
 
-  const d = COHESION_STAY_END[youngs[0].cohort];
-  const ministresData = getMinistres(d);
-  const template = ministresData.template;
-  const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-  const data = [];
-  for (const young of youngs) {
-    data.push(
-      subHtml
-        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
-        .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
-        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
-        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
-        .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
-        .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-        .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
-        .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
-    );
+    const d = COHESION_STAY_END[youngs[0].cohort];
+    const ministresData = getMinistres(d);
+    const template = ministresData.template;
+    const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
+    const data = [];
+    for (const young of youngs) {
+      data.push(
+        subHtml
+          .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
+          .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+          .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
+          .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
+          .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
+          .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+          .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
+          .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
+      );
+    }
+
+    const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
+
+    const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
+
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-
-  const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
-
-  const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
-
-  res.contentType("application/pdf");
-  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-  res.set("Cache-Control", "public, max-age=1");
-  res.send(buffer);
 });
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -301,66 +311,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ youngId: Joi.string().required(), sessionId: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { youngId, sessionId } = value;
-    const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const session = await SessionPhase1Model.findById(sessionId);
-    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
-
-    if (!canAssignCohesionCenter(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // update youngs infos
-    young.set({
-      status: "VALIDATED",
-      statusPhase1: "AFFECTED",
-      sessionPhase1Id: sessionId,
-    });
-
-    //if the young has already a meetingPoint and therefore a place taken in a bus
-    let bus = null;
-    if (young.meetingPointId) {
-      console.log(`affecting ${young.id} but is already in meetingPoint ${young.meetingPointId}`);
-      const meetingPoint = await MeetingPointObject.findById(young.meetingPointId);
-      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      bus = await BusObject.findById(meetingPoint.busId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      console.log(`${young.id} is in bus ${bus.idExcel}`);
-    }
-
-    // if young has confirmed their meetingPoint, we will cancel it
-    if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") {
-      young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
-    }
-
-    await young.save({ fromUser: req.user });
-
-    // update session infos
-    const data = await updatePlacesSessionPhase1(session, req.user);
-    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
-    if (bus) await updatePlacesBus(bus);
-
-    return res.status(200).send({
-      data: serializeSessionPhase1(data, req.user),
-      young: serializeYoung(young, req.user),
-      ok: true,
-    });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/:sessionId/share", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -378,10 +328,17 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
 
     if (!canShareSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    //Create token
+    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const startAt = datefns.subDays(new Date(cohort.dateStart), 7);
+    const endDate = datefns.addDays(new Date(cohort.dateEnd), 7);
+
     const sessionToken = await sessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
-      startAt: START_DATE_PHASE1[sessionPhase1.cohort],
-      expireAt: END_DATE_PHASE1[sessionPhase1.cohort],
+      startAt: startAt,
+      expireAt: endDate,
       sessionId: sessionPhase1._id,
     });
 
@@ -424,9 +381,19 @@ router.post("/check-token/:token", async (req, res) => {
           youngs: [],
           meetingPoint: [],
         },
+        transportInfoGivenByLocal: {
+          youngs: [],
+          meetingPoint: [],
+        },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-      const meetingPoints = await MeetingPointObject.find({ centerId: sessionPhase1.cohesionCenterId });
+
+      const ligneBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId });
+
+      let arrayMeetingPoints = [];
+      ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
+
+      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
 
       for (const young of youngs) {
         const tempYoung = {
@@ -450,24 +417,27 @@ router.post("/check-token/:token", async (req, res) => {
           statusPhase1: young.statusPhase1,
           meetingPointId: young.meetingPointId,
         };
-
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
+        } else if (young.transportInfoGivenByLocal === "true") {
+          result.transportInfoGivenByLocal.youngs.push(tempYoung);
         } else {
-          const tempMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-
-          if (tempMeetingPoint) {
-            if (!result[tempMeetingPoint.busExcelId]) {
-              result[tempMeetingPoint.busExcelId] = {};
-              result[tempMeetingPoint.busExcelId]["youngs"] = [];
-              result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
+          const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+          if (youngMeetingPoint) {
+            if (!result[youngLigneBus.busId]) {
+              result[youngLigneBus.busId] = {};
+              result[youngLigneBus.busId]["youngs"] = [];
+              result[youngLigneBus.busId]["ligneBus"] = [];
+              result[youngLigneBus.busId]["meetingPoint"] = [];
             }
-
-            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === tempMeetingPoint._id.toString())) {
-              result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
+            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
             }
-
-            result[tempMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+            }
+            result[youngLigneBus.busId]["youngs"].push(tempYoung);
           }
         }
       }

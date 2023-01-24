@@ -15,13 +15,12 @@ const YoungModel = require("../models/young");
 const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
-const MeetingPointModel = require("../models/meetingPoint");
-const BusModel = require("../models/bus");
 const StructureModel = require("../models/structure");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
 const CohesionCenterModel = require("../models/cohesionCenter");
+const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 
 const { getQPV, getDensity } = require("../geo");
 const config = require("../config");
@@ -34,7 +33,6 @@ const {
   deleteFile,
   validatePassword,
   updatePlacesSessionPhase1,
-  updatePlacesBus,
   ERRORS,
   isYoung,
   inSevenDays,
@@ -43,6 +41,7 @@ const {
   getCcOfYoung,
   notifDepartmentChange,
   STEPS2023REINSCRIPTION,
+  updateSeatsTakenInBusLine,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
@@ -180,7 +179,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
-      phone: Joi.string(),
+      phone: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -492,10 +491,25 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     if (!sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
-    const oldMeetingPointId = young.meetingPointId;
+    const oldBusId = young.ligneId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
-      young.set({ sessionPhase1Id: undefined });
-      young.set({ meetingPointId: undefined });
+      young.set({
+        cohesionCenterId: undefined,
+        sessionPhase1Id: undefined,
+        meetingPointId: undefined,
+        ligneId: undefined,
+        deplacementPhase1Autonomous: undefined,
+        transportInfoGivenByLocal: undefined,
+        cohesionStayPresence: undefined,
+        presenceJDM: undefined,
+        departInform: undefined,
+        departSejourAt: undefined,
+        departSejourMotif: undefined,
+        departSejourMotifComment: undefined,
+        youngPhase1Agreement: "false",
+        hasMeetingInformation: undefined,
+        cohesionStayMedicalFileReceived: undefined,
+      });
     }
 
     // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
@@ -513,12 +527,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
-    if (oldMeetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
-      if (meetingPoint) {
-        const bus = await BusModel.findById(meetingPoint.busId);
-        if (bus) await updatePlacesBus(bus);
-      }
+    if (oldBusId) {
+      const bus = await LigneDeBusModel.findById(oldBusId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
     const emailsTo = [];
@@ -1119,7 +1130,9 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+    const session = await SessionPhase1.findById(young.sessionPhase1Id);
+
+    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
