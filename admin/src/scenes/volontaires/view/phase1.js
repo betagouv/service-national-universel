@@ -47,7 +47,7 @@ export default function Phase1(props) {
 
   const getDisplayCenterButton = async () => {
     try {
-      if ((young.status === "VALIDATED" && young.status === "WAITING_LIST") || young.statusPhase1 === "WAITING_AFFECTATION") return setCohortOpenForAffection(false);
+      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || young.statusPhase1 === "WAITING_AFFECTATION") return setCohortOpenForAffection(false);
       const { ok, data } = await api.get("/cohort/" + young.cohort);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
@@ -55,6 +55,7 @@ export default function Phase1(props) {
         return setCohortOpenForAffection(false);
       }
       console.log("🚀 ~ file: phase1.js:62 ~ getDisplayCenterButton ~ user, young, data", user, young, data);
+      console.log("🚀 ~ file: phase1.js:63 ~ getDisplayCenterButton ~ canAssignManually(user, young, data)", canAssignManually(user, young, data));
       return setCohortOpenForAffection(canAssignManually(user, young, data));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
