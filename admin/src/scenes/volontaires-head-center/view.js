@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "react-router-dom";
-import { SentryRoute } from "../../../sentry";
+import { SentryRoute } from "../../sentry";
 
-import api from "../../../services/api";
-import VolontairePhase0View from "../../phase0/view";
-import Phase1 from "../../volontaires/view/phase1";
+import api from "../../services/api";
+import VolontairePhase0View from "../phase0/view";
+import Phase1 from "../volontaires/view/phase1";
 
-import Breadcrumbs from "../../../components/Breadcrumbs";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 export default function VolontaireHeadCenter({ ...props }) {
   const [young, setYoung] = useState();

@@ -6,8 +6,8 @@ import plausibleEvent from "../../services/plausible";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import Panel from "./panel";
-import DownloadAllAttestation from "../../components/buttons/DownloadAllAttestation";
+import Panel from "./components/panel";
+// import DownloadAllAttestation from "../../components/buttons/DownloadAllAttestation";
 import ExportComponent from "../../components/ExportXlsx";
 import {
   translate,
@@ -22,7 +22,7 @@ import {
   confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
   getLabelWithdrawnReason,
-  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
+  START_DATE_SESSION_PHASE1,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
@@ -56,7 +56,7 @@ const FILTERS = [
 ];
 
 export default function List() {
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const { sessionPhase1 } = useSelector((state) => state.Auth);
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -447,7 +447,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayPresence}
           name="cohesionStayPresence"
-          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
+          disabled={START_DATE_SESSION_PHASE1[value.cohort].getTime() > Date.now()}
           handleChange={(e) => {
             const value = e.target.value;
             setModal({
@@ -470,7 +470,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayMedicalFileReceived}
           name="cohesionStayMedicalFileReceived"
-          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
+          disabled={START_DATE_SESSION_PHASE1[value.cohort].getTime() > Date.now()}
           handleChange={(e) => {
             const value = e.target.value;
             updateYoung({ cohesionStayMedicalFileReceived: value });

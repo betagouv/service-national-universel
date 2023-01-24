@@ -200,7 +200,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   return (
     <div className="px-[30px] pt-[15px] flex justify-end items-end border-b-[#E5E7EB] border-b-[1px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
-      <div className="flex flex-row flex-wrap-reverse w-full items-end justify-end">
+      <div className={`flex flex-row flex-wrap-reverse w-full items-end justify-end ${user.role === ROLES.HEAD_CENTER ? "pt-[57px]" : ""}`}>
         <div className="grow self-start">
           <Title>
             <div className="mr-[15px]">

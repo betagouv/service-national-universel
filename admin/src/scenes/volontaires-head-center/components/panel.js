@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, getAge } from "../../utils";
-import api from "../../services/api";
-import PanelActionButton from "../../components/buttons/PanelActionButton";
+import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, getAge } from "snu-lib";
+import api from "../../../services/api";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default function PanelView({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -125,12 +125,10 @@ const Details = ({ title, value }) => {
 
 const Panel = styled.div`
   background: #ffffff;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1;
   flex: 1;
   max-width: 420px;
-  position: relative;
   min-height: 100vh;
   font-size: 14px;
   align-self: flex-start;
@@ -143,7 +141,7 @@ const Panel = styled.div`
     font-weight: 400;
     width: 45px;
     height: 45px;
-    background: url(${require("../../assets/close_icon.png")}) center no-repeat;
+    background: url(${require("../../../assets/close_icon.png")}) center no-repeat;
     background-size: 12px;
     padding: 15px;
     position: absolute;
@@ -168,7 +166,7 @@ const Panel = styled.div`
     &-edit {
       width: 30px;
       height: 26px;
-      background: url(${require("../../assets/pencil.svg")}) center no-repeat;
+      background: url(${require("../../../assets/pencil.svg")}) center no-repeat;
       background-size: 16px;
       position: absolute;
       right: 0;
