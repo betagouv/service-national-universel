@@ -108,6 +108,38 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
   }
 });
 
+/**
+ * Récupère les points de rassemblements pour un centre de cohésion avec cohort
+ */
+router.get("/center/:centerId/cohort/:cohortId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      centerId: Joi.string().required(),
+      cohortId: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { centerId, cohortId } = value;
+
+    if (!canViewMeetingPoints(req.user, { centerId, cohortId })) {
+      return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    const ligneBus = await LigneBusModel.find({ cohort: cohortId, centerId: centerId });
+
+    let arrayMeetingPoints = [];
+    ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
+
+    const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
+
+    return res.status(200).send({ ok: true, data: { meetingPoints, ligneBus } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
