@@ -78,7 +78,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code !== "success") throw new Error(mail.message);
+    if (mail.code !== "success") throw new Error(await mail.text());
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -105,7 +105,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code !== "success") throw new Error(mail.message);
+    if (mail.code !== "success") throw new Error(await mail.text());
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
