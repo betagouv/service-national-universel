@@ -41,9 +41,7 @@ const FILTERS = ["SEARCH", "MISSION_NAME", "STATUS", "TUTOR", "DEPARTMENT", "REG
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState();
-  const [panel, setPanel] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [columnModalOpen, setColumnModalOpen] = useState(false);
   const [young, setYoung] = useState();
 
   const [countPending, setCountPending] = useState(0);
@@ -59,7 +57,6 @@ export default function List() {
 
   const history = useHistory();
   const { currentTab } = useParams();
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   React.useEffect(() => {
     const listTab = ["all", "pending", "follow"];
@@ -229,8 +226,7 @@ export default function List() {
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
-    console.log("data", data, ok);
-    if (ok) setPanel({ application, young: data });
+    if (ok) setYoung(data);
   };
 
   function getExportFields() {
@@ -582,10 +578,9 @@ export default function List() {
         </ReactiveBase>
       </div>
       <Panel
-        value={panel?.young}
-        application={panel?.application}
+        value={young}
         onChange={() => {
-          setPanel(null);
+          setYoung(null);
         }}
       />
     </div>
