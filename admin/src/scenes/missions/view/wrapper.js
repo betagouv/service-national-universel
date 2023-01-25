@@ -73,7 +73,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
               onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
               {mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
-              ) : mission.pendingApplications > 0 ? (
+              ) : mission.pendingApplications > 1 ? (
                 <ExclamationCircle className="text-white" fill="orange" />
               ) : null}
               <div>Candidatures</div>
