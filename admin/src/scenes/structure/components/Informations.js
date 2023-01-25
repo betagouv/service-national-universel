@@ -40,6 +40,19 @@ export default function Informations() {
 
   const onSubmit = async () => {
     setIsLoading(true);
+
+    const error = {};
+    if (!data?.name) error.name = "Le nom est obligatoire";
+    if (!data?.address) error.address = "L'adresse est obligatoire";
+    if (!data?.zip) error.zip = "Le code postal est obligatoire";
+    if (!data?.city) error.city = "La ville est obligatoire";
+    if (!data?.addressVerified) error.addressVerified = "L'adresse n'a pas été vérifiée";
+    if (!data?.legalStatus) error.legalStatus = "Veuillez sélectionner un statut juridique";
+    if (!data?.types) error.types = "Veuillez sélectionner au moins un type d'agréément";
+    if (!data?.siret) error.siret = "Le numéro SIRET est obligatoire";
+    setErrors(error);
+    if (Object.keys(error).length > 0) return setIsLoading(false);
+
     try {
       const { ok, code, data: resData } = await API.put(`/structure/${structure._id}`, data);
       if (!ok) {
