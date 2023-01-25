@@ -6,6 +6,7 @@ import Phase2Contract from "./phase2Contract";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 
 import api from "../../../services/api";
+import Application from "./application";
 import Details from "./Details";
 import Wrapper from "./wrapper";
 import { ENABLE_PM } from "../../../utils";
@@ -40,16 +41,7 @@ export default function VolontaireResponsible({ ...props }) {
           )}
         />
       )}
-      <SentryRoute
-        path="/volontaire/:id"
-        component={() => (
-          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-            <Wrapper young={young} tab="details">
-              <Details young={young} />
-            </Wrapper>
-          </div>
-        )}
-      />
+      <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/:currentTab" component={() => <Application young={young} onChange={getYoung} />} />
     </Switch>
   );
 }
