@@ -1,3 +1,11 @@
+# [1.206.0](https://github.com/betagouv/service-national-universel/compare/v1.205.0...v1.206.0) (2023-01-25)
+
+
+### Features
+
+* **admin:** Completion et tri de l'export de schéma de répartition ([#2208](https://github.com/betagouv/service-national-universel/issues/2208)) ([8b101d9](https://github.com/betagouv/service-national-universel/commit/8b101d9fe12b389f51cf03ffa6c187116c456a7c))
+* **admin/api:** super admin panel for cohort ([#2209](https://github.com/betagouv/service-national-universel/issues/2209)) ([ce43728](https://github.com/betagouv/service-national-universel/commit/ce43728a65a389ce1a25669f6ff3f8702d1f11da))
+
 # [1.205.0](https://github.com/betagouv/service-national-universel/compare/v1.204.0...v1.205.0) (2023-01-24)
 
 
