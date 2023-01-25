@@ -7,7 +7,7 @@ const CohortModel = require("../models/cohort");
 const { capture } = require("../sentry");
 const { ERRORS, getFile } = require("../utils");
 const { decrypt } = require("../cryptoUtils");
-const { ROLES } = require("snu-lib");
+const { ROLES, isSuperAdmin } = require("snu-lib");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -74,7 +74,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
 
     cohort.dsnjExportDates[exportDateKey] = date;
 
-    await cohort.save();
+    await cohort.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: cohort });
   } catch (err) {
@@ -175,5 +175,57 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req, res) => {
+  try {
+    const { error: idError, value: cohortName } = Joi.string().required().validate(req.params.cohort, { stripUnknown: true });
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { error: bodyError, value: body } = Joi.object({
+      dateStart: Joi.date().required(),
+      dateEnd: Joi.date().required(),
+      pdrChoiceLimitDate: Joi.date().required(),
+      manualAffectionOpenForAdmin: Joi.boolean().required(),
+      manualAffectionOpenForReferentRegion: Joi.boolean().required(),
+      manualAffectionOpenForReferentDepartment: Joi.boolean().required(),
+      isAssignmentAnnouncementsOpenForYoung: Joi.boolean().required(),
+    }).validate(req.body, { stripUnknown: true });
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    const cohort = await CohortModel.findOne({ name: cohortName });
+
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    cohort.set({
+      dateStart: formatDateTimeZone(body.dateStart),
+      dateEnd: formatDateTimeZone(body.dateEnd),
+      pdrChoiceLimitDate: formatDateTimeZone(body.pdrChoiceLimitDate),
+      manualAffectionOpenForAdmin: body.manualAffectionOpenForAdmin,
+      manualAffectionOpenForReferentRegion: body.manualAffectionOpenForReferentRegion,
+      manualAffectionOpenForReferentDepartment: body.manualAffectionOpenForReferentDepartment,
+      isAssignmentAnnouncementsOpenForYoung: body.isAssignmentAnnouncementsOpenForYoung,
+    });
+
+    await cohort.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+const formatDateTimeZone = (date) => {
+  //remove timezones
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d;
+};
 
 module.exports = router;
