@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 import ModalExport from "../../components/modals/ModalExport";
 import { structureExportFields } from "snu-lib/excelExports";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import Panel from "./panel";
 import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel, colors } from "../../utils";
-import VioletButton from "../../components/buttons/VioletButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
-import { HiAdjustments } from "react-icons/hi";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import LockedSvg from "../../assets/lock.svg";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { Title } from "../centersV2/components/commons";
+import { BsDownload } from "react-icons/bs";
+import FilterIcon from "../../assets/icons/Filter";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION", "TYPE", "SOUS-TYPE"];
 const formatLongDate = (date) => {
@@ -30,11 +29,10 @@ const formatLongDate = (date) => {
 };
 
 export default function List() {
-  const [structure, setStructure] = useState(null);
-  // List of structure IDS currently displayed in results
+  const history = useHistory();
   const [structureIds, setStructureIds] = useState([]);
-  // List of missions associated to the structures
   const [missions, setMissions] = useState([]);
+  const [responsibles, setResponsibles] = useState([]);
   const [filterVisible, setFilterVisible] = useState(false);
   const [infosHover, setInfosHover] = useState(false);
   const [infosClick, setInfosClick] = useState(false);
@@ -54,6 +52,13 @@ export default function List() {
         });
         if (responses.length) {
           setMissions(responses[0]?.hits?.hits || []);
+        }
+        const { responses: responsibleResponses } = await api.esQuery("referent", {
+          size: ES_NO_LIMIT,
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
+        });
+        if (responses.length) {
+          setResponsibles(responsibleResponses[0]?.hits?.hits || []);
         }
       }
     })();
@@ -190,15 +195,19 @@ export default function List() {
               URLParams={true}
               queryFormat="and"
             />
-            <button onClick={handleShowFilter} className="rounded-lg px-3 text-sm border-[1px] bg-gray-100 border-gray-100 text-gray-500 hover:bg-white">
-              Filtres
+            <button
+              onClick={handleShowFilter}
+              className={`group py-2 px-3 rounded-lg flex items-center gap-2 text-sm ${filterVisible ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
+              <FilterIcon className={filterVisible ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
+              <p className={filterVisible ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
             </button>
-            <button className="rounded-lg px-3 text-sm border-[1px] border-gray-300 hover:bg-gray-100 ml-auto" onClick={() => setIsExportOpen(true)}>
-              Exporter
+            <button className="flex gap-2 items-center rounded-lg px-3 text-sm border-[1px] border-gray-300 hover:bg-gray-100 ml-auto" onClick={() => setIsExportOpen(true)}>
+              <BsDownload className="text-gray-400" />
+              <p>Exporter</p>
             </button>
           </div>
           <FilterRow visible={filterVisible}>
-            <div className="uppercase text-xs text-snu-purple-800">Général</div>
+            <div className="uppercase text-xs text-blue-600">Général</div>
             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
             <MultiDropdownList
@@ -261,7 +270,7 @@ export default function List() {
             />
           </FilterRow>
           <FilterRow visible={filterVisible}>
-            <div className="uppercase text-xs text-snu-purple-800">Spécificité</div>
+            <div className="uppercase text-xs text-blue-600">Spécificité</div>
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
@@ -302,43 +311,43 @@ export default function List() {
             <DeleteFilters />
           </FilterRow>
 
-          <ReactiveListComponent
-            defaultQuery={getDefaultQuery}
-            react={{ and: FILTERS }}
-            sortOptions={[
-              { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
-              { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
-              { label: "Nom de la structure (A > Z)", dataField: "name.keyword", sortBy: "asc" },
-              { label: "Nom de la structure (Z > A)", dataField: "name.keyword", sortBy: "desc" },
-            ]}
-            onData={({ rawData }) => {
-              if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
-            }}
-            render={({ data }) => {
-              return (
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Structures</th>
-                      <th>Missions</th>
-                      <th>Contexte</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((hit) => (
-                      <Hit
-                        hit={hit}
-                        key={hit._id}
-                        missions={missions.filter((e) => e._source.structureId === hit._id)}
-                        onClick={() => setStructure(hit)}
-                        selected={structure?._id === hit._id}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              );
-            }}
-          />
+          <div className="reactive-result">
+            <ReactiveListComponent
+              defaultQuery={getDefaultQuery}
+              react={{ and: FILTERS }}
+              paginationAt="bottom"
+              onData={({ rawData }) => {
+                if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
+              }}
+              render={({ data }) => {
+                return (
+                  // <div className="p-8">
+                  <table className="table-fixed w-full">
+                    <thead className="uppercase text-gray-500">
+                      <tr className="border-b-[1px] border-gray-100">
+                        <th className="font-semibold px-4 py-3 text-xs w-1/3">Structures</th>
+                        <th className="font-semibold px-4 py-3 text-xs">Equipe</th>
+                        <th className="font-semibold px-4 py-3 text-xs">Missions</th>
+                        <th className="font-semibold px-4 py-3 text-xs">Contexte</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.map((hit) => (
+                        <Hit
+                          hit={hit}
+                          key={hit._id}
+                          missions={missions.filter((e) => e._source.structureId === hit._id)}
+                          responsibles={responsibles.filter((e) => e._source.structureId === hit._id)}
+                          onClick={() => history.push(`/structure/${hit._id}`)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                  // </div>
+                );
+              }}
+            />
+          </div>
         </main>
 
         {/* <Panel value={structure} onChange={() => setStructure(null)} /> */}
@@ -347,26 +356,32 @@ export default function List() {
   );
 }
 
-const Hit = ({ hit, onClick, selected, missions }) => {
+const Hit = ({ hit, onClick, missions, responsibles }) => {
   const missionsInfo = {
     count: missions.length || "0",
     placesTotal: missions.reduce((acc, e) => acc + e._source.placesTotal, 0),
   };
+  const responsiblesInfo = {
+    count: responsibles.length || "0",
+  };
   return (
-    <tr onClick={onClick}>
-      <td>
-        <div>
-          <span className="">{hit.name}</span>
-          <p>
-            {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
-          </p>
-        </div>
+    <tr className="border-b-[1px] border-gray-100 text-xs hover:bg-gray-50" onClick={onClick}>
+      <td className="px-4 py-3 space-y-1">
+        <p className="text-base font-semibold">{hit.name}</p>
+        <p>
+          {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
+        </p>
       </td>
-      <td>
-        <div>{missionsInfo.count} missions</div>
-        <div>{missionsInfo.placesTotal} places</div>
+      <td className="px-4 py-3 space-y-1">
+        <p>
+          {responsiblesInfo.count} responsable{responsiblesInfo.count > 1 && "s"}
+        </p>
       </td>
-      <td>
+      <td className="px-4 py-3 space-y-1">
+        <p>{missionsInfo.count} missions</p>
+        <p>{missionsInfo.placesTotal} places</p>
+      </td>
+      <td className="px-4 py-3 space-y-1">
         {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color={colors.lightGold} minTooltipText={translate(hit.status)} /> : null}
         {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color={colors.darkBlue} minTooltipText="Tête de réseau" /> : null}
         {hit.networkName ? (

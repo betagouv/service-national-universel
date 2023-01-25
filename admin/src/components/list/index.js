@@ -246,7 +246,10 @@ export const FilterRow = styled.div`
   ${({ visible }) => (!visible ? "display: none;" : "display: flex;")}
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 10px;
   margin-bottom: 10px;
+  margin-left: 22px;
+  margin-right: 22px;
   gap: 10px;
   button {
     background-color: #fff;
