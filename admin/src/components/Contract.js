@@ -35,7 +35,6 @@ export default function Contract({ young }) {
   const [tutor, setTutor] = useState(null);
   const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
-  const [structureManager, setStructureManager] = useState(null);
 
   const [loadings, setLoadings] = useState({
     saveButton: false,
@@ -45,16 +44,16 @@ export default function Contract({ young }) {
   const getApplication = async () => {
     if (!young) return;
     // todo : why not just
-    // let { ok, data, code } = await api.get(`/application/${applicationId}`);
-    let { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    let { ok, data: currentApplication, code } = await api.get(`/application/${applicationId}`);
+    // let { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) {
       capture(code);
       return toastr.error("Oups, une erreur est survenue", code);
     }
-    const currentApplication = data.find((e) => e._id === applicationId);
+    // const currentApplication = data.find((e) => e._id === applicationId);
 
     if (currentApplication.contractId) {
-      ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
+      const { ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`);
       if (!ok) {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
@@ -113,16 +112,6 @@ export default function Contract({ young }) {
     return setStructure(data);
   };
 
-  const getStructureManager = async () => {
-    if (!application) return;
-    const { ok, data, code } = await api.get(`/referent/${structure.structureManagerId}`);
-    if (!ok) {
-      capture(code);
-      return toastr.error("Oups, une erreur est survenue", code);
-    }
-    return setStructureManager(data);
-  };
-
   useEffect(() => {
     getApplication();
   }, [young]);
@@ -133,10 +122,6 @@ export default function Contract({ young }) {
     getManagerDepartment();
     getStructure();
   }, [application]);
-
-  useEffect(() => {
-    getStructureManager();
-  }, [structure]);
 
   const onSubmit = async (values) => {
     try {
@@ -154,7 +139,6 @@ export default function Contract({ young }) {
         missionDuration: values.missionDuration?.toString(),
         youngId: young._id,
         structureId: structure._id,
-        representativeId: structure.representativeId,
         applicationId: application._id,
         missionId: mission._id,
         tutorId: tutor?._id,
@@ -198,7 +182,6 @@ export default function Contract({ young }) {
       youngDepartment: young.department,
       youngEmail: young.email,
       youngPhone: young.phone,
-
       parent1FirstName: young.parent1FirstName,
       parent1LastName: young.parent1LastName,
       parent1Address: young.parent1OwnAddress === "true" ? young.parent1Address : young.address,
@@ -206,7 +189,6 @@ export default function Contract({ young }) {
       parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
       parent1Phone: young.parent1Phone,
       parent1Email: young.parent1Email,
-
       parent2FirstName: young.parent2FirstName,
       parent2LastName: young.parent2LastName,
       parent2Address: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Address : young.address) : "",
@@ -214,7 +196,6 @@ export default function Contract({ young }) {
       parent2Department: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Department : young.department) : "",
       parent2Phone: young.parent2Phone,
       parent2Email: young.parent2Email,
-
       missionName: mission.name,
       missionObjective: mission.description,
       missionAction: mission.actions,
@@ -225,27 +206,21 @@ export default function Contract({ young }) {
       missionZip: mission.zip || "",
       missionDuration: mission.duration || "",
       missionFrequence: mission.frequence || "",
-
       date: dateForDatePicker(new Date()),
-
       projectManagerFirstName: managerDepartment?.firstName || "",
       projectManagerLastName: managerDepartment?.lastName || "",
       projectManagerRole: managerDepartment?.role || "Chef de Projet départemental",
       projectManagerEmail: managerDepartment?.email || "",
-
-      structureManagerFirstName: structureManager?.firstName || "",
-      structureManagerLastName: structureManager?.lastName || "",
-      structureManagerRole: "Représentant de la structure",
-      structureManagerEmail: structureManager?.email || "",
-
+      structureManagerFirstName: structure.structureManager?.firstName || "",
+      structureManagerLastName: structure.structureManager?.lastName || "",
+      structureManagerRole: structure.structureManager?.role || "Responsable de structure",
+      structureManagerEmail: structure.structureManager?.email || "",
       tutorFirstName: tutor?.firstName || "",
       tutorLastName: tutor?.lastName || "",
       tutorRole: "Tuteur de mission",
       tutorEmail: tutor?.email || "",
-
       structureSiret: structure?.siret || "",
       structureName: structure?.name || "",
-
       sendMessage: false,
     };
   }

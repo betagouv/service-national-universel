@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import API from "../../../services/api";
@@ -10,8 +10,11 @@ import Field from "../../centersV2/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
+import { StructureContext } from "../view";
+import Textarea from "../../../components/Textarea";
 
-export default function Informations({ structure }) {
+export default function Informations() {
+  const { structure, setStructure } = useContext(StructureContext);
   const [data, setData] = useState(structure);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +48,7 @@ export default function Informations({ structure }) {
       }
       toastr.success("Structure mise à jour avec succès");
       setData(resData);
+      setStructure(resData);
       setIsEditing(false);
     } catch (e) {
       console.log(e);
@@ -55,22 +59,24 @@ export default function Informations({ structure }) {
   };
 
   return (
-    <main className="bg-white mx-8 my-6 p-8 rounded-lg shadow-lg shadow-neutral-100/50">
+    <main className="bg-white mx-8 my-3 p-8 rounded-lg shadow-sm">
       <div className="flex justify-between w-full">
         <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
-        <EditButton
-          onClick={async () => {
-            const options = await getNetworkOptions();
-            setNetworkOptions(options);
-          }}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          isLoading={isLoading}
-          onSubmit={onSubmit}
-          defaultData={structure}
-          setData={setData}
-          setErrors={setErrors}
-        />
+        {
+          <EditButton
+            onClick={async () => {
+              const options = await getNetworkOptions();
+              setNetworkOptions(options);
+            }}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            isLoading={isLoading}
+            onSubmit={onSubmit}
+            defaultData={structure}
+            setData={setData}
+            setErrors={setErrors}
+          />
+        }
       </div>
 
       <div className="flex my-8">
@@ -82,7 +88,7 @@ export default function Informations({ structure }) {
 
           <div className="space-y-2 my-4">
             <div className="text-xs font-medium leading-4 text-gray-900">Présentation de la structure (facultatif)</div>
-            <Field
+            <Textarea
               readOnly={!isEditing}
               label="Précisez les informations complémentaires à préciser au volontaire. "
               onChange={(e) => setData({ ...data, description: e.target.value })}

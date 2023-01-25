@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
@@ -8,6 +8,8 @@ import Details from "./detailsV2";
 import Missions from "./missions";
 import Historic from "./history";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+
+export const StructureContext = createContext(null);
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Structures");
@@ -25,13 +27,13 @@ export default function Index({ ...props }) {
 
   if (!structure) return <div />;
   return (
-    <>
+    <StructureContext.Provider value={{ structure, setStructure }}>
       <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
       <Switch>
         <SentryRoute path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
         <SentryRoute path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
-        <SentryRoute path="/structure/:id" component={() => <Details structure={structure} />} />
+        <SentryRoute path="/structure/:id" component={() => <Details />} />
       </Switch>
-    </>
+    </StructureContext.Provider>
   );
 }

@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiPhone } from "react-icons/hi";
 import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import ModalRepresentant from "../modals/ModalRepresentant";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../services/api";
+import { StructureContext } from "../../view";
 
-export default function CardRepresentant({ structure }) {
-  const [representant, setRepresentant] = useState(structure.structureManager || null);
+export default function CardRepresentant() {
+  const { structure, setStructure } = useContext(StructureContext);
+  const representant = structure.structureManager || null;
   const [copied, setCopied] = React.useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const handleShowModal = () => setIsOpen(true);
@@ -17,7 +19,7 @@ export default function CardRepresentant({ structure }) {
       const { ok, code, data } = await api.post(`/structure/${structure._id}/representant`, value);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la mise a jour du représentant de la structure : ", translate(code));
       toastr.success("Le représentant de la structure a été mis à jour ");
-      setRepresentant(data.structureManager);
+      setStructure(data);
       setIsOpen(false);
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue lors de la mise a jour du représentant de la structure : ", translate(e.code));
@@ -26,10 +28,10 @@ export default function CardRepresentant({ structure }) {
 
   const onDelete = async () => {
     try {
-      const { ok, code } = await api.remove(`/structure/${structure._id}/representant`);
+      const { ok, code, data } = await api.remove(`/structure/${structure._id}/representant`);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Le représentant a bien été supprimé");
-      setRepresentant(null);
+      setStructure(data);
     } catch (e) {
       return toastr.error("Une erreur s'est produite :", translate(e.code));
     }
@@ -76,7 +78,7 @@ export default function CardRepresentant({ structure }) {
           </button>
         </div>
       )}
-      <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} representant={representant} structure={structure} />
+      <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} />
     </>
   );
 }

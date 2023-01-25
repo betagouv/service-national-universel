@@ -1,14 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ModalContacts from "../modals/ModalContacts";
-import { getInitials, getReferents } from "../../../../utils";
+import { getInitials } from "../../../../utils";
 
-export default function CardContacts({ structure }) {
+export default function CardContacts({ contacts, setContacts }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [contacts, setContacts] = useState([]);
-
-  useEffect(() => {
-    getReferents(structure._id).then((contacts) => setContacts(contacts));
-  }, []);
 
   if (!contacts.length) return <div />;
   return (
@@ -27,7 +22,7 @@ export default function CardContacts({ structure }) {
             );
         })}
       </div>
-      <ModalContacts isOpen={isOpen} setIsOpen={setIsOpen} structure={structure} contacts={contacts} setContacts={setContacts} />
+      <ModalContacts isOpen={isOpen} setIsOpen={setIsOpen} contacts={contacts} setContacts={setContacts} />
     </div>
   );
 }

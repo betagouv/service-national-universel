@@ -31,7 +31,7 @@ export default function Menu({ id }) {
   };
 
   return (
-    <div className="flex justify-between items-center border-bottom my-6">
+    <div className="flex justify-between items-center border-bottom my-4">
       <ModalConfirmDelete
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}

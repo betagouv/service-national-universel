@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Footer } from "../../../../components/modals/Modal";
 import ModalForm from "../../../../components/modals/ModalForm";
 import ModalButton from "../../../../components/buttons/ModalButton";
 import { HiInformationCircle, HiOutlineTrash } from "react-icons/hi";
+import { StructureContext } from "../../view";
 
-export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete, representant, structure }) {
-  const onCancel = () => setIsOpen(false);
+export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
+  const { structure } = useContext(StructureContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState(representant || {});
+  const [data, setData] = useState(structure.structureManager || {});
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -28,7 +29,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
   };
 
   return (
-    <ModalForm isOpen={isOpen} headerText={`Représentant de la structure ${structure.name}`} onCancel={onCancel} classNameModal="max-w-3xl">
+    <ModalForm isOpen={isOpen} headerText={`Représentant de la structure ${structure.name}`} onCancel={() => setIsOpen(false)} classNameModal="max-w-3xl">
       <form className="w-full" onSubmit={handleSubmit}>
         <p className="text-gray-500 text-sm mx-8 my-4">
           Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
@@ -94,7 +95,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
           <ModalButton disabled={isLoading} type="submit" primary>
             Enregistrer
           </ModalButton>
-          <ModalButton onClick={onCancel}>Annuler</ModalButton>
+          <ModalButton onClick={() => setIsOpen(false)}>Annuler</ModalButton>
         </Footer>
       </form>
     </ModalForm>
