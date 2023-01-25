@@ -322,12 +322,12 @@ export default function List() {
               render={({ data }) => {
                 return (
                   <table className="table-fixed w-full">
-                    <thead className="uppercase text-gray-500">
+                    <thead className="uppercase text-gray-500 text-xs font-semibold">
                       <tr className="border-b-[1px] border-gray-100">
-                        <th className="font-semibold px-4 py-3 text-xs w-1/3">Structures</th>
-                        <th className="font-semibold px-4 py-3 text-xs">Equipe</th>
-                        <th className="font-semibold px-4 py-3 text-xs">Missions</th>
-                        <th className="font-semibold px-4 py-3 text-xs">Contexte</th>
+                        <th className="pl-8 py-3 w-1/3">Structures</th>
+                        <th>Equipe</th>
+                        <th>Missions</th>
+                        <th>Contexte</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -364,22 +364,22 @@ const Hit = ({ hit, onClick, missions, responsibles }) => {
   };
   return (
     <tr className="border-b-[1px] border-gray-100 text-xs hover:bg-gray-50" onClick={onClick}>
-      <td className="px-4 py-3 space-y-1">
+      <td className="pl-8 py-3 space-y-1">
         <p className="text-base font-semibold">{hit.name}</p>
         <p>
           {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
         </p>
       </td>
-      <td className="px-4 py-3 space-y-1">
+      <td>
         <p>
           {responsiblesInfo.count} responsable{responsiblesInfo.count > 1 && "s"}
         </p>
       </td>
-      <td className="px-4 py-3 space-y-1">
+      <td>
         <p>{missionsInfo.count} missions</p>
         <p>{missionsInfo.placesTotal} places</p>
       </td>
-      <td className="px-4 py-3 space-y-1">
+      <td>
         {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color={colors.lightGold} minTooltipText={translate(hit.status)} /> : null}
         {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color={colors.darkBlue} minTooltipText="Tête de réseau" /> : null}
         {hit.networkName ? (

@@ -50,12 +50,6 @@ export default function Menu({ id }) {
           <Bin fill="red" />
           <p>Supprimer</p>
         </button>
-        <button
-          className="flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] gap-2 mb-auto ml-auto"
-          onClick={() => setIsOpen(true)}>
-          <Bin fill="red" />
-          <p>Supprimer</p>
-        </button>
       </nav>
     </div>
   );

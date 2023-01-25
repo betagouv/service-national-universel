@@ -40,7 +40,7 @@ export default function CardRepresentant() {
   return (
     <>
       {representant ? (
-        <div className="w-96 rounded-lg bg-white shadow-sm hover:cursor-pointer hover:scale-105" onClick={handleShowModal}>
+        <div className="w-96 rounded-xl bg-white shadow-sm hover:cursor-pointer hover:scale-105" onClick={handleShowModal}>
           <div className="px-4 py-3 space-y-1">
             <p className="text-sm">Représentant de la structure</p>
             <p className="text-sm text-gray-500">

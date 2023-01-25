@@ -7,7 +7,7 @@ export default function CardContacts({ contacts, setContacts }) {
 
   if (!contacts.length) return <div />;
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:cursor-pointer items-center hover:scale-105 w-64 px-7 py-6" onClick={() => setIsOpen(true)}>
+    <div className="bg-white rounded-xl shadow-sm hover:cursor-pointer items-center hover:scale-105 w-64 px-7 py-6" onClick={() => setIsOpen(true)}>
       <p className="mb-1 text-sm">L&apos;équipe</p>
       <p className="text-gray-500 text-xs">
         {contacts.length} responsable{contacts.length > 1 && "s"}

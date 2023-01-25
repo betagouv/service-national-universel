@@ -14,6 +14,7 @@ import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
 import { StructureContext } from "../../view";
 
 export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts }) {
+  const { structure } = useContext(StructureContext);
   const [contact, setContact] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -92,7 +93,6 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
         setContact(null);
         toastr.success("Le contact a été sauvegardé !");
       } else {
-        const { structure } = useContext(StructureContext);
         contact.role = structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
         contact.structureId = structure._id;
         contact.structureName = structure.name;

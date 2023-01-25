@@ -72,7 +72,7 @@ export default function Informations() {
   };
 
   return (
-    <main className="bg-white mx-8 my-3 p-8 rounded-lg shadow-sm">
+    <div className="bg-white p-8 rounded-xl shadow-sm">
       <div className="flex justify-between w-full">
         <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
         {
@@ -253,6 +253,6 @@ export default function Informations() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

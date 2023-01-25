@@ -36,7 +36,9 @@ export default function DetailsView() {
         <CardRepresentant />
         <CardContacts contacts={contacts} setContacts={setContacts} />
       </section>
-      <Informations />
+      <main className="mx-8 mt-3 mb-12">
+        <Informations />
+      </main>
     </>
   );
 }
