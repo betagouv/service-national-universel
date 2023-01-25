@@ -352,16 +352,3 @@ export const getNetworkOptions = async (inputValue) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });
 };
-
-export const getParentStructure = async (networkId) => {
-  try {
-    const { responses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: networkId } }] } } });
-    if (responses.length) {
-      const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      if (structures.length) return structures[0];
-      return null;
-    }
-  } catch (e) {
-    console.log(e);
-  }
-};
