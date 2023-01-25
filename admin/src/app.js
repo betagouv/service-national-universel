@@ -42,7 +42,7 @@ import Loader from "./components/Loader";
 import api, { initApi } from "./services/api";
 import { initSentry, SentryRoute, history } from "./sentry";
 
-import { adminURL, environment } from "./config";
+import { adminURL } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
