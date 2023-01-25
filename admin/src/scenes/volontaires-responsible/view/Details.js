@@ -70,7 +70,7 @@ export default function DetailsVolontaires({ young }) {
                 Représentant légal 2
               </div>
             </div>
-            <Representant parent={selectedRepresentant} young={young} />
+            <Representant parent={selectedRepresentant === 1 ? "1" : "2"} young={young} />
           </div>
         </div>
       </div>
@@ -102,23 +102,23 @@ const Representant = ({ parent, young }) => {
       <Field title="Email" value={parent === "1" ? young.parent1Email : young.parent2Email} />
       <Field title="Téléphone" value={parent === "1" ? young.parent1Phone : young.parent2Phone} />
       <Field title="Adresse différente de celle du volontaire" value={parent === "1" ? translate(young.parent1OwnAddress) : translate(young.parent2OwnAddress)} />
-      {parent === "1" && young.parent1OwnAddress === "true" && (
-        <div>
-          <Field title="Adresse" value={young.parent1Address} />
+      {((parent === "1" && young.parent1OwnAddress === "true") || (parent === "2" && young?.parent2OwnAddress === "true")) && (
+        <div className="flex flex-col gap-4">
+          <Field title="Adresse" value={parent === "1" ? young.parent1Address : young.parent2Address} />
           <div className="flex flex-row gap-3 items-end justify-around w-full">
             <div className="w-1/2">
-              <Field title="Code postal" value={young.parent1Zip} />
+              <Field title="Code postal" value={parent === "1" ? young.parent1Zip : young.parent2Zip} />
             </div>
             <div className="w-1/2">
-              <Field title="Ville" value={young.parent1City} />
+              <Field title="Ville" value={parent === "1" ? young.parent1City : young.parent2City} />
             </div>
           </div>
           <div className="flex flex-row gap-3 items-end justify-around w-full">
             <div className="w-1/2">
-              <Field title="Département" value={young.parent1Department} />
+              <Field title="Département" value={parent === "1" ? young.parent1Department : young.parent2Department} />
             </div>
             <div className="w-1/2">
-              <Field title="Région" value={young.parent1Region} />
+              <Field title="Région" value={parent === "1" ? young.parent1Region : young.parent2Region} />
             </div>
           </div>
         </div>
