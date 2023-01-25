@@ -5,13 +5,13 @@ import API from "../../../services/api";
 
 import EditButton from "./EditButton";
 import MultiSelect from "./MultiSelect";
+import Textarea from "./Textarea";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Field from "../../centersV2/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 import { StructureContext } from "../view";
-import Textarea from "../../../components/Textarea";
 
 export default function Informations() {
   const { structure, setStructure } = useContext(StructureContext);
@@ -39,6 +39,7 @@ export default function Informations() {
   };
 
   const onSubmit = async () => {
+    if (data.isNtwork) data.networkId = undefined;
     setIsLoading(true);
 
     const error = {};
@@ -49,7 +50,6 @@ export default function Informations() {
     if (!data?.addressVerified) error.addressVerified = "L'adresse n'a pas été vérifiée";
     if (!data?.legalStatus) error.legalStatus = "Veuillez sélectionner un statut juridique";
     if (!data?.types) error.types = "Veuillez sélectionner au moins un type d'agréément";
-    if (!data?.siret) error.siret = "Le numéro SIRET est obligatoire";
     setErrors(error);
     if (Object.keys(error).length > 0) return setIsLoading(false);
 
@@ -191,27 +191,29 @@ export default function Informations() {
               error={errors?.siret}
             />
 
-            <div className="space-y-2 my-3">
-              <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
-              <p className="text-xs font-medium leading-4 text-gray-400">
-                Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au superviseur
-                de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
-              </p>
-              <Select
-                label="Sélectionnez un réseau"
-                readOnly={!isEditing}
-                options={networkOptions}
-                selected={networkOptions.find((e) => e.value === data.networkId) || { label: data.networkName, value: data.networkId } || {}}
-                setSelected={(e) => setData({ ...data, networkId: e.value, networkName: e.label })}
-                error={errors?.network}
-              />
-            </div>
+            {data.isNetwork === "false" && (
+              <div className="space-y-2 my-3">
+                <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
+                <p className="text-xs font-medium leading-4 text-gray-400">
+                  Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
+                  superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
+                </p>
+                <Select
+                  label="Sélectionnez un réseau"
+                  readOnly={!isEditing}
+                  options={networkOptions}
+                  selected={networkOptions.find((e) => e.value === data.networkId) || { label: data.networkName, value: data.networkId } || {}}
+                  setSelected={(e) => setData({ ...data, networkId: e.value, networkName: e.label })}
+                  error={errors?.network}
+                />
+              </div>
+            )}
 
             <div className="flex justify-between my-3">
               <p className="text-gray-500">Tête de réseau</p>
               <div className="flex gap-2 items-center">
-                <Toggle value={data.isNetworkHead === "true"} onChange={(e) => setData({ ...data, isNetworkHead: e.toString() })} disabled={!isEditing} />
-                {data.isNetworkHead ? "Oui" : "Non"}
+                <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
+                {data.isNetwork ? "Oui" : "Non"}
               </div>
             </div>
 

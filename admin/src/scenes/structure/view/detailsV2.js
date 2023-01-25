@@ -1,22 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useSelector } from "react-redux";
-import { getReferents, ROLES } from "../../../utils";
+import { ROLES } from "../../../utils";
 
 import { Title } from "../../centersV2/components/commons";
 import Menu from "../components/Menu";
 import Informations from "../components/Informations";
-import CardContacts from "../components/cards/CardContacts";
-import CardRepresentant from "../components/cards/CardRepresentant";
 import { StructureContext } from ".";
 
 export default function DetailsView() {
   const user = useSelector((state) => state.Auth.user);
   const { structure } = useContext(StructureContext);
-  const [contacts, setContacts] = useState([]);
-
-  useEffect(() => {
-    getReferents(structure._id).then((contacts) => setContacts(contacts));
-  }, []);
 
   if (!structure) return <div />;
   return (
@@ -32,10 +25,7 @@ export default function DetailsView() {
         )}
       </header>
       <Menu id={structure._id} />
-      <section className="flex mx-8 gap-4">
-        <CardRepresentant />
-        <CardContacts contacts={contacts} setContacts={setContacts} />
-      </section>
+      <section className="flex mx-8 gap-4">{/* Cartes */}</section>
       <main className="mx-8 mt-">
         <Informations />
       </main>

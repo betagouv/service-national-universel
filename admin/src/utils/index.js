@@ -307,3 +307,26 @@ export function formatHistory(data, role) {
   }
   return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
 }
+
+export const getNetworkOptions = async () => {
+  try {
+    const { data } = await api.get("/structure/networks");
+    if (data.length) return data.map((e) => ({ label: e.name, value: e._id }));
+    return [];
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getParentStructure = async (networkId) => {
+  try {
+    const { responses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: networkId } }] } } });
+    if (responses.length) {
+      const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+      if (structures.length) return structures[0];
+      return null;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
