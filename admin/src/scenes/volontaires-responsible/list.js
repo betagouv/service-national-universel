@@ -43,6 +43,7 @@ export default function List() {
   const [missions, setMissions] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const [young, setYoung] = useState();
+  const [panel, setPanel] = useState(null);
 
   const [countPending, setCountPending] = useState(0);
   const [countFollow, setCountFollow] = useState(0);
@@ -226,7 +227,8 @@ export default function List() {
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
-    if (ok) setYoung(data);
+    if (ok) setPanel({ application, young: data });
+    console.log(data);
   };
 
   function getExportFields() {
@@ -555,7 +557,7 @@ export default function List() {
                             currentTab={currentTab}
                             mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
                             onClick={() => handleClick(hit)}
-                            opened={young?._id === hit.youngId}
+                            opened={panel?.young?._id === hit.youngId}
                             selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                             //onChangeApplication={updateMission}
                             onSelect={(newItem) =>
@@ -578,9 +580,10 @@ export default function List() {
         </ReactiveBase>
       </div>
       <Panel
-        value={young}
+        value={panel?.young}
+        application={panel?.application}
         onChange={() => {
-          setYoung(null);
+          setPanel(null);
         }}
       />
     </div>
