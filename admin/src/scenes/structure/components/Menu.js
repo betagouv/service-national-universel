@@ -1,23 +1,25 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { translate } from "snu-lib";
 import API from "../../../services/api";
 import ModalConfirmDelete from "../../centersV2/components/ModalConfirmDelete";
 import Bin from "../../../assets/Bin";
+import { StructureContext } from "../view";
 
-export default function Menu({ id }) {
+export default function Menu({ tab }) {
+  const { structure } = useContext(StructureContext);
   const tabs = [
-    { label: "Détails", src: `/structure/${id}` },
-    { label: "Missions", src: `/structure/${id}/missions` },
-    { label: "Historique", src: `/structure/${id}/historic` },
+    { label: "Détails", value: "details", src: `/structure/${structure._id}` },
+    { label: "Missions", value: "missions", src: `/structure/${structure._id}/missions` },
+    { label: "Historique", value: "historique", src: `/structure/${structure._id}/historique` },
   ];
-  const activeTab = tabs.find((tab) => tab.src === window.location.pathname);
+  const activeTab = tabs.find((e) => e.value === tab);
   const [isOpen, setIsOpen] = useState(false);
 
   const onConfirmDelete = async () => {
     try {
-      const { ok, code } = await API.remove(`/structure/${id}`);
+      const { ok, code } = await API.remove(`/structure/${structure._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok && code === "LINKED_OBJECT") return toastr.error("Cette structure a des candidatures sur une de ses missions");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -30,7 +32,7 @@ export default function Menu({ id }) {
   };
 
   return (
-    <div className="flex justify-between items-center border-bottom my-4">
+    <div className="flex justify-between items-center border-bottom">
       <ModalConfirmDelete
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
