@@ -321,7 +321,6 @@ export default function List() {
               }}
               render={({ data }) => {
                 return (
-                  // <div className="p-8">
                   <table className="table-fixed w-full">
                     <thead className="uppercase text-gray-500">
                       <tr className="border-b-[1px] border-gray-100">
@@ -343,7 +342,6 @@ export default function List() {
                       ))}
                     </tbody>
                   </table>
-                  // </div>
                 );
               }}
             />

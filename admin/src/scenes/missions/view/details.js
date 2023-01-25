@@ -391,7 +391,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     <a
                       target="_blank"
                       rel="noreferrer"
-                      href={`${adminURL}/structure/${values.structureId}`}
+                      href={`${adminURL}/structure/${values.structureId}/edit`}
                       className="inline-block w-full border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
                       Voir la structure
                     </a>
