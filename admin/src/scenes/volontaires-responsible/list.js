@@ -45,10 +45,11 @@ export default function List() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   const [young, setYoung] = useState();
-  const [applications, setApplications] = useState([]);
-  const countAll = applications?.length;
-  const countPending = missions?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
-  const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
+
+  const [countPending, setCountPending] = useState(0);
+  const [countFollow, setCountFollow] = useState(0);
+  const [countAll, setCountAll] = useState(0);
+
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
   const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
   const [currentTab, setCurrentTab] = useState("all");
@@ -96,6 +97,22 @@ export default function List() {
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
+  const getApplicationCount = async () => {
+    try {
+      const { data, ok } = await api.get(`/structure/${user.structureId}/application/count`);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures");
+      }
+      setCountPending(data.waitingValidation);
+      setCountFollow(data.toFollow);
+      setCountAll(data.countAll);
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures");
+
+      console.log(error);
+    }
+  };
+
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/structure/${structure}/mission`);
     if (!missionsResponse.ok) {
@@ -125,6 +142,7 @@ export default function List() {
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
     initMissions(user.structureId);
+    getApplicationCount();
   }, []);
   const RenderText = (text) => {
     return (

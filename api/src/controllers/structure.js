@@ -153,6 +153,25 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false, f
   }
 });
 
+router.get("/:id/application/count", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const data = await ApplicationObject.find({ structureId: checkedId });
+
+    const waitingValidation = data.filter((application) => application.status === "WAITING_VALIDATION").length;
+    const toFollow = data.filter((application) => ["IN_PROGRESS", "VALIDATED"].includes(application.status)).length;
+
+    return res.status(200).send({ ok: true, data: { waitingValidation, toFollow, countAll: data.length } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, StructureObject));
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
