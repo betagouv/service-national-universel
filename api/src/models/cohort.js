@@ -39,15 +39,34 @@ const Schema = new mongoose.Schema({
         "Si true, les affectations sont 'révélées' au jeune. Sinon, le jeune doit avoir l'impression qu'il est toujours dans un état d'attente d'affectation même si il a été affecté.",
     },
   },
-  manualAffectionOpenForReferent: {
+  manualAffectionOpenForAdmin: {
+    type: Boolean,
+    documentation: {
+      description: "Si true, les admins peuvent manuellement affecter un jeune à un centre",
+    },
+  },
+  manualAffectionOpenForReferentRegion: {
     type: Boolean,
     documentation: {
       description: "Si true, les referents régionaux peuvent manuellement affecter un jeune à un centre",
     },
   },
+  manualAffectionOpenForReferentDepartment: {
+    type: Boolean,
+    documentation: {
+      description: "Si true, les referents départementaux peuvent manuellement affecter un jeune à un centre",
+    },
+  },
 
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
+  pdrChoiceLimitDate: {
+    type: Date,
+    documentation: {
+      description: "Date limite de choix du PDR par le jeune",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

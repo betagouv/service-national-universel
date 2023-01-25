@@ -16,7 +16,6 @@ export default function StepsAffected({ young, center }) {
       if (young.youngPhase1Agreement === "true") nb++;
       if (young.convocationFileDownload === "true") nb++;
       if (young.cohesionStayMedicalFileDownload === "true") nb++;
-      console.log("NB = ", nb);
       setNbvalid(nb);
     }
   }, [young]);

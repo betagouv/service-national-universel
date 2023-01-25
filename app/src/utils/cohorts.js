@@ -43,9 +43,9 @@ export function cohortAssignmentAnnouncementsIsOpenForYoung(cohortName) {
 }
 
 export function getMeetingPointChoiceLimitDateForCohort(cohortName) {
-  const cohort = getCohortDetail(cohortName);
-  if (cohort && cohort.dateStart) {
-    return dayjs(cohort.dateStart).subtract(12, "day").toDate();
+  const cohort = getCohort(cohortName);
+  if (cohort && cohort.pdrChoiceLimitDate) {
+    return cohort.pdrChoiceLimitDate;
   } else {
     return null;
   }

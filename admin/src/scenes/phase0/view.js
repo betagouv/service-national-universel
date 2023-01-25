@@ -40,7 +40,7 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { copyToClipboard, regexPhoneFrenchCountries } from "../../utils";
+import { copyToClipboard } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
@@ -66,6 +66,7 @@ const parentStatusOptions = [
 const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
+  const user = useSelector((state) => state.Auth.user);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
@@ -251,6 +252,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           currentRequest={currentCorrectionRequestField}
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
+          readonly={user.role === ROLES.HEAD_CENTER}
         />
         <SectionParents
           young={young}
@@ -261,8 +263,9 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           oldCohort={oldCohort}
+          readonly={user.role === ROLES.HEAD_CENTER}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} />}
+        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} />}
       </div>
       {globalMode === "correction" && (
         <>
@@ -544,7 +547,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange }) {
+function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
@@ -650,7 +653,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       <Section
         step={globalMode === "correction" ? "Première étape" : null}
         title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
-        editable={young.status !== YOUNG_STATUS.DELETED}
+        editable={young.status !== YOUNG_STATUS.DELETED && !readonly}
         mode={sectionMode}
         onChangeMode={onSectionChangeMode}
         saving={saving}
@@ -1062,7 +1065,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
   );
 }
 
-function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort }) {
+function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort, readonly }) {
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
@@ -1191,7 +1194,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       <Section
         step={globalMode === "correction" ? "Seconde étape :" : null}
         title={globalMode === "correction" ? "Vérifiez la situation et l'accord parental" : "Détails"}
-        editable={young.status !== YOUNG_STATUS.DELETED}
+        editable={young.status !== YOUNG_STATUS.DELETED && !readonly}
         mode={sectionMode}
         onChangeMode={onSectionChangeMode}
         saving={saving}
@@ -1496,7 +1499,7 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young, onChange }) {
+function SectionConsentements({ young, onChange, readonly = false }) {
   const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
 
@@ -1693,7 +1696,7 @@ function SectionConsentements({ young, onChange }) {
             <div className="font-bold">Droit à l&apos;image</div>
             <div className="flex items-center">
               <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
-              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
+              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && !readonly && (
                 <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
                   Modifier
                 </a>
@@ -1704,12 +1707,54 @@ function SectionConsentements({ young, onChange }) {
         </div>
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
-          (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && young.parent1AllowImageRights !== "true" && young.parent1AllowImageRights !== "false" && (
+          (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") &&
+            young.parent1AllowImageRights !== "true" &&
+            young.parent1AllowImageRights !== "false" &&
+            !readonly && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                  }}>
+                  Copier le lien du formulaire
+                </div>
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
+                    }
+                  }}>
+                  Relancer
+                </BorderButton>
+              </div>
+            )
+        }
+
+        {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
+          <div className="mt-[16px] flex itemx-center justify-between">
+            <div className="grow text-[#374151] text-[14px] leading-[20px]">
+              <div className="font-bold">Consentement à la participation</div>
+              <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
+            </div>
+            <MiniSwitch value={young.parent1AllowSNU === "true"} />
+          </div>
+        ) : (
+          !readonly && (
             <div className="mt-2 flex items-center justify-between">
               <div
                 className="cursor-pointer italic text-[#1D4ED8]"
                 onClick={() => {
-                  copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                  copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
                   toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                 }}>
                 Copier le lien du formulaire
@@ -1718,7 +1763,7 @@ function SectionConsentements({ young, onChange }) {
                 mode="blue"
                 onClick={async () => {
                   try {
-                    const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                    const response = await api.get(`/young-edition/${young._id}/remider/1`);
                     if (response.ok) {
                       toastr.success(translate("REMINDER_SENT"), "");
                     } else {
@@ -1732,43 +1777,6 @@ function SectionConsentements({ young, onChange }) {
               </BorderButton>
             </div>
           )
-        }
-
-        {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
-          <div className="mt-[16px] flex itemx-center justify-between">
-            <div className="grow text-[#374151] text-[14px] leading-[20px]">
-              <div className="font-bold">Consentement à la participation</div>
-              <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
-            </div>
-            <MiniSwitch value={young.parent1AllowSNU === "true"} />
-          </div>
-        ) : (
-          <div className="mt-2 flex items-center justify-between">
-            <div
-              className="cursor-pointer italic text-[#1D4ED8]"
-              onClick={() => {
-                copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
-                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-              }}>
-              Copier le lien du formulaire
-            </div>
-            <BorderButton
-              mode="blue"
-              onClick={async () => {
-                try {
-                  const response = await api.get(`/young-edition/${young._id}/remider/1`);
-                  if (response.ok) {
-                    toastr.success(translate("REMINDER_SENT"), "");
-                  } else {
-                    toastr.error(translate(response.code), "");
-                  }
-                } catch (error) {
-                  toastr.error(translate(error.code), "");
-                }
-              }}>
-              Relancer
-            </BorderButton>
-          </div>
         )}
         {young.parent2Status && (
           <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
@@ -1790,7 +1798,7 @@ function SectionConsentements({ young, onChange }) {
                     <div className="font-bold">Droit à l&apos;image</div>
                     <div className="flex items-center">
                       <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
-                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && !readonly && (
                         <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
                           Modifier
                         </a>
@@ -1802,7 +1810,7 @@ function SectionConsentements({ young, onChange }) {
                 {
                   /* lien et relance du droit à l'image du parent 2 si parent2AllowImageRights n'a pas de valeur  et que le droit à l'image a été réinitialisé
                    * on envoit alors vers le formulaire de modification du droit à l'image */
-                  young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && young.parent2AllowImageRightsReset === "true" && (
+                  young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && young.parent2AllowImageRightsReset === "true" && !readonly && (
                     <div className="mt-2 flex items-center justify-between">
                       <div
                         className="cursor-pointer italic text-[#1D4ED8]"
@@ -1840,7 +1848,8 @@ function SectionConsentements({ young, onChange }) {
                 young.parent1AllowImageRights === "true" &&
                 young.parent2AllowSNU !== "false" &&
                 !young.parent2AllowImageRights &&
-                young.parent2AllowImageRightsReset !== "true" && (
+                young.parent2AllowImageRightsReset !== "true" &&
+                !readonly && (
                   <div className="mt-2 flex items-center justify-between">
                     <div
                       className="cursor-pointer italic text-[#1D4ED8]"
@@ -1883,9 +1892,11 @@ function SectionConsentements({ young, onChange }) {
                     Refusé
                   </div>
                 ) : (
-                  <BorderButton mode="red" onClick={parent2RejectSNU}>
-                    Déclarer un refus
-                  </BorderButton>
+                  !readonly && (
+                    <BorderButton mode="red" onClick={parent2RejectSNU}>
+                      Déclarer un refus
+                    </BorderButton>
+                  )
                 )}
               </div>
             ) : null}

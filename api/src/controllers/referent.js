@@ -179,7 +179,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
-      phone: Joi.string(),
+      phone: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -493,9 +493,23 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
-      young.set({ sessionPhase1Id: undefined });
-      young.set({ meetingPointId: undefined });
-      young.set({ ligneId: undefined });
+      young.set({
+        cohesionCenterId: undefined,
+        sessionPhase1Id: undefined,
+        meetingPointId: undefined,
+        ligneId: undefined,
+        deplacementPhase1Autonomous: undefined,
+        transportInfoGivenByLocal: undefined,
+        cohesionStayPresence: undefined,
+        presenceJDM: undefined,
+        departInform: undefined,
+        departSejourAt: undefined,
+        departSejourMotif: undefined,
+        departSejourMotifComment: undefined,
+        youngPhase1Agreement: "false",
+        hasMeetingInformation: undefined,
+        cohesionStayMedicalFileReceived: undefined,
+      });
     }
 
     // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
@@ -1116,7 +1130,9 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+    const session = await SessionPhase1.findById(young.sessionPhase1Id);
+
+    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
