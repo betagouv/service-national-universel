@@ -308,14 +308,49 @@ export function formatHistory(data, role) {
   return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
 }
 
-export const getNetworkOptions = async () => {
-  try {
-    const { data } = await api.get("/structure/networks");
-    if (data.length) return data.map((e) => ({ label: e.name, value: e._id }));
-    return [];
-  } catch (e) {
-    console.log(e);
+export const getNetworkOptions = async (inputValue) => {
+  const body = {
+    query: { bool: { must: [{ term: { isNetwork: { value: "true" } } }] } },
+    size: 50,
+    track_total_hits: true,
+  };
+  if (inputValue) {
+    body.query.bool.must.push({
+      bool: {
+        should: [
+          {
+            multi_match: {
+              query: inputValue,
+              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+              type: "cross_fields",
+              operator: "and",
+            },
+          },
+          {
+            multi_match: {
+              query: inputValue,
+              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+              type: "phrase",
+              operator: "and",
+            },
+          },
+          {
+            multi_match: {
+              query: inputValue,
+              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
+              type: "phrase_prefix",
+              operator: "and",
+            },
+          },
+        ],
+        minimum_should_match: "1",
+      },
+    });
   }
+  const { responses } = await api.esQuery("structure", body);
+  return responses[0].hits.hits.map((hit) => {
+    return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
+  });
 };
 
 export const getParentStructure = async (networkId) => {

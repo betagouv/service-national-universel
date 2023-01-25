@@ -3,6 +3,7 @@ import DatePickerList from "../../phase0/components/DatePickerList";
 import { htmlCleaner } from "../../../utils";
 
 export default function Field({ name, label, value, className = "", type = "text", handleChange, readOnly = false, errors = {}, row, isJvaMission = false }) {
+  console.log("🚀 ~ file: Field.js:6 ~ Field ~ errors", errors);
   return (
     <div className={className}>
       <div

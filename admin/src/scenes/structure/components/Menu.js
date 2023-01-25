@@ -1,19 +1,23 @@
 import React, { useContext, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { translate } from "snu-lib";
+import { canViewPatchesHistory, translate } from "snu-lib";
 import API from "../../../services/api";
 import ModalConfirmDelete from "../../centersV2/components/ModalConfirmDelete";
 import Bin from "../../../assets/Bin";
 import { StructureContext } from "../view";
+import { useSelector } from "react-redux";
 
 export default function Menu({ tab }) {
   const { structure } = useContext(StructureContext);
+  const user = useSelector((state) => state.Auth.user);
   const tabs = [
     { label: "Détails", value: "details", src: `/structure/${structure._id}` },
     { label: "Missions", value: "missions", src: `/structure/${structure._id}/missions` },
-    { label: "Historique", value: "historique", src: `/structure/${structure._id}/historique` },
   ];
+  if (canViewPatchesHistory(user)) {
+    tabs.push({ label: "Historique", value: "historique", src: `/structure/${structure._id}/historique` });
+  }
   const activeTab = tabs.find((e) => e.value === tab);
   const [isOpen, setIsOpen] = useState(false);
 

@@ -5,9 +5,9 @@ import API from "../../../services/api";
 
 import EditButton from "./EditButton";
 import MultiSelect from "./MultiSelect";
-import Textarea from "./Textarea";
+import AsyncSelect from "react-select/async";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
-import Field from "../../centersV2/components/Field";
+import Field from "../../missions/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
@@ -22,8 +22,6 @@ export default function Informations() {
 
   const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
   const structureTypesOptions = typesStructure[data.legalStatus].map((e) => ({ label: e, value: e }));
-
-  const [networkOptions, setNetworkOptions] = useState([]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setData({
@@ -47,7 +45,6 @@ export default function Informations() {
     if (!data?.address) error.address = "L'adresse est obligatoire";
     if (!data?.zip) error.zip = "Le code postal est obligatoire";
     if (!data?.city) error.city = "La ville est obligatoire";
-    if (!data?.addressVerified) error.addressVerified = "L'adresse n'a pas été vérifiée";
     if (!data?.legalStatus) error.legalStatus = "Veuillez sélectionner un statut juridique";
     if (!data?.types) error.types = "Veuillez sélectionner au moins un type d'agréément";
     setErrors(error);
@@ -75,38 +72,32 @@ export default function Informations() {
     <div className="bg-white p-8 rounded-xl shadow-sm">
       <div className="flex justify-between w-full">
         <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
-        {
-          <EditButton
-            onClick={async () => {
-              const options = await getNetworkOptions();
-              setNetworkOptions(options);
-            }}
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-            isLoading={isLoading}
-            onSubmit={onSubmit}
-            defaultData={structure}
-            setData={setData}
-            setErrors={setErrors}
-          />
-        }
+        {<EditButton isEditing={isEditing} setIsEditing={setIsEditing} isLoading={isLoading} onSubmit={onSubmit} defaultData={structure} setData={setData} setErrors={setErrors} />}
       </div>
 
       <div className="flex my-8">
         <div className="space-y-4 w-[45%]">
           <div className="space-y-2">
             <div className="text-xs font-medium leading-4 text-gray-900">Nom de la structure</div>
-            <Field readOnly={!isEditing} label="Nom de la structure" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} />
+            <Field
+              name="name"
+              readOnly={!isEditing}
+              label="Nom de la structure"
+              handleChange={(e) => setData({ ...data, name: e.target.value })}
+              value={data.name}
+              errors={errors}
+              error={errors?.name}
+            />
           </div>
 
           <div className="space-y-2 my-4">
             <div className="text-xs font-medium leading-4 text-gray-900">Présentation de la structure (facultatif)</div>
-            <Textarea
+            <Field
               readOnly={!isEditing}
               label="Précisez les informations complémentaires à préciser au volontaire. "
-              onChange={(e) => setData({ ...data, description: e.target.value })}
+              handleChange={(e) => setData({ ...data, description: e.target.value })}
               value={data.description || ""}
-              error={errors?.description}
+              type="textarea"
             />
           </div>
 
@@ -115,30 +106,32 @@ export default function Informations() {
             <Field
               readOnly={!isEditing}
               label="Adresse"
-              onChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
+              handleChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
               value={data.address}
               error={errors?.address}
             />
             <div className="flex items-center gap-3">
               <Field
+                name="zip"
                 readOnly={!isEditing}
                 label="Code postal"
-                onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
+                handleChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
                 value={data.zip}
                 error={errors?.zip}
               />
               <Field
+                name="city"
                 readOnly={!isEditing}
                 label="Ville"
-                onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
+                handleChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
                 value={data.city}
                 error={errors?.city}
               />
             </div>
             {data.addressVerified && (
               <div className="flex items-center gap-3">
-                <Field readOnly={!isEditing} label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
-                <Field readOnly={!isEditing} label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+                <Field readOnly={!isEditing} label="Département" handleChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
+                <Field readOnly={!isEditing} label="Région" handleChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
               </div>
             )}
             {isEditing && (
@@ -183,13 +176,7 @@ export default function Informations() {
               error={errors?.types}
               setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
             />
-            <Field
-              readOnly={!isEditing}
-              label="Numéro de SIRET (si disponible)"
-              onChange={(e) => setData({ ...data, siret: e.target.value })}
-              value={data.siret || ""}
-              error={errors?.siret}
-            />
+            <Field readOnly={!isEditing} label="Numéro de SIRET (si disponible)" handleChange={(e) => setData({ ...data, siret: e.target.value })} value={data.siret || ""} />
 
             {data.isNetwork === "false" && (
               <div className="space-y-2 my-3">
@@ -198,13 +185,24 @@ export default function Informations() {
                   Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
                   superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
                 </p>
-                <Select
-                  label="Sélectionnez un réseau"
-                  readOnly={!isEditing}
-                  options={networkOptions}
-                  selected={networkOptions.find((e) => e.value === data.networkId) || { label: data.networkName, value: data.networkId } || {}}
-                  setSelected={(e) => setData({ ...data, networkId: e.value, networkName: e.label })}
-                  error={errors?.network}
+                <AsyncSelect
+                  label="Réseau national"
+                  value={{ label: data.networkName }}
+                  loadOptions={getNetworkOptions}
+                  isDisabled={!isEditing}
+                  noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
+                  styles={{
+                    dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                    placeholder: (styles) => ({ ...styles, color: "black" }),
+                    control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                    singleValue: (styles) => ({ ...styles, color: "black" }),
+                    multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                    indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                  }}
+                  defaultOptions
+                  handleChange={(e) => setData({ ...data, networkName: e.label, networkId: e._id })}
+                  placeholder="Rechercher une structure"
+                  error={errors.structureName}
                 />
               </div>
             )}
@@ -212,7 +210,7 @@ export default function Informations() {
             <div className="flex justify-between my-3">
               <p className="text-gray-500">Tête de réseau</p>
               <div className="flex gap-2 items-center">
-                <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
+                <Toggle value={data.isNetwork === "true"} handleChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
                 {data.isNetwork ? "Oui" : "Non"}
               </div>
             </div>
@@ -220,7 +218,7 @@ export default function Informations() {
             <div className="flex justify-between my-3">
               <p className="text-gray-500">Préparation militaire</p>
               <div className="flex gap-2 items-center">
-                <Toggle value={data.isMilitaryPreparation === "true"} onChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
+                <Toggle value={data.isMilitaryPreparation === "true"} handleChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
                 {data.isMilitaryPreparation ? "Oui" : "Non"}
               </div>
             </div>
@@ -228,28 +226,10 @@ export default function Informations() {
             <div className="space-y-2 my-3">
               <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Field
-                  readOnly={!isEditing}
-                  label="Site Internet"
-                  onChange={(e) => setData({ ...data, website: e.target.value })}
-                  value={data.website || ""}
-                  error={errors?.website}
-                />
-                <Field
-                  readOnly={!isEditing}
-                  label="Facebook"
-                  onChange={(e) => setData({ ...data, facebook: e.target.value })}
-                  value={data.facebook || ""}
-                  error={errors?.facebook}
-                />
-                <Field readOnly={!isEditing} label="Twitter" onChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} error={errors?.twitter} />
-                <Field
-                  readOnly={!isEditing}
-                  label="Instagram"
-                  onChange={(e) => setData({ ...data, instagram: e.target.value })}
-                  value={data.instagram || ""}
-                  error={errors?.instagram}
-                />
+                <Field readOnly={!isEditing} label="Site Internet" handleChange={(e) => setData({ ...data, website: e.target.value })} value={data.website || ""} />
+                <Field readOnly={!isEditing} label="Facebook" handleChange={(e) => setData({ ...data, facebook: e.target.value })} value={data.facebook || ""} />
+                <Field readOnly={!isEditing} label="Twitter" handleChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} />
+                <Field readOnly={!isEditing} label="Instagram" handleChange={(e) => setData({ ...data, instagram: e.target.value })} value={data.instagram || ""} />
               </div>
             </div>
           </div>

@@ -1,8 +1,7 @@
 import React, { useContext, useState } from "react";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { ROLES, canViewPatchesHistory } from "../../../utils";
+import { ROLES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import { StructureContext } from ".";
@@ -18,7 +17,7 @@ export default function Wrapper({ children, tab }) {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
       <header className="flex items-center justify-between mx-8 my-4">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-medium leading-6 m-0">{structure.name}</h1>
+          <h1 className="text-2xl font-bold leading-6 m-0">{structure.name}</h1>
           {structure.isMilitaryPreparation === "true" && <Badge text="Préparation Militaire" />}
         </div>
         {user.role !== ROLES.RESPONSIBLE && structure.status !== "DRAFT" && (
@@ -44,10 +43,3 @@ export default function Wrapper({ children, tab }) {
     </div>
   );
 }
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-`;
