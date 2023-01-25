@@ -203,6 +203,7 @@ export default function SchemaRepartition({ region, department }) {
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
+        centerName: g.centerName,
         centerDepartment: g.toDepartment,
         centerRegion: g.toRegion,
       };
@@ -220,11 +221,40 @@ export default function SchemaRepartition({ region, department }) {
       return data;
     });
 
-    console.log("sheetData: ", sheetData);
+    // tri par centre
+    sheetData.sort((a, b) => {
+      const aname = a.centerName;
+      const bname = b.centerName;
+
+      if (aname) {
+        if (bname) {
+          return aname.localeCompare(bname);
+        } else {
+          return -1;
+        }
+      } else {
+        if (bname) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    });
+
+    // console.log("sheetData: ", sheetData);
     let sheet = XLSX.utils.json_to_sheet(sheetData);
 
     // --- fix header names
-    let headers = ["Cohorte", "Région des volontaires", "Département des volontaires", "Nombre de volontaires", "ID centre", "Département du centre", "Région du centre"];
+    let headers = [
+      "Cohorte",
+      "Région des volontaires",
+      "Département des volontaires",
+      "Nombre de volontaires",
+      "ID centre",
+      "Nom du centre",
+      "Département du centre",
+      "Région du centre",
+    ];
     for (let i = 1; i <= maxGatheringPlaces; ++i) {
       headers.push(
         ...[
