@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, NavLink, useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
@@ -52,14 +52,19 @@ export default function List() {
 
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
   const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
-  const [currentTab, setCurrentTab] = useState("all");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
   const checkboxRef = React.useRef();
 
   const history = useHistory();
+  const { currentTab } = useParams();
   const handleShowFilter = () => setFilterVisible(!filterVisible);
+
+  React.useEffect(() => {
+    const listTab = ["all", "pending", "follow"];
+    if (!listTab.includes(currentTab)) history.push(`/volontaire/list/all`);
+  }, [currentTab]);
 
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
@@ -384,8 +389,9 @@ export default function List() {
           }}
         />
         <div className="flex">
-          <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
+          <TabItem count={countAll} to={`/volontaire/list/all`} title="Toutes les candidatures" active={currentTab === "all"} />
           <TabItem
+            to={`/volontaire/list/pending`}
             count={countPending}
             icon={
               missions.some((mission) => mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5) ? (
@@ -395,10 +401,9 @@ export default function List() {
               ) : null
             }
             title="À traiter"
-            onClick={() => setCurrentTab("pending")}
             active={currentTab === "pending"}
           />
-          <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
+          <TabItem to={`/volontaire/list/follow`} count={countFollow} title="À suivre" active={currentTab === "follow"} />
         </div>
         <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <div className={`relative items-start mb-4`}>
@@ -664,9 +669,10 @@ const PaperClip = () => {
   );
 };
 
-const TabItem = ({ active, title, count, onClick, icon }) => (
-  <div
+const TabItem = ({ active, title, count, onClick, icon, to }) => (
+  <NavLink
     onClick={onClick}
+    to={to}
     className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-blue-600 ${
       active ? "!text-blue-600 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
     }`}>
@@ -678,7 +684,7 @@ const TabItem = ({ active, title, count, onClick, icon }) => (
 
       <div className={`px-2 border-[0.5px] font-medium text-xs rounded-3xl ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
     </div>
-  </div>
+  </NavLink>
 );
 
 function FilterButton({ onClick }) {

@@ -8,8 +8,8 @@ import View from "./view";
 export default function Index() {
   return (
     <Switch>
+      <SentryRoute path="/volontaire/list/:currentTab" component={List} />
       <SentryRoute path="/volontaire/:id" component={View} />
-      <SentryRoute path="/volontaire" component={List} />
     </Switch>
   );
 }
