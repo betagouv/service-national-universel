@@ -4,6 +4,7 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
+const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -28,11 +29,12 @@ const {
   CELLAR_KEYSECRET_SUPPORT,
   PUBLIC_BUCKET_NAME_SUPPORT,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { SUB_ROLES } = require("snu-lib/roles");
 const { getAge } = require("snu-lib/date");
+const { capture } = require("../sentry");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -257,6 +259,18 @@ const updateCenterDependencies = async (center, fromUser) => {
     });
     await sessions[i].save({ fromUser });
   }
+  const plansDeTransport = await PlanTransportModel.find({ centerId: center._id });
+  plansDeTransport.forEach(async (planDeTransport) => {
+    planDeTransport.set({
+      centerDepartment: center.department,
+      centerRegion: center.region,
+      centerZip: center?.zip,
+      centerAddress: center?.address,
+      centerCode: center.code2022,
+      centerName: center.name,
+    });
+    await planDeTransport.save({ fromUser });
+  });
 };
 
 const deleteCenterDependencies = async (center, fromUser) => {
@@ -312,6 +326,38 @@ const updatePlacesBus = async (bus) => {
   }
   return bus;
 };
+
+async function updateSeatsTakenInBusLine(busline) {
+  try {
+    const seatsTaken = await YoungModel.count({
+      $and: [
+        {
+          status: "VALIDATED",
+          ligneId: busline._id.toString(),
+        },
+        {
+          $or: [{ statusPhase1: { $in: ["AFFECTED", "DONE"] } }, { statusPhase1Tmp: { $in: ["AFFECTED", "DONE"] } }],
+        },
+      ],
+    });
+    if (busline.youngSeatsTaken !== seatsTaken) {
+      busline.set({ youngSeatsTaken: seatsTaken });
+      await busline.save();
+      await busline.index();
+
+      // Do the same update with planTransport
+      const planTransport = await PlanTransportModel.findById(busline._id);
+      if (!planTransport) throw new Error("PlanTransport not found");
+      planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
+      await planTransport.save();
+      await planTransport.index();
+    }
+  } catch (e) {
+    console.log(e);
+    capture(e);
+  }
+  return busline;
+}
 
 const sendAutoCancelMeetingPoint = async (young) => {
   const cc = [];
@@ -568,7 +614,7 @@ const getCcOfYoung = ({ template, young }) => {
   return cc;
 };
 
-async function notifDepartmentChange(department, template, young) {
+async function notifDepartmentChange(department, template, young, extraParams = {}) {
   const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
   for (let referent of referents) {
     await sendTemplate(template, {
@@ -577,6 +623,7 @@ async function notifDepartmentChange(department, template, young) {
         youngFirstName: young.firstName,
         youngLastName: young.lastName,
         cta: `${ADMIN_URL}/volontaire/${young._id}`,
+        ...extraParams,
       },
     });
   }
@@ -598,6 +645,9 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
+
+  if (!dateDeValidation[sessionPhase1.cohort] || !dateDeValidationTerminale[sessionPhase1.cohort]) return;
+
   const now = new Date();
   if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
@@ -675,13 +725,28 @@ const updateYoungApplicationFilesType = async (application, user) => {
   const young = await YoungModel.findById(application.youngId);
   const applications = await ApplicationModel.find({ youngId: application.youngId });
 
-  const listFiles = applications.reduce((prev, acc) => {
-    if (acc.contractAvenantFiles.length !== 0 && !prev.includes("contractAvenantFiles")) prev.push("contractAvenantFiles");
-    if (acc.justificatifsFiles.length !== 0 && !prev.includes("justificatifsFiles")) prev.push("justificatifsFiles");
-    if (acc.feedBackExperienceFiles.length !== 0 && !prev.includes("feedBackExperienceFiles")) prev.push("feedBackExperienceFiles");
-    if (acc.othersFiles.length !== 0 && !prev.includes("othersFiles")) prev.push("othersFiles");
-    return prev;
-  }, []);
+  const listFiles = [];
+  applications.map(async (application) => {
+    const currentListFiles = [];
+    if (application.contractAvenantFiles.length > 0) {
+      currentListFiles.push("contractAvenantFiles");
+      listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
+    }
+    if (application.justificatifsFiles.length > 0) {
+      currentListFiles.push("justificatifsFiles");
+      listFiles.indexOf("justificatifsFiles") === -1 && listFiles.push("justificatifsFiles");
+    }
+    if (application.feedBackExperienceFiles.length > 0) {
+      currentListFiles.push("feedBackExperienceFiles");
+      listFiles.indexOf("feedBackExperienceFiles") === -1 && listFiles.push("feedBackExperienceFiles");
+    }
+    if (application.othersFiles.length > 0) {
+      currentListFiles.push("othersFiles");
+      listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
+    }
+    application.set({ filesType: currentListFiles });
+    await application.save({ fromUser: user });
+  });
   young.set({ phase2ApplicationFilesType: listFiles });
   await young.save({ fromUser: user });
 };
@@ -710,7 +775,8 @@ const ERRORS = {
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
   EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
-  EMAIL_OR_TOKEN_INVALID: "EMAIL_OR_TOKEN_INVALID",
+  EMAIL_OR_API_KEY_INVALID: "EMAIL_OR_API_KEY_INVALID",
+  TOKEN_INVALID: "TOKEN_INVALID",
   PASSWORD_INVALID: "PASSWORD_INVALID",
   EMAIL_INVALID: "EMAIL_INVALID",
   EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
@@ -782,6 +848,7 @@ module.exports = {
   updateCenterDependencies,
   deleteCenterDependencies,
   updatePlacesBus,
+  updateSeatsTakenInBusLine,
   sendAutoCancelMeetingPoint,
   listFiles,
   deleteFile,

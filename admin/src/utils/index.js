@@ -248,7 +248,7 @@ function formatField(field) {
 function formatValue(path, value) {
   if (!value) return "Vide";
   if (typeof value === "object") {
-    if (Object.values(value).every((v) => !v.length)) return "Vide";
+    if (Object.values(value).every((v) => !v?.length)) return "Vide";
     if (path.includes("Files")) return value.name;
     if (path.includes("correctionRequests")) return `${translateModelFields("young", value.field)} : ${value.message}`;
     if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;

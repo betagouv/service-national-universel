@@ -2,12 +2,13 @@ require("../../mongo");
 
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
-const mongoose = require("mongoose");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
 const ApplicationModel = require("../../models/application");
+const ApplicationPatchModel = require("./models/applicationPatch");
+
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
@@ -90,8 +91,7 @@ exports.handler = async () => {
   try {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
-    const application_patches = mongoose.model("application_patches", new mongoose.Schema({}, { collection: "application_patches" }));
-    await findAll(application_patches, mongooseFilterForDayBefore(), processPatch);
+    await findAll(ApplicationPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
       title: "✅ Application Logs",
       text: `${result.applicationPatchScanned} application patches were scanned:\n ${printResult(result.event)}`,

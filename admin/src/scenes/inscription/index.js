@@ -64,6 +64,7 @@ const FILTERS = [
   "SAME_DEPARTMENT",
   "PMR",
   "ALLERGIES",
+  "NOTES",
 ];
 
 export default function Inscription() {
@@ -322,7 +323,8 @@ export default function Inscription() {
                   }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
                 />
                 <MultiDropdownList
@@ -374,6 +376,21 @@ export default function Inscription() {
                 <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Note interne"
+                  componentId="NOTES"
+                  dataField="hasNotes.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "NOTES") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Note interne", "Note interne")}
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
@@ -407,7 +424,7 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
-                  renderLabel={(items) => getFilterLabel(items, "École")}
+                  renderLabel={(items) => getFilterLabel(items, "Établissement")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
@@ -618,8 +635,16 @@ export default function Inscription() {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
-                sortBy="desc"
-                dataField="lastStatusAt"
+                sortOptions={[
+                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
+                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
+                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
+                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                  { label: "Date de mise à jour (récent > ancien)", dataField: "updatedAt", sortBy: "desc" },
+                  { label: "Date de mise à jour (ancien > récent)", dataField: "updatedAt", sortBy: "asc" },
+                ]}
                 render={({ data, resultStats }) => {
                   return (
                     <Table>

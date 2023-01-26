@@ -5,6 +5,7 @@ import api from "../../../services/api";
 import { SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import ButtonPlain from "./ButtonPlain";
 import { capture } from "../../../sentry";
+import Select from "../../../components/TailwindSelect";
 
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
@@ -70,9 +71,7 @@ export default function DocumentPhase1(props) {
     }
   };
 
-  const needModal = (e) => {
-    const value = e.target.value;
-    const name = e.target.name;
+  const needModal = (value, name) => {
     setLoading(true);
     setState(name, value);
     handleChange({ value, name });
@@ -100,14 +99,16 @@ export default function DocumentPhase1(props) {
       <article className="flex items-start justify-between gap-6">
         <div className="flex flex-col justify-center items-center basis-1/4">
           <section className="bg-gray-50 rounded-lg m-2 flex flex-col items-center justify-start p-4 h-[300px] w-full">
-            <div className="flex row justify-center mx-2 mb-3 w-full">
-              <select disabled={loading} className="form-control text-sm w-full mx-6" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
-                {medicalFileOptions.map((o) => (
-                  <option key={o.label} data-color="green" value={o.value} label={o.label}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+            <div className=" mx-2 mb-3 w-full">
+              <Select
+                name="cohesionStayMedical"
+                type="select"
+                setSelected={({ value }) => {
+                  needModal(value, "cohesionStayMedical");
+                }}
+                selected={statusCohesionStayMedical}
+                options={medicalFileOptions}
+              />
             </div>
             <FileIcon icon="sanitaire" filled={young.cohesionStayMedicalFileDownload === "true"} />
             <p className="text-base font-bold mt-2">Fiche sanitaire</p>

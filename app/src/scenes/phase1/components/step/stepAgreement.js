@@ -22,7 +22,9 @@ export default function StepAgreement({ young }) {
   useEffect(() => {
     if (young) {
       setValid(young.youngPhase1Agreement === "true");
-      setEnabled(young.rulesYoung === "true");
+      setEnabled(
+        (young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true",
+      );
     }
   }, [young]);
 
@@ -59,11 +61,11 @@ export default function StepAgreement({ young }) {
         {enabled && !valid ? (
           stateDesktop ? (
             <div className="flex items-center justify-center bg-gray-100 h-9 w-9 rounded-full hover:scale-110">
-              <HiOutlineChevronDown className="h-5 w-5" />
+              <HiOutlineChevronUp className="h-5 w-5" />
             </div>
           ) : (
             <div className="flex items-center justify-center bg-gray-100 h-9 w-9 rounded-full hover:scale-110">
-              <HiOutlineChevronUp className="h-5 w-5" />
+              <HiOutlineChevronDown className="h-5 w-5" />
             </div>
           )
         ) : null}
@@ -138,7 +140,7 @@ const content = ({ handleSubmit, young }) => {
         </button>
       </div>
       <div className="flex flex-col border-[1px] border-gray-100 shadow-sm rounded-2xl py-5 px-5 lg:w-1/3 md:max-w-screen-1/2">
-        <h1 className="text-xl leading-7 font-bold pb-4">J'ai changé d'avis</h1>
+        <h1 className="text-xl leading-7 font-bold pb-4">J&apos;ai changé d&apos;avis</h1>
         <p className="pb-3 text-sm text-gray-600">Mes dates ne me correspondent pas ({translateCohort(young.cohort)})</p>
         <Link to="/changer-de-sejour" className="pb-4 text-sm text-blue-700 whitespace-nowrap hover:underline hover:underline-offset-2 text-now">
           Changer de séjour &gt;

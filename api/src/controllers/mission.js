@@ -42,7 +42,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         }
       }
     }
-
+    if (checkedMission?.hebergement === "false") {
+      delete checkedMission.hebergementPayant;
+    }
     const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
     if (data.status === MISSION_STATUS.WAITING_VALIDATION) {
@@ -104,6 +106,18 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       // Sur changement de description ou actions, on doit revalider la mission
       if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
         checkedMission.status = "WAITING_VALIDATION";
+      }
+    }
+    if (checkedMission?.hebergement === "false") {
+      delete checkedMission.hebergementPayant;
+    }
+
+    if (mission.placesTotal !== checkedMission.placesTotal) {
+      if (mission.placesTotal < checkedMission.placesTotal) {
+        mission.placesLeft = mission.placesLeft + (checkedMission.placesTotal - mission.placesTotal);
+      } else if (checkedMission.placesTotal < mission.placesTotal) {
+        mission.placesLeft = mission.placesLeft - (mission.placesTotal - checkedMission.placesTotal);
+        if (mission.placesLeft < 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
     }
 

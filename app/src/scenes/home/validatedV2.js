@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import Clock from "../../assets/icons/Clock";
 import PrepareSejour from "../../assets/icons/PrepareSejour";
 
@@ -25,7 +26,11 @@ export default function ValidatedV2() {
                 <div className="h-8 w-8">
                   <Clock />
                 </div>
-                <div className="left-7 text-[#738297] ml-2">Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion.</div>
+                <div className="left-7 text-[#738297] ml-2">
+                  {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST
+                    ? "Vous êtes sur liste complémentaire pour le séjour de cohésion"
+                    : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
+                </div>
               </div>
               <div className="flex flex-col items-stretch w-fit">
                 <button
@@ -57,7 +62,11 @@ export default function ValidatedV2() {
               <div className="h-8 w-8">
                 <Clock />
               </div>
-              <div className="left-7 text-[#738297] text-sm ml-2">Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion.</div>
+              <div className="left-7 text-[#738297] text-sm ml-2">
+                {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST
+                  ? "Vous êtes sur liste complémentaire pour le séjour de cohésion"
+                  : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
+              </div>
             </div>
             <button
               className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-3 text-white hover:!text-blue-600 text-sm leading-5 transition ease-in-out duration-150"

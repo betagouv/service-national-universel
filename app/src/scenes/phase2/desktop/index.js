@@ -125,24 +125,6 @@ export default function IndexDesktop() {
       {/* BEGIN LINKS */}
       <div className="mx-10 mt-4">
         <div className="flex space-x-5 mb-4">
-          {referentManagerPhase2 ? (
-            <div className="w-1/3 border border-gray-200 rounded-lg py-2 px-3 flex flex-col justify-around">
-              <div className="flex items-center justify-between  ml-3">
-                <div className="font-bold">Contacter mon référent</div>
-                <MdOutlineContentCopy
-                  className="text-gray-400 hover:text-blue-600 cursor-pointer"
-                  onClick={() => {
-                    copyToClipboard(referentManagerPhase2.email);
-                    toastr.info("L'email de votre référent a été copié dans le presse-papier");
-                    // setCopied(true);
-                  }}
-                />
-              </div>
-              <div className="text-sm text-gray-600  ml-3">
-                {referentManagerPhase2.firstName} {referentManagerPhase2.lastName} - {referentManagerPhase2.email}
-              </div>
-            </div>
-          ) : null}
           <div className="flex w-1/3 border-[1px] border-gray-200 hover:border-gray-300 rounded-lg cursor-pointer">
             <a
               href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`}

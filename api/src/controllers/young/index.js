@@ -21,8 +21,7 @@ const SessionPhase1 = require("../../models/sessionPhase1");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
-const MeetingPointModel = require("../../models/meetingPoint");
-const BusModel = require("../../models/bus");
+const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
@@ -31,7 +30,6 @@ const {
   inSevenDays,
   isYoung,
   isReferent,
-  updatePlacesBus,
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
   getCcOfYoung,
@@ -39,6 +37,7 @@ const {
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
   deleteFile,
+  updateSeatsTakenInBusLine,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
@@ -49,7 +48,7 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
-const { getAvailableSessions } = require("../../utils/cohort");
+const { getFilteredSessions } = require("../../utils/cohort");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -410,47 +409,6 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
-router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const young = await YoungObject.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    if (isReferent(req.user) && !canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
-    const bus = await BusModel.findById(meetingPoint?.busId);
-
-    young.set({
-      deplacementPhase1Autonomous: "true",
-      meetingPointId: null,
-    });
-    await young.save({ fromUser: req.user });
-
-    // if there is a bus, we need to remove the young from it
-    if (bus) await updatePlacesBus(bus);
-
-    return res.status(200).send({ ok: true, data: young });
-  } catch (error) {
-    capture(error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
@@ -465,8 +423,8 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value?.department && young?.department && value?.department !== young?.department) {
-      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young);
-      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
     }
 
     if (value?.status === YOUNG_STATUS.WITHDRAWN) {
@@ -509,13 +467,10 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
-    // if they had a meeting point, we check if we need to update the places taken / left in the bus
-    if (young.meetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
-      if (meetingPoint) {
-        const bus = await BusModel.findById(meetingPoint.busId);
-        if (bus) await updatePlacesBus(bus);
-      }
+    // if they had a bus, we check if we need to update the places taken / left in the bus
+    if (young.ligneId) {
+      const bus = await LigneDeBusModel.findById(young.ligneId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
     }
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -550,11 +505,25 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
-    const oldMeetingPointId = young.meetingPointId;
+    const oldBusId = young.ligneId;
     const oldCohort = young.cohort;
-    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
-      young.set({ sessionPhase1Id: undefined });
-      young.set({ meetingPointId: undefined });
+    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId || young.ligneId)) {
+      young.set({
+        cohesionCenterId: undefined,
+        sessionPhase1Id: undefined,
+        meetingPointId: undefined,
+        ligneId: undefined,
+        deplacementPhase1Autonomous: undefined,
+        transportInfoGivenByLocal: undefined,
+        cohesionStayPresence: undefined,
+        presenceJDM: undefined,
+        departInform: undefined,
+        departSejourAt: undefined,
+        departSejourMotif: undefined,
+        departSejourMotifComment: undefined,
+        youngPhase1Agreement: "false",
+        hasMeetingInformation: undefined,
+      });
     }
 
     // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
@@ -562,7 +531,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getAvailableSessions(young);
+    const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -584,13 +553,10 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
-    // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
-    if (oldMeetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
-      if (meetingPoint) {
-        const bus = await BusModel.findById(meetingPoint.busId);
-        if (bus) await updatePlacesBus(bus);
-      }
+    // if they had a bus, we check if we need to update the places taken / left in the bus
+    if (oldBusId) {
+      const bus = await LigneDeBusModel.findById(oldBusId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
     const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
@@ -606,56 +572,29 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         },
       });
     }
+    const emailsTo = [];
+    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    if (emailsTo.length !== 0) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
+        emailTo: emailsTo,
+        params: {
+          cohort,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+          cta: `${config.APP_URL}/change-cohort`,
+        },
+      });
+    }
+
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
         motif: cohortChangeReason,
         cohortPeriod: translateCohort(cohort),
       },
-      cc,
     });
-
-    res.status(200).send({ ok: true, data: young });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:id/session-phase1/cancel", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    }
-
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
-    const oldSessionPhase1Id = young.sessionPhase1Id;
-    const oldMeetingPointId = young.meetingPointId;
-    young.set({ sessionPhase1Id: undefined });
-    young.set({ meetingPointId: undefined });
-
-    await young.save({ fromUser: req.user });
-
-    // if they had a session, we check if we need to update the places taken / left
-    if (oldSessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
-    if (oldMeetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
-      if (meetingPoint) {
-        const bus = await BusModel.findById(meetingPoint.busId);
-        if (bus) await updatePlacesBus(bus);
-      }
-    }
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -1135,5 +1074,6 @@ router.use("/:id/phase2", require("./phase2"));
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
 router.use("/note", require("./note"));
+router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
 
 module.exports = router;

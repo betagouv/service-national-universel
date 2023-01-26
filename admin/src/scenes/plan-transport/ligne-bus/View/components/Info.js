@@ -10,13 +10,14 @@ import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import Loader from "../../../../../components/Loader";
+import { useHistory } from "react-router-dom";
 
 const options = [
   { label: "Oui", value: true },
   { label: "Non", value: false },
 ];
 
-export default function Info({ bus, setBus, dataForCheck }) {
+export default function Info({ bus, setBus, dataForCheck, nbYoung }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -33,14 +34,16 @@ export default function Info({ bus, setBus, dataForCheck }) {
     lunchBreakReturn: bus.lunchBreakReturn || false,
   });
 
+  const history = useHistory();
+
   React.useEffect(() => {
     setData({
       busId: bus.busId || "",
       departuredDate: bus.departuredDate || "",
       returnDate: bus.returnDate || "",
-      youngCapacity: bus.youngCapacity || "",
-      totalCapacity: bus.totalCapacity || "",
-      followerCapacity: bus.followerCapacity || "",
+      youngCapacity: bus.youngCapacity || 0,
+      totalCapacity: bus.totalCapacity || 0,
+      followerCapacity: bus.followerCapacity || 0,
       travelTime: bus.travelTime || "",
       lunchBreak: bus.lunchBreak || false,
       lunchBreakReturn: bus.lunchBreakReturn || false,
@@ -168,7 +171,11 @@ export default function Info({ bus, setBus, dataForCheck }) {
               />
             </div>
           </div>
-          <button className="flex justify-center bg-gray-100 rounded-lg py-2.5 text-sm text-gray-800">Voir les volontaires (à venir)</button>
+          <button
+            className="flex justify-center bg-gray-100 rounded-lg py-2.5 text-sm text-gray-800"
+            onClick={() => history.push(`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`)}>
+            Voir les volontaires ({nbYoung})
+          </button>
         </div>
         <div className="flex w-[10%] justify-center items-center">
           <div className="w-[1px] h-full my-2 border-r-[1px] border-gray-300"></div>

@@ -779,6 +779,15 @@ export default function Edit(props) {
               <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3>
             ) : null}
             <Header style={{ justifyContent: "flex-end" }}>
+              {!defaultValue && (
+                <a
+                  href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3508?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mr-auto">
+                  <img className="w-32" src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
+                </a>
+              )}
               {!defaultValue ? (
                 <LoadingButton
                   color={"#fff"}

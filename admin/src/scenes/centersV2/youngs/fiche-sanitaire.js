@@ -8,14 +8,14 @@ import FilterSvg from "../../../assets/icons/Filter";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
-import ModalPointageFicheSanitaire from "../../centers/components/modals/ModalPointageFicheSanitaire";
+import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
 import { getFilterLabel, translate, translatePhase1, getAge, YOUNG_STATUS } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
-import ModalMultiPointageFicheSanitaire from "../../centers/components/modals/ModalMultiPointageFicheSanitaire";
+import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
 const FILTERS = [
   "SEARCH",
   "STATUS",

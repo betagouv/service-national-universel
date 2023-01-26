@@ -120,7 +120,7 @@ function supervisor({ onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -132,57 +132,33 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      {environment !== "production" && (
-        <>
-          <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
-        </>
-      )}
-      {ssoSupportStorage === "sso-support" ? (
-        <DrawerConnectToZammood title="Boîte de réception" history={history}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerConnectToZammood>
-      ) : (
-        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerTabWithIcons>
-      )}
+      <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
+
+      <DrawerConnectToZammood title="Boîte de réception" history={history}>
+        {!tickets ? (
+          <div />
+        ) : (
+          <>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
+              <div>{newTickets}</div>
+            </div>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
+              <div>{openedTickets}</div>
+            </div>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
+              <div>{closedTickets}</div>
+            </div>
+          </>
+        )}
+      </DrawerConnectToZammood>
+
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -217,6 +193,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       ) : (
         <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       )}
+      {/* <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} /> */}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
 
@@ -269,6 +246,19 @@ function visitor({ onClick, from }) {
   );
 }
 
+function dsnj({ onClick }) {
+  return <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />;
+}
+
+function transporter({ onClick }) {
+  return (
+    <>
+      <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
+      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
+    </>
+  );
+}
+
 const Drawer = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -279,7 +269,6 @@ const Drawer = (props) => {
   const [open, setOpen] = useState();
   const [from, setFrom] = useState();
   const history = useHistory();
-  const ssoSupportStorage = localStorage?.getItem("sso-support");
 
   const [info, setInfo] = useState({
     isOpen: false,
@@ -334,15 +323,17 @@ const Drawer = (props) => {
       {!isOpen ? (
         <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
-            <ul className="divide-y divide-slate-700">
-              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+            <ul className="divide-y divide-slate-700 min-w-[220px]">
+              {![ROLES.DSNJ, ROLES.TRANSPORTER].includes(user.role) && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
+              {user.role === ROLES.DSNJ && dsnj({ user, onClick: handleClick, from })}
+              {user.role === ROLES.TRANSPORTER && transporter({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>
@@ -350,7 +341,7 @@ const Drawer = (props) => {
         <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
           <div>
             <ul className="divide-y divide-slate-700">
-              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+              {![ROLES.DSNJ, ROLES.TRANSPORTER].includes(user.role) && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
@@ -358,6 +349,7 @@ const Drawer = (props) => {
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
+              {user.role === ROLES.TRANSPORTER && transporter({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>

@@ -18,6 +18,7 @@ import {
   GRADES,
   getAge,
   ROLES,
+  SENDINBLUE_TEMPLATES,
 } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
@@ -46,8 +47,8 @@ import { appURL } from "../../config";
 import { capture } from "../../sentry";
 
 const REJECTION_REASONS = {
-  NOT_FRENCH: "Le volontaire n&apos;est pas de nationalité française",
-  TOO_YOUNG: "Le volontaire n&apos;a pas l&apos;âge requis",
+  NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
+  TOO_YOUNG: "Le volontaire n'a pas l'âge requis",
   OTHER: "Autre (préciser)",
 };
 
@@ -65,6 +66,7 @@ const parentStatusOptions = [
 const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
+  const user = useSelector((state) => state.Auth.user);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
@@ -73,7 +75,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [action, setAction] = useState();
 
   useEffect(() => {
-    console.log("VolontairePhase0View: ", young);
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
       setOldCohort(dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
@@ -98,7 +99,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   }
 
   async function onCorrectionRequestChange(fieldName, message, reason) {
-    console.log("cor change", fieldName, message, reason);
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
@@ -208,6 +208,20 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
 
       await api.put(`/referent/young/${young._id}`, body);
       if (action === "WAITING_LIST") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
+
+      //Notify young
+      switch (state) {
+        case "REFUSED":
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
+          break;
+        case "WAITING_LIST":
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
+          break;
+        case "VALIDATED":
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+          break;
+      }
+
       toastr.success("Votre action a été enregistrée.");
       onChange && onChange();
     } catch (err) {
@@ -238,6 +252,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           currentRequest={currentCorrectionRequestField}
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
+          readonly={user.role === ROLES.HEAD_CENTER}
         />
         <SectionParents
           young={young}
@@ -248,8 +263,9 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           oldCohort={oldCohort}
+          readonly={user.role === ROLES.HEAD_CENTER}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} />}
+        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} />}
       </div>
       {globalMode === "correction" && (
         <>
@@ -363,10 +379,10 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
 
   async function validate() {
     try {
-      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?getAllSessions=true`);
       if (!res.ok) throw new Error(res);
       const session = res.data.find(({ name }) => name === young.cohort);
-      if (session.isFull) {
+      if (session?.isFull) {
         return setConfirmModal({
           icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
           title: "Objectif d'inscription régional atteint",
@@ -531,7 +547,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange }) {
+function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
@@ -562,7 +578,6 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   }
 
   function onLocalChange(field, value) {
-    console.log("on the local change: ", field, value);
     setData({ ...data, [field]: value });
   }
 
@@ -614,7 +629,6 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     result = validateEmpty(data, "city", errors) && result;
     result = validateEmpty(data, "country", errors) && result;
 
-    console.log("Errors: ", errors);
     setErrors(errors);
     return result;
   }
@@ -639,7 +653,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       <Section
         step={globalMode === "correction" ? "Première étape" : null}
         title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
-        editable={young.status !== YOUNG_STATUS.DELETED}
+        editable={young.status !== YOUNG_STATUS.DELETED && !readonly}
         mode={sectionMode}
         onChangeMode={onSectionChangeMode}
         saving={saving}
@@ -1051,7 +1065,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
   );
 }
 
-function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort }) {
+function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort, readonly }) {
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
@@ -1081,7 +1095,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   }
 
   function onLocalChange(field, value) {
-    console.log("on the local change: ", field, value);
     const newData = { ...data, [field]: value };
     if (field === "situation") {
       newData.employed = youngEmployedSituationOptions.includes(value) ? "true" : "false";
@@ -1104,7 +1117,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     if (validate()) {
       try {
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
-        console.log("RESULT = ", result);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
@@ -1125,11 +1137,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     let errors = {};
 
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
-      if (!validator.isEmail(data[`parent${parent}Email`])) {
+      if ((data[`parent${parent}ContactPreference`] === "email" || data[`parent${parent}Email`] !== "") && !validator.isEmail(data[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if (!validator.isMobilePhone(data[`parent${parent}Phone`], ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+      if (
+        (data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") &&
+        !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])
+      ) {
         errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide.";
         result = false;
       }
@@ -1144,7 +1159,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       }
     }
 
-    console.log("Errors: ", errors);
     setErrors(errors);
     return result;
   }
@@ -1158,9 +1172,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     );
   }
 
-  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) }];
+  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) || Object.keys(errors)?.some((error) => error.includes("parent1")) }];
   if (young.parent2Status) {
-    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) });
+    tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) || Object.keys(errors)?.some((error) => error.includes("parent2")) });
   }
 
   function onParrentTabChange(tab) {
@@ -1168,7 +1182,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     onStartRequest("");
   }
 
-  const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
+  const situationOptions = Object.keys(YOUNG_SITUATIONS)
+    .map((s) => ({ value: s, label: translate(s) }))
+    .filter((s) => s.value !== YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL);
   const gradeOptions = Object.keys(GRADES)
     .filter((g) => g !== GRADES.NOT_SCOLARISE)
     .map((g) => ({ value: g, label: translateGrade(g) }));
@@ -1178,7 +1194,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       <Section
         step={globalMode === "correction" ? "Seconde étape :" : null}
         title={globalMode === "correction" ? "Vérifiez la situation et l'accord parental" : "Détails"}
-        editable={young.status !== YOUNG_STATUS.DELETED}
+        editable={young.status !== YOUNG_STATUS.DELETED && !readonly}
         mode={sectionMode}
         onChangeMode={onSectionChangeMode}
         saving={saving}
@@ -1483,7 +1499,7 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young, onChange }) {
+function SectionConsentements({ young, onChange, readonly = false }) {
   const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
 
@@ -1531,6 +1547,72 @@ function SectionConsentements({ young, onChange }) {
     }
   }
 
+  function confirmImageRightsChange(parentId, event) {
+    event.preventDefault();
+
+    const parent = {
+      firstName: young[`parent${parentId}FirstName`],
+      lastName: young[`parent${parentId}LastName`],
+    };
+
+    setConfirmModal({
+      title: "Modification de l’accord de droit à l’image",
+      message: (
+        <div>
+          Vous vous apprêtez à envoyer à {parent.firstName} {parent.lastName} une demande de modification de son accord de droit à l&apos;image.
+          <br />
+          Un email lui sera envoyé. Cela annulera l&apos;ancien accord.
+        </div>
+      ),
+      confirm: () => changeImagesRights(parentId),
+    });
+  }
+
+  async function changeImagesRights(parentId) {
+    try {
+      const result = await api.put(`/young-edition/${young._id}/parent-image-rights-reset`, { parentId });
+      if (!result.ok) {
+        toastr.error("Erreur !", "Nous n'avons pu modifier le droit à l'image pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+      } else {
+        toastr.success("Le droit à l'image a été remis à zéro. Un email a été envoyé au représentant légal.");
+        onChange && onChange(result.data);
+      }
+    } catch (err) {
+      capture(err);
+      toastr.error("Erreur !", "Nous n'avons pu modifier le droit à l'image pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
+  function openParentsAllowSNUModal() {
+    setConfirmModal({
+      icon: <Warning />,
+      title: "Annulation du refus de consentement",
+      message: (
+        <div>
+          Vous vous apprêtez à annuler le refus de consentement des représentants légaux de {young.firstName} {young.lastName}.
+          <br />
+          Ils recevront un email de relance pour leur demander de confirmer leur consentement.
+        </div>
+      ),
+      confirm: resetParentsAllowSNU,
+    });
+  }
+
+  async function resetParentsAllowSNU() {
+    try {
+      let result = await api.put(`/young-edition/${young._id}/parent-allow-snu-reset`);
+      if (!result.ok) {
+        toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour les représentants légaux. Veuillez réessayer dans quelques instants.");
+      } else {
+        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal 1.");
+        onChange && onChange(result.data);
+      }
+    } catch (err) {
+      capture(err);
+      toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour ce représentant légal. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -1566,7 +1648,14 @@ function SectionConsentements({ young, onChange }) {
             <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
-        <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+        <div className="flex items-center gap-8">
+          <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
+          {young.parentAllowSNU === "false" && (
+            <button onClick={openParentsAllowSNUModal} className="mt-2 mb-6 text-blue-600 underline">
+              Annuler le refus de consentement
+            </button>
+          )}
+        </div>
         <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
           <b>
             {young.firstName} {young.lastName}
@@ -1605,10 +1694,52 @@ function SectionConsentements({ young, onChange }) {
         <div className="mt-[16px] flex itemx-center justify-between">
           <div className="grow text-[#374151] text-[14px] leading-[20px]">
             <div className="font-bold">Droit à l&apos;image</div>
-            <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
+            <div className="flex items-center">
+              <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
+              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && !readonly && (
+                <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
+                  Modifier
+                </a>
+              )}
+            </div>
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
+        {
+          /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
+          (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") &&
+            young.parent1AllowImageRights !== "true" &&
+            young.parent1AllowImageRights !== "false" &&
+            !readonly && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                  }}>
+                  Copier le lien du formulaire
+                </div>
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
+                    }
+                  }}>
+                  Relancer
+                </BorderButton>
+              </div>
+            )
+        }
+
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
           <div className="mt-[16px] flex itemx-center justify-between">
             <div className="grow text-[#374151] text-[14px] leading-[20px]">
@@ -1618,32 +1749,34 @@ function SectionConsentements({ young, onChange }) {
             <MiniSwitch value={young.parent1AllowSNU === "true"} />
           </div>
         ) : (
-          <div className="mt-2 flex items-center justify-between">
-            <div
-              className="cursor-pointer italic text-[#1D4ED8]"
-              onClick={() => {
-                copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
-                toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-              }}>
-              Copier le lien du formulaire
-            </div>
-            <BorderButton
-              mode="blue"
-              onClick={async () => {
-                try {
-                  const response = await api.get(`/young-edition/${young._id}/remider/1`);
-                  if (response.ok) {
-                    toastr.success(translate("REMINDER_SENT"), "");
-                  } else {
-                    toastr.error(translate(response.code), "");
+          !readonly && (
+            <div className="mt-2 flex items-center justify-between">
+              <div
+                className="cursor-pointer italic text-[#1D4ED8]"
+                onClick={() => {
+                  copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
+                  toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                }}>
+                Copier le lien du formulaire
+              </div>
+              <BorderButton
+                mode="blue"
+                onClick={async () => {
+                  try {
+                    const response = await api.get(`/young-edition/${young._id}/remider/1`);
+                    if (response.ok) {
+                      toastr.success(translate("REMINDER_SENT"), "");
+                    } else {
+                      toastr.error(translate(response.code), "");
+                    }
+                  } catch (error) {
+                    toastr.error(translate(error.code), "");
                   }
-                } catch (error) {
-                  toastr.error(translate(error.code), "");
-                }
-              }}>
-              Relancer
-            </BorderButton>
-          </div>
+                }}>
+                Relancer
+              </BorderButton>
+            </div>
+          )
         )}
         {young.parent2Status && (
           <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
@@ -1659,42 +1792,92 @@ function SectionConsentements({ young, onChange }) {
               )}
             </div>
             {young.parent1AllowImageRights === "true" && (
-              <div className="mt-[16px] flex items-center justify-between">
-                <div className="grow text-[#374151] text-[14px] leading-[20px]">
-                  <div className="font-bold">Droit à l&apos;image</div>
-                  <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+              <>
+                <div className="mt-[16px] flex items-center justify-between">
+                  <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                    <div className="font-bold">Droit à l&apos;image</div>
+                    <div className="flex items-center">
+                      <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
+                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && !readonly && (
+                        <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
+                          Modifier
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
                 </div>
-                {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
-              </div>
+                {
+                  /* lien et relance du droit à l'image du parent 2 si parent2AllowImageRights n'a pas de valeur  et que le droit à l'image a été réinitialisé
+                   * on envoit alors vers le formulaire de modification du droit à l'image */
+                  young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false" && young.parent2AllowImageRightsReset === "true" && !readonly && (
+                    <div className="mt-2 flex items-center justify-between">
+                      <div
+                        className="cursor-pointer italic text-[#1D4ED8]"
+                        onClick={() => {
+                          copyToClipboard(`${appURL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}&parent=2`);
+                          toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                        }}>
+                        Copier le lien du formulaire
+                      </div>
+                      <BorderButton
+                        mode="blue"
+                        onClick={async () => {
+                          try {
+                            const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 2 });
+                            if (response.ok) {
+                              toastr.success(translate("REMINDER_SENT"), "");
+                            } else {
+                              toastr.error(translate(response.code), "");
+                            }
+                          } catch (error) {
+                            toastr.error(translate(error.code), "");
+                          }
+                        }}>
+                        Relancer
+                      </BorderButton>
+                    </div>
+                  )
+                }
+              </>
             )}
-            {young.parent1AllowSNU === "true" && young.parent1AllowImageRights === "true" && young.parent2AllowSNU !== "false" && !young.parent2AllowImageRights && (
-              <div className="mt-2 flex items-center justify-between">
-                <div
-                  className="cursor-pointer italic text-[#1D4ED8]"
-                  onClick={() => {
-                    copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
-                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                  }}>
-                  Copier le lien du formulaire
-                </div>
-                <BorderButton
-                  mode="blue"
-                  onClick={async () => {
-                    try {
-                      const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                      if (response.ok) {
-                        toastr.success(translate("REMINDER_SENT"), "");
-                      } else {
-                        toastr.error(translate(response.code), "");
-                      }
-                    } catch (error) {
-                      toastr.error(translate(error.code), "");
-                    }
-                  }}>
-                  Relancer
-                </BorderButton>
-              </div>
-            )}
+            {
+              /* lien et relance du consentement (droit à l'image) du parent 2 si parent2AllowImageRights n'a jamais eu de valeur (première demande)
+               * on envoit alors vers le formulaire complet de consentement du parent 2 */
+              young.parent1AllowSNU === "true" &&
+                young.parent1AllowImageRights === "true" &&
+                young.parent2AllowSNU !== "false" &&
+                !young.parent2AllowImageRights &&
+                young.parent2AllowImageRightsReset !== "true" &&
+                !readonly && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div
+                      className="cursor-pointer italic text-[#1D4ED8]"
+                      onClick={() => {
+                        copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                        toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                      }}>
+                      Copier le lien du formulaire
+                    </div>
+                    <BorderButton
+                      mode="blue"
+                      onClick={async () => {
+                        try {
+                          const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                          if (response.ok) {
+                            toastr.success(translate("REMINDER_SENT"), "");
+                          } else {
+                            toastr.error(translate(response.code), "");
+                          }
+                        } catch (error) {
+                          toastr.error(translate(error.code), "");
+                        }
+                      }}>
+                      Relancer
+                    </BorderButton>
+                  </div>
+                )
+            }
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
               young.status,
             ) ? (
@@ -1709,9 +1892,11 @@ function SectionConsentements({ young, onChange }) {
                     Refusé
                   </div>
                 ) : (
-                  <BorderButton mode="red" onClick={parent2RejectSNU}>
-                    Déclarer un refus
-                  </BorderButton>
+                  !readonly && (
+                    <BorderButton mode="red" onClick={parent2RejectSNU}>
+                      Déclarer un refus
+                    </BorderButton>
+                  )
                 )}
               </div>
             ) : null}

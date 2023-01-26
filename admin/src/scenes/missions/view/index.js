@@ -12,6 +12,7 @@ import { toastr } from "react-redux-toastr";
 import { translate, ROLES } from "../../../utils";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import { environment } from "../../../config";
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Missions");
@@ -84,7 +85,7 @@ export default function Index({ ...props }) {
         <SentryRoute path="/mission/:id/youngs" component={() => <Youngs mission={mission} updateMission={fetchMission} applications={applications} />} />
         <SentryRoute path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
         <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} updateMission={fetchMission} />} />
-        <SentryRoute path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
+        <SentryRoute path="/mission/:id" component={() => <Details getMission={fetchMission} mission={mission} setMission={setMission} structure={structure} tutor={tutor} />} />
       </Switch>
     </>
   );

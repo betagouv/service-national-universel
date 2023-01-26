@@ -11,8 +11,9 @@ import Quote from "../components/Icons/Quote";
 import Thumbs from "../components/Icons/Thumbs";
 import ReactTooltip from "react-tooltip";
 import Send from "../components/Icons/Send";
+import Tags from "../components/Tags";
 
-export default function View({ open, setOpen, modification, getModification }) {
+export default function View({ open, setOpen, modification, getModification, tagsOptions, getTags }) {
   const user = useSelector((state) => state.Auth.user);
   const [message, setMessage] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -32,7 +33,7 @@ export default function View({ open, setOpen, modification, getModification }) {
       });
 
       //add opinion to conversation
-      if (modification.opinion === true || modification.opinion === false) {
+      if (modification.opinion === "true" || modification.opinion === "false") {
         conversation.push({
           opinion: modification.opinion,
           userId: modification.opinionUserId,
@@ -106,6 +107,62 @@ export default function View({ open, setOpen, modification, getModification }) {
     }
   };
 
+  const onCreateTags = async (inputValue) => {
+    try {
+      setIsLoading(true);
+      // Save data
+      const { ok, code, data: tags } = await api.post(`/tags`, { name: inputValue, type: "modification_bus" });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la création du tag", translate(code));
+        return setIsLoading(false);
+      }
+      tagsOptions.push({ value: tags._id, label: tags.name });
+      getTags();
+      await onChangeTags(tags._id);
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la création du tag");
+      setIsLoading(false);
+    }
+  };
+
+  const onChangeTags = async (tagId) => {
+    try {
+      setIsLoading(true);
+      // Save data
+      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tag/${tagId}`);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag", translate(code));
+        return setIsLoading(false);
+      }
+      await getModification();
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag");
+      setIsLoading(false);
+    }
+  };
+
+  const onDeleteTags = async (tagId) => {
+    try {
+      setIsLoading(true);
+      // Save data
+      const { ok, code } = await api.put(`/demande-de-modification/${modification._id}/tag/${tagId}/delete`);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag", translate(code));
+        return setIsLoading(false);
+      }
+      await getModification();
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la sauvegarde du tag");
+      setIsLoading(false);
+    }
+  };
+
   if (!modification) return null;
 
   return (
@@ -129,7 +186,7 @@ export default function View({ open, setOpen, modification, getModification }) {
                 </div>
                 {modification?.opinion && (
                   <div className="flex items-center justify-center text-white text-xs rounded-full p-1.5 bg-[#3D5B85]">
-                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === false && "rotate-180"}`} />
+                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === "false" && "rotate-180"}`} />
                   </div>
                 )}
               </div>
@@ -142,7 +199,18 @@ export default function View({ open, setOpen, modification, getModification }) {
                 </div>
               </div>
             </div>
-            <div className="text-lg leading-6 font-medium text-[#242526] mt-4">Commentaires</div>
+            <div className="mt-2">
+              <Tags
+                options={tagsOptions}
+                placeholder="Spécifiez le type de demande..."
+                onChange={onChangeTags}
+                onCreateOption={onCreateTags}
+                onDeleteOption={onDeleteTags}
+                values={modification.tagIds}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="text-lg leading-6 font-medium text-[#242526] mt-2">Commentaires</div>
             <div className="flex flex-col gap-6 pl-2 mt-2">
               {modification?.status !== "PENDING" && (
                 <div className="flex items-start gap-3 rounded-xl">
@@ -172,7 +240,7 @@ export default function View({ open, setOpen, modification, getModification }) {
                   )}
                   {message.type === "opinion" && (
                     <div className="flex items-center justify-center text-white text-xs rounded-full p-2.5 bg-[#3D5B85] cursor-pointer  border-[1px] border-white shadow-lg h-11 w-11">
-                      <Thumbs className={`text-white ${message.opinion === false && "rotate-180"}`} />
+                      <Thumbs className={`text-white ${message.opinion === "false" && "rotate-180"}`} />
                     </div>
                   )}
                   <div className="flex flex-col gap-1">
@@ -181,7 +249,7 @@ export default function View({ open, setOpen, modification, getModification }) {
                       <div className="text-sm text-gray-500">{dayjs(message.date).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
                     <div className="text-gray-800 text-sm leading-5 whitespace-pre-wrap">
-                      {message.type === "message" ? message?.message : message.opinion ? "A donné un avis favorable" : "A donné un avis défavorable"}
+                      {message.type === "message" ? message?.message : message.opinion === "true" ? "A donné un avis favorable" : "A donné un avis défavorable"}
                     </div>
                   </div>
                 </div>
@@ -211,13 +279,13 @@ export default function View({ open, setOpen, modification, getModification }) {
                   {getInitials(user.firstName + " " + user.lastName)}
                 </div>
                 <textarea rows={1} className="flex-1 appearance-none p-1" placeholder="Répondre" value={message} onChange={(e) => setMessage(e.target.value)} />
-                {modification?.opinion !== true && modification?.opinion !== false && message === "" && (
+                {modification?.opinion !== "true" && modification?.opinion !== "false" && message === "" && (
                   <>
                     <button
                       data-tip
                       data-for="tool-up"
                       disabled={isLoading}
-                      onClick={() => onSendOpinion(true)}
+                      onClick={() => onSendOpinion("true")}
                       className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
                       <Thumbs className="text-white h-4 w-4" />
                     </button>
@@ -229,7 +297,7 @@ export default function View({ open, setOpen, modification, getModification }) {
                       data-tip
                       data-for="tool-down"
                       disabled={isLoading}
-                      onClick={() => onSendOpinion(false)}
+                      onClick={() => onSendOpinion("false")}
                       className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
                       <Thumbs className="text-white h-4 w-4 rotate-180" />
                     </button>

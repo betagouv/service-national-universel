@@ -16,7 +16,9 @@ import GroupModificationEnhanced from "./group/GroupModificationEnhanced";
 
 export default function GroupEditor({ group, className = "", onChange }) {
   const { user } = useSelector((state) => state.Auth);
-  const [step, setStep] = useState(group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
+  const [step, setStep] = useState(
+    group._id ? ([ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION,
+  );
   const [previousStep, setPreviousStep] = useState(null);
   const [reloadNextStep, setReloadNextStep] = useState(null);
   const [tempGroup, setTempGroup] = useState(group);
@@ -29,7 +31,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
         if (reloadNextStep === GROUPSTEPS.CANCEL) {
           onChange(null);
         } else {
-          if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+          if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
             setPreviousStep(step);
             setStep(reloadNextStep);
           }
@@ -37,14 +39,20 @@ export default function GroupEditor({ group, className = "", onChange }) {
         }
       } else {
         setPreviousStep(null);
-        setStep(group && group._id ? (user.role === ROLES.REFERENT_DEPARTMENT ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
+        setStep(
+          group && group._id
+            ? [ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)
+              ? GROUPSTEPS.AFFECTATION_SUMMARY
+              : GROUPSTEPS.MODIFICATION
+            : GROUPSTEPS.CREATION,
+        );
       }
     }
     setTempGroup(group);
   }, [group]);
 
   function onChangeStep(newStep) {
-    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
       setPreviousStep(step);
       setStep(newStep);
     }
@@ -120,7 +128,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
 
   async function onUpdateTemp(group, nextStep) {
     setTempGroup(group);
-    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
       setPreviousStep(step);
       setStep(nextStep);
     }

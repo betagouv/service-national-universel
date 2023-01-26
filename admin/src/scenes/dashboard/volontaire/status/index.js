@@ -39,6 +39,7 @@ export default function StatusIndex({ filter }) {
   const [departInform, setDepartInform] = useState({});
   const [departSejourMotif, setDepartSejourMotif] = useState({});
   const [presenceJDM, setPresenceJDM] = useState({});
+  const [hasMeetingInformation, setHasMeetingInformation] = useState({});
   const [totalHit, setTotalHit] = useState();
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function StatusIndex({ filter }) {
           departInform: { terms: { field: "departInform.keyword" } },
           departSejourMotif: { terms: { field: "departSejourMotif.keyword" } },
           statusEquivalence: { terms: { field: "status_equivalence.keyword" } },
+          hasMeetingInformation: { terms: { field: "hasMeetingInformation.keyword" } },
         },
         track_total_hits: true,
         size: 0,
@@ -97,6 +99,7 @@ export default function StatusIndex({ filter }) {
         setDepartInform(responses[0].aggregations.departInform.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setDepartSejourMotif(responses[0].aggregations.departSejourMotif.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setStatusEquivalence(responses[0].aggregations.statusEquivalence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setHasMeetingInformation(responses[0].aggregations.hasMeetingInformation.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setTotalHit(responses[0].hits.total.value);
       }
     })();
@@ -237,6 +240,7 @@ export default function StatusIndex({ filter }) {
               presenceJDM={presenceJDM}
               departInform={departInform}
               departSejourMotif={departSejourMotif}
+              hasMeetingInformation={hasMeetingInformation}
             />
           </>
         )}

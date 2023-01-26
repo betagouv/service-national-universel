@@ -1,12 +1,12 @@
 require("../../mongo");
 
 const { ObjectId } = require("mongodb");
-const mongoose = require("mongoose");
 const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const MissionModel = require("../../models/mission");
+const MissionPatchModel = require("./models/missionPatch");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
@@ -104,8 +104,7 @@ exports.handler = async () => {
   try {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
 
-    const mission_patches = mongoose.model("mission_patches", new mongoose.Schema({}, { collection: "mission_patches" }));
-    await findAll(mission_patches, mongooseFilterForDayBefore(), processPatch);
+    await findAll(MissionPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
       title: "✅ Mission Logs",
       text: `${result.missionPatchScanned} missions were scanned:\n ${printResult(result.event)}`,

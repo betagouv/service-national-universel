@@ -6,12 +6,16 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
+import { YOUNG_STATUS } from "snu-lib";
+import ReactTooltip from "react-tooltip";
 
 export default function Goal({ filter }) {
   const user = useSelector((state) => state.Auth.user);
 
   const [total2020Affected, setTotal2020Affected] = useState();
   const [totalValidated, setTotalValidated] = useState();
+  const [totalWaitingList, setTotalWaitingList] = useState();
+  const [openApplications, setOpenApplications] = useState();
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const goal = useMemo(
     () => inscriptionGoals && inscriptionGoals.reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
@@ -24,6 +28,10 @@ export default function Goal({ filter }) {
     if (!goal || !totalInscription) return 0;
     return ((totalInscription / (goal || 1)) * 100).toFixed(2);
   }, [goal, totalInscription]);
+  const percent2 = useMemo(() => {
+    if (!openApplications || !goal) return 0;
+    return ((openApplications / (goal || 1)) * 100).toFixed(2);
+  }, [openApplications, goal]);
 
   async function fetch2020Affected() {
     const body = {
@@ -43,9 +51,43 @@ export default function Goal({ filter }) {
     }
   }
 
+  async function fetchOpenApplications() {
+    const openApplicationStatus = [
+      YOUNG_STATUS.IN_PROGRESS,
+      YOUNG_STATUS.WAITING_VALIDATION,
+      YOUNG_STATUS.WAITING_CORRECTION,
+      YOUNG_STATUS.VALIDATED,
+      YOUNG_STATUS.WAITING_LIST,
+      YOUNG_STATUS.REINSCRIPTION,
+    ];
+    const body = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      aggs: { number_of_applications: { filter: { terms: { "status.keyword": openApplicationStatus } } } },
+      size: 0,
+    };
+
+    if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+    if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
+    if (filter.region?.length)
+      body.query.bool.filter.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filter.region } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filter.region } }] } },
+          ],
+        },
+      });
+    if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+
+    const { responses } = await api.esQuery("young", body);
+    if (responses.length) {
+      setOpenApplications(responses[0].aggregations.number_of_applications.doc_count);
+    }
+  }
+
   async function fetchValidated() {
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } }] } },
       aggs: { status: { terms: { field: "status.keyword" } } },
       size: 0,
     };
@@ -58,6 +100,7 @@ export default function Goal({ filter }) {
     if (responses.length) {
       const m = api.getAggregations(responses[0]);
       setTotalValidated(m.VALIDATED || 0);
+      setTotalWaitingList(m.WAITING_LIST || 0);
     }
   }
 
@@ -66,6 +109,7 @@ export default function Goal({ filter }) {
       fetch2020Affected();
       fetchValidated();
       getInscriptionGoals(filter.region, filter.department, filter.academy);
+      fetchOpenApplications();
     })();
   }, [JSON.stringify(filter)]);
 
@@ -102,8 +146,8 @@ export default function Goal({ filter }) {
   return (
     <>
       <Row>
-        <Col md={4}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} className="h-full">
             <CardTitle>Objectif d&apos;inscriptions</CardTitle>
             <CardValueWrapper>
               <CardValue>{goal || "-"}</CardValue>
@@ -111,9 +155,9 @@ export default function Goal({ filter }) {
             </CardValueWrapper>
           </Card>
         </Col>
-        <Col md={4}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}}>
-            <CardTitle>Nombre d&apos;inscrits {filter.cohort === "2021" && "*"}</CardTitle>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}} className="h-full">
+            <CardTitle>Nombre de dossiers validés (liste principale) {filter.cohort === "2021" && "*"}</CardTitle>
             <CardValueWrapper>
               <CardValue>{totalInscription || "0"}</CardValue>
               <CardArrow />
@@ -121,11 +165,40 @@ export default function Goal({ filter }) {
             {filter.cohort === "2021" && <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>}
           </Card>
         </Col>
-        <Col md={4}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}} className="h-full">
+            <CardTitle>Nombre d’inscrits (liste principale et liste complémentaire) {filter.cohort === "2021" && "*"}</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{totalInscription + totalWaitingList || "0"}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+            {filter.cohort === "2021" && <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>}
+          </Card>
+        </Col>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} className="h-full">
             <CardTitle>Taux de remplissage</CardTitle>
             <CardValueWrapper>
               <CardValue style={goal && percent >= 100 ? { color: "firebrick" } : {}}>{goal ? `${percent} %` : "-"}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} className="h-full">
+            <CardTitle>
+              <div data-tip="" data-for="tooltip-goal">
+                Taux d&apos;ouverture de dossiers
+              </div>
+              <ReactTooltip id="tooltip-goal" className="bg-white shadow-xl opacity-100" arrowColor="white" place="top">
+                <div className="text-xs text-gray-700 w-[375px]">
+                  Nombre de dossiers ouverts (en cours, en attente de validation, en attente de correction, sur liste complémentaire, validés) de jeunes scolarisés dans la région
+                  (ou si non scolarisés, résidents dans la région) divisé par l’objectif d’inscription régional.
+                </div>
+              </ReactTooltip>
+            </CardTitle>
+            <CardValueWrapper>
+              <CardValue style={openApplications && percent2 >= 100 ? { color: "firebrick" } : {}}>{openApplications ? `${percent2} %` : "-"}</CardValue>
               <CardArrow />
             </CardValueWrapper>
           </Card>

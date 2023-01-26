@@ -19,12 +19,12 @@ const clean = async () => {
     if (diffDays(application.createdAt, now) >= 14) {
       countAutoCancel++;
       application.set({ status: APPLICATION_STATUS.CANCEL });
-      await application.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
+      await application.save({ fromUser: { firstName: `[CRON] Suppression candidatures en attente J+15` } });
       const young = await YoungModel.findById(application.youngId);
       if (young) {
         const applications = await ApplicationModel.find({ youngId: young._id.toString() });
         young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-        await young.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
+        await young.save({ fromUser: { firstName: `[CRON] Suppression candidatures en attente J+15` } });
       }
     }
   });

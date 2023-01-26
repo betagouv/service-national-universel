@@ -6,22 +6,32 @@
  *   PUT   /young-edition/:id/situationparents    -> Modifie les données du jeune qui se trouvent dans la deuxième section de la page du jeune (Détails).
  *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune sur une phase.
  *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
+ *   PUT   /young-edition/:id/parent-image-rights-reset
+ *                                                -> Remet à undefined le consentement de droit à l'image d'un parent en lui renvoyant une notification pour le redonner.
+ *   PUT   /young-edition/:id/parent-allow-snu-reset
+ *                                                -> Remet à undefined le consentement de participation des deux parents en leur renvoyant une notification pour le redonner.
+ *   GET   /young-edition/:id/remider/:idParent   -> Relance la notification de consentement pour le parent 1 ou 2
+ *   GET   /young-edition/:id/reminder-parent-image-rights/:idParent
+ *                                                -> Relance la notification de consentement au droit à l'image pour le parent 1 ou 2
  */
 
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
-const { ERRORS } = require("../utils");
+const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_SMS } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, canEditYoung } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
-const { sendTemplate, sendSMS } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const { format } = require("date-fns");
 const config = require("../config");
+const YoungObject = require("../models/young");
+const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
+const SessionPhase1Model = require("../models/sessionPhase1");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -79,8 +89,6 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    console.log("SAVE VALUE: ", value);
-    console.log("body: ", req.body);
 
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
@@ -102,6 +110,12 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     }
 
     if (value.birthdateAt) value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
+
+    // test de déménagement.
+    if (young.department !== value.department && value.department !== null && value.department !== undefined && young.department !== null && young.department !== undefined) {
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -208,7 +222,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- validate data
     const bodySchema = Joi.object().keys({
-      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"),
+      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN"), // "WAITING_LIST"
       statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"),
       statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"),
     });
@@ -252,6 +266,19 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     // --- update young
     young.set(value);
     await young.save({ fromUser: req.user });
+
+    // --- update statusPhase 1 deendencies
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
+    }
+
+    // if they had a bus, we check if we need to update the places taken / left in the bus
+    if (young.ligneId) {
+      const bus = await LigneDeBusModel.findById(young.ligneId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
+    }
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -352,22 +379,14 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
       if (young.parent1AllowSNU || young.parentAllowSNU) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
-      if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone,
-          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
       // parent 2
     } else {
       if (
@@ -381,23 +400,167 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
       ) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
-      if (young.parent2ContactPreference === "phone") {
-        await sendSMS(
-          young.parent2Phone,
-          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
-          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
     }
+
+    return res.status(200).send({ ok: true });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // checks data
+    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (paramError) {
+      capture(paramError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const youngId = paramValue.id;
+
+    const { error: bodyError, value: bodyValue } = Joi.object({ parentId: Joi.number().valid(1, 2).required() }).validate(req.body, { stripUnknown: true });
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const parentId = bodyValue.parentId;
+
+    // --- get young & verify rights
+    const young = await YoungObject.findById(youngId);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- reset parent image rights
+    young[`parent${parentId}AllowImageRights`] = undefined;
+    if (parentId === 2) {
+      young.set({ parent2AllowImageRightsReset: "true" });
+    }
+    await young.save();
+
+    // --- send notification
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
+      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+
+    // --- return updated young
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // checks data
+    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (paramError) {
+      capture(paramError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const youngId = paramValue.id;
+
+    // --- get young & verify rights
+    const young = await YoungObject.findById(youngId);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- reset parent allow snu
+    young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined, status: YOUNG_STATUS.IN_PROGRESS, parent1ValidationDate: undefined });
+    if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
+    await young.save();
+
+    // --- send notification
+    // parent 1
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+    // parent 2
+    if (young.parent2Id) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
+    }
+
+    // --- return updated young
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // checks data
+    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (paramError) {
+      capture(paramError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const youngId = paramValue.id;
+
+    const { error: bodyError, value: bodyValue } = Joi.object({ parentId: Joi.number().valid(1, 2).required() }).validate(req.body, { stripUnknown: true });
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const parentId = bodyValue.parentId;
+
+    // --- get young & verify rights
+    const young = await YoungObject.findById(youngId);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    // --- Check and resend notification
+    if (young[`parent${parentId}AllowImageRights`] === "true" || young[`parent${parentId}AllowImageRights`] === "false") {
+      return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+    }
+
+    // --- send notification
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
+      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
 
     return res.status(200).send({ ok: true });
   } catch (err) {

@@ -18,7 +18,7 @@ const options = [
   { label: "Bus", value: "bus" },
   { label: "Train", value: "train" },
   { label: "Avion", value: "avion" },
-  { label: "Fusée", value: "fusée" },
+  // { label: "Fusée", value: "fusée" },
 ];
 
 const keys = ["code", "name", "city", "zip", "department", "region"];
@@ -217,7 +217,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
           </p>
         </div>
         <div className="flex flex-col mt-8 gap-4">
-          {user.role === ROLES.ADMIN && editPdr && (
+          {user.role === ROLES.ADMIN && editPdr && !volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount && (
             <div className="relative">
               <div
                 ref={refContainer}
@@ -292,7 +292,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               value={data?.busArrivalHour}
               error={errors?.busArrivalHour}
               readOnly={!editPdr}
-              disabled={editPdr && user.role !== ROLES.ADMIN}
+              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
             <Field
               label="Heure de convocation"
@@ -315,7 +315,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               value={data?.departureHour}
               error={errors?.departureHour}
               readOnly={!editPdr}
-              disabled={editPdr && user.role !== ROLES.ADMIN}
+              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
             <Field
               label="Heure d’arrivée"
@@ -324,7 +324,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               value={data.returnHour}
               error={errors?.returnHour}
               readOnly={!editPdr}
-              disabled={editPdr && user.role !== ROLES.ADMIN}
+              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
           </div>
         </div>

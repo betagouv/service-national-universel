@@ -76,7 +76,6 @@ app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
 app.use("/session-phase1", require("./controllers/session-phase1"));
 app.use("/email", require("./controllers/email"));
-app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
@@ -89,6 +88,8 @@ app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-
 app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
 app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
 app.use("/young-edition", require("./controllers/young-edition"));
+app.use("/tags", require("./controllers/tags"));
+app.use("/cohort", require("./controllers/cohort"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

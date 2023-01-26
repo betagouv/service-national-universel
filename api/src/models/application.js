@@ -191,6 +191,14 @@ const Schema = new mongoose.Schema({
     default: [],
   },
 
+  filesType: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des type de fichier des candidatures",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

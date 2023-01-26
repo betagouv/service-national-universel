@@ -24,6 +24,8 @@ export default function Creation({ open, setOpen, bus, getModification }) {
       toastr.success("Votre demande de modification a bien été envoyée");
       await getModification();
       setOpen(false);
+      setMessage("");
+      setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
       capture(e);

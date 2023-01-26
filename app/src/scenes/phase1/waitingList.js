@@ -42,15 +42,11 @@ export default function WaitingList({ young }) {
             <strong className="text-xl">Vous êtes sur liste complémentaire pour le séjour de cohésion</strong>
             <br />
             <span className="text-gray-500">
-              Nous vous contacterons par email dès qu'une place se libèrera vous permettant de participer au séjour de cohésion, ne perdez pas espoir !<br />
-              Vous pouvez consulter{" "}
+              Une place peut se libérer dans les prochains jours : nous vous en avertirons. Vous pouvez également choisir de vous inscrire sans attendre sur un autre séjour sur
+              lequel il reste de la place. Vous pouvez consulter les{" "}
               <a className="text-indigo-600 underline hover:text-indigo-800" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
-                les articles de notre base de connaissance a propos de la Phase 1
+                articles de notre base de connaissance a propos de la Phase 1.
               </a>
-              .<br />
-              Merci de votre patience.
-              <br />
-              L&apos;équipe SNU
             </span>
           </article>
         </section>

@@ -10,20 +10,33 @@ import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import Loader from "../../../../components/Loader";
-import { translate } from "snu-lib";
+import { ROLES, translate } from "snu-lib";
 import Creation from "../modificationPanel/Creation";
+import { useSelector } from "react-redux";
+import { environment } from "../../../../config";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
   const [dataForCheck, setDataForCheck] = React.useState(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
+  const [nbYoung, setNbYoung] = React.useState();
+  const user = useSelector((state) => state.Auth.user);
 
   const getBus = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return <div />;
       const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
+
+      let body = {
+        query: { bool: { filter: [{ terms: { "ligneId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "cohort.keyword": [reponseBus.cohort] } }] } },
+        size: 0,
+      };
+
+      const { responses } = await api.esQuery("young", body);
+
+      setNbYoung(responses[0].hits.total.value);
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
@@ -83,11 +96,13 @@ export default function View(props) {
             <Title>{data.busId}</Title>
             <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{data.cohort}</div>
           </div>
-          <button
-            className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
-            onClick={() => setPanelOpen(true)}>
-            Demander une modification
-          </button>
+          {user.role !== ROLES.REFERENT_DEPARTMENT && environment !== "production" && (
+            <button
+              className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
+              onClick={() => setPanelOpen(true)}>
+              Demander une modification
+            </button>
+          )}
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
@@ -99,7 +114,7 @@ export default function View(props) {
             />
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
           <div className="flex gap-4 items-start">
             <div className="flex flex-col gap-4 w-1/2">
               {data.meetingsPointsDetail.map((pdr, index) => (

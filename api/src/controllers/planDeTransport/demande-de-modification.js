@@ -2,17 +2,28 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const {
-  LigneBusCanCreateDemandeDeModification,
-  LigneBusCanViewDemandeDeModification,
-  LigneBusCanSendMessageDemandeDeModification,
-  LigneBusCanEditStatusDemandeDeModification,
-  LigneBusCanEditOpinionDemandeDeModification,
+  ligneBusCanCreateDemandeDeModification,
+  ligneBusCanViewDemandeDeModification,
+  ligneBusCanSendMessageDemandeDeModification,
+  ligneBusCanEditStatusDemandeDeModification,
+  ligneBusCanEditOpinionDemandeDeModification,
+  ligneBusCanEditTagsDemandeDeModification,
 } = require("snu-lib");
+const { ObjectId } = require("mongodb");
+
+const updateModificationDependencies = async (modif, fromUser) => {
+  const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
+  const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id.toString());
+  const copyModif = JSON.parse(JSON.stringify(modif));
+  modificationBus.set({ ...copyModif });
+  await planDeTransport.save({ fromUser });
+};
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -23,21 +34,29 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { lineId, message } = value;
 
     const line = await LigneBusModel.findById(lineId);
     if (!line) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await ModificationBusModel.create({
+    const modificationBus = await ModificationBusModel.create({
       lineId: line._id.toString(),
       lineName: line.busId,
+      cohort: line.cohort,
       requestMessage: message,
       requestUserId: req.user._id.toString(),
       requestUserName: req.user.firstName + " " + req.user.lastName,
       requestUserRole: req.user.role,
     });
+
+    const planDeTransport = await PlanTransportModel.findById(line._id);
+    const copyModif = JSON.parse(JSON.stringify(modificationBus));
+    if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [copyModif];
+    else planDeTransport.modificationBuses.push(copyModif);
+
+    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -55,7 +74,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanEditStatusDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditStatusDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { status, id } = value;
 
@@ -71,6 +90,8 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     await modif.save({ fromUser: req.user });
 
+    await updateModificationDependencies(modif, req.user);
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -81,13 +102,13 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 router.put("/:id/opinion", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      opinion: Joi.boolean().required(),
+      opinion: Joi.string().required().valid("true", "false"),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanEditOpinionDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditOpinionDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { opinion, id } = value;
 
@@ -102,6 +123,8 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
     });
 
     await modif.save({ fromUser: req.user });
+
+    await updateModificationDependencies(modif, req.user);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -119,7 +142,7 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
     console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { message, id } = value;
 
@@ -129,6 +152,68 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
     const messages = modif.messages || [];
 
     modif.set({ messages: [...messages, { message, userId: req.user._id.toString(), userName: req.user.firstName + " " + req.user.lastName, date: new Date() }] });
+
+    await modif.save({ fromUser: req.user });
+
+    await updateModificationDependencies(modif, req.user);
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      tagId: Joi.string().required(),
+      id: Joi.string().required(),
+    }).validate({ ...req.body, ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { tagId, id } = value;
+
+    const modif = await ModificationBusModel.findById(id);
+    if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const tags = modif.tagIds || [];
+    //check if tag already exist
+    const tagExist = tags.find((tag) => tag === tagId);
+    if (tagExist) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    modif.set({ tagIds: [...tags, tagId] });
+
+    await modif.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      tagId: Joi.string().required(),
+      id: Joi.string().required(),
+    }).validate({ ...req.body, ...req.params });
+    console.log(error);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { tagId, id } = value;
+
+    const modif = await ModificationBusModel.findById(id);
+    if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const tags = modif.tagIds || [];
+
+    modif.set({ tagIds: tags.filter((tag) => tag !== tagId) });
 
     await modif.save({ fromUser: req.user });
 
@@ -147,7 +232,7 @@ router.get("/ligne/:id", passport.authenticate("referent", { session: false, fai
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!LigneBusCanViewDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanViewDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 

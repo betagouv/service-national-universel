@@ -63,19 +63,20 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  youngSeatsTaken: {
+    type: Number,
+    required: true,
+    default: 0,
+    documentation: {
+      description: "Nombre de jeunes",
+    },
+  },
+
   travelTime: {
     type: String,
     required: true,
     documentation: {
       description: "Temps de route",
-    },
-  },
-
-  km: {
-    type: Number,
-    required: true,
-    documentation: {
-      description: "Nombre de km",
     },
   },
 

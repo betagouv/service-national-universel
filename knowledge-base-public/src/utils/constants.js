@@ -6,4 +6,5 @@ export const translateRoleBDC = {
   head_center: "Chef de centre",
   public: "Public",
   visitor: "Visiteur régional",
+  dsnj: "DSNJ",
 };
