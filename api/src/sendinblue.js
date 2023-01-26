@@ -247,6 +247,16 @@ async function sync(obj, type, { force } = { force: false }) {
 async function syncContact(email, attributes, listIds) {
   try {
     const res = api.getContact(email);
+    if (!res.ok) {
+        // Not found
+        if (res?.status === 404) {
+            const creationRes = await createContact({ email, attributes, listIds });
+            if (!creationRes.ok) throw new Error(await creationRes.text());
+        }
+        throw new Error(await res.text());
+    }
+    const resUpdate = await updateContact(email, { attributes, listIds });
+    if (!res.ok) throw new Error(await resUpdate.text());
     if (res && res.status === 404) {
       const res = await createContact({ email, attributes, listIds });
       if (!res.ok) throw new Error(await res.text());
