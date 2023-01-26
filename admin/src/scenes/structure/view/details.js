@@ -17,6 +17,7 @@ import { canDeleteReferent, copyToClipboard, ES_NO_LIMIT, htmlCleaner, ROLES, tr
 import DeleteBtnComponent from "../components/DeleteBtnComponent";
 import Invite from "../components/invite";
 import StructureView from "./wrapper";
+import TeamCard from "../components/cards/TeamCard";
 
 export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);
@@ -93,6 +94,7 @@ export default function DetailsView({ structure }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <StructureView structure={structure} tab="details">
+        <TeamCard structureId={structure._id} />
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>

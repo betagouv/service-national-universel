@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import ModalForm from "../../../../components/modals/ModalForm";
 import validator from "validator";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { copyToClipboard, translate, formatPhoneNumberFR, regexPhoneFrenchCountries, getInitials } from "../../../../utils";
@@ -12,8 +11,10 @@ import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import API from "../../../../services/api";
 import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
 import { StructureContext } from "../../view";
+import ModalTailwind from "../../../../components/modals/ModalTailwind";
 
-export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts }) {
+export default function TeamModal({ open, setOpen, team, setTeam }) {
+  console.log("🚀 ~ file: TeamModal.js:17 ~ TeamModal ~ team", team);
   const { structure } = useContext(StructureContext);
   const [contact, setContact] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,8 +28,8 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
   };
 
   const onCancel = () => {
+    setOpen(false);
     resetState();
-    setIsOpen(false);
   };
 
   const handleDelete = (target) => {
@@ -61,8 +62,8 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(target);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
-      setContacts(contacts.filter((e) => e._id !== target._id));
-      setContact(null);
+      setTeam(team.filter((e) => e._id !== target._id));
+      setTeam(null);
       return onReferentDeleted();
     } catch (e) {
       console.log(e);
@@ -87,9 +88,9 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
           setIsLoading(false);
           return toastr.error("Une erreur s'est produite lors de la sauvegarde du responsable :", translate(code));
         }
-        const index = contacts.findIndex((e) => e._id === contact._id);
-        contacts[index] = data;
-        setContacts(contacts);
+        const index = team.findIndex((e) => e._id === contact._id);
+        team[index] = data;
+        setTeam(team);
         setContact(null);
         toastr.success("Le contact a été sauvegardé !");
       } else {
@@ -102,7 +103,7 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
           if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cette adresse email est déjà utilisée.", `${contact.email} a déjà un compte sur cette plateforme.`);
           else return toastr.error("Une erreur s'est produite lors de la création du responsable :", translate(code));
         }
-        setContacts([...contacts, data]);
+        setTeam([...team, data]);
         setContact(null);
         toastr.success("Le contact a été créé !");
       }
@@ -117,9 +118,9 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
     setContact({ ...contact, [e.target.name]: e.target.value });
   };
 
-  if (!contacts) return <div />;
+  if (!team) return <div />;
   return (
-    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} headerText="L'équipe" onCancel={onCancel}>
+    <ModalTailwind isOpen={open} onClose={() => setOpen(false)} className="bg-white rounded-lg shadow-xl h-[400px]">
       {contact ? (
         <EditContact
           contact={contact}
@@ -131,9 +132,12 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
           onChange={resetState}
         />
       ) : (
-        <div className="w-full grid grid-cols-2 gap-4 p-4">
-          {contacts.length && contacts.map((contact) => <DisplayContact key={contact._id} contact={contact} setContact={setContact} />)}
-          {contacts.length < 4 && <AddContact setContact={setContact} />}
+        <div className="p-8">
+          <p className="text-lg font-medium text-center pb-4">L&apos;équipe</p>
+          <div className="w-full grid grid-cols-2 gap-6 my-3">
+            {team.length && team.map((contact) => <DisplayContact key={contact._id} contact={contact} setContact={setContact} />)}
+            {team.length < 4 && <AddContact setContact={setContact} />}
+          </div>
         </div>
       )}
       <ModalConfirm
@@ -157,18 +161,19 @@ export default function ModalContacts({ isOpen, setIsOpen, contacts, setContacts
           setModalTutor({ isOpen: false, onConfirm: null });
         }}
       />
+
       <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
-    </ModalForm>
+    </ModalTailwind>
   );
 }
 
 const DisplayContact = ({ contact, setContact }) => {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="group flex flex-col rounded-lg bg-white border-grey-200 border-[1px] px-2 h-24">
+    <div className="group flex flex-col rounded-lg bg-white border-grey-200 border-[1px] w-96 h-28">
       <div className="flex justify-between items-center">
-        <div className="flex items-center p-2">
-          <div className="h-7 w-7 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-xs font-bold mr-2">
+        <div className="flex items-center p-3">
+          <div className="h-9 w-9 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-sm font-bold mr-3">
             {getInitials(contact.firstName + " " + contact.lastName)}
           </div>
           <div>
@@ -177,13 +182,13 @@ const DisplayContact = ({ contact, setContact }) => {
           </div>
         </div>
         <div
-          className="invisible group-hover:!visible h-7 w-7 flex items-center rounded-full bg-gray-100 justify-center mx-1 cursor-pointer hover:scale-105"
+          className="invisible group-hover:!visible h-7 w-7 flex items-center rounded-full bg-gray-100 justify-center mr-3 cursor-pointer hover:scale-105"
           onClick={() => setContact(contact)}>
           <HiPencil className="text-blue-500 tex-lg" />
         </div>
       </div>
 
-      <div className="flex flex-row border-t-[1px] border-gray-200">
+      <div className="flex flex-row border-t-[1px] border-gray-200 my-auto">
         {contact.phone && (
           <div className="flex flex-1 flex-row justify-center items-center my-2 px-2">
             <HiPhone className="text-gray-400" />
@@ -212,7 +217,7 @@ const DisplayContact = ({ contact, setContact }) => {
 const AddContact = ({ setContact }) => {
   return (
     <div
-      className="flex flex-row border-dashed border-blue-600 rounded-lg bg-white border-grey-200 border-[1px] px-2 items-center justify-center hover:cursor-pointer h-24"
+      className="flex flex-row border-dashed border-blue-600 rounded-lg bg-[#ffffff] border-grey-200 border-[1px] px-2 items-center justify-center hover:cursor-pointer h-28 hover:bg-[#eff6ff]"
       onClick={() => setContact({})}>
       <HiPlus className="text-indigo-300" />
       <div className="pl-2 text-blue-600 text-sm">Ajouter un responsable</div>
@@ -220,75 +225,47 @@ const AddContact = ({ setContact }) => {
   );
 };
 
+const Field = ({ isLoading, label, name, value, handleChange, type = "text", required = false }) => (
+  <div className={`flex flex-1 flex-col border-[1px] rounded-lg w-96 py-2 px-3 ${isLoading && "bg-gray-200"}`}>
+    <label htmlFor="name" className="w-full m-0 text-left text-xs text-gray-500">
+      {label}
+    </label>
+    <input required={required} disabled={isLoading} className="disabled:bg-gray-200" name={name} id={name} onChange={handleChange} value={value[name]} type={type} />
+  </div>
+);
+
 const EditContact = ({ contact, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
   return (
-    <form className="w-full" onSubmit={handleSubmit}>
-      <div className="flex flex-col items-center justify-center p-4">
-        <div className="w-full flex flex-col justify-center ">
-          <div className="flex flex-row">
-            <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-              <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
-                Prénom
-              </label>
-              <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={contact.firstName} />
-            </div>
-
-            <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-              <label htmlFor="lastName" className="w-full m-0 text-left text-gray-500">
-                Nom
-              </label>
-              <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={contact.lastName} />
-            </div>
+    <form className="p-8" onSubmit={handleSubmit}>
+      <p className="text-lg font-medium text-center pb-4">L&apos;équipe</p>
+      <div className="grid grid-cols-2 gap-6 my-3">
+        <Field isLoading={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={contact} required={true} />
+        <Field isLoading={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={contact} required={true} />
+        <Field isLoading={isLoading} label="Email" name="email" handleChange={handleChange} value={contact} required={!contact.phone} />
+        <Field isLoading={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={contact} required={!contact.email} type="tel" />
+      </div>
+      {contact._id && (
+        <button disabled={isLoading} className="border-b-[1px] border-b-transparent hover:border-red-500 pt-4 mx-2 ml-auto" type="button" onClick={() => handleDelete(contact)}>
+          <div className="w-full flex flex-row justify-center items-center text-red-500">
+            <HiOutlineTrash className="text-red-300 text-lg mr-2" />
+            Supprimer le contact
           </div>
-          <div className="flex flex-row">
-            <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-              <label htmlFor="contactPhone" className="w-full m-0 text-left text-gray-500">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                pattern="\d*"
-                required={!contact.email}
-                disabled={isLoading}
-                className="w-full disabled:bg-gray-200"
-                name="phone"
-                id="phone"
-                onChange={handleChange}
-                value={contact.phone}
-              />
-            </div>
-            <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-              <label htmlFor="contactMail" className="w-full m-0 text-left text-gray-500">
-                Adresse email
-              </label>
-              <input required={!contact.phone} disabled={isLoading} className="w-full disabled:bg-gray-200" name="email" id="email" onChange={handleChange} value={contact.email} />
-            </div>
-          </div>
+        </button>
+      )}
 
-          {contact._id && (
-            <button disabled={isLoading} className="border-b-[1px] border-b-transparent hover:border-red-500 pt-4 mx-2 ml-auto" type="button" onClick={() => handleDelete(contact)}>
-              <div className="w-full flex flex-row justify-center items-center text-red-500">
-                <HiOutlineTrash className="text-red-300 text-lg mr-2" />
-                Supprimer le contact
-              </div>
-            </button>
-          )}
-        </div>
-
-        <div className="w-full flex flex-row justify-center mt-4">
-          <button
-            className="bg-white flex flex-1 border-[1px] rounded-lg border-grey-300 items-center py-2 px-8 m-2 justify-center cursor-pointer hover:bg-blue-600"
-            onClick={onChange}
-            disabled={isLoading}>
-            Annuler
-          </button>
-          <button
-            className="flex flex-1 border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm items-center py-2 px-8 m-2 text-white text-sm justify-center hover:opacity-90"
-            type="submit"
-            disabled={isLoading}>
-            {contact._id ? "Enregistrer" : "Envoyer l'invitation"}
-          </button>
-        </div>
+      <div className="mt-auto grid grid-cols-2 gap-6">
+        <button
+          className="bg-white flex flex-1 border-[1px] rounded-lg border-grey-300 items-center py-2 px-8 justify-center cursor-pointer hover:bg-blue-600"
+          onClick={onChange}
+          disabled={isLoading}>
+          Annuler
+        </button>
+        <button
+          className="flex flex-1 border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm items-center py-2 px-8 text-white text-sm justify-center hover:opacity-90"
+          type="submit"
+          disabled={isLoading}>
+          {contact._id ? "Enregistrer" : "Envoyer l'invitation"}
+        </button>
       </div>
     </form>
   );
