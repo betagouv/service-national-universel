@@ -48,7 +48,11 @@ export const CardComponentPercentage = ({ to, getLink, color, title, value, tota
   return getLink && to ? <Link to={getLink(to)}>{render()}</Link> : render();
 };
 
-export const Card = ({ children, ...p }) => <CardStyle {...p}>{children}</CardStyle>;
+export const Card = ({ className, children, ...p }) => (
+  <CardStyle className={className ? className : ""} {...p}>
+    {children}
+  </CardStyle>
+);
 
 export const CardTitle = styled.h3`
   color: #171725;

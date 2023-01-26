@@ -35,7 +35,7 @@ export default function Select({ options, value, alignItems = "left", onChange }
               </>
             ) : (
               <>
-                <Bus className="text-blue-600 opacity-40" /> {value}
+                <Bus className="text-blue-600 opacity-40" /> {value === "transportInfoGivenByLocal" ? "Services locaux" : value}
               </>
             )}
           </div>
@@ -60,7 +60,7 @@ export default function Select({ options, value, alignItems = "left", onChange }
                     </>
                   ) : (
                     <>
-                      <Bus className="text-blue-600 opacity-40" /> {option.value}
+                      <Bus className="text-blue-600 opacity-40" /> {option.value === "transportInfoGivenByLocal" ? "Services locaux" : option.value}
                     </>
                   )}
                 </div>

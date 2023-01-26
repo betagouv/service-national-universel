@@ -18,6 +18,12 @@ const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminat
         description: "Champ contenant l'ID du MeetingPoint",
       },
     },
+    busArrivalHour: {
+      type: String,
+      documentation: {
+        description: "Heure d'arrivée du bus",
+      },
+    },
     meetingHour: {
       type: String,
       required: true,
@@ -170,6 +176,19 @@ const Schema = new mongoose.Schema({
     required: true,
     documentation: {
       description: "Département du centre",
+    },
+  },
+
+  centerAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse du centre",
+    },
+  },
+  centerZip: {
+    type: String,
+    documentation: {
+      description: "Code postal du centre",
     },
   },
 

@@ -13,6 +13,22 @@ const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
 
+/**
+ * Récupère toutes les ligneBus +  les points de rassemblemnts associés
+ */
+router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const ligneBus = await LigneBusModel.find({ deletedAt: { $exists: false } });
+    let arrayMeetingPoints = [];
+    ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
+    const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
+    return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -114,6 +130,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerId,
       centerRegion: center?.region,
       centerDepartment: center?.department,
+      centerZip: center?.zip,
+      centerAddress: center?.address,
       centerName: center?.name,
       centerCode: center?.code2022,
       centerArrivalTime,
@@ -309,6 +327,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     meetingPoint.set({
       meetingPointId: newMeetingPointId,
       ...pointDeRassemblement._doc,
+      busArrivalHour: ligneToPoint.busArrivalHour,
       meetingHour: ligneToPoint.meetingHour,
       returnHour: ligneToPoint.returnHour,
       transportType: ligneToPoint.transportType,

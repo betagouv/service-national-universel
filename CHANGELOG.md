@@ -1,3 +1,62 @@
+# [1.205.0](https://github.com/betagouv/service-national-universel/compare/v1.204.0...v1.205.0) (2023-01-24)
+
+
+### Bug Fixes
+
+* **admin:** phase 1 head center ([#2196](https://github.com/betagouv/service-national-universel/issues/2196)) ([1ff6115](https://github.com/betagouv/service-national-universel/commit/1ff61159d03582fcab803b8b518b3caae356a721))
+* **admin:** remove SD contact on new session ([92e3d7c](https://github.com/betagouv/service-national-universel/commit/92e3d7c20fdb634ab75febce9f6137806029481d))
+* **admin:** update region and department values ([c2c3681](https://github.com/betagouv/service-national-universel/commit/c2c368115043d85a87f9853dbfcb7f20b852fbd2))
+* **api:** remove duplicated young patch cron ([735bc81](https://github.com/betagouv/service-national-universel/commit/735bc81532f4313dc3b3f962829b5cc5afc701de))
+* **api:** signup invite referent ([33e0d5c](https://github.com/betagouv/service-national-universel/commit/33e0d5c8ec3e43fe76af8cfb2a809dca86c34cab))
+* **api/admin:** clean meetingPoint ([18a552e](https://github.com/betagouv/service-national-universel/commit/18a552e04f8ec4c07f464ea5a95e321c5562dab7))
+
+
+### Features
+
+* **admin:** panel list demande de modifications ([#2199](https://github.com/betagouv/service-national-universel/issues/2199)) ([7827acb](https://github.com/betagouv/service-national-universel/commit/7827acbf840668cac4c98349ecd169def2bcb664))
+* **admin:** update open Affectation for ref / admin ([#2204](https://github.com/betagouv/service-national-universel/issues/2204)) ([a8ee914](https://github.com/betagouv/service-national-universel/commit/a8ee914678c8316a1f5b08da2b0ffa14d87930b6))
+* **api:** reset phase 1 if young change cohort or reinscription ([#2200](https://github.com/betagouv/service-national-universel/issues/2200)) ([ae846f1](https://github.com/betagouv/service-national-universel/commit/ae846f16230f1a5ddf53923860185e276dfac2cb))
+* **api,admin:** Ajout du champs pdrChoiceLimitDate dans le modèle cohort. ([#2205](https://github.com/betagouv/service-national-universel/issues/2205)) ([808aac9](https://github.com/betagouv/service-national-universel/commit/808aac93c155e565a0b35f3672b6f331a252944d))
+* **api/admin:** disabled edit PDR if PDR in schema ([#2202](https://github.com/betagouv/service-national-universel/issues/2202)) ([9bacd3d](https://github.com/betagouv/service-national-universel/commit/9bacd3de551e62cdb56ab15f784dec3e775a4a62))
+
+# [1.204.0](https://github.com/betagouv/service-national-universel/compare/v1.203.0...v1.204.0) (2023-01-23)
+
+
+### Bug Fixes
+
+* **api:** Use deep copy ([6900c9f](https://github.com/betagouv/service-national-universel/commit/6900c9f5a45eedce7bd267cab37c155d31d730db))
+
+
+### Features
+
+* **admin:** add button to reset parental consent ([#2195](https://github.com/betagouv/service-national-universel/issues/2195)) ([2645f40](https://github.com/betagouv/service-national-universel/commit/2645f400090bd839661361fd6efd4a4bae64314f))
+* **api:** Ajouts de tests sur les PDR ([#2198](https://github.com/betagouv/service-national-universel/issues/2198)) ([469574a](https://github.com/betagouv/service-national-universel/commit/469574a0b00246337cbfa07a9c9e541ef0ddfdda))
+* **api/admin:** add  hasMeetingInformation ([cd10fb3](https://github.com/betagouv/service-national-universel/commit/cd10fb32fce4dce33a6a96d5ee4ea1908ab5388f))
+
+# [1.203.0](https://github.com/betagouv/service-national-universel/compare/v1.202.0...v1.203.0) (2023-01-20)
+
+
+### Bug Fixes
+
+* **admin:** export application issu de QPV ([13a6c9f](https://github.com/betagouv/service-national-universel/commit/13a6c9f391639c7813d881ec99dbbebd2d913514))
+* **admin:** formulaire incomplet isJva mission ([85b6705](https://github.com/betagouv/service-national-universel/commit/85b67050805571c89f245a9fe8793986100d42ea))
+* **admin:** formulaire incomplet_2 isJva mission ([2fa4d8e](https://github.com/betagouv/service-national-universel/commit/2fa4d8e545eb12d8527e1d3a602e30e1343d3c8a))
+* **admin:** Pb nb pdr inconsistant excel ([#2197](https://github.com/betagouv/service-national-universel/issues/2197)) ([bbc085b](https://github.com/betagouv/service-national-universel/commit/bbc085b7227e48e670787d624a4ec239e062709e))
+* **api:** Check if we find youngs before continue ([0b3e43e](https://github.com/betagouv/service-national-universel/commit/0b3e43e994ff016894f29246e02be30926109a42))
+* **api:** missing try catch ([83b28b0](https://github.com/betagouv/service-national-universel/commit/83b28b0230f592f39e715c3c532006b7ba055a87))
+* **app:** Phase 1 Jeunse Affecté : problème d'activation des étapes ([#2192](https://github.com/betagouv/service-national-universel/issues/2192)) ([ef62d85](https://github.com/betagouv/service-national-universel/commit/ef62d8535b7b1494baa8192d5ca24f539cfa180f))
+
+
+### Features
+
+* **admin:** delete old centers ([#2190](https://github.com/betagouv/service-national-universel/issues/2190)) ([f0d450c](https://github.com/betagouv/service-national-universel/commit/f0d450cfc885320cc7bd9bde738f2732e9bb6984))
+* **admin:** delete old meeting points ([#2191](https://github.com/betagouv/service-national-universel/issues/2191)) ([6413334](https://github.com/betagouv/service-national-universel/commit/6413334aefa48435c0e8f2be7600fafa1c0b5e85))
+* **admin:** update dashboard ([1ff96c0](https://github.com/betagouv/service-national-universel/commit/1ff96c0c2d23b977ff3d6a901735c9b968548990))
+* **admin/api:** Excel plan de transport + 2/3 fix  ([#2189](https://github.com/betagouv/service-national-universel/issues/2189)) ([c0cc5e5](https://github.com/betagouv/service-national-universel/commit/c0cc5e5548ea93ba6b29b712693becd6cc509feb))
+* **admin/app:** remove phase2 referent manager email ([#2193](https://github.com/betagouv/service-national-universel/issues/2193)) ([d1e9aee](https://github.com/betagouv/service-national-universel/commit/d1e9aee757968eb2463eeeac7219d94b6ae97b97))
+* **api/admin:** update place bus if young WITHDRAW or change cohort ([#2188](https://github.com/betagouv/service-national-universel/issues/2188)) ([f7094ce](https://github.com/betagouv/service-national-universel/commit/f7094ce188ebee373ace334849f09ddbf0fa6be6))
+* **app:** add license to young contact questions ([0f7a6fb](https://github.com/betagouv/service-national-universel/commit/0f7a6fbcc9342c588c9a2a985add5c44a9684dc3))
+
 # [1.202.0](https://github.com/betagouv/service-national-universel/compare/v1.201.0...v1.202.0) (2023-01-19)
 
 

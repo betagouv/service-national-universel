@@ -57,7 +57,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     }
     const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
 
-    young.set({ meetingPointId, ligneId, deplacementPhase1Autonomous });
+    young.set({ meetingPointId, ligneId, deplacementPhase1Autonomous, hasMeetingInformation: "true" });
     await young.save({ fromUser: req.user });
 
     if (bus) {

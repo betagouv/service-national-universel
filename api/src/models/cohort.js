@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
+const patchHistory = require("mongoose-patch-history").default;
 
 const MODELNAME = "cohort";
 
@@ -39,22 +40,59 @@ const Schema = new mongoose.Schema({
         "Si true, les affectations sont 'révélées' au jeune. Sinon, le jeune doit avoir l'impression qu'il est toujours dans un état d'attente d'affectation même si il a été affecté.",
     },
   },
-  manualAffectionOpenForReferent: {
+  manualAffectionOpenForAdmin: {
+    type: Boolean,
+    documentation: {
+      description: "Si true, les admins peuvent manuellement affecter un jeune à un centre",
+    },
+  },
+  manualAffectionOpenForReferentRegion: {
     type: Boolean,
     documentation: {
       description: "Si true, les referents régionaux peuvent manuellement affecter un jeune à un centre",
     },
   },
+  manualAffectionOpenForReferentDepartment: {
+    type: Boolean,
+    documentation: {
+      description: "Si true, les referents départementaux peuvent manuellement affecter un jeune à un centre",
+    },
+  },
 
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
+  pdrChoiceLimitDate: {
+    type: Date,
+    documentation: {
+      description: "Date limite de choix du PDR par le jeune",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+});
+
+Schema.virtual("fromUser").set(function (fromUser) {
+  if (fromUser) {
+    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
 });
 
 Schema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
+});
+
+Schema.plugin(patchHistory, {
+  mongoose,
+  name: `${MODELNAME}Patches`,
+  trackOriginalValue: true,
+  includes: {
+    modelName: { type: String, required: true, default: MODELNAME },
+    user: { type: Object, required: false, from: "_user" },
+  },
+  excludes: ["/updatedAt"],
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

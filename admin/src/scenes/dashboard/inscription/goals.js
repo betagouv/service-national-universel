@@ -14,6 +14,7 @@ export default function Goal({ filter }) {
 
   const [total2020Affected, setTotal2020Affected] = useState();
   const [totalValidated, setTotalValidated] = useState();
+  const [totalWaitingList, setTotalWaitingList] = useState();
   const [openApplications, setOpenApplications] = useState();
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const goal = useMemo(
@@ -86,7 +87,7 @@ export default function Goal({ filter }) {
 
   async function fetchValidated() {
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } }] } },
       aggs: { status: { terms: { field: "status.keyword" } } },
       size: 0,
     };
@@ -99,6 +100,7 @@ export default function Goal({ filter }) {
     if (responses.length) {
       const m = api.getAggregations(responses[0]);
       setTotalValidated(m.VALIDATED || 0);
+      setTotalWaitingList(m.WAITING_LIST || 0);
     }
   }
 
@@ -144,8 +146,8 @@ export default function Goal({ filter }) {
   return (
     <>
       <Row>
-        <Col md={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} className="h-full">
             <CardTitle>Objectif d&apos;inscriptions</CardTitle>
             <CardValueWrapper>
               <CardValue>{goal || "-"}</CardValue>
@@ -153,9 +155,9 @@ export default function Goal({ filter }) {
             </CardValueWrapper>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}}>
-            <CardTitle>Nombre d&apos;inscrits {filter.cohort === "2021" && "*"}</CardTitle>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}} className="h-full">
+            <CardTitle>Nombre de dossiers validés (liste principale) {filter.cohort === "2021" && "*"}</CardTitle>
             <CardValueWrapper>
               <CardValue>{totalInscription || "0"}</CardValue>
               <CardArrow />
@@ -163,8 +165,18 @@ export default function Goal({ filter }) {
             {filter.cohort === "2021" && <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>}
           </Card>
         </Col>
-        <Col md={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}} className="h-full">
+            <CardTitle>Nombre d’inscrits (liste principale et liste complémentaire) {filter.cohort === "2021" && "*"}</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{totalInscription + totalWaitingList || "0"}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+            {filter.cohort === "2021" && <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>}
+          </Card>
+        </Col>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} className="h-full">
             <CardTitle>Taux de remplissage</CardTitle>
             <CardValueWrapper>
               <CardValue style={goal && percent >= 100 ? { color: "firebrick" } : {}}>{goal ? `${percent} %` : "-"}</CardValue>
@@ -172,8 +184,8 @@ export default function Goal({ filter }) {
             </CardValueWrapper>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+        <Col>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} className="h-full">
             <CardTitle>
               <div data-tip="" data-for="tooltip-goal">
                 Taux d&apos;ouverture de dossiers

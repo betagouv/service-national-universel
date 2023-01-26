@@ -97,6 +97,12 @@ export const step2Question = {
     label: "Phase 2 - Mission d'intérêt général",
     tags: ["TAG_phase_2"],
   },
+  PHASE_2_LICENSE: {
+    parentId: "QUESTION",
+    id: "PHASE_2_LICENSE",
+    label: "Phase 2 - Permis",
+    tags: ["TAG_phase_2, TAG_phase_2_license"],
+  },
   PHASE_3: {
     parentId: "QUESTION",
     id: "PHASE_3",

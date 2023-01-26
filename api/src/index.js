@@ -76,7 +76,6 @@ app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
 app.use("/session-phase1", require("./controllers/session-phase1"));
 app.use("/email", require("./controllers/email"));
-app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));

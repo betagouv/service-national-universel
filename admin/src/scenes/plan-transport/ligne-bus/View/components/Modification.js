@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 import { ROLES, translate } from "snu-lib";
 import Loader from "../../../../../components/Loader";
 import { capture } from "../../../../../sentry";
@@ -16,6 +17,9 @@ export default function Modification({ demandeDeModification, getModification })
   const [panel, setPanel] = React.useState({ open: false });
   const [tagsOptions, setTagsOptions] = React.useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
+
+  const redirectDemande = new URLSearchParams(window.location.search).get("demande");
 
   const getTags = async () => {
     try {
@@ -39,6 +43,15 @@ export default function Modification({ demandeDeModification, getModification })
       const index = demandeDeModification.findIndex((item) => item._id === id);
       const newModification = demandeDeModification[index];
       setPanel({ open: true, modification: newModification });
+    }
+    if (redirectDemande) {
+      const id = redirectDemande;
+      const index = demandeDeModification.findIndex((item) => item._id === id);
+      const newModification = demandeDeModification[index];
+      setPanel({ open: true, modification: newModification });
+      history.replace({
+        search: null,
+      });
     }
   }, [demandeDeModification]);
 
