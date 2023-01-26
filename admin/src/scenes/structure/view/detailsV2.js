@@ -213,7 +213,7 @@ export default function DetailsView() {
                       indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                     }}
                     defaultOptions
-                    handleChange={(e) => setData({ ...data, networkName: e.label, networkId: e._id })}
+                    onChange={(e) => setData({ ...data, networkName: e.label, networkId: e._id })}
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
                   />
@@ -223,7 +223,7 @@ export default function DetailsView() {
               <div className="flex justify-between my-3">
                 <p className="text-gray-500">Tête de réseau</p>
                 <div className="flex gap-2 items-center">
-                  <Toggle value={data.isNetwork === "true"} handleChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
+                  <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
                   {data.isNetwork ? "Oui" : "Non"}
                 </div>
               </div>
@@ -231,7 +231,7 @@ export default function DetailsView() {
               <div className="flex justify-between my-3">
                 <p className="text-gray-500">Préparation militaire</p>
                 <div className="flex gap-2 items-center">
-                  <Toggle value={data.isMilitaryPreparation === "true"} handleChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
+                  <Toggle value={data.isMilitaryPreparation === "true"} onChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
                   {data.isMilitaryPreparation ? "Oui" : "Non"}
                 </div>
               </div>

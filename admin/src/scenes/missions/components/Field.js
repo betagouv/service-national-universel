@@ -28,7 +28,7 @@ export default function Field({ name, label, value, className = "", type = "text
         {type === "textarea" && (
           <>
             {readOnly || isJvaMission ? (
-              <div rows={row} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
+              <div className="whitespace-pre" rows={row} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
             ) : (
               <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
             )}
