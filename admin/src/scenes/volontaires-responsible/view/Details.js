@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
-import api from "../../../services/api";
-import { capture } from "../../../sentry";
+import React, { useState } from "react";
 import { translate } from "snu-lib";
+import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
+import ReactTooltip from "react-tooltip";
 
 export default function DetailsVolontaires({ young }) {
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
@@ -64,16 +62,27 @@ export default function DetailsVolontaires({ young }) {
                 className={`cursor-pointer pb-3 ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-9 font-normal`}>
                 Représentant légal 1
               </div>
-              <div
-                onClick={() => setSelectedRepresentant(2)}
-                className={`cursor-pointer pb-3 ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-9 font-normal`}>
-                Représentant légal 2
+              <div className="flex flex-row items-start justify-center" data-tip="" data-for="tooltip-delete">
+                <div
+                  onClick={() => {
+                    if (!young?.parent2Status) return;
+                    setSelectedRepresentant(2);
+                  }}
+                  className={`cursor-pointer pb-3 ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] ${
+                    !young?.parent2Status ? "mr-2" : "mr-9"
+                  } font-normal`}>
+                  Représentant légal 2
+                </div>
+                {!young?.parent2Status && <ExclamationCircle className="text-white mt-[2px]" fill="red" />}
               </div>
             </div>
             <Representant parent={selectedRepresentant === 1 ? "1" : "2"} young={young} />
           </div>
         </div>
       </div>
+      <ReactTooltip id="tooltip-delete" className="bg-white shadow-sm text-black" arrowColor="white" disable={false}>
+        <div className="text-[black]">Non renseigné</div>
+      </ReactTooltip>
     </div>
   );
 }
