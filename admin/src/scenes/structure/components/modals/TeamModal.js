@@ -13,24 +13,24 @@ import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
 import { StructureContext } from "../../view";
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
 
-export default function TeamModal({ open, setOpen, team, setTeam }) {
-  console.log("🚀 ~ file: TeamModal.js:17 ~ TeamModal ~ team", team);
+export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
-  const [contact, setContact] = useState(null);
+  const [responsible, setResponsible] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const resetState = () => {
-    setContact(null);
+    setResponsible(null);
     setIsLoading(false);
   };
 
-  const onCancel = () => {
-    setOpen(false);
-    resetState();
-  };
+  // const onCancel = () => {
+  //   setIsOpen(false);
+  //   // resetState();
+  // };
 
   const handleDelete = (target) => {
     setModal({
@@ -74,37 +74,38 @@ export default function TeamModal({ open, setOpen, team, setTeam }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!contact.firstName || !contact.lastName || !contact.email || !contact.phone) {
+      if (!responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone) {
         return toastr.error("Vous devez remplir tous les champs", "nom, prénom, télephone et e-mail");
       }
-      if (!validator.matches(contact.phone, regexPhoneFrenchCountries)) {
+      if (!validator.matches(responsible.phone, regexPhoneFrenchCountries)) {
         return toastr.error("Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX");
       }
 
       setIsLoading(true);
-      if (contact._id) {
-        const { ok, code, data } = await API.put(`/referent/${contact._id}`, contact);
+      if (responsible._id) {
+        const { ok, code, data } = await API.put(`/referent/${responsible._id}`, responsible);
         if (!ok) {
           setIsLoading(false);
           return toastr.error("Une erreur s'est produite lors de la sauvegarde du responsable :", translate(code));
         }
-        const index = team.findIndex((e) => e._id === contact._id);
+        const index = team.findIndex((e) => e._id === responsible._id);
         team[index] = data;
         setTeam(team);
-        setContact(null);
+        setResponsible(null);
         toastr.success("Le contact a été sauvegardé !");
       } else {
-        contact.role = structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
-        contact.structureId = structure._id;
-        contact.structureName = structure.name;
-        const { ok, code, data } = await API.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, contact);
+        responsible.role = structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
+        responsible.structureId = structure._id;
+        responsible.structureName = structure.name;
+        const { ok, code, data } = await API.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, responsible);
         if (!ok) {
           setIsLoading(false);
-          if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cette adresse email est déjà utilisée.", `${contact.email} a déjà un compte sur cette plateforme.`);
-          else return toastr.error("Une erreur s'est produite lors de la création du responsable :", translate(code));
+          if (e.code === "USER_ALREADY_REGISTERED") {
+            return toastr.error("Cette adresse email est déjà utilisée.", `${responsible.email} a déjà un compte sur cette plateforme.`);
+          } else return toastr.error("Une erreur s'est produite lors de la création du responsable :", translate(code));
         }
         setTeam([...team, data]);
-        setContact(null);
+        setResponsible(null);
         toastr.success("Le contact a été créé !");
       }
     } catch (e) {
@@ -114,17 +115,14 @@ export default function TeamModal({ open, setOpen, team, setTeam }) {
     }
   };
 
-  const handleChange = (e) => {
-    setContact({ ...contact, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setResponsible({ ...responsible, [e.target.name]: e.target.value });
 
-  if (!team) return <div />;
   return (
-    <ModalTailwind isOpen={open} onClose={() => setOpen(false)} className="bg-white rounded-lg shadow-xl h-[400px]">
-      {contact ? (
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl h-[450px] w-[800px]">
+      {responsible ? (
         <EditContact
-          contact={contact}
-          setContact={setContact}
+          responsible={responsible}
+          setResponsible={setResponsible}
           isLoading={isLoading}
           handleSubmit={handleSubmit}
           handleChange={handleChange}
@@ -132,11 +130,11 @@ export default function TeamModal({ open, setOpen, team, setTeam }) {
           onChange={resetState}
         />
       ) : (
-        <div className="p-8">
-          <p className="text-lg font-medium text-center pb-4">L&apos;équipe</p>
-          <div className="w-full grid grid-cols-2 gap-6 my-3">
-            {team.length && team.map((contact) => <DisplayContact key={contact._id} contact={contact} setContact={setContact} />)}
-            {team.length < 4 && <AddContact setContact={setContact} />}
+        <div className="px-8 py-7">
+          <p className="text-lg font-medium text-center mb-1">L&apos;équipe</p>
+          <div className="w-full grid grid-cols-2 gap-6 my-4">
+            {team.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
+            {team.length < 4 && <AddContact setResponsible={setResponsible} />}
           </div>
         </div>
       )}
@@ -161,47 +159,46 @@ export default function TeamModal({ open, setOpen, team, setTeam }) {
           setModalTutor({ isOpen: false, onConfirm: null });
         }}
       />
-
       <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
     </ModalTailwind>
   );
 }
 
-const DisplayContact = ({ contact, setContact }) => {
+const DisplayContact = ({ responsible, setResponsible }) => {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="group flex flex-col rounded-lg bg-white border-grey-200 border-[1px] w-96 h-28">
+    <div className="group flex flex-col rounded-lg bg-white border-grey-200 border-[1px] h-28">
       <div className="flex justify-between items-center">
         <div className="flex items-center p-3">
           <div className="h-9 w-9 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-sm font-bold mr-3">
-            {getInitials(contact.firstName + " " + contact.lastName)}
+            {getInitials(responsible.firstName + " " + responsible.lastName)}
           </div>
           <div>
-            <div className="text-sm text-bold text-gray-900">{contact.firstName + " " + contact.lastName}</div>
-            <div className="text-xs text-gray-500">{translate(contact.role)}</div>
+            <div className="text-sm text-bold text-gray-900">{responsible.firstName + " " + responsible.lastName}</div>
+            <div className="text-xs text-gray-500">{translate(responsible.role)}</div>
           </div>
         </div>
         <div
           className="invisible group-hover:!visible h-7 w-7 flex items-center rounded-full bg-gray-100 justify-center mr-3 cursor-pointer hover:scale-105"
-          onClick={() => setContact(contact)}>
+          onClick={() => setResponsible(responsible)}>
           <HiPencil className="text-blue-500 tex-lg" />
         </div>
       </div>
 
       <div className="flex flex-row border-t-[1px] border-gray-200 my-auto">
-        {contact.phone && (
+        {responsible.phone && (
           <div className="flex flex-1 flex-row justify-center items-center my-2 px-2">
             <HiPhone className="text-gray-400" />
-            <div className="pl-2 text-gray-700 whitespace-nowrap">{formatPhoneNumberFR(contact.phone)}</div>
+            <div className="pl-2 text-gray-700 whitespace-nowrap">{formatPhoneNumberFR(responsible.phone)}</div>
           </div>
         )}
-        {contact.email && (
+        {responsible.email && (
           <div className="flex flex-2 my-2 px-2 border-l-[1px] border-gray-200 truncate w-full justify-center items-center">
-            <div className="pr-2 flex-row text-gray-700 truncate ">{contact.email}</div>
+            <div className="pr-2 flex-row text-gray-700 truncate ">{responsible.email}</div>
             <div
               className="flex items-center justify-center cursor-pointer hover:scale-105"
               onClick={() => {
-                copyToClipboard(contact.email);
+                copyToClipboard(responsible.email);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 3000);
               }}>
@@ -214,11 +211,11 @@ const DisplayContact = ({ contact, setContact }) => {
   );
 };
 
-const AddContact = ({ setContact }) => {
+const AddContact = ({ setResponsible }) => {
   return (
     <div
       className="flex flex-row border-dashed border-blue-600 rounded-lg bg-[#ffffff] border-grey-200 border-[1px] px-2 items-center justify-center hover:cursor-pointer h-28 hover:bg-[#eff6ff]"
-      onClick={() => setContact({})}>
+      onClick={() => setResponsible({})}>
       <HiPlus className="text-indigo-300" />
       <div className="pl-2 text-blue-600 text-sm">Ajouter un responsable</div>
     </div>
@@ -226,7 +223,7 @@ const AddContact = ({ setContact }) => {
 };
 
 const Field = ({ isLoading, label, name, value, handleChange, type = "text", required = false }) => (
-  <div className={`flex flex-1 flex-col border-[1px] rounded-lg w-96 py-2 px-3 ${isLoading && "bg-gray-200"}`}>
+  <div className={`border-[1px] rounded-lg py-2 px-3 ${isLoading && "bg-gray-200"}`}>
     <label htmlFor="name" className="w-full m-0 text-left text-xs text-gray-500">
       {label}
     </label>
@@ -234,18 +231,23 @@ const Field = ({ isLoading, label, name, value, handleChange, type = "text", req
   </div>
 );
 
-const EditContact = ({ contact, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
+const EditContact = ({ responsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
   return (
-    <form className="p-8" onSubmit={handleSubmit}>
-      <p className="text-lg font-medium text-center pb-4">L&apos;équipe</p>
-      <div className="grid grid-cols-2 gap-6 my-3">
-        <Field isLoading={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={contact} required={true} />
-        <Field isLoading={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={contact} required={true} />
-        <Field isLoading={isLoading} label="Email" name="email" handleChange={handleChange} value={contact} required={!contact.phone} />
-        <Field isLoading={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={contact} required={!contact.email} type="tel" />
+    <form className="px-8 py-7 flex flex-col h-full" onSubmit={handleSubmit}>
+      <p className="text-lg font-medium text-center mb-2">L&apos;équipe</p>
+      {!responsible._id && (
+        <p className="text-center text-gray-500 m-2">
+          Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-6 my-4">
+        <Field isLoading={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible} required={true} />
+        <Field isLoading={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible} required={true} />
+        <Field isLoading={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible} required={!responsible.phone} />
+        <Field isLoading={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible} required={!responsible.email} type="tel" />
       </div>
-      {contact._id && (
-        <button disabled={isLoading} className="border-b-[1px] border-b-transparent hover:border-red-500 pt-4 mx-2 ml-auto" type="button" onClick={() => handleDelete(contact)}>
+      {responsible._id && (
+        <button disabled={isLoading} className="border-b-[1px] border-b-transparent hover:border-red-500 mx-2 ml-auto" type="button" onClick={() => handleDelete(responsible)}>
           <div className="w-full flex flex-row justify-center items-center text-red-500">
             <HiOutlineTrash className="text-red-300 text-lg mr-2" />
             Supprimer le contact
@@ -254,17 +256,14 @@ const EditContact = ({ contact, isLoading, handleSubmit, handleChange, handleDel
       )}
 
       <div className="mt-auto grid grid-cols-2 gap-6">
-        <button
-          className="bg-white flex flex-1 border-[1px] rounded-lg border-grey-300 items-center py-2 px-8 justify-center cursor-pointer hover:bg-blue-600"
-          onClick={onChange}
-          disabled={isLoading}>
+        <button className="border-[1px] rounded-lg border-grey-300 bg-[#ffffff] py-2 px-8 hover:bg-[#f9fafb]" onClick={onChange} disabled={isLoading}>
           Annuler
         </button>
         <button
-          className="flex flex-1 border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm items-center py-2 px-8 text-white text-sm justify-center hover:opacity-90"
+          className="border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm py-2 px-8 text-white text-sm justify-center hover:opacity-90"
           type="submit"
           disabled={isLoading}>
-          {contact._id ? "Enregistrer" : "Envoyer l'invitation"}
+          {responsible._id ? "Enregistrer" : "Envoyer l'invitation"}
         </button>
       </div>
     </form>
