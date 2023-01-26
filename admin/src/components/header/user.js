@@ -8,8 +8,10 @@ import api from "../../services/api";
 import { ROLES } from "../../utils";
 import plausibleEvent from "../../services/plausible";
 import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
+import { FiSettings } from "react-icons/fi";
 
 import Avatar from "../Avatar";
+import { isSuperAdmin } from "snu-lib";
 
 export default function HeaderUser() {
   const dispatch = useDispatch();
@@ -41,7 +43,7 @@ export default function HeaderUser() {
           </div>
           <hr className="m-0 border-t-coolGray-100" />
           <NavLink to="/profil">
-            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
               <HiUser className="group-hover:scale-110" />
               Profil
             </div>
@@ -54,15 +56,23 @@ export default function HeaderUser() {
           ) : null}
           {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
             <NavLink to={`/structure/${user.structureId}`}>
-              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
                 <HiUserAdd className="group-hover:scale-110" />
                 Inviter&nbsp;un&nbsp;utilisateur
               </div>
             </NavLink>
           ) : null}
+          {isSuperAdmin(user) && (
+            <NavLink to="/settings">
+              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
+                <FiSettings className=" group-hover:scale-110" />
+                Settings
+              </div>
+            </NavLink>
+          )}
           <hr className="m-0 border-t-coolGray-100" />
           <NavLink to="/logout" onClick={logout}>
-            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-red-700 hover:text-red-700">
+            <div className="group  cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2 text-red-700 hover:text-red-700">
               <HiLogout className="text-red-700 group-hover:scale-110" />
               Se déconnecter
             </div>
