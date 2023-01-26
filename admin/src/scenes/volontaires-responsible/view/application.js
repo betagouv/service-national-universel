@@ -31,6 +31,7 @@ import Download from "../../../assets/icons/Download";
 import Bell from "../../../assets/icons/Bell";
 
 import Details from "./Details";
+import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -150,6 +151,7 @@ export default function Phase2Application({ young, onChange }) {
   return (
     <>
       <YoungHeader young={young} tab={currentTab} onChange={onChange} isStructure={true} applicationId={application?._id} />
+      <Phase2MilitaryPreparation young={young} FileCard={FileCard} />
       <div className="p-7">
         <div className="bg-white w-full h-full rounded-lg px-4">
           <div className="flex items-center justify-between py-6">
