@@ -47,7 +47,7 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (sms.code !== "success") throw new Error(await sms.text());
+    if (sms.code !== "success") throw new Error(sms.message);
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -248,12 +248,12 @@ async function syncContact(email, attributes, listIds) {
   try {
     const res = api.getContact(email);
     if (!res.ok) {
-      // Not found
-      if (res?.status === 404) {
-        const creationRes = await createContact({ email, attributes, listIds });
-        if (!creationRes.ok) throw new Error(await creationRes.text());
-      }
-      throw new Error(await res.text());
+        // Not found
+        if (res?.status === 404) {
+            const creationRes = await createContact({ email, attributes, listIds });
+            if (!creationRes.ok) throw new Error(await creationRes.text());
+        }
+        throw new Error(await res.text());
     }
     const resUpdate = await updateContact(email, { attributes, listIds });
     if (!res.ok) throw new Error(await resUpdate.text());
