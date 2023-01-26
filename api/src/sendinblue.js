@@ -23,6 +23,7 @@ const api = async (path, options = {}) => {
     });
     const contentType = res.headers.raw()["content-type"];
     if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
+    capture("Sendinblue api did not return json" + JSON.stringify({ path, options, res }));
     return await res.text();
   } catch (e) {
     console.log("Erreur in sendinblue api", e);
@@ -47,7 +48,7 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (sms.code !== "success") throw new Error(sms.message);
+    if (sms.code !== "success") throw new Error(JSON.stringify);
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -78,7 +79,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code !== "success") throw new Error(await mail.text());
+    if (mail.code !== "success") throw new Error(JSON.stringify(mail));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -105,7 +106,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code !== "success") throw new Error(await mail.text());
+    if (mail.code !== "success") throw new Error(JSON.stringify(mail));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -137,9 +138,7 @@ async function createContact({ email, attributes, emailBlacklisted, smsBlacklist
     updateEnabled,
     smtpBlacklistSender,
   };
-  const res = await api("/contacts", { method: "POST", body: JSON.stringify(body) });
-  if (res.code !== "success") throw new Error(await res.text());
-  return res;
+  return await api("/contacts", { method: "POST", body: JSON.stringify(body) });
 }
 
 /**
@@ -185,9 +184,7 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
     smtpBlacklistSender,
   };
 
-  const res = await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
-  if (res && res.code) return false;
-  return true;
+  return await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
 }
 
 async function sync(obj, type, { force } = { force: false }) {
@@ -246,26 +243,16 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const res = getContact(email);
+    const res = await getContact(email);
     if (!res.ok) {
-      // Not found
-      if (res?.status === 404) {
-        const creationRes = await createContact({ email, attributes, listIds });
-        if (!creationRes.ok) throw new Error(await creationRes.text());
+      if (res?.code === "document_not_found") {
+        const res = await createContact({ email, attributes, listIds });
+        if (!res.ok) throw new Error(JSON.stringify(res));
       }
-      throw new Error(await res.text());
+      throw new Error(JSON.stringify(res));
     }
     const resUpdate = await updateContact(email, { attributes, listIds });
-    if (!res.ok) throw new Error(await resUpdate.text());
-    if (res && res.status === 404) {
-      const res = await createContact({ email, attributes, listIds });
-      if (!res.ok) throw new Error(await res.text());
-    }
-    if (res && res.status === 200) {
-      const res = await updateContact(email, { attributes, listIds });
-      if (!res.ok) throw new Error(await res.text());
-    }
-    if (!res.ok) throw new Error(await res.text());
+    if (!resUpdate.ok) throw new Error(JSON.stringify(resUpdate));
   } catch (e) {
     capture(e);
   }
