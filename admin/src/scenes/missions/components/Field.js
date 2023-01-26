@@ -1,8 +1,11 @@
 import React from "react";
 import DatePickerList from "../../phase0/components/DatePickerList";
-import { htmlCleaner } from "../../../utils";
+import { copyToClipboard, htmlCleaner } from "../../../utils";
+import { HiCheckCircle } from "react-icons/hi";
+import { BiCopy } from "react-icons/bi";
 
-export default function Field({ name, label, value, className = "", type = "text", handleChange, readOnly = false, errors = {}, row, isJvaMission = false }) {
+export default function Field({ name, label, value, className = "", type = "text", handleChange, readOnly = false, errors = {}, row, isJvaMission = false, copy = false }) {
+  const [copied, setCopied] = React.useState(false);
   return (
     <div className={className}>
       <div
@@ -10,7 +13,19 @@ export default function Field({ name, label, value, className = "", type = "text
           errors[name] ? "border-red-500" : "border-[#D1D5DB]"
         }`}
         key={name}>
-        {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
+        <div className="flex justify-between">
+          {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
+          {copy && value && (
+            <div
+              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              onClick={() => {
+                copyToClipboard(value);
+                setCopied(true);
+              }}>
+              {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
+            </div>
+          )}
+        </div>
         {type === "date" && (
           <DatePickerList disabled={readOnly || isJvaMission} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />
         )}

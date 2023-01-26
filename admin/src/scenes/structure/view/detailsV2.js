@@ -123,7 +123,7 @@ export default function DetailsView() {
                 value={data.address}
                 error={errors?.address}
               />
-              <div className="flex items-center gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Field
                   name="zip"
                   readOnly={!isEditing}
@@ -142,12 +142,26 @@ export default function DetailsView() {
                 />
               </div>
               {data.addressVerified && (
-                <div className="flex items-center gap-3">
-                  <Field readOnly={!isEditing} label="Département" handleChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
-                  <Field readOnly={!isEditing} label="Région" handleChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Field
+                    readOnly={!isEditing}
+                    label="Département"
+                    className="w-full"
+                    handleChange={(e) => setData({ ...data, department: e.target.value })}
+                    value={data.department}
+                    disabled={true}
+                  />
+                  <Field
+                    readOnly={!isEditing}
+                    label="Région"
+                    className="w-full"
+                    handleChange={(e) => setData({ ...data, region: e.target.value })}
+                    value={data.region}
+                    disabled={true}
+                  />
                 </div>
               )}
-              {isEditing && (
+              {isEditing && !data.addressVerified && (
                 <div className="space-y-2 ">
                   <VerifyAddress
                     address={data.address}
@@ -199,6 +213,7 @@ export default function DetailsView() {
                     superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
                   </p>
                   <AsyncSelect
+                    isClearable
                     label="Réseau national"
                     value={{ label: data.networkName }}
                     loadOptions={getNetworkOptions}
@@ -213,7 +228,7 @@ export default function DetailsView() {
                       indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                     }}
                     defaultOptions
-                    onChange={(e) => setData({ ...data, networkName: e.label, networkId: e._id })}
+                    onChange={(e) => setData({ ...data, networkName: e?.label || "", networkId: e?._id || "" })}
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
                   />
@@ -239,10 +254,10 @@ export default function DetailsView() {
               <div className="space-y-2 my-3">
                 <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <Field readOnly={!isEditing} label="Site Internet" handleChange={(e) => setData({ ...data, website: e.target.value })} value={data.website || ""} />
-                  <Field readOnly={!isEditing} label="Facebook" handleChange={(e) => setData({ ...data, facebook: e.target.value })} value={data.facebook || ""} />
-                  <Field readOnly={!isEditing} label="Twitter" handleChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} />
-                  <Field readOnly={!isEditing} label="Instagram" handleChange={(e) => setData({ ...data, instagram: e.target.value })} value={data.instagram || ""} />
+                  <Field readOnly={!isEditing} label="Site Internet" handleChange={(e) => setData({ ...data, website: e.target.value })} value={data.website || ""} copy={true} />
+                  <Field readOnly={!isEditing} label="Facebook" handleChange={(e) => setData({ ...data, facebook: e.target.value })} value={data.facebook || ""} copy={true} />
+                  <Field readOnly={!isEditing} label="Twitter" handleChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} copy={true} />
+                  <Field readOnly={!isEditing} label="Instagram" handleChange={(e) => setData({ ...data, instagram: e.target.value })} value={data.instagram || ""} copy={true} />
                 </div>
               </div>
             </div>
