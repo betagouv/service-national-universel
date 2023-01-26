@@ -129,7 +129,7 @@ const Schema = new mongoose.Schema({
   },
   subRole: {
     type: String,
-    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST],
+    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"],
   },
   sessionPhase1Id: {
     type: String,

@@ -9,8 +9,8 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES, SENDINBLUE_SMS } = require("snu-lib");
-const { sendTemplate, sendSMS } = require("./../../sendinblue");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
@@ -308,9 +308,8 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
       parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
-      parent1ContactPreference: needRequired(Joi.string().trim().valid("email", "phone"), isRequired),
-      parent1Email: Joi.string().trim().email(),
-      parent1Phone: Joi.string().trim(),
+      parent1Email: needRequired(Joi.string().trim().email(), isRequired),
+      parent1Phone: needRequired(Joi.string().trim(), isRequired),
       parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
       parent2Status: Joi.alternatives().conditional("parent2", {
         is: true,
@@ -323,19 +322,14 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
         then: needRequired(Joi.string().uppercase().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      parent2ContactPreference: Joi.alternatives().conditional("parent2", {
-        is: true,
-        then: needRequired(Joi.string().trim().valid("email", "phone"), isRequired),
-        otherwise: Joi.isError(new Error()),
-      }),
       parent2Email: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.string().trim().email(),
+        then: needRequired(Joi.string().trim().email(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
       parent2Phone: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.string().trim(),
+        then: needRequired(Joi.string().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
     };
@@ -359,11 +353,6 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     }
 
     if (type === "next") {
-      if (value?.parent1ContactPreference === "email") value.parent1Phone = "";
-      if (value?.parent1ContactPreference === "phone") value.parent1Email = "";
-      if (value?.parent2ContactPreference === "email") value.parent2Phone = "";
-      if (value?.parent2ContactPreference === "phone") value.parent2Email = "";
-
       value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
 
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -394,40 +383,24 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
       // If latest ID proof has an invalid date, notify parent 1.
       if (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]) {
-        if (young.parent1ContactPreference === "phone") {
-          await sendSMS(
-            young.parent1Phone,
-            SENDINBLUE_SMS.OUTDATED_ID_PROOF.template(young, `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`),
-            SENDINBLUE_SMS.OUTDATED_ID_PROOF.tag,
-          );
-        } else {
-          await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-            emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-            params: {
-              cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-              youngFirstName: young.firstName,
-              youngName: young.lastName,
-            },
-          });
-        }
-      }
-
-      if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone,
-          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
           emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
           params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
             youngFirstName: young.firstName,
             youngName: young.lastName,
           },
         });
       }
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
 
       value.inscriptionDoneDate = new Date();
     }
@@ -542,40 +515,24 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
 
     if (notifyExpirationDate && needCniRelance) {
-      if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone,
-          SENDINBLUE_SMS.OUTDATED_ID_PROOF.template(young, `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}`),
-          SENDINBLUE_SMS.OUTDATED_ID_PROOF.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
     }
     if (needParent1Relance) {
-      if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone,
-          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
     }
 
     young.set({ inscriptionDoneDate: new Date() });

@@ -626,7 +626,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     type="textarea"
                     row={4}
                     handleChange={(e) => setValues({ ...values, description: e.target.value })}
-                    label="Décrivez en quelques mots votre mission"
+                    label="Décrivez votre mission"
                     value={translate(values.description)}
                   />
                 </div>
@@ -647,7 +647,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     name="actions"
                     row={4}
                     handleChange={(e) => setValues({ ...values, actions: e.target.value })}
-                    label="Listez brièvement les actions confiées au(x) volontaires"
+                    label="Listez les actions confiées au(x) volontaires"
                     value={translate(values.actions)}
                   />
                 </div>

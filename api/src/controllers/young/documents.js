@@ -270,7 +270,8 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype, size } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const filetype = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);

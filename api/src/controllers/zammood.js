@@ -178,7 +178,7 @@ router.post("/ticket/form", async (req, res) => {
       files: req.body.files,
     };
     const { error, value } = Joi.object({
-      email: Joi.string().email().required(),
+      email: Joi.string().trim().email().required(),
       subject: Joi.string().required(),
       message: Joi.string().required(),
       firstName: Joi.string().required(),
