@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
-const { capture } = require("./sentry");
+const { capture, captureMessage: sentryCaptureMessage } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -10,25 +10,23 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 //https://my.sendinblue.com/lists/add-attributes
 
 const api = async (path, options = {}) => {
-  try {
-    if (!SENDINBLUEKEY) {
-      console.log("NO SENDINBLUE KEY");
-      console.log(options);
-      return console.log("Mail was not sent.");
-    }
-
-    const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
-      ...options,
-      headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
-    });
-    const contentType = res.headers.raw()["content-type"];
-    if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
-    capture("Sendinblue api did not return json" + JSON.stringify({ path, options, res }));
-    return await res.text();
-  } catch (e) {
-    console.log("Erreur in sendinblue api", e);
-    capture(e);
+  if (!SENDINBLUEKEY) {
+    console.log("NO SENDINBLUE KEY");
+    console.log(options);
+    return console.log("Mail was not sent.");
   }
+
+  const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
+    ...options,
+    headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(error);
+  }
+  const contentType = res.headers.raw()["content-type"];
+  if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
+  return await res.text();
 };
 
 // https://developers.sendinblue.com/reference/sendtransacsms
@@ -48,7 +46,6 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (sms.code !== "success") throw new Error(JSON.stringify);
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -79,7 +76,6 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code !== "success") throw new Error(JSON.stringify(mail));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -106,7 +102,6 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code !== "success") throw new Error(JSON.stringify(mail));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -138,7 +133,8 @@ async function createContact({ email, attributes, emailBlacklisted, smsBlacklist
     updateEnabled,
     smtpBlacklistSender,
   };
-  return await api("/contacts", { method: "POST", body: JSON.stringify(body) });
+  const res = await api("/contacts", { method: "POST", body: JSON.stringify(body) });
+  return res;
 }
 
 /**
@@ -184,7 +180,9 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
     smtpBlacklistSender,
   };
 
-  return await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
+  const res = await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
+  if (res && res.code) return false;
+  return true;
 }
 
 async function sync(obj, type, { force } = { force: false }) {
@@ -243,17 +241,11 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const res = await getContact(email);
-    if (!res.ok) {
-      if (res?.code === "document_not_found") {
-        const res = await createContact({ email, attributes, listIds });
-        if (!res.ok) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
-        return;
-      }
-      throw new Error(JSON.stringify(res));
+    try {
+      await updateContact(email, { attributes, listIds });
+    } catch (e) {
+      await createContact({ email, attributes, listIds });
     }
-    const resUpdate = await updateContact(email, { attributes, listIds });
-    if (!resUpdate.ok) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
   } catch (e) {
     capture(e);
   }
