@@ -23,7 +23,7 @@ const api = async (path, options = {}) => {
     });
     const contentType = res.headers.raw()["content-type"];
     if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
-    capture("Sendinblue api did not return json" + JSON.stringify({ res, path, options }));
+    // ! UpdateContact return empty json if it works
     return await res.text();
   } catch (e) {
     console.log("Erreur in sendinblue api", e);
