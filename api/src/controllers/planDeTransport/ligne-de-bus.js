@@ -543,7 +543,7 @@ async function getInfoBus(line) {
   return { ...line._doc, meetingsPointsDetail, centerDetail };
 }
 
-const PATCHES_COUNT_PER_PAGE = 50;
+const PATCHES_COUNT_PER_PAGE = 150;
 
 router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -580,28 +580,32 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       const modificationBuses = await ModificationBusModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
       const modificationBusIds = modificationBuses.map((line) => line._id);
 
-      // const pipeline = [
-      //   { $match: { ref: { $in: lineIds } } },
-      //   { $unionWith: { coll: "lignetopoint_patches", pipeline: [{ $match: { ref: { $in: lineToPointIds } } }] } },
-      //   { $unionWith: { coll: "modificationbus_patches", pipeline: [{ $match: { ref: { $in: modificationBusIds } } }] } },
-      //
-      //   // get total
-      //   { $group: { _id: null, total: { $sum: 1 }, results: { $push: "$$ROOT" } } },
-      //
-      //   // sort, limit, offset
-      //   { $sort: { date: 1 } },
-      //   { $project: { total: 1, results: { $slice: ["$results", offset, limit] } } },
-      // ];
-      console.log("line ids: ", lineIds.map((l) => "ObjectId(\"" + l + "\")").join(","));
-      console.log("point ids: ", lineToPointIds.map((l) => "ObjectId(\"" + l + "\")").join(","));
-      console.log("modif: ", modificationBusIds.map((l) => "ObjectId(\"" + l + "\")").join(","));
-
       const pipeline = [
         // tout ceci est là pour remplacer un $unionWith qui n'existe pas dans la version de mongo < 4.4
         { $limit: 1 },
         { $project: { _id: 1 } },
         { $project: { _id: 0 } },
-        { $lookup: { from: "lignebus_patches", pipeline: [{ $match: { ref: { $in: lineIds } } }], as: "ligneBuses" } },
+        {
+          $lookup: {
+            from: "lignebus_patches",
+            pipeline: [
+              { $match: { ref: { $in: lineIds } } },
+              { $addFields: { lineId: { $toObjectId: "$ref" } } },
+              {
+                $lookup: {
+                  from: "lignebuses",
+                  localField: "lineId",
+                  foreignField: "_id",
+                  as: "bus",
+                },
+              },
+              { $unwind: "$bus" },
+              { $addFields: { refName: "$bus.busId" } },
+              { $project: { bus: 0 } },
+            ],
+            as: "ligneBuses",
+          },
+        },
         { $lookup: { from: "lignetopoint_patches", pipeline: [{ $match: { ref: { $in: lineToPointIds } } }], as: "ligneToPoints" } },
         { $lookup: { from: "modificationbus_patches", pipeline: [{ $match: { ref: { $in: modificationBusIds } } }], as: "modificationBuses" } },
         { $project: { union: { $concatArrays: ["$ligneBuses", "$ligneToPoints", "$modificationBuses"] } } },
@@ -629,13 +633,14 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       ];
 
       const patches = await LigneBusModel.aggregate(pipeline);
-      console.log("PATCHES: ", patches);
+      // console.log("PATCHES: ", patches);
 
       // --- results
       return res.status(200).send({
         ok: true,
-        data: patches.results,
-        pagination: { count: patches.total, pageCount: Math.ceil(patches.total / PATCHES_COUNT_PER_PAGE), page: Math.floor(offset / PATCHES_COUNT_PER_PAGE) },
+        truc: "paf",
+        data: patches[0].results,
+        pagination: { count: patches[0].total, pageCount: Math.ceil(patches[0].total / PATCHES_COUNT_PER_PAGE), page: Math.floor(offset / PATCHES_COUNT_PER_PAGE) },
       });
     } else {
       return res.status(200).send({ ok: true, data: [], pagination: { count: 0, pageCount: 0, page: 0 } });

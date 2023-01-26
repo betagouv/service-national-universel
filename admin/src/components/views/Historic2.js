@@ -119,7 +119,7 @@ function Event({ e, index, model, refName, path }) {
     <tr key={index} className="border-t border-t-slate-100 hover:bg-slate-50 cursor-default">
       {refName && (
         <td className="px-4 py-3 cursor-pointer overflow-hidden">
-          <a href={`/${path}/${e.ref}`}>{e.ref}</a>
+          <a href={`/${path}/${e.ref}`}>{e.refName}</a>
         </td>
       )}
       <td className="px-4 py-3 overflow-hidden">
