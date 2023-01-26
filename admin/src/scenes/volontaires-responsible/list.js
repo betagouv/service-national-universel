@@ -23,6 +23,7 @@ import {
   formatLongDateUTC,
   formatDateFRTimezoneUTC,
   APPLICATION_STATUS,
+  translateApplicationFileType,
 } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
@@ -36,13 +37,12 @@ import { DepartmentFilter, RegionFilter } from "../../components/filters";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExclamationCircle from "../../assets/icons/ExclamationCircle";
 
-const FILTERS = ["SEARCH", "MISSION_NAME", "STATUS", "TUTOR", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "MISSION_NAME", "STATUS", "TUTOR", "DEPARTMENT", "REGION", "FILES_TYPE"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
-  const [young, setYoung] = useState();
   const [panel, setPanel] = useState(null);
 
   const [countPending, setCountPending] = useState(0);
@@ -459,6 +459,7 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Mission")}
                 />
+
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -486,6 +487,22 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="FILES_TYPE"
+                  dataField="filesType.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "FILES_TYPE") }}
+                  renderItem={(e, count) => {
+                    return `${translateApplicationFileType(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Pièces jointes", "Pièces jointes")}
+                  showMissing={true}
+                  missingLabel="Aucune pièce jointe"
                 />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" placeholder="Département du volontaire" />
                 <RegionFilter
