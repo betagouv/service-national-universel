@@ -253,7 +253,7 @@ async function syncContact(email, attributes, listIds) {
       throw new Error(JSON.stringify(res));
     }
     const resUpdate = await updateContact(email, { attributes, listIds });
-    if (!resUpdate.code) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
+    if (resUpdate.code) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
   } catch (e) {
     capture(e);
   }
