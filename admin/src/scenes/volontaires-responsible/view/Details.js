@@ -9,7 +9,7 @@ export default function DetailsVolontaires({ young }) {
     <div className="p-7">
       <div className="bg-white w-full h-full rounded-lg px-8 py-6">
         <div className="text-lg font-medium text-gray-900 mb-6">Informations générales</div>
-        <div className="flex flex-row items-start justify-around w-full gap-16">
+        <div className="flex flex-col items-start justify-around w-full gap-16 lg:flex-row">
           <div className="flex flex-col gap-2 w-full">
             <div className="text-xs font-medium mb-2">Identité et contact</div>
             <div className="flex flex-col gap-4">
@@ -45,7 +45,7 @@ export default function DetailsVolontaires({ young }) {
       </div>
       <div className="bg-white w-full h-full rounded-lg px-8 py-6 mt-6">
         <div className="text-lg font-medium text-gray-900">Détails</div>
-        <div className="flex flex-row items-start justify-around w-full gap-16">
+        <div className="flex flex-col items-start justify-around w-full gap-16 lg:flex-row">
           <div className="flex flex-col gap-2 w-full">
             <div className="text-xs font-medium mb-2 mt-6">Situation</div>
             <div className="flex flex-col gap-4">
@@ -62,7 +62,7 @@ export default function DetailsVolontaires({ young }) {
                 className={`cursor-pointer pb-3 ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-9 font-normal`}>
                 Représentant légal 1
               </div>
-              <div className="flex flex-row items-start justify-center" data-tip="" data-for="tooltip-delete">
+              <div className="flex flex-row items-start justify-center" data-tip="" data-for="tooltip-status">
                 <div
                   onClick={() => {
                     if (!young?.parent2Status) return;
@@ -80,7 +80,7 @@ export default function DetailsVolontaires({ young }) {
           </div>
         </div>
       </div>
-      <ReactTooltip id="tooltip-delete" className="bg-white shadow-sm text-black" arrowColor="white" disable={false}>
+      <ReactTooltip id="tooltip-status" className="bg-white shadow-sm text-black" arrowColor="white" disable={false}>
         <div className="text-[black]">Non renseigné</div>
       </ReactTooltip>
     </div>
