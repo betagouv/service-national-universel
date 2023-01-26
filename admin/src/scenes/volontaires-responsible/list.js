@@ -273,7 +273,6 @@ export default function List() {
           Téléphone: data.young.phone,
         },
         address: {
-          "Issu de QPV": translate(data.young.qpv),
           "Adresse postale du volontaire": data.young.address,
           "Code postal du volontaire": data.young.zip,
           "Ville du volontaire": data.young.city,
