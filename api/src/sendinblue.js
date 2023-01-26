@@ -247,13 +247,13 @@ async function syncContact(email, attributes, listIds) {
     if (!res.ok) {
       if (res?.code === "document_not_found") {
         const res = await createContact({ email, attributes, listIds });
-        if (!res.ok) throw new Error(JSON.stringify(res));
+        if (!res.ok) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
         return;
       }
       throw new Error(JSON.stringify(res));
     }
     const resUpdate = await updateContact(email, { attributes, listIds });
-    if (!resUpdate.ok) throw new Error(JSON.stringify(resUpdate));
+    if (!resUpdate.ok) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
   } catch (e) {
     capture(e);
   }
