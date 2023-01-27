@@ -23,14 +23,7 @@ export default function Phase2MilitaryPreparation({ young }) {
           <div className="font-medium text-lg text-gray-900">Dossier d&apos;éligibilité aux préparations militaires</div>
           <div className="text-sm text-gray-500">Ce dossier sera accessible après sa validation par le référent départemental du volontaire.</div>
         </div>
-      ) : null}
-      {young.statusMilitaryPreparationFiles === "REFUSED" || young.statusPhase2 === "VALIDATED" ? (
-        <div className="flex flex-col px-7 py-3">
-          <div className="font-medium text-lg text-gray-900">Dossier d&apos;éligibilité aux préparations militaires</div>
-          <div className="text-sm text-gray-500">Ce dossier n&apos;est plus accessible.</div>
-        </div>
-      ) : null}
-      {young.statusMilitaryPreparationFiles === "VALIDATED" ? (
+      ) : young.statusMilitaryPreparationFiles === "VALIDATED" ? (
         <div className="px-7 py-3">
           <div onClick={() => setMilitaryOpen((militaryOpen) => !militaryOpen)} className="flex flex-row justify-between items-center cursor-pointer">
             <div className="flex flex-row items-center gap-3">
@@ -96,7 +89,12 @@ export default function Phase2MilitaryPreparation({ young }) {
             </div>
           )}
         </div>
-      ) : null}
+      ) : (
+        <div className="flex flex-col px-7 py-3">
+          <div className="font-medium text-lg text-gray-900">Dossier d&apos;éligibilité aux préparations militaires</div>
+          <div className="text-sm text-gray-500">Ce dossier n&apos;est plus accessible.</div>
+        </div>
+      )}
     </div>
   );
 }
