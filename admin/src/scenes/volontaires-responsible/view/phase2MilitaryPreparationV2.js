@@ -11,15 +11,13 @@ export default function Phase2MilitaryPreparation({ young }) {
   const [modalFiles, setModalFiles] = useState({ isOpen: false, title: "", nameFiles: "", initialValues: [] });
   return (
     <div className="bg-white mx-8 mt-7 rounded-lg">
-      {modalFiles.nameFiles ? (
-        <ModalFilesPM
-          isOpen={modalFiles?.isOpen}
-          onCancel={() => setModalFiles({ isOpen: false })}
-          title={modalFiles?.title}
-          readOnly={true}
-          path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
-        />
-      ) : null}
+      <ModalFilesPM
+        isOpen={modalFiles?.isOpen}
+        onCancel={() => setModalFiles({ isOpen: false })}
+        title={modalFiles?.title}
+        readOnly={true}
+        path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
+      />
       {["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(young.statusMilitaryPreparationFiles) ? (
         <div className="flex flex-col px-7 py-3">
           <div className="font-medium text-lg text-gray-900">Dossier d&apos;éligibilité aux préparations militaires</div>
