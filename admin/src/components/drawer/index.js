@@ -219,7 +219,14 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       </DrawerConnectToZammood>
 
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
-      <ModalInfo isOpen={info.isOpen} title={info.title} message={info.message} onClose={() => setInfo({ ...info, isOpen: false })} />
+      <ModalInfo
+        isOpen={info?.isOpen}
+        title={info?.title}
+        message={info?.message}
+        onClose={() => {
+          setInfo({ ...info, isOpen: false });
+        }}
+      />
     </>
   );
 }
