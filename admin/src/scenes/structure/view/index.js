@@ -10,6 +10,7 @@ import Missions from "./missions";
 import Historic from "./history";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { environment } from "../../../config";
+console.log("🚀 ~ file: index.js:13 ~ environment", environment);
 
 export const StructureContext = createContext(null);
 
@@ -34,7 +35,7 @@ export default function Index({ ...props }) {
       <Switch>
         <SentryRoute path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
         <SentryRoute path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
-        <SentryRoute path="/structure/:id" component={["staging", "development"].includes(environment) ? DetailsV2 : Details} />
+        <SentryRoute path="/structure/:id" component={() => (environment === "production" ? <Details structure={structure} /> : <DetailsV2 />)} />
       </Switch>
     </StructureContext.Provider>
   );
