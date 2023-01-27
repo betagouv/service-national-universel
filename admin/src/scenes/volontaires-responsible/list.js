@@ -27,7 +27,7 @@ import {
 } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-import { applicationExportFields } from "snu-lib/excelExports";
+import { applicationExportFieldsStructure } from "snu-lib/excelExports";
 
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import SelectAction from "../../components/SelectAction";
@@ -240,14 +240,6 @@ export default function List() {
     if (ok) setPanel({ application, young: data });
   };
 
-  function getExportFields() {
-    const filtered = applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
-    // remove Issu de QPV field for responsible and supervisor
-    const filterAdress = filtered.find((e) => e.id === "address");
-    filterAdress.desc = filterAdress.desc.filter((e) => e !== "Issu de QPV");
-    return filtered.map((e) => (e.id !== "address" ? e : filterAdress));
-  }
-
   async function transform(data, values) {
     let all = data;
     if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
@@ -267,12 +259,14 @@ export default function List() {
       if (!data.young.domains) data.young.domains = [];
       if (!data.young.periodRanking) data.young.periodRanking = [];
 
+      console.log(data.young);
+
       const allFields = {
         identity: {
           Cohorte: data.youngCohort,
           Prénom: data.youngFirstName,
           Nom: data.youngLastName,
-          Sexe: data.gender,
+          Sexe: translate(data.young.gender),
           "Date de naissance": formatLongDateUTCWithoutTime(data.youngBirthdateAt),
         },
         contact: {
@@ -289,6 +283,11 @@ export default function List() {
           "Département du volontaire": data.young.department,
           "Académie du volontaire": data.young.academy,
           "Région du volontaire": data.young.region,
+        },
+        proche: {
+          "Adresse postale du proche": data.young.mobilityNearRelativeAddress,
+          "Code postal du proche": data.young.mobilityNearRelativeZip,
+          "Ville du proche": data.young.mobilityNearRelativeZip,
         },
         application: {
           "Statut de la candidature": translate(data.status),
@@ -461,7 +460,7 @@ export default function List() {
                   setIsOpen={setIsExportOpen}
                   index="application"
                   transform={transform}
-                  exportFields={getExportFields()}
+                  exportFields={applicationExportFieldsStructure}
                   filters={FILTERS}
                   getExportQuery={getExportQuery}
                 />
