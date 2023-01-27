@@ -1,10 +1,10 @@
 import React from "react";
 import DatePickerList from "../../phase0/components/DatePickerList";
-import { copyToClipboard, htmlCleaner } from "../../../utils";
+import { copyToClipboard } from "../../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 
-export default function Field({ name, label, value, className = "", type = "text", handleChange, readOnly = false, errors = {}, row, isJvaMission = false, copy = false }) {
+export default function Field({ name, label, value, className = "", type = "text", handleChange, readOnly = false, errors = {}, row = 5, isJvaMission = false, copy = false }) {
   const [copied, setCopied] = React.useState(false);
   return (
     <div className={className}>
@@ -41,13 +41,7 @@ export default function Field({ name, label, value, className = "", type = "text
         )}
 
         {type === "textarea" && (
-          <>
-            {readOnly || isJvaMission ? (
-              <div className="whitespace-pre" rows={row} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
-            ) : (
-              <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
-            )}
-          </>
+          <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
         )}
         {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
       </div>
