@@ -685,7 +685,6 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
 };
 
 const BadgeContract = (status, applicationStatus) => {
-  // TODO : a quel moment affiche t on le status du contrat ?
   if (!status || ["WAITING_VALIDATION", "WAITING_ACCEPTATION"].includes(applicationStatus)) return;
   if (status === "DRAFT") return <span className="text-xs font-medium border-[0.5px] text-white px-2 rounded-3xl py-1 bg-orange-500">Brouillon</span>;
   if (status === "SENT") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-white">Envoyé</span>;
