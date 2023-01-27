@@ -25,7 +25,7 @@ export default function MultiSelect({ options, selected, setSelected, label, rea
                     <div className="flex items-center justify-between w-full overflow-hidden">
                       <div className="flex gap-2">
                         {selected.map((e) => (
-                          <span key={e.label} className="block w-48 truncate">
+                          <span key={e.label} className="block w-max-48 truncate">
                             {e.label}
                           </span>
                         ))}

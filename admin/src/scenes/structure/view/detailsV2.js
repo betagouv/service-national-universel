@@ -22,7 +22,7 @@ export default function DetailsView() {
   const [errors, setErrors] = useState({});
 
   const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
-  const structureTypesOptions = data.legalStatus ? typesStructure[data.legalStatus].map((e) => ({ label: e, value: e })) : [];
+  const structureTypesOptions = data.legalStatus && data.legalStatus !== "OTHER" ? typesStructure[data.legalStatus].map((e) => ({ label: e, value: e })) : [];
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setData({
@@ -189,7 +189,7 @@ export default function DetailsView() {
                 setSelected={(e) => setData({ ...data, legalStatus: e.value })}
                 error={errors?.legalStatus}
               />
-              {data.legalStatus && (
+              {data.legalStatus && data.legalStatus !== "OTHER" && (
                 <MultiSelect
                   label="Sélectionnez un ou plusieurs agrééments"
                   readOnly={!isEditing}

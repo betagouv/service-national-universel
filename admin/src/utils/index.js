@@ -50,6 +50,7 @@ export const typesStructure = {
     "Association agréée de sécurité civile",
     "Autre agrément",
   ],
+  OTHER: [],
 };
 export const sousTypesStructure = {
   "Collectivité territoriale": ["Commune", "EPCI", "Conseil départemental", "Conseil régional", "Autre"],
