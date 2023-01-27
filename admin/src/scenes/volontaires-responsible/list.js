@@ -177,7 +177,6 @@ export default function List() {
       message: `Vous êtes sur le point de changer le statut des candidatures de ${youngSelected?.length} volontaire${isPlural ? "s" : ""}. Un email sera automatiquement envoyé.`,
       onSubmit: async () => {
         try {
-          console.log(status);
           const { ok, code } = await api.post(`/application/multiaction/change-status/${status}`, {
             ids: youngSelected.map((y) => y._id),
           });
@@ -239,7 +238,6 @@ export default function List() {
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setPanel({ application, young: data });
-    console.log(data);
   };
 
   function getExportFields() {
