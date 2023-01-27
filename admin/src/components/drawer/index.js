@@ -102,7 +102,7 @@ function responsible({ user, onClick, from }) {
     <>
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/volontaire/list/all" title="Mes candidatures" onClick={onClick} />
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -114,7 +114,7 @@ function supervisor({ onClick, from }) {
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/volontaire/list/all" title="Mes candidatures" onClick={onClick} />
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -193,7 +193,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       ) : (
         <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       )}
-      {/* <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} /> */}
+      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
 
@@ -219,7 +219,14 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       </DrawerConnectToZammood>
 
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
-      <ModalInfo isOpen={info.isOpen} title={info.title} message={info.message} onClose={() => setInfo({ ...info, isOpen: false })} />
+      <ModalInfo
+        isOpen={info?.isOpen}
+        title={info?.title}
+        message={info?.message}
+        onClose={() => {
+          setInfo({ ...info, isOpen: false });
+        }}
+      />
     </>
   );
 }
