@@ -352,7 +352,6 @@ export default function List() {
           "Région représentant légal 2": data.young.parent2Region,
         },
       };
-      delete allFields.address["Issu de QPV"];
       let fields = { "ID de la candidature": data._id, "ID du volontaire": data.youngId };
       for (const element of values) {
         let key;
