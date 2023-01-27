@@ -259,8 +259,6 @@ export default function List() {
       if (!data.young.domains) data.young.domains = [];
       if (!data.young.periodRanking) data.young.periodRanking = [];
 
-      console.log(data.young);
-
       const allFields = {
         identity: {
           Cohorte: data.youngCohort,
