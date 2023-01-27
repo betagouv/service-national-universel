@@ -402,9 +402,9 @@ export default function List() {
             }}
             count={countPending}
             icon={
-              missions.some((mission) => mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5) ? (
+              countPending && countPending > missions?.reduce((acc, mission) => acc + mission.placesLeft, 0) * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
-              ) : missions.some((mission) => mission.pendingApplications > 0) ? (
+              ) : countPending > 0 ? (
                 <ExclamationCircle className="text-white" fill="orange" />
               ) : null
             }
