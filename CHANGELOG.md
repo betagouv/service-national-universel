@@ -1,3 +1,37 @@
+# [1.207.0](https://github.com/betagouv/service-national-universel/compare/v1.206.0...v1.207.0) (2023-01-26)
+
+
+### Bug Fixes
+
+* **admin:** mission wording ([5a0a16d](https://github.com/betagouv/service-national-universel/commit/5a0a16dd0f8d4efc98b8d2521a8cf1d1bbf9284d))
+* **api:** Error if code only ! ([1c65ddb](https://github.com/betagouv/service-national-universel/commit/1c65ddb6426a922a5af80144d00ace2569b44b24))
+* **api:** Handle SIB errors ([d9d6466](https://github.com/betagouv/service-national-universel/commit/d9d64665aa63d2b6910c932e645709e1e7b436b5))
+* **api:** Return if creation was ok ! ([a316bfd](https://github.com/betagouv/service-national-universel/commit/a316bfd23459fea3bbd1d5a3ecefd4b4fa45c24c))
+* **api:** Trim email ([ef96338](https://github.com/betagouv/service-national-universel/commit/ef96338c53f533ee380ff59b3d5d8bc3c57bac64))
+* **api/SIB:** Do not capture for res.text() ([e10a7df](https://github.com/betagouv/service-national-universel/commit/e10a7df97245dc6832f3a54cd13cefd2a46c6140))
+* **app:** correction de la suppression des SMS sur la version mobile ([#2216](https://github.com/betagouv/service-national-universel/issues/2216)) ([9738496](https://github.com/betagouv/service-national-universel/commit/973849699476d322714cc0bef20ec57819637608))
+
+
+### Features
+
+* **api,admin:** Suppression de la demande de préférence de contact pour les représentants + suppression de l'envoi par SMS ([#2211](https://github.com/betagouv/service-national-universel/issues/2211)) ([ad39b5a](https://github.com/betagouv/service-national-universel/commit/ad39b5a9d483a32914972b88fcdce5b1cefb1978))
+
+
+### Reverts
+
+* Revert "fix(api): Enrich capture SIB" ([c5a5d3c](https://github.com/betagouv/service-national-universel/commit/c5a5d3c21d11637d87b103f4b0e1156006cdf8a9))
+* Revert "chore(api): improve error mgmt sib (#2158)" ([ec60b73](https://github.com/betagouv/service-national-universel/commit/ec60b73bb4c006b884cd85292f45bddf40dc8711)), closes [#2158](https://github.com/betagouv/service-national-universel/issues/2158)
+* Revert "fix(api): sms error" ([2ee3aa2](https://github.com/betagouv/service-national-universel/commit/2ee3aa296be85565c25a26e13f802370f1b196b4))
+* Revert "fix(api): getContact" ([0e9322d](https://github.com/betagouv/service-national-universel/commit/0e9322dbb5d2d7c1adc923332faab743105de116))
+
+# [1.206.0](https://github.com/betagouv/service-national-universel/compare/v1.205.0...v1.206.0) (2023-01-25)
+
+
+### Features
+
+* **admin:** Completion et tri de l'export de schéma de répartition ([#2208](https://github.com/betagouv/service-national-universel/issues/2208)) ([8b101d9](https://github.com/betagouv/service-national-universel/commit/8b101d9fe12b389f51cf03ffa6c187116c456a7c))
+* **admin/api:** super admin panel for cohort ([#2209](https://github.com/betagouv/service-national-universel/issues/2209)) ([ce43728](https://github.com/betagouv/service-national-universel/commit/ce43728a65a389ce1a25669f6ff3f8702d1f11da))
+
 # [1.205.0](https://github.com/betagouv/service-national-universel/compare/v1.204.0...v1.205.0) (2023-01-24)
 
 

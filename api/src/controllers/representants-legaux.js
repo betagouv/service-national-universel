@@ -13,14 +13,14 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungModel = require("../models/young");
-const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, SENDINBLUE_SMS } = require("snu-lib");
+const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
-const { sendTemplate, sendSMS } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const config = require("../config");
 
@@ -213,27 +213,16 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     }
 
     if (shouldSendToParent2) {
-      if (young.parent2ContactPreference === "phone") {
-        if (!young.parent2Phone) value.imageRight = "true";
-        else {
-          await sendSMS(
-            young.parent2Phone,
-            SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
-            SENDINBLUE_SMS.PARENT2_CONSENT.tag,
-          );
-        }
-      } else {
-        if (young.parent2Email == null || young.parent2Email.trim().length === 0) value.imageRight = "true";
-        else {
-          await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-            emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-            params: {
-              cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-              youngFirstName: young.firstName,
-              youngName: young.lastName,
-            },
-          });
-        }
+      if (young.parent2Email == null || young.parent2Email.trim().length === 0) value.imageRight = "true";
+      else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+          params: {
+            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+            youngFirstName: young.firstName,
+            youngName: young.lastName,
+          },
+        });
       }
     }
 
