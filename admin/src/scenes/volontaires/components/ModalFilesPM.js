@@ -10,7 +10,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import FileSaver from "file-saver";
 
-export default function ModalFilesPM({ isOpen, onCancel, path, title, canUpload = true }) {
+export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly = false }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [uploading] = useState(false);
   const [filesList, setFilesList] = useState([]);
@@ -99,7 +99,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title, canUpload 
                       <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file._id)}>
                         Télécharger
                       </div>
-                      {canUpload && (
+                      {!readOnly && (
                         <div
                           className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
                           onClick={async () => {
@@ -114,7 +114,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title, canUpload 
                   </div>
                 ))
               : null}
-            {canUpload && (
+            {!readOnly && (
               <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
                 <AddImage className="text-gray-400" />
                 <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>

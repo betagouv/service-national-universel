@@ -16,7 +16,7 @@ export default function Phase2MilitaryPreparation({ young }) {
           isOpen={modalFiles?.isOpen}
           onCancel={() => setModalFiles({ isOpen: false })}
           title={modalFiles?.title}
-          canUpload={false}
+          readOnly={true}
           path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
         />
       ) : null}
