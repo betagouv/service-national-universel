@@ -48,7 +48,7 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (sms.code) throw new Error(JSON.stringify);
+    if (sms.code) throw new Error(JSON.stringify(sms));
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
