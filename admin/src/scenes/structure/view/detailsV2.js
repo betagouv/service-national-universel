@@ -12,7 +12,7 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Field from "../../missions/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
-import StructureView from "./wrapper";
+import StructureView from "./wrapperv2";
 
 export default function DetailsView() {
   const { structure, setStructure } = useContext(StructureContext);

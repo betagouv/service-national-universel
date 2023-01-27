@@ -1,35 +1,81 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { ROLES } from "../../../utils";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { translate, ROLES, canViewPatchesHistory } from "../../../utils";
+import api from "../../../services/api";
+import TabList from "../../../components/views/TabList";
+import Tab from "../../../components/views/Tab";
 import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import { StructureContext } from ".";
-import Menu from "../components/Menu";
 
-export default function Wrapper({ children, tab }) {
-  const { structure } = useContext(StructureContext);
+export default function Wrapper({ children, structure, tab }) {
+  const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const isResponsible = user.role === ROLES.RESPONSIBLE;
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer cette structure ?", message: "Cette action est irréversible." });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/structure/${structure._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT") return toastr.error("Cette structure a des candidatures sur une de ses missions");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette structure a été supprimée.");
+      return history.push(`/structure`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
+    }
+  };
   if (!structure) return null;
   return (
-    <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
-      <header className="flex items-center justify-between mx-8 my-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold leading-6 m-0">{structure.name}</h1>
-          {structure.isMilitaryPreparation === "true" && <Badge text="Préparation Militaire" />}
+    <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
+      <Header>
+        <div style={{ flex: 1 }}>
+          <Title>
+            {structure.name}
+            {structure.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
+          </Title>
+
+          <TabList>
+            <Tab isActive={tab === "details"} onClick={() => history.push(`/structure/${structure._id}`)}>
+              Détails
+            </Tab>
+            {!isResponsible && (
+              <>
+                <Tab isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
+                  Missions
+                </Tab>
+                {canViewPatchesHistory(user) ? (
+                  <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
+                    Historique
+                  </Tab>
+                ) : null}
+              </>
+            )}
+          </TabList>
         </div>
-        {user.role !== ROLES.RESPONSIBLE && structure.status !== "DRAFT" && (
-          <a
-            className="px-3 py-2 cursor-pointer border-[1px] rounded-lg bg-blue-600 border-blue-600 text-[#ffffff] hover:bg-white hover:text-[#2563eb]"
-            href={"/mission/create/" + structure._id}>
-            Nouvelle mission
-          </a>
-        )}
-      </header>
-      <Menu tab={tab} />
-      <div className="m-8">{children}</div>
+        <div style={{ display: "flex" }}>
+          {!isResponsible && structure?.status !== "DRAFT" ? (
+            <Link to={`/mission/create/${structure._id}`}>
+              <PanelActionButton icon="plus" title="Nouvelle mission" />
+            </Link>
+          ) : null}
+          <Link to={`/structure/${structure._id}/edit`}>
+            <PanelActionButton icon="pencil" title="Modifier" />
+          </Link>
+          <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+        </div>
+      </Header>
+      {children}
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -43,3 +89,17 @@ export default function Wrapper({ children, tab }) {
     </div>
   );
 }
+
+const Title = styled.div`
+  color: rgb(38, 42, 62);
+  font-weight: 700;
+  font-size: 24px;
+  margin-bottom: 10px;
+`;
+
+const Header = styled.div`
+  padding: 0 25px 0;
+  display: flex;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+`;
