@@ -193,7 +193,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       ) : (
         <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       )}
-      {/* <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} /> */}
+      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
 
