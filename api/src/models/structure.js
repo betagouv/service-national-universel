@@ -235,12 +235,6 @@ const Schema = new mongoose.Schema({
     lon: { type: Number },
     lat: { type: Number },
   },
-  addressVerified: {
-    type: String,
-    documentation: {
-      description: "L'adresse a été vérifiée",
-    },
-  },
 
   state: {
     type: String,
