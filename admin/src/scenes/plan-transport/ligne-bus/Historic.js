@@ -38,7 +38,7 @@ export default function Historic() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport" }, { label: "Historique du plan de transport" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport", to: "/ligne-de-bus" }, { label: "Historique du plan de transport" }]} />
       <div className="w-full px-8 pt-3 pb-4">
         <div className="flex pb-6 items-center justify-between">
           <Title>Historique du plan de transport</Title>

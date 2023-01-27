@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export default function Breadcrumbs({ items }) {
   return (
-    <nav className="flex gap-3 text-gray-400 items-center ml-8 mt-8">
+    <div className="flex gap-3 text-gray-400 items-center ml-8 mt-8">
       <Link to="/">
         <Template className="hover:text-snu-purple-300 hover:scale-105" />
       </Link>
@@ -23,6 +23,6 @@ export default function Breadcrumbs({ items }) {
           </React.Fragment>
         );
       })}
-    </nav>
+    </div>
   );
 }
