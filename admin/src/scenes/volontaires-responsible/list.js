@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-import { useHistory, NavLink, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
@@ -57,12 +57,22 @@ export default function List() {
   const checkboxRef = React.useRef();
 
   const history = useHistory();
-  const { currentTab } = useParams();
 
-  React.useEffect(() => {
+  //currenTab is the tab selected in the url
+  // tab is the tab selected in the component --> to avoid refresh
+  const { currentTab } = useParams();
+  const [tab, setTab] = useState("all");
+
+  useEffect(() => {
     const listTab = ["all", "pending", "follow"];
-    if (!listTab.includes(currentTab)) history.push(`/volontaire/list/all`);
+    if (!listTab.includes(currentTab)) return history.push(`/volontaire/list/all`);
+    setTab(currentTab);
   }, [currentTab]);
+
+  useEffect(() => {
+    if (!missions) return;
+    getApplicationCount();
+  }, [missions]);
 
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
@@ -91,9 +101,9 @@ export default function List() {
       sort: [{ "youngLastName.keyword": "asc" }],
       size: ES_NO_LIMIT,
     };
-    if (currentTab === "pending") {
+    if (tab === "pending") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
-    } else if (currentTab === "follow") {
+    } else if (tab === "follow") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
     }
     return body;
@@ -102,16 +112,18 @@ export default function List() {
 
   const getApplicationCount = async () => {
     try {
-      const { data, ok } = await api.get(`/structure/${user.structureId}/application/count`);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures");
-      }
-      setCountPending(data.waitingValidation);
-      setCountFollow(data.toFollow);
-      setCountAll(data.countAll);
+      const body = {
+        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
+        sort: [{ "youngLastName.keyword": "asc" }],
+        size: ES_NO_LIMIT,
+      };
+      const { responses } = await api.esQuery("application", body);
+      const applicationList = responses[0].hits.hits.map((e) => e._source);
+      setCountAll(applicationList.length);
+      setCountFollow(applicationList.filter((e) => ["IN_PROGRESS", "VALIDATED"].includes(e.status)).length);
+      setCountPending(applicationList.filter((e) => e.status === "WAITING_VALIDATION").length);
     } catch (error) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures");
-
       console.log(error);
     }
   };
@@ -145,7 +157,6 @@ export default function List() {
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
     initMissions(user.structureId);
-    getApplicationCount();
   }, []);
   const RenderText = (text) => {
     return (
@@ -221,7 +232,7 @@ export default function List() {
     },
   ];
   const filteredRoleActions = () => {
-    if (currentTab === "pending") return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id)));
+    if (tab === "pending") return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id)));
     else return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id)));
   };
 
@@ -363,7 +374,7 @@ export default function List() {
     if (currentTab === "all") return;
     setYoungSelected([]);
     filteredRoleActions();
-  }, [currentTab]);
+  }, [tab]);
   useEffect(() => {
     if (youngSelected.length === 0) return;
     filteredRoleActions();
@@ -386,9 +397,20 @@ export default function List() {
           }}
         />
         <div className="flex">
-          <TabItem count={countAll} to={`/volontaire/list/all`} title="Toutes les candidatures" active={currentTab === "all"} />
           <TabItem
-            to={`/volontaire/list/pending`}
+            count={countAll}
+            onClick={() => {
+              setTab("all");
+              window.history.replaceState(null, null, "/volontaire/list/all");
+            }}
+            title="Toutes les candidatures"
+            active={tab === "all"}
+          />
+          <TabItem
+            onClick={() => {
+              setTab("pending");
+              window.history.replaceState(null, null, "/volontaire/list/pending");
+            }}
             count={countPending}
             icon={
               missions.some((mission) => mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5) ? (
@@ -398,9 +420,17 @@ export default function List() {
               ) : null
             }
             title="À traiter"
-            active={currentTab === "pending"}
+            active={tab === "pending"}
           />
-          <TabItem to={`/volontaire/list/follow`} count={countFollow} title="À suivre" active={currentTab === "follow"} />
+          <TabItem
+            onClick={() => {
+              setTab("follow");
+              window.history.replaceState(null, null, "/volontaire/list/follow");
+            }}
+            count={countFollow}
+            title="À suivre"
+            active={tab === "follow"}
+          />
         </div>
         <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <div className={`relative items-start mb-4`}>
@@ -422,7 +452,7 @@ export default function List() {
                   />
                   <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                 </div>
-                {currentTab !== "all" ? (
+                {tab !== "all" ? (
                   <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
                 ) : (
                   <button
@@ -553,7 +583,7 @@ export default function List() {
                     <Table>
                       <thead>
                         <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2 text-start">
-                          {currentTab !== "all" && (
+                          {tab !== "all" && (
                             <th className="w-1/12">
                               <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
                             </th>
@@ -561,7 +591,7 @@ export default function List() {
 
                           <th className="w-3/12">Volontaire</th>
                           <th className="w-4/12">Mission</th>
-                          {currentTab !== "pending" && <th className="w-1/12">Contrat et Documents</th>}
+                          {tab !== "pending" && <th className="w-1/12">Contrat et Documents</th>}
                           <th className="w-3/12">Statut candidature</th>
                         </tr>
                       </thead>
@@ -570,12 +600,12 @@ export default function List() {
                           <Hit
                             key={hit._id}
                             hit={hit}
-                            currentTab={currentTab}
+                            currentTab={tab}
                             mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
                             onClick={() => handleClick(hit)}
                             opened={panel?.young?._id === hit.youngId}
                             selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
-                            //onChangeApplication={updateMission}
+                            onChangeApplication={() => history.go(0)}
                             onSelect={(newItem) =>
                               setYoungSelected((prev) => {
                                 if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
@@ -683,10 +713,9 @@ const PaperClip = () => {
   );
 };
 
-const TabItem = ({ active, title, count, onClick, icon, to }) => (
-  <NavLink
+const TabItem = ({ active, title, count, onClick, icon }) => (
+  <div
     onClick={onClick}
-    to={to}
     className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-blue-600 ${
       active ? "!text-blue-600 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
     }`}>
@@ -698,7 +727,7 @@ const TabItem = ({ active, title, count, onClick, icon, to }) => (
 
       <div className={`px-2 border-[0.5px] font-medium text-xs rounded-3xl ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
     </div>
-  </NavLink>
+  </div>
 );
 
 function FilterButton({ onClick }) {
