@@ -5,7 +5,7 @@ import API from "../../../services/api";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 import { StructureContext } from "../view";
 
-import EditButton from "../components/EditButton";
+import EditButton from "../../../components/buttons/EditButton";
 import MultiSelect from "../components/MultiSelect";
 import AsyncSelect from "react-select/async";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
@@ -42,6 +42,7 @@ export default function DetailsView() {
     setIsLoading(true);
 
     const error = {};
+    if (!data.addressVerified) error.addressVerified = "Veuillez vérifier l'adresse";
     if (!data?.name) error.name = "Le nom est obligatoire";
     if (!data?.address) error.address = "L'adresse est obligatoire";
     if (!data?.zip) error.zip = "Le code postal est obligatoire";
@@ -144,21 +145,14 @@ export default function DetailsView() {
               {data.addressVerified && (
                 <div className="grid grid-cols-2 gap-3">
                   <Field
-                    readOnly={!isEditing}
+                    readOnly={true}
                     label="Département"
                     className="w-full"
                     handleChange={(e) => setData({ ...data, department: e.target.value })}
                     value={data.department}
                     disabled={true}
                   />
-                  <Field
-                    readOnly={!isEditing}
-                    label="Région"
-                    className="w-full"
-                    handleChange={(e) => setData({ ...data, region: e.target.value })}
-                    value={data.region}
-                    disabled={true}
-                  />
+                  <Field readOnly={true} label="Région" className="w-full" handleChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
                 </div>
               )}
               {isEditing && !data.addressVerified && (

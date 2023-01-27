@@ -20,14 +20,16 @@ export default function MultiSelect({ options, selected, setSelected, label, rea
                     error ? "border-red-500" : "border-gray-300"
                   } bg-white py-2 px-2.5 items-center`}>
                   {icon ? icon : null}
-                  <div className={`flex flex-col w-full `}>
+                  <div className="flex flex-col w-full">
                     <label className="text-xs leading-4 text-gray-500">{label}</label>
                     <div className="flex items-center justify-between w-full">
-                      {selected.map((e) => (
-                        <span key={e.label} className="block truncate">
-                          {e.label}
-                        </span>
-                      ))}
+                      <div className="flex gap-2">
+                        {selected.map((e) => (
+                          <span key={e.label} className="block truncate">
+                            {e.label}
+                          </span>
+                        ))}
+                      </div>
                       <span className="pointer-events-none flex items-center pr-2">
                         {!readOnly && (
                           <>

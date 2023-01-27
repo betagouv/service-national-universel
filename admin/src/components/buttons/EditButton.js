@@ -1,5 +1,5 @@
 import React from "react";
-import Pencil from "../../../assets/icons/Pencil";
+import Pencil from "../../assets/icons/Pencil";
 
 export default function EditButton({ isEditing, setIsEditing, isLoading, onSubmit, defaultData, setData, setErrors }) {
   const style = (color) => {
