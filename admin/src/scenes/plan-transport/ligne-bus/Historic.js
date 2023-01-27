@@ -44,7 +44,7 @@ export default function Historic() {
           <Title>Historique du plan de transport</Title>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
-        {loading ? <Loader /> : <HistoryComponent model="young" data={formattedData} customFilterOptions={filters} refName="Ligne" />}
+        {loading ? <Loader /> : <HistoryComponent model="young" data={formattedData} customFilterOptions={filters} refName="Ligne" path={"ligne-de-bus"} />}
       </div>
     </>
   );

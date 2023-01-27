@@ -588,29 +588,64 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         {
           $lookup: {
             from: "lignebus_patches",
-            pipeline: [
-              { $match: { ref: { $in: lineIds } } },
-              { $addFields: { lineId: { $toObjectId: "$ref" } } },
-              {
-                $lookup: {
-                  from: "lignebuses",
-                  localField: "lineId",
-                  foreignField: "_id",
-                  as: "bus",
-                },
-              },
-              { $unwind: "$bus" },
-              { $addFields: { refName: "$bus.busId" } },
-              { $project: { bus: 0 } },
-            ],
+            pipeline: [{ $match: { ref: { $in: lineIds } } }, { $addFields: { lineId: { $toObjectId: "$ref" } } }],
             as: "ligneBuses",
           },
         },
-        { $lookup: { from: "lignetopoint_patches", pipeline: [{ $match: { ref: { $in: lineToPointIds } } }], as: "ligneToPoints" } },
-        { $lookup: { from: "modificationbus_patches", pipeline: [{ $match: { ref: { $in: modificationBusIds } } }], as: "modificationBuses" } },
+        {
+          $lookup: {
+            from: "lignetopoint_patches",
+            pipeline: [
+              { $match: { ref: { $in: lineToPointIds } } },
+              { $addFields: { lineToPointId: { $toObjectId: "$ref" } } },
+              {
+                $lookup: {
+                  from: "lignetopoints",
+                  localField: "lineToPointId",
+                  foreignField: "_id",
+                  as: "lineToPoint",
+                },
+              },
+              { $unwind: "$lineToPoint" },
+              { $addFields: { lineId: { $toObjectId: "$lineToPoint.lineId" } } },
+            ],
+            as: "ligneToPoints",
+          },
+        },
+        {
+          $lookup: {
+            from: "modificationbus_patches",
+            pipeline: [
+              { $match: { ref: { $in: modificationBusIds } } },
+              { $addFields: { modificationId: { $toObjectId: "$ref" } } },
+              {
+                $lookup: {
+                  from: "modificationbuses",
+                  localField: "modificationId",
+                  foreignField: "_id",
+                  as: "modificationBus",
+                },
+              },
+              { $unwind: "$modificationBus" },
+              { $addFields: { lineId: { $toObjectId: "$modificationBus.lineId" } } },
+            ],
+            as: "modificationBuses",
+          },
+        },
         { $project: { union: { $concatArrays: ["$ligneBuses", "$ligneToPoints", "$modificationBuses"] } } },
         { $unwind: "$union" },
         { $replaceRoot: { newRoot: "$union" } },
+        {
+          $lookup: {
+            from: "lignebuses",
+            localField: "lineId",
+            foreignField: "_id",
+            as: "bus",
+          },
+        },
+        { $unwind: "$bus" },
+        { $addFields: { refName: "$bus.busId" } },
+        { $project: { bus: 0, lineToPoint: 0, lineToPointId: 0, modificationBus: 0, modificationId: 0 } },
         { $sort: { date: 1 } },
 
         // on déplie chaque op.
@@ -620,7 +655,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
             op: "$ops.op",
             path: "$ops.path",
             value: "$ops.value",
-            originalValue: "$ops.orignalValue",
+            originalValue: "$ops.originalValue",
           },
         },
         { $project: { ops: 0, __v: 0 } },
