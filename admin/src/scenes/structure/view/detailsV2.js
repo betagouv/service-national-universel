@@ -22,7 +22,7 @@ export default function DetailsView() {
   const [errors, setErrors] = useState({});
 
   const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
-  const structureTypesOptions = typesStructure[data.legalStatus].map((e) => ({ label: e, value: e }));
+  const structureTypesOptions = data.legalStatus ? typesStructure[data.legalStatus].map((e) => ({ label: e, value: e })) : [];
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setData({
@@ -185,18 +185,20 @@ export default function DetailsView() {
                 label="Sélectionnez un statut juridique"
                 readOnly={!isEditing}
                 options={legalStatusOptions}
-                selected={legalStatusOptions.find((e) => e.value === data.legalStatus)}
+                selected={legalStatusOptions.find((e) => e.value === data.legalStatus || "")}
                 setSelected={(e) => setData({ ...data, legalStatus: e.value })}
                 error={errors?.legalStatus}
               />
-              <MultiSelect
-                label="Sélectionnez un ou plusieurs agrééments"
-                readOnly={!isEditing}
-                options={structureTypesOptions}
-                selected={structureTypesOptions.filter((e) => data.types.includes(e.value))}
-                error={errors?.types}
-                setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
-              />
+              {data.legalStatus && (
+                <MultiSelect
+                  label="Sélectionnez un ou plusieurs agrééments"
+                  readOnly={!isEditing}
+                  options={structureTypesOptions}
+                  selected={structureTypesOptions.filter((e) => data.types.includes(e.value)) || ""}
+                  error={errors?.types}
+                  setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
+                />
+              )}
               <Field readOnly={!isEditing} label="Numéro de SIRET (si disponible)" handleChange={(e) => setData({ ...data, siret: e.target.value })} value={data.siret || ""} />
 
               {data.isNetwork === "false" && (

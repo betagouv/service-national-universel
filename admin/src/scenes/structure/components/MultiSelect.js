@@ -22,10 +22,10 @@ export default function MultiSelect({ options, selected, setSelected, label, rea
                   {icon ? icon : null}
                   <div className="flex flex-col w-full">
                     <label className="text-xs leading-4 text-gray-500">{label}</label>
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center justify-between w-full overflow-hidden">
                       <div className="flex gap-2">
                         {selected.map((e) => (
-                          <span key={e.label} className="block truncate">
+                          <span key={e.label} className="block w-48 truncate">
                             {e.label}
                           </span>
                         ))}
