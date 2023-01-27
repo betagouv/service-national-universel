@@ -243,13 +243,11 @@ export default function List() {
   };
 
   function getExportFields() {
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
-      const filtered = applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
-      // remove Issu de QPV field for responsible and supervisor
-      const filterAdress = filtered.find((e) => e.id === "address");
-      filterAdress.desc = filterAdress.desc.filter((e) => e !== "Issu de QPV");
-      return filtered.map((e) => (e.id !== "address" ? e : filterAdress));
-    } else return applicationExportFields.filter((e) => !["missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+    const filtered = applicationExportFields.filter((e) => !["choices", "missionInfo", "missionTutor", "missionLocation", "structureInfo", "structureLocation"].includes(e.id));
+    // remove Issu de QPV field for responsible and supervisor
+    const filterAdress = filtered.find((e) => e.id === "address");
+    filterAdress.desc = filterAdress.desc.filter((e) => e !== "Issu de QPV");
+    return filtered.map((e) => (e.id !== "address" ? e : filterAdress));
   }
 
   async function transform(data, values) {
@@ -357,9 +355,7 @@ export default function List() {
           "Région représentant légal 2": data.young.parent2Region,
         },
       };
-      if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
-        delete allFields.address["Issu de QPV"];
-      }
+      delete allFields.address["Issu de QPV"];
       let fields = { "ID de la candidature": data._id, "ID du volontaire": data.youngId };
       for (const element of values) {
         let key;
