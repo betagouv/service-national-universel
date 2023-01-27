@@ -360,9 +360,9 @@ export default function List() {
     });
   }
   useEffect(() => {
+    filteredRoleActions();
     if (currentTab === "all") return;
     setYoungSelected([]);
-    filteredRoleActions();
   }, [tab]);
   useEffect(() => {
     if (youngSelected.length === 0) return;
