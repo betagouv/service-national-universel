@@ -50,7 +50,7 @@ export default function Menu({ tab }) {
             {tab.label}
           </Link>
         ))}
-        {tab === "details" && canDeleteStructure(user.role, structure) && (
+        {tab === "details" && canDeleteStructure(user, structure) && (
           <button
             className="flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] gap-2 mb-auto ml-auto"
             onClick={() => setIsOpen(true)}>
