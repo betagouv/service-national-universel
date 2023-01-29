@@ -712,6 +712,18 @@ function validatePhase2Preference(preferences) {
     .validate(preferences, { stripUnknown: true });
 }
 
+function validateStructureManager(structureManager) {
+  return Joi.object()
+    .keys({
+      firstName: validateFirstName().allow(null, ""),
+      lastName: Joi.string().uppercase().allow(null, ""),
+      mobile: Joi.string().allow(null, ""),
+      email: Joi.string().lowercase().trim().email().allow(null, ""),
+      role: Joi.string().allow(null, ""),
+    })
+    .validate(structureManager, { stripUnknown: true });
+}
+
 module.exports = {
   validateId,
   validateString,
@@ -735,4 +747,5 @@ module.exports = {
   validateSessionPhase1,
   validatePhase1Document,
   validatePhase2Preference,
+  validateStructureManager,
 };

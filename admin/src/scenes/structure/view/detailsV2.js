@@ -13,6 +13,7 @@ import Field from "../../missions/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
 import StructureView from "./wrapperv2";
+import CardRepresentant from "../components/cards/CardRepresentant";
 
 export default function DetailsView() {
   const { structure, setStructure } = useContext(StructureContext);
@@ -72,7 +73,9 @@ export default function DetailsView() {
 
   return (
     <StructureView tab="details">
-      <div className="flex gap-4">{/* Cartes */}</div>
+      <div className="flex gap-4 my-6">
+        <CardRepresentant />
+      </div>
       <main className="bg-white p-8 rounded-xl shadow-sm">
         <div className="flex justify-between w-full">
           <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
