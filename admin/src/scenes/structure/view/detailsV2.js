@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { canCreateStructure, translate } from "snu-lib";
 import API from "../../../services/api";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 import { StructureContext } from "../view";
@@ -16,6 +17,7 @@ import StructureView from "./wrapperv2";
 
 export default function DetailsView() {
   const { structure, setStructure } = useContext(StructureContext);
+  const user = useSelector((state) => state.Auth.user);
   const [data, setData] = useState(structure);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,9 +76,9 @@ export default function DetailsView() {
     <StructureView tab="details">
       <div className="flex gap-4">{/* Cartes */}</div>
       <main className="bg-white p-8 rounded-xl shadow-sm">
-        <div className="flex justify-between w-full">
+        <div className="flex items-center justify-between">
           <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
-          {
+          {canCreateStructure(user) && (
             <EditButton
               isEditing={isEditing}
               setIsEditing={setIsEditing}
@@ -86,11 +88,11 @@ export default function DetailsView() {
               setData={setData}
               setErrors={setErrors}
             />
-          }
+          )}
         </div>
 
-        <div className="flex my-8">
-          <div className="space-y-4 w-[45%]">
+        <div className="w-full flex flex-col lg:flex-row lg:space-x-8 my-8">
+          <div className="w-full space-y-4">
             <div className="space-y-2">
               <div className="text-xs font-medium leading-4 text-gray-900">Nom de la structure</div>
               <Field
@@ -174,87 +176,85 @@ export default function DetailsView() {
             </div>
           </div>
 
-          <div className="flex w-[10%] justify-center items-center">
+          <div className="hidden lg:flex justify-center items-center">
             <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300" />
           </div>
 
-          <div className="space-y-4 w-[45%]">
-            <div className="flex flex-col gap-2">
-              <div className="text-xs font-medium leading-4 text-gray-900">Informations juridiques</div>
-              <Select
-                label="Sélectionnez un statut juridique"
+          <div className="w-full space-y-4">
+            <div className="text-xs font-medium leading-4 text-gray-900">Informations juridiques</div>
+            <Select
+              label="Sélectionnez un statut juridique"
+              readOnly={!isEditing}
+              options={legalStatusOptions}
+              selected={legalStatusOptions.find((e) => e.value === data.legalStatus || "")}
+              setSelected={(e) => setData({ ...data, legalStatus: e.value })}
+              error={errors?.legalStatus}
+            />
+            {data.legalStatus && data.legalStatus !== "OTHER" && (
+              <MultiSelect
+                label="Sélectionnez un ou plusieurs agrééments"
                 readOnly={!isEditing}
-                options={legalStatusOptions}
-                selected={legalStatusOptions.find((e) => e.value === data.legalStatus || "")}
-                setSelected={(e) => setData({ ...data, legalStatus: e.value })}
-                error={errors?.legalStatus}
+                options={structureTypesOptions}
+                selected={structureTypesOptions.filter((e) => data.types.includes(e.value)) || ""}
+                error={errors?.types}
+                setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
               />
-              {data.legalStatus && data.legalStatus !== "OTHER" && (
-                <MultiSelect
-                  label="Sélectionnez un ou plusieurs agrééments"
-                  readOnly={!isEditing}
-                  options={structureTypesOptions}
-                  selected={structureTypesOptions.filter((e) => data.types.includes(e.value)) || ""}
-                  error={errors?.types}
-                  setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
-                />
-              )}
-              <Field readOnly={!isEditing} label="Numéro de SIRET (si disponible)" handleChange={(e) => setData({ ...data, siret: e.target.value })} value={data.siret || ""} />
+            )}
+            <Field readOnly={!isEditing} label="Numéro de SIRET (si disponible)" handleChange={(e) => setData({ ...data, siret: e.target.value })} value={data.siret || ""} />
 
-              {data.isNetwork === "false" && (
-                <div className="space-y-2 my-3">
-                  <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
-                  <p className="text-xs font-medium leading-4 text-gray-400">
-                    Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
-                    superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
-                  </p>
-                  <AsyncSelect
-                    isClearable
-                    label="Réseau national"
-                    value={{ label: data.networkName }}
-                    loadOptions={getNetworkOptions}
-                    isDisabled={!isEditing}
-                    noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
-                    styles={{
-                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      placeholder: (styles) => ({ ...styles, color: "black" }),
-                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
-                      singleValue: (styles) => ({ ...styles, color: "black" }),
-                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
-                    }}
-                    defaultOptions
-                    onChange={(e) => setData({ ...data, networkName: e?.label || "", networkId: e?._id || "" })}
-                    placeholder="Rechercher une structure"
-                    error={errors.structureName}
-                  />
-                </div>
-              )}
-
-              <div className="flex justify-between my-3">
-                <p className="text-gray-500">Tête de réseau</p>
-                <div className="flex gap-2 items-center">
-                  <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
-                  {data.isNetwork ? "Oui" : "Non"}
-                </div>
-              </div>
-
-              <div className="flex justify-between my-3">
-                <p className="text-gray-500">Préparation militaire</p>
-                <div className="flex gap-2 items-center">
-                  <Toggle value={data.isMilitaryPreparation === "true"} onChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
-                  {data.isMilitaryPreparation ? "Oui" : "Non"}
-                </div>
-              </div>
-
+            {/* {data.isNetwork === "false" && (
               <div className="space-y-2 my-3">
-                <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Field readOnly={!isEditing} label="Site Internet" handleChange={(e) => setData({ ...data, website: e.target.value })} value={data.website || ""} copy={true} />
-                  <Field readOnly={!isEditing} label="Facebook" handleChange={(e) => setData({ ...data, facebook: e.target.value })} value={data.facebook || ""} copy={true} />
-                  <Field readOnly={!isEditing} label="Twitter" handleChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} copy={true} />
-                  <Field readOnly={!isEditing} label="Instagram" handleChange={(e) => setData({ ...data, instagram: e.target.value })} value={data.instagram || ""} copy={true} />
-                </div>
+                <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
+                <p className="text-xs font-medium leading-4 text-gray-400">
+                  Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
+                  superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
+                </p>
+                <AsyncSelect
+                  isClearable
+                  label="Réseau national"
+                  value={{ label: data.networkName }}
+                  loadOptions={getNetworkOptions}
+                  isDisabled={!isEditing}
+                  noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
+                  styles={{
+                    dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                    placeholder: (styles) => ({ ...styles, color: "black" }),
+                    control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                    singleValue: (styles) => ({ ...styles, color: "black" }),
+                    multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                    indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                  }}
+                  defaultOptions
+                  onChange={(e) => setData({ ...data, networkName: e?.label || "", networkId: e?._id || "" })}
+                  placeholder="Rechercher une structure"
+                  error={errors.structureName}
+                />
+              </div>
+            )} */}
+
+            <div className="flex justify-between my-3">
+              <p className="text-gray-500">Tête de réseau</p>
+              <div className="flex gap-2 items-center">
+                <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
+                {data.isNetwork ? "Oui" : "Non"}
+              </div>
+            </div>
+
+            <div className="flex justify-between my-3">
+              <p className="text-gray-500">Préparation militaire</p>
+              <div className="flex gap-2 items-center">
+                <Toggle value={data.isMilitaryPreparation === "true"} onChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
+                {data.isMilitaryPreparation ? "Oui" : "Non"}
+              </div>
+            </div>
+
+            <div className="space-y-2 my-3">
+              <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Field readOnly={!isEditing} label="Site Internet" handleChange={(e) => setData({ ...data, website: e.target.value })} value={data.website || ""} copy={true} />
+                <Field readOnly={!isEditing} label="Facebook" handleChange={(e) => setData({ ...data, facebook: e.target.value })} value={data.facebook || ""} copy={true} />
+                <Field readOnly={!isEditing} label="Twitter" handleChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} copy={true} />
+                <Field readOnly={!isEditing} label="Instagram" handleChange={(e) => setData({ ...data, instagram: e.target.value })} value={data.instagram || ""} copy={true} />
               </div>
             </div>
           </div>
