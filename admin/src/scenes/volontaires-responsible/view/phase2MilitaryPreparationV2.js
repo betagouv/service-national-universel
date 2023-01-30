@@ -7,7 +7,6 @@ import ModalFilesPM from "../../volontaires/components/ModalFilesPM";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 
 export default function Phase2MilitaryPreparation({ young }) {
-  console.log("🚀 ~ file: phase2MilitaryPreparationV2.js:10 ~ Phase2MilitaryPreparation ~ young", young);
   const [militaryOpen, setMilitaryOpen] = useState(false);
   const [modalFiles, setModalFiles] = useState({ isOpen: false, title: "", nameFiles: "", initialValues: [] });
   return (
