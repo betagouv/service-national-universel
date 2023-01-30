@@ -164,7 +164,7 @@ export default function Convocation() {
           <>
             {young.transportInfoGivenByLocal === "true" ? (
               <ConvocText>
-                Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")}.
+                Le <b>retour de votre séjour </b>est prévu au même endroit que le jour du départ en centre SNU..
               </ConvocText>
             ) : (
               <ConvocText>

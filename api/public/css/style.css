@@ -181,13 +181,6 @@ img.bg {
   width: 85%;
 }
 
-#convocation-cohesion > .local-transport {
-  font-size: 0.75rem;
-  left: 150px;
-  top: 400px;
-  width: 85%;
-}
-
 #convocation-cohesion > .meeting-point {
   /* border: 1px solid rgb(47, 0, 255) ; */
   font-size: 0.8rem;
