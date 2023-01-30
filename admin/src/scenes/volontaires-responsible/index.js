@@ -10,6 +10,7 @@ import View from "./view";
 export default function Index() {
   return (
     <Switch>
+      <SentryRoute path="/volontaire" component={List} />
       {environment === "production" ? <SentryRoute path="/volontaire/list/:currentTab" component={List} /> : <SentryRoute path="/volontaire/list/:currentTab" component={ListV2} />}
       <SentryRoute path="/volontaire/:id" component={View} />
     </Switch>
