@@ -7,17 +7,20 @@ import ModalFilesPM from "../../volontaires/components/ModalFilesPM";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 
 export default function Phase2MilitaryPreparation({ young }) {
+  console.log("🚀 ~ file: phase2MilitaryPreparationV2.js:10 ~ Phase2MilitaryPreparation ~ young", young);
   const [militaryOpen, setMilitaryOpen] = useState(false);
   const [modalFiles, setModalFiles] = useState({ isOpen: false, title: "", nameFiles: "", initialValues: [] });
   return (
     <div className="bg-white mx-8 mt-7 rounded-lg">
-      <ModalFilesPM
-        isOpen={modalFiles?.isOpen}
-        onCancel={() => setModalFiles({ isOpen: false })}
-        title={modalFiles?.title}
-        readOnly={true}
-        path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
-      />
+      {modalFiles.nameFiles ? (
+        <ModalFilesPM
+          isOpen={modalFiles?.isOpen}
+          onCancel={() => setModalFiles({ isOpen: false })}
+          title={modalFiles?.title}
+          readOnly={true}
+          path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
+        />
+      ) : null}
       {["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(young.statusMilitaryPreparationFiles) ? (
         <div className="flex flex-col px-7 py-3">
           <div className="font-medium text-lg text-gray-900">Dossier d&apos;éligibilité aux préparations militaires</div>
