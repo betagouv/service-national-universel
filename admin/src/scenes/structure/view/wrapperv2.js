@@ -9,10 +9,10 @@ export default function Wrapper({ tab, children }) {
 
   if (!structure) return null;
   return (
-    <>
+    <div className="block w-full">
       <div className="flex justify-between border-bottom">
         <div>
-          <div className="flex items-center justify-between m-8">
+          <div className="flex items-center justify-between gap-4 m-8">
             <h1 className="text-2xl font-bold leading-6 m-0">{structure.name}</h1>
             {structure.isMilitaryPreparation === "true" && <Badge text="Préparation Militaire" />}
           </div>
@@ -21,6 +21,6 @@ export default function Wrapper({ tab, children }) {
         {tab === "details" && <Actions />}
       </div>
       <main className="m-8">{children}</main>
-    </>
+    </div>
   );
 }
