@@ -111,7 +111,7 @@ const renderLocalTransport = async (young) => {
   console.log(getBaseUrl());
   try {
     if (!["AFFECTED", "DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
-    if (!young.sessionPhase1Id || (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true")) throw `young ${young.id} unauthorized`;
+    if (!young.sessionPhase1Id) throw `young ${young.id} unauthorized`;
     const session = await SessionPhase1.findById(young.sessionPhase1Id);
     if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
     const center = await CohesionCenterModel.findById(session.cohesionCenterId);
