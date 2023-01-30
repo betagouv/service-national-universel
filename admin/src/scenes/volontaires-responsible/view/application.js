@@ -29,6 +29,7 @@ import Check from "../../../assets/icons/Check";
 import FileIcon from "../../../assets/FileIcon";
 import Download from "../../../assets/icons/Download";
 import Bell from "../../../assets/icons/Bell";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 import Dossier from "./dossier";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
@@ -144,12 +145,14 @@ export default function Phase2Application({ young, onChange }) {
   if (currentTab === "dossier")
     return (
       <>
+        <Breadcrumbs items={[{ label: "Mes candidatures", to: "/volontaire/list/all" }, { label: "Fiche candidature" }]} />
         <YoungHeader young={young} tab={currentTab} onChange={onChange} isStructure={true} applicationId={application?._id} />
         <Dossier young={young} />
       </>
     );
   return (
     <>
+      <Breadcrumbs items={[{ label: "Mes candidatures", to: "/volontaire/list/all" }, { label: "Fiche candidature" }]} />
       <YoungHeader young={young} tab={currentTab} onChange={onChange} isStructure={true} applicationId={application?._id} />
       <Phase2MilitaryPreparation young={young} FileCard={FileCard} />
       <div className="p-7">
