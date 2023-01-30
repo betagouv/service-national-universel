@@ -11,6 +11,7 @@ import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { environment } from "../../config";
 
 export default function PanelView({ onChange, value }) {
   const [missions, setMissions] = useState({ count: "-", placesTotal: "-", placesLeft: "-", all: [] });
@@ -104,9 +105,11 @@ export default function PanelView({ onChange, value }) {
           <Link to={`/structure/${value._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          <Link to={`/structure/${value._id}/edit`}>
-            <PanelActionButton icon="pencil" title="Modifier" />
-          </Link>
+          {environment === "production" && (
+            <Link to={`/structure/${value._id}/edit`}>
+              <PanelActionButton icon="pencil" title="Modifier" />
+            </Link>
+          )}
           <PanelActionButton onClick={() => onClickDelete(value)} icon="bin" title="Supprimer" />
         </div>
       </div>

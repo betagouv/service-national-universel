@@ -7,6 +7,7 @@ import View from "./view";
 import Edit from "./edit";
 import List from "./list";
 import Create from "./create";
+import { environment } from "../../config";
 
 export default function Index() {
   useDocumentTitle("Structures");
@@ -14,7 +15,7 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/structure/create" component={Create} />
-      <SentryRoute path="/structure/:id/edit" component={Edit} />
+      <SentryRoute path="/structure/:id/edit" component={environment === "production" ? Edit : View} />
       <SentryRoute path="/structure/:id" component={View} />
       <SentryRoute path="/structure" component={List} />
     </Switch>
