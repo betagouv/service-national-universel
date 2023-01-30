@@ -431,7 +431,7 @@ export default function Phase2Application({ young, onChange }) {
                           stepOne: true,
                         });
                       }}
-                      className={`group min-h-[230px] w-[250px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
+                      className={`group min-h-[230px] w-[300px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
                       <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
                         <HiPlus />
                         Ajouter une pièce jointe
@@ -582,7 +582,7 @@ function SendContractLink({ contract, target }) {
 
 function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false, topSubComment }) {
   return (
-    <section className={` bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw} w-[250px]`}>
+    <section className={` bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw} w-[300px]`}>
       <FileIcon filled={filled} icon={icon} />
       <section className="mt-2">
         {topSubComment ? <p className="text-xs">{topSubComment}</p> : null}

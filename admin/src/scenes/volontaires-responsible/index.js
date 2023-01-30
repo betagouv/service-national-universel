@@ -18,8 +18,7 @@ export default function Index() {
       ) : (
         <>
           <SentryRoute path="/volontaire/list/:currentTab" component={ListV2} />
-          <SentryRoute path="/volontaire/:id" component={View} />
-          <SentryRoute path="/volontaire" component={List} />
+          <SentryRoute path="/volontaire/:id/phase2/application/:applicationId" component={View} />
         </>
       )}
     </Switch>
