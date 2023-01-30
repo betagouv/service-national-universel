@@ -12,6 +12,8 @@ import API from "../../../../services/api";
 import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
 import { StructureContext } from "../../view";
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
+import Select from "../../../centersV2/components/Select";
+import { useSelector } from "react-redux";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
@@ -26,11 +28,6 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
     setResponsible(null);
     setIsLoading(false);
   };
-
-  // const onCancel = () => {
-  //   setIsOpen(false);
-  //   // resetState();
-  // };
 
   const handleDelete = (target) => {
     setModal({
@@ -53,6 +50,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
     setModalReferentDeleted({
       isOpen: true,
     });
+    setResponsible(null);
   };
 
   const onConfirmDelete = async (target) => {
@@ -63,7 +61,6 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       setTeam(team.filter((e) => e._id !== target._id));
-      setTeam(null);
       return onReferentDeleted();
     } catch (e) {
       console.log(e);
@@ -118,9 +115,10 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const handleChange = (e) => setResponsible({ ...responsible, [e.target.name]: e.target.value });
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl h-[450px] w-[800px]">
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl h-[460px] w-[800px]">
       {responsible ? (
         <EditContact
+          team={team}
           responsible={responsible}
           setResponsible={setResponsible}
           isLoading={isLoading}
@@ -227,11 +225,15 @@ const Field = ({ isLoading, label, name, value, handleChange, type = "text", req
     <label htmlFor="name" className="w-full m-0 text-left text-xs text-gray-500">
       {label}
     </label>
-    <input required={required} disabled={isLoading} className="disabled:bg-gray-200" name={name} id={name} onChange={handleChange} value={value[name]} type={type} />
+    <input required={required} disabled={isLoading} className="w-full disabled:bg-gray-200" name={name} id={name} onChange={handleChange} value={value[name]} type={type} />
   </div>
 );
 
-const EditContact = ({ responsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
+const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
+  const roles = [ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
+  const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
+  const user = useSelector((state) => state.Auth.user);
+
   return (
     <form className="px-8 py-7 flex flex-col h-full" onSubmit={handleSubmit}>
       <p className="text-lg font-medium text-center mb-2">L&apos;équipe</p>
@@ -245,8 +247,16 @@ const EditContact = ({ responsible, isLoading, handleSubmit, handleChange, handl
         <Field isLoading={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible} required={true} />
         <Field isLoading={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible} required={!responsible.phone} />
         <Field isLoading={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible} required={!responsible.email} type="tel" />
+        {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
+          <Select
+            label="Sélectionnez un rôle"
+            options={rolesOptions}
+            selected={rolesOptions.find((e) => e.value === responsible.role || "")}
+            setSelected={(e) => setResponsible({ ...responsible, role: e.value })}
+          />
+        )}
       </div>
-      {responsible._id && (
+      {responsible._id && team.length > 1 && (
         <button disabled={isLoading} className="border-b-[1px] border-b-transparent hover:border-red-500 mx-2 ml-auto" type="button" onClick={() => handleDelete(responsible)}>
           <div className="w-full flex flex-row justify-center items-center text-red-500">
             <HiOutlineTrash className="text-red-300 text-lg mr-2" />
