@@ -115,7 +115,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const handleChange = (e) => setResponsible({ ...responsible, [e.target.name]: e.target.value });
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl h-[460px] w-[800px]">
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl w-[800px] h-[500px] p-8">
       {responsible ? (
         <EditContact
           team={team}
@@ -128,11 +128,11 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
           onChange={resetState}
         />
       ) : (
-        <div className="px-8 py-7">
-          <p className="text-lg font-medium text-center mb-1">L&apos;équipe</p>
-          <div className="w-full grid grid-cols-2 gap-6 my-4">
-            {team.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
-            {team.length < 4 && <AddContact setResponsible={setResponsible} />}
+        <div className="space-y-8">
+          <p className="text-lg font-medium text-center">L&apos;équipe</p>
+          <div className="h-88 grid grid-cols-2 gap-6 overflow-auto">
+            {team?.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
+            <AddContact setResponsible={setResponsible} />
           </div>
         </div>
       )}
@@ -165,7 +165,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
 const DisplayContact = ({ responsible, setResponsible }) => {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="group flex flex-col rounded-lg bg-white border-grey-200 border-[1px] h-28">
+    <div className="group flex flex-col rounded-lg border-grey-200 border-[1px] h-28">
       <div className="flex justify-between items-center">
         <div className="flex items-center p-3">
           <div className="h-9 w-9 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-sm font-bold mr-3">
@@ -235,14 +235,13 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
   const user = useSelector((state) => state.Auth.user);
 
   return (
-    <form className="px-8 py-7 flex flex-col h-full" onSubmit={handleSubmit}>
-      <p className="text-lg font-medium text-center mb-2">L&apos;équipe</p>
+    <form className="h-full flex flex-col space-y-4" onSubmit={handleSubmit}>
+      <p className="text-lg font-medium text-center">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
       {!responsible._id && (
-        <p className="text-center text-gray-500 m-2">
-          Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.
-        </p>
+        <p className="text-center text-gray-500">Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.</p>
       )}
-      <div className="grid grid-cols-2 gap-6 my-4">
+
+      <div className="grid grid-cols-2 gap-6">
         <Field isLoading={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible} required={true} />
         <Field isLoading={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible} required={true} />
         <Field isLoading={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible} required={!responsible.phone} />
@@ -256,25 +255,25 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
           />
         )}
       </div>
-      {responsible._id && team.length > 1 && (
-        <button disabled={isLoading} className="border-b-[1px] border-b-transparent hover:border-red-500 mx-2 ml-auto" type="button" onClick={() => handleDelete(responsible)}>
-          <div className="w-full flex flex-row justify-center items-center text-red-500">
-            <HiOutlineTrash className="text-red-300 text-lg mr-2" />
-            Supprimer le contact
-          </div>
-        </button>
-      )}
 
-      <div className="mt-auto grid grid-cols-2 gap-6">
-        <button className="border-[1px] rounded-lg border-grey-300 bg-[#ffffff] py-2 px-8 hover:bg-[#f9fafb]" onClick={onChange} disabled={isLoading}>
-          Annuler
-        </button>
-        <button
-          className="border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm py-2 px-8 text-white text-sm justify-center hover:opacity-90"
-          type="submit"
-          disabled={isLoading}>
-          {responsible._id ? "Enregistrer" : "Envoyer l'invitation"}
-        </button>
+      <div className="mt-auto space-y-4">
+        {responsible._id && team.length > 1 && (
+          <button disabled={isLoading} className="items-center gap-2 flex ml-auto text-red-500" onClick={() => handleDelete(responsible)}>
+            <HiOutlineTrash className="text-lg" />
+            Supprimer le contact
+          </button>
+        )}
+        <div className="grid grid-cols-2 gap-6">
+          <button className="border-[1px] rounded-lg border-grey-300 bg-[#ffffff] py-2 px-8 hover:bg-[#f9fafb]" onClick={onChange} disabled={isLoading}>
+            Annuler
+          </button>
+          <button
+            className="border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm py-2 px-8 text-white text-sm justify-center hover:opacity-90"
+            type="submit"
+            disabled={isLoading}>
+            {responsible._id ? "Enregistrer" : "Envoyer l'invitation"}
+          </button>
+        </div>
       </div>
     </form>
   );
