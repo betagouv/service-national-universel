@@ -43,7 +43,7 @@ export default function Phase2Application({ young, onChange }) {
   const [modalDurationOpen, setModalDurationOpen] = React.useState(false);
   const [contractStatus, setContractStatus] = React.useState(null);
   let { applicationId, currentTab } = useParams();
-  console.log(currentTab);
+
   const history = useHistory();
   const [loadingContract, setLoadingContract] = React.useState(false);
 
