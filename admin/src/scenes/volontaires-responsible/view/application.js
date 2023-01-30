@@ -17,7 +17,7 @@ import rubberStampNotValided from "../../../assets/rubberStampNotValided.svg";
 import ReactTooltip from "react-tooltip";
 
 import { HiPlus } from "react-icons/hi";
-import ModalPJ from "../../volontaires/components/ModalPJ";
+import ModalPJ from "../../volontaires/view/phase2bis/components/ModalPJ";
 import Clock from "../../../assets/Clock.svg";
 import LeftArrow from "../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../assets/icons/Pencil";
