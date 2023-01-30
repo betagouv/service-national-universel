@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { appURL } from "../../../config";
 import { capture } from "../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard } from "../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard, ENABLE_PM } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 
@@ -154,7 +154,8 @@ export default function Phase2Application({ young, onChange }) {
     <>
       <Breadcrumbs items={[{ label: "Mes candidatures", to: "/volontaire/list/all" }, { label: "Fiche candidature" }]} />
       <YoungHeader young={young} tab={currentTab} onChange={onChange} isStructure={true} applicationId={application?._id} />
-      <Phase2MilitaryPreparation young={young} FileCard={FileCard} />
+      {ENABLE_PM && <Phase2MilitaryPreparation young={young} FileCard={FileCard} />}
+
       <div className="p-7">
         <div className="bg-white w-full h-full rounded-lg px-4">
           <div className="flex items-center justify-between py-6">
