@@ -1,3 +1,17 @@
+# [1.208.0](https://github.com/betagouv/service-national-universel/compare/v1.207.0...v1.208.0) (2023-01-27)
+
+
+### Bug Fixes
+
+* **admin:** crash navbar ([6c52cee](https://github.com/betagouv/service-national-universel/commit/6c52ceeaa905b40bd1d453faba9e5cd87d17c312))
+
+
+### Features
+
+* **admin:** open PDT to ref ([e5e8b25](https://github.com/betagouv/service-national-universel/commit/e5e8b25391a3f45ebb7c1d029bd64582be2d0ddc))
+* **admin:** structure - responsible phase 2 : Mes candidatures ([#2207](https://github.com/betagouv/service-national-universel/issues/2207)) ([b0c5b41](https://github.com/betagouv/service-national-universel/commit/b0c5b4167581533d2c3ffafa94982399be371e34))
+* **api/admin:** Refonte ecran structure détails ([#2218](https://github.com/betagouv/service-national-universel/issues/2218)) ([25e75aa](https://github.com/betagouv/service-national-universel/commit/25e75aa7c43af2f075f4ee3f2803336152afda80))
+
 # [1.207.0](https://github.com/betagouv/service-national-universel/compare/v1.206.0...v1.207.0) (2023-01-26)
 
 

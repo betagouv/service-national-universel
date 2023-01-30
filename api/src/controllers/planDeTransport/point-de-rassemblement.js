@@ -29,7 +29,7 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
 
     // get all meeting points to cohesion from schema de répartition center with bus
     const schemaMeetingPoints = await SchemaDeRepartitionModel.aggregate([
-      { $match: { cohort: req.user.cohort, centerId: cohesionCenter._id.toString() } },
+      { $match: { cohort: req.user.cohort, centerId: cohesionCenter._id.toString(), fromDepartment: req.user.department } },
       { $unwind: "$gatheringPlaces" },
       {
         $addFields: { meetingPointId: { $toObjectId: "$gatheringPlaces" } },

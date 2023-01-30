@@ -151,7 +151,7 @@ export default function StepUpload() {
   }
 
   const isEnabled =
-    (!corrections?.length && young.files.cniFiles != null && date != null && !loading && !error.text) || (corrections?.length && hasChanged && !loading && !error.text);
+    (!corrections?.length && young?.files?.cniFiles?.length && date != null && !loading && !error.text) || (corrections?.length && hasChanged && !loading && !error.text);
 
   return (
     <>
