@@ -389,7 +389,7 @@ export default function Phase2Application({ young, onChange }) {
                 <div className="flex justify-between">
                   <div className="text-lg leading-6 font-semibold">Documents</div>
                 </div>
-                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full items-stretch">
+                <div className="flex flex-row justify-start gap-4 my-4 flex-wrap self-center">
                   {optionsType.map(
                     (option, index) =>
                       application[option].length > 0 && (
@@ -412,6 +412,17 @@ export default function Phase2Application({ young, onChange }) {
                         />
                       ),
                   )}
+                  {/* case du modele d'avenant */}
+                  <FileCard
+                    key={"model-avenant"}
+                    name={"Avenant au contat d'engagement"}
+                    icon="reglement"
+                    filled={true}
+                    color="text-blue-600 bg-white"
+                    topSubComment="Modèle à télécharger"
+                    status="Modifier"
+                    onClick={() => console.log("download")}
+                  />
                   {optionsType.reduce((acc, option) => acc + (application[option].length > 0 ? 1 : 0), 0) < optionsType.length && (
                     <section
                       onClick={() => {
@@ -420,7 +431,7 @@ export default function Phase2Application({ young, onChange }) {
                           stepOne: true,
                         });
                       }}
-                      className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
+                      className={`group min-h-[230px] w-[250px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
                       <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
                         <HiPlus />
                         Ajouter une pièce jointe
@@ -569,12 +580,13 @@ function SendContractLink({ contract, target }) {
   );
 }
 
-function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false }) {
+function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false, topSubComment }) {
   return (
-    <section className={`basis-1/4  bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw}`}>
+    <section className={` bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw} w-[250px]`}>
       <FileIcon filled={filled} icon={icon} />
-      <section>
-        <p className="text-base font-bold mt-2">{name}</p>
+      <section className="mt-2">
+        {topSubComment ? <p className="text-xs">{topSubComment}</p> : null}
+        <p className="text-base font-bold">{name}</p>
         {description ? <p className="ttext-xs leading-4 font-normal mt-1">{description}</p> : null}
       </section>
       {showNumber ? (
