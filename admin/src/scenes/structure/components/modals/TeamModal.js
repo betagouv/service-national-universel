@@ -183,15 +183,15 @@ const DisplayContact = ({ responsible, setResponsible }) => {
         </div>
       </div>
 
-      <div className="flex flex-row border-t-[1px] border-gray-200 my-auto">
+      <div className="flex border-t-[1px] border-gray-200 my-auto">
         {responsible.phone && (
-          <div className="flex flex-1 flex-row justify-center items-center my-2 px-2">
+          <div className="flex flex-1 flex-row justify-center items-center my-2 px-3">
             <HiPhone className="text-gray-400" />
             <div className="pl-2 text-gray-700 whitespace-nowrap">{formatPhoneNumberFR(responsible.phone)}</div>
           </div>
         )}
         {responsible.email && (
-          <div className="flex flex-2 my-2 px-2 border-l-[1px] border-gray-200 truncate w-full justify-center items-center">
+          <div className="flex flex-2 my-2 px-3 border-l-[1px] border-gray-200 truncate w-full items-center">
             <div className="pr-2 flex-row text-gray-700 truncate ">{responsible.email}</div>
             <div
               className="flex items-center justify-center cursor-pointer hover:scale-105"
