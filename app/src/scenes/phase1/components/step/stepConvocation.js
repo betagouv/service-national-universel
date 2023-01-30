@@ -36,6 +36,7 @@ export default function StepConvocation({ young }) {
   const handleDownload = async () => {
     const { data } = await api.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
     plausibleEvent("affecté_step3");
+    if (young?.convocationFileDownload === "true") return;
     dispatch(setYoung(data));
   };
 
