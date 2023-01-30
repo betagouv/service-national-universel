@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import api from "../../../services/api";
 import StructureView from "./wrapper";
+import StructureViewV2 from "./wrapperv2";
 import Panel from "../../missions/panel";
 
 import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import Loader from "../../../components/Loader";
+import { environment } from "../../../config";
 
 export default function Mission({ structure }) {
   const [data, setData] = useState([]);
@@ -27,9 +29,42 @@ export default function Mission({ structure }) {
 
   if (!structure) return <Loader />;
 
+  if (environment === "production")
+    return (
+      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+        <StructureView structure={structure} tab="missions">
+          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+            <div style={{ flex: 2, position: "relative" }}>
+              <Table>
+                <thead>
+                  <tr>
+                    <th width="40%">Mission</th>
+                    <th>Dates</th>
+                    <th>Places</th>
+                    <th width="20%">Statut pour la mission</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((hit) => (
+                    <Hit key={hit._id} hit={hit} onClick={() => handleClick(hit)} />
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </div>
+        </StructureView>
+        <Panel
+          mission={mission}
+          onChange={() => {
+            setMission(null);
+          }}
+        />
+      </div>
+    );
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <StructureView structure={structure} tab="missions">
+      <StructureViewV2 tab="missions">
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>
             <Table>
@@ -49,7 +84,7 @@ export default function Mission({ structure }) {
             </Table>
           </div>
         </div>
-      </StructureView>
+      </StructureViewV2>
       <Panel
         mission={mission}
         onChange={() => {
