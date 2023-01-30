@@ -4,6 +4,7 @@ import { translate } from "snu-lib";
 import API from "../../../services/api";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 import { StructureContext } from "../view";
+
 import EditButton from "../../../components/buttons/EditButton";
 import MultiSelect from "../components/MultiSelect";
 import AsyncSelect from "react-select/async";
@@ -19,8 +20,10 @@ export default function DetailsView() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
   const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
   const structureTypesOptions = data.legalStatus && data.legalStatus !== "OTHER" ? typesStructure[data.legalStatus].map((e) => ({ label: e, value: e })) : [];
+
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     setData({
       ...data,
@@ -33,9 +36,11 @@ export default function DetailsView() {
       city: isConfirmed ? suggestion.city : data.city,
     });
   };
+
   const onSubmit = async () => {
     if (data.isNtwork) data.networkId = undefined;
     setIsLoading(true);
+
     const error = {};
     if (!data.addressVerified) error.addressVerified = "Veuillez vérifier l'adresse";
     if (!data?.name) error.name = "Le nom est obligatoire";
@@ -46,6 +51,7 @@ export default function DetailsView() {
     if (!data?.types) error.types = "Veuillez sélectionner au moins un type d'agréément";
     setErrors(error);
     if (Object.keys(error).length > 0) return setIsLoading(false);
+
     try {
       const { ok, code, data: resData } = await API.put(`/structure/${structure._id}`, data);
       if (!ok) {
@@ -63,6 +69,7 @@ export default function DetailsView() {
       setIsLoading(false);
     }
   };
+
   return (
     <StructureView tab="details">
       <div className="flex gap-4">{/* Cartes */}</div>
@@ -96,6 +103,7 @@ export default function DetailsView() {
                 error={errors?.name}
               />
             </div>
+
             <div className="space-y-2 my-4">
               <div className="text-xs font-medium leading-4 text-gray-900">Présentation de la structure (facultatif)</div>
               <Field
@@ -106,6 +114,7 @@ export default function DetailsView() {
                 type="textarea"
               />
             </div>
+
             <div className="space-y-3">
               <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
               <Field

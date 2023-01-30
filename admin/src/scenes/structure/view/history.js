@@ -15,7 +15,7 @@ export default function History({ structure }) {
       </div>
     );
   return (
-    <WrapperHistoryV2 structure={structure} tab="historique">
+    <WrapperHistoryV2 tab="historique">
       <HistoricComponent model="structure" value={structure} />
     </WrapperHistoryV2>
   );

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { StructureContext } from ".";
 import Badge from "../../../components/Badge";
-import Actions from "../components/Actions";
+import HeaderButtons from "../components/HeaderButtons";
 import Menu from "../components/Menu";
 
 export default function Wrapper({ tab, children }) {
@@ -18,7 +18,7 @@ export default function Wrapper({ tab, children }) {
           </div>
           <Menu tab={tab} />
         </div>
-        {tab === "details" && <Actions />}
+        {tab === "details" && <HeaderButtons />}
       </div>
       <main className="m-8">{children}</main>
     </div>
