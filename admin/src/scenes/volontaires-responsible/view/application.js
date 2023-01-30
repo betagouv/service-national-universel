@@ -158,12 +158,7 @@ export default function Phase2Application({ young, onChange }) {
 
       <div className="p-7">
         <div className="bg-white w-full h-full rounded-lg px-4">
-          <div className="flex items-center justify-between py-6">
-            <button
-              onClick={history.goBack}
-              className="h-8 w-8 flex items-center justify-center space-x-1 bg-gray-100 rounded-full border-[1px] border-gray-100 hover:border-gray-300">
-              <LeftArrow stroke={"#374151"} width={15} />
-            </button>
+          <div className="flex items-center justify-center py-6">
             <div className="flex items-center gap-3 text-2xl font-bold">
               <div>Espace&nbsp;candidature </div>
               <div className="flex items-center justify-end">
@@ -172,15 +167,6 @@ export default function Phase2Application({ young, onChange }) {
                 </div>
               </div>
             </div>
-            {application?.contractId ? (
-              <button
-                className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
-                onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
-                <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
-              </button>
-            ) : (
-              <div />
-            )}
           </div>
           <hr />
           <div className="flex relative items-center justify-center w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
