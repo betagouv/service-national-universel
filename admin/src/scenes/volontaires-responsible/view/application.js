@@ -407,7 +407,9 @@ export default function Phase2Application({ young, onChange }) {
                     color="text-blue-600 bg-white"
                     topSubComment="Modèle à télécharger"
                     status="Modifier"
-                    onClick={() => console.log("download")}
+                    onClick={() => {
+                      window.open("https://cellar-c2.services.clever-cloud.com/cni-bucket-prod/file/modele_avenant_au_contrat_phase2.pdf", "_blank");
+                    }}
                   />
                   {optionsType.reduce((acc, option) => acc + (application[option].length > 0 ? 1 : 0), 0) < optionsType.length && (
                     <section
