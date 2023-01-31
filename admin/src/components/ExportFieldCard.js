@@ -3,7 +3,7 @@ import React, { useState } from "react";
 export default function ExportFieldCard({ category, selectedFields, setSelectedFields }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="rounded-xl border-[1px] px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition">
+    <div className="rounded-xl border-[1px] px-3 py-2.5 cursor-pointer">
       <div
         onClick={() => {
           if (!selectedFields.includes(category.id)) {
