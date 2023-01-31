@@ -3,10 +3,14 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import { useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { ES_NO_LIMIT } from "../../../utils";
+import { adminURL } from "../../../config";
+import Field from "../../missions/components/Field";
+import AsyncSelect from "react-select/async";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
   const [values, setValues] = useState({ structureId: "", tutorId: "" });
+  const [selectedStructure, setSelectedStructure] = useState(null);
   const [referents, setReferents] = useState([]);
   const [errors, setErrors] = useState({});
   const referentSelectRef = useRef();
@@ -54,10 +58,43 @@ export default function CustomMission({ young, onChange }) {
             <div className="text-lg font-medium text-gray-900">Détails de la mission</div>
             <div>
               <div className="text-xs font-medium mb-2">
-                Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
-                fragiles »
+                Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. <br />
+                Exemple : « Je fais les courses de produits pour mes voisins les plus fragiles »
               </div>
               <Field name="name" errors={errors} handleChange={(e) => setValues({ ...values, name: e.target.value })} label="Nom de la mission" value={values.name} />
+            </div>
+            <div className="mt-4">
+              <div className="text-xs font-medium mb-2">Structure rattachée</div>
+              <AsyncSelect
+                label="Structure"
+                value={{ label: values.structureName }}
+                loadOptions={fetchStructures}
+                noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
+                styles={{
+                  dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                  placeholder: (styles) => ({ ...styles, color: "black" }),
+                  control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                  singleValue: (styles) => ({ ...styles, color: "black" }),
+                  multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                  indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                }}
+                defaultOptions
+                onChange={(e) => {
+                  setValues({ ...values, structureName: e.label, structureId: e._id });
+                  setSelectedStructure(e.structure);
+                }}
+                placeholder="Rechercher une structure"
+                error={errors.structureName}
+              />
+              {values.structureName && (
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`${adminURL}/structure/${values.structureId}/edit`}
+                  className="inline-block w-full border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
+                  Voir la structure
+                </a>
+              )}
             </div>
           </div>
         </div>
