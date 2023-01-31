@@ -2,14 +2,26 @@ import React, { useEffect, useState, useRef } from "react";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { useHistory } from "react-router-dom";
 import api from "../../../services/api";
-import { ES_NO_LIMIT } from "../../../utils";
+import { ES_NO_LIMIT, MISSION_DOMAINS, translate } from "../../../utils";
 import { adminURL } from "../../../config";
 import Field from "../../missions/components/Field";
 import AsyncSelect from "react-select/async";
+import ReactSelect from "react-select";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
-  const [values, setValues] = useState({ structureId: "", structureName: "", tutorId: "" });
+  const [values, setValues] = useState({
+    structureId: "",
+    structureName: "",
+    tutorId: "",
+    mainDomain: "",
+    domains: [],
+    format: "",
+    duration: "",
+    description: "",
+    actions: "",
+    contraintes: "",
+  });
   const [selectedStructure, setSelectedStructure] = useState(null);
   const [referents, setReferents] = useState([]);
   const [errors, setErrors] = useState({});
@@ -27,6 +39,9 @@ export default function CustomMission({ young, onChange }) {
       setReferents(responseReferents);
     }
   }
+  const mainDomainsOption = Object.keys(MISSION_DOMAINS).map((d) => {
+    return { value: d, label: translate(d) };
+  });
   useEffect(() => {
     initReferents();
   }, [values.structureId]);
@@ -95,6 +110,96 @@ export default function CustomMission({ young, onChange }) {
                 </a>
               )}
             </div>
+            <div className="mt-4">
+              <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
+              <CustomSelect
+                noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
+                options={mainDomainsOption}
+                placeholder={"Sélectionnez un domaine principal"}
+                onChange={(e) => {
+                  setValues({ ...values, mainDomain: e.value, domains: values.domains.filter((d) => d !== e.value) });
+                }}
+                value={values.mainDomain}
+              />
+              <div className="flex flex-row text-xs font-medium my-2">
+                <div>Domaine(s) d&apos;action secondaire(s)</div>
+                <div className="text-gray-400">&nbsp;(facultatif)</div>
+              </div>
+              <CustomSelect
+                isMulti
+                options={mainDomainsOption.filter((d) => d.value !== values.mainDomain)}
+                noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
+                placeholder={"Sélectionnez un ou plusieurs domaines"}
+                onChange={(e) => {
+                  setValues({ ...values, domains: e });
+                }}
+                value={[...values.domains]}
+              />
+            </div>
+            <div>
+              <div className="text-xs font-medium mb-2">Type de mission</div>
+              <CustomSelect
+                errors={errors}
+                options={[
+                  { value: "CONTINUOUS", label: translate("CONTINUOUS") },
+                  { value: "DISCONTINUOUS", label: translate("DISCONTINUOUS") },
+                ]}
+                placeholder={"Mission regroupée sur des journées"}
+                onChange={(e) => setValues({ ...values, format: e.value })}
+                value={values.format}
+              />
+            </div>
+            <div>
+              <div className="flex flex-row text-xs font-medium mt-2">
+                <div>Durée de la mission</div>
+                <div className="text-gray-400">&nbsp;(facultatif)</div>
+              </div>
+              <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
+              <Field errors={errors} name="duration" handleChange={(e) => setValues({ ...values, duration: e.target.value })} label="Heure(s)" value={translate(values.duration)} />
+            </div>
+            <div>
+              <div className="flex flex-row text-xs font-medium my-2">Objectifs de la mission</div>
+              <Field
+                errors={errors}
+                name="description"
+                type="textarea"
+                row={4}
+                handleChange={(e) => setValues({ ...values, description: e.target.value })}
+                label="Décrivez votre mission"
+                value={translate(values.description)}
+              />
+            </div>
+            <div>
+              <div className="flex flex-row text-xs font-medium my-2">Actions concrètes confiées au(x) volontaire(s)</div>
+              <Field
+                errors={errors}
+                type="textarea"
+                name="actions"
+                row={4}
+                handleChange={(e) => setValues({ ...values, actions: e.target.value })}
+                label="Listez les actions confiées au(x) volontaires"
+                value={translate(values.actions)}
+              />
+            </div>
+            <div>
+              <div className="flex flex-col text-xs font-medium my-2">
+                <div>
+                  Contraintes spécifiques pour cette mission
+                  <span className="text-gray-400">&nbsp;(facultatif).&nbsp;</span>
+                </div>
+                <div>(conditions physiques, période de formation, mission en soirée...)</div>
+              </div>
+              <Field
+                type="textarea"
+                row={4}
+                handleChange={(e) => setValues({ ...values, contraintes: e.target.value })}
+                label="Précisez les informations complémentaires à préciser au volontaire."
+                value={translate(values.contraintes)}
+              />
+            </div>
+          </div>
+          <div>
+            <div className="text-lg font-medium text-gray-900">Dates et places disponibles</div>
           </div>
         </div>
       </div>
@@ -145,4 +250,24 @@ const fetchStructures = async (inputValue) => {
   return responses[0].hits.hits.map((hit) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });
+};
+const CustomSelect = ({ ref = null, onChange, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option", error }) => {
+  return (
+    <ReactSelect
+      ref={ref}
+      noOptionsMessage={() => noOptionsMessage}
+      styles={{
+        dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        placeholder: (styles) => ({ ...styles, color: error ? "red" : "black" }),
+        singleValue: (styles) => ({ ...styles, color: "black" }),
+        multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+      }}
+      options={options}
+      placeholder={placeholder}
+      onChange={(val) => (isMulti ? onChange(val.map((c) => c.value)) : onChange(val))}
+      value={isMulti ? options.filter((c) => value.includes(c.value)) : options.find((c) => c.value === value)}
+      isMulti={isMulti}
+    />
+  );
 };
