@@ -6,9 +6,11 @@ import Phase2Contract from "./phase2Contract";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 
 import api from "../../../services/api";
+import Application from "./application";
 import Details from "./Details";
 import Wrapper from "./wrapper";
 import { ENABLE_PM } from "../../../utils";
+import { environment } from "../../../config";
 
 export default function VolontaireResponsible({ ...props }) {
   const [young, setYoung] = useState();
@@ -28,28 +30,35 @@ export default function VolontaireResponsible({ ...props }) {
   return (
     <Switch>
       <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
-      {ENABLE_PM && (
-        <SentryRoute
-          path="/volontaire/:id/preparation-militaire"
-          component={() => (
-            <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-              <Wrapper young={young} tab="militaryPreparation">
-                <Phase2MilitaryPreparation young={young} />
-              </Wrapper>
-            </div>
+
+      {environment === "production" ? (
+        <>
+          {ENABLE_PM && (
+            <SentryRoute
+              path="/volontaire/:id/preparation-militaire"
+              component={() => (
+                <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+                  <Wrapper young={young} tab="militaryPreparation">
+                    <Phase2MilitaryPreparation young={young} />
+                  </Wrapper>
+                </div>
+              )}
+            />
           )}
-        />
+          <SentryRoute
+            path="/volontaire/:id"
+            component={() => (
+              <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+                <Wrapper young={young} tab="details">
+                  <Details young={young} />
+                </Wrapper>
+              </div>
+            )}
+          />
+        </>
+      ) : (
+        <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/:currentTab" component={() => <Application young={young} onChange={getYoung} />} />
       )}
-      <SentryRoute
-        path="/volontaire/:id"
-        component={() => (
-          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-            <Wrapper young={young} tab="details">
-              <Details young={young} />
-            </Wrapper>
-          </div>
-        )}
-      />
     </Switch>
   );
 }
