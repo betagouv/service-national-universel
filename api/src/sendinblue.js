@@ -241,23 +241,6 @@ async function sync(obj, type, { force } = { force: false }) {
   }
 }
 
-// async function syncContact(email, attributes, listIds) {
-// try {
-//   const res = await getContact(email);
-//   if (res.code) {
-//     if (res?.code === "document_not_found") {
-//       const res = await createContact({ email, attributes, listIds });
-//       if (res.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
-//       return;
-//     }
-//     throw new Error(JSON.stringify({ res, email, attributes, listIds }));
-//   }
-//   const resUpdate = await updateContact(email, { attributes, listIds });
-//   if (resUpdate.code) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
-// } catch (e) {
-//   capture(e);
-// }
-
 async function syncContact(email, attributes, listIds) {
   try {
     const res = await createContact({ email, attributes, listIds, updateEnabled: true });
