@@ -33,7 +33,7 @@ export default function PanelView({ onChange, value, application }) {
           </div>
         )}
         <div style={{ display: "flex" }}>
-          <Link to={`/volontaire/${application.youngId}/phase2/application/${application._id}/candidature`}>
+          <Link to={`/volontaire/${application.youngId}/phase2/application/${application._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
           {application.status === "VALIDATED" || application.status === "IN_PROGRESS" || application.status === "DONE" || application.status === "ABANDON" ? (

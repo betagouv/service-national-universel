@@ -220,7 +220,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           {isStructure ? (
             <TabList className="mt-[30px]">
               {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && user.role !== ROLES.HEAD_CENTER && (
-                <Tab isActive={tab === "candidature"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}/candidature`)}>
+                <Tab isActive={tab === "candidature"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`)}>
                   <div className="flex items-center">
                     Candidature{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
                   </div>

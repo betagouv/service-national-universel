@@ -29,8 +29,6 @@ export default function VolontaireResponsible({ ...props }) {
   if (!young) return <div />;
   return (
     <Switch>
-      <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
-
       {environment === "production" ? (
         <>
           {ENABLE_PM && (
@@ -57,7 +55,11 @@ export default function VolontaireResponsible({ ...props }) {
           />
         </>
       ) : (
-        <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/:currentTab" component={() => <Application young={young} onChange={getYoung} />} />
+        <>
+          <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
+          <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/dossier" component={() => <Application young={young} onChange={getYoung} currentTab="dossier" />} />
+          <SentryRoute path="/volontaire/:id/phase2/application/:applicationId" exact component={() => <Application young={young} onChange={getYoung} />} />
+        </>
       )}
     </Switch>
   );

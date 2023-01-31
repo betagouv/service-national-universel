@@ -32,7 +32,7 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import Dossier from "./dossier";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
 
-export default function Phase2Application({ young, onChange }) {
+export default function Phase2Application({ young, onChange, currentTab = "candidature" }) {
   const [application, setApplication] = React.useState(null);
   const [mission, setMission] = React.useState();
   const [tags, setTags] = React.useState();
@@ -40,7 +40,7 @@ export default function Phase2Application({ young, onChange }) {
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalDurationOpen, setModalDurationOpen] = React.useState(false);
   const [contractStatus, setContractStatus] = React.useState(null);
-  let { applicationId, currentTab } = useParams();
+  let { applicationId } = useParams();
 
   const history = useHistory();
   const [loadingContract, setLoadingContract] = React.useState(false);
@@ -151,7 +151,7 @@ export default function Phase2Application({ young, onChange }) {
   return (
     <>
       <Breadcrumbs items={[{ label: "Mes candidatures", to: "/volontaire/list/all" }, { label: "Fiche candidature" }]} />
-      <YoungHeader young={young} tab={currentTab} onChange={onChange} isStructure={true} applicationId={application?._id} />
+      <YoungHeader young={young} tab={"candidature"} onChange={onChange} isStructure={true} applicationId={application?._id} />
       {ENABLE_PM && <Phase2MilitaryPreparation young={young} FileCard={FileCard} />}
 
       <div className="p-7">

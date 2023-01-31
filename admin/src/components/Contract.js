@@ -235,7 +235,7 @@ export default function Contract({ young, admin }) {
     <>
       <BackLink
         onClick={() => {
-          history.push(`/volontaire/${young._id}/phase2/application/${applicationId}/candidature`);
+          history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`);
         }}>
         {"<"} Revenir à l&apos;espace candidature
       </BackLink>
