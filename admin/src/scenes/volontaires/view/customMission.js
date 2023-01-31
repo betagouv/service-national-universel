@@ -9,7 +9,7 @@ import AsyncSelect from "react-select/async";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
-  const [values, setValues] = useState({ structureId: "", tutorId: "" });
+  const [values, setValues] = useState({ structureId: "", structureName: "", tutorId: "" });
   const [selectedStructure, setSelectedStructure] = useState(null);
   const [referents, setReferents] = useState([]);
   const [errors, setErrors] = useState({});
@@ -69,14 +69,13 @@ export default function CustomMission({ young, onChange }) {
                 label="Structure"
                 value={{ label: values.structureName }}
                 loadOptions={fetchStructures}
-                noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
-                styles={{
-                  dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                  placeholder: (styles) => ({ ...styles, color: "black" }),
-                  control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
-                  singleValue: (styles) => ({ ...styles, color: "black" }),
-                  multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                  indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                noOptionsMessage={() => {
+                  return (
+                    <a className="flex items-center gap-2 flex-col cursor-pointer no-underline" href={`${adminURL}/structure/create`} target="_blank" rel="noreferrer">
+                      <div className="text-sm text-gray-400">La structure recherchée n&apos;est pas dans la liste ?</div>
+                      <div className="font-medium text-blue-600 text-">Créer une nouvelle structure</div>
+                    </a>
+                  );
                 }}
                 defaultOptions
                 onChange={(e) => {
