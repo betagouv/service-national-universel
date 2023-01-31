@@ -8,6 +8,7 @@ import { APPLICATION_STATUS_COLORS, ROLES, translate, ENABLE_PM } from "../../..
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer } from "../../../components/dashboard";
+import { environment } from "../../../config";
 
 export default function Applications() {
   const user = useSelector((state) => state.Auth.user);
@@ -32,6 +33,8 @@ export default function Applications() {
     if (e > 0) return e;
     return "-";
   };
+
+  const link = environment === "production" ? "/volontaire" : "/volontaire/list/all";
 
   return (
     <>
@@ -60,7 +63,7 @@ export default function Applications() {
           </Col>
         ) : null}
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"WAITING_VALIDATION"%5D`}>
+          <Link to={link + `?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} style={{ marginBottom: 10 }}>
                 <CardTitle>En attente de validation</CardTitle>
@@ -78,7 +81,7 @@ export default function Applications() {
           </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"VALIDATED"%5D`}>
+          <Link to={link + `?STATUS=%5B"VALIDATED"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED} style={{ marginBottom: 10 }}>
                 <CardTitle>Approuvées</CardTitle>
@@ -96,7 +99,7 @@ export default function Applications() {
           </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"REFUSED"%5D`}>
+          <Link to={link + `?STATUS=%5B"REFUSED"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.REFUSED}>
                 <CardTitle>Non retenues</CardTitle>
@@ -109,7 +112,7 @@ export default function Applications() {
           </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"CANCEL"%5D`}>
+          <Link to={link + `?STATUS=%5B"CANCEL"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.CANCEL}>
                 <CardTitle>Annulées</CardTitle>
@@ -129,7 +132,7 @@ export default function Applications() {
           </h4>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"IN_PROGRESS"%5D`}>
+          <Link to={link + `?STATUS=%5B"IN_PROGRESS"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.IN_PROGRESS}>
                 <CardTitle>En cours sur une MIG</CardTitle>
@@ -142,7 +145,7 @@ export default function Applications() {
           </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"DONE"%5D`}>
+          <Link to={link + `?STATUS=%5B"DONE"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
                 <CardTitle>Ayant effectué leur MIG</CardTitle>
@@ -155,7 +158,7 @@ export default function Applications() {
           </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire/list/all?STATUS=%5B"NOT_COMPLETED"%5D`}>
+          <Link to={link + `?STATUS=%5B"NOT_COMPLETED"%5D`}>
             <CardContainer>
               <Card borderBottomColor={APPLICATION_STATUS_COLORS.NOT_COMPLETED}>
                 <CardTitle>Ayant abandonné leur MIG</CardTitle>
