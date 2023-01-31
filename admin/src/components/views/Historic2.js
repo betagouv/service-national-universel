@@ -1,23 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { formatStringLongDate, translateModelFields, isIsoDate, translateHistory } from "../../utils";
 import { formatLongDateFR, translateAction } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
-import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
+
+import { Listbox, Transition } from "@headlessui/react";
+import { BsChevronDown, BsChevronUp } from "react-icons/bs";
+import { AiOutlineCheck } from "react-icons/ai";
 
 export default function Historic({ model, data, customFilterOptions, refName }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [commonFilters, setCommonFilters] = useState({ op: [], user: [], path: [] });
+  console.log("🚀 ~ file: Historic2.js:16 ~ Historic ~ commonFilters", commonFilters);
   const [customFilter, setCustomFilter] = useState({ label: "", values: null });
   const activeFilters = getActiveFilters();
+  console.log("🚀 ~ file: Historic2.js:15 ~ Historic ~ activeFilters", activeFilters);
   const filteredData = filterData();
 
   function getActiveFilters() {
     let filters = [];
     for (const [key, value] of Object.entries(commonFilters)) {
-      if (value.length) filters.push({ [key]: value });
+      if (value.length) filters.push([{ [key]: value }]);
     }
     if (customFilter?.value) filters.push(customFilter.value);
     return filters;
@@ -35,10 +40,8 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
     return d;
   }
 
-  function filterEvent(event, filters) {
-    return filters.every((filter) => {
-      return Object.entries(filter).some(([key, value]) => value.includes(event[key]));
-    });
+  function filterEvent(event, eventFilters) {
+    return eventFilters.every((eventFilter) => eventFilter.some((v) => Object.entries(v).every(([key, value]) => value.includes(event[key]))));
   }
 
   function searchEvent(e, query) {
@@ -67,8 +70,17 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
         <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
           <MultiSelect
             options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
+            selected={commonFilters.path}
+            setSelected={(path) => setCommonFilters((f) => ({ ...f, path: path.value }))}
+            label="Donnée modifiée"
+          />
+          <MultiSelect
+            options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
             value={commonFilters.path}
-            onChange={(path) => setCommonFilters((f) => ({ ...f, ...{ path } }))}
+            onChange={(e) => {
+              console.log("🚀 ~ file: Historic2.js:100 ~ Historic ~ value", e);
+              setCommonFilters({ ...commonFilters, ...{ path: e.target.value } });
+            }}
             label="Donnée modifiée"
           />
           <MultiSelect
@@ -156,5 +168,54 @@ function Event({ e, index, model, refName, path }) {
         <UserCard user={e.user} />
       </td>
     </tr>
+  );
+}
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function MultiSelect({ options, selected, setSelected, label }) {
+  const [filters, setFilters] = useState([]);
+
+  return (
+    <div className="min-w-72">
+      <Listbox value={selected} onChange={setSelected} multiple>
+        {({ open }) => (
+          <div className="relative">
+            <Listbox.Button className="flex rounded-lg p-2 border bg-white items-center gap-3">
+              <p className="text-left text-sm text-gray-500 max-w-sm whitespace-nowrap overflow-hidden">
+                {label} : {filters.map((e) => e.label).join(", ")}
+              </p>
+              <span className="pointer-events-none flex items-center pr-2">
+                {open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}
+              </span>
+            </Listbox.Button>
+
+            <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {options.map((option) => (
+                  <Listbox.Option
+                    key={option.value}
+                    className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
+                    value={option}>
+                    {({ selected, active }) => (
+                      <>
+                        <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{option.label}</span>
+                        {selected ? (
+                          <span className={classNames(active ? "text-white" : "text-blue-600", "absolute inset-y-0 right-0 flex items-center pr-4")}>
+                            <AiOutlineCheck className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+          </div>
+        )}
+      </Listbox>
+    </div>
   );
 }
