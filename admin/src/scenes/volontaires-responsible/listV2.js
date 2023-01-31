@@ -592,7 +592,7 @@ export default function List() {
                             currentTab={tab}
                             mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
                             onClick={() => handleClick(hit)}
-                            opened={panel?.young?._id === hit.youngId}
+                            opened={panel?.application?._id === hit._id}
                             selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                             onChangeApplication={() => history.go(0)}
                             onSelect={(newItem) =>
