@@ -122,12 +122,19 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendStructureManagerContractEmail(contract, isValidateAgainMail) {
-  return sendContractEmail(contract, {
+  sendContractEmail(contract, {
+    email: contract.tutorEmail,
+    name: `${contract.tutorFirstName} ${contract.tutorLastName}`,
+    token: contract.tutorToken,
+    isValidateAgainMail,
+  });
+  sendContractEmail(contract, {
     email: contract.structureManagerEmail,
     name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
     token: contract.structureManagerToken,
     isValidateAgainMail,
   });
+  return;
 }
 
 async function sendParent1ContractEmail(contract, isValidateAgainMail) {
