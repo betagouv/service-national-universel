@@ -18,8 +18,6 @@ import ReactTooltip from "react-tooltip";
 
 import { HiPlus } from "react-icons/hi";
 import ModalPJ from "../../volontaires/view/phase2bis/components/ModalPJ";
-import Clock from "../../../assets/Clock.svg";
-import LeftArrow from "../../../assets/icons/ArrowNarrowLeft";
 import Pencil from "../../../assets/icons/Pencil";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
