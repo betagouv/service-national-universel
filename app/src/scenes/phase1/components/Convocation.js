@@ -50,7 +50,7 @@ export default function Convocation() {
 
   useEffect(() => {
     // À changer par la suite ? Notamment le isFromDOMTOM() ?
-    if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") return console.log("unauthorized");
+    if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") return console.log("unauthorized");
     getCenter();
     setCohort(getCohortDetail(young.cohort));
     young.meetingPointId && getMeetingPoint();
@@ -62,7 +62,7 @@ export default function Convocation() {
     return meetingPoint.pointDeRassemblement.address + " " + meetingPoint.pointDeRassemblement.zip + " " + meetingPoint.pointDeRassemblement.city;
   };
 
-  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") {
+  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {
     return (
       <Warning>
         ⚠️ Impossible d&apos;afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
@@ -111,34 +111,40 @@ export default function Convocation() {
           </>
         ) : (
           <>
-            <ConvocText>
-              Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
-              <div className="text-center">
-                <div>
-                  <b>Le </b> {dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
-                </div>
-                <div>
-                  <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
-                </div>
-                <div>
-                  <b>Au </b>
-                  {getMeetingAddress()}
-                </div>
-                <div>
-                  {meetingPoint?.bus ? (
-                    <>
-                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              </div>
-            </ConvocText>
-            <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
-              Attention à bien respecter l&apos;horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de cohésion. Votre représentant légal doit rester
-              jusqu&apos;à votre prise en charge par les accompagnateurs
-            </ConvocText>
+            {young.transportInfoGivenByLocal === "true" ? (
+              <ConvocText>Les informations de transport vous sont transmises par les serivces locaux.</ConvocText>
+            ) : (
+              <>
+                <ConvocText>
+                  Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
+                  <div className="text-center">
+                    <div>
+                      <b>Le </b> {dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
+                    </div>
+                    <div>
+                      <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
+                    </div>
+                    <div>
+                      <b>Au </b>
+                      {getMeetingAddress()}
+                    </div>
+                    <div>
+                      {meetingPoint?.bus ? (
+                        <>
+                          <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
+                </ConvocText>
+                <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
+                  Attention à bien respecter l&apos;horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de cohésion. Votre représentant légal doit rester
+                  jusqu&apos;à votre prise en charge par les accompagnateurs
+                </ConvocText>
+              </>
+            )}
           </>
         )}
         <ConvocText>Il vous est demandé de vous présenter avec :</ConvocText>
@@ -155,10 +161,18 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
         {!isFromDOMTOM() ? (
-          <ConvocText>
-            Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
-            {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre.
-          </ConvocText>
+          <>
+            {young.transportInfoGivenByLocal === "true" ? (
+              <ConvocText>
+                Le <b>retour de votre séjour </b>est prévu au même endroit que le jour du départ en centre SNU.
+              </ConvocText>
+            ) : (
+              <ConvocText>
+                Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
+                {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre SNU.
+              </ConvocText>
+            )}
+          </>
         ) : null}
         <ConvocText>
           <b>
@@ -168,15 +182,18 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>
           Afin que votre séjour se déroule dans les meilleures conditions, nous vous rappelons que chaque volontaire, lors de son inscription, s&apos;est engagé à respecter le{" "}
-          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank" rel="noreferrer">
-            règlement intérieur
-          </a>{" "}
+          <b>
+            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank" rel="noreferrer">
+              règlement intérieur
+            </a>
+          </b>{" "}
           du centre
         </ConvocText>
         <ConvocText>Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.</ConvocText>
         <Sign>
-          Emmanuelle PÉRÈS <br />
-          La directrice de la jeunesse, de l&apos;éducation populaire et de la vie associative, déléguée interministérielle à la jeunesse
+          Yves BOERO
+          <br />
+          Le directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative par intérim
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire dans la section «&nbsp;Séjour&nbsp;de&nbsp;cohésion&nbsp;» ou le{" "}

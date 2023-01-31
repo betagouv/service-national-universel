@@ -27,7 +27,7 @@ import NoteDisplayModal from "../../volontaires/view/notes/components/NoteDispla
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
 
-export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION }) {
+export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION, isStructure = false, applicationId = null }) {
   const user = useSelector((state) => state.Auth.user);
   const [confirmModal, setConfirmModal] = useState(null);
   const [viewedNotes, setVieweNotes] = useState([]);
@@ -217,59 +217,79 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               </>
             )}
           </Title>
-          <TabList className="mt-[30px]">
-            <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
-              <div className="flex items-center">
-                Dossier d&apos;inscription
-                {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
-                  <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
-                )}
-              </div>
-            </Tab>
-            {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
-              <>
-                <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+          {isStructure ? (
+            <TabList className="mt-[30px]">
+              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && user.role !== ROLES.HEAD_CENTER && (
+                <Tab isActive={tab === "candidature"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`)}>
                   <div className="flex items-center">
-                    Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
+                    Candidature{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
                   </div>
                 </Tab>
-                {user.role !== ROLES.HEAD_CENTER && (
-                  <>
-                    <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
-                      <div className="flex items-center">
-                        Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
-                      </div>
-                    </Tab>
-                    <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
-                      <div className="flex items-center">
-                        Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
-                      </div>
-                    </Tab>
-                  </>
-                )}
-              </>
-            )}
-            {user.role !== ROLES.HEAD_CENTER && (
-              <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
+              )}
+              <Tab isActive={tab === "dossier"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}/dossier`)}>
                 <div className="flex items-center">
-                  <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
-                  Historique
+                  Dossier d&apos;inscription
+                  {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
+                    <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
+                  )}
                 </div>
               </Tab>
-            )}
-            {canViewEmailHistory(user) ? (
-              <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
-                Notifications
+            </TabList>
+          ) : (
+            <TabList className="mt-[30px]">
+              <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
+                <div className="flex items-center">
+                  Dossier d&apos;inscription
+                  {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
+                    <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
+                  )}
+                </div>
               </Tab>
-            ) : null}
-            {user.role !== ROLES.HEAD_CENTER && canViewNotes(user) && (
-              <Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
-                {`(${young.notes?.length || 0}) Notes internes`}
-              </Tab>
-            )}
-          </TabList>
+              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
+                <>
+                  <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+                    <div className="flex items-center">
+                      Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
+                    </div>
+                  </Tab>
+                  {user.role !== ROLES.HEAD_CENTER && (
+                    <>
+                      <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+                        <div className="flex items-center">
+                          Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                        </div>
+                      </Tab>
+                      <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+                        <div className="flex items-center">
+                          Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                        </div>
+                      </Tab>
+                    </>
+                  )}
+                </>
+              )}
+              {user.role !== ROLES.HEAD_CENTER && (
+                <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
+                  <div className="flex items-center">
+                    <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                    Historique
+                  </div>
+                </Tab>
+              )}
+              {canViewEmailHistory(user) ? (
+                <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
+                  Notifications
+                </Tab>
+              ) : null}
+              {user.role !== ROLES.HEAD_CENTER && canViewNotes(user) && (
+                <Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
+                  {`(${young.notes?.length || 0}) Notes internes`}
+                </Tab>
+              )}
+            </TabList>
+          )}
         </div>
-        {user.role !== ROLES.HEAD_CENTER && (
+        {!isStructure && user.role !== ROLES.HEAD_CENTER && (
           <div className="w-[300px] self-end">
             <div className="relative mb-[15px]">
               <div className="absolute top-[-45px]">

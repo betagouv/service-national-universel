@@ -10,7 +10,6 @@ import Missions from "./missions";
 import Historic from "./history";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { environment } from "../../../config";
-console.log("🚀 ~ file: index.js:13 ~ environment", environment);
 
 export const StructureContext = createContext(null);
 

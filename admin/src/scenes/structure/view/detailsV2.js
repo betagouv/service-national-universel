@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { canCreateStructure, translate } from "snu-lib";
 import API from "../../../services/api";
 import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 import { StructureContext } from "../view";
@@ -13,9 +14,10 @@ import Field from "../../missions/components/Field";
 import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
 import StructureView from "./wrapperv2";
-import CardRepresentant from "../components/cards/CardRepresentant";
+import TeamCard from "../components/cards/TeamCard";
 
 export default function DetailsView() {
+  const user = useSelector((state) => state.Auth.user);
   const { structure, setStructure } = useContext(StructureContext);
   const [data, setData] = useState(structure);
   const [isEditing, setIsEditing] = useState(false);
@@ -73,13 +75,13 @@ export default function DetailsView() {
 
   return (
     <StructureView tab="details">
-      <div className="flex gap-4 my-6">
-        <CardRepresentant />
+      <div className="flex gap-4 my-4">
+        <TeamCard structureId={structure._id} />
       </div>
       <main className="bg-white p-8 rounded-xl shadow-sm">
         <div className="flex justify-between w-full">
           <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
-          {
+          {canCreateStructure(user) && (
             <EditButton
               isEditing={isEditing}
               setIsEditing={setIsEditing}
@@ -89,7 +91,7 @@ export default function DetailsView() {
               setData={setData}
               setErrors={setErrors}
             />
-          }
+          )}
         </div>
 
         <div className="flex my-8">
@@ -204,7 +206,7 @@ export default function DetailsView() {
               )}
               <Field readOnly={!isEditing} label="Numéro de SIRET (si disponible)" handleChange={(e) => setData({ ...data, siret: e.target.value })} value={data.siret || ""} />
 
-              {data.isNetwork === "false" && (
+              {(!data.isNetwork || data.isNetwork === "false") && (
                 <div className="space-y-2 my-3">
                   <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
                   <p className="text-xs font-medium leading-4 text-gray-400">

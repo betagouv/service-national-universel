@@ -48,7 +48,7 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (sms.code) throw new Error(JSON.stringify(sms));
+    if (sms.code) throw new Error(JSON.stringify({ sms, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -79,7 +79,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code) throw new Error(JSON.stringify(mail));
+    if (mail.code) throw new Error(JSON.stringify({ mail, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -106,7 +106,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code) throw new Error(JSON.stringify(mail));
+    if (mail.code) throw new Error(JSON.stringify({ mail, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -250,7 +250,7 @@ async function syncContact(email, attributes, listIds) {
         if (res.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
         return;
       }
-      throw new Error(JSON.stringify(res));
+      throw new Error(JSON.stringify({ res, email, attributes, listIds }));
     }
     const resUpdate = await updateContact(email, { attributes, listIds });
     if (resUpdate.code) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
