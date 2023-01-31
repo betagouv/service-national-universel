@@ -9,17 +9,19 @@ const { isYoung } = require("../utils");
 
 exports.handler = async () => {
   try {
-    const youngs = await YoungObject.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).lean();
-    const referents = await ReferentObject.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).lean();
+    const youngs = await YoungObject.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } });
+    const referents = await ReferentObject.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } });
     const contacts = youngs.concat(referents);
+    const contactsWithAttributes = [];
     for (const contact of contacts) {
-      contact.attributes = await getUserAttributes(contact);
+      const attributes = await getUserAttributes(contact);
+      contactsWithAttributes.push({ ...contact.toObject(), attributes });
     }
     let updatedLength = 0;
     while (updatedLength < contacts.length) {
       let length = 100;
       if (updatedLength + 100 > contacts.length) length = contacts.length - updatedLength;
-      const slicedContacts = contacts.slice(updatedLength, updatedLength + length);
+      const slicedContacts = contactsWithAttributes.slice(updatedLength, updatedLength + length);
       const response = await zammood.api(`/v0/contact`, { method: "POST", credentials: "include", body: JSON.stringify({ contacts: slicedContacts }) });
       if (!response.ok) slack.error({ title: "Fail sync contacts (young + ref) to Zammood", text: JSON.stringify(response.code) });
       updatedLength += 100;
