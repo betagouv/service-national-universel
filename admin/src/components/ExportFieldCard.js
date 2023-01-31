@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function ExportFieldCard({ category, selectedFields, setSelectedFields }) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="rounded-xl border-[1px] px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition">
       <div
@@ -18,11 +18,9 @@ export default function ExportFieldCard({ category, selectedFields, setSelectedF
           <p className="text-sm font-medium text-gray-600">{category.title}</p>
           <input readOnly type="checkbox" checked={selectedFields.includes(category.id)} />
         </div>
-        <div className={`text-gray-400 h-${isOpen ? "auto" : 16} overflow-hidden`}>
+        <div className={`text-gray-400 text-xs h-${isOpen ? "auto" : 16} overflow-hidden`}>
           {category.desc.map((e) => (
-            <p key={e} className="text-xs">
-              {e}
-            </p>
+            <p key={e}>{e}</p>
           ))}
         </div>
       </div>

@@ -151,6 +151,8 @@ export default function List() {
           Durée: data.duration,
           "Fréquence estimée": data.frequence,
           "Période de réalisation": data.period?.map(translate)?.join(", "),
+          "Hébergement proposé": translate(data.hebergement),
+          "Hébergement payant": translate(data.hebergementPayant),
         },
         tutor: {
           "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",

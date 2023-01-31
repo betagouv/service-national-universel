@@ -66,7 +66,7 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
       </div>
 
       <div className="grid grid-cols-2 gap-4 px-8 pt-8 mb-8 bg-white">
-        <button className="rounded-md border bg-white text-gray-500" onClick={() => setIsOpen(false)}>
+        <button className="rounded-md border bg-[#ffffff] text-gray-500 hover:bg-[#f9fafb] transition" onClick={() => setIsOpen(false)}>
           Annuler
         </button>
         <div className="flex w-full">
@@ -82,8 +82,8 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
             setIsOpen={setIsOpen}
             css={{
               override: true,
-              button: `rounded-md px-4 py-2 text-sm w-full hover:brightness-125 bg-blue-600 text-blue-100 transition`,
-              loadingButton: `bg-brand-transPurple rounded-md px-4 py-2 text-sm text-white font-semibold w-full`,
+              button: "w-full bg-blue-600 text-blue-50 rounded-md px-4 py-2 text-sm hover:brightness-125 transition",
+              loadingButton: "w-full bg-blue-600 text-blue-50 rounded-md px-4 py-2 text-sm brightness-75 cursor-not-allowed",
             }}
           />
         </div>

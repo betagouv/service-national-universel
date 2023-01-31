@@ -86,7 +86,7 @@ export default function List() {
         structureInfo: {
           "Nom de la structure": data.name,
           "Statut juridique": translate(data.legalStatus),
-          "Type(s) de structure": data.types.toString(),
+          "Type de structure": data.types.toString(),
           "Sous-type de structure": data.sousTypes,
           "Présentation de la structure": data.description,
         },
