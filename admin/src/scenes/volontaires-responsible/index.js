@@ -13,7 +13,7 @@ export default function Index() {
       {environment === "production" ? (
         <>
           <SentryRoute path="/volontaire/:id" component={View} />
-          <SentryRoute path="/volontaire" component={List} />
+          <SentryRoute path="/volontaire" exact component={List} />
         </>
       ) : (
         <>
