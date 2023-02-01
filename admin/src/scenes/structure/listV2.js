@@ -9,13 +9,10 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel, colors } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/plausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
-import UnlockedSvg from "../../assets/lock-open.svg";
-import LockedSvg from "../../assets/lock.svg";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { Title } from "../centersV2/components/commons";
 import { BsDownload } from "react-icons/bs";
@@ -34,13 +31,8 @@ export default function List() {
   const [missions, setMissions] = useState([]);
   const [responsibles, setResponsibles] = useState([]);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [infosHover, setInfosHover] = useState(false);
-  const [infosClick, setInfosClick] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
-  const toggleInfos = () => {
-    setInfosClick(!infosClick);
-  };
   const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   useEffect(() => {
@@ -147,7 +139,7 @@ export default function List() {
       <header className="m-8 flex items-center justify-between">
         <Title>Mes structures affiliées</Title>
         <Link
-          className="px-3 py-2 bg-blue-600 rounded-lg text-sm text-[#ffffff] border-[1px] border-blue-600 hover:bg-white hover:text-[#2563eb]"
+          className="px-3 py-2 bg-blue-600 rounded-lg text-sm text-white hover:brightness-110 active:brightness-125"
           to="/structure/create"
           onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
           Inviter une nouvelle structure
@@ -163,23 +155,6 @@ export default function List() {
           filters={FILTERS}
           getExportQuery={getExportQuery}
         />
-        {infosHover || infosClick ? (
-          <HelpText>
-            <div>
-              Pour filtrer les structures, cliquez sur les éléments ci-dessus.
-              <div style={{ height: "0.5rem" }} />
-              <div>
-                <span className="title">Corps en uniforme :</span>rassemble toutes les structures déclarées en tant que corps en uniforme
-              </div>
-              <div>
-                <span className="title">Affiliation à un réseau national :</span>rassemble les structures liées par une structure mère et pilotée par un superviseur (responsable)
-              </div>
-              <div>
-                <span className="title">Préparation militaire:</span>rassemble toutes les structures qui proposent des PM
-              </div>
-            </div>
-          </HelpText>
-        ) : null}
         <main className="bg-white rounded-lg m-8 shadow-sm">
           <div className="flex p-4 gap-4 border-b-[1px] border-gray-100 h-[90px]">
             <DataSearch
@@ -195,127 +170,124 @@ export default function List() {
               URLParams={true}
               queryFormat="and"
             />
-            <button
-              onClick={handleShowFilter}
-              className={`group py-2 px-3 rounded-lg flex items-center gap-2 text-sm ${filterVisible ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
-              <FilterIcon className={filterVisible ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
-              <p className={filterVisible ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
+            <button onClick={handleShowFilter} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
+              <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
+              <p className="text-gray-400 group-hover:text-gray-100 transition">Filtres</p>
             </button>
             <button className="flex gap-2 items-center rounded-lg px-3 text-sm border-[1px] border-gray-300 hover:bg-gray-100 ml-auto" onClick={() => setIsExportOpen(true)}>
               <BsDownload className="text-gray-400" />
               <p>Exporter</p>
             </button>
           </div>
-          <FilterRow visible={filterVisible}>
-            <div className="uppercase text-xs text-blue-600">Général</div>
-            <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-            <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Statut juridique"
-              componentId="LEGAL_STATUS"
-              dataField="legalStatus.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "LEGAL_STATUS") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Statut juridique", "Statut juridique")}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Type"
-              componentId="TYPE"
-              dataField="types.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "TYPE") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Type", "Type")}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Sous-type"
-              componentId="SOUS-TYPE"
-              dataField="sousType.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "SOUS-TYPE") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-              renderLabel={(items) => getFilterLabel(items, "Sous-type", "Sous-type")}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Affiliation à un réseau national"
-              componentId="WITH_NETWORK"
-              dataField="networkName.keyword"
-              title=""
-              react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
-              URLParams={true}
-              showSearch={true}
-              searchPlaceholder="Rechercher..."
-              sortBy="asc"
-            />
-          </FilterRow>
-          <FilterRow visible={filterVisible}>
-            <div className="uppercase text-xs text-blue-600">Spécificité</div>
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Préparation Militaire"
-              componentId="MILITARY_PREPARATION"
-              dataField="isMilitaryPreparation.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Corps en uniforme"
-              componentId="CORPS"
-              dataField="structurePubliqueEtatType.keyword"
-              transformData={(data) => {
-                return data.filter((d) => corpsEnUniforme.includes(d.key));
-              }}
-              react={{ and: FILTERS.filter((e) => e !== "CORPS") }}
-              renderItem={(e, count) => {
-                return `${translate(e)} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={false}
-            />
-            <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
-              {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
-              Aide
-            </Help>
-          </FilterRow>
-          <FilterRow className="flex justify-center" visible={filterVisible}>
-            <DeleteFilters />
-          </FilterRow>
+          <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-x-2">
+                <div className="uppercase text-xs text-blue-600 mr-2">Généralités</div>
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Statut juridique"
+                  componentId="LEGAL_STATUS"
+                  dataField="legalStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LEGAL_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut juridique", "Statut juridique")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Type"
+                  componentId="TYPE"
+                  dataField="types.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "TYPE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Type", "Type")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Sous-type"
+                  componentId="SOUS-TYPE"
+                  dataField="sousType.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SOUS-TYPE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Sous-type", "Sous-type")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Affiliation à un réseau national"
+                  componentId="WITH_NETWORK"
+                  dataField="networkName.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
+                  URLParams={true}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  sortBy="asc"
+                />
+              </div>
+              <div className="flex items-center gap-x-2">
+                <div className="uppercase text-xs text-blue-600 mr-2">Spécificités</div>
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="MILITARY_PREPARATION"
+                  dataField="isMilitaryPreparation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Corps en uniforme"
+                  componentId="CORPS"
+                  dataField="structurePubliqueEtatType.keyword"
+                  transformData={(data) => {
+                    return data.filter((d) => corpsEnUniforme.includes(d.key));
+                  }}
+                  react={{ and: FILTERS.filter((e) => e !== "CORPS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+              </div>
+              <DeleteFilters />
+            </div>
+          </div>
 
           <div className="reactive-result">
             <ReactiveListComponent
               defaultQuery={getDefaultQuery}
               react={{ and: FILTERS }}
               paginationAt="bottom"
+              showTopResultStats={false}
               onData={({ rawData }) => {
                 if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
               }}
