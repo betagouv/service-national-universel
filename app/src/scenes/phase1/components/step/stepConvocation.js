@@ -90,8 +90,6 @@ export default function StepConvocation({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
-              {/*
-
               <button
                 type="button"
                 className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
@@ -108,6 +106,7 @@ export default function StepConvocation({ young }) {
                 </WithTooltip>
               </button>
 
+              {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
               <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
@@ -119,8 +118,6 @@ export default function StepConvocation({ young }) {
                   Télécharger
                 </DownloadConvocationButton>
               </div>
-              */}
-              
             </div>
           </>
         ) : null}
@@ -163,8 +160,6 @@ export default function StepConvocation({ young }) {
         <Modal centered isOpen={stateMobil} toggle={() => setStateMobil(false)} size="xl">
           <ModalContainer>
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setStateMobil(false)} />
-              {/* 
-
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
@@ -209,7 +204,6 @@ export default function StepConvocation({ young }) {
                   </button>
                 </div>
               </div>
-            */}
               {showConvocation ? (
                 <div className="pb-4">
                   <Convocation />
