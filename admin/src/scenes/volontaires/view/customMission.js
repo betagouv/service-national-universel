@@ -11,6 +11,7 @@ import {
   MISSION_PERIOD_DURING_SCHOOL,
   regexPhoneFrenchCountries,
   SENDINBLUE_TEMPLATES,
+  ENABLE_PM,
   ROLES,
 } from "../../../utils";
 import { adminURL } from "../../../config";
@@ -48,6 +49,7 @@ export default function CustomMission({ young, onChange }) {
     period: [],
     placesTotal: "1",
     applicationStatus: "",
+    isMilitaryPreparation: "false",
   });
   const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [selectedStructure, setSelectedStructure] = useState(null);
@@ -580,6 +582,19 @@ export default function CustomMission({ young, onChange }) {
                 </div>
               )}
             </div>
+            {ENABLE_PM && selectedStructure && selectedStructure?.isMilitaryPreparation === "true" ? (
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-gray-800 font-medium">Prépartion Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
+                <Toggle
+                  id="isMilitaryPreparation"
+                  name="isMilitaryPreparation"
+                  value={values?.isMilitaryPreparation === "true"}
+                  onChange={(e) => {
+                    setValues({ ...values, isMilitaryPreparation: e.toString() });
+                  }}
+                />
+              </div>
+            ) : null}
             <div>
               <div className="text-lg font-medium text-gray-900 mt-11 mb-4">Hébergement</div>
               <div className="flex flex-row justify-between items-center">
