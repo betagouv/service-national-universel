@@ -1,3 +1,24 @@
+# [1.211.0](https://github.com/betagouv/service-national-universel/compare/v1.210.0...v1.211.0) (2023-02-01)
+
+
+### Bug Fixes
+
+* **admin:** block convocation ([14858c1](https://github.com/betagouv/service-national-universel/commit/14858c13f33bccf989c192c3667fd3662fef1c92))
+* **admin:** fix history multiselect input ([0f61f63](https://github.com/betagouv/service-national-universel/commit/0f61f63c580dca85e81a0df302a11dd646d2ac2a))
+* **admin:** reouverture convocation + fix ([15c9234](https://github.com/betagouv/service-national-universel/commit/15c9234232ad0cb77348f8770b677f38e12b4f5b))
+* **api:** Catch parents without email errors more precisely ([e8d3af6](https://github.com/betagouv/service-national-universel/commit/e8d3af66657b10fea51722c2e88abd88b29c0428))
+* **api:** Catch parents without email errors more precisely ([4878c9c](https://github.com/betagouv/service-national-universel/commit/4878c9c4613c74f3dcb314b913754e755bfde8a0))
+* **app:** cant download convocation ([9d301c9](https://github.com/betagouv/service-national-universel/commit/9d301c914affb3666e087ffdcaa80e8cb075f496))
+* **app/api:** retour convocation ([69159de](https://github.com/betagouv/service-national-universel/commit/69159de070d14f3945e482ac0510da485b557a69))
+* **lib/admin:** retours sur historique volontaires ([#2225](https://github.com/betagouv/service-national-universel/issues/2225)) ([61eac2e](https://github.com/betagouv/service-national-universel/commit/61eac2ece9dc23e3815b349d16b1acb898bc2e5a))
+* **pdf:** Handle errors in try/catch ([0e79efc](https://github.com/betagouv/service-national-universel/commit/0e79efc56299705417507f06d9f041b73f373b6f))
+* **sib:** Handle SIB error call more properly ([0c70571](https://github.com/betagouv/service-national-universel/commit/0c70571db00fa49951617d3a5041d80602594981))
+
+
+### Features
+
+* **api,app:** améliorations choix des PDR sur le jeune. ([#2227](https://github.com/betagouv/service-national-universel/issues/2227)) ([7f25d44](https://github.com/betagouv/service-national-universel/commit/7f25d4452526cf8b66244aa217263dc29a240949))
+
 # [1.210.0](https://github.com/betagouv/service-national-universel/compare/v1.209.0...v1.210.0) (2023-01-31)
 
 
