@@ -150,8 +150,13 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled =
-    (!corrections?.length && young.files.cniFiles != null && date != null && !loading && !error.text) || (corrections?.length && hasChanged && !loading && !error.text);
+  const isEnabled = () => {
+    if (corrections?.length) {
+      return hasChanged && !loading && !error.text;
+    } else {
+      return (young?.files?.cniFiles?.length > 0 || [...recto, ...verso].length > 0) && date !== null && !loading && !error.text;
+    }
+  };
 
   return (
     <>

@@ -297,6 +297,7 @@ function MeetingPointChooser({ meetingPoint, onChoose, choosed, expired }) {
       <LinearMap />
       <div className="text-[#242526] text-base font-bold mt-3 text-center">{meetingPoint.name}</div>
       <div className="flex-1 text-gray-800 text-sm mt-1 underline text-center">{completeAddress}</div>
+      <div className="flex-1 text-gray-500 text-sm mt-1 text-center">N° de transport : {meetingPoint.busLineName}</div>
       <div className="w-[66px] h-[1px] bg-gray-200 my-4" />
       <div className="flex items-center mb-8">
         <Schedule type="Aller" className="mr-4">

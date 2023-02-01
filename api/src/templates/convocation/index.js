@@ -4,9 +4,7 @@ const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const SessionPhase1 = require("../../models/sessionPhase1");
-const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
-const BusModel = require("../../models/bus");
 
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
@@ -62,6 +60,8 @@ const render = async (young) => {
     }
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
+    cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
+    cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
 
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
@@ -100,6 +100,62 @@ const render = async (young) => {
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
       .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr })))
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
+      .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      .replace(/{{TOP}}/g, sanitizeAll(getTop()))
+      .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
+  } catch (e) {
+    throw e;
+  }
+};
+
+const renderLocalTransport = async (young) => {
+  console.log(getBaseUrl());
+  try {
+    if (!["AFFECTED", "DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
+    if (!young.sessionPhase1Id) throw `young ${young.id} unauthorized`;
+    const session = await SessionPhase1.findById(young.sessionPhase1Id);
+    if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
+    const center = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!center) throw `center ${session.cohesionCenterId} not found for young ${young._id} - session ${session._id}`;
+
+    const cohort = await CohortModel.findOne({ name: young.cohort });
+    cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
+    cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
+
+    const service = await DepartmentServiceModel.findOne({ department: young?.department });
+    if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+    const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
+
+    const html = fs.readFileSync(path.resolve(__dirname, "./cohesionLocalService.html"), "utf8");
+    return html
+      .replace(
+        /{{CONTACTS}}/g,
+        sanitizeAll(
+          contacts
+            .map((contact) => {
+              return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
+            })
+            .join(""),
+        ),
+      )
+      .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
+      .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+      .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+      .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
+      .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
+      .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
+      .replace(/{{CITY}}/g, sanitizeAll(young.city))
+      .replace(
+        /{{COHESION_STAY_DATE_STRING}}/g,
+        sanitizeAll(datefns.format(cohort?.dateStart, "dd MMMM", { locale: fr }) + " au " + datefns.format(cohort?.dateEnd, "dd MMMM yyyy", { locale: fr })),
+      )
+      .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
+      .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
+      .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
+      .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+      .replace(/{{MEETING_DATE}}/g, sanitizeAll(`<b>Le</b> ${datefns.format(new Date(cohort?.dateStart), "EEEE dd MMMM", { locale: fr })}`))
+      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr })))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
@@ -157,6 +213,7 @@ const renderDOMTOM = async (young) => {
 
 const cohesion = async (young) => {
   if (isFromDOMTOM(young)) return renderDOMTOM(young);
+  if (young?.transportInfoGivenByLocal === "true") return renderLocalTransport(young);
   return render(young);
 };
 

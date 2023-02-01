@@ -10,7 +10,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import FileSaver from "file-saver";
 
-export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
+export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly = false }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [uploading] = useState(false);
   const [filesList, setFilesList] = useState([]);
@@ -99,27 +99,31 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
                       <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file._id)}>
                         Télécharger
                       </div>
-                      <div
-                        className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
-                        onClick={async () => {
-                          setLoading(true);
-                          await handleDelete(file._id);
-                          setLoading(false);
-                        }}>
-                        Supprimer
-                      </div>
+                      {!readOnly && (
+                        <div
+                          className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
+                          onClick={async () => {
+                            setLoading(true);
+                            await handleDelete(file._id);
+                            setLoading(false);
+                          }}>
+                          Supprimer
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
               : null}
-            <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
-              <AddImage className="text-gray-400" />
-              <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>
-                Téléversez le formulaire
+            {!readOnly && (
+              <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
+                <AddImage className="text-gray-400" />
+                <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>
+                  Téléversez le formulaire
+                </div>
+                <input type="file" ref={hiddenFileInput} onChange={(e) => handleUpload(e.target.files)} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
+                <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
               </div>
-              <input type="file" ref={hiddenFileInput} onChange={(e) => handleUpload(e.target.files)} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
-              <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
-            </div>
+            )}
           </div>
           <Footer>
             <ModalButton onClick={onCancel} disabled={loading || uploading}>

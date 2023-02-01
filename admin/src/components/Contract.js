@@ -524,7 +524,7 @@ export default function Contract({ young, admin }) {
                           <p>
                             L’Etat s’engage à identifier les missions susceptibles d’être proposées au volontaire dans le cadre des missions d’intérêt général. L’Etat s’assure de
                             la qualité des conditions de réalisation de cette mission au regard des finalités du SNU. Enfin, l’Etat valide la réalisation de la mission du
-                            volontaire. La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un mentor
+                            volontaire. La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un tuteur
                             est nommé au sein de la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.
                           </p>
                           <p>
@@ -542,7 +542,7 @@ export default function Contract({ young, admin }) {
                             L&apos;engagement, l&apos;affectation et l&apos;activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n°
                             84-16 du 11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l&apos;Etat, le chapitre Ier de la loi n° 84-53 du 26
                             janvier 1984 portant dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986
-                            portant dispositions statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le mentor
+                            portant dispositions statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le tuteur
                             désigné, informe le représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.
                           </p>
                           <p>

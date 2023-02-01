@@ -101,6 +101,7 @@ function validateStructure(structure) {
         lat: Joi.number().allow(null),
         lon: Joi.number().allow(null),
       }),
+      addressVerified: Joi.boolean().allow(null),
       state: Joi.string().allow(null, ""),
       isMilitaryPreparation: Joi.string().allow(null, ""),
     })

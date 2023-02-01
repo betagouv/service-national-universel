@@ -34,6 +34,7 @@ export default function StepConvocation({ young }) {
   const dispatch = useDispatch();
 
   const handleDownload = async () => {
+    if (young?.convocationFileDownload === "true") return;
     const { data } = await api.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
     plausibleEvent("affecté_step3");
     dispatch(setYoung(data));
@@ -89,6 +90,7 @@ export default function StepConvocation({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
+
               <button
                 type="button"
                 className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
@@ -105,7 +107,6 @@ export default function StepConvocation({ young }) {
                 </WithTooltip>
               </button>
 
-              {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
               <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
@@ -149,6 +150,7 @@ export default function StepConvocation({ young }) {
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => modal?.onConfirm()}
       />
+
       {showConvocation ? (
         <div className="hidden md:flex pb-4">
           <Convocation />
@@ -161,7 +163,6 @@ export default function StepConvocation({ young }) {
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
-                {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
                 <div className="w-full" onClick={handleDownload}>
                   <DownloadConvocationButton
                     young={young}
@@ -171,6 +172,7 @@ export default function StepConvocation({ young }) {
                     Télécharger
                   </DownloadConvocationButton>
                 </div>
+
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
                   <button
                     type="button"

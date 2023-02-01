@@ -1,3 +1,89 @@
+# [1.210.0](https://github.com/betagouv/service-national-universel/compare/v1.209.0...v1.210.0) (2023-01-31)
+
+
+### Bug Fixes
+
+* **admin:** contract wording ([ad816b2](https://github.com/betagouv/service-national-universel/commit/ad816b295912ba3617eb05c5624a175d8b3e6a2d))
+* **admin:** intégration des retours sur les exports excel phase 2 ([#2221](https://github.com/betagouv/service-national-universel/issues/2221)) ([f53dbf4](https://github.com/betagouv/service-national-universel/commit/f53dbf4e343233974a1c28f346df9cdb1e13636b))
+* **admin:** remove unnecessary route responsible dashboard ([6210235](https://github.com/betagouv/service-national-universel/commit/62102356d3b49f1774c4d504bd0f58333e7a088d))
+* **admin:** route contrat d'engagement ([8077fde](https://github.com/betagouv/service-national-universel/commit/8077fdecdd80e67d53f4ef012c8d9bf10e92a2ca))
+* **admin:** route staging/prod dashboard responsible ([2a80630](https://github.com/betagouv/service-national-universel/commit/2a80630f1586762ab284c8a6fd783a465cbe14ba))
+* **api:** SIB better syncContacts ([#2222](https://github.com/betagouv/service-national-universel/issues/2222)) ([3d2ca33](https://github.com/betagouv/service-national-universel/commit/3d2ca336f3dd6c17d3d97d22b274e4569604cef9))
+* **api:** support contact synchro script ([3b93ab7](https://github.com/betagouv/service-national-universel/commit/3b93ab786839ad7fe9a1466add68795234fd69a5))
+* **app:** enable button for upload on mobile ([67fcf7a](https://github.com/betagouv/service-national-universel/commit/67fcf7af68a0b1c58e5f2e6dd1cc58b9a66f2b0a))
+
+
+### Features
+
+* **admin:** export missions / applications filter by status ([517e0a2](https://github.com/betagouv/service-national-universel/commit/517e0a25241b4ec3b9dfc4b9b179c389bd57d0c1))
+* **admin:** structure phase 2 profil volontaire / candidature ([2767e0c](https://github.com/betagouv/service-national-universel/commit/2767e0ca6f453fc0d871ca5a87eecb6bb244b3aa))
+
+# [1.209.0](https://github.com/betagouv/service-national-universel/compare/v1.208.0...v1.209.0) (2023-01-30)
+
+
+### Bug Fixes
+
+* **admin:** fix reponsible dashboard ([08569a8](https://github.com/betagouv/service-national-universel/commit/08569a81d942122f8a4ebed85cbd6a70dbfdb7cf))
+* **admin:** fix reponsible dashboard 2 ([e689b48](https://github.com/betagouv/service-national-universel/commit/e689b48deba7670b1c27a3b1253654fd831f1943))
+* **admin:** route volontaire responsible ([757fab8](https://github.com/betagouv/service-national-universel/commit/757fab86325f025eaac4d003d1fee3b2672ab791))
+* **api:** PDR available for young ([cb588ad](https://github.com/betagouv/service-national-universel/commit/cb588adb9312484b7d2adf2f1865b9085bf03fc8))
+* **app:** Tentative fix ([45b140e](https://github.com/betagouv/service-national-universel/commit/45b140e7ed034aba8ddf1b3caac8cd41e75bc3ad))
+* **sib:** Add context for error ! ([0e3585b](https://github.com/betagouv/service-national-universel/commit/0e3585b16198c50570016aaac6272721ecb77812))
+
+
+### Features
+
+* **admin:** carte équipe structure ([#2213](https://github.com/betagouv/service-national-universel/issues/2213)) ([a4dc4a1](https://github.com/betagouv/service-national-universel/commit/a4dc4a104573778f3bbe9b4a2521e4df91000674))
+* **api/app:** modifs convocation ([0de12de](https://github.com/betagouv/service-national-universel/commit/0de12de0ae78a134e35cfe8d41ad4a628b581dc0))
+
+# [1.208.0](https://github.com/betagouv/service-national-universel/compare/v1.207.0...v1.208.0) (2023-01-27)
+
+
+### Bug Fixes
+
+* **admin:** crash navbar ([6c52cee](https://github.com/betagouv/service-national-universel/commit/6c52ceeaa905b40bd1d453faba9e5cd87d17c312))
+
+
+### Features
+
+* **admin:** open PDT to ref ([e5e8b25](https://github.com/betagouv/service-national-universel/commit/e5e8b25391a3f45ebb7c1d029bd64582be2d0ddc))
+* **admin:** structure - responsible phase 2 : Mes candidatures ([#2207](https://github.com/betagouv/service-national-universel/issues/2207)) ([b0c5b41](https://github.com/betagouv/service-national-universel/commit/b0c5b4167581533d2c3ffafa94982399be371e34))
+* **api/admin:** Refonte ecran structure détails ([#2218](https://github.com/betagouv/service-national-universel/issues/2218)) ([25e75aa](https://github.com/betagouv/service-national-universel/commit/25e75aa7c43af2f075f4ee3f2803336152afda80))
+
+# [1.207.0](https://github.com/betagouv/service-national-universel/compare/v1.206.0...v1.207.0) (2023-01-26)
+
+
+### Bug Fixes
+
+* **admin:** mission wording ([5a0a16d](https://github.com/betagouv/service-national-universel/commit/5a0a16dd0f8d4efc98b8d2521a8cf1d1bbf9284d))
+* **api:** Error if code only ! ([1c65ddb](https://github.com/betagouv/service-national-universel/commit/1c65ddb6426a922a5af80144d00ace2569b44b24))
+* **api:** Handle SIB errors ([d9d6466](https://github.com/betagouv/service-national-universel/commit/d9d64665aa63d2b6910c932e645709e1e7b436b5))
+* **api:** Return if creation was ok ! ([a316bfd](https://github.com/betagouv/service-national-universel/commit/a316bfd23459fea3bbd1d5a3ecefd4b4fa45c24c))
+* **api:** Trim email ([ef96338](https://github.com/betagouv/service-national-universel/commit/ef96338c53f533ee380ff59b3d5d8bc3c57bac64))
+* **api/SIB:** Do not capture for res.text() ([e10a7df](https://github.com/betagouv/service-national-universel/commit/e10a7df97245dc6832f3a54cd13cefd2a46c6140))
+* **app:** correction de la suppression des SMS sur la version mobile ([#2216](https://github.com/betagouv/service-national-universel/issues/2216)) ([9738496](https://github.com/betagouv/service-national-universel/commit/973849699476d322714cc0bef20ec57819637608))
+
+
+### Features
+
+* **api,admin:** Suppression de la demande de préférence de contact pour les représentants + suppression de l'envoi par SMS ([#2211](https://github.com/betagouv/service-national-universel/issues/2211)) ([ad39b5a](https://github.com/betagouv/service-national-universel/commit/ad39b5a9d483a32914972b88fcdce5b1cefb1978))
+
+
+### Reverts
+
+* Revert "fix(api): Enrich capture SIB" ([c5a5d3c](https://github.com/betagouv/service-national-universel/commit/c5a5d3c21d11637d87b103f4b0e1156006cdf8a9))
+* Revert "chore(api): improve error mgmt sib (#2158)" ([ec60b73](https://github.com/betagouv/service-national-universel/commit/ec60b73bb4c006b884cd85292f45bddf40dc8711)), closes [#2158](https://github.com/betagouv/service-national-universel/issues/2158)
+* Revert "fix(api): sms error" ([2ee3aa2](https://github.com/betagouv/service-national-universel/commit/2ee3aa296be85565c25a26e13f802370f1b196b4))
+* Revert "fix(api): getContact" ([0e9322d](https://github.com/betagouv/service-national-universel/commit/0e9322dbb5d2d7c1adc923332faab743105de116))
+
+# [1.206.0](https://github.com/betagouv/service-national-universel/compare/v1.205.0...v1.206.0) (2023-01-25)
+
+
+### Features
+
+* **admin:** Completion et tri de l'export de schéma de répartition ([#2208](https://github.com/betagouv/service-national-universel/issues/2208)) ([8b101d9](https://github.com/betagouv/service-national-universel/commit/8b101d9fe12b389f51cf03ffa6c187116c456a7c))
+* **admin/api:** super admin panel for cohort ([#2209](https://github.com/betagouv/service-national-universel/issues/2209)) ([ce43728](https://github.com/betagouv/service-national-universel/commit/ce43728a65a389ce1a25669f6ff3f8702d1f11da))
+
 # [1.205.0](https://github.com/betagouv/service-national-universel/compare/v1.204.0...v1.205.0) (2023-01-24)
 
 

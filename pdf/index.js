@@ -22,28 +22,38 @@ const DEFAULT_OPTIONS = {
 };
 
 const renderFromHtml = async (html, options) => {
-  const { browser, page } = await getBrowserAndPage(options);
-  await page.setContent(html, options?.navigation ?? {});
-  const pdfOptions = options ?? {};
-  const buffer = await page.pdf({
-    ...DEFAULT_OPTIONS,
-    ...pdfOptions,
-  });
+  try {
+    const { browser, page } = await getBrowserAndPage(options);
+    await page.setContent(html, options?.navigation ?? {});
+    const pdfOptions = options ?? {};
+    const buffer = await page.pdf({
+      ...DEFAULT_OPTIONS,
+      ...pdfOptions,
+    });
 
-  await browser.close();
+    await browser.close();
 
-  return buffer;
+    return buffer;
+  } catch (error) {
+    console.log(error);
+    capture(error);
+  }
 };
 
 const getBrowserAndPage = async (options) => {
-  const browser = await puppeteer.launch(options?.launch ?? {});
-  const page = await browser.newPage();
+  try {
+    const browser = await puppeteer.launch(options?.launch ?? {});
+    const page = await browser.newPage();
 
-  if (options?.emulateMedia) {
-    await page.emulateMediaType(options.emulateMedia);
+    if (options?.emulateMedia) {
+      await page.emulateMediaType(options.emulateMedia);
+    }
+
+    return { browser, page };
+  } catch (error) {
+    console.log(error);
+    capture(error);
   }
-
-  return { browser, page };
 };
 
 app.use(express.static(__dirname + "/public"));
@@ -61,6 +71,8 @@ app.post("/render", async (req, res) => {
       ),
       req.body.options || {}
     );
+    if (!buffer)
+      throw new Error("No buffer returned : " + JSON.stringify(req.body));
     // console.log(`${req.body.html} generated`);
     if (GENERATE_LOCALLY)
       fs.writeFileSync(

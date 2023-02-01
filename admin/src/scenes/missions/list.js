@@ -58,6 +58,7 @@ export default function List() {
   };
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isExportCandidatureOpen, setIsExportCandidatureOpen] = useState(false);
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState([]);
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -151,6 +152,8 @@ export default function List() {
           Durée: data.duration,
           "Fréquence estimée": data.frequence,
           "Période de réalisation": data.period?.map(translate)?.join(", "),
+          "Hébergement proposé": translate(data.hebergement),
+          "Hébergement payant": translate(data.hebergementPayant),
         },
         tutor: {
           "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",
@@ -259,7 +262,7 @@ export default function List() {
       // Add applications info
       const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
       const queryApplication = {
-        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
+        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": applicationStatusFilter } }] } },
         track_total_hits: true,
         size: ES_NO_LIMIT,
       };
@@ -270,6 +273,8 @@ export default function List() {
       });
       if (resultApplications?.data?.length) {
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
+      } else {
+        all = all.map((item) => ({ ...item, candidatures: [] }));
       }
 
       let youngIds = [];
@@ -688,6 +693,9 @@ export default function List() {
                   renderLabel={(items) => getFilterLabel(items, "Statut de candidature", "Statut de candidature")}
                   showMissing
                   missingLabel="Aucune candidature ni proposition"
+                  onValueChange={(e) => {
+                    setApplicationStatusFilter(e.filter((e) => e !== "Aucune candidature ni proposition"));
+                  }}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, translate as t, getAge, formatDateFRTimezoneUTC } from "../../utils";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import SelectStatusApplication from "../../components/selectStatusApplication";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -35,7 +33,7 @@ export default function PanelView({ onChange, value, application }) {
           </div>
         )}
         <div style={{ display: "flex" }}>
-          <Link to={`/volontaire/${young._id}`}>
+          <Link to={`/volontaire/${application.youngId}/phase2/application/${application._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
           {application.status === "VALIDATED" || application.status === "IN_PROGRESS" || application.status === "DONE" || application.status === "ABANDON" ? (

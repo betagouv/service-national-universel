@@ -174,7 +174,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
         onChange={() => setModal({ isOpen: false, template: null, data: null })}
         onConfirm={onRefuse}
       />
-      {modalFiles.nameFiles ? (
+      {modalFiles?.nameFiles ? (
         <ModalFilesPM
           isOpen={modalFiles?.isOpen}
           onCancel={() => setModalFiles({ isOpen: false })}

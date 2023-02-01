@@ -24,9 +24,9 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_SMS, canEditYoung } = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, canEditYoung } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
-const { sendTemplate, sendSMS } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const { format } = require("date-fns");
 const config = require("../config");
 const YoungObject = require("../models/young");
@@ -379,22 +379,14 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
       if (young.parent1AllowSNU || young.parentAllowSNU) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
-      if (young.parent1ContactPreference === "phone") {
-        await sendSMS(
-          young.parent1Phone,
-          SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-          SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
       // parent 2
     } else {
       if (
@@ -408,22 +400,14 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
       ) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
-      if (young.parent2ContactPreference === "phone") {
-        await sendSMS(
-          young.parent2Phone,
-          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
-          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
     }
 
     return res.status(200).send({ ok: true });
@@ -512,40 +496,24 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
 
     // --- send notification
     // parent 1
-    if (young.parent1ContactPreference === "phone") {
-      await sendSMS(
-        young.parent1Phone,
-        SENDINBLUE_SMS.PARENT1_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`),
-        SENDINBLUE_SMS.PARENT1_CONSENT.tag,
-      );
-    } else {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+    // parent 2
+    if (young.parent2Id) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
       });
-    }
-    // parent 2
-    if (young.parent2Id) {
-      if (young.parent2ContactPreference === "phone") {
-        await sendSMS(
-          young.parent2Phone,
-          SENDINBLUE_SMS.PARENT2_CONSENT.template(young, `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`),
-          SENDINBLUE_SMS.PARENT2_CONSENT.tag,
-        );
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
     }
 
     // --- return updated young
