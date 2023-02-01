@@ -362,3 +362,15 @@ export const getNetworkOptions = async (inputValue) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });
 };
+
+export const debounce = (fn, delay) => {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+};

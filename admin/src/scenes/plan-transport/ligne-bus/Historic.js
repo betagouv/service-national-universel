@@ -16,7 +16,7 @@ export default function Historic() {
   const [data, setData] = React.useState([]);
   const [pagination, setPagination] = React.useState({ count: 0, page: 0, pageCount: 0 });
   const [currentPage, setCurrentPage] = React.useState(0);
-  const [filters, setFilters] = React.useState({ op: [], user: [], path: [] });
+  const [filters, setFilters] = React.useState({ op: [], user: [], path: [], query: "" });
 
   useEffect(() => {
     getPatches();
@@ -47,6 +47,9 @@ export default function Historic() {
       }
       if (filters.path && filters.path.length > 0) {
         query.path = filters.path.join(",");
+      }
+      if (filters.query && filters.query.trim().length > 0) {
+        query.query = filters.query.trim();
       }
       const queryString = Object.keys(query)
         .map((key) => key + "=" + query[key])

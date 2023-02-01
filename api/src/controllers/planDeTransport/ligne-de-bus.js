@@ -21,6 +21,7 @@ const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
+const { formatStringLongDate, isIsoDate, getDepartmentNumber, COHORTS} = require("snu-lib");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -565,12 +566,16 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       op: Joi.string(),
       path: Joi.string(),
       userId: Joi.string(),
+      query: Joi.string().trim().lowercase(),
       // filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId } = valueQuery;
+    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId, query: filterQuery } = valueQuery;
+    if (filterQuery && filterQuery.trim().length === 0) {
+      filterQuery = undefined;
+    }
 
     // --- security
     if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -703,7 +708,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         ...pipelineFilter,
 
         // get total
-        { $group: { _id: null, total: { $sum: 1 }, results: { $push: "$$ROOT" } } },
+        // { $group: { _id: null, total: { $sum: 1 }, results: { $push: "$$ROOT" } } },
 
         // limit, offset
         // { $project: { total: 1, results: { $slice: ["$results", offset, limit] } } },
@@ -715,12 +720,21 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
 
       // --- results
       if (patches && patches.length > 0) {
+        let results;
+        if (filterQuery) {
+          results = patches.filter((p) => {
+            return filterPatchWithQuery(p, filterQuery);
+          });
+        } else {
+          results = patches;
+        }
+
         return res.status(200).send({
           ok: true,
-          data: patches[0].results.slice(offset, offset + limit),
+          data: results.slice(offset, offset + limit),
           pagination: {
-            count: patches[0].total,
-            pageCount: Math.ceil(patches[0].total / limit),
+            count: results.length,
+            pageCount: Math.ceil(results.length / limit),
             page: Math.floor(offset / limit),
             itemsPerPage: limit,
           },
@@ -747,3 +761,38 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
 });
 
 module.exports = router;
+
+function filterPatchWithQuery(p, query) {
+  const matchFieldName = translateBusPatchesField(p.path).toLowerCase().includes(query);
+  const matchOriginalValue = (isIsoDate(p.originalValue) ? formatStringLongDate(p.originalValue) : p.originalValue)?.toLowerCase().includes(query);
+  const matchFromValue = (isIsoDate(p.value) ? formatStringLongDate(p.value) : p.value)?.toLowerCase().includes(query);
+
+  return matchFieldName || matchOriginalValue || matchFromValue;
+}
+
+  "/createdAt",
+  "/km",
+  "/youngSeatsTaken",
+
+const busPatchFields = {
+  cohort: "Cohorte",
+  busId: "Numero de bus",
+  departuredDate: "Date de départ",
+  returnDate: "Date de retour",
+  youngCapacity: "Capacité de jeunes",
+  totalCapacity: "Capacité totale",
+  followerCapacity: "Capacité d'accompagnateurs",
+  youngSeatsTaken: "Nombre de jeunes",
+  travelTime: "Temps de route",
+  lunchBreak: "Pause déjeuner aller",
+  lunchBreakReturn: "Pause déjeuner retour",
+  sessionId: "Session",
+  centerId: "Centre de destination",
+  centerArrivalTime: "Heure d'arrivée au centre",
+  centerDepartureTime: "Heure de départ du centre",
+  meetingPointsIds: "Points de rassemblement",
+}
+
+function translateBusPatchesField(path) {
+
+}

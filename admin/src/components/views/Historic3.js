@@ -1,8 +1,8 @@
 /**
  * Cette version de l'historique considère que les données, la pagination et les filtres se font côté serveur.
  */
-import React, { useState } from "react";
-import { formatStringLongDate, translateModelFields, isIsoDate, translateHistory } from "../../utils";
+import React, { useState, useCallback } from "react";
+import {formatStringLongDate, translateModelFields, isIsoDate, translateHistory, debounce} from "../../utils";
 import { formatLongDateFR, translateAction } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
@@ -45,12 +45,25 @@ export default function Historic3({ model, data, refName, path, pagination, chan
     return matchFieldName || matchOriginalValue || matchFromValue;
   }
 
+  const debouncedChangeFilter = useCallback(
+    debounce(async (value) => {
+      console.log("debounced change filter");
+      changeFilters({ ...filters, ...value });
+    }, 500),
+    [],
+  );
+
+  function changeQuery(value) {
+    setQuery(value);
+    debouncedChangeFilter({ query: value });
+  }
+
   return (
     <div className="w-full bg-white rounded-xl shadow-md text-slate-700">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="w-full flex p-4 gap-4 justify-between items-center">
         <div className="flex items-center gap-4">
-          <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
+          <input onChange={(e) => changeQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
