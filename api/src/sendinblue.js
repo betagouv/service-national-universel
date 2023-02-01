@@ -2,6 +2,7 @@ const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -106,6 +107,11 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
+
+    // * To delete once we put the email of the parent in the template
+    const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == mail?.body?.templateId);
+    if (mail?.message == "email is missing in to" && isParentTemplate) throw new Error("Parent sans email : " + body?.to?.[0]?.name);
+
     if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
