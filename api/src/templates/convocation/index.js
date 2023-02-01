@@ -60,6 +60,8 @@ const render = async (young) => {
     }
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
+    cohort.dateStart.setDate(cohort.dateStart.getDate() + 1);
+    cohort.dateEnd.setDate(cohort.dateEnd.getDate() + 1);
 
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
@@ -118,6 +120,8 @@ const renderLocalTransport = async (young) => {
     if (!center) throw `center ${session.cohesionCenterId} not found for young ${young._id} - session ${session._id}`;
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
+    cohort.dateStart.setDate(cohort.dateStart.getDate() + 1);
+    cohort.dateEnd.setDate(cohort.dateEnd.getDate() + 1);
 
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
@@ -144,7 +148,7 @@ const renderLocalTransport = async (young) => {
       .replace(/{{CITY}}/g, sanitizeAll(young.city))
       .replace(
         /{{COHESION_STAY_DATE_STRING}}/g,
-        sanitizeAll(datefns.format(new Date(cohort?.dateStart), "dd MMMM", { locale: fr }) + " au " + datefns.format(new Date(cohort?.dateEnd), "dd MMMM yyyy", { locale: fr })),
+        sanitizeAll(datefns.format(cohort?.dateStart, "dd MMMM", { locale: fr }) + " au " + datefns.format(cohort?.dateEnd, "dd MMMM yyyy", { locale: fr })),
       )
       .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))

@@ -90,8 +90,7 @@ export default function StepConvocation({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
-              {/* 
-               <button
+              <button
                 type="button"
                 className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
                 onClick={() =>
@@ -106,12 +105,10 @@ export default function StepConvocation({ young }) {
                   <HiOutlineMail className="h-5 w-5 text-gray-600" />
                 </WithTooltip>
               </button>
-              */}
 
               {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
               <div onClick={handleDownload}>
-                {/* 
-                 <DownloadConvocationButton
+                <DownloadConvocationButton
                   young={young}
                   uri="cohesion"
                   className={`flex flex-row  items-center justify-center px-4 py-2 rounded-lg ${
@@ -120,7 +117,6 @@ export default function StepConvocation({ young }) {
                   <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
                   Télécharger
                 </DownloadConvocationButton>
-                */}
               </div>
             </div>
           </>
@@ -168,9 +164,8 @@ export default function StepConvocation({ young }) {
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
                 {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
-                {/* 
-
                 <div className="w-full" onClick={handleDownload}>
+                  {/* 
                     <DownloadConvocationButton
                     young={young}
                     uri="cohesion"
@@ -178,6 +173,7 @@ export default function StepConvocation({ young }) {
                     <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
                     Télécharger
                   </DownloadConvocationButton>
+                  */}
                 </div>
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
                   <button
@@ -207,7 +203,6 @@ export default function StepConvocation({ young }) {
                     </span>
                   </button>
                 </div>
-                  */}
               </div>
               {showConvocation ? (
                 <div className="pb-4">
