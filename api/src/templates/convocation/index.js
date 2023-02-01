@@ -60,8 +60,8 @@ const render = async (young) => {
     }
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
-    cohort.dateStart.setDate(cohort.dateStart.getDate() + 1);
-    cohort.dateEnd.setDate(cohort.dateEnd.getDate() + 1);
+    cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
+    cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
 
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
@@ -120,8 +120,8 @@ const renderLocalTransport = async (young) => {
     if (!center) throw `center ${session.cohesionCenterId} not found for young ${young._id} - session ${session._id}`;
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
-    cohort.dateStart.setDate(cohort.dateStart.getDate() + 1);
-    cohort.dateEnd.setDate(cohort.dateEnd.getDate() + 1);
+    cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
+    cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
 
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;

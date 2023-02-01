@@ -90,7 +90,6 @@ export default function StepConvocation({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
-              {/*
 
               <button
                 type="button"
@@ -119,7 +118,6 @@ export default function StepConvocation({ young }) {
                   Télécharger
                 </DownloadConvocationButton>
               </div>
-            */}
             </div>
           </>
         ) : null}
@@ -166,8 +164,6 @@ export default function StepConvocation({ young }) {
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
                 <div className="w-full" onClick={handleDownload}>
-                  {/* 
-
                   <DownloadConvocationButton
                     young={young}
                     uri="cohesion"
@@ -175,7 +171,6 @@ export default function StepConvocation({ young }) {
                     <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
                     Télécharger
                   </DownloadConvocationButton>
-            */}
                 </div>
 
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
@@ -188,7 +183,6 @@ export default function StepConvocation({ young }) {
                       Voir
                     </span>
                   </button>
-                  {/* 
                   <button
                     onClick={() =>
                       setModal({
@@ -206,7 +200,6 @@ export default function StepConvocation({ young }) {
                       Recevoir par mail
                     </span>
                   </button>
-                  */}
                 </div>
               </div>
               {showConvocation ? (
