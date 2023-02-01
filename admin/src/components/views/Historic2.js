@@ -1,24 +1,25 @@
 import React, { useState, Fragment } from "react";
 import { formatStringLongDate, translateModelFields, isIsoDate, translateHistory } from "../../utils";
 import { formatLongDateFR, translateAction } from "snu-lib";
-import FilterIcon from "../../assets/icons/Filter";
-import UserCard from "../UserCard";
-import { HiOutlineArrowRight } from "react-icons/hi";
 
+import { HiOutlineArrowRight } from "react-icons/hi";
 import { Listbox, Transition } from "@headlessui/react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { AiOutlineCheck } from "react-icons/ai";
+import FilterIcon from "../../assets/icons/Filter";
+import UserCard from "../UserCard";
 
 export default function Historic({ model, data, customFilterOptions, refName }) {
-  const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [authors, setAuthors] = useState([]);
   const [ops, setOps] = useState([]);
   const [paths, setPaths] = useState([]);
+  const [customFilter, setCustomFilter] = useState(null);
+  const [query, setQuery] = useState("");
+
   const pathOptions = getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }));
   const opOptions = getOptions("op").map((e) => ({ label: translateAction(e), value: e }));
   const userOptions = getOptions("author").map((e) => ({ label: e, value: e }));
-  const [customFilter, setCustomFilter] = useState(null);
   const filteredData = data.filter((event) => filterEvent(event));
 
   function getOptions(key) {
@@ -49,25 +50,26 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
   }
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-md text-slate-700">
+    <div className="bg-white rounded-xl shadow-md text-gray-700">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
-      <div className="flex p-4 gap-4">
-        <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"} transition`}>
-          <FilterIcon className={isOpen ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
-          <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
-        </button>
-        {customFilterOptions && <CustomFilters customFilterOptions={customFilterOptions} customFilter={customFilter} setCustomFilter={setCustomFilter} />}
-      </div>
-      {isOpen && (
-        <div className="flex flex-wrap gap-4 p-4">
-          <MultiSelect options={pathOptions} selected={paths} onChange={setPaths} label="Donnée modifiée" />
-          <MultiSelect options={opOptions} selected={ops} onChange={setOps} label="Type d'action" />
-          <MultiSelect options={userOptions} selected={authors} onChange={setAuthors} label="Auteur de la modification" />
+      <div className="p-4 space-y-6">
+        <div className="flex gap-4">
+          <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
+          <button onClick={() => setIsOpen(!isOpen)} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
+            <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
+            <p className="text-gray-400 group-hover:text-gray-100 transition">Filtres</p>
+          </button>
+          {customFilterOptions && <CustomFilters customFilterOptions={customFilterOptions} customFilter={customFilter} setCustomFilter={setCustomFilter} />}
         </div>
-      )}
+        {isOpen && (
+          <div className="flex flex-wrap gap-4">
+            <MultiSelect options={pathOptions} selected={paths} onChange={setPaths} label="Donnée modifiée" />
+            <MultiSelect options={opOptions} selected={ops} onChange={setOps} label="Type d'action" />
+            <MultiSelect options={userOptions} selected={authors} onChange={setAuthors} label="Auteur de la modification" />
+          </div>
+        )}
+      </div>
+
       <table className="table-fixed w-full">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
@@ -148,13 +150,17 @@ function classNames(...classes) {
 
 function MultiSelect({ options, selected, onChange, label }) {
   return (
-    <div className="min-w-72">
+    <div className="min-w-96">
       <Listbox value={selected} onChange={onChange} multiple>
         {({ open }) => (
           <div className="relative">
             <Listbox.Button className="flex rounded-lg p-2 border bg-white items-center gap-3">
-              <p className="text-left text-sm text-gray-500 max-w-sm whitespace-nowrap overflow-hidden">
-                {label} : {selected?.map((e) => e.label).join(", ")}
+              <p className="min-w-1/4 text-left text-sm text-gray-500 max-w-xs whitespace-nowrap overflow-hidden">
+                {label} :{" "}
+                {options
+                  .filter((option) => selected.includes(option.value))
+                  .map((option) => option.label)
+                  .join(", ")}
               </p>
               <span className="pointer-events-none flex items-center pr-2">
                 {open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}
