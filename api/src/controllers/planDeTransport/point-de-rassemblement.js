@@ -49,7 +49,11 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
     ]);
 
     // get all buses to cohesion center using previous meeting points, find used meeting points with hours and get a new meeting point list
-    const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
+    let schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
+    // on ajoute le PDR choisi par le jeune pour être certain qu'il soit à l'arrivée.
+    if (req.user.meetingPointId) {
+      schemaMeetingPointIds.push(req.user.meetingPointId);
+    }
     const meetingPoints = await LigneToPointModel.aggregate([
       { $match: { meetingPointId: { $in: schemaMeetingPointIds } } },
       {
@@ -86,6 +90,7 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
                 meetingHour: "$meetingHour",
                 returnHour: "$returnHour",
                 busLineId: "$lignebus._id",
+                busLineName: "$lignebus.busId",
                 youngSeatsTaken: "$lignebus.youngSeatsTaken",
                 youngCapacity: "$lignebus.youngCapacity",
               },
@@ -97,7 +102,11 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
 
     // on ne garde que les bus avec de la place restante.
     const availableMeetingPoints = meetingPoints.filter((mp) => {
-      return mp.youngSeatsTaken < mp.youngCapacity;
+      if (req.user.meetingPointId) {
+        return mp.youngSeatsTaken < mp.youngCapacity || req.user.meetingPointId === mp._id.toString();
+      } else {
+        return mp.youngSeatsTaken < mp.youngCapacity;
+      }
     });
 
     // return meeting points
@@ -512,6 +521,7 @@ router.get("/:id/in-schema", passport.authenticate("referent", { session: false,
     const schema = await SchemaDeRepartitionModel.findOne({ gatheringPlaces: id });
 
     // --- résultat
+    // noinspection RedundantConditionalExpressionJS
     return res.status(200).send({ ok: true, data: schema ? true : false });
   } catch (error) {
     capture(error);
