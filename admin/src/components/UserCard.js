@@ -18,7 +18,7 @@ export default function UserCard({ user }) {
   return (
     <a href={getlink(user)} className="hover:cursor-pointer group">
       <div className="flex gap-2">
-        <div className="rounded-full w-10 h-10 overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100">
+        <div className="shrink-0 rounded-full w-10 h-10 overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100">
           {getAvatar(user)}
         </div>
         <div className="max-w-xs">

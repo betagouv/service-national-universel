@@ -9,6 +9,8 @@ import Select from "../components/Select";
 import { cohortList } from "../util";
 import { createEvent } from "../../../utils";
 
+let filterOptionsCache = null;
+
 export default function Historic() {
   const [loading, setLoading] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -16,7 +18,28 @@ export default function Historic() {
   const [data, setData] = React.useState([]);
   const [pagination, setPagination] = React.useState({ count: 0, page: 0, pageCount: 0 });
   const [currentPage, setCurrentPage] = React.useState(0);
-  const [filters, setFilters] = React.useState({ op: [], user: [], path: [], query: "" });
+  const [filters, setFilters] = React.useState({ op: [], userId: [], path: [], query: "" });
+  const [options, setOptions] = React.useState(filterOptionsCache);
+
+  useEffect(() => {
+    (async function () {
+      try {
+        if (filterOptionsCache) {
+          setOptions(filterOptionsCache);
+        } else {
+          const { ok, data } = await API.get("/ligne-de-bus/patches/filter-options");
+          if (ok) {
+            filterOptionsCache = data;
+            setOptions(data);
+          } else {
+            console.log("Error: unable to load options...");
+          }
+        }
+      } catch (err) {
+        console.log("Error: unable to load options...", err);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     getPatches();
@@ -35,7 +58,6 @@ export default function Historic() {
 
   // Insert fetch and format logic here
   const getPatches = async () => {
-    console.log("getPatches - Filters = ", filters);
     setLoading(true);
     try {
       let query = { page: currentPage };
@@ -66,7 +88,6 @@ export default function Historic() {
   };
 
   function changePage(page) {
-    console.log("Change Page : ", page);
     setCurrentPage(page);
   }
 
@@ -82,7 +103,6 @@ export default function Historic() {
           <Loader />
         ) : (
           <HistoryComponent
-            model="young"
             data={formattedData}
             refName="Ligne"
             path={"ligne-de-bus"}
@@ -90,6 +110,7 @@ export default function Historic() {
             changePage={changePage}
             filters={filters}
             changeFilters={setFilters}
+            filterOptions={options}
           />
         )}
       </div>

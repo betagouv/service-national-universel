@@ -2,52 +2,22 @@
  * Cette version de l'historique considère que les données, la pagination et les filtres se font côté serveur.
  */
 import React, { useState, useCallback } from "react";
-import {formatStringLongDate, translateModelFields, isIsoDate, translateHistory, debounce} from "../../utils";
-import { formatLongDateFR, translateAction } from "snu-lib";
+import { translateHistory, debounce } from "../../utils";
+import { formatLongDateFR, translateAction, translateBusPatchesField } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
 import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 import Pagination3 from "../Pagination3";
 
-export default function Historic3({ model, data, refName, path, pagination, changePage, filters, changeFilters }) {
-  const [query, setQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const activeFilters = getActiveFilters();
-
-  function getActiveFilters() {
-    let filters = [];
-    for (const [key, value] of Object.entries(filters)) {
-      if (value.length) filters.push({ [key]: value });
-    }
-    return filters;
-  }
-
-  function filterData() {
-    let d = data;
-    if (activeFilters?.length) d = d.filter((e) => filterEvent(e, activeFilters));
-    if (query) d = d.filter((e) => searchEvent(e, query));
-    return d;
-  }
-
-  function filterEvent(event, filters) {
-    return filters.every((filter) => {
-      return Object.entries(filter).some(([key, value]) => value.includes(event[key]));
-    });
-  }
-
-  function searchEvent(e, query) {
-    const serializedQuery = query.toLowerCase().trim();
-    const matchFieldName = translateModelFields(model, e.path).toLowerCase().includes(serializedQuery);
-    const matchOriginalValue = (isIsoDate(e.originalValue) ? formatStringLongDate(e.originalValue) : e.originalValue)?.toLowerCase().includes(serializedQuery);
-    const matchFromValue = (isIsoDate(e.value) ? formatStringLongDate(e.value) : e.value)?.toLowerCase().includes(serializedQuery);
-
-    return matchFieldName || matchOriginalValue || matchFromValue;
-  }
+export default function Historic3({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions }) {
+  const [query, setQuery] = useState(filters?.query ? filters.query : "");
+  const [isOpen, setIsOpen] = useState(
+    filters && ((filters.op && filters.op.length > 0) || (filters.path && filters.path.length > 0) || (filters.author && filters.author.length > 0)),
+  );
 
   const debouncedChangeFilter = useCallback(
     debounce(async (value) => {
-      console.log("debounced change filter");
       changeFilters({ ...filters, ...value });
     }, 500),
     [],
@@ -81,7 +51,7 @@ export default function Historic3({ model, data, refName, path, pagination, chan
           className="p-4"
         />
       </div>
-      {isOpen && FilterDrawer({ data, filters, changeFilters, activeFilters, model })}
+      {isOpen && FilterDrawer({ filters, changeFilters, filterOptions })}
       <table className="table-fixed w-full">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
@@ -95,7 +65,7 @@ export default function Historic3({ model, data, refName, path, pagination, chan
         </thead>
         <tbody>
           {data.map((e, index) => (
-            <Event key={index} e={e} index={index} model={model} refName={refName} path={path} />
+            <Event key={index} e={e} index={index} refName={refName} path={path} />
           ))}
         </tbody>
       </table>
@@ -113,34 +83,7 @@ export default function Historic3({ model, data, refName, path, pagination, chan
   );
 }
 
-function FilterButton({ filter, setCustomFilter, customFilter }) {
-  const checked = filter.label === customFilter.label;
-
-  function handleChange() {
-    if (checked) return setCustomFilter({ label: "", value: null });
-    return setCustomFilter(filter);
-  }
-
-  return (
-    <label className={`text-blue-500 py-2 px-3 m-0 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-50 ${checked && "bg-blue-50"}`}>
-      <FilterIcon className="fill-blue-300" />
-      {filter.label}
-      <input type="checkbox" checked={checked} onChange={() => handleChange()} className="hidden" />
-    </label>
-  );
-}
-
-function CustomFilters({ customFilterOptions, setCustomFilter, customFilter }) {
-  return (
-    <div className="flex flex-wrap gap-4">
-      {customFilterOptions.map((filter) => (
-        <FilterButton key={filter.label} filter={filter} setCustomFilter={setCustomFilter} customFilter={customFilter} />
-      ))}
-    </div>
-  );
-}
-
-function Event({ e, index, model, refName, path }) {
+function Event({ e, index, refName, path }) {
   return (
     <tr key={index} className="border-t border-t-slate-100 hover:bg-slate-50 cursor-default">
       {refName && (
@@ -152,7 +95,7 @@ function Event({ e, index, model, refName, path }) {
         <p className="text-gray-400 truncate">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
-        <p>{translateModelFields(model, e.path)}</p>
+        <p>{translateBusPatchesField(e.path)}</p>
       </td>
       <td className="px-4 py-3 truncate text-gray-400">{translateHistory(e.path, e.originalValue)}</td>
       <td className="px-4 py-3">
@@ -166,32 +109,21 @@ function Event({ e, index, model, refName, path }) {
   );
 }
 
-function FilterDrawer({ data, filters, changeFilters, model }) {
-  function getOptions(key) {
-    const arr = data?.map((e) => e[key]);
-    return [...new Set(arr)];
-  }
-
+function FilterDrawer({ filters, changeFilters, filterOptions }) {
   function getAuthorOptions() {
-    let options = {};
-    data.forEach((e) => {
-      if (options[e.authorId] === undefined) {
-        options[e.authorId] = { label: e.author, value: e.authorId };
-      }
-    });
-    return Object.values(options);
+    return filterOptions ? filterOptions.user.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id })) : [];
   }
 
   return (
     <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
       <MultiSelect
-        options={getOptions("path").map((e) => ({ label: translateModelFields(model, e), value: e }))}
+        options={filterOptions ? filterOptions.path.map((e) => ({ label: translateBusPatchesField(e) + " - " + e, value: e })) : []}
         value={filters.path}
         onChange={(path) => changeFilters((f) => ({ ...f, ...{ path } }))}
         label="Donnée modifiée"
       />
       <MultiSelect
-        options={getOptions("op").map((e) => ({ label: translateAction(e), value: e }))}
+        options={filterOptions ? filterOptions.op.map((e) => ({ label: translateAction(e), value: e })) : []}
         value={filters.op}
         onChange={(op) => changeFilters((f) => ({ ...f, ...{ op } }))}
         label="Type d'action"

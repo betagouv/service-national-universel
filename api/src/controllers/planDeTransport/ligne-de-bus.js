@@ -21,7 +21,8 @@ const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
-const { formatStringLongDate, isIsoDate, getDepartmentNumber, COHORTS} = require("snu-lib");
+const { formatStringLongDate, isIsoDate, translateBusPatchesField } = require("snu-lib");
+const mongoose = require("mongoose");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -548,6 +549,46 @@ const PATCHES_COUNT_PER_PAGE = 20;
 const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
 const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
 
+/**
+ * Pour l'historique du plan de transport, permet de récupérer la liste des options des filtres
+ */
+router.get("/patches/filter-options", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const busline = {
+      op: await db.collection("lignebus_patches").distinct("ops.op"),
+      path: await db.collection("lignebus_patches").distinct("ops.path"),
+      user: await db.collection("lignebus_patches").distinct("user"),
+    };
+    const lineToPoint = {
+      op: await db.collection("lignetopoint_patches").distinct("ops.op"),
+      path: await db.collection("lignetopoint_patches").distinct("ops.path"),
+      user: await db.collection("lignetopoint_patches").distinct("user"),
+    };
+    const modifications = {
+      op: await db.collection("modificationbus_patches").distinct("ops.op"),
+      path: await db.collection("modificationbus_patches").distinct("ops.path"),
+      user: await db.collection("modificationbus_patches").distinct("user"),
+    };
+
+    const op = mergeArrayItems([...busline.op, ...lineToPoint.op, ...modifications.op]);
+    const path = mergeArrayItems([...busline.path, ...lineToPoint.path, ...modifications.path]);
+    const user = mergeArrayItems([...busline.user, ...lineToPoint.user, ...modifications.user], "_id");
+
+    return res.status(200).send({
+      ok: true,
+      data: { op, path, user },
+    });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+/**
+ * Historique des plan de transports
+ * (on cherche l'historique dans 3 patches (lignebus, modificationBus et ligneToPoint)
+ */
 router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- validate data
@@ -706,12 +747,6 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         { $match: { path: { $nin: HIDDEN_FIELDS } } },
         { $match: { $or: [{ value: { $nin: IGNORED_VALUES } }, { originalValue: { $nin: IGNORED_VALUES } }] } },
         ...pipelineFilter,
-
-        // get total
-        // { $group: { _id: null, total: { $sum: 1 }, results: { $push: "$$ROOT" } } },
-
-        // limit, offset
-        // { $project: { total: 1, results: { $slice: ["$results", offset, limit] } } },
       ];
 
       const patches = await LigneBusModel.aggregate(pipeline);
@@ -721,6 +756,8 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       // --- results
       if (patches && patches.length > 0) {
         let results;
+
+        // --- filtrage texte libre
         if (filterQuery) {
           results = patches.filter((p) => {
             return filterPatchWithQuery(p, filterQuery);
@@ -729,6 +766,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
           results = patches;
         }
 
+        // --- result with pagination
         return res.status(200).send({
           ok: true,
           data: results.slice(offset, offset + limit),
@@ -762,37 +800,35 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
 
 module.exports = router;
 
+function pathToKey(path) {
+  if (path && path.length > 0) {
+    let key = path[0] === "/" ? path.substring(1) : path;
+    const idx = key.indexOf("/");
+    if (idx >= 0) {
+      key = key.substring(0, idx);
+    }
+    return key;
+  } else {
+    return path;
+  }
+}
+
 function filterPatchWithQuery(p, query) {
-  const matchFieldName = translateBusPatchesField(p.path).toLowerCase().includes(query);
-  const matchOriginalValue = (isIsoDate(p.originalValue) ? formatStringLongDate(p.originalValue) : p.originalValue)?.toLowerCase().includes(query);
-  const matchFromValue = (isIsoDate(p.value) ? formatStringLongDate(p.value) : p.value)?.toLowerCase().includes(query);
+  const matchFieldName = translateBusPatchesField(pathToKey(p.path)).toLowerCase().includes(query);
+  const matchOriginalValue = p.originalValue
+    ? (isIsoDate(p.originalValue) ? formatStringLongDate(p.originalValue) : p.originalValue.toString())?.toLowerCase().includes(query)
+    : false;
+  const matchFromValue = p.value ? (isIsoDate(p.value) ? formatStringLongDate(p.value) : p.value.toString())?.toLowerCase().includes(query) : false;
 
   return matchFieldName || matchOriginalValue || matchFromValue;
 }
 
-  "/createdAt",
-  "/km",
-  "/youngSeatsTaken",
-
-const busPatchFields = {
-  cohort: "Cohorte",
-  busId: "Numero de bus",
-  departuredDate: "Date de départ",
-  returnDate: "Date de retour",
-  youngCapacity: "Capacité de jeunes",
-  totalCapacity: "Capacité totale",
-  followerCapacity: "Capacité d'accompagnateurs",
-  youngSeatsTaken: "Nombre de jeunes",
-  travelTime: "Temps de route",
-  lunchBreak: "Pause déjeuner aller",
-  lunchBreakReturn: "Pause déjeuner retour",
-  sessionId: "Session",
-  centerId: "Centre de destination",
-  centerArrivalTime: "Heure d'arrivée au centre",
-  centerDepartureTime: "Heure de départ du centre",
-  meetingPointsIds: "Points de rassemblement",
-}
-
-function translateBusPatchesField(path) {
-
+function mergeArrayItems(array, subProperty) {
+  let set = {};
+  for (const item of array) {
+    let p = subProperty ? item[subProperty].toString() : item;
+    p = pathToKey(p);
+    set[p] = subProperty ? item : p;
+  }
+  return Object.values(set);
 }
