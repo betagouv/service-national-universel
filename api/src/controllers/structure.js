@@ -233,7 +233,6 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
     await structure.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
   } catch (error) {
-    console.log("🚀 ~ file: structure.js:231 ~ router.post ~ error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }

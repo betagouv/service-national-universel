@@ -122,19 +122,24 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendStructureManagerContractEmail(contract, isValidateAgainMail) {
-  sendContractEmail(contract, {
-    email: contract.tutorEmail,
-    name: `${contract.tutorFirstName} ${contract.tutorLastName}`,
-    token: contract.tutorToken,
-    isValidateAgainMail,
-  });
-  sendContractEmail(contract, {
-    email: contract.structureManagerEmail,
-    name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
-    token: contract.structureManagerToken,
-    isValidateAgainMail,
-  });
-  return;
+  try {
+    return await Promise.all([
+      sendContractEmail(contract, {
+        email: contract.tutorEmail,
+        name: `${contract.tutorFirstName} ${contract.tutorLastName}`,
+        token: contract.tutorToken,
+        isValidateAgainMail,
+      }),
+      await sendContractEmail(contract, {
+        email: contract.structureManagerEmail,
+        name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
+        token: contract.structureManagerToken,
+        isValidateAgainMail,
+      }),
+    ]);
+  } catch (e) {
+    capture(e);
+  }
 }
 
 async function sendParent1ContractEmail(contract, isValidateAgainMail) {

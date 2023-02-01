@@ -216,7 +216,7 @@ export default function Contract({ young }) {
       projectManagerEmail: managerDepartment?.email || "",
       structureManagerFirstName: structure.structureManager?.firstName || tutor?.firstName || "",
       structureManagerLastName: structure.structureManager?.lastName || tutor?.lastName || "",
-      structureManagerRole: structure.structureManager?.email ? structure.structureManager.role || "Responsable de structure" : "Tuteur de mission",
+      structureManagerRole: structure.structureManager?.role || "Responsable de structure",
       structureManagerEmail: structure.structureManager?.email || tutor?.email || "",
       tutorFirstName: tutor?.firstName || "",
       tutorLastName: tutor?.lastName || "",

@@ -11,6 +11,7 @@ import Button from "../Button";
 import Warning from "../../../../assets/icons/Warning";
 import ReactTooltip from "react-tooltip";
 import ModalRepresentant from "../modals/ModalRepresentant";
+import { capture } from "../../../../sentry";
 
 export default function CardRepresentant() {
   const { structure, setStructure } = useContext(StructureContext);
@@ -27,6 +28,7 @@ export default function CardRepresentant() {
       setStructure(data);
       setIsOpen(false);
     } catch (e) {
+      capture(e);
       return toastr.error("Oups, une erreur est survenue lors de la mise a jour du représentant de la structure : ", translate(e.code));
     }
   };
@@ -38,6 +40,7 @@ export default function CardRepresentant() {
       toastr.success("Le représentant a bien été supprimé");
       setStructure(data);
     } catch (e) {
+      capture(e);
       return toastr.error("Une erreur s'est produite :", translate(e.code));
     }
   };
@@ -46,7 +49,7 @@ export default function CardRepresentant() {
     <>
       <Card onClick={handleShowModal} className="w-96">
         {representant ? (
-          <>
+          <div className="flex flex-col h-full justify-between">
             <div className="px-4 py-3 space-y-1">
               <div className="flex items-center gap-2">
                 <p className="text-sm">Représentant de la structure</p>
@@ -84,7 +87,7 @@ export default function CardRepresentant() {
                 </div>
               </div>
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex flex-col justify-between px-4 py-3 h-full">
             <p className="text-sm">Représentant de la structure</p>

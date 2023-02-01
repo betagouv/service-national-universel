@@ -13,10 +13,24 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(structure.structureManager || {});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => setData({ ...data, [e.target.name]: e.target.value });
 
   const handleSubmit = async () => {
+    const errors = {};
+    if (!data.firstName) errors.firstName = "Le prénom est obligatoire";
+    if (!data.lastName) errors.lastName = "Le nom est obligatoire";
+    if (!data.email) errors.email = "L'email est obligatoire";
+    if (!data.email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) errors.email = "L'email n'est pas valide";
+    if (!data.mobile) errors.mobile = "Le téléphone est obligatoire";
+    if (data.mobile) {
+      const phone = data.mobile.replace(/ /g, "");
+      if (!phone.match(/^(0|\+33)[1-9]([-. ]?[0-9]{2}){4}$/)) errors.mobile = "Le téléphone n'est pas valide";
+    }
+    if (Object.keys(errors).length > 0) return setErrors(errors);
+    setErrors({});
+
     setIsLoading(true);
     await onSubmit(data);
     setIsLoading(false);
@@ -33,6 +47,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
 
   const handleCancel = () => {
     setData(structure.structureManager || {});
+    setErrors({});
     setIsOpen(false);
   };
 
@@ -49,18 +64,20 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
           <div className="text-blue-800 text-sm">Attention : les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Prénom" name="firstName" value={data.firstName} handleChange={handleChange} />
-          <Field label="Nom" name="lastName" value={data.lastName} handleChange={handleChange} />
-          <Field label="Téléphone" name="mobile" value={data.mobile} handleChange={handleChange} />
-          <Field label="Adresse email" name="email" value={data.email} handleChange={handleChange} />
-          <Field label="Rôle" name="role" value={data.role} handleChange={handleChange} />
+          <Field label="Prénom" name="firstName" value={data.firstName} handleChange={handleChange} errors={errors} />
+          <Field label="Nom" name="lastName" value={data.lastName} handleChange={handleChange} errors={errors} />
+          <Field label="Téléphone" name="mobile" value={data.mobile} handleChange={handleChange} errors={errors} />
+          <Field label="Adresse email" name="email" value={data.email} handleChange={handleChange} errors={errors} />
+          <Field label="Rôle" name="role" value={data.role} handleChange={handleChange} errors={errors} />
           <div className="h-full flex flex-col items-end">
-            <button disabled={isLoading} className="bg-[#ffffff] hover:bg-[#fef2f2] text-red-500 px-4 py-2 rounded-lg transition mt-auto" onClick={handleDelete}>
-              <div className="w-full flex justify-center items-center gap-2">
-                <HiOutlineTrash className="text-lg" />
-                Supprimer le contact
-              </div>
-            </button>
+            {structure.structureManager && (
+              <button disabled={isLoading} className="bg-[#ffffff] hover:bg-[#fef2f2] text-red-500 px-4 py-2 rounded-lg transition mt-auto" onClick={handleDelete}>
+                <div className="w-full flex justify-center items-center gap-2">
+                  <HiOutlineTrash className="text-lg" />
+                  Supprimer le contact
+                </div>
+              </button>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mt-auto">
