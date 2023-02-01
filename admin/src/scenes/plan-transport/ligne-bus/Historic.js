@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Loader from "../../../components/Loader";
-import HistoryComponent from "../../../components/views/Historic3";
+import HistoryComponent from "../../../components/views/HistoricServerDriven";
 import API from "../../../services/api";
 import { Title } from "../components/commons";
 import Select from "../components/Select";

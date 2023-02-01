@@ -8,9 +8,9 @@ import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
 import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
-import Pagination3 from "../Pagination3";
+import PaginationServerDriven from "../PaginationServerDriven";
 
-export default function Historic3({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions }) {
+export default function HistoricServerDriven({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions }) {
   const [query, setQuery] = useState(filters?.query ? filters.query : "");
   const [isOpen, setIsOpen] = useState(
     filters && ((filters.op && filters.op.length > 0) || (filters.path && filters.path.length > 0) || (filters.author && filters.author.length > 0)),
@@ -41,7 +41,7 @@ export default function Historic3({ data, refName, path, pagination, changePage,
             <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
           </button>
         </div>
-        <Pagination3
+        <PaginationServerDriven
           pageCount={pagination.pageCount}
           currentPage={pagination.page}
           changePage={changePage}
@@ -70,7 +70,7 @@ export default function Historic3({ data, refName, path, pagination, changePage,
         </tbody>
       </table>
       <hr className="border-t border-t-slate-100" />
-      <Pagination3
+      <PaginationServerDriven
         pageCount={pagination.pageCount}
         currentPage={pagination.page}
         changePage={changePage}

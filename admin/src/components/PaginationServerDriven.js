@@ -1,15 +1,15 @@
 /**
- * Ce composant va avec le Historic3.
+ * Ce composant va avec le HistoricServerDriven.
  * Il gère les données de pagination en provenance du serveur.
  * Et il reprend la forme de la pagination des reactlist.
  */
 import React from "react";
 
-const DISPLAYED_PAGES = 4;
+const DEFAULT_DISPLAYED_PAGES = 4;
 
-export default function Pagination3({ pageCount, currentPage, count, itemsPerPage, itemsCount, className, changePage }) {
-  const lastPage = Math.min(pageCount - 1, Math.max(DISPLAYED_PAGES, currentPage));
-  const firstPage = Math.max(lastPage - DISPLAYED_PAGES + 1, 1);
+export default function PaginationServerDriven({ pageCount, currentPage, count, itemsPerPage, itemsCount, className, changePage, displayedPages = DEFAULT_DISPLAYED_PAGES }) {
+  const lastPage = Math.min(pageCount - 1, Math.max(displayedPages, currentPage));
+  const firstPage = Math.max(lastPage - displayedPages + 1, 1);
   const lastItem = currentPage * itemsPerPage + itemsCount;
   const pages = [];
   for (let i = firstPage; i <= lastPage; ++i) {
