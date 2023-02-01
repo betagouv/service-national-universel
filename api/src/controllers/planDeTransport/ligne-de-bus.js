@@ -543,7 +543,9 @@ async function getInfoBus(line) {
   return { ...line._doc, meetingsPointsDetail, centerDetail };
 }
 
-const PATCHES_COUNT_PER_PAGE = 150;
+const PATCHES_COUNT_PER_PAGE = 20;
+const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
+const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
 
 router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -557,19 +559,24 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     }
 
     const { error: errorQuery, value: valueQuery } = Joi.object({
-      offset: Joi.number().default(0),
+      offset: Joi.number(),
       limit: Joi.number().default(PATCHES_COUNT_PER_PAGE),
+      page: Joi.number(),
+      op: Joi.string(),
+      path: Joi.string(),
+      userId: Joi.string(),
       // filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { offset, limit /*, filter*/ } = valueQuery;
+    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId } = valueQuery;
 
     // --- security
     if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // --- query
+    // ------ find all patches ids
     const { cohort } = value;
     const lines = await LigneBusModel.find({ cohort }, { _id: 1 });
     if (lines.length > 0) {
@@ -580,6 +587,33 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       const modificationBuses = await ModificationBusModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
       const modificationBusIds = modificationBuses.map((line) => line._id);
 
+      // ------ manage pagination
+      if (offset === undefined || offset === null) {
+        if (page === undefined || page === null || page < 1) {
+          offset = 0;
+        } else {
+          offset = page * limit;
+        }
+      }
+
+      // ------ compute filters
+      let filter = {};
+      let hasFilter = false;
+      if (filterOp && filterOp.trim().length > 0) {
+        filter.op = filterOp;
+        hasFilter = true;
+      }
+      if (filterPath && filterPath.trim().length > 0) {
+        filter.path = (filterPath.trim()[0] === "/" ? "" : "/") + filterPath.trim();
+        hasFilter = true;
+      }
+      if (filterUserId && filterUserId.trim().length > 0) {
+        filter["user._id"] = ObjectId(filterUserId);
+        hasFilter = true;
+      }
+      const pipelineFilter = hasFilter ? [{ $match: filter }] : [];
+
+      // ------ build complete pipeline
       const pipeline = [
         // tout ceci est là pour remplacer un $unionWith qui n'existe pas dans la version de mongo < 4.4
         { $limit: 1 },
@@ -660,6 +694,14 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         },
         { $project: { ops: 0, __v: 0 } },
 
+        // unwind on values array (fait anciennement en front)
+        { $unwind: { path: "$value", preserveNullAndEmptyArrays: true } },
+
+        // filter (fait anciennement en front)
+        { $match: { path: { $nin: HIDDEN_FIELDS } } },
+        { $match: { $or: [{ value: { $nin: IGNORED_VALUES } }, { originalValue: { $nin: IGNORED_VALUES } }] } },
+        ...pipelineFilter,
+
         // get total
         { $group: { _id: null, total: { $sum: 1 }, results: { $push: "$$ROOT" } } },
 
@@ -668,15 +710,33 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       ];
 
       const patches = await LigneBusModel.aggregate(pipeline);
-      // console.log("PATCHES: ", patches);
+      console.log(pipeline);
+      console.log("PATCHES: ", patches);
 
       // --- results
-      return res.status(200).send({
-        ok: true,
-        truc: "paf",
-        data: patches[0].results,
-        pagination: { count: patches[0].total, pageCount: Math.ceil(patches[0].total / PATCHES_COUNT_PER_PAGE), page: Math.floor(offset / PATCHES_COUNT_PER_PAGE) },
-      });
+      if (patches && patches.length > 0) {
+        return res.status(200).send({
+          ok: true,
+          data: patches[0].results,
+          pagination: {
+            count: patches[0].total,
+            pageCount: Math.ceil(patches[0].total / limit),
+            page: Math.floor(offset / limit),
+            itemsPerPage: limit,
+          },
+        });
+      } else {
+        return res.status(200).send({
+          ok: true,
+          data: [],
+          pagination: {
+            count: 0,
+            pageCount: 0,
+            page: 0,
+            itemsPerPage: limit,
+          },
+        });
+      }
     } else {
       return res.status(200).send({ ok: true, data: [], pagination: { count: 0, pageCount: 0, page: 0 } });
     }

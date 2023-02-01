@@ -269,11 +269,12 @@ function formatUser(user, role) {
   return user;
 }
 
-function createEvent(e, value, originalValue, role) {
+export function createEvent(e, value, originalValue, role) {
   let event = {};
-  event.path = formatField(e.path.substring(1));
+  event.path = e.path ? formatField(e.path.substring(1)) : null;
   event.user = formatUser(e.user, role);
   event.author = `${event.user.firstName} ${event.user.lastName}`;
+  event.authorId = e.user ? e.user._id : null;
   event.op = e.op;
   event.date = e.date;
   event.value = formatValue(event.path, value);
