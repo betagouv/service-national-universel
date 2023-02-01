@@ -409,7 +409,6 @@ export default function CustomMission({ young, onChange }) {
                 <div>Période de réalisation de la mission</div>
                 <div className="text-gray-400">&nbsp;(facultatif)</div>
               </div>
-              {/* Script pour passage d'array periode en single value */}
               <CustomSelect
                 isMulti
                 options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
