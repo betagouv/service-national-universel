@@ -249,6 +249,7 @@ export default function CustomMission({ young, onChange }) {
                 defaultOptions
                 onChange={(e) => {
                   setValues({ ...values, structureName: e.label, structureId: e._id, isMilitaryPreparation: "false" });
+                  console.log(e.structure);
                   setSelectedStructure(e.structure);
                 }}
                 placeholder="Rechercher une structure"
