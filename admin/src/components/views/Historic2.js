@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { formatStringLongDate, translateModelFields, isIsoDate, translateHistory } from "../../utils";
 import { formatLongDateFR, translateAction } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
-import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 import Pagination from "../Pagination";
 
@@ -57,7 +56,7 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
         <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
+          className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"} transition`}>
           <FilterIcon className={isOpen ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
           <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
         </button>
@@ -88,7 +87,7 @@ export default function Historic({ model, data, customFilterOptions, refName, pa
 }
 
 function FilterButton({ filter, setCustomFilter, customFilter }) {
-  const checked = filter.label === customFilter.label;
+  const checked = filter.label === customFilter?.label;
 
   function handleChange() {
     if (checked) return setCustomFilter({ label: "", value: null });

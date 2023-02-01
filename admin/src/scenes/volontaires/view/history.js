@@ -29,15 +29,20 @@ export default function History({ young, onChange }) {
   const filters = [
     {
       label: "Validations de phase",
-      value: { path: ["statusPhase1", "statusPhase2", "statusPhase3"], value: ["DONE", "VALIDATED"] },
+      value: [
+        { path: ["status"], value: ["VALIDATED"] },
+        { path: ["statusPhase1"], value: ["DONE"] },
+        { path: ["statusPhase2"], value: ["VALIDATED"] },
+        { path: ["statusPhase3"], value: ["DONE"] },
+      ],
     },
     {
       label: "Changements de cohortes",
-      value: { path: ["cohort"] },
+      value: [{ path: ["cohort"] }],
     },
     {
       label: "Pièces justificatives",
-      value: { path: ["files", "files/cniFiles/0", "files/cniFiles/1", "files/cniFiles/2"] },
+      value: [{ path: ["files", "files/cniFiles/0", "files/cniFiles/1", "files/cniFiles/2"] }],
     },
   ];
 

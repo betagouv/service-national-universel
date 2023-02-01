@@ -23,8 +23,8 @@ const api = async (path, options = {}) => {
     });
     const contentType = res.headers.raw()["content-type"];
     if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
-    // ! UpdateContact return empty json if it works
-    return await res.text();
+    // Sometimes, sendinblue returns a 204 with an empty body
+    return true;
   } catch (e) {
     console.log("Erreur in sendinblue api", e);
     capture(e);
@@ -48,7 +48,7 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (sms.code) throw new Error(JSON.stringify(sms));
+    if (!sms || sms?.code) throw new Error(JSON.stringify({ sms, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -79,7 +79,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code) throw new Error(JSON.stringify(mail));
+    if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -106,7 +106,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (mail.code) throw new Error(JSON.stringify(mail));
+    if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -243,17 +243,9 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const res = await getContact(email);
-    if (res.code) {
-      if (res?.code === "document_not_found") {
-        const res = await createContact({ email, attributes, listIds });
-        if (res.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
-        return;
-      }
-      throw new Error(JSON.stringify(res));
-    }
-    const resUpdate = await updateContact(email, { attributes, listIds });
-    if (resUpdate.code) throw new Error(JSON.stringify({ resUpdate, email, attributes, listIds }));
+    const res = await createContact({ email, attributes, listIds, updateEnabled: true });
+    if (!res || res?.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
+    return;
   } catch (e) {
     capture(e);
   }
