@@ -705,19 +705,19 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         // get total
         { $group: { _id: null, total: { $sum: 1 }, results: { $push: "$$ROOT" } } },
 
-        // sort, limit, offset
-        { $project: { total: 1, results: { $slice: ["$results", offset, limit] } } },
+        // limit, offset
+        // { $project: { total: 1, results: { $slice: ["$results", offset, limit] } } },
       ];
 
       const patches = await LigneBusModel.aggregate(pipeline);
-      console.log(pipeline);
-      console.log("PATCHES: ", patches);
+      // console.log(pipeline);
+      // console.log("PATCHES: ", patches);
 
       // --- results
       if (patches && patches.length > 0) {
         return res.status(200).send({
           ok: true,
-          data: patches[0].results,
+          data: patches[0].results.slice(offset, offset + limit),
           pagination: {
             count: patches[0].total,
             pageCount: Math.ceil(patches[0].total / limit),
