@@ -582,18 +582,22 @@ export default function CustomMission({ young, onChange }) {
                 </div>
               )}
             </div>
-            {ENABLE_PM && selectedStructure && selectedStructure?.isMilitaryPreparation === "true" ? (
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-gray-800 font-medium">Prépartion Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
-                <Toggle
-                  id="isMilitaryPreparation"
-                  name="isMilitaryPreparation"
-                  value={values?.isMilitaryPreparation === "true"}
-                  onChange={(e) => {
-                    setValues({ ...values, isMilitaryPreparation: e.toString() });
-                  }}
-                />
-              </div>
+            {ENABLE_PM && selectedStructure ? (
+              <>
+                <div className="text-lg font-medium text-gray-900 mt-11 mb-4">Prépartion Militaire</div>
+
+                <div className="flex flex-row justify-between items-center">
+                  <div className="text-gray-800 font-medium">Prépartion Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
+                  <Toggle
+                    id="isMilitaryPreparation"
+                    name="isMilitaryPreparation"
+                    value={values?.isMilitaryPreparation === "true"}
+                    onChange={(e) => {
+                      setValues({ ...values, isMilitaryPreparation: e.toString() });
+                    }}
+                  />
+                </div>
+              </>
             ) : null}
             <div>
               <div className="text-lg font-medium text-gray-900 mt-11 mb-4">Hébergement</div>
