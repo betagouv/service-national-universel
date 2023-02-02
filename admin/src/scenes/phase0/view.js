@@ -615,7 +615,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       result = false;
     }
     if (!data.phone || !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
-      errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide.";
+      errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
       result = false;
     }
     result = validateEmpty(data, "lastName", errors) && result;
@@ -1145,7 +1145,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         (data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") &&
         !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])
       ) {
-        errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide.";
+        errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
         result = false;
       }
       result = validateEmpty(data, `parent${parent}LastName`, errors) && result;

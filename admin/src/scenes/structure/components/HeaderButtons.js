@@ -32,7 +32,7 @@ export default function Actions() {
     <div className="pr-8 pt-8 space-y-7">
       {user.role !== ROLES.RESPONSIBLE && structure.status !== "DRAFT" && (
         <a
-          className="px-3 py-2 cursor-pointer border-[1px] rounded-lg bg-blue-600 border-blue-600 text-[#ffffff] hover:bg-white hover:text-[#2563eb]"
+          className="px-3 py-2 cursor-pointer rounded-lg bg-blue-600 text-blue-50 hover:brightness-110 hover:text-blue-50 active:brightness-125"
           href={"/mission/create/" + structure._id}>
           Nouvelle mission
         </a>

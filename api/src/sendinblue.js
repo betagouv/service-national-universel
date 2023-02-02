@@ -20,6 +20,9 @@ const api = async (path, options = {}) => {
 
     const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
       ...options,
+      retries: 3,
+      retryDelay: 1000,
+      retryOn: [502, 503, 504],
       headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
     });
     const contentType = res.headers.raw()["content-type"];
@@ -109,7 +112,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
 
     // * To delete once we put the email of the parent in the template
-    const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == mail?.body?.templateId);
+    const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == body?.templateId);
     if (mail?.message == "email is missing in to" && isParentTemplate) throw new Error("Parent sans email : " + body?.to?.[0]?.name);
 
     if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));

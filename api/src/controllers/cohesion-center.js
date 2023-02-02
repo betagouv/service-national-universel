@@ -192,19 +192,20 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error, value } = Joi.object({
       academy: Joi.string().required(),
+      address: Joi.string().required(),
+      city: Joi.string().required(),
+      zip: Joi.string().required(),
+      department: Joi.string().required(),
+      region: Joi.string().required(),
       addressVerified: Joi.boolean().required(),
       centerDesignation: Joi.string().allow(null, ""),
-      city: Joi.string().required(),
       code2022: Joi.string().required(),
       complement: Joi.string().allow(null, ""),
       placesTotal: Joi.number().required(),
-      department: Joi.string().required(),
       domain: Joi.string().required(),
       name: Joi.string().required(),
       pmr: Joi.boolean().required(),
-      region: Joi.string().required(),
       typology: Joi.string().required(),
-      zip: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);

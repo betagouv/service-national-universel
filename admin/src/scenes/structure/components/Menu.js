@@ -10,7 +10,7 @@ export default function Menu({ tab }) {
   const user = useSelector((state) => state.Auth.user);
   const tabs = [
     { label: "Détails", id: "details", src: `/structure/${structure._id}` },
-    { label: "Missions", id: "missions", src: `/structure/${structure._id}/missions` },
+    // { label: "Missions", id: "missions", src: `/structure/${structure._id}/missions` },
   ];
   if (canViewPatchesHistory(user)) {
     tabs.push({ label: "Historique", id: "historique", src: `/structure/${structure._id}/historique`, icon: Clock });
