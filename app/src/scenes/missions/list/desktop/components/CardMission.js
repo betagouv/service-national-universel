@@ -41,19 +41,18 @@ export default function mission({ mission, youngLocation }) {
         </div>
       </div>
 
-      <div className="flex justify-center flex-col text-xs gap-1 mx-2 text-gray-900">
-        <div>
-          <span className="text-gray-500">Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
-        </div>
-        <div>
-          <span className="text-gray-500">Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
-        </div>
-      </div>
-
       <div className="flex flex-1 justify-between">
+        <div className="flex basis-[30%] justify-center flex-col text-xs gap-1 mx-2 text-gray-900">
+          <div>
+            <span className="text-gray-500">Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
+          </div>
+          <div>
+            <span className="text-gray-500">Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
+          </div>
+        </div>
         {/* DISTANCE */}
         {youngLocation && mission.location ? (
-          <div className="flex basis-[60%] items-center justify-end space-x-2">
+          <div className="flex basis-[30%] items-center justify-end space-x-2">
             <LocationMarker className="text-gray-400" />
             <div className="text-gray-800 text-base font-bold">à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km</div>
             {mission?.hebergement === "true" ? (
