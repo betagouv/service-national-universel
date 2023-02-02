@@ -161,7 +161,13 @@ export default function StepPDR({ young, center }) {
           {meetingPoints ? (
             <div className="grid grid-cols-4 gap-4">
               {meetingPoints.map((mp) => (
-                <MeetingPointChooser key={mp._id} meetingPoint={mp} onChoose={() => chooseMeetingPoint(mp)} choosed={mp._id === young.meetingPointId} expired={pdrChoiceExpired} />
+                <MeetingPointChooser
+                  key={mp._id}
+                  meetingPoint={mp}
+                  onChoose={() => chooseMeetingPoint(mp)}
+                  choosed={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
+                  expired={pdrChoiceExpired}
+                />
               ))}
               <MeetingPointGoAloneDesktop
                 center={center}
