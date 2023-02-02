@@ -57,10 +57,10 @@ export default function mission({ mission, youngLocation }) {
           </div>
           <div className="flex justify-start flex-row text-xs gap-2 mt-1">
             <div>
-              <span className="text-gray-500">&nbsp;Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
+              <span className="text-gray-500">&nbsp;Du</span>&nbsp;{formatStringDateTimezoneUTC(mission.startAt)}
             </div>
             <div>
-              <span className="text-gray-500">Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
+              <span className="text-gray-500">Au</span>&nbsp;{formatStringDateTimezoneUTC(mission.endAt)}
             </div>
           </div>
         </div>

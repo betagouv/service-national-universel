@@ -44,10 +44,10 @@ export default function mission({ mission, youngLocation }) {
       <div className="flex flex-1 justify-between">
         <div className="flex basis-[30%] justify-center flex-col text-xs gap-1 mx-2 text-gray-900">
           <div>
-            <span className="text-gray-500">Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
+            <span className="text-gray-500">Du</span>&nbsp;{formatStringDateTimezoneUTC(mission.startAt)}
           </div>
           <div>
-            <span className="text-gray-500">Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
+            <span className="text-gray-500">Au</span>&nbsp;{formatStringDateTimezoneUTC(mission.endAt)}
           </div>
         </div>
         {/* DISTANCE */}
