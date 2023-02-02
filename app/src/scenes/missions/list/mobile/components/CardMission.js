@@ -24,7 +24,7 @@ export default function mission({ mission, youngLocation }) {
             </div>
             <div className="text-gray-900 font-bold text-base">{mission?.name}</div>
           </div>
-          <div className="flex flex-1 items-center flex-row w-full">
+          <div className="flex flex-1 items-center flex-row w-full mt-2">
             {/* 
             
 
