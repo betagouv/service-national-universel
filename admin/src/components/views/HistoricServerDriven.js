@@ -9,8 +9,9 @@ import UserCard from "../UserCard";
 import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 import PaginationServerDriven from "../PaginationServerDriven";
+import Loader from "../Loader";
 
-export default function HistoricServerDriven({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions }) {
+export default function HistoricServerDriven({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions, loading = false }) {
   const [query, setQuery] = useState(filters?.query ? filters.query : "");
   const [isOpen, setIsOpen] = useState(
     filters && ((filters.op && filters.op.length > 0) || (filters.path && filters.path.length > 0) || (filters.author && filters.author.length > 0)),
@@ -30,9 +31,8 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
 
   return (
     <div className="w-full bg-white rounded-xl shadow-md text-slate-700">
-      {!data.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="w-full flex p-4 gap-4 justify-between items-center">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 py-4">
           <input onChange={(e) => changeQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -41,44 +41,54 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
             <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
           </button>
         </div>
-        <PaginationServerDriven
-          pageCount={pagination.pageCount}
-          currentPage={pagination.page}
-          changePage={changePage}
-          count={pagination.count}
-          itemsPerPage={pagination.itemsPerPage}
-          itemsCount={data.length}
-          className="p-4"
-        />
+        {!loading && (
+          <PaginationServerDriven
+            pageCount={pagination.pageCount}
+            currentPage={pagination.page}
+            changePage={changePage}
+            count={pagination.count}
+            itemsPerPage={pagination.itemsPerPage}
+            itemsCount={data.length}
+            className="p-4"
+          />
+        )}
       </div>
       {isOpen && FilterDrawer({ filters, changeFilters, filterOptions })}
-      <table className="table-fixed w-full">
-        <thead>
-          <tr className="uppercase border-t border-t-slate-100">
-            {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((e, index) => (
-            <Event key={index} e={e} index={index} refName={refName} path={path} />
-          ))}
-        </tbody>
-      </table>
-      <hr className="border-t border-t-slate-100" />
-      <PaginationServerDriven
-        pageCount={pagination.pageCount}
-        currentPage={pagination.page}
-        changePage={changePage}
-        count={pagination.count}
-        itemsPerPage={pagination.itemsPerPage}
-        itemsCount={data.length}
-        className="p-4"
-      />
+      {loading ? (
+        <Loader />
+      ) : data.length === 0 ? (
+        <div className="italic p-4">Aucune donnée</div>
+      ) : (
+        <>
+          <table className="table-fixed w-full">
+            <thead>
+              <tr className="uppercase border-t border-t-slate-100">
+                {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
+                <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
+                <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
+                <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
+                <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
+                <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((e, index) => (
+                <Event key={index} e={e} index={index} refName={refName} path={path} />
+              ))}
+            </tbody>
+          </table>
+          <hr className="border-t border-t-slate-100" />
+          <PaginationServerDriven
+            pageCount={pagination.pageCount}
+            currentPage={pagination.page}
+            changePage={changePage}
+            count={pagination.count}
+            itemsPerPage={pagination.itemsPerPage}
+            itemsCount={data.length}
+            className="p-4"
+          />
+        </>
+      )}
     </div>
   );
 }

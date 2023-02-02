@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import Loader from "../../../components/Loader";
 import HistoryComponent from "../../../components/views/HistoricServerDriven";
 import API from "../../../services/api";
 import { Title } from "../components/commons";
@@ -99,20 +98,17 @@ export default function Historic() {
           <Title>Historique du plan de transport</Title>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>
-        {loading ? (
-          <Loader />
-        ) : (
-          <HistoryComponent
-            data={formattedData}
-            refName="Ligne"
-            path={"ligne-de-bus"}
-            pagination={pagination}
-            changePage={changePage}
-            filters={filters}
-            changeFilters={setFilters}
-            filterOptions={options}
-          />
-        )}
+        <HistoryComponent
+          loading={loading}
+          data={formattedData}
+          refName="Ligne"
+          path={"ligne-de-bus"}
+          pagination={pagination}
+          changePage={changePage}
+          filters={filters}
+          changeFilters={setFilters}
+          filterOptions={options}
+        />
       </div>
     </>
   );

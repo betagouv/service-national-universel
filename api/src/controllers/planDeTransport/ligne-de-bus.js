@@ -4,7 +4,7 @@ const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
+// const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
@@ -565,15 +565,15 @@ router.get("/patches/filter-options", passport.authenticate("referent", { sessio
       path: await db.collection("lignetopoint_patches").distinct("ops.path"),
       user: await db.collection("lignetopoint_patches").distinct("user"),
     };
-    const modifications = {
-      op: await db.collection("modificationbus_patches").distinct("ops.op"),
-      path: await db.collection("modificationbus_patches").distinct("ops.path"),
-      user: await db.collection("modificationbus_patches").distinct("user"),
-    };
+    // const modifications = {
+    //   op: await db.collection("modificationbus_patches").distinct("ops.op"),
+    //   path: await db.collection("modificationbus_patches").distinct("ops.path"),
+    //   user: await db.collection("modificationbus_patches").distinct("user"),
+    // };
 
-    const op = mergeArrayItems([...busline.op, ...lineToPoint.op, ...modifications.op]);
-    const path = mergeArrayItems([...busline.path, ...lineToPoint.path, ...modifications.path]);
-    const user = mergeArrayItems([...busline.user, ...lineToPoint.user, ...modifications.user], "_id");
+    const op = mergeArrayItems([...busline.op, ...lineToPoint.op /*, ...modifications.op*/]);
+    const path = mergeArrayItems([...busline.path, ...lineToPoint.path /*, ...modifications.path*/]);
+    const user = mergeArrayItems([...busline.user, ...lineToPoint.user /*, ...modifications.user*/], "_id");
 
     return res.status(200).send({
       ok: true,
@@ -630,8 +630,8 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       const lineStringIds = lineIds.map((l) => l.toString());
       const lineToPoints = await LigneToPointModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
       const lineToPointIds = lineToPoints.map((line) => line._id);
-      const modificationBuses = await ModificationBusModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
-      const modificationBusIds = modificationBuses.map((line) => line._id);
+      // const modificationBuses = await ModificationBusModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
+      // const modificationBusIds = modificationBuses.map((line) => line._id);
 
       // ------ manage pagination
       if (offset === undefined || offset === null) {
@@ -692,7 +692,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
             as: "ligneToPoints",
           },
         },
-        {
+        /*{
           $lookup: {
             from: "modificationbus_patches",
             pipeline: [
@@ -711,8 +711,8 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
             ],
             as: "modificationBuses",
           },
-        },
-        { $project: { union: { $concatArrays: ["$ligneBuses", "$ligneToPoints", "$modificationBuses"] } } },
+        },*/
+        { $project: { union: { $concatArrays: ["$ligneBuses", "$ligneToPoints" /*, "$modificationBuses"*/] } } },
         { $unwind: "$union" },
         { $replaceRoot: { newRoot: "$union" } },
         {
