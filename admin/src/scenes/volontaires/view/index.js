@@ -54,7 +54,7 @@ export default function Index({ ...props }) {
       <Switch>
         <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/equivalence" component={() => <FormEquivalence young={young} onChange={getYoung} />} />
-        <SentryRoute path="/volontaire/:id/phase2/custom_mission" component={() => <CustomMission young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase2/mission-personnalisé" component={() => <CustomMission young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2" component={() => <Phase2Bis young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
