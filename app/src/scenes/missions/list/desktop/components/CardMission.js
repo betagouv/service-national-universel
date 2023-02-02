@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translate, formatStringDateTimezoneUTC, getDistance } from "../../../../../utils";
+import { translate, getDistance } from "../../../../../utils";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import IconDomain from "../../../components/IconDomain";
 import House from "../../../components/HouseIcon";
+import dayjs from "dayjs";
+import Calendar from "../../../../../assets/icons/Calendar";
 
 export default function mission({ mission, youngLocation }) {
   const tags = [];
@@ -14,7 +16,7 @@ export default function mission({ mission, youngLocation }) {
     <Link
       to={`/mission/${mission._id}`}
       className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] mb-4 hover:translate-x-1 transition duration-200 ease-in z-10">
-      <div className="flex flex-1">
+      <div className="flex flex-1 basis-[60%]">
         {/* icon */}
         <div className="flex items-center mr-3">
           <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
@@ -41,45 +43,48 @@ export default function mission({ mission, youngLocation }) {
         </div>
       </div>
 
-      <div className="flex flex-1 justify-between">
-        <div className="flex basis-[30%] justify-center flex-col text-xs gap-1 mx-2 text-gray-900">
-          <div>
-            <span className="text-gray-500">Du</span>&nbsp;{formatStringDateTimezoneUTC(mission.startAt)}
+      <div className="flex flex-1 justify-end items-center basis-[40%]">
+        <div className="flex flex-row w-full justify-end items-center flex-wrap">
+          <div className="flex flex-1 flex-row text-sm gap-2 mx-2 text-gray-900 font-bold  items-center justify-center">
+            <Calendar width={14} heigth={20} className=" min-w-[14px] min-h-[20px] text-gray-400" />
+            <div className="flex flex-row gap-1 flex-wrap">
+              <div>du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
+              <div>au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
+            </div>
           </div>
-          <div>
-            <span className="text-gray-500">Au</span>&nbsp;{formatStringDateTimezoneUTC(mission.endAt)}
-          </div>
+          {/* DISTANCE */}
+          {youngLocation && mission.location ? (
+            <div className="flex flex-none items-center justify-end space-x-2">
+              <LocationMarker className="text-gray-400" />
+              <div className="text-gray-800 text-base font-bold">
+                à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
+              </div>
+              {mission?.hebergement === "true" ? (
+                <>
+                  {mission.hebergementPayant === "true" ? (
+                    <div className="p-2 bg-yellow-100 rounded-full">
+                      <House tooltip={"Hébergement payant proposé"} color="#D97706" />
+                    </div>
+                  ) : (
+                    <div className="p-2 bg-green-50 rounded-full">
+                      <House tooltip={"Hébergement gratuit proposé"} color="#059669" />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-2 w-[14px]" />
+              )}
+            </div>
+          ) : (
+            <div />
+          )}
+          {/* END DISTANCE */}
         </div>
-        {/* DISTANCE */}
-        {youngLocation && mission.location ? (
-          <div className="flex basis-[30%] items-center justify-end space-x-2">
-            <LocationMarker className="text-gray-400" />
-            <div className="text-gray-800 text-base font-bold">à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km</div>
-            {mission?.hebergement === "true" ? (
-              <>
-                {mission.hebergementPayant === "true" ? (
-                  <div className="p-2 bg-yellow-100 rounded-full">
-                    <House tooltip={"Hébergement payant proposé"} color="#D97706" />
-                  </div>
-                ) : (
-                  <div className="p-2 bg-green-50 rounded-full">
-                    <House tooltip={"Hébergement gratuit proposé"} color="#059669" />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="p-2 w-[14px]" />
-            )}
-          </div>
-        ) : (
-          <div />
-        )}
-        {/* END DISTANCE */}
 
-        {/* STATUT */}
-        <div className="flex basis-[40%] items-center justify-end">
-          <div className="text-gray-500 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
+        <div className="absolute top-4 bg-gray-100 rounded-lg px-3 py-1.5">
+          <div className="text-gray-700 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
         </div>
+
         {/* END STATUT */}
       </div>
     </Link>
