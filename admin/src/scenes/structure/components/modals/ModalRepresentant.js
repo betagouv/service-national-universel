@@ -1,12 +1,14 @@
 import React, { useContext, useState } from "react";
-import { HiOutlineTrash } from "react-icons/hi";
 import { StructureContext } from "../../view";
+import validator from "validator";
 
+import { HiOutlineTrash } from "react-icons/hi";
 import Warning from "../../../../assets/icons/Warning";
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Button from "../Button";
 import Field from "../../../missions/components/Field";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
+import { regexPhoneFrenchCountries } from "../../../../utils";
 
 export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
   const { structure } = useContext(StructureContext);
@@ -22,12 +24,10 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
     if (!data.firstName) errors.firstName = "Le prénom est obligatoire";
     if (!data.lastName) errors.lastName = "Le nom est obligatoire";
     if (!data.email) errors.email = "L'email est obligatoire";
-    if (!data.email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) errors.email = "L'email n'est pas valide";
+    if (!validator.isEmail(data.email)) errors.email = "L'email n'est pas valide";
     if (!data.mobile) errors.mobile = "Le téléphone est obligatoire";
-    if (data.mobile) {
-      const phone = data.mobile.replace(/ /g, "");
-      if (!phone.match(/^(0|\+33)[1-9]([-. ]?[0-9]{2}){4}$/)) errors.mobile = "Le téléphone n'est pas valide";
-    }
+    if (!validator.matches(data.mobile, regexPhoneFrenchCountries)) errors.mobile = "Le téléphone n'est pas valide";
+
     if (Object.keys(errors).length > 0) return setErrors(errors);
     setErrors({});
 

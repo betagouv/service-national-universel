@@ -4,6 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { ES_NO_LIMIT } from "snu-lib";
 import TeamModal from "../modals/TeamModal";
 import { getInitials } from "../../../../utils";
+import Card from "../Card";
 
 export default function TeamCard({ structureId }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function TeamCard({ structureId }) {
   if (!team?.length) return <div />;
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm hover:cursor-pointer items-center hover:scale-105 w-64 px-7 py-6" onClick={() => setIsOpen(true)}>
+      <Card className="w-64 px-7 py-6" onClick={() => setIsOpen(true)}>
         <p className="mb-1 text-sm">L&apos;équipe</p>
         <p className="text-gray-500 text-xs">
           {team.length} responsable{team.length > 1 && "s"}
@@ -45,7 +46,7 @@ export default function TeamCard({ structureId }) {
               );
           })}
         </div>
-      </div>
+      </Card>
       <TeamModal isOpen={isOpen} onCancel={() => setIsOpen(false)} team={team} setTeam={setTeam} />
     </>
   );
