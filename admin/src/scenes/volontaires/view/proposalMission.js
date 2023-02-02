@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
@@ -18,6 +18,7 @@ export default function ProposeMission({ young, onSend }) {
   const [searchedValue, setSearchedValue] = useState("");
 
   const getDefaultQuery = () => {
+    // Ajouter vérif si mission déjà proposée
     return {
       query: {
         bool: {
@@ -79,15 +80,18 @@ export default function ProposeMission({ young, onSend }) {
       missionName: mission.name,
       structureName: mission.structureName,
     });
-    if (!okMail) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
+    if (!okMail) {
+      toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
+      capture(codeMail);
+      return;
+    }
     toastr.success("Email envoyé !");
-    return onSend();
   };
 
   return (
     <>
       <YoungHeader young={young} onChange={onSend} />
-      <div className="bg-blue-50 rounded-xl shadow-sm m-8 p-8 space-y-8 items-center">
+      <div className="bg-white rounded-xl shadow-sm m-8 p-8 space-y-8 items-center">
         <div className="grid grid-cols-9 border-b pb-8">
           <div className="w-9 h-9 rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105">
             <Link to={`/volontaire/${young._id}/phase2`}>
@@ -145,84 +149,46 @@ export default function ProposeMission({ young, onSend }) {
 }
 
 const HitMission = ({ mission, onSend }) => {
-  console.log("🚀 ~ file: proposalMission.js:155 ~ HitMission ~ hit", mission);
   return (
     <div className="bg-white shadow-md rounded-xl p-4 my-8">
-      <div className="flex gap-4">
-        <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
-        <div className="bg-red-100 w-full">
-          <div>{mission.structureName}</div>
-          <div className="bg-green-100 flex justify-between">
-            <div>{mission.name}</div>
-            <div>dates</div>
-            <p>places</p>
-            <button>bouton</button>
+      <div className="flex gap-6">
+        <div className="m-auto">
+          <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+        </div>
+        <div className="w-full space-y-4">
+          <p className="text-xs uppercase">{mission.structureName}</p>
+          <div className="flex justify-between items-center">
+            <div className="w-1/3 text-lg font-semibold leading-6">{mission.name}</div>
+            <table className="text-sm table-auto">
+              <tr>
+                <td className="text-gray-500 p-1">Du </td>
+                <td className="text-gray-700">{formatStringDateTimezoneUTC(mission.startAt)}</td>
+              </tr>
+              <tr>
+                <td className="text-gray-500 p-1">Au </td>
+                <td className="text-gray-700">{formatStringDateTimezoneUTC(mission.endAt)}</td>
+              </tr>
+            </table>
+            <p className="text-xs leading-4 font-medium">
+              {mission.placesLeft} {mission.placesLeft > 1 ? "places disponibles" : "place disponible"}
+            </p>
+            <button className="bg-blue-600 px-3 py-2 rounded-md text-sm text-blue-50 hover:brightness-110 active:brightness-125" onClick={onSend}>
+              Proposer la mission
+            </button>
           </div>
-          <div>tags</div>
+          <div className="flex items-center gap-2">
+            <Tag tag={`${mission.city} ${mission.zip}`} />
+            {mission.domains && mission.domains.map((tag, index) => <Tag key={index} tag={translate(tag)} />)}
+            {mission.isMilitaryPreparation === "true" && <Tag tag="Préparation militaire" />}
+          </div>
         </div>
       </div>
     </div>
-
-    //   </div>
-    //   <div className="flex justify-between">
-    //     <Link className="flex basis-[35%] items-center" to={`/mission/${mission._d}`}>
-    //       {/* icon */}
-    //       <div className="flex items-center mr-4"></div>
-    //       {/* mission info */}
-    //       <div className="flex flex-col flex-1 justify-center">
-    //         <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
-    //         <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
-    //         {/* tags */}
-    //         {mission.domains && (
-    //           <div className=" inline-flex flex-wrap">
-    //             {mission.domains.map((tag, index) => {
-    //               return (
-    //                 <div
-    //                   key={index}
-    //                   className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
-    //                   {tag}
-    //                 </div>
-    //               );
-    //             })}
-    //             {mission.isMilitaryPreparation === "true" ? (
-    //               <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
-    //                 Préparation militaire
-    //               </div>
-    //             ) : null}
-    //           </div>
-    //         )}
-    //       </div>
-    //     </Link>
-    //     <div className="flex basis-[65%] justify-between items-center">
-    //       {/* date */}
-    //       <div className="flex flex-col basis-[30%] justify-center">
-    //         <div>
-    //           <span className="text-gray-500 mr-1 text-xs">Du</span>
-    //           <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.startAt)}</span>
-    //         </div>
-    //         <div>
-    //           <span className="text-gray-500 text-xs mr-1">Au</span>
-    //           <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.endAt)}</span>
-    //         </div>
-    //       </div>
-
-    //       {/* places disponibles */}
-    //       <div className="flex basis-[25%]">
-    //         {mission.placesLeft <= 0 ? (
-    //           <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
-    //         ) : (
-    //           <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
-    //         )}
-    //       </div>
-    //       <div>
-    //         <button className="bg-blue-600 px-3 py-2 rounded-md text-sm text-blue-50 hover:brightness-110 active:brightness-125" onClick={onSend}>
-    //           Proposer la mission
-    //         </button>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
   );
+};
+
+const Tag = ({ tag }) => {
+  return <div className="flex text-xs text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center px-3 py-1 font-medium ">{tag}</div>;
 };
 
 const ResultStats = styled.div`
