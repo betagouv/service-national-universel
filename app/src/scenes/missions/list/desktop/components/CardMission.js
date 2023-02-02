@@ -45,16 +45,16 @@ export default function mission({ mission, youngLocation }) {
 
       <div className="flex flex-1 justify-end items-center basis-[40%]">
         <div className="flex flex-row w-full justify-end items-center flex-wrap">
-          <div className="flex flex-1 flex-row text-sm gap-2 mx-2 text-gray-900 font-bold  items-center justify-center">
-            <Calendar width={14} heigth={20} className=" min-w-[14px] min-h-[20px] text-gray-400" />
-            <div className="flex flex-row gap-1 flex-wrap">
-              <div>du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
-              <div>au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
+          <div className="flex flex-row text-sm gap-2 mx-2 text-gray-900 font-bold items-center justify-center">
+            <Calendar className=" min-w-[14px] min-h-[20px] text-gray-400" />
+            <div className="flex flex-row gap-1 flex-wrap max-w-min xl:max-w-full">
+              <div className="whitespace-nowrap">du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
+              <div className="whitespace-nowrap">au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
             </div>
           </div>
           {/* DISTANCE */}
           {youngLocation && mission.location ? (
-            <div className="flex flex-none items-center justify-end space-x-2">
+            <div className="flex flex-none items-center justify-end space-x-2 ml-4">
               <LocationMarker className="text-gray-400" />
               <div className="text-gray-800 text-base font-bold">
                 à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
@@ -81,7 +81,7 @@ export default function mission({ mission, youngLocation }) {
           {/* END DISTANCE */}
         </div>
 
-        <div className="absolute top-4 bg-gray-100 rounded-lg px-3 py-1.5">
+        <div className="absolute top-2 bg-gray-100 rounded-lg px-3 py-1.5">
           <div className="text-gray-700 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
         </div>
 

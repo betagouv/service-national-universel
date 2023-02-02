@@ -32,8 +32,8 @@ export default function mission({ mission, youngLocation }) {
             <div className="flex flex-1 flex-row text-xs gap-2 mx-2 text-gray-900 font-bold  items-center justify-start">
               <Calendar width={10} heigth={16} className=" min-w-[14px] min-h-[20px] text-gray-400" />
               <div className="flex flex-row gap-1 flex-wrap">
-                <div>du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
-                <div>au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
+                <div className="whitespace-nowrap">du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
+                <div className="whitespace-nowrap">au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
               </div>
             </div>
 
