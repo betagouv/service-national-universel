@@ -13,6 +13,7 @@ import {
   SENDINBLUE_TEMPLATES,
   ENABLE_PM,
   ROLES,
+  COHESION_STAY_END,
 } from "../../../utils";
 import { adminURL } from "../../../config";
 import Field from "../../missions/components/Field";
@@ -209,6 +210,37 @@ export default function CustomMission({ young, onChange }) {
       if (referentSelectRef.current?.select?.select) referentSelectRef.current.select.select.setValue("");
     }
   }, [creationTutor]);
+
+  function canApplyToPhase2(young) {
+    const now = new Date();
+    return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
+  }
+  if (!canApplyToPhase2(young))
+    return (
+      <>
+        {" "}
+        <YoungHeader young={young} tab="phase2" onChange={onChange} />
+        <div className="mx-8 my-7 py-6 px-8 bg-white">
+          <div className="flex items-center">
+            <div className="rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105" onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M5.83333 13.3334L2.5 10.0001M2.5 10.0001L5.83333 6.66675M2.5 10.0001L17.5 10.0001"
+                  stroke="#374151"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="flex flex-1 justify-center text-3xl leading-8 font-bold tracking-tight">
+              Créer une mission personnalisée à {young.firstName} {young.lastName}
+            </div>
+          </div>
+          <div className="text-center mt-8">Le jeune n&apos;est pas éligible à la phase 2</div>
+        </div>
+      </>
+    );
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />

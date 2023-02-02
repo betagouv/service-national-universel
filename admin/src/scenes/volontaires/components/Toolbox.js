@@ -7,9 +7,13 @@ import ProposalMission from "../view/proposalMission";
 import { useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 
+import { COHESION_STAY_END } from "../../../utils";
+import ReactTooltip from "react-tooltip";
+
 export default function Toolbox({ young }) {
   const [openProposalMission, setOpenProposalMission] = React.useState(false);
   const history = useHistory();
+  const canApplyToPhase2 = ["DONE", "EXEMPTED"].includes(young.statusPhase1) && new Date() >= COHESION_STAY_END[young.cohort];
 
   return (
     <div className="flex flex-col">
@@ -76,11 +80,18 @@ export default function Toolbox({ young }) {
             </div>
           </div>
           <button
-            className="group flex gap-1 rounded-[10px] border-[1px] py-2 items-center justify-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]"
-            onClick={() => history.push(`/volontaire/${young._id}/phase2/mission-personnalisé`)}>
+            data-tip=""
+            data-for="tooltip-custom"
+            className={`group flex gap-1 rounded-[10px] border-[1px] py-2 items-center justify-center border-blue-600  bg-blue-600 ${
+              canApplyToPhase2 ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
+            }`}
+            onClick={() => canApplyToPhase2 && history.push(`/volontaire/${young._id}/phase2/mission-personnalisé`)}>
             <HiOutlineAdjustments className="text-blue-300 w-5 h-5" />
-            <div className="text-blue-100 group-hover:text-white text-sm ">Créer une mission personnalisée</div>
+            <div className={`text-blue-100 text-sm ${canApplyToPhase2 && "group-hover:text-white"}`}>Créer une mission personnalisée</div>
           </button>
+          <ReactTooltip id="tooltip-custom" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+            <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
+          </ReactTooltip>
         </div>
       </div>
       {openProposalMission ? (
