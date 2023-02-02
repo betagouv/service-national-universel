@@ -142,6 +142,11 @@ export default function CustomMission({ young, onChange }) {
       if (!values.placesTotal) error.placesTotal = "Ce champ est obligatoire";
       if (isNaN(values.placesTotal)) error.placesTotal = "Ce champ doit être un nombre";
 
+      if (creationTutor) {
+        setValues({ ...values, tutorId: "", tutorName: "" });
+        referentSelectRef.current.select.select.setValue("");
+      }
+
       setErrors(error);
       if (Object.keys(error).length > 0) {
         toastr.error("Oups, le formulaire est incomplet");
@@ -197,6 +202,12 @@ export default function CustomMission({ young, onChange }) {
       setValues({ ...values, subPeriod: [] });
     }
   }, [values.period]);
+  useEffect(() => {
+    if (creationTutor) {
+      setValues({ ...values, tutorId: "", tutorName: "" });
+      if (referentSelectRef.current?.select?.select) referentSelectRef.current.select.select.setValue("");
+    }
+  }, [creationTutor]);
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
@@ -460,7 +471,10 @@ export default function CustomMission({ young, onChange }) {
               error={errors.tutorId}
               placeholder={"Sélectionnez un tuteur"}
               onChange={(e) => {
-                setValues({ ...values, tutorName: e.label, tutorId: e.value });
+                if (!e?.__isNew__ && e) {
+                  setValues({ ...values, tutorName: e.label, tutorId: e.value });
+                  setCreationTutor(false);
+                }
               }}
               styles={{
                 placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "#6B7280" }),
