@@ -15,6 +15,7 @@ import Select from "../../centersV2/components/Select";
 import Toggle from "../../centersV2/components/Toggle";
 import StructureView from "./wrapperv2";
 import TeamCard from "../components/cards/TeamCard";
+import CardRepresentant from "../components/cards/CardRepresentant";
 
 export default function DetailsView() {
   const user = useSelector((state) => state.Auth.user);
@@ -76,6 +77,7 @@ export default function DetailsView() {
   return (
     <StructureView tab="details">
       <div className="flex gap-4 my-4">
+        <CardRepresentant />
         <TeamCard structureId={structure._id} />
       </div>
       <main className="bg-white p-8 rounded-xl shadow-sm">

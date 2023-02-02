@@ -92,6 +92,10 @@ const Schema = new mongoose.Schema({
   structureManagerLastName: { type: String },
   structureManagerRole: { type: String },
   structureManagerEmail: { type: String },
+  tutorFirstName: { type: String },
+  tutorLastName: { type: String },
+  tutorRole: { type: String },
+  tutorEmail: { type: String },
   structureSiret: { type: String },
   structureName: { type: String },
 
