@@ -93,11 +93,12 @@ export default function CustomMission({ young, onChange }) {
       } else {
         newTutor.role = ROLES.RESPONSIBLE;
       }
-      const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, newTutor);
+      const { ok, code, data } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, newTutor);
       if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
       setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
+      setValues({ ...values, tutorId: data._id, label: data.firstName + " " + data.lastName });
+      setReferents((referents) => [...referents, ...[{ value: data._id, label: data.firstName + " " + data.lastName, tutor: data }]]);
       setCreationTutor(false);
-      initReferents();
       return toastr.success("Invitation envoyée");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
@@ -260,7 +261,6 @@ export default function CustomMission({ young, onChange }) {
                 defaultOptions
                 onChange={(e) => {
                   setValues({ ...values, structureName: e.label, structureId: e._id, isMilitaryPreparation: "false" });
-                  console.log(e.structure);
                   setSelectedStructure(e.structure);
                 }}
                 placeholder="Rechercher une structure"
