@@ -1,9 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translate } from "../../../../../utils";
+import { translate, formatStringDateTimezoneUTC, getDistance } from "../../../../../utils";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import IconDomain from "../../../components/IconDomain";
-import { getDistance } from "../../../../../utils";
 import House from "../../../components/HouseIcon";
 
 export default function mission({ mission, youngLocation }) {
@@ -39,6 +38,15 @@ export default function mission({ mission, youngLocation }) {
               ) : null}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center flex-col text-xs gap-1 mx-2">
+        <div>
+          <span className="text-gray-500">Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
+        </div>
+        <div>
+          <span className="text-gray-500">Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import IconDomain from "../../../components/IconDomain";
-import { getDistance } from "../../../../../utils";
+import { getDistance, formatStringDateTimezoneUTC } from "../../../../../utils";
 import House from "../../../components/HouseIcon";
 
 export default function mission({ mission, youngLocation }) {
@@ -23,9 +23,12 @@ export default function mission({ mission, youngLocation }) {
             <div className="text-gray-900 font-bold text-base">{mission?.name}</div>
           </div>
           <div className="flex flex-1 items-center justify-between">
-            <div className="flex flex-1 items-center justify-start">
-              <div className="text-gray-500 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
+            <div>
+              <div className="flex flex-1 items-center justify-start">
+                <div className="text-gray-500 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
+              </div>
             </div>
+
             {youngLocation && mission.location ? (
               <div className="flex items-center justify-end space-x-2">
                 <LocationMarker className="text-gray-400" />
@@ -51,6 +54,14 @@ export default function mission({ mission, youngLocation }) {
             ) : (
               <div />
             )}
+          </div>
+          <div className="flex justify-start flex-row text-xs gap-2 mt-1">
+            <div>
+              <span className="text-gray-500">&nbsp;Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
+            </div>
+            <div>
+              <span className="text-gray-500">Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
+            </div>
           </div>
         </div>
       </div>
