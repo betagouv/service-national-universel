@@ -10,8 +10,9 @@ import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDIN
 import { Link } from "react-router-dom";
 import Loadingbutton from "../../../components/buttons/LoadingButton";
 import plausibleEvent from "../../../services/plausible";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
-export default function xxxxxxx({ young, onSend }) {
+export default function ProposeMission({ young, onSend }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
@@ -84,52 +85,67 @@ export default function xxxxxxx({ young, onSend }) {
 
   return (
     <>
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-          <div style={{ flex: 2, position: "relative" }}>
-            <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher une mission par mots clés..."
-                componentId="SEARCH"
-                dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
-                fuzziness={1}
-                style={{ flex: 2, border: "1px solid #f4f5f7" }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                onValueChange={setSearchedValue}
-                queryFormat="and"
-              />
-            </Filter>
-            <ResultTable hide={!searchedValue}>
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                scrollOnChange={false}
-                react={{ and: FILTERS }}
-                paginationAt="bottom"
-                size={3}
-                showLoader={true}
-                renderResultStats={(e) => {
-                  return (
-                    <div>
-                      <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
-                    </div>
-                  );
-                }}
-                render={({ data }) => (
-                  <Table>
-                    <tbody>
-                      {data.map((hit, i) => (
-                        <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              />
-            </ResultTable>
+      <YoungHeader young={young} onChange={onSend} />
+      <div className="bg-white rounded-xl shadow-sm m-8 p-8 space-y-8 items-center">
+        <div className="grid grid-cols-3 border-b pb-8">
+          <div className="w-9 rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105">
+            <Link to={`/volontaire/${young._id}/phase2`}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M5.83333 13.3334L2.5 10.0001M2.5 10.0001L5.83333 6.66675M2.5 10.0001L17.5 10.0001"
+                  stroke="#374151"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
           </div>
+          <h1 className="text-center text-2xl font-semibold">
+            Proposer une mission à {young.firstName} {young.lastName}
+          </h1>
         </div>
-      </ReactiveBase>
+        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <DataSearch
+            showIcon={false}
+            placeholder="Rechercher une mission par mots clés..."
+            componentId="SEARCH"
+            dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
+            fuzziness={1}
+            autosuggest={false}
+            onValueChange={setSearchedValue}
+            queryFormat="and"
+            innerClass={{ input: "searchbox" }}
+            className="datasearch-searchfield w-1/3 mx-auto"
+          />
+          {searchedValue && (
+            <ReactiveListComponent
+              defaultQuery={getDefaultQuery}
+              scrollOnChange={false}
+              react={{ and: FILTERS }}
+              paginationAt="bottom"
+              size={3}
+              showLoader={true}
+              renderResultStats={(e) => {
+                return (
+                  <div>
+                    <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
+                  </div>
+                );
+              }}
+              render={({ data }) => (
+                <table>
+                  <tbody>
+                    {data.map((hit, i) => (
+                      <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            />
+          )}
+        </ReactiveBase>
+      </div>
     </>
   );
 }
@@ -144,14 +160,14 @@ const HitMission = ({ hit, onSend }) => {
   return (
     <tr>
       <td>
-        <TeamMember to={`/mission/${hit._id}`}>
+        <div to={`/mission/${hit._id}`}>
           <div>
             <h2>{hit.name}</h2>
             <p>
               {hit.structureName} {`• ${hit.city} (${hit.department})`}
             </p>
           </div>
-        </TeamMember>
+        </div>
       </td>
       <td>
         <div>
@@ -182,122 +198,10 @@ const HitMission = ({ hit, onSend }) => {
   );
 };
 
-const ResultTable = styled.div`
-  ${({ hide }) => (hide ? "display: none;" : "")}
-  background-color: #fff;
-  position: relative;
-  padding-bottom: 10px;
-  border-radius: 0.5rem;
-  margin-bottom: 2rem;
-  .pagination {
-    margin: 0;
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
 const ResultStats = styled.div`
   color: #242526;
   font-size: 12px;
   padding-left: 25px;
-`;
-
-const TeamMember = styled(Link)`
-  h2 {
-    color: #333;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
-  }
-`;
-
-const Filter = styled.div`
-  padding: 0;
-  margin: 1rem 0 0.2rem 0;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  th {
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
 `;
 
 const BottomResultStats = styled(ResultStats)`

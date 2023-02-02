@@ -18,6 +18,7 @@ import { YOUNG_STATUS } from "../../../utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import FormEquivalence from "./FormEquivalence";
 import VolontairePhase0View from "../../phase0/view";
+import ProposeMission from "./proposalMission";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
@@ -53,6 +54,7 @@ export default function Index({ ...props }) {
       <Switch>
         <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/equivalence" component={() => <FormEquivalence young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase2/propose-mission" component={() => <ProposeMission young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2" component={() => <Phase2Bis young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />

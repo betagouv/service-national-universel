@@ -5,7 +5,7 @@ import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
 import ProposalMission from "../view/proposalMission";
 import CreateMission from "../view/createMission";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 
 export default function Toolbox({ young }) {
@@ -32,15 +32,12 @@ export default function Toolbox({ young }) {
               </a>
             </div>
           </div>
-          <button
-            className="group flex gap-1 rounded-[10px] border-[1px] py-2 items-center justify-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]"
-            onClick={() => {
-              setOpenCreateMission(false);
-              setOpenProposalMission(!openProposalMission);
-            }}>
+          <Link
+            to={`/volontaire/${young._id}/phase2/propose-mission`}
+            className="group flex gap-1 rounded-[10px] border-[1px] py-2 items-center justify-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]">
             <HiOutlineSearch className="text-blue-300 w-5 h-5" />
-            <div className="text-blue-100 group-hover:text-white text-sm ">Trouver une mission</div>
-          </button>
+            <p className="text-blue-100 group-hover:text-white text-sm ">Trouver une mission</p>
+          </Link>
         </div>
         <div className="flex flex-col bg-white rounded-xl shadow-block p-4 basis-1/3">
           <div className="flex items-center gap-6 mb-4 flex-1">
