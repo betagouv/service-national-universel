@@ -17,13 +17,9 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import { Title } from "../centersV2/components/commons";
 import { BsDownload } from "react-icons/bs";
 import FilterIcon from "../../assets/icons/Filter";
+import { formatStringLongDate } from "snu-lib";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION", "TYPE", "SOUS-TYPE"];
-const formatLongDate = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
-};
 
 export default function List() {
   const history = useHistory();
@@ -198,7 +194,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut juridique", "Statut juridique")}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Statut juridique", "Statut juridique")}</div>}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -213,7 +209,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Type", "Type")}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Type", "Type")}</div>}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -228,7 +224,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Sous-type", "Sous-type")}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Sous-type", "Sous-type")}</div>}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -339,7 +335,7 @@ const Hit = ({ hit, onClick, missions, responsibles }) => {
       <td className="pl-8 py-3 space-y-1">
         <p className="text-base font-semibold">{hit.name}</p>
         <p>
-          {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
+          {translate(hit.legalStatus)} • Créée le {formatStringLongDate(hit.createdAt)}
         </p>
       </td>
       <td>
