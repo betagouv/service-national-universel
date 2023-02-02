@@ -31,6 +31,9 @@ async function getQPV(postcode, commune, adresse) {
 
       fetch(url + "?" + str, {
         method: "get",
+        retries: 3,
+        retryDelay: 1000,
+        retryOn: [502, 503, 504],
         headers: { "Content-Type": "application/json", Authorization: "Basic " + Buffer.from(QPV_USERNAME + ":" + QPV_PASSWORD).toString("base64") },
       })
         .then((res) => {

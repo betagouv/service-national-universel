@@ -20,6 +20,9 @@ const api = async (path, options = {}) => {
 
     const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
       ...options,
+      retries: 3,
+      retryDelay: 1000,
+      retryOn: [502, 503, 504],
       headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
     });
     const contentType = res.headers.raw()["content-type"];
