@@ -6,7 +6,8 @@ import IconDomain from "../../../../components/IconDomain";
 import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate } from "../../../../utils";
+import ModalConfirm from "../../../../components/modals/ModalConfirm";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES } from "../../../../utils";
 import { SelectStatusApplicationPhase2 } from "./components/SelectStatusApplicationPhase2";
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -48,6 +49,8 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [contract, setContract] = useState();
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   useEffect(() => {
     (async () => {
       if (!hit.missionId) return;
@@ -173,6 +176,40 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                 }}
                 dropdownClassName="right-3"
               />
+              {hit.status === "WAITING_VALIDATION" && (
+                <div className="absolute right-6">
+                  <div
+                    className="text-blue-600 text-xs cursor-pointer underline mt-1"
+                    onClick={async () => {
+                      setModal({
+                        isOpen: true,
+                        title: "Renvoyer un mail",
+                        message: "Souhaitez-vous renvoyer un mail à la structure ?",
+                        onConfirm: async () => {
+                          try {
+                            const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
+                            if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                            toastr.success("L'email a bien été envoyé");
+                          } catch (e) {
+                            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                          }
+                        },
+                      });
+                    }}>
+                    Relancer la structure
+                  </div>
+                  <ModalConfirm
+                    isOpen={modal?.isOpen}
+                    title={modal?.title}
+                    message={modal?.message}
+                    onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+                    onConfirm={() => {
+                      modal?.onConfirm();
+                      setModal({ isOpen: false, onConfirm: null });
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
           {/* end statut */}
