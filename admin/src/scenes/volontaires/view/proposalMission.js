@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
@@ -8,9 +8,10 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
-import Loadingbutton from "../../../components/buttons/LoadingButton";
-import plausibleEvent from "../../../services/plausible";
 import YoungHeader from "../../phase0/components/YoungHeader";
+import { capture } from "../../../sentry";
+import { translate } from "snu-lib";
+import IconDomain from "../../../components/IconDomain";
 
 export default function ProposeMission({ young, onSend }) {
   const FILTERS = ["SEARCH"];
@@ -87,8 +88,8 @@ export default function ProposeMission({ young, onSend }) {
     <>
       <YoungHeader young={young} onChange={onSend} />
       <div className="bg-white rounded-xl shadow-sm m-8 p-8 space-y-8 items-center">
-        <div className="grid grid-cols-3 border-b pb-8">
-          <div className="w-9 rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105">
+        <div className="grid grid-cols-9 border-b pb-8">
+          <div className="w-9 h-9 rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105">
             <Link to={`/volontaire/${young._id}/phase2`}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -101,7 +102,7 @@ export default function ProposeMission({ young, onSend }) {
               </svg>
             </Link>
           </div>
-          <h1 className="text-center text-2xl font-semibold">
+          <h1 className="text-center text-2xl font-semibold col-span-7">
             Proposer une mission à {young.firstName} {young.lastName}
           </h1>
         </div>
@@ -133,15 +134,7 @@ export default function ProposeMission({ young, onSend }) {
                   </div>
                 );
               }}
-              render={({ data }) => (
-                <table>
-                  <tbody>
-                    {data.map((hit, i) => (
-                      <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
-                    ))}
-                  </tbody>
-                </table>
-              )}
+              render={({ data }) => data.map((hit, i) => <HitMission key={i} mission={hit} onSend={() => handleProposal(hit)} />)}
             />
           )}
         </ReactiveBase>
@@ -150,51 +143,70 @@ export default function ProposeMission({ young, onSend }) {
   );
 }
 
-const HitMission = ({ hit, onSend }) => {
-  const [sending, setSending] = useState(false);
-  let mounted = useRef(false);
-  useEffect(() => {
-    mounted && setSending(false);
-    return () => (mounted = false);
-  }, [hit]);
+const HitMission = ({ mission, onSend }) => {
+  console.log("🚀 ~ file: proposalMission.js:155 ~ HitMission ~ hit", mission);
   return (
-    <tr>
-      <td>
-        <div to={`/mission/${hit._id}`}>
+    <div className="bg-white shadow-sm rounded-xl p-4 my-8">
+      <div className="flex justify-between">
+        <Link className="flex basis-[35%] items-center" to={`/mission/${mission._d}`}>
+          {/* icon */}
+          <div className="flex items-center mr-4">
+            <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+          </div>
+          {/* mission info */}
+          <div className="flex flex-col flex-1 justify-center">
+            <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
+            <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
+            {/* tags */}
+            {mission.domains && (
+              <div className=" inline-flex flex-wrap">
+                {mission.domains.map((tag, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
+                      {tag}
+                    </div>
+                  );
+                })}
+                {mission.isMilitaryPreparation === "true" ? (
+                  <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
+                    Préparation militaire
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </Link>
+        <div className="flex basis-[65%] justify-between items-center">
+          {/* date */}
+          <div className="flex flex-col basis-[30%] justify-center">
+            <div>
+              <span className="text-gray-500 mr-1 text-xs">Du</span>
+              <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.startAt)}</span>
+            </div>
+            <div>
+              <span className="text-gray-500 text-xs mr-1">Au</span>
+              <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.endAt)}</span>
+            </div>
+          </div>
+
+          {/* places disponibles */}
+          <div className="flex basis-[25%]">
+            {mission.placesLeft <= 0 ? (
+              <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
+            ) : (
+              <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
+            )}
+          </div>
           <div>
-            <h2>{hit.name}</h2>
-            <p>
-              {hit.structureName} {`• ${hit.city} (${hit.department})`}
-            </p>
+            <button className="bg-blue-600 px-3 py-2 rounded-md text-sm text-blue-50 hover:brightness-110 active:brightness-125" onClick={onSend}>
+              Proposer la mission
+            </button>
           </div>
         </div>
-      </td>
-      <td>
-        <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
-        </div>
-        <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
-        </div>
-      </td>
-      <td>
-        {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
-        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTaken} / {hit.placesTotal}
-        </div>
-      </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Loadingbutton
-          onClick={() => {
-            plausibleEvent("Volontaires/profil/phase2 CTA - Proposer mission existante");
-            setSending(true);
-            onSend();
-          }}
-          loading={sending}>
-          Proposer cette mission
-        </Loadingbutton>
-      </td>
-    </tr>
+      </div>
+    </div>
   );
 };
 
