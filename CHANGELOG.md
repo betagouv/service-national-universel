@@ -1,3 +1,21 @@
+# [1.212.0](https://github.com/betagouv/service-national-universel/compare/v1.211.0...v1.212.0) (2023-02-02)
+
+
+### Bug Fixes
+
+* **api:** condition for structure manager email on send contract ([a546b30](https://github.com/betagouv/service-national-universel/commit/a546b30808dfbb2dd863d1f2cce67750d40ca811))
+* **api:** edit center adress ([cfa14de](https://github.com/betagouv/service-national-universel/commit/cfa14de1f0b0605342368072c5788dc72e87aeb2))
+* **app:** Fix du choix d'un PDR quand plusieurs lignes de bus passent par le même PDR ([098d1c2](https://github.com/betagouv/service-national-universel/commit/098d1c21b0c9618fa00116c460184d3bb73c4ef9))
+* **structurev2:** fixes to styles and form validation ([477dfe9](https://github.com/betagouv/service-national-universel/commit/477dfe935381a4401cc965726b33ca18187d31c5))
+
+
+### Features
+
+* **admin:** refonte liste structures (staging) ([#2212](https://github.com/betagouv/service-national-universel/issues/2212)) ([5069080](https://github.com/betagouv/service-national-universel/commit/5069080080336d6306250c164640c7aacb1c78e1))
+* **admin:** Relancer la structure ([1a0ad66](https://github.com/betagouv/service-national-universel/commit/1a0ad660c04169246a6e3450135ab59b8eb302f1))
+* **api/admin:** refonte structure : représentant de structure ([#2223](https://github.com/betagouv/service-national-universel/issues/2223)) ([4d0c0d5](https://github.com/betagouv/service-national-universel/commit/4d0c0d588ff0e8a290791eee3bc58cf41552a1b8))
+* **app:** Ajout date "Trouvez une mission" ([9ee5403](https://github.com/betagouv/service-national-universel/commit/9ee5403e58b7da8dde192b2296ca1e44170c96fc))
+
 # [1.211.0](https://github.com/betagouv/service-national-universel/compare/v1.210.0...v1.211.0) (2023-02-01)
 
 
