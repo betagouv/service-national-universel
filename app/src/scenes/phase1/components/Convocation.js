@@ -191,9 +191,9 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.</ConvocText>
         <Sign>
-          Yves BOERO
+          Thibaut de SAINT POL
           <br />
-          Le directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative par intérim
+          Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire dans la section «&nbsp;Séjour&nbsp;de&nbsp;cohésion&nbsp;» ou le{" "}
