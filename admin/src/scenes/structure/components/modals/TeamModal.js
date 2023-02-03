@@ -14,6 +14,7 @@ import { StructureContext } from "../../view";
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Select from "../../../centersV2/components/Select";
 import { useSelector } from "react-redux";
+import Button from "../Button";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
@@ -233,9 +234,10 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
   const roles = [ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
   const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
   const user = useSelector((state) => state.Auth.user);
+  const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone;
 
   return (
-    <form className="h-full flex flex-col space-y-4" onSubmit={handleSubmit}>
+    <div className="h-full flex flex-col space-y-4" onSubmit={handleSubmit}>
       <p className="text-lg font-medium text-center">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
       {!responsible._id && (
         <p className="text-center text-gray-500">Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.</p>
@@ -264,17 +266,14 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
           </button>
         )}
         <div className="grid grid-cols-2 gap-6">
-          <button className="border-[1px] rounded-lg border-grey-300 bg-[#ffffff] py-2 px-8 hover:bg-[#f9fafb]" onClick={onChange} disabled={isLoading}>
+          <Button onClick={onChange} disabled={isLoading} category="tertiary">
             Annuler
-          </button>
-          <button
-            className="border-[1px] rounded-lg border-blue-600 bg-blue-600 shadow-sm py-2 px-8 text-white text-sm justify-center hover:opacity-90"
-            type="submit"
-            disabled={isLoading}>
+          </Button>
+          <Button category="primary" disabled={disabled} onClick={handleSubmit}>
             {responsible._id ? "Enregistrer" : "Envoyer l'invitation"}
-          </button>
+          </Button>
         </div>
       </div>
-    </form>
+    </div>
   );
 };

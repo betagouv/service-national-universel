@@ -122,16 +122,28 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendStructureManagerContractEmail(contract, isValidateAgainMail) {
-  return sendContractEmail(contract, {
-    email: contract.structureManagerEmail,
-    name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
-    token: contract.structureManagerToken,
-    isValidateAgainMail,
-  });
+  try {
+    await sendContractEmail(contract, {
+      email: contract.tutorEmail,
+      name: `${contract.tutorFirstName} ${contract.tutorLastName}`,
+      token: contract.tutorToken,
+      isValidateAgainMail,
+    });
+    if (contract.structureManagerEmail) {
+      await sendContractEmail(contract, {
+        email: contract.structureManagerEmail,
+        name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
+        token: contract.structureManagerToken,
+        isValidateAgainMail,
+      });
+    }
+  } catch (e) {
+    capture(e);
+  }
 }
 
 async function sendParent1ContractEmail(contract, isValidateAgainMail) {
-  return sendContractEmail(contract, {
+  return await sendContractEmail(contract, {
     email: contract.parent1Email,
     name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
     token: contract.parent1Token,
@@ -140,7 +152,7 @@ async function sendParent1ContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendParent2ContractEmail(contract, isValidateAgainMail) {
-  return sendContractEmail(contract, {
+  return await sendContractEmail(contract, {
     email: contract.parent2Email,
     name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
     token: contract.parent2Token,
@@ -149,7 +161,7 @@ async function sendParent2ContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendYoungContractEmail(contract, isValidateAgainMail) {
-  return sendContractEmail(contract, {
+  return await sendContractEmail(contract, {
     email: contract.youngEmail,
     name: `${contract.youngFirstName} ${contract.youngLastName}`,
     token: contract.youngContractToken,
@@ -158,29 +170,33 @@ async function sendYoungContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendContractEmail(contract, options) {
-  let template, cc;
-  if (options.isValidateAgainMail) {
-    console.log("send (re)validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
-    template = SENDINBLUE_TEMPLATES.REVALIDATE_CONTRACT;
-  } else {
-    console.log("send validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
-    template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
+  try {
+    let template, cc;
+    if (options.isValidateAgainMail) {
+      console.log("send (re)validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
+      template = SENDINBLUE_TEMPLATES.REVALIDATE_CONTRACT;
+    } else {
+      console.log("send validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
+      template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
+    }
+    const params = {
+      toName: options.name,
+      youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
+      missionName: contract.missionName,
+      cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
+    };
+    const emailTo = [{ name: options.name, email: options.email }];
+    if (options?.cc?.length) {
+      cc = options.cc;
+    }
+    await sendTemplate(template, {
+      emailTo,
+      params,
+      cc,
+    });
+  } catch (e) {
+    capture(e);
   }
-  const params = {
-    toName: options.name,
-    youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
-    missionName: contract.missionName,
-    cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
-  };
-  const emailTo = [{ name: options.name, email: options.email }];
-  if (options?.cc?.length) {
-    cc = options.cc;
-  }
-  await sendTemplate(template, {
-    emailTo,
-    params,
-    cc,
-  });
 }
 
 // Create or update contract.

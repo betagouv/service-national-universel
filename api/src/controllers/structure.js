@@ -11,7 +11,7 @@ const { ERRORS } = require("../utils");
 const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
-const { validateId, validateStructure } = require("../utils/validator");
+const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
@@ -206,6 +206,53 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = validateStructureManager(req.body);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const { error: errorId, value: structureId } = validateId(req.params.id);
+    if (errorId) {
+      capture(errorId);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canModifyStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const structure = await StructureObject.findById(structureId);
+    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    structure.set({ structureManager: value });
+    await structure.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canModifyStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const structure = await StructureObject.findById(value);
+    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    structure.set({ structureManager: undefined });
+    await structure.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
