@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { capture } from "../../../sentry";
 import CardMission from "../components/CardMission";
+import { canApplyToPhase2 } from "snu-lib";
 
 export default function ProposeMission({ young, onSend }) {
   const FILTERS = ["SEARCH"];
@@ -126,33 +127,35 @@ export default function ProposeMission({ young, onSend }) {
           </h1>
         </div>
 
-        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <DataSearch
-            showIcon={false}
-            placeholder="Rechercher une mission par mots clés..."
-            componentId="SEARCH"
-            dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
-            fuzziness={1}
-            autosuggest={false}
-            onValueChange={setSearchedValue}
-            queryFormat="and"
-            innerClass={{ input: "searchbox" }}
-            className="datasearch-searchfield w-1/3 mx-auto"
-          />
-          {searchedValue && (
-            <ReactiveListComponent
-              defaultQuery={getDefaultQuery}
-              scrollOnChange={false}
-              react={{ and: FILTERS }}
-              paginationAt="bottom"
-              size={3}
-              showLoader={true}
-              showTopResultStats={false}
-              render={({ data }) => data.map((hit, i) => <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />)}
-              className="reactive-result"
+        {canApplyToPhase2(young) ? (
+          <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+            <DataSearch
+              showIcon={false}
+              placeholder="Rechercher une mission par mots clés..."
+              componentId="SEARCH"
+              dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
+              fuzziness={1}
+              autosuggest={false}
+              onValueChange={setSearchedValue}
+              queryFormat="and"
+              innerClass={{ input: "searchbox" }}
+              className="datasearch-searchfield w-1/3 mx-auto"
             />
-          )}
-        </ReactiveBase>
+            {searchedValue && (
+              <ReactiveListComponent
+                defaultQuery={getDefaultQuery}
+                scrollOnChange={false}
+                react={{ and: FILTERS }}
+                paginationAt="bottom"
+                showTopResultStats={false}
+                render={({ data }) => data.map((hit, i) => <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />)}
+                className="reactive-result"
+              />
+            )}
+          </ReactiveBase>
+        ) : (
+          <p className="text-center ">Ce volontaire n&apos;est pas éligible à la phase 2.</p>
+        )}
       </div>
     </>
   );
