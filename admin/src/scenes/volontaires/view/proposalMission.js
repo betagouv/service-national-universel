@@ -1,19 +1,37 @@
-import React, { useState, useEffect, useRef } from "react";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
-import Loadingbutton from "../../../components/buttons/LoadingButton";
-import plausibleEvent from "../../../services/plausible";
+import YoungHeader from "../../phase0/components/YoungHeader";
+import { capture } from "../../../sentry";
+import CardMission from "../components/CardMission";
+import { canApplyToPhase2 } from "snu-lib";
 
-export default function xxxxxxx({ young, onSend }) {
+export default function ProposeMission({ young, onSend }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
+  const [missionIds, setMissionIds] = useState([]);
+
+  useEffect(() => {
+    getApplications().then((applications) => {
+      setMissionIds(applications.map((a) => a.missionId));
+    });
+  }, []);
+
+  const getApplications = async () => {
+    if (!young) return;
+    const { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
+    return data;
+  };
 
   const getDefaultQuery = () => {
     return {
@@ -77,231 +95,68 @@ export default function xxxxxxx({ young, onSend }) {
       missionName: mission.name,
       structureName: mission.structureName,
     });
-    if (!okMail) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
+    if (!okMail) {
+      toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
+      capture(codeMail);
+      return;
+    }
+    setMissionIds([...missionIds, mission._id]);
     toastr.success("Email envoyé !");
-    return onSend();
   };
 
   return (
     <>
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-          <div style={{ flex: 2, position: "relative" }}>
-            <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher une mission par mots clés..."
-                componentId="SEARCH"
-                dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
-                fuzziness={1}
-                style={{ flex: 2, border: "1px solid #f4f5f7" }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                onValueChange={setSearchedValue}
-                queryFormat="and"
-              />
-            </Filter>
-            <ResultTable hide={!searchedValue}>
+      <YoungHeader young={young} onChange={onSend} />
+      <div className="bg-white rounded-xl shadow-sm m-8 p-8 space-y-8 items-center">
+        <div className="grid grid-cols-9 border-b pb-8">
+          <div className="w-9 h-9 rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105">
+            <Link to={`/volontaire/${young._id}/phase2`}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M5.83333 13.3334L2.5 10.0001M2.5 10.0001L5.83333 6.66675M2.5 10.0001L17.5 10.0001"
+                  stroke="#374151"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+          </div>
+          <h1 className="text-center text-2xl font-semibold col-span-7">
+            Proposer une mission à {young.firstName} {young.lastName}
+          </h1>
+        </div>
+
+        {canApplyToPhase2(young) ? (
+          <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+            <DataSearch
+              showIcon={false}
+              placeholder="Rechercher une mission par mots clés..."
+              componentId="SEARCH"
+              dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
+              fuzziness={1}
+              autosuggest={false}
+              onValueChange={setSearchedValue}
+              queryFormat="and"
+              innerClass={{ input: "searchbox" }}
+              className="datasearch-searchfield w-1/3 mx-auto"
+            />
+            {searchedValue && (
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 scrollOnChange={false}
                 react={{ and: FILTERS }}
                 paginationAt="bottom"
-                size={3}
-                showLoader={true}
-                renderResultStats={(e) => {
-                  return (
-                    <div>
-                      <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
-                    </div>
-                  );
-                }}
-                render={({ data }) => (
-                  <Table>
-                    <tbody>
-                      {data.map((hit, i) => (
-                        <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
+                showTopResultStats={false}
+                render={({ data }) => data.map((hit, i) => <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />)}
+                className="reactive-result"
               />
-            </ResultTable>
-          </div>
-        </div>
-      </ReactiveBase>
+            )}
+          </ReactiveBase>
+        ) : (
+          <p className="text-center ">Ce volontaire n&apos;est pas éligible à la phase 2.</p>
+        )}
+      </div>
     </>
   );
 }
-
-const HitMission = ({ hit, onSend }) => {
-  const [sending, setSending] = useState(false);
-  let mounted = useRef(false);
-  useEffect(() => {
-    mounted && setSending(false);
-    return () => (mounted = false);
-  }, [hit]);
-  return (
-    <tr>
-      <td>
-        <TeamMember to={`/mission/${hit._id}`}>
-          <div>
-            <h2>{hit.name}</h2>
-            <p>
-              {hit.structureName} {`• ${hit.city} (${hit.department})`}
-            </p>
-          </div>
-        </TeamMember>
-      </td>
-      <td>
-        <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
-        </div>
-        <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
-        </div>
-      </td>
-      <td>
-        {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
-        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTaken} / {hit.placesTotal}
-        </div>
-      </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Loadingbutton
-          onClick={() => {
-            plausibleEvent("Volontaires/profil/phase2 CTA - Proposer mission existante");
-            setSending(true);
-            onSend();
-          }}
-          loading={sending}>
-          Proposer cette mission
-        </Loadingbutton>
-      </td>
-    </tr>
-  );
-};
-
-const ResultTable = styled.div`
-  ${({ hide }) => (hide ? "display: none;" : "")}
-  background-color: #fff;
-  position: relative;
-  padding-bottom: 10px;
-  border-radius: 0.5rem;
-  margin-bottom: 2rem;
-  .pagination {
-    margin: 0;
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-`;
-
-const TeamMember = styled(Link)`
-  h2 {
-    color: #333;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
-  }
-`;
-
-const Filter = styled.div`
-  padding: 0;
-  margin: 1rem 0 0.2rem 0;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  th {
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;
-
-const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
-`;

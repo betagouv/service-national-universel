@@ -4,11 +4,8 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
-import Details from "./details";
-import DeletedDetail from "./deletedDetail";
 import Phase1 from "./phase1";
 import Phase2Bis from "./phase2bis";
-import Phase2 from "./phase2";
 import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
 import History from "./history";
@@ -18,6 +15,7 @@ import { YOUNG_STATUS } from "../../../utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import FormEquivalence from "./FormEquivalence";
 import VolontairePhase0View from "../../phase0/view";
+import ProposeMission from "./proposalMission";
 import CustomMission from "./customMission";
 
 export default function Index({ ...props }) {
@@ -54,6 +52,7 @@ export default function Index({ ...props }) {
       <Switch>
         <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/equivalence" component={() => <FormEquivalence young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase2/propose-mission" component={() => <ProposeMission young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/mission-personnalisé" component={() => <CustomMission young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
         <SentryRoute path="/volontaire/:id/phase2" component={() => <Phase2Bis young={young} onChange={getYoung} />} />
