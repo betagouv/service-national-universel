@@ -89,9 +89,11 @@ export default function Toolbox({ young }) {
             <HiOutlineAdjustments className="text-blue-300 w-5 h-5" />
             <div className={`text-blue-100 text-sm ${canApplyToPhase2 && "group-hover:text-white"}`}>Créer une mission personnalisée</div>
           </button>
-          <ReactTooltip id="tooltip-custom" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
-            <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
-          </ReactTooltip>
+          {!canApplyToPhase2 ? (
+            <ReactTooltip id="tooltip-custom" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+              <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
+            </ReactTooltip>
+          ) : null}
         </div>
       </div>
       {openProposalMission ? (
