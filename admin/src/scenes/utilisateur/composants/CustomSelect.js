@@ -1,6 +1,7 @@
 import React from "react";
 import ReactSelect from "react-select";
 
+// select using react-select with the possibility of chosing multiple values. Design close to new field design
 const isEmpty = (value) => {
   if (!value) return true;
   if (Array.isArray(value) && value.length === 0) return true;

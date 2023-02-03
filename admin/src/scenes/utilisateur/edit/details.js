@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import validator from "validator";
 
 import Pencil from "../../../assets/icons/Pencil";
 import { Box } from "../../../components/box";
@@ -36,6 +37,7 @@ export default function Details({ user, setUser, currentUser }) {
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [mode, setMode] = useState(MODE_DEFAULT);
   const [isSaving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
   const [areCentersLoading, setCentersLoading] = useState(true);
   const [data, setData] = useState({ ...user });
   const [newCenter, setNewCenter] = useState(undefined);
@@ -176,37 +178,70 @@ export default function Details({ user, setUser, currentUser }) {
     setMode(MODE_DEFAULT);
     setData({ ...user });
     setNewCenter(undefined);
+    setErrors({});
+  };
+
+  const validate = () => {
+    let isValid = true;
+    const errors = {};
+    if (!data.email || !validator.isEmail(data.email)) {
+      errors.email = "L'email ne semble pas valide";
+      isValid = false;
+    }
+    if (!data.firstName) {
+      errors.firstName = "Veuillez renseigner le prénom";
+      isValid = false;
+    }
+    if (!data.lastName) {
+      errors.lastName = "Veuillez renseigner le nom";
+      isValid = false;
+    }
+
+    if (data.phone && !data.phone.match(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/gim)) {
+      errors.phone = "Le téléphone doit être un numéro de téléphone valide";
+      isValid = false;
+    }
+
+    if (data.mobile && !validator.isMobilePhone(data.mobile, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+      errors.mobile = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
+      isValid = false;
+    }
+
+    setErrors(errors);
+    return isValid;
   };
 
   const onSave = async () => {
     try {
       setSaving(true);
-      plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
-      if (user.role === ROLES.HEAD_CENTER && data.role !== ROLES.HEAD_CENTER) {
-        for (let index = 0; index < sessionsWhereUserIsHeadCenter.length; index++) {
-          const { ok, code } = await api.remove(`/session-phase1/${sessionsWhereUserIsHeadCenter[index]._id}/headCenter`);
-          if (!ok) {
-            return toastr.error("Une erreur s'est produite lors de la suppression du chef de centre ", translate(code));
+      if (validate()) {
+        plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
+        if (user.role === ROLES.HEAD_CENTER && data.role !== ROLES.HEAD_CENTER) {
+          for (let index = 0; index < sessionsWhereUserIsHeadCenter.length; index++) {
+            const { ok, code } = await api.remove(`/session-phase1/${sessionsWhereUserIsHeadCenter[index]._id}/headCenter`);
+            if (!ok) {
+              return toastr.error("Une erreur s'est produite lors de la suppression du chef de centre ", translate(code));
+            }
           }
         }
+        const updatedData = { ...data };
+        if ((user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) && !(data.role === ROLES.RESPONSIBLE || data.role === ROLES.SUPERVISOR)) {
+          updatedData.structureId = null;
+        }
+        if (data.structureId && user.structureId !== data.structureId) {
+          const { ok, code } = await api.put(`/referent/${user._id}/structure/${updatedData.structureId}`);
+          if (!ok)
+            return code === "OPERATION_NOT_ALLOWED"
+              ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
+              : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
+          updatedData.structureId = undefined;
+        }
+        const { ok, code, data: updatedUser } = await api.put(`/referent/${user._id}`, updatedData);
+        if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+        setUser(updatedUser);
+        setMode(MODE_DEFAULT);
+        toastr.success("Utilisateur mis à jour !", "");
       }
-      const updatedData = { ...data };
-      if (user.role === ROLES.RESPONSIBLE || (user.role === ROLES.SUPERVISOR && !(data.role === ROLES.RESPONSIBLE || data.role === ROLES.SUPERVISOR))) {
-        updatedData.structureId = null;
-      }
-      if (data.structureId && user.structureId !== data.structureId) {
-        const { ok, code } = await api.put(`/referent/${user._id}/structure/${updatedData.structureId}`);
-        if (!ok)
-          return code === "OPERATION_NOT_ALLOWED"
-            ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
-            : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
-        updatedData.structureId = undefined;
-      }
-      const { ok, code, data: updatedUser } = await api.put(`/referent/${user._id}`, updatedData);
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      setUser(updatedUser);
-      setMode(MODE_DEFAULT);
-      toastr.success("Utilisateur mis à jour !", "");
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
     } finally {
@@ -333,11 +368,11 @@ export default function Details({ user, setUser, currentUser }) {
           <div className="flex">
             <div className="pr-16 flex-1 flex flex-col">
               <div className="mb-2">Identité</div>
-              <Field mode={mode} className="mb-4" name="lastName" label="Nom" value={data.lastName} onChange={onChange("lastName")} />
-              <Field mode={mode} name="firstName" label="Prénom" value={data.firstName} onChange={onChange("firstName")} />
+              <Field mode={mode} className="mb-4" name="lastName" label="Nom" value={data.lastName} onChange={onChange("lastName")} error={errors.lastName} />
+              <Field mode={mode} name="firstName" label="Prénom" value={data.firstName} onChange={onChange("firstName")} error={errors.firstName} />
               <div className="mt-4 mb-2">Rôle</div>
               <Field
-                mode={data.role === ROLES.ADMIN ? mode : MODE_DEFAULT}
+                mode={currentUser.role === ROLES.ADMIN ? mode : MODE_DEFAULT}
                 label="Rôle"
                 name="role"
                 value={data.role}
@@ -369,6 +404,9 @@ export default function Details({ user, setUser, currentUser }) {
                   subRoleOptions={getSubRoleOptions(data.role === ROLES.REFERENT_REGION ? REFERENT_REGION_SUBROLE : VISITOR_SUBROLES)}
                   regionOrDepOptions={regionList.map((r) => ({ value: r, label: r }))}
                 />
+              )}
+              {!(user.role === ROLES.HEAD_CENTER) && data.role === ROLES.HEAD_CENTER && (
+                <div className="mt-4 text-gray-500">Enregistrer les changement pour accéder au choix des centres.</div>
               )}
               {user.role === ROLES.HEAD_CENTER && data.role === ROLES.HEAD_CENTER && (
                 <div className="flex flex-col">
@@ -466,9 +504,9 @@ export default function Details({ user, setUser, currentUser }) {
             <div className="w-[1px] bg-[#E5E7EB]" />
             <div className="pl-16 flex-1">
               <div className="mb-2">Contact</div>
-              <Field mode={mode} className="mb-4" label="E-mail" name="email" value={data.email} onChange={onChange("email")} />
-              <Field mode={mode} className="mb-4" label="Téléphone fixe" name="phone" value={data.phone} onChange={onChange("phone")} />
-              <Field mode={mode} label="Téléphone mobile" name="mobile" value={data.mobile} onChange={onChange("mobile")} />
+              <Field mode={mode} className="mb-4" label="E-mail" name="email" value={data.email} onChange={onChange("email")} error={errors.email} />
+              <Field mode={mode} className="mb-4" label="Téléphone fixe" name="phone" value={data.phone} onChange={onChange("phone")} error={errors.phone} />
+              <Field mode={mode} label="Téléphone mobile" name="mobile" value={data.mobile} onChange={onChange("mobile")} error={errors.mobile} />
             </div>
           </div>
         </Box>

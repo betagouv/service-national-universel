@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import Details from "./details";
 import Notifications from "./notifications";
 import History from "./history";
+import Loader from "../../../components/Loader";
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
@@ -34,7 +35,7 @@ export default function Index({ ...props }) {
     })();
   }, []);
 
-  if (!user || !currentUser) return <div />;
+  if (!user || !currentUser) return <Loader />;
 
   return (
     <>
