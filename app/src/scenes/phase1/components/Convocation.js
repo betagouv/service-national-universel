@@ -93,10 +93,10 @@ export default function Convocation() {
         <ConvocText style={{ textAlign: "center" }}>
           <b>CONVOCATION</b>
           <br /> au séjour de cohésion dans le cadre du service national universel (SNU)
-          <br /> <i style={{ fontSize: ".8rem" }}>Décret n° 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national universel</i>
+          <br /> <i style={{ fontSize: ".8rem" }}>Article R.113-1 du code du service national</i>
         </ConvocText>
         <ConvocText>
-          Je suis heureuse de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
+          Je suis heureux de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
           <b>du {dayjs(new Date(cohort?.dateStart)).locale("fr").format("DD MMMM") + " au " + dayjs(new Date(cohort?.dateEnd)).locale("fr").format("DD MMMM YYYY")}</b>, a été
           retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
@@ -147,16 +147,16 @@ export default function Convocation() {
             )}
           </>
         )}
-        <ConvocText>Il vous est demandé de vous présenter avec :</ConvocText>
+        <ConvocText>
+          Il vous est demandé de confirmer votre participation en amont du départ via votre compte volontaire et de vous présenter au point de rassemblement avec :
+        </ConvocText>
         <ConvocText>
           <ul style={{ marginLeft: "1rem" }}>
-            <li>- Votre convocation</li>
-            <li>- Une pièce d&apos;identité</li>
-            <li>- La fiche sanitaire complétée sous pli</li>
-            <li>- 2 masques jetables à usage médical (pour le transport en commun),</li>
-            {!isFromDOMTOM() ? (
-              <li>- une collation plus ou moins conséquente en fonction de la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>
-            ) : null}
+            <li>- votre convocation</li>
+            <li>- votre pièce d&apos;identité</li>
+            <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
+            <li>- en fonction des consignes sanitaires le jour du départ, 2 masques jetables à usage médical pour le transport en commun, </li>
+            {!isFromDOMTOM() ? <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li> : null}
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
@@ -196,11 +196,11 @@ export default function Convocation() {
           Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
-          Pour toute information complémentaire, rendez-vous sur votre compte volontaire dans la section «&nbsp;Séjour&nbsp;de&nbsp;cohésion&nbsp;» ou le{" "}
+          Pour toute information complémentaire, rendez-vous sur votre compte volontaire (rubrique «{" "}
           <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
-            centre&nbsp;d&apos;aide
-          </a>
-          .
+            Besoin d&apos;aide
+          </a>{" "}
+          »).
         </ConvocText>
       </Content>
     </Hero>
