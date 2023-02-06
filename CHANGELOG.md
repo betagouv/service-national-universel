@@ -1,3 +1,18 @@
+# [1.214.0](https://github.com/betagouv/service-national-universel/compare/v1.213.0...v1.214.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* **admin:** Modal Affectation passage cohort from db ([8861cad](https://github.com/betagouv/service-national-universel/commit/8861cad1c4bf9e9d4d79b1ed68f759893d2da65d))
+* **admin:** super-admin invisible ([99510e2](https://github.com/betagouv/service-national-universel/commit/99510e2f3b37d53f18bfad16cf767ff158b35312))
+* **api:** proposition PDR for admin ([6c5c85e](https://github.com/betagouv/service-national-universel/commit/6c5c85e1046b6f3b702e5376de33bc8d4a956bce))
+
+
+### Features
+
+* **admin:** Tooltip disabled choix PDR modal affectation ([f587f90](https://github.com/betagouv/service-national-universel/commit/f587f9043068babbb4850ea86f73bbc114747142))
+* **admin/api:** new user page design and center edition ([#2224](https://github.com/betagouv/service-national-universel/issues/2224)) ([92f2649](https://github.com/betagouv/service-national-universel/commit/92f264979167c3c1d4ddac419738b83d21b73d1c))
+
 # [1.213.0](https://github.com/betagouv/service-national-universel/compare/v1.212.0...v1.213.0) (2023-02-03)
 
 
