@@ -28,7 +28,7 @@ const {
   ROLES,
 } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
-const { validateSessionPhase1, validateId, validateHeadOfCenterCohortChange } = require("../utils/validator");
+const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
@@ -476,7 +476,7 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
 
     const { error: errorIdHeadCenter, value: checkedIdHeadCenter } = validateId(req.body.id);
     if (errorIdHeadCenter) {
-      capture(error);
+      capture(errorIdHeadCenter);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const referent = await ReferentModel.findById(checkedIdHeadCenter);
