@@ -1,3 +1,19 @@
+# [1.213.0](https://github.com/betagouv/service-national-universel/compare/v1.212.0...v1.213.0) (2023-02-03)
+
+
+### Bug Fixes
+
+* **admin:** Tooltip showing when it shouldnt on phase2 ([9a96d40](https://github.com/betagouv/service-national-universel/commit/9a96d403ef966e298e0c7cba6f6c62615ad61010))
+* **api:** Add condition ([82afdd3](https://github.com/betagouv/service-national-universel/commit/82afdd362f87dbebb914987c0ad58100c3ed5a26))
+* **app/api:** eratum convocation ([6c69fdd](https://github.com/betagouv/service-national-universel/commit/6c69fdd7650c0104a50d94464d4fec1da0835cb1))
+
+
+### Features
+
+* **admin:** Fiche volontaire : phase 2 - outils d’aide - mission personnalisée ([a80462c](https://github.com/betagouv/service-national-universel/commit/a80462cf3e30b3a079109c2b50dfda3b2449835f))
+* **admin:** refonte outil de proposition de mission ([#2232](https://github.com/betagouv/service-national-universel/issues/2232)) ([4e89f33](https://github.com/betagouv/service-national-universel/commit/4e89f3315dae694a0111557c5d9635db92783172))
+* **app:** Changement signataire convocaiton ([e7538ef](https://github.com/betagouv/service-national-universel/commit/e7538ef7eb4ad6f2d311ae7d785441d526c35087))
+
 # [1.212.0](https://github.com/betagouv/service-national-universel/compare/v1.211.0...v1.212.0) (2023-02-02)
 
 

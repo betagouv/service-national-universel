@@ -44,6 +44,7 @@ export default function Phase1(props) {
   const [values, setValues] = useState(props.young);
 
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
+  const [cohort, setCohort] = useState();
 
   const getDisplayCenterButton = async () => {
     try {
@@ -55,6 +56,7 @@ export default function Phase1(props) {
         captureMessage("Oups, une erreur est survenue lors de la récupération de la cohorte : " + JSON.stringify(data));
         return setCohortOpenForAffection(false);
       }
+      setCohort(data);
       return setCohortOpenForAffection(canAssignManually(user, young, data));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
@@ -402,6 +404,7 @@ export default function Phase1(props) {
         isOpen={modalAffectations?.isOpen}
         onCancel={() => setModalAffectation({ isOpen: false })}
         young={young}
+        cohort={cohort}
         center={modalAffectations?.center}
         sessionId={modalAffectations?.sessionId}
       />
