@@ -32,6 +32,7 @@ export default function Field({
   rows,
   maxLength,
   copy = false,
+  error: errorProps,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
@@ -41,6 +42,8 @@ export default function Field({
   const [copied, setCopied] = useState(false);
 
   const { errors } = useContext(SectionContext);
+
+  const error = errorProps || errors[name];
 
   useEffect(() => {
     setOpened(name && currentRequest === name);
@@ -101,7 +104,7 @@ export default function Field({
   return (
     <div className={className}>
       <div
-        className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${errors[name] ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
+        className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${error ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
         key={name}
         onMouseEnter={() => mouseOver(true)}
         onMouseLeave={() => mouseOver(false)}>
@@ -117,7 +120,7 @@ export default function Field({
             {type === "textarea" && (
               <textarea maxLength={maxLength} rows={rows || 4} value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />
             )}
-            {errors[name] && <div className="text-[#EF4444] mt-[8px]">{errors[name]}</div>}
+            {error && <div className="text-[#EF4444] mt-[8px]">{error}</div>}
           </>
         ) : (
           <div className="flex items-center gap-2">
