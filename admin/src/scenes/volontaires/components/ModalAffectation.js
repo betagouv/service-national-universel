@@ -13,6 +13,7 @@ import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
 import dayjs from "dayjs";
+import ReactTooltip from "react-tooltip";
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -210,6 +211,11 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
             {pdrOption === "" && (
               <>
                 <div className="my-4 text-gray-900 text-xl text-center font-medium">Choix du point de rassemblement</div>
+                {youngSelectDisabled ? (
+                  <ReactTooltip id="tooltip-delai" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+                    <div className="text-[black]">Le délai de confirmation du point de rassemblement par le volontaire est dépassé</div>
+                  </ReactTooltip>
+                ) : null}
                 <div className="flex flex-row flex-wrap gap-4 px-4">
                   <div
                     onClick={() => setPdrOption("ref-select")}
@@ -222,6 +228,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 
                   {/* disable j-12 du depart en sejour */}
                   <div
+                    data-tip=""
+                    data-for="tooltip-delai"
                     onClick={() => {
                       if (youngSelectDisabled) return;
                       setPdrOption("young-select");
