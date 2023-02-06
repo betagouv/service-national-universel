@@ -15,6 +15,7 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Select from "../../../centersV2/components/Select";
 import { useSelector } from "react-redux";
 import Button from "../Button";
+import { Link, useHistory } from "react-router-dom";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
@@ -131,9 +132,11 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
       ) : (
         <div className="space-y-8">
           <p className="text-lg font-medium text-center">L&apos;équipe</p>
-          <div className="h-88 grid grid-cols-2 gap-6 overflow-auto">
-            {team?.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
-            <AddContact setResponsible={setResponsible} />
+          <div className="h-88 overflow-auto">
+            <div className="grid grid-cols-2 gap-6 overflow-auto">
+              {team?.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
+              <AddContact setResponsible={setResponsible} />
+            </div>
           </div>
         </div>
       )}
@@ -164,11 +167,13 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
 }
 
 const DisplayContact = ({ responsible, setResponsible }) => {
+  console.log("🚀 ~ file: TeamModal.js:170 ~ DisplayContact ~ responsible", responsible);
   const [copied, setCopied] = useState(false);
+
   return (
     <div className="group flex flex-col rounded-lg border-grey-200 border-[1px] h-28">
       <div className="flex justify-between items-center">
-        <div className="flex items-center p-3">
+        <Link to={`/user/${responsible._id}`} className="flex items-center p-3">
           <div className="h-9 w-9 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-sm font-bold mr-3">
             {getInitials(responsible.firstName + " " + responsible.lastName)}
           </div>
@@ -176,7 +181,7 @@ const DisplayContact = ({ responsible, setResponsible }) => {
             <div className="text-sm text-bold text-gray-900">{responsible.firstName + " " + responsible.lastName}</div>
             <div className="text-xs text-gray-500">{translate(responsible.role)}</div>
           </div>
-        </div>
+        </Link>
         <div
           className="invisible group-hover:!visible h-7 w-7 flex items-center rounded-full bg-gray-100 justify-center mr-3 cursor-pointer hover:scale-105"
           onClick={() => setResponsible(responsible)}>
