@@ -12,7 +12,9 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS } = require("../utils");
+const ReferentModel = require("../models/referent");
+
+const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile } = require("../utils");
 const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
 
 const {
@@ -31,9 +33,18 @@ const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-const { COHESION_STAY_END } = require("snu-lib");
+const { COHESION_STAY_END, canSendTimeScheduleReminderForSessionPhase1, START_DATE_SESSION_PHASE1 } = require("snu-lib");
 
 const datefns = require("date-fns");
+const { fr } = require("date-fns/locale");
+const fileUpload = require("express-fileupload");
+const SessionPhase1 = require("../models/sessionPhase1");
+const FileType = require("file-type");
+const fs = require("fs");
+const config = require("../config");
+const NodeClam = require("clamscan");
+const mongoose = require("mongoose");
+const { encrypt, decrypt } = require("../cryptoUtils");
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
@@ -449,6 +460,240 @@ router.post("/check-token/:token", async (req, res) => {
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+/**
+ * Upload a new time schedule file in session (id)
+ */
+router.post(
+  "/:id/time-schedule",
+  passport.authenticate(["referent"], { session: false, failWithError: true }),
+  fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  async (req, res) => {
+    try {
+      // --- validate
+      const { error, value } = Joi.object({
+        id: Joi.string().alphanum().length(24).required(),
+      }).validate(req.params, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      const { id: sessionId } = value;
+
+      // --- rights
+      const session = await SessionPhase1.findById(sessionId);
+      if (!session) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+      if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const files = Object.values(req.files);
+      if (files.length === 0) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+      const file = files[0];
+
+      const { name, tempFilePath, mimetype, size } = file;
+      const filetype = await FileType.fromFile(tempFilePath);
+      const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
+      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+        fs.unlinkSync(tempFilePath);
+        return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      }
+
+      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        try {
+          const clamscan = await new NodeClam().init({
+            removeInfected: true,
+          });
+          const { isInfected } = await clamscan.isInfected(tempFilePath);
+          if (isInfected) {
+            capture(`File ${name} of user(${req.user.id})is infected`);
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          }
+        } catch {
+          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+        }
+      }
+
+      const newFile = {
+        _id: mongoose.Types.ObjectId(),
+        name,
+        size,
+        uploadedAt: Date.now(),
+        mimetype,
+      };
+      const data = fs.readFileSync(tempFilePath);
+      const encryptedBuffer = encrypt(data);
+      const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
+      await uploadFile(`app/session/${sessionId}/time-schedule/${newFile._id}`, resultingFile);
+      fs.unlinkSync(tempFilePath);
+
+      // Add file to session & save
+      newFile._id = newFile._id.toString();
+      session.timeScheduleFiles.push(newFile);
+
+      await session.save({ fromUser: req.user });
+      return res.status(200).send({ session: serializeSessionPhase1(session), data: newFile, ok: true });
+    } catch (error) {
+      capture(error);
+      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
+
+/**
+ * Delete a time schedule file (fileId) in session (sessionId)
+ */
+router.delete("/:sessionId/time-schedule/:fileId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- validate
+    const { error, value } = Joi.object({
+      sessionId: Joi.string().alphanum().length(24).required(),
+      fileId: Joi.string().required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { sessionId, fileId } = value;
+
+    // --- rights
+    const session = await SessionPhase1.findById(sessionId);
+    if (!session) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- remove file
+    const index = session.timeScheduleFiles ? session.timeScheduleFiles.findIndex((f) => f._id === fileId) : -1;
+    if (index < 0) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const [file] = session.timeScheduleFiles.splice(index, 1);
+    try {
+      await deleteFile(`app/session/${sessionId}/time-schedule/${fileId}`);
+    } catch (err) {
+      capture(err);
+      console.error("Unable to delete time schedule file at " + file.path, err);
+    }
+
+    // --- save & return
+    await session.save({ fromUser: req.user });
+
+    return res.status(200).send({ data: session, ok: true });
+  } catch (error) {
+    capture(error);
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+/**
+ * Download a time schedule file (fileId) from session (sessionId).
+ */
+router.get("/:sessionId/time-schedule/:fileId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- validate
+    const { error, value } = Joi.object({
+      sessionId: Joi.string().alphanum().length(24).required(),
+      fileId: Joi.string().required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { sessionId, fileId } = value;
+
+    // --- rights
+    const session = await SessionPhase1.findById(sessionId);
+    if (!session) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (!canViewSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const file = session.timeScheduleFiles ? session.timeScheduleFiles.find((f) => f._id === fileId) : null;
+    if (!file) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // --- Download from s3
+    const downloaded = await getFile(`app/session/${sessionId}/time-schedule/${fileId}`);
+    if (!downloaded) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // --- Send
+    console.log("FILE = ", file);
+    return res.status(200).send({
+      data: Buffer.from(decrypt(downloaded.Body), "base64"),
+      mimeType: file.mime,
+      fileName: file.name,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:sessionId/time-schedule/send-reminder", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- validate
+    const { error, value } = Joi.object({
+      sessionId: Joi.string().alphanum().length(24).required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { sessionId } = value;
+
+    // --- rights
+    const session = await SessionPhase1.findById(sessionId);
+    if (!session) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (!canSendTimeScheduleReminderForSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- get headCenter
+    const headCenter = await ReferentModel.findById(session.headCenterId);
+    if (!headCenter) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (headCenter.email === null || headCenter.email === undefined) {
+      return res.status(400).send({ ok: false, code: ERRORS.EMAIL_INVALID });
+    }
+
+    // --- send template
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    let date = cohort ? cohort.dateStart : START_DATE_SESSION_PHASE1[session.cohort];
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.TIME_SCHEDULE_REMINDER, {
+      emailTo: [{ email: headCenter.email }],
+      params: {
+        date: date ? datefns.format(date, "dd MMMM yyyy", { locale: fr }) : "?",
+        cohesioncenter: session.nameCentre,
+        cta: `${ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}&timeschedule=true`,
+      },
+    });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
