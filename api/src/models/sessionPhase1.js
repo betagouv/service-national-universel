@@ -131,6 +131,14 @@ const Schema = new mongoose.Schema({
       description: "Fichiers d'emploi du temps",
     },
   },
+  hasTimeSchedule: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La session possède au moins 1 fichier d'emploi du temps.",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

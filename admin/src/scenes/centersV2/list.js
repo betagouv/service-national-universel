@@ -2,14 +2,21 @@ import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { BsDownload } from "react-icons/bs";
-
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateTypologieCenter, translateDomainCenter, getFilterLabel } from "../../utils";
-
-import { COHESION_STAY_START, COHORTS } from "snu-lib";
-
+import {
+  COHESION_STAY_START,
+  COHORTS,
+  translate,
+  formatLongDateFR,
+  ES_NO_LIMIT,
+  ROLES,
+  canCreateOrUpdateCohesionCenter,
+  translateTypologieCenter,
+  translateDomainCenter,
+  getFilterLabel,
+} from "snu-lib";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
 import { FilterButton, TabItem, Badge } from "./components/commons";
@@ -24,7 +31,7 @@ import { useHistory } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022", "TIMESCHEDULE"];
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -190,6 +197,7 @@ const ListSession = ({ firstSession }) => {
                     "Capacité maximale d'accueil": center?.placesTotal,
                     "Place total de la session": data.placesTotal,
                     "Place restante de la session": data.placesLeft,
+                    "Emploi du temps": data.hasTimeSchedule === "true" ? "Déposé" : "Non déposé",
                     Typologie: translateTypologieCenter(center?.typology),
                     Domaine: translateDomainCenter(center?.domain),
                     "Gestionnaire ou propriétaire": center?.complement,
@@ -237,7 +245,7 @@ const ListSession = ({ firstSession }) => {
             filters={FILTERS}
             defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
           />
-          {user.role === ROLES.ADMIN ? (
+          {user.role === ROLES.ADMIN && (
             <MultiDropdownList
               defaultQuery={getDefaultQuery}
               className="dropdown-filter"
@@ -254,7 +262,7 @@ const ListSession = ({ firstSession }) => {
               missingLabel="Non renseigné"
               renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
             />
-          ) : null}
+          )}
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
             className="dropdown-filter"
@@ -281,6 +289,22 @@ const ListSession = ({ firstSession }) => {
             URLParams={true}
             showSearch={false}
             renderLabel={(items) => <div>{getFilterLabel(items, "Statut", "Statut")}</div>}
+          />
+          <MultiDropdownList
+            defaultQuery={getDefaultQuery}
+            className="dropdown-filter"
+            componentId="TIMESCHEDULE"
+            dataField="hasTimeSchedule.keyword"
+            react={{ and: FILTERS.filter((e) => e !== "TIMESCHEDULE") }}
+            renderItem={(e, count) => {
+              return `${translate(e)} (${count})`;
+            }}
+            title=""
+            URLParams={true}
+            showSearch={false}
+            renderLabel={(items) => getFilterLabel(items, "Emploi du temps", "Emploi du temps")}
+            showMissing
+            missingLabel="Non renseigné"
           />
           <DeleteFilters />
         </div>

@@ -537,6 +537,7 @@ router.post(
       // Add file to session & save
       newFile._id = newFile._id.toString();
       session.timeScheduleFiles.push(newFile);
+      session.set("hasTimeSchedule", "true");
 
       await session.save({ fromUser: req.user });
       return res.status(200).send({ session: serializeSessionPhase1(session), data: newFile, ok: true });
@@ -587,6 +588,7 @@ router.delete("/:sessionId/time-schedule/:fileId", passport.authenticate(["refer
     }
 
     // --- save & return
+    session.set("hasTimeSchedule", session.timeScheduleFiles.length > 0 ? "true" : "false");
     await session.save({ fromUser: req.user });
 
     return res.status(200).send({ data: session, ok: true });
@@ -634,7 +636,6 @@ router.get("/:sessionId/time-schedule/:fileId", passport.authenticate(["referent
     }
 
     // --- Send
-    console.log("FILE = ", file);
     return res.status(200).send({
       data: Buffer.from(decrypt(downloaded.Body), "base64"),
       mimeType: file.mime,

@@ -93,8 +93,16 @@ export default function Index({ ...props }) {
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
         sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
+        const blockedSession = sessionFiltered.find((s) => s.cohort === focusedCohort);
+        if (user.role === ROLES.HEAD_CENTER) {
+          if (blockedSession) {
+            setSessions([blockedSession]);
+            setFocusedSession(blockedSession);
+            return;
+          }
+        }
         setSessions(sessionFiltered);
-        if (!blockFocus) setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
+        if (!blockFocus) setFocusedSession(blockedSession || allSessions?.data[0]);
       }
     })();
   };
@@ -168,7 +176,6 @@ export default function Index({ ...props }) {
       newAllSessions.splice(index, 1, newSession);
       setSessions(newAllSessions);
       setFocusedSession(newSession);
-      console.log("session after: ", newSession);
     }
   }
 
