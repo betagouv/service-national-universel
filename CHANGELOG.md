@@ -1,3 +1,12 @@
+## [1.214.1](https://github.com/betagouv/service-national-universel/compare/v1.214.0...v1.214.1) (2023-02-07)
+
+
+### Bug Fixes
+
+* **admin:** Fix some wrong id ([3cb452a](https://github.com/betagouv/service-national-universel/commit/3cb452a2eb93927736af3a15ca1057ccb1c2e92d))
+* **admin:** history improvements ([#2235](https://github.com/betagouv/service-national-universel/issues/2235)) ([f33fc9f](https://github.com/betagouv/service-national-universel/commit/f33fc9f4b9bd2c71619fd8bf11d998c3413e4530))
+* **admin:** structure redirect contrat ([8c9be66](https://github.com/betagouv/service-national-universel/commit/8c9be660f27e5e5e2b070a6a451a6b599f19b37b))
+
 # [1.214.0](https://github.com/betagouv/service-national-universel/compare/v1.213.0...v1.214.0) (2023-02-06)
 
 
