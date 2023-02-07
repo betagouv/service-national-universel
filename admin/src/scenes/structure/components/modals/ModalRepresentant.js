@@ -40,7 +40,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
     setModalDelete({
       isOpen: true,
       title: "Supprimer le représentant",
-      message: "Êtes-vous sûr de vouloir supprimer les informations de ce représentant de structure ?",
+      message: "Voulez-vous vraiment supprimer les informations de ce représentant de structure ?",
       onDelete: onDelete,
     });
   };
@@ -56,7 +56,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
       <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[800px] h-[500px] px-8 py-7 flex flex-col gap-4">
         <p className="text-lg font-medium text-center">Représentant de la structure</p>
         <p className="text-gray-500 text-sm text-center">
-          Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
+          Dans le cadre du contrat d’engagement préalable à l’engagement d’un·e volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
           votre structure.
         </p>
         <div className="flex items-center bg-blue-50 rounded-lg p-3 gap-2">

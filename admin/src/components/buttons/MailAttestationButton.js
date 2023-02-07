@@ -24,7 +24,7 @@ export default function MailAttestationButton({ young, children, type, template,
     } catch (e) {
       capture(e);
       setLoading(false);
-      toastr.error("Erreur lors de l'envoie du document", e.message);
+      toastr.error("Erreur lors de l'envoi du document", e.message);
     }
   };
 
@@ -38,7 +38,7 @@ export default function MailAttestationButton({ young, children, type, template,
             isOpen: true,
             onConfirm,
             title: "Envoie de document par mail",
-            message: `Êtes-vous sûr de vouloir transmettre le document "${placeholder}" par mail à ${young.email} ?`,
+            message: `Voulez-vous vraiment transmettre le document "${placeholder}" par mail à ${young.email} ?`,
           });
         }}>
         {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}

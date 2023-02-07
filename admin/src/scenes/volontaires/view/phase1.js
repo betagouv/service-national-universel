@@ -179,7 +179,7 @@ export default function Phase1(props) {
                       setModal({
                         isOpen: true,
                         title: "Envoie de document par mail",
-                        message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
+                        message: `Voulez-vous vraiment transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
                         onConfirm: sendMail,
                       })
                     }
@@ -209,7 +209,7 @@ export default function Phase1(props) {
                       setModal({
                         isOpen: true,
                         title: "Confirmation de la participation",
-                        message: `Êtes-vous sûr de vouloir modifier la confirmation de participation de ${young.firstName} ${young.lastName} à  ${
+                        message: `Voulez-vous vraiment modifier la confirmation de participation de ${young.firstName} ${young.lastName} à  ${
                           value === "true" ? "oui" : "non"
                         }`,
                         onConfirm: () => onConfirmationYoungAgreement(value),

@@ -113,7 +113,7 @@ export default function Index({ ...props }) {
       toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
       return setLoading(false);
     }
-    toastr.success("La session a bien été modifiée avec succès");
+    toastr.success("La session a été modifiée avec succès");
     setLoading(false);
     setErrors({});
     // faut aussi change le state sessions
@@ -331,7 +331,7 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
               setModalDelete({
                 isOpen: true,
                 title: "Supprimer la session",
-                message: "Êtes-vous sûr de vouloir supprimer cette session?",
+                message: "Voulez-vous vraiment supprimer cette session ?",
                 onDelete: handleSessionDelete,
               });
           }}

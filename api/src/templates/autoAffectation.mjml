@@ -31,8 +31,8 @@
           - la fiche sanitaire (à télécharger depuis votre compte SNU puis à envoyer par voie postale sous pli confidentiel à l'adresse indiquée sur votre compte)
         </mj-text>
         <mj-button font-size="20px" background-color="#3490DC" href="{{ctaDocuments}}">Accéder à mes documents</mj-button>
-        <mj-button font-size="20px" background-color="#3490DC" href="{{ctaWithdraw}}">Non, je laisse ma place à un autre volontaire</mj-button>
-        <mj-text font-size="18px" color="#000">Nous sommes impatients de vous retrouver au séjour de cohésion,</mj-text>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{ctaWithdraw}}">Non, je laisse ma place à un·e autre volontaire</mj-button>
+        <mj-text font-size="18px" color="#000">Nous avons hâte de vous retrouver au séjour de cohésion,</mj-text>
         <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
       </mj-column>
     </mj-section>

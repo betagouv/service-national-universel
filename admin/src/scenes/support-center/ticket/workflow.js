@@ -230,7 +230,7 @@ export const subjectsStructure = {
   APPLICATION: {
     parentId: "QUESTION",
     id: "APPLICATION",
-    label: "La candidature d'un volontaire",
+    label: "La candidature d'un·e volontaire",
     tags: ["TAG_Candidature"],
   },
   QUESTION_OTHER: {

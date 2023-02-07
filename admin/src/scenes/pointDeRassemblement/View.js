@@ -259,7 +259,7 @@ export default function View(props) {
                   setModalDelete({
                     isOpen: true,
                     title: "Supprimer le point de rassemblement",
-                    message: "Êtes-vous sûr de vouloir supprimer ce point de rassemblement ?",
+                    message: "Voulez-vous vraiment supprimer ce point de rassemblement ?",
                     onDelete: onDelete,
                   })
                 }
@@ -440,7 +440,7 @@ export default function View(props) {
                   <button
                     className="absolute bottom-5 right-5 flex gap-2 items-center cursor-pointer px-2 py-1 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() =>
-                      setModalDelete({ isOpen: true, onDelete: onDeleteSession, title: "Supprimer la session", message: "Êtes-vous sûr de vouloir supprimer cette session ?" })
+                      setModalDelete({ isOpen: true, onDelete: onDeleteSession, title: "Supprimer la session", message: "Voulez-vous vraiment supprimer cette session ?" })
                     }
                     disabled={isLoading}>
                     <Trash className="text-red-400 h-4 w-4" />

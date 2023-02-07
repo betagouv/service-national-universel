@@ -53,7 +53,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
               <br />
               <span className="underline text-snu-purple-300">{teamate.email}</span>
               <br />
-              Êtes-vous sûr de vouloir l&apos;inviter&nbsp;?
+              Voulez-vous vraiment l&apos;inviter&nbsp;?
             </div>
           ),
           isOpen: true,

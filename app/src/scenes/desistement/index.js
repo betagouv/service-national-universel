@@ -47,7 +47,7 @@ export default function Desistement() {
     });
     try {
       const { ok, code } = await api.put(`/young`, { ...values, status, lastStatusAt: Date.now() });
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+      if (!ok) return toastr.error("Une erreur est survenue lors du traitement de votre demande :", translate(code));
       logout();
     } catch (e) {
       console.log(e);
@@ -66,7 +66,7 @@ export default function Desistement() {
       {mandatoryPhasesDone ? (
         <ComponentConfirm
           title="Suppression du compte SNU"
-          message="Vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté(e). Souhaitez-vous réellement supprimer votre compte ?"
+          message="Vous êtes sur le point de supprimer votre compte. Cela va immédiatement vous déconnecter. Souhaitez-vous réellement supprimer votre compte ?"
           onConfirm={async () => {
             await onConfirm(YOUNG_STATUS.DELETED);
           }}

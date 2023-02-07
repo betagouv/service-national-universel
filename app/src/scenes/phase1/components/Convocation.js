@@ -96,7 +96,7 @@ export default function Convocation() {
           <br /> <i style={{ fontSize: ".8rem" }}>Article R.113-1 du code du service national</i>
         </ConvocText>
         <ConvocText>
-          Je suis heureux de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
+          J'ai le plaisir de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
           <b>du {dayjs(new Date(cohort?.dateStart)).locale("fr").format("DD MMMM") + " au " + dayjs(new Date(cohort?.dateEnd)).locale("fr").format("DD MMMM YYYY")}</b>, a été
           retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>

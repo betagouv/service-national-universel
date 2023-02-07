@@ -355,7 +355,7 @@ const completeRules = () => {
         </p>
         <p className="pb-2 indent-8 underline">4.2 PRISE EN CHARGE INDIVIDUALISÉE (PAI) ET PROJET PERSONNALISÉ DE SCOLARISATION (PPS)</p>
         <p className="pb-2">
-          Lorsqu'un volontaire bénéficie d'un protocole de prise en charge individualisée (PAI) du fait d'une pathologie chronique ou aiguë, il en informe le responsable du centre
+          Lorsqu'un·e volontaire bénéficie d'un protocole de prise en charge individualisée (PAI) du fait d'une pathologie chronique ou aiguë, il en informe le responsable du centre
           SNU lors de son inscription et en transmet une copie, en même temps que sa fiche sanitaire. Le centre prendra en compte ces PAI et PPS afin d'anticiper et mettre en place
           les modalités organisationnelles et matérielles requises, en concertation avec le volontaire et sa famille et, le cas échéant, le médecin ou l'équipe qui le suit
           habituellement au titre de son PAI ou PPS.

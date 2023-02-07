@@ -56,7 +56,7 @@ export default function CardRepresentant() {
                 <Warning data-tip data-for="representant" />
                 <ReactTooltip id="representant" type="light" place="top">
                   <span>
-                    Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au
+                    Dans le cadre du contrat d’engagement préalable à l’engagement d’un·e volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au
                     sein de votre structure
                   </span>
                 </ReactTooltip>

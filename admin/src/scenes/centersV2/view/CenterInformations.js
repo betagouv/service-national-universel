@@ -95,7 +95,7 @@ export default function Details({ center, setCenter, sessions }) {
       // check session
       const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
       if (!canUpdateSession) {
-        error.placesTotal = "La capacité maximale est inférieur à la capacité de l'une des sessions";
+        error.placesTotal = "La capacité maximale est inférieure à la capacité de l'une des sessions";
       }
       setErrors(error);
       if (Object.keys(error).length > 0) return setIsLoading(false);
@@ -178,7 +178,7 @@ export default function Details({ center, setCenter, sessions }) {
                   setModalDelete({
                     isOpen: true,
                     title: "Supprimer le centre",
-                    message: "Êtes-vous sûr de vouloir supprimer ce centre?",
+                    message: "Voulez-vous vraiment supprimer ce centre ?",
                     onDelete: onDelete,
                   })
                 }

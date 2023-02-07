@@ -70,14 +70,14 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
     <div className="flex flex-col bg-white px-12 pt-12 pb-4">
       <div className="flex items-center justify-between rounded-lg">
         <div>
-          <h3 style={{ color: "#111827", fontWeight: "bold" }}>Suggérez la mission à un volontaire</h3>
+          <h3 style={{ color: "#111827", fontWeight: "bold" }}>Suggérez la mission à un·e volontaire</h3>
           <p style={{ color: "#6B7280" }}>Un e-mail lui sera envoyé avec la présentation de la mission ainsi qu’un lien pour candidater.</p>
         </div>
         <SearchStyle>
           <DataSearch
             defaultQuery={getDefaultQuery}
             showIcon={false}
-            placeholder="Rechercher un volontaire..."
+            placeholder="Rechercher un·e volontaire..."
             react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
             componentId="SEARCH"
             dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
