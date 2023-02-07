@@ -59,6 +59,7 @@ export default function Index({ ...props }) {
 
   async function fetchMission() {
     const id = props.match && props.match.params && props.match.params.id;
+    if (!id) return <div />;
     const missionResponse = await api.get(`/mission/${id}`);
     if (!missionResponse.ok) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));

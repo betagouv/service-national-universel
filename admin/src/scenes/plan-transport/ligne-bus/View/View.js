@@ -51,6 +51,7 @@ export default function View(props) {
   const getDataForCheck = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
       const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${id}/data-for-check`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
@@ -65,6 +66,7 @@ export default function View(props) {
   const getDemandeDeModification = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
       const { ok, code, data: reponseDemandeDeModification } = await api.get(`/demande-de-modification/ligne/${id}`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));

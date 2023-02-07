@@ -25,6 +25,7 @@ const contactTypes = {
 
 export default function ListPDR(props) {
   const id = props.match && props.match.params && props.match.params.id;
+  if (!id) return <div />;
   const cohort = new URLSearchParams(props.location.search).get("cohort");
   const [PDR, setPDR] = React.useState();
   const [bus, setBus] = React.useState();

@@ -23,6 +23,7 @@ export default function Edit(props) {
     (async () => {
       if (isNew) return setDefaultValue(null);
       const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
       const { data } = await api.get(`/program/${id}`);
       setDefaultValue(data);
     })();
