@@ -9,6 +9,8 @@ import API from "../../../services/api";
 import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function Notifications({ young, onChange }) {
+  // ! Ajouter un loading, c'est super lent !
+
   const [emails, setEmails] = React.useState();
   console.log("🚀 ~ file: notifications.js:13 ~ Notifications ~ emails", emails);
   const { user } = useSelector((state) => state.Auth);

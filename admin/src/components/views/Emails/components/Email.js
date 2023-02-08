@@ -1,6 +1,7 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { formatLongDateFR } from "snu-lib";
+import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import TailwindPanelWide from "../../../TailwindPanelWide";
 
@@ -34,18 +35,21 @@ function EmailPanel({ open, setOpen, email }) {
   console.log("🚀 ~ file: Email.js:28 ~ EmailPanel ~ emailData", emailData);
 
   async function getMail(email) {
-    const { ok, data } = await API.get("/email/" + email.messageId);
-    if (!ok) {
+    try {
+      const { ok, data } = await API.get("/email/" + email.messageId);
+      if (!ok) {
+        capture("Impossible de récupérer les données de l'email" + JSON.stringify(email));
+        toastr.error("Erreur", "Impossible de récupérer les données de l'email");
+      }
+      setEmailData(data);
+    } catch (error) {
       toastr.error("Erreur", "Impossible de récupérer les données de l'email");
     }
-    return data;
   }
 
   React.useEffect(() => {
     if (open) {
-      getMail(email).then((data) => {
-        setEmailData(data);
-      });
+      getMail(email);
     }
   }, [open]);
 

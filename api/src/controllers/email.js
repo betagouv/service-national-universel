@@ -7,12 +7,12 @@ const Joi = require("joi");
 const Netmask = require("netmask").Netmask;
 
 const { ERRORS } = require("../utils");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const EmailObject = require("../models/email");
 const { canViewEmailHistory } = require("snu-lib/roles");
 const { serializeEmail } = require("../utils/serializer");
-const { validateId } = require("../utils/validator");
-const { getEmail } = require("../sendinblue");
+const { getEmailsList, getEmailContent } = require("../sendinblue");
+const { validateString } = require("../utils/validator");
 
 function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
@@ -113,17 +113,28 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    // const { error, value: checkedId } = validateId(req.params.id);
-    // if (error) {
-    //   capture(error);
-    //   return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    // }
-
-    const email = await getEmail(req.params.id);
-    if (!email) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
+    const { error, value: messageId } = validateString(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    return res.status(200).send({ ok: true, data: email });
+
+    const emails = await getEmailsList({ messageId });
+    console.log("🚀 ~ file: email.js:124 ~ router.get ~ emails", emails);
+    if (!emails || emails.code) {
+      captureMessage("Error while fetching email" + JSON.stringify(emails));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const uuid = emails.transactionalEmails[0].uuid;
+
+    const emailData = await getEmailContent(uuid);
+    if (!emailData || emailData.code) {
+      captureMessage("Error while fetching email" + JSON.stringify(emailData));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    return res.status(200).send({ ok: true, data: emailData });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

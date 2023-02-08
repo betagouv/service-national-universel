@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const queryString = require("querystring");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
@@ -93,23 +94,6 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
   }
 }
 
-async function getEmail(id) {
-  try {
-    const response = await fetch(`https://api.sendinblue.com/v3/smtp/email/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.SENDINBLUEKEY,
-      },
-    });
-    const data = await response.json();
-    return data;
-  } catch (e) {
-    console.log("Erreur in getEmail", e);
-    capture(e);
-  }
-}
-
 async function getEmailsList({ email, templateId, messageId, startDate, endDate, sort, limit, offset } = {}) {
   try {
     const body = {
@@ -122,7 +106,15 @@ async function getEmailsList({ email, templateId, messageId, startDate, endDate,
       limit,
       offset,
     };
-    return await api("/smtp/emails", { method: "GET", body: JSON.stringify(body) });
+    const filteredBody = Object.entries(body)
+      .filter(([_, value]) => value !== undefined)
+      .reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      }, {});
+    console.log("🚀 ~ file: sendinblue.js:115 ~ getEmailsList ~ filteredBody", filteredBody);
+    console.log("🚀 ~ file: sendinblue.js:118 ~ getEmailsList ~ `/smtp/emails?${queryString.stringify(filteredBody)}`", `/smtp/emails?${queryString.stringify(filteredBody)}`);
+    return await api(`/smtp/emails?${queryString.stringify(filteredBody)}`, { method: "GET" });
   } catch (e) {
     console.log("Erreur in getEmail", e);
     capture(e);
@@ -131,7 +123,7 @@ async function getEmailsList({ email, templateId, messageId, startDate, endDate,
 
 async function getEmailContent(uuid) {
   try {
-    return await api(`/smtp/emails/${uuid}`, { method: "GET" });
+    return await api(`/smtp/emails?${queryString.stringify(uuid)}`, { method: "GET" });
   } catch (e) {
     console.log("Erreur in getEmail", e);
     capture(e);
@@ -320,4 +312,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };
