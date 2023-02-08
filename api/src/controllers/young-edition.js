@@ -248,11 +248,11 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     if (value.statusPhase1 === "WAITING_AFFECTATION") {
       if (young?.meetingPointId) {
         oldBus = await LigneDeBusModel.findById(young.ligneId);
-        young.set({ meetingPointId: undefined, ligneId: undefined });
+        young.set({ meetingPointId: undefined, ligneId: undefined, hasMeetingInformation: "false" });
       }
       if (young?.sessionPhase1Id) {
         oldSession = await SessionPhase1Model.findById(young.sessionPhase1Id);
-        young.set({ sessionPhase1Id: undefined });
+        young.set({ sessionPhase1Id: undefined, cohesionStayPresence: undefined, presenceJDM: undefined });
       }
     }
 
