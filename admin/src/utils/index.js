@@ -360,3 +360,42 @@ export const getNetworkOptions = async (inputValue) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });
 };
+
+export const translateEmails = (t) => {
+  switch (t) {
+    case "opened":
+      return "ouvert";
+    case "request":
+      return "demande";
+    case "requests":
+      return "demandes";
+    case "delivered":
+      return "délivré";
+    case "deferred":
+      return "différé";
+    case "clicked":
+      return "cliqué";
+    case "clicks":
+      return "cliques";
+    case "unique_opened":
+      return "ouveture unique";
+    case "invalid_email":
+      return "email invalide";
+    case "sent":
+      return "envoyé";
+    case "soft_bounce":
+      return "rebond (faible)";
+    case "hard_bounce":
+      return "rebond (fort)";
+    case "unsubscribe":
+      return "désinscrit";
+    case "complaint":
+      return "plainte";
+    case "blocked":
+      return "bloqué";
+    case "error":
+      return "erreur";
+    default:
+      return t;
+  }
+};
