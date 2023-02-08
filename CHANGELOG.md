@@ -1,3 +1,20 @@
+# [1.215.0](https://github.com/betagouv/service-national-universel/compare/v1.214.1...v1.215.0) (2023-02-08)
+
+
+### Bug Fixes
+
+* **admin:** filter drawer closed by default in history ([b354621](https://github.com/betagouv/service-national-universel/commit/b354621a59cd85a466e42675e9fbc458c3e4e6e1))
+* **admin:** wait for structure load on contract page ([38a4067](https://github.com/betagouv/service-national-universel/commit/38a4067f896a4cf15d26303829e31c5c8436c24b))
+* **admin:** Wrong url fix ([16af7e4](https://github.com/betagouv/service-national-universel/commit/16af7e462ff52029359318c2e856b41807612ba1))
+
+
+### Features
+
+* **admin:** reset session / bus / meeetingPoint when waiting affectation ([#2241](https://github.com/betagouv/service-national-universel/issues/2241)) ([be01318](https://github.com/betagouv/service-national-universel/commit/be0131870c7578e048df1f6dccc42bdd10c77290))
+* **admin,api:** historique du plan de transports ([#2128](https://github.com/betagouv/service-national-universel/issues/2128)) ([7ef7536](https://github.com/betagouv/service-national-universel/commit/7ef7536ba9d3529da3037c102a040fe48dae1dab))
+* **api:** Add ES for emails ([60b2de1](https://github.com/betagouv/service-national-universel/commit/60b2de1e8a07f27b8eac9113e812cc5a03b124fb))
+* **api,admin:** Ajout des emplois du temps sur les sessions ([#2238](https://github.com/betagouv/service-national-universel/issues/2238)) ([c9738ce](https://github.com/betagouv/service-national-universel/commit/c9738ced6f3765d03327f5df7fbe29ff4ef6a870))
+
 ## [1.214.1](https://github.com/betagouv/service-national-universel/compare/v1.214.0...v1.214.1) (2023-02-07)
 
 
