@@ -40,12 +40,21 @@ export function MoreButton({ className = "", onClick = () => {} }) {
   );
 }
 
-export function DeleteButton({ className = "", onClick = () => {} }) {
+export function DeleteButton({ className = "", onClick = () => {}, mode = "red" }) {
+  let modeStyle;
+  switch (mode) {
+    case "gray":
+      modeStyle = "bg-gray-200 text-gray-600 hover:text-gray-200 hover:bg-gray-600 hover:border-gray-600";
+      break;
+    case "red":
+    default:
+      modeStyle = "bg-[#EF4444] text-[#FFFFFF] hover:text-[#EF4444] hover:bg-[#FFFFFF] hover:border-[#EF4444]";
+  }
   return (
     <div
-      className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#EF4444] cursor-pointer group border-[1px] border-[transparent] hover:bg-[#FFFFFF] hover:border-[#EF4444] ${className}`}
+      className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group border-[1px] border-[transparent] ${modeStyle} ${className}`}
       onClick={onClick}>
-      <Bin className="w-[14px] h-[14px] text-[#FFFFFF] group-hover:text-[#EF4444]" />
+      <Bin className="w-[14px] h-[14px]" />
     </div>
   );
 }

@@ -20,6 +20,7 @@ import Select from "../components/Select";
 
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
+import TimeSchedule from "../components/TimeSchedule";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -27,7 +28,7 @@ export default function Index({ ...props }) {
 
   const [center, setCenter] = useState();
   const [sessions, setSessions] = useState([]);
-  const [focusedSession, setFocusedSession] = useState({});
+  const [focusedSession, setFocusedSession] = useState(null);
 
   const query = queryString.parse(location.search);
   const { cohorte: cohortQueryUrl } = query;
@@ -58,6 +59,16 @@ export default function Index({ ...props }) {
     setEditInfoSession(focusedSession);
   }, [focusedSession]);
 
+  useEffect(() => {
+    const querySessionId = getQuerySessionId();
+    if (querySessionId) {
+      const session = sessions.find((s) => s._id === querySessionId);
+      if (session) {
+        setFocusedSession(session);
+      }
+    }
+  }, [sessions]);
+
   const getCenter = (blockFocus = false) => {
     (async () => {
       if (!center || !center?.cohorts) return;
@@ -82,14 +93,31 @@ export default function Index({ ...props }) {
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
         sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
+        const blockedSession = sessionFiltered.find((s) => s.cohort === focusedCohort);
+        if (user.role === ROLES.HEAD_CENTER) {
+          if (blockedSession) {
+            setSessions([blockedSession]);
+            setFocusedSession(blockedSession);
+            return;
+          }
+        }
         setSessions(sessionFiltered);
-        if (!blockFocus) setFocusedSession(sessionFiltered.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
+        if (!blockFocus) setFocusedSession(blockedSession || allSessions?.data[0]);
       }
     })();
   };
   useEffect(() => {
     getCenter();
   }, [center]);
+
+  function getQuerySessionId() {
+    const { sessionId } = queryString.parse(location.search);
+    if (sessionId) {
+      return sessionId;
+    } else {
+      return null;
+    }
+  }
 
   const statusOptions = [
     { value: "VALIDATED", label: "Validée" },
@@ -140,6 +168,17 @@ export default function Index({ ...props }) {
       return toastr.error("Oups, une erreur est survenue lors de la suppression de la session");
     }
   };
+
+  function onSessionChanged(newSession) {
+    const index = sessions.findIndex((s) => s._id === newSession._id);
+    if (index >= 0) {
+      const newAllSessions = [...sessions];
+      newAllSessions.splice(index, 1, newSession);
+      setSessions(newAllSessions);
+      setFocusedSession(newSession);
+    }
+  }
+
   if (!center) return <div />;
   return (
     <>
@@ -201,57 +240,60 @@ export default function Index({ ...props }) {
             </div>
           </div>
           <div className="">
-            {center?._id && focusedSession?._id ? (
-              <div className="flex">
-                {/* // Taux doccupation */}
-                <OccupationCard
-                  canBeDeleted={focusedSession.canBeDeleted}
-                  placesTotal={focusedSession.placesTotal}
-                  placesTotalModified={editInfoSession.placesTotal}
-                  placesLeft={focusedSession.placesLeft}
-                  user={user}
-                  modalDelete={modalDelete}
-                  setModalDelete={setModalDelete}
-                  handleSessionDelete={handleSessionDelete}
-                />
-                {/* // liste des volontaires */}
-                <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
-                  <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
-                    <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
-                      Voir les volontaires
-                    </button>
+            {center?._id && focusedSession?._id && (
+              <div className="">
+                <div className="flex border-b-[1px] border-b-gray-200">
+                  {/* // Taux doccupation */}
+                  <OccupationCard
+                    canBeDeleted={focusedSession.canBeDeleted}
+                    placesTotal={focusedSession.placesTotal}
+                    placesTotalModified={editInfoSession.placesTotal}
+                    placesLeft={focusedSession.placesLeft}
+                    user={user}
+                    modalDelete={modalDelete}
+                    setModalDelete={setModalDelete}
+                    handleSessionDelete={handleSessionDelete}
+                  />
+                  {/* // liste des volontaires */}
+                  <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
+                    <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
+                      <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                        Voir les volontaires
+                      </button>
+                    </div>
+                    <div className="flex flex-1 items-center justify-center">
+                      <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
+                        Voir l&apos;équipe
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-1 items-center justify-center">
-                    <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
-                      Voir l&apos;équipe
-                    </button>
-                  </div>
-                </div>
 
-                {/* // équipe */}
-                <div className="flex gap-4 flex-1 min-w-1/4 flex-col justify-between items-center bg-white p-4 max-w-xl">
-                  <div className="w-64">
-                    <Select
-                      readOnly={!editingBottom || ROLES.ADMIN != user.role}
-                      label="Statut"
-                      icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5 mr-2" fill="#2563eb" color="white" /> : null}
-                      options={statusOptions}
-                      setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
-                      selected={statusOptions.find((e) => e.value === editInfoSession.status)}
-                    />
-                  </div>
-                  <div className="w-64">
-                    <Field
-                      error={errors.placesTotal}
-                      readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
-                      label="Places ouvertes"
-                      value={editInfoSession.placesTotal}
-                      onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
-                    />
+                  {/* // équipe */}
+                  <div className="flex gap-4 flex-1 min-w-1/4 flex-col justify-between items-center bg-white p-4 max-w-xl">
+                    <div className="w-64">
+                      <Select
+                        readOnly={!editingBottom || ROLES.ADMIN !== user.role}
+                        label="Statut"
+                        icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5 mr-2" fill="#2563eb" color="white" /> : null}
+                        options={statusOptions}
+                        setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
+                        selected={statusOptions.find((e) => e.value === editInfoSession.status)}
+                      />
+                    </div>
+                    <div className="w-64">
+                      <Field
+                        error={errors.placesTotal}
+                        readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
+                        label="Places ouvertes"
+                        value={editInfoSession.placesTotal}
+                        onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
+                <TimeSchedule session={focusedSession} className="p-8" onSessionChanged={onSessionChanged} />
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       ) : null}

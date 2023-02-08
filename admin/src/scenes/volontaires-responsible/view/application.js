@@ -77,6 +77,9 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
     // todo : why not just
     let { ok, data, code } = await api.get(`/application/${applicationId}`);
     if (!ok) {
+      if (code === "INVALID_PARAMS") {
+        return toastr.error("Mauvaise URL", "Cette URL n'est pas valide");
+      }
       capture(code);
       return toastr.error("Oups, une erreur est survenue", code);
     }
