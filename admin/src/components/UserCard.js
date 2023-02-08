@@ -21,8 +21,8 @@ export default function UserCard({ user }) {
         <div className="rounded-full w-10 h-10 overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100">
           {getAvatar(user)}
         </div>
-        <div className="max-w-xs leading-4">
-          <p className="font-medium truncate underline-offset-2 decoration-2">
+        <div className="leading-4  max-w-[120px]">
+          <p className="font-medium underline-offset-2 decoration-2 truncate">
             {user.firstName} {user.lastName && user.lastName}
           </p>
           <p className="capitalize text-gray-400 truncate underline-offset-2 decoration-2">{translate(user?.role)}</p>

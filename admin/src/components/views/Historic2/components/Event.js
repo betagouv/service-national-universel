@@ -18,11 +18,11 @@ export default function Event({ e, index, model, refName, path }) {
         </p>
         <p>{translateModelFields(model, e.path)}</p>
       </td>
-      <td className="px-4 py-3 truncate text-gray-400">{translateHistory(e.path, e.originalValue)}</td>
+      <td className="px-4 py-3 text-gray-400 max-w-xs truncate">{translateHistory(e.path, e.originalValue)}</td>
       <td className="px-4 py-3">
         <HiOutlineArrowRight />
       </td>
-      <td className="px-4 py-3 truncate">{translateHistory(e.path, e.value)}</td>
+      <td className="px-4 py-3 max-w-xs truncate">{translateHistory(e.path, e.value)}</td>
       <td className="px-4 py-3">
         <UserCard user={e.user} />
       </td>
