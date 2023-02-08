@@ -93,6 +93,23 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
   }
 }
 
+async function getEmail(id) {
+  try {
+    const response = await fetch(`https://api.sendinblue.com/v3/smtp/email/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.SENDINBLUEKEY,
+      },
+    });
+    const data = await response.json();
+    return data;
+  } catch (e) {
+    console.log("Erreur in getEmail", e);
+    capture(e);
+  }
+}
+
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, { force } = { force: false }) {
   try {
@@ -275,4 +292,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };

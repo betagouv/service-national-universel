@@ -11,6 +11,8 @@ const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
 const { canViewEmailHistory } = require("snu-lib/roles");
 const { serializeEmail } = require("../utils/serializer");
+const { validateId } = require("../utils/validator");
+const { getEmail } = require("../sendinblue");
 
 function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
@@ -107,6 +109,25 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     capture(error);
   }
   return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+});
+
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // const { error, value: checkedId } = validateId(req.params.id);
+    // if (error) {
+    //   capture(error);
+    //   return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    // }
+
+    const email = await getEmail(req.params.id);
+    if (!email) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    return res.status(200).send({ ok: true, data: email });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 module.exports = router;

@@ -1,5 +1,7 @@
 import React from "react";
+import { toastr } from "react-redux-toastr";
 import { formatLongDateFR } from "snu-lib";
+import API from "../../../../services/api";
 import TailwindPanelWide from "../../../TailwindPanelWide";
 
 export default function Email({ email }) {
@@ -11,12 +13,15 @@ export default function Email({ email }) {
 
   return (
     <>
-      <tr className="border-t border-t-slate-100 hover:bg-slate-50 cursor-pointer rounded-xl" onClick={handleClick}>
+      <tr
+        aria-checked={open}
+        className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer rounded-xl aria-checked:bg-blue-500 aria-checked:text-white transition"
+        onClick={handleClick}>
         <td className="px-4 py-3">
-          <p className="text-gray-400 truncate">{email.subject}</p>
+          <p className="font-bold truncate">{email.subject}</p>
           <p>Description</p>
         </td>
-        <td className="px-4 py-3 truncate text-gray-800">{formatLongDateFR(email.date)}</td>
+        <td className="px-4 py-3 truncate">{formatLongDateFR(email.date)}</td>
         <td className="px-4 py-3 truncate">{email.templateId || ""}</td>
       </tr>
       <EmailPanel open={open} setOpen={setOpen} email={email} />
@@ -29,14 +34,10 @@ function EmailPanel({ open, setOpen, email }) {
   console.log("🚀 ~ file: Email.js:28 ~ EmailPanel ~ emailData", emailData);
 
   async function getMail(email) {
-    const response = await fetch(`https://api.sendinblue.com/v3/smtp/email/${email.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.SENDINBLUEKEY,
-      },
-    });
-    const data = await response.json();
+    const { ok, data } = await API.get("/email/" + email.messageId);
+    if (!ok) {
+      toastr.error("Erreur", "Impossible de récupérer les données de l'email");
+    }
     return data;
   }
 
@@ -50,7 +51,7 @@ function EmailPanel({ open, setOpen, email }) {
 
   return (
     <TailwindPanelWide open={open} setOpen={setOpen} title={email.subject}>
-      {emailData.subject ? (
+      {emailData?.subject ? (
         <>
           <div className="flex flex-col">
             <div className="flex flex-row">

@@ -37,10 +37,7 @@ export default function TailwindPanelWide({ open, setOpen, title, children }) {
                     </div>
                     <div className="relative mt-6 flex-1 px-4 sm:px-6">
                       {/* Replace with your content */}
-                      <div className="absolute inset-0 px-4 sm:px-6">
-                        {children}
-                        <div className="h-full border-2 border-dashed border-gray-200" aria-hidden="true" />
-                      </div>
+                      <div className="absolute inset-0 px-4 sm:px-6">{children}</div>
                       {/* /End replace */}
                     </div>
                   </div>

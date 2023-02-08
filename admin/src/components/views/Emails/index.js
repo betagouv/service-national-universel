@@ -23,7 +23,7 @@ export default function Emails({ data }) {
   const templateIDOptions = getOptions(data, "templateId");
 
   return (
-    <div className="bg-white rounded-xl shadow-md text-gray-700">
+    <div className="bg-white rounded-xl shadow-md text-gray-700 pb-32">
       {!data?.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="p-4 space-y-6">
         <div className="flex gap-4">
