@@ -55,7 +55,9 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
       </div>
       {isOpen && FilterDrawer({ filters, changeFilters, filterOptions })}
       {loading ? (
-        <Loader />
+        <div className="pb-12">
+          <Loader />
+        </div>
       ) : data.length === 0 ? (
         <div className="italic p-4">Aucune donnée</div>
       ) : (
