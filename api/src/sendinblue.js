@@ -107,13 +107,11 @@ async function getEmailsList({ email, templateId, messageId, startDate, endDate,
       offset,
     };
     const filteredBody = Object.entries(body)
-      .filter(([_, value]) => value !== undefined)
+      .filter(([, value]) => value !== undefined)
       .reduce((obj, [key, value]) => {
         obj[key] = value;
         return obj;
       }, {});
-    console.log("🚀 ~ file: sendinblue.js:115 ~ getEmailsList ~ filteredBody", filteredBody);
-    console.log("🚀 ~ file: sendinblue.js:118 ~ getEmailsList ~ `/smtp/emails?${queryString.stringify(filteredBody)}`", `/smtp/emails?${queryString.stringify(filteredBody)}`);
     return await api(`/smtp/emails?${queryString.stringify(filteredBody)}`, { method: "GET" });
   } catch (e) {
     console.log("Erreur in getEmail", e);
@@ -123,7 +121,7 @@ async function getEmailsList({ email, templateId, messageId, startDate, endDate,
 
 async function getEmailContent(uuid) {
   try {
-    return await api(`/smtp/emails?${queryString.stringify(uuid)}`, { method: "GET" });
+    return await api(`/smtp/emails/${uuid}`, { method: "GET" });
   } catch (e) {
     console.log("Erreur in getEmail", e);
     capture(e);
