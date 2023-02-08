@@ -3,9 +3,12 @@ import { toastr } from "react-redux-toastr";
 import { formatLongDateFR } from "snu-lib";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
+import { htmlCleaner } from "../../../../utils";
+import Loader from "../../../Loader";
 import TailwindPanelWide from "../../../TailwindPanelWide";
 
 export default function Email({ email }) {
+  console.log("🚀 ~ file: Email.js:10 ~ Email ~ email", email);
   const [open, setOpen] = React.useState(false);
 
   function handleClick() {
@@ -32,6 +35,7 @@ export default function Email({ email }) {
 
 function EmailPanel({ open, setOpen, email }) {
   const [emailData, setEmailData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
   console.log("🚀 ~ file: Email.js:28 ~ EmailPanel ~ emailData", emailData);
 
   async function getMail(email) {
@@ -40,8 +44,10 @@ function EmailPanel({ open, setOpen, email }) {
       if (!ok) {
         capture("Impossible de récupérer les données de l'email" + JSON.stringify(email));
         toastr.error("Erreur", "Impossible de récupérer les données de l'email");
+        return setLoading(false);
       }
       setEmailData(data);
+      setLoading(false);
     } catch (error) {
       toastr.error("Erreur", "Impossible de récupérer les données de l'email");
     }
@@ -53,19 +59,21 @@ function EmailPanel({ open, setOpen, email }) {
     }
   }, [open]);
 
+  // ! TRaduction en FR
+
   return (
-    <TailwindPanelWide open={open} setOpen={setOpen} title={email.subject}>
-      {emailData?.subject ? (
+    <TailwindPanelWide open={open} setOpen={setOpen} title={email?.subject}>
+      {!loading ? (
         <>
           <div className="flex flex-col">
             <div className="flex flex-row">
               <div className="flex flex-col">
                 <p className="text-gray-400">From</p>
-                <p className="text-gray-800">{emailData.sender.email}</p>
+                <p className="text-gray-800">{email.sender}</p>
               </div>
               <div className="flex flex-col">
                 <p className="text-gray-400">To</p>
-                <p className="text-gray-800">{emailData.to[0].email}</p>
+                <p className="text-gray-800">{email.to[0].email}</p>
               </div>
             </div>
             <div className="flex flex-row">
@@ -85,7 +93,7 @@ function EmailPanel({ open, setOpen, email }) {
           </div>
           <div className="flex flex-col">
             <p className="text-gray-400">Body</p>
-            <p className="text-gray-800">{emailData.body}</p>
+            <div dangerouslySetInnerHTML={{ __html: htmlCleaner(emailData.body) }} />
           </div>
         </>
       ) : (
