@@ -1,6 +1,6 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { formatLongDateFR } from "snu-lib";
+import { formatLongDateFR, translate } from "snu-lib";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import { htmlCleaner } from "../../../../utils";
@@ -22,8 +22,8 @@ export default function Email({ email }) {
         className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer rounded-xl aria-checked:bg-blue-500 aria-checked:text-white transition"
         onClick={handleClick}>
         <td className="px-4 py-3">
-          <p className="font-bold truncate">{email.subject}</p>
-          <p>Description</p>
+          <p className="font-bold max-w-lg truncate">{email.subject}</p>
+          <p>{translate(email.event)}</p>
         </td>
         <td className="px-4 py-3 truncate">{formatLongDateFR(email.date)}</td>
         <td className="px-4 py-3 truncate">{email.templateId || ""}</td>

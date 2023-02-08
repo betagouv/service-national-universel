@@ -103,7 +103,12 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     }
 
     if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    const data = await EmailObject.find({ email }).sort("-date");
+    let data = [];
+    if (req.user.role === "admin") {
+      data = await EmailObject.find({ email, event: "delivered" }).sort("-date");
+    } else {
+      data = await EmailObject.find({ email }).sort("-date");
+    }
     return res.status(200).send({ ok: true, data: data.map((e) => serializeEmail(e)) });
   } catch (error) {
     capture(error);
