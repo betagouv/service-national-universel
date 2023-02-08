@@ -5,6 +5,14 @@ const esClient = require("../es");
 const MODELNAME = "sessionphase1";
 const { ENVIRONMENT } = require("../config");
 
+const File = new mongoose.Schema({
+  _id: String,
+  name: String,
+  uploadedAt: Date,
+  size: Number,
+  mimetype: String,
+});
+
 const Schema = new mongoose.Schema({
   cohesionCenterId: {
     type: String,
@@ -116,6 +124,22 @@ const Schema = new mongoose.Schema({
       description: "Statut",
     },
   },
+
+  timeScheduleFiles: {
+    type: [File],
+    documentation: {
+      description: "Fichiers d'emploi du temps",
+    },
+  },
+  hasTimeSchedule: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La session possède au moins 1 fichier d'emploi du temps.",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
