@@ -9,7 +9,7 @@ import Event from "./components/Event";
 import MultiSelect from "./components/Multiselect";
 
 export default function Historic({ model, data, customFilterOptions, refName }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [authors, setAuthors] = useState([]);
   const [ops, setOps] = useState([]);
   const [paths, setPaths] = useState([]);
