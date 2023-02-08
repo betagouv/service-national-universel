@@ -110,6 +110,34 @@ async function getEmail(id) {
   }
 }
 
+async function getEmailsList({ email, templateId, messageId, startDate, endDate, sort, limit, offset } = {}) {
+  try {
+    const body = {
+      email,
+      templateId,
+      messageId,
+      startDate,
+      endDate,
+      sort,
+      limit,
+      offset,
+    };
+    return await api("/smtp/emails", { method: "GET", body: JSON.stringify(body) });
+  } catch (e) {
+    console.log("Erreur in getEmail", e);
+    capture(e);
+  }
+}
+
+async function getEmailContent(uuid) {
+  try {
+    return await api(`/smtp/emails/${uuid}`, { method: "GET" });
+  } catch (e) {
+    console.log("Erreur in getEmail", e);
+    capture(e);
+  }
+}
+
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, { force } = { force: false }) {
   try {
@@ -292,4 +320,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };
