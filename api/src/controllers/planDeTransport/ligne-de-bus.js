@@ -726,7 +726,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         { $unwind: "$bus" },
         { $addFields: { refName: "$bus.busId" } },
         { $project: { bus: 0, lineToPoint: 0, lineToPointId: 0, modificationBus: 0, modificationId: 0 } },
-        { $sort: { date: 1 } },
+        { $sort: { date: -1 } },
 
         // on déplie chaque op.
         { $unwind: "$ops" },
@@ -814,13 +814,16 @@ function pathToKey(path) {
 }
 
 function filterPatchWithQuery(p, query) {
-  const matchFieldName = translateBusPatchesField(pathToKey(p.path)).toLowerCase().includes(query);
-  const matchOriginalValue = p.originalValue
-    ? (isIsoDate(p.originalValue) ? formatStringLongDate(p.originalValue) : p.originalValue.toString())?.toLowerCase().includes(query)
-    : false;
-  const matchFromValue = p.value ? (isIsoDate(p.value) ? formatStringLongDate(p.value) : p.value.toString())?.toLowerCase().includes(query) : false;
-
-  return matchFieldName || matchOriginalValue || matchFromValue;
+  return (
+    // bus
+    p.refName.toLowerCase().includes(query) ||
+    // field
+    translateBusPatchesField(pathToKey(p.path)).toLowerCase().includes(query) ||
+    // original-value
+    (p.originalValue && (isIsoDate(p.originalValue) ? formatStringLongDate(p.originalValue) : p.originalValue.toString())?.toLowerCase().includes(query)) ||
+    // value
+    (p.value && (isIsoDate(p.value) ? formatStringLongDate(p.value) : p.value.toString())?.toLowerCase().includes(query))
+  );
 }
 
 function mergeArrayItems(array, subProperty) {
