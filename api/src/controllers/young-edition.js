@@ -242,6 +242,32 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     // --- update dates
     const now = new Date();
 
+    // reset cohesion/bus/meetingPoint center when new status is WAITING_AFFECTATION
+    let oldSession;
+    let oldBus;
+    if (value.statusPhase1 === "WAITING_AFFECTATION") {
+      if (young?.meetingPointId) oldBus = await LigneDeBusModel.findById(young.ligneId);
+      if (young?.sessionPhase1Id) {
+        oldSession = await SessionPhase1Model.findById(young.sessionPhase1Id);
+        young.set({
+          cohesionCenterId: undefined,
+          sessionPhase1Id: undefined,
+          meetingPointId: undefined,
+          ligneId: undefined,
+          deplacementPhase1Autonomous: undefined,
+          transportInfoGivenByLocal: undefined,
+          cohesionStayPresence: undefined,
+          presenceJDM: undefined,
+          departInform: undefined,
+          departSejourAt: undefined,
+          departSejourMotif: undefined,
+          departSejourMotifComment: undefined,
+          youngPhase1Agreement: "false",
+          hasMeetingInformation: undefined,
+        });
+      }
+    }
+
     if (value.statusPhase2) {
       value.statusPhase2UpdatedAt = now;
       if (value.statusPhase2 === "VALIDATED") {
@@ -269,16 +295,10 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- update statusPhase 1 deendencies
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
+    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
 
     // if they had a bus, we check if we need to update the places taken / left in the bus
-    if (young.ligneId) {
-      const bus = await LigneDeBusModel.findById(young.ligneId);
-      if (bus) await updateSeatsTakenInBusLine(bus);
-    }
+    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

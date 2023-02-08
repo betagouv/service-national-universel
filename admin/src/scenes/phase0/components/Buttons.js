@@ -1,7 +1,7 @@
 import React from "react";
 import { Spinner } from "reactstrap";
 
-export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "grey" }) {
+export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "" }) {
   let color;
   switch (mode) {
     case "blue":
@@ -9,6 +9,9 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
       break;
     case "red":
       color = "bg-white text-[#EF4444] border-[#EF4444] hover:!bg-[#EF4444] hover:text-white";
+      break;
+    case "grey":
+      color = "bg-white text-[#374151] border-gray-300 hover:!bg-gray-300 hover:text-white";
       break;
     default:
       color = "bg-white text-[#000091] border-[#000091] hover:!bg-[#000091] hover:text-white";

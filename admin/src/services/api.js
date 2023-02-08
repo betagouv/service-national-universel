@@ -220,7 +220,8 @@ class api {
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
     }
-    formData.append("body", JSON.stringify({ names, ...properties }));
+    let allData = properties ? { names, ...properties } : { names };
+    formData.append("body", JSON.stringify(allData));
     if (category) formData.set("category", category);
     if (expirationDate) formData.set("expirationDate", expirationDate);
     return new Promise(async (resolve, reject) => {
