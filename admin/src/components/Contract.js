@@ -168,7 +168,7 @@ export default function Contract({ young }) {
     }
   };
 
-  if (!application || !mission || !managerDepartment || !tutor) return <Loader />;
+  if (!application || !mission || !managerDepartment || !tutor || !structure) return <Loader />;
 
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
