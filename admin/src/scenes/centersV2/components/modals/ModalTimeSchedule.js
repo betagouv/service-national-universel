@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Modal } from "reactstrap";
 import CloseSvg from "../../../../assets/Close";
 import { ModalContainer } from "../../../../components/modals/Modal";
@@ -12,18 +12,10 @@ import { capture } from "../../../../sentry";
 import { download } from "snu-lib";
 
 const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
-const ACCEPTABLE_MIME_TYPES = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
+const ACCEPTABLE_MIME_TYPES = ["image/jpg", "image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
 
 export default function ModalTimeSchedule({ session, onCancel, onChanged }) {
-  useEffect(() => {
-    console.log("return of the session: ", session);
-    for (const file of session.timeScheduleFiles) {
-      console.log(file.name);
-    }
-  }, [session]);
-
   function sessionChanged(newSession) {
-    console.log("session changed: ", newSession);
     onChanged && onChanged(newSession);
   }
 
@@ -129,7 +121,6 @@ function DropZone({ session, className = "", sessionChanged }) {
   }
 
   function dropped(e) {
-    console.log("dropped: ", e);
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -139,9 +130,6 @@ function DropZone({ session, className = "", sessionChanged }) {
   }
 
   async function uploadFile(file) {
-    console.log("Upload File: ", file);
-    console.log("type: ", file.type);
-    console.log("accept: ", ACCEPTABLE_MIME_TYPES, ACCEPTABLE_MIME_TYPES.findIndex((t) => t === file.type) >= 0);
     if (ACCEPTABLE_MIME_TYPES.findIndex((t) => t === file.type) < 0) {
       toastr.error("Les seules fichiers autorisés sont les images (Jpeg ou Png) et les PDF.");
       return;
