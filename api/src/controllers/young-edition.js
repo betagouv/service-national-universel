@@ -272,14 +272,14 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     value.lastStatusAt = now;
 
-    // --- update young
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
     // --- check rights
     if (!canUserUpdateYoungStatus(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+
+    // --- update young
+    young.set(value);
+    await young.save({ fromUser: req.user });
 
     // --- update statusPhase 1 deendencies
     // if they had a cohesion center, we check if we need to update the places taken / left
