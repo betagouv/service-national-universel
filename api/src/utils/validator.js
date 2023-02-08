@@ -727,6 +727,17 @@ function validateStructureManager(structureManager) {
     .validate(structureManager, { stripUnknown: true });
 }
 
+function validateHeadOfCenterCohortChange(values) {
+  return Joi.object()
+    .keys({
+      cohesionCenterId: Joi.string().regex(idRegex, "id").required(),
+      headCenterId: Joi.string().regex(idRegex, "id").required(),
+      oldCohort: Joi.string().valid(...COHORTS),
+      newCohort: Joi.string().valid(...COHORTS),
+    })
+    .validate(values, { stripUnknown: true });
+}
+
 module.exports = {
   validateId,
   validateString,
@@ -751,4 +762,5 @@ module.exports = {
   validatePhase1Document,
   validatePhase2Preference,
   validateStructureManager,
+  validateHeadOfCenterCohortChange,
 };

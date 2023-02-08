@@ -410,12 +410,12 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
         $replaceRoot: { newRoot: "$meetingPoint" },
       },
     ]);
+
     const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
 
     const ligneToPoint = await LigneToPointModel.find({ meetingPointId: { $in: schemaMeetingPointIds }, deletedAt: { $exists: false } });
-
     const ligneBusIds = ligneToPoint.map((l) => l.lineId.toString());
-    let ligneBus = await LigneBusModel.find({ _id: { $in: ligneBusIds } });
+    let ligneBus = await LigneBusModel.find({ _id: { $in: ligneBusIds }, centerId });
 
     const finalMeettingPoints = [];
     ligneBus.map((l) => {
@@ -431,14 +431,13 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
 
     //build final Array since client wait for ligneToPoint + meetingPoint + ligneBus
     const data = [];
-    finalMeettingPointsObjects.map((m) => {
-      const ligneToPointFiltered = ligneToPoint.find((l) => l.meetingPointId === m._id.toString());
-      const ligneBusFiltered = ligneBus.find((l) => l._id.toString() === ligneToPointFiltered.lineId);
+    ligneToPoint.map((ligne) => {
+      const meetingPointFiltered = finalMeettingPointsObjects.find((m) => m._id.toString() === ligne.meetingPointId);
+      const ligneBusFiltered = ligneBus.find((l) => l._id.toString() === ligne.lineId);
 
       // filter uniquement sur les bus avec des places dispos
-      if (ligneBusFiltered && ligneBusFiltered.youngSeatsTaken < ligneBusFiltered.youngCapacity) {
-        data.push({ meetingPoint: m, ligneToPoint: ligneToPointFiltered, ligneBus: ligneBusFiltered });
-      }
+      if (meetingPointFiltered && ligneBusFiltered && ligneBusFiltered.youngSeatsTaken < ligneBusFiltered.youngCapacity)
+        data.push({ meetingPoint: meetingPointFiltered, ligneToPoint: ligne, ligneBus: ligneBusFiltered });
     });
 
     return res.status(200).send({ ok: true, data });

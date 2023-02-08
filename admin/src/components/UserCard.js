@@ -17,11 +17,11 @@ export default function UserCard({ user }) {
   if (!user) return null;
   return (
     <a href={getlink(user)} className="hover:cursor-pointer group">
-      <div className="flex gap-2">
+      <div className="flex items-center gap-3">
         <div className="shrink-0 rounded-full w-10 h-10 overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100">
           {getAvatar(user)}
         </div>
-        <div className="max-w-xs">
+        <div className="max-w-xs leading-4">
           <p className="font-medium truncate underline-offset-2 decoration-2">
             {user.firstName} {user.lastName && user.lastName}
           </p>

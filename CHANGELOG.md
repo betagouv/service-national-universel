@@ -1,3 +1,61 @@
+## [1.214.1](https://github.com/betagouv/service-national-universel/compare/v1.214.0...v1.214.1) (2023-02-07)
+
+
+### Bug Fixes
+
+* **admin:** Fix some wrong id ([3cb452a](https://github.com/betagouv/service-national-universel/commit/3cb452a2eb93927736af3a15ca1057ccb1c2e92d))
+* **admin:** history improvements ([#2235](https://github.com/betagouv/service-national-universel/issues/2235)) ([f33fc9f](https://github.com/betagouv/service-national-universel/commit/f33fc9f4b9bd2c71619fd8bf11d998c3413e4530))
+* **admin:** structure redirect contrat ([8c9be66](https://github.com/betagouv/service-national-universel/commit/8c9be660f27e5e5e2b070a6a451a6b599f19b37b))
+
+# [1.214.0](https://github.com/betagouv/service-national-universel/compare/v1.213.0...v1.214.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* **admin:** Modal Affectation passage cohort from db ([8861cad](https://github.com/betagouv/service-national-universel/commit/8861cad1c4bf9e9d4d79b1ed68f759893d2da65d))
+* **admin:** super-admin invisible ([99510e2](https://github.com/betagouv/service-national-universel/commit/99510e2f3b37d53f18bfad16cf767ff158b35312))
+* **api:** proposition PDR for admin ([6c5c85e](https://github.com/betagouv/service-national-universel/commit/6c5c85e1046b6f3b702e5376de33bc8d4a956bce))
+
+
+### Features
+
+* **admin:** Tooltip disabled choix PDR modal affectation ([f587f90](https://github.com/betagouv/service-national-universel/commit/f587f9043068babbb4850ea86f73bbc114747142))
+* **admin/api:** new user page design and center edition ([#2224](https://github.com/betagouv/service-national-universel/issues/2224)) ([92f2649](https://github.com/betagouv/service-national-universel/commit/92f264979167c3c1d4ddac419738b83d21b73d1c))
+
+# [1.213.0](https://github.com/betagouv/service-national-universel/compare/v1.212.0...v1.213.0) (2023-02-03)
+
+
+### Bug Fixes
+
+* **admin:** Tooltip showing when it shouldnt on phase2 ([9a96d40](https://github.com/betagouv/service-national-universel/commit/9a96d403ef966e298e0c7cba6f6c62615ad61010))
+* **api:** Add condition ([82afdd3](https://github.com/betagouv/service-national-universel/commit/82afdd362f87dbebb914987c0ad58100c3ed5a26))
+* **app/api:** eratum convocation ([6c69fdd](https://github.com/betagouv/service-national-universel/commit/6c69fdd7650c0104a50d94464d4fec1da0835cb1))
+
+
+### Features
+
+* **admin:** Fiche volontaire : phase 2 - outils d’aide - mission personnalisée ([a80462c](https://github.com/betagouv/service-national-universel/commit/a80462cf3e30b3a079109c2b50dfda3b2449835f))
+* **admin:** refonte outil de proposition de mission ([#2232](https://github.com/betagouv/service-national-universel/issues/2232)) ([4e89f33](https://github.com/betagouv/service-national-universel/commit/4e89f3315dae694a0111557c5d9635db92783172))
+* **app:** Changement signataire convocaiton ([e7538ef](https://github.com/betagouv/service-national-universel/commit/e7538ef7eb4ad6f2d311ae7d785441d526c35087))
+
+# [1.212.0](https://github.com/betagouv/service-national-universel/compare/v1.211.0...v1.212.0) (2023-02-02)
+
+
+### Bug Fixes
+
+* **api:** condition for structure manager email on send contract ([a546b30](https://github.com/betagouv/service-national-universel/commit/a546b30808dfbb2dd863d1f2cce67750d40ca811))
+* **api:** edit center adress ([cfa14de](https://github.com/betagouv/service-national-universel/commit/cfa14de1f0b0605342368072c5788dc72e87aeb2))
+* **app:** Fix du choix d'un PDR quand plusieurs lignes de bus passent par le même PDR ([098d1c2](https://github.com/betagouv/service-national-universel/commit/098d1c21b0c9618fa00116c460184d3bb73c4ef9))
+* **structurev2:** fixes to styles and form validation ([477dfe9](https://github.com/betagouv/service-national-universel/commit/477dfe935381a4401cc965726b33ca18187d31c5))
+
+
+### Features
+
+* **admin:** refonte liste structures (staging) ([#2212](https://github.com/betagouv/service-national-universel/issues/2212)) ([5069080](https://github.com/betagouv/service-national-universel/commit/5069080080336d6306250c164640c7aacb1c78e1))
+* **admin:** Relancer la structure ([1a0ad66](https://github.com/betagouv/service-national-universel/commit/1a0ad660c04169246a6e3450135ab59b8eb302f1))
+* **api/admin:** refonte structure : représentant de structure ([#2223](https://github.com/betagouv/service-national-universel/issues/2223)) ([4d0c0d5](https://github.com/betagouv/service-national-universel/commit/4d0c0d588ff0e8a290791eee3bc58cf41552a1b8))
+* **app:** Ajout date "Trouvez une mission" ([9ee5403](https://github.com/betagouv/service-national-universel/commit/9ee5403e58b7da8dde192b2296ca1e44170c96fc))
+
 # [1.211.0](https://github.com/betagouv/service-national-universel/compare/v1.210.0...v1.211.0) (2023-02-01)
 
 

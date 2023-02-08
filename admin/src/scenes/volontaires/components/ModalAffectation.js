@@ -13,10 +13,11 @@ import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
 import dayjs from "dayjs";
+import ReactTooltip from "react-tooltip";
 
 const LIST_PAGE_LIMIT = 3;
 
-export default function ModalAffectations({ isOpen, onCancel, young, center = null, sessionId = null }) {
+export default function ModalAffectations({ isOpen, onCancel, young, center = null, sessionId = null, cohort }) {
   const FILTERS = ["SEARCH"];
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
   const [session, setSession] = useState(null);
@@ -33,10 +34,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   const [selectedPdr, setSelectedPdr] = useState(null);
   const [sessionSearch, setSessionSearch] = useState("");
 
-  const sessionObject = sessions2023.find((s) => s.name === young.cohort);
-
   // true à J - 12 du départ
-  const youngSelectDisabled = !dayjs(sessionObject?.dateStart).subtract(12, "day").isAfter(dayjs());
+  const youngSelectDisabled = !dayjs(cohort?.pdrChoiceLimitDate).isAfter(dayjs());
 
   const closeModal = () => {
     setInputPdr("");
@@ -210,6 +209,11 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
             {pdrOption === "" && (
               <>
                 <div className="my-4 text-gray-900 text-xl text-center font-medium">Choix du point de rassemblement</div>
+                {youngSelectDisabled ? (
+                  <ReactTooltip id="tooltip-delai" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+                    <div className="text-[black]">Le délai de confirmation du point de rassemblement par le volontaire est dépassé</div>
+                  </ReactTooltip>
+                ) : null}
                 <div className="flex flex-row flex-wrap gap-4 px-4">
                   <div
                     onClick={() => setPdrOption("ref-select")}
@@ -222,6 +226,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 
                   {/* disable j-12 du depart en sejour */}
                   <div
+                    data-tip=""
+                    data-for="tooltip-delai"
                     onClick={() => {
                       if (youngSelectDisabled) return;
                       setPdrOption("young-select");
@@ -376,22 +382,22 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
               <div className="flex flex-row justify-center gap-6 mb-2">
                 <div className="flex flex-row">
                   <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(sessionObject.dateStart).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(sessionObject.dateStart).locale("fr").format("D")}</div>
+                    <div className="text-orange-600 capitalize">{dayjs(cohort.dateStart).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(cohort.dateStart).locale("fr").format("D")}</div>
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Aller à 16h</div>
-                    <div className="text-gray-600 first-letter:capitalize">{dayjs(sessionObject.dateStart).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(cohort.dateStart).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
                 <div className="flex flex-row">
                   <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(sessionObject.dateEnd).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(sessionObject.dateEnd).locale("fr").format("D")}</div>
+                    <div className="text-orange-600 capitalize">{dayjs(cohort.dateEnd).locale("fr").format("MMM")}</div>
+                    <div className="text-gray-700 text-lg">{dayjs(cohort.dateEnd).locale("fr").format("D")}</div>
                   </div>
                   <div className="flex flex-col items-start justify-center ml-2">
                     <div className="text-gray-900 font-bold">Retour à 11h</div>
-                    <div className="text-gray-600 first-letter:capitalize">{dayjs(sessionObject.dateEnd).locale("fr").format("dddd D MMMM")}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(cohort.dateEnd).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
               </div>
