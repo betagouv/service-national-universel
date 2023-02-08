@@ -25,6 +25,7 @@ const contactTypes = {
 
 export default function ListPDR(props) {
   const id = props.match && props.match.params && props.match.params.id;
+  if (!id) return <div />;
   const [bus, setBus] = React.useState();
   const [loading, setLoading] = React.useState(true);
   const [filterVisible, setFilterVisible] = React.useState(false);

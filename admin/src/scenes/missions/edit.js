@@ -53,6 +53,7 @@ export default function Edit(props) {
   async function initMission() {
     if (isNew) return setDefaultValue(null);
     const id = props.match && props.match.params && props.match.params.id;
+    if (!id) return <div />;
     const { data } = await api.get(`/mission/${id}`);
     if (data && data.startAt) data.startAt = dateForDatePicker(data.startAt);
     if (data && data.endAt) data.endAt = dateForDatePicker(data.endAt);

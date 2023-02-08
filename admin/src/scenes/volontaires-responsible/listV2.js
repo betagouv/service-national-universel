@@ -594,7 +594,6 @@ export default function List() {
                             onClick={() => handleClick(hit)}
                             opened={panel?.application?._id === hit._id}
                             selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
-                            onChangeApplication={() => history.go(0)}
                             onSelect={(newItem) =>
                               setYoungSelected((prev) => {
                                 if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
@@ -625,10 +624,17 @@ export default function List() {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab, opened, mission }) => {
+const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "";
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
+  const history = useHistory();
+
+  const onChangeApplication = (status) => {
+    if (status === "VALIDATED" && currentTab === "all") history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}/contrat`);
+    else history.go(0);
+  };
+
   return (
     <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
       {currentTab !== "all" && (
