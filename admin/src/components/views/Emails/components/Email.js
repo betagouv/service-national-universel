@@ -1,6 +1,7 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { formatLongDateFR, translate } from "snu-lib";
+import { formatLongDateFR, ROLES } from "snu-lib";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import { htmlCleaner, translateEmails } from "../../../../utils";
@@ -8,6 +9,7 @@ import Loader from "../../../Loader";
 import TailwindPanelWide from "../../../TailwindPanelWide";
 
 export default function Email({ email }) {
+  const { user } = useSelector((state) => state.Auth);
   console.log("🚀 ~ file: Email.js:10 ~ Email ~ email", email);
   const [open, setOpen] = React.useState(false);
 
@@ -23,11 +25,11 @@ export default function Email({ email }) {
         onClick={handleClick}>
         <td className="px-4 py-3">
           <p className="font-semibold max-w-2xl truncate">{email.subject}</p>
-          <p>{translate(email.event)}</p>
+          <p className="text-sm text-gray-500">[Description]</p>
         </td>
         <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
         <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
-        <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>
+        {user.role === ROLES.ADMIN && <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>}
       </tr>
       <EmailPanel open={open} setOpen={setOpen} email={email} />
     </>

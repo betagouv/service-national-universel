@@ -370,15 +370,15 @@ export const translateEmails = (t) => {
     case "requests":
       return "demandes";
     case "delivered":
-      return "délivré";
+      return "remis";
     case "deferred":
       return "différé";
     case "clicked":
       return "cliqué";
     case "clicks":
-      return "cliques";
+      return "clics";
     case "unique_opened":
-      return "ouveture unique";
+      return "ouverture unique";
     case "invalid_email":
       return "email invalide";
     case "sent":

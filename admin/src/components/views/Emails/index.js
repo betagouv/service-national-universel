@@ -7,11 +7,14 @@ import ReactiveListComponent from "../../ReactiveListComponent";
 import Email from "./components/Email";
 import DeleteFilters from "../../buttons/DeleteFilters";
 import FilterIcon from "../../../assets/icons/Filter";
+import { ROLES } from "snu-lib";
+import { useSelector } from "react-redux";
 
 export default function Emails({ young }) {
-  const [open, setOpen] = React.useState(false);
+  const { user } = useSelector((state) => state.Auth);
+  const [open, setOpen] = React.useState(true);
 
-  const FILTERS = ["SEARCH", "DATE", "TEMPLATE_ID"];
+  const FILTERS = ["SEARCH", "DATE", "TEMPLATE_ID", "EVENT"];
 
   const getDefaultQuery = () => {
     const query = {
@@ -20,6 +23,7 @@ export default function Emails({ young }) {
           filter: [{ term: { "email.keyword": young.email } }],
         },
       },
+      collapse: { field: "messageId.keyword" },
       track_total_hits: true,
     };
     return query;
@@ -41,7 +45,7 @@ export default function Emails({ young }) {
               autosuggest={false}
               className="datasearch-searchfield"
               innerClass={{ input: "searchbox" }}
-            />{" "}
+            />
             <button onClick={() => setOpen(!open)} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
               <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
               <p className="text-gray-400 group-hover:text-gray-100 transition">Filtres</p>
@@ -59,6 +63,8 @@ export default function Emails({ young }) {
                 title=""
                 showFilter={true}
                 filterLabel="Date d'envoi"
+                // className="date-filter"
+                // innerClass={{ label: "text-xs", "input-container": "input-container" }}
               />
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
@@ -93,7 +99,7 @@ export default function Emails({ young }) {
                     <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>
                     <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Date d&apos;envoi</th>
                     <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Template ID</th>
-                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>
+                    {user.role === ROLES.ADMIN && <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>}
                   </tr>
                 </thead>
                 <tbody>

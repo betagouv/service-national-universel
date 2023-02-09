@@ -667,18 +667,16 @@ router.post("/email/:action(_msearch|export)", passport.authenticate(["referent"
     if (!canViewEmailHistory(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let filter = [];
-    if (user.role !== ROLES.ADMIN) {
-      filter.push({
-        bool: { term: { "event.keyword": "delivered" } },
-      });
+
+    if (user.role === ROLES.ADMIN) {
+      filter.push({ term: { "event.keyword": "delivered" } });
     }
 
     if (req.params.action === "export") {
       const response = await allRecords("email", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "email", body: body });
-      console.log("🚀 ~ file: es.js:684 ~ router.post ~ response", response.body.responses[0].error);
+      const response = await esClient.msearch({ index: "email", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(response.body);
     }
   } catch (error) {
