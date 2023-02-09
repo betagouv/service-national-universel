@@ -59,7 +59,7 @@ export default function Convocation() {
 
   const getMeetingAddress = () => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    const complement = meetingPoint.pointDeRassemblement.complementAddress.find((c) => c.cohort === young.cohort);
+    const complement = meetingPoint.pointDeRassemblement?.complementAddress.find((c) => c.cohort === young.cohort);
     const complementText = complement?.complement ? ", " + complement.complement : "";
     return (
       meetingPoint.pointDeRassemblement.name +
