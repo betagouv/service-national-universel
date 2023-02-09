@@ -44,15 +44,15 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
         )}
       </div>
 
-      <table className="table-auto w-full max-w-full">
+      <table className="table-fixed w-full">
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
             {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-96">Action</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80">Détails</th>
             <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 max-w-xs"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-auto">Auteur</th>
           </tr>
         </thead>
         <tbody>
