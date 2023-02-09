@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 
 export default function Emails({ young }) {
   const { user } = useSelector((state) => state.Auth);
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
 
   const FILTERS = ["SEARCH", "DATE", "TEMPLATE_ID", "EVENT"];
 
@@ -62,7 +62,7 @@ export default function Emails({ young }) {
                 URLParams={true}
                 title=""
                 showFilter={true}
-                filterLabel="Date d'envoi"
+                filterLabel="Date"
                 // className="date-filter"
                 // innerClass={{ label: "text-xs", "input-container": "input-container" }}
               />
@@ -87,6 +87,7 @@ export default function Emails({ young }) {
 
         <div className="reactive-result">
           <ReactiveListComponent
+            distinctField="templateId.keyword"
             pageSize={20}
             defaultQuery={getDefaultQuery}
             react={{ and: FILTERS }}

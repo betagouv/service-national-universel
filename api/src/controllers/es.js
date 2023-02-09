@@ -668,7 +668,7 @@ router.post("/email/:action(_msearch|export)", passport.authenticate(["referent"
 
     let filter = [];
 
-    if (user.role === ROLES.ADMIN) {
+    if (user.role !== ROLES.ADMIN) {
       filter.push({ term: { "event.keyword": "delivered" } });
     }
 

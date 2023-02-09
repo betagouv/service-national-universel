@@ -24,8 +24,8 @@ export default function Email({ email }) {
         className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition active:brightness-110"
         onClick={handleClick}>
         <td className="px-4 py-3">
-          <p className="font-semibold max-w-2xl truncate">{email.subject}</p>
-          <p className="text-sm text-gray-500">[Description]</p>
+          <p className="text-sm font-semibold max-w-2xl truncate">{email.subject}</p>
+          <p className="text-xs text-gray-500">[Description]</p>
         </td>
         <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
         <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
