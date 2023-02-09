@@ -44,7 +44,7 @@ function EmailPanel({ open, setOpen, email }) {
   async function getMail(email) {
     try {
       const { ok, data } = await API.get("/email/" + email.messageId);
-      if (!data?.count) {
+      if (!ok) {
         capture("Impossible de récupérer les données de l'email" + JSON.stringify(email));
         toastr.error("Erreur", "Impossible de récupérer les données de l'email");
         return setLoading(false);
