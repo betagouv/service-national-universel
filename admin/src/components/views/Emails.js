@@ -1,17 +1,16 @@
-import React from "react";
-import { apiURL } from "../../../config";
-import API from "../../../services/api";
 import { DataSearch, DateRange, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
-
-import ReactiveListComponent from "../../ReactiveListComponent";
-import Email from "./components/Email";
-import DeleteFilters from "../../buttons/DeleteFilters";
-import FilterIcon from "../../../assets/icons/Filter";
-import { ROLES } from "snu-lib";
+import React from "react";
 import { useSelector } from "react-redux";
-import { translateEmails } from "../../../utils";
+import { formatLongDateFR, ROLES, TEMPLATE_DESCRIPTIONS } from "snu-lib";
+import FilterIcon from "../../assets/icons/Filter";
+import { apiURL } from "../../config";
+import API from "../../services/api";
+import { translateEmails } from "../../utils";
+import DeleteFilters from "../buttons/DeleteFilters";
+import EmailPanel from "../panels/EmailPanel";
+import ReactiveListComponent from "../ReactiveListComponent";
 
-export default function Emails({ young }) {
+export default function Emails({ email }) {
   const { user } = useSelector((state) => state.Auth);
   const [open, setOpen] = React.useState(false);
 
@@ -21,7 +20,7 @@ export default function Emails({ young }) {
     const query = {
       query: {
         bool: {
-          filter: [{ term: { "email.keyword": young.email } }],
+          filter: [{ term: { "email.keyword": email } }],
         },
       },
       collapse: { field: "messageId.keyword" },
@@ -29,7 +28,6 @@ export default function Emails({ young }) {
     };
     return query;
   };
-
   return (
     <div className="bg-white rounded-xl shadow-md text-gray-700">
       <ReactiveBase url={`${apiURL}/es`} app="email" headers={{ Authorization: `JWT ${API.getToken()}` }}>
@@ -100,7 +98,6 @@ export default function Emails({ young }) {
                   }}
                 />
               )}
-
               <DeleteFilters />
             </div>
           )}
@@ -135,5 +132,28 @@ export default function Emails({ young }) {
         </div>
       </ReactiveBase>
     </div>
+  );
+}
+
+function Email({ email }) {
+  const { user } = useSelector((state) => state.Auth);
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <tr
+        aria-checked={open}
+        className="border-t border-gray-100 hover:bg-gray-50 text-gray-700 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition"
+        onClick={() => setOpen(!open)}>
+        <td className="px-4 py-3">
+          <p className="text-sm font-semibold max-w-2xl truncate">{email.subject}</p>
+          <p className="text-xs">{TEMPLATE_DESCRIPTIONS[email.templateId] || ""}</p>
+        </td>
+        <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
+        <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
+        {user.role === ROLES.ADMIN && <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>}
+      </tr>
+      <EmailPanel open={open} setOpen={setOpen} email={email} />
+    </>
   );
 }

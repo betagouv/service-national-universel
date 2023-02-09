@@ -1,45 +1,13 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { formatLongDateFR, ROLES } from "snu-lib";
-import { capture } from "../../../../sentry";
-import API from "../../../../services/api";
-import { htmlCleaner, translateEmails } from "../../../../utils";
-import Loader from "../../../Loader";
-import TailwindPanelWide from "../../../TailwindPanelWide";
+import { formatLongDateFR } from "snu-lib";
+import { capture } from "../../sentry";
+import API from "../../services/api";
+import TailwindPanelWide from "./TailwindPanelWide";
 
-export default function Email({ email }) {
-  const { user } = useSelector((state) => state.Auth);
-  console.log("🚀 ~ file: Email.js:10 ~ Email ~ email", email);
-  const [open, setOpen] = React.useState(false);
-
-  function handleClick() {
-    setOpen(!open);
-  }
-
-  return (
-    <>
-      <tr
-        aria-checked={open}
-        className="border-t border-gray-100 hover:bg-gray-50 text-gray-700 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition"
-        onClick={handleClick}>
-        <td className="px-4 py-3">
-          <p className="text-sm font-semibold max-w-2xl truncate">{email.subject}</p>
-          <p className="text-xs">[Description]</p>
-        </td>
-        <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
-        <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
-        {user.role === ROLES.ADMIN && <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>}
-      </tr>
-      <EmailPanel open={open} setOpen={setOpen} email={email} />
-    </>
-  );
-}
-
-function EmailPanel({ open, setOpen, email }) {
+export default function EmailPanel({ open, setOpen, email }) {
   const [emailData, setEmailData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  console.log("🚀 ~ file: Email.js:28 ~ EmailPanel ~ emailData", emailData);
 
   async function getMail(email) {
     try {
@@ -62,17 +30,16 @@ function EmailPanel({ open, setOpen, email }) {
     }
   }, [open]);
 
-  // ! TRaduction en FR
-
   return (
     <TailwindPanelWide open={open} setOpen={setOpen} title={email?.subject}>
-      {!loading && emailData ? (
+      {loading && <p className="animate-pulse">Chargement...</p>}
+      {emailData && (
         <>
           <div className="flex flex-col">
             <div className="flex flex-row">
               <div className="flex flex-col">
                 <p className="text-gray-400">From</p>
-                <p className="text-gray-800">{email.sender}</p>
+                <p className="text-gray-800">{emailData.sender}</p>
               </div>
               {/* <div className="flex flex-col">
                 <p className="text-gray-400">To</p>
@@ -99,8 +66,6 @@ function EmailPanel({ open, setOpen, email }) {
             <div dangerouslySetInnerHTML={{ __html: emailData.body }} />
           </div>
         </>
-      ) : (
-        <p className="animate-pulse">Chargement...</p>
       )}
     </TailwindPanelWide>
   );
