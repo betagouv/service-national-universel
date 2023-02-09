@@ -128,8 +128,8 @@ export default function StepPDR({ young, center }) {
         title={"Changement de PDR"}
         message={
           modalMeetingPoint.meetingPoint
-            ? "Vous vous apprêtez à changer votre point de rassemblement, souhaitez-vous confirmer cette action ?"
-            : "Vous vous apprêtez à choisir de vous rendre seul au centre, souhaitez-vous confirmer cette action ?"
+            ? "Vous vous apprêtez à changer votre point de rassemblement, souhaitez-vous confirmer cette action ? Après avoir cliquer sur 'Confirmer le changement', nous vous invitons à télécharger votre convocation qui a été mise à jour."
+            : "Vous vous apprêtez à choisir de vous rendre seul au centre, souhaitez-vous confirmer cette action ? Après avoir cliquer sur 'Confirmer le changement', nous vous invitons à télécharger votre convocation qui a été mise à jour."
         }
         confirmText="Confirmer le changement"
         onCancel={() => setModalMeetingPoint({ isOpen: false, meetingPoint: null })}
