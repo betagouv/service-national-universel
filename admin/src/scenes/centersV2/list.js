@@ -168,11 +168,21 @@ const ListSession = ({ firstSession }) => {
             transform={async (all) => {
               const { responses } = await api.esQuery("cohesioncenter", {
                 size: ES_NO_LIMIT,
-                query: { match_all: {} },
+                query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.cohesionCenterId))].filter((e) => e) } }] } },
                 track_total_hits: true,
               });
 
               const centerList = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+
+              console.log([...new Set(all.map((s) => s.headCenterId))]);
+
+              const { responses: responses2 } = await api.esQuery("referent", {
+                size: ES_NO_LIMIT,
+                query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.headCenterId))].filter((e) => e) } }] } },
+                track_total_hits: true,
+              });
+
+              const headCenters = responses2[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
 
               return all
                 .sort(function (a, b) {
@@ -185,6 +195,7 @@ const ListSession = ({ firstSession }) => {
                 })
                 .map((data) => {
                   const center = centerList.find((e) => e?.id?.toString() === data?.cohesionCenterId?.toString());
+                  const headCenter = headCenters.find((e) => e?.id?.toString() === data?.headCenterId?.toString());
                   return {
                     "Id centre": center?.id?.toString(),
                     "Code du centre": center?.code2022,
@@ -207,7 +218,11 @@ const ListSession = ({ firstSession }) => {
                     Département: center?.department,
                     Académie: center?.academy,
                     Région: center?.region,
-                    "Créé lé": formatLongDateFR(data.createdAt),
+                    "Prénom du chef de centre": headCenter?.firstName || "",
+                    "Nom du chef de centre": headCenter?.lastName || "",
+                    "Email du chef de centre": headCenter?.email || "",
+                    "Téléphone du chef de centre": headCenter?.mobile || headCenter?.phone || "",
+                    "Créé le": formatLongDateFR(data.createdAt),
                     "Mis à jour le": formatLongDateFR(data.updatedAt),
                   };
                 });
