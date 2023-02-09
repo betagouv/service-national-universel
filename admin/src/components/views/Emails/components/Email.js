@@ -96,7 +96,7 @@ function EmailPanel({ open, setOpen, email }) {
           </div>
           <div className="flex flex-col">
             <p className="text-gray-400">Body</p>
-            <div dangerouslySetInnerHTML={{ __html: htmlCleaner(emailData.body) }} />
+            <div dangerouslySetInnerHTML={{ __html: emailData.body }} />
           </div>
         </>
       ) : (
