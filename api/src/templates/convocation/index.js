@@ -39,7 +39,9 @@ function getBottom() {
 const render = async (young) => {
   const getMeetingAddress = (meetingPoint, center) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    return meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city;
+    const complement = meetingPoint?.complementAddress.find((c) => c.cohort === young.cohort);
+    const complementText = complement?.complement ? ", " + complement.complement : "";
+    return meetingPoint.name + " ", meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city + complementText;
   };
 
   try {
