@@ -41,7 +41,7 @@ function EmailPanel({ open, setOpen, email }) {
   async function getMail(email) {
     try {
       const { ok, data } = await API.get("/email/" + email.messageId);
-      if (!ok) {
+      if (!data?.count) {
         capture("Impossible de récupérer les données de l'email" + JSON.stringify(email));
         toastr.error("Erreur", "Impossible de récupérer les données de l'email");
         return setLoading(false);
@@ -71,10 +71,10 @@ function EmailPanel({ open, setOpen, email }) {
                 <p className="text-gray-400">From</p>
                 <p className="text-gray-800">{email.sender}</p>
               </div>
-              <div className="flex flex-col">
+              {/* <div className="flex flex-col">
                 <p className="text-gray-400">To</p>
                 <p className="text-gray-800">{email.to[0].email}</p>
-              </div>
+              </div> */}
             </div>
             <div className="flex flex-row">
               <div className="flex flex-col">

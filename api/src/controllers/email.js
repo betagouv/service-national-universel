@@ -127,7 +127,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const emails = await getEmailsList({ messageId });
     console.log("🚀 ~ file: email.js:124 ~ router.get ~ emails", emails);
-    if (!emails || emails.code) {
+    if (!emails?.count || emails.code) {
       captureMessage("Error while fetching email" + JSON.stringify(emails));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
