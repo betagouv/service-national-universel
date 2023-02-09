@@ -26,6 +26,7 @@ export default function Account() {
       if (!values.location || !values.location.lat || !values.location.lon) {
         values.location = await putLocation(values.city, values.zip);
       }
+      if (!values.location) return toastr.error("Il y a un soucis avec le nom de la ville ou/et le zip code");
       const { ok, code, data: young } = await api.put("/young", values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(young));
