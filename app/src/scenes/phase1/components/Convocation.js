@@ -59,7 +59,18 @@ export default function Convocation() {
 
   const getMeetingAddress = () => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    return meetingPoint.pointDeRassemblement.address + " " + meetingPoint.pointDeRassemblement.zip + " " + meetingPoint.pointDeRassemblement.city;
+    const complement = meetingPoint.pointDeRassemblement.complementAddress.find((c) => c.cohort === young.cohort);
+    const complementText = complement?.complement ? ", " + complement.complement : "";
+    return (
+      meetingPoint.pointDeRassemblement.name +
+      ", " +
+      meetingPoint.pointDeRassemblement.address +
+      " " +
+      meetingPoint.pointDeRassemblement.zip +
+      " " +
+      meetingPoint.pointDeRassemblement.city +
+      complementText
+    );
   };
 
   if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {
