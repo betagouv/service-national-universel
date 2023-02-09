@@ -21,11 +21,11 @@ export default function Email({ email }) {
     <>
       <tr
         aria-checked={open}
-        className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition active:brightness-110"
+        className="border-t border-gray-100 hover:bg-gray-50 text-gray-700 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition"
         onClick={handleClick}>
         <td className="px-4 py-3">
           <p className="text-sm font-semibold max-w-2xl truncate">{email.subject}</p>
-          <p className="text-xs text-gray-500">[Description]</p>
+          <p className="text-xs">[Description]</p>
         </td>
         <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
         <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
@@ -66,7 +66,7 @@ function EmailPanel({ open, setOpen, email }) {
 
   return (
     <TailwindPanelWide open={open} setOpen={setOpen} title={email?.subject}>
-      {!loading ? (
+      {!loading && emailData ? (
         <>
           <div className="flex flex-col">
             <div className="flex flex-row">

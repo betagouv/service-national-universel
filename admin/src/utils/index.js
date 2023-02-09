@@ -364,37 +364,39 @@ export const getNetworkOptions = async (inputValue) => {
 export const translateEmails = (t) => {
   switch (t) {
     case "opened":
-      return "ouvert";
+      return "Ouvert";
     case "request":
-      return "demande";
+      return "Demande";
     case "requests":
-      return "demandes";
+      return "Demandes";
     case "delivered":
-      return "remis";
+      return "Remis";
     case "deferred":
-      return "différé";
+      return "Différé";
     case "clicked":
-      return "cliqué";
+      return "Cliqué";
     case "clicks":
-      return "clics";
+      return "Clics";
     case "unique_opened":
-      return "ouverture unique";
+      return "Ouverture unique";
     case "invalid_email":
-      return "email invalide";
+      return "Email invalide";
     case "sent":
-      return "envoyé";
+      return "Envoyé";
     case "soft_bounce":
-      return "rebond (faible)";
+      return "Rebond (faible)";
     case "hard_bounce":
-      return "rebond (fort)";
+      return "Rebond (fort)";
     case "unsubscribe":
-      return "désinscrit";
+      return "Désinscrit";
     case "complaint":
-      return "plainte";
+      return "Plainte";
     case "blocked":
-      return "bloqué";
+      return "Bloqué";
     case "error":
-      return "erreur";
+      return "Erreur";
+    case "click":
+      return "Clic";
     default:
       return t;
   }

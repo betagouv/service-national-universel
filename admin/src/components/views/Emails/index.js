@@ -9,6 +9,7 @@ import DeleteFilters from "../../buttons/DeleteFilters";
 import FilterIcon from "../../../assets/icons/Filter";
 import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
+import { translateEmails } from "../../../utils";
 
 export default function Emails({ young }) {
   const { user } = useSelector((state) => state.Auth);
@@ -80,6 +81,26 @@ export default function Emails({ young }) {
                 searchPlaceholder="Rechercher..."
                 size={1000}
               />
+              {user.role === ROLES.ADMIN && (
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Dernier statut"
+                  componentId="EVENT"
+                  dataField="event.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "EVENT") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  size={1000}
+                  renderItem={(label) => {
+                    return <span>{translateEmails(label)}</span>;
+                  }}
+                />
+              )}
+
               <DeleteFilters />
             </div>
           )}
@@ -87,7 +108,7 @@ export default function Emails({ young }) {
 
         <div className="reactive-result">
           <ReactiveListComponent
-            distinctField="templateId.keyword"
+            distinctField="messageId.keyword"
             pageSize={20}
             defaultQuery={getDefaultQuery}
             react={{ and: FILTERS }}
