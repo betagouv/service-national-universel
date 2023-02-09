@@ -3,7 +3,7 @@ import { toastr } from "react-redux-toastr";
 import { formatLongDateFR, translate } from "snu-lib";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
-import { htmlCleaner } from "../../../../utils";
+import { htmlCleaner, translateEmails } from "../../../../utils";
 import Loader from "../../../Loader";
 import TailwindPanelWide from "../../../TailwindPanelWide";
 
@@ -19,14 +19,15 @@ export default function Email({ email }) {
     <>
       <tr
         aria-checked={open}
-        className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer rounded-xl aria-checked:bg-blue-500 aria-checked:text-white transition"
+        className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition active:brightness-110"
         onClick={handleClick}>
         <td className="px-4 py-3">
-          <p className="font-bold max-w-lg truncate">{email.subject}</p>
+          <p className="font-semibold max-w-2xl truncate">{email.subject}</p>
           <p>{translate(email.event)}</p>
         </td>
-        <td className="px-4 py-3 truncate">{formatLongDateFR(email.date)}</td>
-        <td className="px-4 py-3 truncate">{email.templateId || ""}</td>
+        <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
+        <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
+        <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>
       </tr>
       <EmailPanel open={open} setOpen={setOpen} email={email} />
     </>
