@@ -4,7 +4,7 @@ import { formatLongDateFR } from "snu-lib";
 import { capture } from "../../sentry";
 import API from "../../services/api";
 import { translateEmails } from "../../utils";
-import PanelV2Wide from "../PanelV2Wide";
+import PanelV2 from "../PanelV2";
 
 export default function EmailPanel({ open, setOpen, email }) {
   const [emailData, setEmailData] = React.useState(null);
@@ -32,7 +32,7 @@ export default function EmailPanel({ open, setOpen, email }) {
   }, [open]);
 
   return (
-    <PanelV2Wide open={open} setOpen={setOpen} title={`Message ID: ${email?.messageId}`}>
+    <PanelV2 open={open} onClose={() => setOpen(false)} title={`Message ID: ${email?.messageId}`} size="2xl" darkBg={false}>
       {loading && <p className="animate-pulse">Chargement...</p>}
       {emailData && (
         <>
@@ -47,6 +47,6 @@ export default function EmailPanel({ open, setOpen, email }) {
           <div dangerouslySetInnerHTML={{ __html: emailData.body }} />
         </>
       )}
-    </PanelV2Wide>
+    </PanelV2>
   );
 }
