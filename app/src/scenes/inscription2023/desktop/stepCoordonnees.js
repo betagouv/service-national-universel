@@ -372,6 +372,8 @@ export default function StepCoordonnees() {
 
       updates.country = FRANCE;
       updates.moreInformation = moreInformation.toString();
+      //@todo: Temporary fix, code should be refactored
+      updates.frenchNationality = "true";
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
