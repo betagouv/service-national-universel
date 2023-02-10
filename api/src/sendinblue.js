@@ -262,7 +262,8 @@ async function syncContact(email, attributes, listIds) {
   }
 }
 
-async function unsync(obj) {
+async function unsync(obj, { force } = { force: false }) {
+  if (ENVIRONMENT !== "production" && !force) return console.log("no unsync sendinblue");
   try {
     if (obj.hasOwnProperty("parent1Email") && obj.parent1Email) {
       await deleteContact(obj.parent1Email);
