@@ -43,7 +43,8 @@ export default function DesktopPageContainer({
                 <button
                   className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] hover:bg-[#000091] hover:text-white"
                   onClick={onClickPrevious}
-                  disabled={disabled}>
+                  // disabled={disabled}
+                >
                   Précédent
                 </button>
               )}

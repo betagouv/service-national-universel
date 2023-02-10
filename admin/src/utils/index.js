@@ -1,4 +1,4 @@
-import passwordValidator from "password-validator";
+import PasswordValidator from "password-validator";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
@@ -117,7 +117,7 @@ export const confirmMessageChangePhase1Presence = (value) => {
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
-  const schema = new passwordValidator();
+  const schema = new PasswordValidator();
   schema
     .is()
     .min(12) // Minimum length 12
@@ -182,13 +182,12 @@ export function classNames(...classes) {
 export const ENABLE_PM = true;
 
 export const htmlCleaner = (text) => {
-  const clean = sanitizeHtml(text, {
+  return sanitizeHtml(text, {
     allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
     allowedAttributes: {
       a: ["href", "target", "rel"],
     },
   });
-  return clean;
 };
 
 export function urlWithScheme(url) {
@@ -271,16 +270,18 @@ function formatUser(user, role) {
   return user;
 }
 
-function createEvent(op, e, value, originalValue, role) {
+export function createEvent(e, value, originalValue, role) {
   let event = {};
-  event.path = formatField(op.path.substring(1));
+  event.path = e.path ? formatField(e.path.substring(1)) : null;
   event.user = formatUser(e.user, role);
   event.author = `${event.user.firstName} ${event.user.lastName}`;
-  event.op = op.op;
+  event.authorId = e.user ? e.user._id : null;
+  event.op = e.op;
   event.date = e.date;
   event.value = formatValue(event.path, value);
   event.originalValue = formatValue(event.path, originalValue);
   event.ref = e.ref;
+  event.refName = e.refName;
   return event;
 }
 
@@ -295,15 +296,18 @@ function filterHiddenFields(e) {
 }
 
 export function formatHistory(data, role) {
+  if (!data) return [];
   // Flatten history: each value inside each op is a separate event
   let history = [];
   for (const e of data) {
     for (const op of e.ops) {
       if (Array.isArray(op.value)) {
-        for (const [i, v] of op.value.entries()) {
-          history.push(createEvent(op, e, v, op.originalValue ? op.originalValue[i] : null, role));
+        for (const v of op.value) {
+          history.push(createEvent({ ...e, ...op }, v, op.originalValue, role));
         }
-      } else history.push(createEvent(op, e, op.value, op.originalValue, role));
+      } else {
+        history.push(createEvent({ ...e, ...op }, op.value, op.originalValue, role));
+      }
     }
   }
   return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));
@@ -400,4 +404,16 @@ export const translateEmails = (t) => {
     default:
       return t;
   }
+};
+
+export const debounce = (fn, delay) => {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
 };

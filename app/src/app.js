@@ -100,7 +100,7 @@ export default function App() {
     <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
         <ScrollToTop />
-        <GoogleTags />
+        {/* <GoogleTags /> */}
         <div className="main">
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>

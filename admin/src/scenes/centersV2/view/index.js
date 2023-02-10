@@ -21,6 +21,7 @@ import Select from "../components/Select";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
+import Loader from "../../../components/Loader";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -179,7 +180,7 @@ export default function Index({ ...props }) {
     }
   }
 
-  if (!center) return <div />;
+  if (!center || !focusedSession) return <Loader />;
   return (
     <>
       <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />

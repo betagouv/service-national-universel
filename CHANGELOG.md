@@ -1,3 +1,38 @@
+# [1.216.0](https://github.com/betagouv/service-national-universel/compare/v1.215.0...v1.216.0) (2023-02-09)
+
+
+### Bug Fixes
+
+* **admin:** center focusedSession ([80fdc4b](https://github.com/betagouv/service-national-universel/commit/80fdc4bc9787c75077e7ecdfc897b812266f71f8))
+* **admin:** Fix Volontaire history et user history ([#2243](https://github.com/betagouv/service-national-universel/issues/2243)) ([416dc1d](https://github.com/betagouv/service-national-universel/commit/416dc1dcb9c62808868aecb765a320b0cf63ab3c))
+* **api:** pdr name on convocaiton ([2c1fd8d](https://github.com/betagouv/service-national-universel/commit/2c1fd8dcbf894459c7203431475421343fd78fd2))
+* **app:** disabled GoogleTags  (a update bientot) ([1b6a1cf](https://github.com/betagouv/service-national-universel/commit/1b6a1cfd4f43b77afd964b2cd5619bb8540097f2))
+* **app:** remove disabled logic on back button ([3dfad14](https://github.com/betagouv/service-national-universel/commit/3dfad14c11d252a16368837805e1805cec6cd603))
+* **lib:** fix departments array for responsibles in canUpdateReferent ([1781ed4](https://github.com/betagouv/service-national-universel/commit/1781ed4397ee052c5b24a6233263b58111c1bf34))
+
+
+### Features
+
+* **admin:** Ajout convocation pdrName + complement ([#2244](https://github.com/betagouv/service-national-universel/issues/2244)) ([15f78d1](https://github.com/betagouv/service-national-universel/commit/15f78d10058b04debd8130c1193520433247d67c))
+* **lib:** Ajout fichier config eslint / prettier  ([#2246](https://github.com/betagouv/service-national-universel/issues/2246)) ([13c6889](https://github.com/betagouv/service-national-universel/commit/13c688970c9520ba444f697410f8bd29ba83f92e))
+
+# [1.215.0](https://github.com/betagouv/service-national-universel/compare/v1.214.1...v1.215.0) (2023-02-08)
+
+
+### Bug Fixes
+
+* **admin:** filter drawer closed by default in history ([b354621](https://github.com/betagouv/service-national-universel/commit/b354621a59cd85a466e42675e9fbc458c3e4e6e1))
+* **admin:** wait for structure load on contract page ([38a4067](https://github.com/betagouv/service-national-universel/commit/38a4067f896a4cf15d26303829e31c5c8436c24b))
+* **admin:** Wrong url fix ([16af7e4](https://github.com/betagouv/service-national-universel/commit/16af7e462ff52029359318c2e856b41807612ba1))
+
+
+### Features
+
+* **admin:** reset session / bus / meeetingPoint when waiting affectation ([#2241](https://github.com/betagouv/service-national-universel/issues/2241)) ([be01318](https://github.com/betagouv/service-national-universel/commit/be0131870c7578e048df1f6dccc42bdd10c77290))
+* **admin,api:** historique du plan de transports ([#2128](https://github.com/betagouv/service-national-universel/issues/2128)) ([7ef7536](https://github.com/betagouv/service-national-universel/commit/7ef7536ba9d3529da3037c102a040fe48dae1dab))
+* **api:** Add ES for emails ([60b2de1](https://github.com/betagouv/service-national-universel/commit/60b2de1e8a07f27b8eac9113e812cc5a03b124fb))
+* **api,admin:** Ajout des emplois du temps sur les sessions ([#2238](https://github.com/betagouv/service-national-universel/issues/2238)) ([c9738ce](https://github.com/betagouv/service-national-universel/commit/c9738ced6f3765d03327f5df7fbe29ff4ef6a870))
+
 ## [1.214.1](https://github.com/betagouv/service-national-universel/compare/v1.214.0...v1.214.1) (2023-02-07)
 
 

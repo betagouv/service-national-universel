@@ -4,14 +4,25 @@ const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+// const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const { canViewLigneBus, canCreateLigneBus, canEditLigneBusGeneralInfo, canEditLigneBusCenter, canEditLigneBusPointDeRassemblement, ROLES } = require("snu-lib/roles");
+const {
+  canViewLigneBus,
+  canCreateLigneBus,
+  canEditLigneBusGeneralInfo,
+  canEditLigneBusCenter,
+  canEditLigneBusPointDeRassemblement,
+  ROLES,
+  canViewPatchesHistory,
+} = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
+const { formatStringLongDate, isIsoDate, translateBusPatchesField } = require("snu-lib");
+const mongoose = require("mongoose");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -534,4 +545,293 @@ async function getInfoBus(line) {
   return { ...line._doc, meetingsPointsDetail, centerDetail };
 }
 
+const PATCHES_COUNT_PER_PAGE = 20;
+const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
+const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
+
+/**
+ * Pour l'historique du plan de transport, permet de récupérer la liste des options des filtres
+ */
+router.get("/patches/filter-options", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const busline = {
+      op: await db.collection("lignebus_patches").distinct("ops.op"),
+      path: await db.collection("lignebus_patches").distinct("ops.path"),
+      user: await db.collection("lignebus_patches").distinct("user"),
+    };
+    const lineToPoint = {
+      op: await db.collection("lignetopoint_patches").distinct("ops.op"),
+      path: await db.collection("lignetopoint_patches").distinct("ops.path"),
+      user: await db.collection("lignetopoint_patches").distinct("user"),
+    };
+    // const modifications = {
+    //   op: await db.collection("modificationbus_patches").distinct("ops.op"),
+    //   path: await db.collection("modificationbus_patches").distinct("ops.path"),
+    //   user: await db.collection("modificationbus_patches").distinct("user"),
+    // };
+
+    const op = mergeArrayItems([...busline.op, ...lineToPoint.op /*, ...modifications.op*/]);
+    const path = mergeArrayItems([...busline.path, ...lineToPoint.path /*, ...modifications.path*/]);
+    const user = mergeArrayItems([...busline.user, ...lineToPoint.user /*, ...modifications.user*/], "_id");
+
+    return res.status(200).send({
+      ok: true,
+      data: { op, path, user },
+    });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+/**
+ * Historique des plan de transports
+ * (on cherche l'historique dans 3 patches (lignebus, modificationBus et ligneToPoint)
+ */
+router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- validate data
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+    }).validate(req.params);
+    if (error) {
+      console.log("🚀 ~ file: ligne-de-bus.js:551 ~ router.get ~ error", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { error: errorQuery, value: valueQuery } = Joi.object({
+      offset: Joi.number(),
+      limit: Joi.number().default(PATCHES_COUNT_PER_PAGE),
+      page: Joi.number(),
+      op: Joi.string(),
+      path: Joi.string(),
+      userId: Joi.string(),
+      query: Joi.string().trim().lowercase(),
+      // filter: Joi.string().trim().allow("", null),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId, query: filterQuery } = valueQuery;
+    if (filterQuery && filterQuery.trim().length === 0) {
+      filterQuery = undefined;
+    }
+
+    // --- security
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // --- query
+    // ------ find all patches ids
+    const { cohort } = value;
+    const lines = await LigneBusModel.find({ cohort }, { _id: 1 });
+    if (lines.length > 0) {
+      const lineIds = lines.map((line) => line._id);
+      const lineStringIds = lineIds.map((l) => l.toString());
+      const lineToPoints = await LigneToPointModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
+      const lineToPointIds = lineToPoints.map((line) => line._id);
+      // const modificationBuses = await ModificationBusModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
+      // const modificationBusIds = modificationBuses.map((line) => line._id);
+
+      // ------ manage pagination
+      if (offset === undefined || offset === null) {
+        if (page === undefined || page === null || page < 1) {
+          offset = 0;
+        } else {
+          offset = page * limit;
+        }
+      }
+
+      // ------ compute filters
+      let filter = {};
+      let hasFilter = false;
+      if (filterOp && filterOp.trim().length > 0) {
+        filter.op = filterOp;
+        hasFilter = true;
+      }
+      if (filterPath && filterPath.trim().length > 0) {
+        filter.path = (filterPath.trim()[0] === "/" ? "" : "/") + filterPath.trim();
+        hasFilter = true;
+      }
+      if (filterUserId && filterUserId.trim().length > 0) {
+        filter["user._id"] = ObjectId(filterUserId);
+        hasFilter = true;
+      }
+      const pipelineFilter = hasFilter ? [{ $match: filter }] : [];
+
+      // ------ build complete pipeline
+      const pipeline = [
+        // tout ceci est là pour remplacer un $unionWith qui n'existe pas dans la version de mongo < 4.4
+        { $limit: 1 },
+        { $project: { _id: 1 } },
+        { $project: { _id: 0 } },
+        {
+          $lookup: {
+            from: "lignebus_patches",
+            pipeline: [{ $match: { ref: { $in: lineIds } } }, { $addFields: { lineId: { $toObjectId: "$ref" } } }],
+            as: "ligneBuses",
+          },
+        },
+        {
+          $lookup: {
+            from: "lignetopoint_patches",
+            pipeline: [
+              { $match: { ref: { $in: lineToPointIds } } },
+              { $addFields: { lineToPointId: { $toObjectId: "$ref" } } },
+              {
+                $lookup: {
+                  from: "lignetopoints",
+                  localField: "lineToPointId",
+                  foreignField: "_id",
+                  as: "lineToPoint",
+                },
+              },
+              { $unwind: "$lineToPoint" },
+              { $addFields: { lineId: { $toObjectId: "$lineToPoint.lineId" } } },
+            ],
+            as: "ligneToPoints",
+          },
+        },
+        /*{
+          $lookup: {
+            from: "modificationbus_patches",
+            pipeline: [
+              { $match: { ref: { $in: modificationBusIds } } },
+              { $addFields: { modificationId: { $toObjectId: "$ref" } } },
+              {
+                $lookup: {
+                  from: "modificationbuses",
+                  localField: "modificationId",
+                  foreignField: "_id",
+                  as: "modificationBus",
+                },
+              },
+              { $unwind: "$modificationBus" },
+              { $addFields: { lineId: { $toObjectId: "$modificationBus.lineId" } } },
+            ],
+            as: "modificationBuses",
+          },
+        },*/
+        { $project: { union: { $concatArrays: ["$ligneBuses", "$ligneToPoints" /*, "$modificationBuses"*/] } } },
+        { $unwind: "$union" },
+        { $replaceRoot: { newRoot: "$union" } },
+        {
+          $lookup: {
+            from: "lignebuses",
+            localField: "lineId",
+            foreignField: "_id",
+            as: "bus",
+          },
+        },
+        { $unwind: "$bus" },
+        { $addFields: { refName: "$bus.busId" } },
+        { $project: { bus: 0, lineToPoint: 0, lineToPointId: 0, modificationBus: 0, modificationId: 0 } },
+        { $sort: { date: -1 } },
+
+        // on déplie chaque op.
+        { $unwind: "$ops" },
+        {
+          $addFields: {
+            op: "$ops.op",
+            path: "$ops.path",
+            value: "$ops.value",
+            originalValue: "$ops.originalValue",
+          },
+        },
+        { $project: { ops: 0, __v: 0 } },
+
+        // unwind on values array (fait anciennement en front)
+        { $unwind: { path: "$value", preserveNullAndEmptyArrays: true } },
+
+        // filter (fait anciennement en front)
+        { $match: { path: { $nin: HIDDEN_FIELDS } } },
+        { $match: { $or: [{ value: { $nin: IGNORED_VALUES } }, { originalValue: { $nin: IGNORED_VALUES } }] } },
+        ...pipelineFilter,
+      ];
+
+      const patches = await LigneBusModel.aggregate(pipeline);
+      // console.log(pipeline);
+      // console.log("PATCHES: ", patches);
+
+      // --- results
+      if (patches && patches.length > 0) {
+        let results;
+
+        // --- filtrage texte libre
+        if (filterQuery) {
+          results = patches.filter((p) => {
+            return filterPatchWithQuery(p, filterQuery);
+          });
+        } else {
+          results = patches;
+        }
+
+        // --- result with pagination
+        return res.status(200).send({
+          ok: true,
+          data: results.slice(offset, offset + limit),
+          pagination: {
+            count: results.length,
+            pageCount: Math.ceil(results.length / limit),
+            page: Math.floor(offset / limit),
+            itemsPerPage: limit,
+          },
+        });
+      } else {
+        return res.status(200).send({
+          ok: true,
+          data: [],
+          pagination: {
+            count: 0,
+            pageCount: 0,
+            page: 0,
+            itemsPerPage: limit,
+          },
+        });
+      }
+    } else {
+      return res.status(200).send({ ok: true, data: [], pagination: { count: 0, pageCount: 0, page: 0 } });
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
+
+function pathToKey(path) {
+  if (path && path.length > 0) {
+    let key = path[0] === "/" ? path.substring(1) : path;
+    const idx = key.indexOf("/");
+    if (idx >= 0) {
+      key = key.substring(0, idx);
+    }
+    return key;
+  } else {
+    return path;
+  }
+}
+
+function filterPatchWithQuery(p, query) {
+  return (
+    // bus
+    p.refName.toLowerCase().includes(query) ||
+    // field
+    translateBusPatchesField(pathToKey(p.path)).toLowerCase().includes(query) ||
+    // original-value
+    (p.originalValue && (isIsoDate(p.originalValue) ? formatStringLongDate(p.originalValue) : p.originalValue.toString())?.toLowerCase().includes(query)) ||
+    // value
+    (p.value && (isIsoDate(p.value) ? formatStringLongDate(p.value) : p.value.toString())?.toLowerCase().includes(query))
+  );
+}
+
+function mergeArrayItems(array, subProperty) {
+  let set = {};
+  for (const item of array) {
+    let p = subProperty ? item[subProperty].toString() : item;
+    p = pathToKey(p);
+    set[p] = subProperty ? item : p;
+  }
+  return Object.values(set);
+}
