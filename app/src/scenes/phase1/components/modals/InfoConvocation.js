@@ -149,7 +149,7 @@ export default function InfoConvocation({ isOpen, onCancel }) {
       }
 
       address.push(meetingPoint.zip + " " + meetingPoint.city);
-      address.push("(" + meetingPoint.address + ")");
+      address.push("(" + meetingPoint.department + ")");
       return address.join(", ");
     }
   };
