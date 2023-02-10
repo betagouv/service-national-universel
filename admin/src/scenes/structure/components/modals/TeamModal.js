@@ -15,7 +15,7 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Select from "../../../centersV2/components/Select";
 import { useSelector } from "react-redux";
 import Button from "../Button";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
@@ -122,6 +122,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
         <EditContact
           team={team}
           responsible={responsible}
+          structureId={structure._id}
           setResponsible={setResponsible}
           isLoading={isLoading}
           handleSubmit={handleSubmit}
@@ -167,7 +168,6 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
 }
 
 const DisplayContact = ({ responsible, setResponsible }) => {
-  console.log("🚀 ~ file: TeamModal.js:170 ~ DisplayContact ~ responsible", responsible);
   const [copied, setCopied] = useState(false);
 
   return (
@@ -235,11 +235,12 @@ const Field = ({ isLoading, label, name, value, handleChange, type = "text", req
   </div>
 );
 
-const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
-  const roles = [ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
-  const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
+const EditContact = ({ team, responsible, structureId, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
   const user = useSelector((state) => state.Auth.user);
   const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone;
+  const roles = [ROLES.RESPONSIBLE];
+  if (user.role === ROLES.SUPERVISOR && user.structureId === structureId) roles.push(ROLES.SUPERVISOR);
+  const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
 
   return (
     <div className="h-full flex flex-col space-y-4" onSubmit={handleSubmit}>

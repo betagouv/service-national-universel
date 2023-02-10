@@ -34,7 +34,7 @@ export default function TeamCard({ structureId }) {
       <Card className="w-64 px-7 py-6" onClick={() => setIsOpen(true)}>
         <p className="mb-1 text-sm">L&apos;équipe</p>
         <p className="text-gray-500 text-xs">
-          {team.length} responsable{team.length > 1 && "s"}
+          {team.length} membre{team.length > 1 && "s"}
         </p>
         <div className="flex flex-row mt-4 -space-x-2">
           {team.map((contact, index) => {
