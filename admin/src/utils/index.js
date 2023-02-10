@@ -300,12 +300,14 @@ export function formatHistory(data, role) {
   // Flatten history: each value inside each op is a separate event
   let history = [];
   for (const e of data) {
-    if (Array.isArray(e.value)) {
-      for (const v of e.value) {
-        history.push(createEvent(e, v, e.originalValue, role));
+    for (const op of e.ops) {
+      if (Array.isArray(op.value)) {
+        for (const v of op.value) {
+          history.push(createEvent({ ...e, ...op }, v, op.originalValue, role));
+        }
+      } else {
+        history.push(createEvent({ ...e, ...op }, op.value, op.originalValue, role));
       }
-    } else {
-      history.push(createEvent(e, e.value, e.originalValue, role));
     }
   }
   return history.filter((e) => !filterEmptyValues(e) && !filterHiddenFields(e));

@@ -1,3 +1,21 @@
+# [1.216.0](https://github.com/betagouv/service-national-universel/compare/v1.215.0...v1.216.0) (2023-02-09)
+
+
+### Bug Fixes
+
+* **admin:** center focusedSession ([80fdc4b](https://github.com/betagouv/service-national-universel/commit/80fdc4bc9787c75077e7ecdfc897b812266f71f8))
+* **admin:** Fix Volontaire history et user history ([#2243](https://github.com/betagouv/service-national-universel/issues/2243)) ([416dc1d](https://github.com/betagouv/service-national-universel/commit/416dc1dcb9c62808868aecb765a320b0cf63ab3c))
+* **api:** pdr name on convocaiton ([2c1fd8d](https://github.com/betagouv/service-national-universel/commit/2c1fd8dcbf894459c7203431475421343fd78fd2))
+* **app:** disabled GoogleTags  (a update bientot) ([1b6a1cf](https://github.com/betagouv/service-national-universel/commit/1b6a1cfd4f43b77afd964b2cd5619bb8540097f2))
+* **app:** remove disabled logic on back button ([3dfad14](https://github.com/betagouv/service-national-universel/commit/3dfad14c11d252a16368837805e1805cec6cd603))
+* **lib:** fix departments array for responsibles in canUpdateReferent ([1781ed4](https://github.com/betagouv/service-national-universel/commit/1781ed4397ee052c5b24a6233263b58111c1bf34))
+
+
+### Features
+
+* **admin:** Ajout convocation pdrName + complement ([#2244](https://github.com/betagouv/service-national-universel/issues/2244)) ([15f78d1](https://github.com/betagouv/service-national-universel/commit/15f78d10058b04debd8130c1193520433247d67c))
+* **lib:** Ajout fichier config eslint / prettier  ([#2246](https://github.com/betagouv/service-national-universel/issues/2246)) ([13c6889](https://github.com/betagouv/service-national-universel/commit/13c688970c9520ba444f697410f8bd29ba83f92e))
+
 # [1.215.0](https://github.com/betagouv/service-national-universel/compare/v1.214.1...v1.215.0) (2023-02-08)
 
 

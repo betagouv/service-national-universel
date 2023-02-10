@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -222,6 +222,7 @@ async function sync(obj, type, { force } = { force: false }) {
 
     let listIds = [];
     if (attributes.TYPE === "YOUNG") {
+      if (user.status === YOUNG_STATUS.DELETED) return;
       if (user.parent1Email) {
         parents.push({ email: user.parent1Email, attributes, listId: [185] });
       }
@@ -247,6 +248,7 @@ async function sync(obj, type, { force } = { force: false }) {
     }
   } catch (e) {
     console.log("error", e);
+    capture(e);
   }
 }
 
@@ -260,7 +262,8 @@ async function syncContact(email, attributes, listIds) {
   }
 }
 
-async function unsync(obj) {
+async function unsync(obj, { force } = { force: false }) {
+  if (ENVIRONMENT !== "production" && !force) return console.log("no unsync sendinblue");
   try {
     if (obj.hasOwnProperty("parent1Email") && obj.parent1Email) {
       await deleteContact(obj.parent1Email);
@@ -272,6 +275,7 @@ async function unsync(obj) {
     await deleteContact(obj.email);
   } catch (e) {
     console.log("Can't delete in sendinblue", obj.email);
+    capture(e);
   }
 }
 
