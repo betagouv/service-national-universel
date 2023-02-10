@@ -222,7 +222,7 @@ async function sync(obj, type, { force } = { force: false }) {
 
     let listIds = [];
     if (attributes.TYPE === "YOUNG") {
-      if (user.status === YOUNG_STATUS.DELETED) return await unsync(user);
+      if (user.status === YOUNG_STATUS.DELETED) return;
       if (user.parent1Email) {
         parents.push({ email: user.parent1Email, attributes, listId: [185] });
       }
