@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { HiX } from "react-icons/hi";
 
-export default function TailwindPanelWide({ open, setOpen, title, children }) {
+export default function PanelV2Wide({ open, setOpen, title, children }) {
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-30" onClose={setOpen}>
