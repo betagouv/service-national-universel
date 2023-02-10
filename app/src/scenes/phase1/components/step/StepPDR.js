@@ -300,9 +300,7 @@ export default function StepPDR({ young, center }) {
                       key={mp._id}
                       meetingPoint={mp}
                       onChoose={() => {
-                        if (young.meetingPointId || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true")
-                          return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-                        chooseMeetingPoint(mp);
+                        return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
                       }}
                       choosed={mp._id === young.meetingPointId}
                       expired={pdrChoiceExpired}
@@ -312,9 +310,7 @@ export default function StepPDR({ young, center }) {
                     center={center}
                     young={young}
                     onChoose={() => {
-                      if (young.meetingPointId || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true")
-                        return setModalMeetingPoint({ isOpen: true });
-                      chooseGoAlone();
+                      return setModalMeetingPoint({ isOpen: true });
                     }}
                     choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                     expired={pdrChoiceExpired}
