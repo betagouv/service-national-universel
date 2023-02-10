@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../utils";
+import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Banner from "./components/banner";
 import Default from "./default";
 import HomePhase2 from "./HomePhase2";
@@ -13,7 +14,7 @@ import WaitingList from "./waitingList";
 import WaitingReinscription from "./WaitingReinscription";
 import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
-import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
+import Phase1NotDone from "./Phase1NotDone";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -64,6 +65,10 @@ export default () => {
       [YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.WAITING_REALISATION].includes(young.statusPhase2)
     ) {
       return <HomePhase2 />;
+    }
+
+    if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+      return <Phase1NotDone />;
     }
 
     if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"].includes(young.cohort)) {

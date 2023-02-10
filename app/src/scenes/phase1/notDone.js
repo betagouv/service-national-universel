@@ -1,12 +1,38 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
+import plausibleEvent from "../../services/plausible";
+import API from "../../services/api";
+import { translate } from "../../utils";
+import { setYoung } from "../../redux/auth/actions";
+import { capture } from "../../sentry";
+import { toastr } from "react-redux-toastr";
+import Loader from "../../components/Loader";
 
 export default function NotDone() {
+  const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young) || {};
+  const history = useHistory();
+  const dispatch = useDispatch();
+
+  async function goToReinscription() {
+    try {
+      setLoading(true);
+      const { ok, code, data: responseData } = await API.put("/young/reinscription/goToReinscription");
+      if (!ok) throw new Error(translate(code));
+      dispatch(setYoung(responseData));
+
+      plausibleEvent("Phase1 Non réalisée/CTA reinscription - home page");
+      return history.push("/reinscription/eligibilite");
+    } catch (e) {
+      setLoading(false);
+      capture(e);
+      toastr.error("Une erreur s'est produite :", translate(e.code));
+    }
+  }
 
   return (
     <HeroContainer>
@@ -20,6 +46,25 @@ export default function NotDone() {
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
           {youngCanChangeSession(young) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
+          <div className="flex flex-col items-stretch w-fit">
+            <button
+              className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+              onClick={() => {
+                plausibleEvent("Phase 2/CTA - Realiser ma mission");
+                history.push("/phase2");
+              }}>
+              Réaliser ma mission d&apos;intérêt général
+            </button>
+            {loading ? (
+              <Loader />
+            ) : (
+              <button
+                className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
+                onClick={goToReinscription}>
+                Se réinscrire à un autre séjour
+              </button>
+            )}
+          </div>
         </div>
         <div className="thumb" />
       </Hero>
