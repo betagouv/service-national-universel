@@ -126,23 +126,33 @@ export default function StepPDR({ young, center }) {
         loading={loading}
         icon={<Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />}
         title={"Changement de PDR"}
-        message={
-          modalMeetingPoint.meetingPoint
-            ? "Vous vous apprêtez à changer votre point de rassemblement, souhaitez-vous confirmer cette action ? Après avoir cliquer sur 'Confirmer le changement', nous vous invitons à télécharger votre convocation qui a été mise à jour."
-            : "Vous vous apprêtez à choisir de vous rendre seul au centre, souhaitez-vous confirmer cette action ? Après avoir cliquer sur 'Confirmer le changement', nous vous invitons à télécharger votre convocation qui a été mise à jour."
-        }
         confirmText="Confirmer le changement"
         onCancel={() => setModalMeetingPoint({ isOpen: false, meetingPoint: null })}
         onConfirm={() => {
           if (modalMeetingPoint.meetingPoint) return chooseMeetingPoint(modalMeetingPoint.meetingPoint);
           return chooseGoAlone();
         }}>
-        {modalMeetingPoint.meetingPoint ? (
-          <div className="text-[14px] leading-[20px] text-gray-900 mt-[8px] text-center">
-            <div>Nouveau point de rassemblement :</div>
-            <div className="text-[#6B7280]">{modalMeetingPoint.meetingPoint.name + ", " + addressOf(modalMeetingPoint.meetingPoint)} </div>
-          </div>
-        ) : null}
+        <div className="flex flex-col gap-2  text-[14px] leading-[20px] text-gray-900 mt-[8px] text-center my-2">
+          {modalMeetingPoint.meetingPoint ? (
+            <>
+              <div>Vous vous apprêtez à changer votre point de rassemblement, souhaitez-vous confirmer cette action ? </div>
+              <div>
+                Après avoir cliquer sur &apos;<i>Confirmer le changement</i>&apos;, nous vous invitons à télécharger votre convocation qui a été mise à jour.
+              </div>
+            </>
+          ) : (
+            <>
+              <div> Vous vous apprêtez à choisir de vous rendre seul au centre, souhaitez-vous confirmer cette action ? </div>
+              <div>Après avoir cliquer sur &apos;Confirmer le changement&apos;, nous vous invitons à télécharger votre convocation qui a été mise à jour.</div>
+            </>
+          )}
+          {modalMeetingPoint.meetingPoint ? (
+            <div>
+              <div>Nouveau point de rassemblement :</div>
+              <div className="text-[#6B7280]">{modalMeetingPoint.meetingPoint.name + ", " + addressOf(modalMeetingPoint.meetingPoint)} </div>
+            </div>
+          ) : null}
+        </div>
       </ConfirmationModal>
 
       {/* Desktop */}
@@ -200,10 +210,7 @@ export default function StepPDR({ young, center }) {
                   key={mp._id}
                   meetingPoint={mp}
                   onChoose={() => {
-                    //if first time we dont open modal
-                    if (young.meetingPointId || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true")
-                      return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-                    chooseMeetingPoint(mp);
+                    return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
                   }}
                   choosed={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
                   expired={pdrChoiceExpired}
@@ -213,9 +220,7 @@ export default function StepPDR({ young, center }) {
                 center={center}
                 young={young}
                 onChoose={() => {
-                  if (young.meetingPointId || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true")
-                    return setModalMeetingPoint({ isOpen: true });
-                  chooseGoAlone();
+                  return setModalMeetingPoint({ isOpen: true });
                 }}
                 choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
