@@ -59,3 +59,8 @@ export function canChooseMeetingPointForCohort(cohortName) {
 export function getCohortDetail(cohortName) {
   return sessions2023.find((c) => c.name === cohortName);
 }
+
+export function isCohortDone(cohortName) {
+  const cohort = getCohort(cohortName);
+  return cohort && cohort.dateEnd.valueOf() < Date.now();
+}

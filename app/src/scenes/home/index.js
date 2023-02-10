@@ -58,6 +58,14 @@ export default () => {
     ) {
       return <WaitingReinscription />;
     }
+    if (
+      young.status === YOUNG_STATUS.VALIDATED &&
+      [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) &&
+      [YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.WAITING_REALISATION].includes(young.statusPhase2)
+    ) {
+      return <HomePhase2 />;
+    }
+
     if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
@@ -70,12 +78,6 @@ export default () => {
         }
       }
     }
-    if (
-      young.status === YOUNG_STATUS.VALIDATED &&
-      [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) &&
-      [YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.WAITING_REALISATION].includes(young.statusPhase2)
-    )
-      return <HomePhase2 />;
 
     return <Default />;
   };

@@ -11,19 +11,9 @@ import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import { capture } from "../../../../sentry";
+import { getCohort } from "../../../../utils/cohorts";
+import dayjs from "dayjs";
 
-const returnMeetingDate = {
-  2021: "mardi 02 juillet, 14:00",
-  "Février 2022": "vendredi 25 février, 11:00",
-  "Juin 2022": "vendredi 24 juin, 11:00",
-  "Juillet 2022": "vendredi 15 juillet, 11:00",
-};
-const cohortToMonth = {
-  2021: "FEVR",
-  "Février 2022": "FEVR",
-  "Juin 2022": "JUIN",
-  "Juillet 2022": "JUIL",
-};
 export default function InfoConvocation({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young) || {};
   const [selectOpen, setSelectOpen] = React.useState(false);
@@ -33,10 +23,12 @@ export default function InfoConvocation({ isOpen, onCancel }) {
   const [center, setCenter] = React.useState();
   const [isLoading, setIsLoading] = React.useState(false);
   const [loadingConvocation, setLoadingConvocation] = React.useState(false);
+  const [returnDate, setReturnDate] = React.useState({});
 
   const getMeetingPoint = async () => {
     try {
-      const { data, ok } = await api.get(`/young/${young._id}/meeting-point`);
+      const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+      console.log("PDR = ", data);
       if (!ok) {
         setMeetingPoint(null);
         return;
@@ -83,6 +75,32 @@ export default function InfoConvocation({ isOpen, onCancel }) {
     setIsLoading(false);
   }, [young]);
 
+  React.useEffect(() => {
+    let date = null;
+    if (isAutonomous || !meetingPoint || !meetingPoint.bus) {
+      const cohort = getCohort(young.cohort);
+      if (cohort) {
+        date = cohort.dateEnd;
+      }
+    } else {
+      date = meetingPoint.bus.returnDate;
+    }
+
+    const hour = meetingPoint && meetingPoint.ligneToPoint ? meetingPoint.ligneToPoint.returnHour : null;
+
+    if (date) {
+      const d = dayjs(date).locale("fr");
+      setReturnDate({
+        date: d.format("DD"),
+        month: d.format("MMM").toUpperCase().replace(".", ""),
+        complete: d.format("dddd D MMMM YYYY"),
+        hour,
+      });
+    } else {
+      setReturnDate({});
+    }
+  }, [meetingPoint]);
+
   const viewConvocation = async ({ uri }) => {
     setLoadingConvocation(true);
     await downloadPDF({
@@ -100,7 +118,9 @@ export default function InfoConvocation({ isOpen, onCancel }) {
         fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
       });
       setLoadingConvocation(false);
-      if (!ok) throw new Error(translate(code));
+      if (!ok) {
+        throw new Error(translate(code));
+      }
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
       capture(e);
@@ -109,18 +129,29 @@ export default function InfoConvocation({ isOpen, onCancel }) {
     }
   };
 
-  const getReturnMeetingDate = () => {
-    if (isAutonomous || !meetingPoint) return returnMeetingDate[young.cohort];
-    return meetingPoint.returnAtString;
-  };
-
   const getMeetingAddress = () => {
-    if (isAutonomous || !meetingPoint) return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
-    const address = [meetingPoint?.departureAddress];
-    if (meetingPoint?.hideDepartmentInConvocation !== "true") {
-      address.push(meetingPoint?.departureDepartment);
+    if (isAutonomous || !meetingPoint) {
+      return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
+    } else {
+      let address = [meetingPoint.address];
+
+      let complement = meetingPoint.complementAddress ? meetingPoint.complementAddress.find((c) => c.cohort === young.cohort) : null;
+      if (complement && complement.complement) {
+        complement = complement.complement.trim();
+        if (complement.length === 0) {
+          complement = null;
+        }
+      } else {
+        complement = null;
+      }
+      if (complement) {
+        address.push(complement);
+      }
+
+      address.push(meetingPoint.zip + " " + meetingPoint.city);
+      address.push("(" + meetingPoint.address + ")");
+      return address.join(", ");
     }
-    return address.filter((e) => e).join(", ");
   };
 
   if (isLoading)
@@ -170,21 +201,18 @@ export default function InfoConvocation({ isOpen, onCancel }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center mt-4 gap-6">
-          <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
-            <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-ninaBlock mx-3 w-7 h-10 md:w-11 md:h-12" />
-            <div className="flex flex-col">
-              <div className="font-bold text-xs whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
-              <div className="text-xs text-gray-600 whitespace-nowrap">
-                {getReturnMeetingDate()
-                  .split(/[,\s]+/)
-                  .slice(0, 3)
-                  .join(" ")}
+        {meetingPoint && (
+          <div className="flex flex-col md:flex-row items-center mt-4 gap-6">
+            <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
+              <Calendar date={returnDate.date} month={returnDate.month} className="shadow-ninaBlock mx-3 w-7 h-10 md:w-11 md:h-12" />
+              <div className="flex flex-col">
+                <div className="font-bold text-xs whitespace-nowrap">Retour à {returnDate.hour}</div>
+                <div className="text-xs text-gray-600 whitespace-nowrap">{returnDate.complete}</div>
               </div>
             </div>
+            <div className="flex w-2/3 text-center md:!text-left md:w-full text-xs leading-5 font-normal text-gray-800">{getMeetingAddress()}</div>
           </div>
-          <div className="flex w-2/3 text-center md:!text-left md:w-full text-xs leading-5 font-normal text-gray-800">{getMeetingAddress()}</div>
-        </div>
+        )}
         <button className="mt-10 w-full text-center text-gray-700 border-[1px] py-2 rounded-lg" onClick={onCancel}>
           Fermer
         </button>

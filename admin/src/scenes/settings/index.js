@@ -29,6 +29,8 @@ export default function Settings() {
     dateStart: "",
     dateEnd: "",
     pdrChoiceLimitDate: "",
+    validationDate: "",
+    validationDateForTerminaleGrade: "",
     manualAffectionOpenForAdmin: false,
     manualAffectionOpenForReferentRegion: false,
     manualAffectionOpenForReferentDepartment: false,
@@ -47,6 +49,8 @@ export default function Settings() {
         dateStart: reponseCohort?.dateStart?.substring(0, 10) || "",
         dateEnd: reponseCohort?.dateEnd?.substring(0, 10) || "",
         pdrChoiceLimitDate: reponseCohort?.pdrChoiceLimitDate?.substring(0, 16) || "",
+        validationDate: reponseCohort?.validationDate?.substring(0, 16) || "",
+        validationDateForTerminaleGrade: reponseCohort?.validationDateForTerminaleGrade?.substring(0, 16) || "",
         manualAffectionOpenForAdmin: reponseCohort?.manualAffectionOpenForAdmin || false,
         manualAffectionOpenForReferentRegion: reponseCohort?.manualAffectionOpenForReferentRegion || false,
         manualAffectionOpenForReferentDepartment: reponseCohort?.manualAffectionOpenForReferentDepartment || false,
@@ -180,6 +184,32 @@ export default function Settings() {
                     onChange={(e) => setData({ ...data, pdrChoiceLimitDate: e.target.value })}
                     type="datetime-local"
                     id="PDR"
+                    className="flex flex-1 px-2 py-1 rounded-md border-[1px] border-gray-300  focus:border-blue-600 focus:ring-blue-600 sm:text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <label htmlFor="PDR" className="w-1/4 text-sm text-gray-700 m-0">
+                    Date d&apos;autovalidation
+                  </label>
+                  <input
+                    disabled={isLoading}
+                    value={data.validationDate}
+                    onChange={(e) => setData({ ...data, validationDate: e.target.value })}
+                    type="datetime-local"
+                    id="validationDate"
+                    className="flex flex-1 px-2 py-1 rounded-md border-[1px] border-gray-300  focus:border-blue-600 focus:ring-blue-600 sm:text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <label htmlFor="PDR" className="w-1/4 text-sm text-gray-700 m-0">
+                    Date d&apos;autovalidation pour les terminales
+                  </label>
+                  <input
+                    disabled={isLoading}
+                    value={data.validationDateForTerminaleGrade}
+                    onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e.target.value })}
+                    type="datetime-local"
+                    id="validationDateForTerminaleGrade"
                     className="flex flex-1 px-2 py-1 rounded-md border-[1px] border-gray-300  focus:border-blue-600 focus:ring-blue-600 sm:text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>

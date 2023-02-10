@@ -7,6 +7,7 @@ const { ERRORS, isYoung, isReferent, updateSeatsTakenInBusLine } = require("../.
 const { canEditYoung } = require("snu-lib");
 const YoungModel = require("../../models/young");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
@@ -75,16 +76,43 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
 
 router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // --- params
     const { error, value: id } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+    // --- query
+    const { error: queryError, value } = Joi.object({
+      withbus: Joi.string().valid("true").optional(),
+    })
+      .unknown()
+      .validate({ ...req.query }, { stripUnknown: true });
+    if (queryError) {
+      capture(queryError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const withBus = value.withbus === "true";
 
+    // --- verify young.
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const data = await PointDeRassemblementModel.findOne({ _id: young.meetingPointId, deletedAt: { $exists: false } });
+    // --- PDR
+    let pdr = await PointDeRassemblementModel.findById(young.meetingPointId);
+
+    let data;
+
+    // --- Bus
+    if (withBus) {
+      console.log("with bus", young.ligneId, young.meetingPointId);
+      const bus = await LigneBusModel.findById(young.ligneId);
+      const ligneToPoint = await LigneToPointModel.findOne({ lineId: young.ligneId, meetingPointId: young.meetingPointId, deletedAt: { $exists: false } });
+      console.log("ltp: ", ligneToPoint);
+      data = { ...pdr.toObject(), bus, ligneToPoint };
+    } else {
+      data = pdr.toObject();
+    }
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
