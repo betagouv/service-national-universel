@@ -55,18 +55,18 @@ export default function Emails({ email }) {
 
           {open && (
             <div className="flex flex-wrap gap-4">
-              <DateRange
-                defaultQuery={getDefaultQuery}
-                componentId="DATE"
-                dataField="date"
-                react={{ and: FILTERS.filter((e) => e !== "DATE") }}
-                URLParams={true}
-                title=""
-                showFilter={true}
-                filterLabel="Date"
-                // className="date-filter"
-                // innerClass={{ label: "text-xs", "input-container": "input-container" }}
-              />
+              {user.role === ROLES.ADMIN && (
+                <DateRange
+                  defaultQuery={getDefaultQuery}
+                  componentId="DATE"
+                  dataField="date"
+                  react={{ and: FILTERS.filter((e) => e !== "DATE") }}
+                  URLParams={true}
+                  title=""
+                  showFilter={true}
+                  filterLabel="Date"
+                />
+              )}
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"

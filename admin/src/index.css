@@ -250,27 +250,6 @@ h4 {
   width: 100%;
   overflow: ellipsis;
 }
-.input-container div {
-  border: 1px solid  #D1D5DB;
-  border-radius: 6px;
-}
-/* .DayPickerInput {
-  font-family: "Marianne";
-  border: 1px solid  #D1D5DB;
-  border-radius: 6px;
-  height: 42px;
-  background-color: #902020;
-  color: #4b5563;
-} */
-/* .DayPickerInput input {
-  font-family: "Marianne";
-  border: 1px solid  #D1D5DB;
-  border-radius: 6px;
-  height: 42px;
-  background-color: #1ec78f;
-  color: #4b5563;
-  padding: 15px 20px;
-} */
 /* Result table reactive base */
 .reactive-result {
   font-family: "Marianne";
