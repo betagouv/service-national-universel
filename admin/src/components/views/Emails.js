@@ -1,7 +1,7 @@
 import { DataSearch, DateRange, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React from "react";
 import { useSelector } from "react-redux";
-import { formatLongDateFR, ROLES, TEMPLATE_DESCRIPTIONS } from "snu-lib";
+import { canViewEmailHistory, formatLongDateFR, ROLES, TEMPLATE_DESCRIPTIONS } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import { apiURL } from "../../config";
 import API from "../../services/api";
@@ -13,6 +13,8 @@ import ReactiveListComponent from "../ReactiveListComponent";
 export default function Emails({ email }) {
   const { user } = useSelector((state) => state.Auth);
   const [open, setOpen] = React.useState(false);
+
+  if (!canViewEmailHistory(user)) return null;
 
   const FILTERS = ["SEARCH", "DATE", "TEMPLATE_ID", "EVENT"];
 
