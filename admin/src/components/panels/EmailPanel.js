@@ -1,14 +1,19 @@
 import React from "react";
+import { BiCopy, BiErrorCircle } from "react-icons/bi";
+import { HiCheckCircle } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 import { formatLongDateFR } from "snu-lib";
 import { capture } from "../../sentry";
 import API from "../../services/api";
-import { translateEmails } from "../../utils";
+import { copyToClipboard, translateEmails } from "../../utils";
 import PanelV2 from "../PanelV2";
 
 export default function EmailPanel({ open, setOpen, email }) {
   const [emailData, setEmailData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  const [copied, setCopied] = React.useState(false);
+  const regex = /<(.*)@smtp-relay.mailin.fr>/;
+  const ID = email.messageId.match(regex)[1];
 
   async function getMail(email) {
     try {
@@ -32,20 +37,41 @@ export default function EmailPanel({ open, setOpen, email }) {
   }, [open]);
 
   return (
-    <PanelV2 open={open} onClose={() => setOpen(false)} title={`Message ID: ${email?.messageId}`} size="2xl" darkBg={false}>
-      {loading && <p className="animate-pulse">Chargement...</p>}
-      {emailData && (
-        <>
-          <div className="flex flex-wrap gap-6">
-            {emailData.events.map((event, index) => (
-              <div key={index} className="w-32">
-                <p className="w-min mx-auto text-sm text-center text-gray-800 bg-gray-100 rounded-full px-3 py-1 m-1">{translateEmails(event.name)}</p>
-                <p className="text-sm text-center text-gray-500">{formatLongDateFR(event.time)}</p>
-              </div>
-            ))}
+    <PanelV2 open={open} onClose={() => setOpen(false)} size="2xl" darkBg={false}>
+      {loading ? (
+        <p className="animate-pulse">Chargement...</p>
+      ) : !emailData || emailData.error ? (
+        <div className="flex flex-col items-center justify-center h-full gap-2">
+          <BiErrorCircle />
+          <p>Les données de cet email ne sont pas encore disponibles.</p>
+        </div>
+      ) : (
+        emailData && (
+          <div className="space-y-8">
+            <div className="flex gap-2">
+              <p className="text-base text-gray-500">Message ID : {ID}</p>
+              <button
+                className={`flex items-center justify-center hover:scale-105`}
+                onClick={() => {
+                  copyToClipboard(ID);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 3000);
+                }}>
+                {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-8">
+              {emailData.events.map((event, index) => (
+                <div key={index} className="space-y-2">
+                  <p className="w-min mx-auto text-center text-gray-800 bg-gray-100 rounded-full px-3 py-1 m-1">{translateEmails(event.name)}</p>
+                  <p className="text-center text-gray-500">{formatLongDateFR(event.time)}</p>
+                </div>
+              ))}
+            </div>
+            <hr />
+            <div dangerouslySetInnerHTML={{ __html: emailData.body }} />
           </div>
-          <div dangerouslySetInnerHTML={{ __html: emailData.body }} />
-        </>
+        )
       )}
     </PanelV2>
   );
