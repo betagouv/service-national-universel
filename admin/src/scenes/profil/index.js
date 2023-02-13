@@ -10,14 +10,18 @@ import PasswordEye from "../../components/PasswordEye";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate } from "../../utils";
+import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, copyToClipboard } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "../utilisateur/composants/ModalUniqueResponsable";
 import { capture } from "../../sentry";
+import { BiCopy } from "react-icons/bi";
+import { HiCheckCircle } from "react-icons/hi";
 
-import Field from "../../components/Field";
+import Select from "../../components/TailwindSelect";
+import Eye from "../../assets/icons/Eye";
+import EyeSlash from "../../assets/EyeSlash";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
@@ -31,6 +35,9 @@ export default function Profil() {
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const [values, setValues] = useState(user);
+  const [rightValues, setRightValues] = useState({ password: "", newPassword: "", confirmPassword: "" });
+  const [valuesLeftHaveChanged, setValuesLeftHaveChanged] = useState(false);
+  const [valuesRightHaveChanged, setValuesRightHaveChanged] = useState(false);
   const [errors, setErrors] = useState({});
 
   const getSubRole = (role) => {
@@ -85,170 +92,97 @@ export default function Profil() {
     });
   };
 
-  if (user === undefined) return <Loader />;
+  const handleChange = (name, value) => {
+    setValues({ ...values, [name]: value });
+    setValuesLeftHaveChanged(true);
+  };
 
+  const handlePasswordChange = (name, value) => {
+    setRightValues({ ...values, [name]: value });
+    setValuesRightHaveChanged(true);
+  };
+
+  if (user === undefined) return <Loader />;
   return (
     <div className="m-8">
       <div className="mb-10 flex items-center gap-4">
         <h2 className="text-2xl font-bold text-brand-black m-0">{`${user.firstName} ${user.lastName}`}</h2>
         <span className="rounded-full border !border-gray-400 bg-gray-100 px-3 py-1 text-sm text-gray-400">{translate(user.role)}</span>
       </div>
-      <div className="bg-white p-8 rounded-lg">
-        <div>
+      <div className="bg-white p-8 rounded-lg flex xl:flex-row flex-col w-full">
+        <div className="flex flex-col gap-4 flex-1">
           <div className="text-lg font-medium text-gray-900">Informations générales</div>
-          <div className="text-xs font-medium my-2">Identité et contact</div>
+          <div className="text-xs font-medium">Identité et contact</div>
           <div className="flex flex-row justify-between items-center gap-4">
-            <Field label="Nom" onChange={(e) => setValues({ ...values, lastName: e.target.value })} value={values.lastName} error={errors?.lastName} />
-            <Field label="Prénom" onChange={(e) => setValues({ ...values, firstName: e.target.value })} value={values.firstName} error={errors?.firstName} />
+            <Field label="Nom" onChange={(e) => handleChange("lastName", e.target.value)} value={values.lastName} error={errors?.lastName} />
+            <Field label="Prénom" onChange={(e) => handleChange("firstName", e.target.value)} value={values.firstName} error={errors?.firstName} />
           </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="py-5 px-10">
-      {/* <p className="mb-4 text-lg font-medium uppercase text-brand-grey">Mon profil</p> */}
-      <div className="mb-10 flex items-center gap-4">
-        <h2 className="text-2xl font-bold text-brand-black m-0">{`${user.firstName} ${user.lastName}`}</h2>
-        <span className="rounded-full border !border-gray-400 bg-gray-100 px-3 py-1 text-sm text-gray-400">{translate(user.role)}</span>
-      </div>
-      <div className="flex gap-8">
-        <div className="flex-1">
-          <Formik
-            initialValues={user}
-            onSubmit={async (values, actions) => {
-              try {
-                const { data, ok } = await api.put("/referent", values);
-                if (ok) {
-                  dispatch(setUser(data));
-                  return toastr.success("Profil mis à jour !");
-                }
-              } catch (e) {
-                console.log(e);
-              }
-              toastr.error("Erreur");
-              actions.setSubmitting(false);
-            }}>
-            {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => (
-              <>
-                <div className="rounded-md bg-white shadow-md">
-                  <div className="border-b border-gray-200 px-8 py-6">
-                    <h3 className="text-lg font-bold text-gray-800">Informations générales</h3>
-                    <p className="italic text-gray-400">Données personnelles</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 p-8">
-                    <Item
-                      className="col-span-2"
-                      required
-                      title="E-mail"
-                      values={values}
-                      name="email"
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                      type={"text"}
-                      validate={(v) => !v && requiredMessage}
-                    />
-                    {user.role === ROLES.REFERENT_DEPARTMENT ? (
-                      <Item className="col-span-2" title="Département" disabled values={values} name="department" handleChange={handleChange} type={"text"} />
-                    ) : null}
-                    {user.role === ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} type={"text"} /> : null}
-                    <Item
-                      required
-                      title="Prénom"
-                      values={values}
-                      name="firstName"
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                      type={"text"}
-                      validate={(v) => !v && requiredMessage}
-                    />
-                    <Item
-                      required
-                      title="Nom"
-                      values={values}
-                      name="lastName"
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                      type={"text"}
-                      validate={(v) => !v && requiredMessage}
-                    />
-                    <Item title="Téléphone mobile" values={values} name="mobile" handleChange={handleChange} type={"text"} />
-                    <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} />
-                    {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR].includes(values.role) ? (
-                      <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
-                    ) : null}
-                    <LoadingButton className="w-full max-w-xs" loading={isSubmitting} onClick={handleSubmit}>
-                      Enregistrer
-                    </LoadingButton>
-                  </div>
-                </div>
-              </>
-            )}
-          </Formik>
-        </div>
-        <div className="flex-1">
-          <Formik
-            initialValues={{ password: "", newPassword: "", verifyPassword: "" }}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={async ({ password, verifyPassword, newPassword }) => {
-              try {
-                const { ok, code, user } = await api.post("/referent/reset_password", { password, verifyPassword, newPassword });
-                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                dispatch(setUser(user));
-                toastr.success("Mot de passe mis à jour!");
-                return history.push("/dashboard");
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
-              }
-            }}>
-            {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
-              <div className="rounded-md bg-white shadow-md">
-                <div className="border-b border-gray-200 px-8 py-6">
-                  <h3 className="text-lg font-bold text-gray-800">Mot de passe</h3>
-                  <p className="italic text-gray-400">Modifier votre mot de passe</p>
-                </div>
-                <div className="flex flex-col gap-4 p-8">
-                  <Item required name="password" title="Actuel" errors={errors} touched={touched}>
-                    <PasswordEye
-                      type="password"
-                      validate={(v) => (!v && requiredMessage) || getPasswordErrorMessage(v)}
-                      placeholder=""
-                      name="password"
-                      value={values.password}
-                      onChange={handleChange}
-                    />
-                  </Item>
-                  <Item required name="newPassword" title="Nouveau" errors={errors} touched={touched}>
-                    <PasswordEye type="password" validate={getPasswordErrorMessage} placeholder="" name="newPassword" value={values.newPassword} onChange={handleChange} />
-                  </Item>
-                  <Item required name="verifyPassword" title="Confirmer" errors={errors} touched={touched}>
-                    <PasswordEye
-                      type="password"
-                      title="Confirmer"
-                      placeholder=""
-                      validate={(v) => (!v && requiredMessage) || (v !== values.newPassword && "Les mots de passe renseignés ne sont pas identiques")}
-                      name="verifyPassword"
-                      value={values.verifyPassword}
-                      onChange={handleChange}
-                    />
-                  </Item>
-                  <LoadingButton className="w-full max-w-xs" onClick={handleSubmit} disabled={isSubmitting}>
-                    Valider mon nouveau mot de passe
-                  </LoadingButton>
-                </div>
+          {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR].includes(values.role) ? (
+            <Select label="Fonction" selected={values.subRole} setSelected={(e) => handleChange("subRole", e.value)} options={getSubRole(values.role)} />
+          ) : null}
+          {user.role === ROLES.REFERENT_DEPARTMENT ? <Field label="Département" value={values.department} readOnly /> : null}
+          {user.role === ROLES.REFERENT_REGION ? <Field label="Région" value={values.region} readOnly /> : null}
+          <Field label="Email" copy onChange={(e) => handleChange("email", e.target.value)} value={values.email} error={errors?.email} />
+          <div className="flex flex-row justify-between items-center gap-4">
+            <Field label="Téléphone mobile (facultatif)" onChange={(e) => handleChange("mobile", e.target.value)} value={values.mobile} error={errors?.mobile} />
+            <Field label="Téléphone fixe (facultatif)" onChange={(e) => handleChange("phone", e.target.value)} value={values.phone ? values.phone : ""} error={errors?.phone} />
+          </div>
+          {valuesLeftHaveChanged && (
+            <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
+              <div
+                className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+                onClick={() => {
+                  setValues({ ...user });
+                  setValuesLeftHaveChanged(false);
+                }}>
+                Annuler
               </div>
-            )}
-          </Formik>
+              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer">Enregistrer</div>
+            </div>
+          )}
+        </div>
+
+        <div className="hidden xl:flex justify-center items-center px-[56px]">
+          <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+        </div>
+
+        <div className="flex flex-col gap-4 flex-1 xl:mt-0 mt-8">
+          <div className="text-lg font-medium text-gray-900">Mot de passe</div>
+          <div className="text-xs font-medium">Mon mot de passe</div>
+          <Field label="Nom" eye onChange={(e) => handlePasswordChange("password", e.target.value)} value={rightValues.password} error={errors?.password} />
+          <Field
+            label="Nouveau mot de passe"
+            eye
+            onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
+            value={rightValues.newPassword}
+            error={errors?.newPassword}
+          />
+          <Field
+            label="Confirmer le nouveau mot de passe"
+            eye
+            onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
+            value={rightValues.confirmPassword}
+            error={errors?.confirmPassword}
+          />
+          {valuesRightHaveChanged && (
+            <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
+              <div
+                className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+                onClick={() => {
+                  setRightValues({ password: "", newPassword: "", confirmPassword: "" });
+                  setValuesRightHaveChanged(false);
+                }}>
+                Annuler
+              </div>
+              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer">Valider mon nouveau mot de passe</div>
+            </div>
+          )}
         </div>
       </div>
-      <div className="w-64 bg-[#bd2130] text-white text-center font-semibold rounded px-4 py-2 mt-2 hover:cursor-pointer hover:bg-[#dc3545]" onClick={onClickDelete}>
-        Supprimer mon compte
+      <div className="flex justify-center items-center my-8">
+        <div className="text-red-500 p-2 border-[1px] border-red-500 rounded-md tex-center self-center w-fit cursor-pointer" onClick={onClickDelete}>
+          Supprimer mon compte
+        </div>
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
@@ -280,3 +214,46 @@ export default function Profil() {
     </div>
   );
 }
+
+const Field = ({ onChange, value, label, disabled = false, error, readOnly = false, copy, className = "", eye = null }) => {
+  const [copied, setCopied] = React.useState(false);
+  const [eyeVisible, setEyeVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
+
+  return (
+    <div
+      key={label}
+      className={`flex flex-col border-[1px] border-gray-300 w-full py-2 px-2.5 rounded-lg ${disabled ? "bg-gray-100" : ""} ${error ? "border-red-500" : ""} ${className}`}>
+      <label className="text-xs leading-4 text-gray-500">{label}</label>
+      <div className="flex items-center gap-2">
+        {copy && value && (
+          <div
+            className={`flex items-center justify-center hover:scale-105`}
+            onClick={() => {
+              copyToClipboard(value);
+              setCopied(true);
+            }}>
+            {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
+          </div>
+        )}
+        <input
+          type={eye && !eyeVisible ? "password" : "text"}
+          className={`w-full ${disabled ? "bg-gray-100" : ""} ${readOnly && "cursor-default"}`}
+          value={value}
+          // to avoid chrome autocomplete
+          autoComplete="new-password"
+          onChange={onChange}
+          disabled={disabled}
+          readOnly={readOnly}
+        />
+        {eye && <>{eyeVisible ? <Eye onClick={() => setEyeVisible(!eyeVisible)} /> : <EyeSlash onClick={() => setEyeVisible(!eyeVisible)} />}</>}
+      </div>
+
+      {error && <div className="text-[#EF4444]">{error}</div>}
+    </div>
+  );
+};
