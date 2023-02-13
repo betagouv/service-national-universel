@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const passport = require("passport");
 const CohortModel = require("../models/cohort");
+const SessionPhase1Model = require("../models/sessionPhase1");
 
 const { capture } = require("../sentry");
 const { ERRORS, getFile } = require("../utils");
@@ -112,6 +113,33 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
+router.get("/bysession/:sessionId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      sessionId: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const session = await SessionPhase1Model.findById(value.sessionId);
+    if (!session) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req, res) => {
   try {
     const { error: exportDateKeyError, value: exportKey } = Joi.string()
@@ -193,6 +221,10 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       manualAffectionOpenForReferentRegion: Joi.boolean().required(),
       manualAffectionOpenForReferentDepartment: Joi.boolean().required(),
       isAssignmentAnnouncementsOpenForYoung: Joi.boolean().required(),
+      youngCheckinForAdmin: Joi.boolean().required(),
+      youngCheckinForHeadOfCenter: Joi.boolean().required(),
+      youngCheckinForRegionReferent: Joi.boolean().required(),
+      youngCheckinForDepartmentReferent: Joi.boolean().required(),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);
@@ -215,6 +247,10 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       manualAffectionOpenForReferentRegion: body.manualAffectionOpenForReferentRegion,
       manualAffectionOpenForReferentDepartment: body.manualAffectionOpenForReferentDepartment,
       isAssignmentAnnouncementsOpenForYoung: body.isAssignmentAnnouncementsOpenForYoung,
+      youngCheckinForAdmin: body.youngCheckinForAdmin,
+      youngCheckinForHeadOfCenter: body.youngCheckinForHeadOfCenter,
+      youngCheckinForRegionReferent: body.youngCheckinForRegionReferent,
+      youngCheckinForDepartmentReferent: body.youngCheckinForDepartmentReferent,
     });
 
     await cohort.save({ fromUser: req.user });

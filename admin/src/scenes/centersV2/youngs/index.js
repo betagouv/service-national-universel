@@ -14,7 +14,6 @@ import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import SelectAction from "../../../components/SelectAction";
 import api from "../../../services/api";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-
 import {
   departmentLookUp,
   formatDateFRTimezoneUTC,
@@ -26,12 +25,15 @@ import {
   translateFileStatusPhase1,
   formatDateFR,
   translatePhase1,
+  youngCheckinField,
 } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
+import Warning from "../../../assets/icons/Warning";
+import { capture } from "../../../sentry";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
@@ -39,6 +41,7 @@ export default function CenterYoungIndex() {
   const [urlParams, setUrlParams] = React.useState("");
   const user = useSelector((state) => state.Auth.user);
   const [loading, setLoading] = React.useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState();
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -62,6 +65,30 @@ export default function CenterYoungIndex() {
       setUrlParams(params.substring(1));
     }
   }, [filter]);
+
+  React.useEffect(() => {
+    (async function () {
+      try {
+        const result = await api.get(`/cohort/bysession/${sessionId}`);
+        if (result.ok) {
+          const cohort = result.data;
+          const field = youngCheckinField[user.role];
+          if (field) {
+            setIsYoungCheckinOpen(cohort[field] ? cohort[field] : false);
+          } else {
+            setIsYoungCheckinOpen(false);
+          }
+        } else {
+          toastr.error("Impossible de vérifier l'ouverture du pointage. il va être désactivé par défaut.");
+          setIsYoungCheckinOpen(false);
+        }
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible de vérifier l'ouverture du pointage. il va être désactivé par défaut.");
+        setIsYoungCheckinOpen(false);
+      }
+    })();
+  }, []);
 
   const viewAttestation = async () => {
     setLoading(true);
@@ -249,8 +276,7 @@ export default function CenterYoungIndex() {
       }
     }
 
-    const data = await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
-    return data;
+    return await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
   };
 
   const exportData = async () => {
@@ -473,13 +499,19 @@ export default function CenterYoungIndex() {
         <div className=" flex flex-1 flex-col lg:flex-row pt-4">
           <nav className="flex flex-1 gap-1">
             <TabItem icon={<Menu />} title="Général" to={`/centre/${id}/${sessionId}/general${urlParams && "?" + urlParams}`} />
-            <TabItem icon={<PencilAlt />} title="Tableau de pointage" to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`} />
+            <TabItem
+              icon={<PencilAlt />}
+              title="Tableau de pointage"
+              to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`}
+              extraIcon={!isYoungCheckinOpen ? <Warning className="text-red-900" /> : null}
+              extraTooltip="Le pointage n'est pas encore ouvert"
+            />
             <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire${urlParams && "?" + urlParams}`} />
           </nav>
         </div>
         <div className="bg-white pt-4">
           {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} />}
-          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} />}
+          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} />}
           {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} />}
         </div>
       </div>
@@ -488,13 +520,24 @@ export default function CenterYoungIndex() {
   );
 }
 
-const TabItem = ({ to, title, icon }) => (
+const TabItem = ({ to, title, icon, extraIcon, extraTooltip }) => (
   <NavLink
     to={to}
     activeClassName="!text-snu-purple-800 bg-white border-none"
     className="text-[13px] px-3 py-2 cursor-pointer text-gray-600 rounded-t-lg bg-gray-50 border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 hover:text-snu-purple-800">
     <div className="flex items-center gap-2">
       {icon} {title}
+      {extraIcon && (
+        <div className="group relative">
+          {extraIcon}
+          {extraTooltip && (
+            <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
+              <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
+              {extraTooltip}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   </NavLink>
 );

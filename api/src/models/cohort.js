@@ -81,6 +81,31 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  youngCheckinForAdmin: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture du pointage des volontaires pour les modérateurs",
+    },
+  },
+  youngCheckinForHeadOfCenter: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture du pointage des volontaires pour les chefs de centre",
+    },
+  },
+  youngCheckinForRegionReferent: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture du pointage des volontaires pour les référents régionaux",
+    },
+  },
+  youngCheckinForDepartmentReferent: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture du pointage des volontaires pour les référents départementaux",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

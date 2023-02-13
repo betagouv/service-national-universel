@@ -9,7 +9,7 @@ import Pencil from "../../../assets/icons/Pencil";
 import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
-import { formatDateFR, ROLES, translate, canAssignManually, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
+import { formatDateFR, ROLES, translate, canAssignManually, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1, youngCheckinField } from "../../../utils";
 import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
@@ -26,6 +26,7 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
+import Warning from "../../../assets/icons/Warning";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -45,6 +46,7 @@ export default function Phase1(props) {
 
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
   const [cohort, setCohort] = useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState();
 
   const getDisplayCenterButton = async () => {
     try {
@@ -102,6 +104,19 @@ export default function Phase1(props) {
       console.log(data);
     })();
   }, []);
+
+  React.useEffect(() => {
+    if (cohort) {
+      const field = youngCheckinField[user.role];
+      if (field) {
+        setIsYoungCheckinOpen(cohort[field] ? cohort[field] : false);
+      } else {
+        setIsYoungCheckinOpen(false);
+      }
+    } else {
+      setIsYoungCheckinOpen(false);
+    }
+  }, [cohort]);
 
   const onConfirmationYoungAgreement = async (value) => {
     setLoading(true);
@@ -196,14 +211,25 @@ export default function Phase1(props) {
               <EditTop />
             </div>
             <div className="mt-3">
-              <div className="text-xs text-gray-900 font-medium">Présence</div>
+              <div className="text-xs text-gray-900 font-medium flex items-center">
+                Présence
+                {!isYoungCheckinOpen && (
+                  <div className="group relative ml-2">
+                    <Warning className="text-red-900" />
+                    <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
+                      <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
+                      Le pointage n&apos;est pas encore ouvert
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="flex flex-row gap-4 mt-2 flex-wrap w-full items-stretch">
                 <div className="flex-1 min-w-[250px]">
                   <TailwindSelect
                     name="youngPhase1Agreement"
                     label="Confirmation de la participation"
                     className="flex-1 min-w-[250px]"
-                    readOnly={!editing}
+                    readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
                     setSelected={({ value }) =>
                       setModal({
@@ -226,7 +252,7 @@ export default function Phase1(props) {
                   <TailwindSelect
                     name="cohesionStayPresence"
                     label="Présence à l'arrivée"
-                    readOnly={!editing}
+                    readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
                     className="flex-1 min-w-[250px]"
                     icon={<SpeakerPhone className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
@@ -243,7 +269,7 @@ export default function Phase1(props) {
                   <TailwindSelect
                     name="presenceJDM"
                     label="Présence JDM"
-                    readOnly={!editing}
+                    readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
                     icon={<BadgeCheck className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
                     setSelected={({ value }) => setModalPointagePresenceJDM({ isOpen: true, value })}
@@ -258,7 +284,7 @@ export default function Phase1(props) {
                 <div className="flex-1 min-w-[250px] items-stretch">
                   <div
                     onClick={() => {
-                      if (!editing) return;
+                      if (!editing || !isYoungCheckinOpen) return;
                       setModalPointageDepart({ isOpen: true });
                     }}
                     className={` border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"} h-full`}>

@@ -35,6 +35,10 @@ export default function Settings() {
     manualAffectionOpenForReferentRegion: false,
     manualAffectionOpenForReferentDepartment: false,
     isAssignmentAnnouncementsOpenForYoung: false,
+    youngCheckinForAdmin: false,
+    youngCheckinForHeadOfCenter: false,
+    youngCheckinForRegionReferent: false,
+    youngCheckinForDeprtmentReferent: false,
   });
 
   const getCohort = async () => {
@@ -55,6 +59,10 @@ export default function Settings() {
         manualAffectionOpenForReferentRegion: reponseCohort?.manualAffectionOpenForReferentRegion || false,
         manualAffectionOpenForReferentDepartment: reponseCohort?.manualAffectionOpenForReferentDepartment || false,
         isAssignmentAnnouncementsOpenForYoung: reponseCohort?.isAssignmentAnnouncementsOpenForYoung || false,
+        youngCheckinForAdmin: reponseCohort?.youngCheckinForAdmin || false,
+        youngCheckinForHeadOfCenter: reponseCohort?.youngCheckinForHeadOfCenter || false,
+        youngCheckinForRegionReferent: reponseCohort?.youngCheckinForRegionReferent || false,
+        youngCheckinForDepartmentReferent: reponseCohort?.youngCheckinForDepartmentReferent || false,
       });
       setIsLoading(false);
     } catch (e) {
@@ -249,6 +257,36 @@ export default function Settings() {
                     disabled={isLoading}
                     value={data.isAssignmentAnnouncementsOpenForYoung}
                     onChange={() => setData({ ...data, isAssignmentAnnouncementsOpenForYoung: !data.isAssignmentAnnouncementsOpenForYoung })}
+                  />
+                </div>
+
+                <div className="text-lg leading-6 font-medium text-gray-900 mt-8">Pointage des volontaires</div>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-sm text-gray-700 m-0">Pour les modérateurs</label>
+                  <Toggle disabled={isLoading} value={data.youngCheckinForAdmin} onChange={() => setData({ ...data, youngCheckinForAdmin: !data.youngCheckinForAdmin })} />
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-sm text-gray-700 m-0">Pour les chefs de centre</label>
+                  <Toggle
+                    disabled={isLoading}
+                    value={data.youngCheckinForHeadOfCenter}
+                    onChange={() => setData({ ...data, youngCheckinForHeadOfCenter: !data.youngCheckinForHeadOfCenter })}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-sm text-gray-700 m-0">Pour les référents régionaux</label>
+                  <Toggle
+                    disabled={isLoading}
+                    value={data.youngCheckinForRegionReferent}
+                    onChange={() => setData({ ...data, youngCheckinForRegionReferent: !data.youngCheckinForRegionReferent })}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-sm text-gray-700 m-0">Pour les référents départementaux</label>
+                  <Toggle
+                    disabled={isLoading}
+                    value={data.youngCheckinForDepartmentReferent}
+                    onChange={() => setData({ ...data, youngCheckinForDepartmentReferent: !data.youngCheckinForDepartmentReferent })}
                   />
                 </div>
               </div>
