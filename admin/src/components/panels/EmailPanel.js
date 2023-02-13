@@ -69,7 +69,7 @@ export default function EmailPanel({ open, setOpen, email }) {
               ))}
             </div>
             <hr />
-            <div dangerouslySetInnerHTML={{ __html: emailData.body }} />
+            <iframe srcDoc={emailData.body} className="w-full h-[600px]" />
           </div>
         )
       )}
