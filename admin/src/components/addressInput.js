@@ -59,7 +59,7 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
     try {
       const text = item;
       const res = await apiAdress(`${encodeURIComponent(text)}`);
-      const arr = res?.features?.filter((e) => e.properties.type !== "municipality");
+      let arr = res?.features?.filter((e) => e.properties.type !== "municipality");
       if (!arr) arr = [];
       arr.push("noresult");
       setSuggestions(arr);

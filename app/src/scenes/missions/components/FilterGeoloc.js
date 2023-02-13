@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import { Col, Row } from "reactstrap";
+import { apiAdress } from "../../../services/api-adresse";
 
 export default function FilterGeoloc({ componentId = "FILTER", young, targetLocation }) {
   return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent young={young} targetLocation={targetLocation} {...data} />} />;
