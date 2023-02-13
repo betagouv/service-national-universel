@@ -8,7 +8,6 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Button from "../Button";
 import Field from "../../../missions/components/Field";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
-import { regexPhoneFrenchCountries } from "../../../../utils";
 
 export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
   const { structure } = useContext(StructureContext);
@@ -26,7 +25,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
     if (!data.email) errors.email = "L'email est obligatoire";
     if (!validator.isEmail(data.email)) errors.email = "L'email n'est pas valide";
     if (!data.mobile) errors.mobile = "Le téléphone est obligatoire";
-    if (!validator.matches(data.mobile, regexPhoneFrenchCountries)) errors.mobile = "Le téléphone n'est pas valide (exemple : (+33)(0)642424242)";
+    if (!validator.isMobilePhone(data.mobile)) errors.mobile = "Le téléphone n'est pas valide (exemple : (+33)(0)642424242)";
 
     if (Object.keys(errors).length > 0) return setErrors(errors);
     setErrors({});
@@ -53,7 +52,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
 
   return (
     <>
-      <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[800px] h-[500px] px-8 py-7 flex flex-col gap-4">
+      <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[800px] min-h-[500px] px-8 py-7 flex flex-col gap-4">
         <p className="text-lg font-medium text-center">Représentant de la structure</p>
         <p className="text-gray-500 text-sm text-center">
           Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
