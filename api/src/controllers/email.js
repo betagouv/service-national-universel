@@ -110,4 +110,3 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 });
 
 module.exports = router;
-
