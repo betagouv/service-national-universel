@@ -110,16 +110,35 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:email/:messageId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: messageId } = validateString(req.params.id);
+    const { error, value } = Joi.object({
+      email: Joi.string().required(),
+      messageId: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { email, messageId } = value;
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const emails = await getEmailsList({ messageId });
+    const dateString = messageId.match(/^\d{8}/)[0]; // extract first 8 numbers
+    const date = new Date(dateString); // convert to date
+    const formattedDate = date.toISOString().slice(0, 10); // format in YYYY-MM-DD
+    if (!formattedDate) {
+      captureMessage("Error while getting date of email" + JSON.stringify(dateString));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const emails = await getEmailsList({ email, messageId, startDate: formattedDate, endDate: formattedDate });
     if (!emails?.count || emails.code) {
       captureMessage("Error while fetching email" + JSON.stringify(emails));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
