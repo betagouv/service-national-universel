@@ -47,11 +47,11 @@ export default function EmailPanel({ open, setOpen, email }) {
         </div>
       ) : (
         emailData && (
-          <div className="space-y-8">
+          <div className="flex flex-col gap-8 h-full">
             <div className="flex gap-2">
               <p className="text-base text-gray-500">Message ID : {ID}</p>
               <button
-                className={`flex items-center justify-center hover:scale-105`}
+                className="flex items-center justify-center hover:scale-105"
                 onClick={() => {
                   copyToClipboard(ID);
                   setCopied(true);
@@ -69,7 +69,7 @@ export default function EmailPanel({ open, setOpen, email }) {
               ))}
             </div>
             <hr />
-            <iframe srcDoc={emailData.body} className="w-full h-[600px]" />
+            <iframe srcDoc={emailData.body} className="flex-1" />
           </div>
         )
       )}
