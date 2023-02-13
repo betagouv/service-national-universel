@@ -1,4 +1,3 @@
-import { Field, Formik } from "formik";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -18,6 +17,8 @@ import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "../utilisateur/composants/ModalUniqueResponsable";
 import { capture } from "../../sentry";
 
+import Field from "../../components/Field";
+
 export default function Profil() {
   useDocumentTitle("Mon profil");
 
@@ -28,6 +29,9 @@ export default function Profil() {
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+
+  const [values, setValues] = useState(user);
+  const [errors, setErrors] = useState({});
 
   const getSubRole = (role) => {
     let subRole = [];
@@ -82,6 +86,25 @@ export default function Profil() {
   };
 
   if (user === undefined) return <Loader />;
+
+  return (
+    <div className="m-8">
+      <div className="mb-10 flex items-center gap-4">
+        <h2 className="text-2xl font-bold text-brand-black m-0">{`${user.firstName} ${user.lastName}`}</h2>
+        <span className="rounded-full border !border-gray-400 bg-gray-100 px-3 py-1 text-sm text-gray-400">{translate(user.role)}</span>
+      </div>
+      <div className="bg-white p-8 rounded-lg">
+        <div>
+          <div className="text-lg font-medium text-gray-900">Informations générales</div>
+          <div className="text-xs font-medium my-2">Identité et contact</div>
+          <div className="flex flex-row justify-between items-center gap-4">
+            <Field label="Nom" onChange={(e) => setValues({ ...values, lastName: e.target.value })} value={values.lastName} error={errors?.lastName} />
+            <Field label="Prénom" onChange={(e) => setValues({ ...values, firstName: e.target.value })} value={values.firstName} error={errors?.firstName} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="py-5 px-10">
@@ -257,47 +280,3 @@ export default function Profil() {
     </div>
   );
 }
-
-const Select = ({ title, name, values, onChange, disabled, options, className }) => {
-  return (
-    <div className={className}>
-      <label className="mb-2 inline-block text-xs uppercase text-brand-grey">{title}</label>
-      <select
-        disabled={disabled}
-        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-        name={name}
-        value={values[name]}
-        onChange={onChange}>
-        <option key={-1} value="" label=""></option>
-        {options.map((o, i) => (
-          <option key={i} value={o.value} label={o.label}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
-const Item = ({ title, values, name, handleChange, disabled, required, errors, touched, type, validate, children, className }) => {
-  return (
-    <div className={className}>
-      <label className="mb-2 inline-block text-xs uppercase text-brand-grey">
-        {required && <span className="text-red-500 mr-1">*</span>}
-        {title}
-      </label>
-      {children || (
-        <Field
-          disabled={disabled}
-          className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-          value={translate(values[name])}
-          name={name}
-          onChange={handleChange}
-          type={type}
-          validate={validate}
-        />
-      )}
-      {errors && touched && <p className="text-xs text-red-500" errors={errors} touched={touched} name={name} />}
-    </div>
-  );
-};
