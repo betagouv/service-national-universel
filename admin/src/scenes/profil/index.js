@@ -115,8 +115,8 @@ export default function Profil() {
 
   const onSubmit = async () => {
     const error = {};
-    if (!values?.lastName) error.name = "Le nom est obligatoire";
-    if (!values?.firstName) error.name = "Le prnéom est obligatoire";
+    if (!values?.lastName) error.lastName = "Le nom est obligatoire";
+    if (!values?.firstName) error.firstName = "Le prénom est obligatoire";
     if (values?.phone && !validator.isMobilePhone(values.phone)) error.phone = "Le numéro de téléphone n'est pas valide";
     if (values?.mobile && !validator.isMobilePhone(values.mobile)) error.mobile = "Le numéro de téléphone n'est pas valide";
     if (!validator.isEmail(values.email)) error.email = "L'adresse email n'est pas valide";
@@ -127,6 +127,8 @@ export default function Profil() {
       const { data, ok } = await api.put("/referent", values);
       if (ok) {
         dispatch(setUser(data));
+        setValuesRightHaveChanged(false);
+        setValues();
         return toastr.success("Profil mis à jour !");
       }
     } catch (e) {
@@ -167,6 +169,7 @@ export default function Profil() {
                 onClick={() => {
                   setValues({ ...user });
                   setValuesLeftHaveChanged(false);
+                  setErrors({});
                 }}>
                 Annuler
               </div>
