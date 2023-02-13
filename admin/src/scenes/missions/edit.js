@@ -20,6 +20,7 @@ import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { capture } from "../../sentry";
+import { putLocation } from "../../services/api-adresse";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Missions");

@@ -8,12 +8,13 @@ import styled from "styled-components";
 import api from "../services/api";
 import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
-import { getPasswordErrorMessage, translate, putLocation } from "../utils";
+import { getPasswordErrorMessage, translate } from "../utils";
 import validator from "validator";
 import AddressInputV2 from "../components/addressInputV2";
 import ModalConfirm from "../components/modals/ModalConfirm";
 import PasswordEye from "../components/PasswordEye";
 import { appURL } from "../config";
+import { putLocation } from "../services/api-adresse";
 
 export default function Account() {
   const young = useSelector((state) => state.Auth.young);

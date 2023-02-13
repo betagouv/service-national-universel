@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const fetch = require("node-fetch");
 
 const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
@@ -18,8 +17,9 @@ const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES, putLocation } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
+const { putLocation } = require("../services/api-adresse");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
