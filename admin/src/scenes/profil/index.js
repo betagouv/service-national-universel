@@ -35,7 +35,7 @@ export default function Profil() {
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const [values, setValues] = useState(user);
-  const [rightValues, setRightValues] = useState({ password: "", newPassword: "", confirmPassword: "" });
+  const [rightValues, setRightValues] = useState({ password: "", newPassword: "", verifyPassword: "" });
   const [valuesLeftHaveChanged, setValuesLeftHaveChanged] = useState(false);
   const [valuesRightHaveChanged, setValuesRightHaveChanged] = useState(false);
   const [errors, setErrors] = useState({});
@@ -101,6 +101,18 @@ export default function Profil() {
     setRightValues({ ...values, [name]: value });
     setValuesRightHaveChanged(true);
   };
+  const onPasswordSubmit = async () => {
+    try {
+      const { ok, code, user } = await api.post("/referent/reset_password", rightValues);
+      if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setUser(user));
+      toastr.success("Mot de passe mis à jour!");
+      return history.push("/dashboard");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
+    }
+  };
 
   if (user === undefined) return <Loader />;
   return (
@@ -149,7 +161,7 @@ export default function Profil() {
         <div className="flex flex-col gap-4 flex-1 xl:mt-0 mt-8">
           <div className="text-lg font-medium text-gray-900">Mot de passe</div>
           <div className="text-xs font-medium">Mon mot de passe</div>
-          <Field label="Nom" eye onChange={(e) => handlePasswordChange("password", e.target.value)} value={rightValues.password} error={errors?.password} />
+          <Field label="Actuel" eye onChange={(e) => handlePasswordChange("password", e.target.value)} value={rightValues.password} error={errors?.password} />
           <Field
             label="Nouveau mot de passe"
             eye
@@ -160,9 +172,9 @@ export default function Profil() {
           <Field
             label="Confirmer le nouveau mot de passe"
             eye
-            onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
-            value={rightValues.confirmPassword}
-            error={errors?.confirmPassword}
+            onChange={(e) => handlePasswordChange("verifyPassword", e.target.value)}
+            value={rightValues.verifyPassword}
+            error={errors?.verifyPassword}
           />
           {valuesRightHaveChanged && (
             <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
@@ -174,7 +186,9 @@ export default function Profil() {
                 }}>
                 Annuler
               </div>
-              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer">Valider mon nouveau mot de passe</div>
+              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onPasswordSubmit}>
+                Valider mon nouveau mot de passe
+              </div>
             </div>
           )}
         </div>
