@@ -3,14 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { VISITOR_SUBROLES } from "snu-lib/roles";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
-import PasswordEye from "../../components/PasswordEye";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, copyToClipboard } from "../../utils";
+import { REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, copyToClipboard } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
@@ -22,6 +19,8 @@ import { HiCheckCircle } from "react-icons/hi";
 import Select from "../../components/TailwindSelect";
 import Eye from "../../assets/icons/Eye";
 import EyeSlash from "../../assets/EyeSlash";
+
+import validator from "validator";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
@@ -114,6 +113,28 @@ export default function Profil() {
     }
   };
 
+  const onSubmit = async () => {
+    const error = {};
+    if (!values?.lastName) error.name = "Le nom est obligatoire";
+    if (!values?.firstName) error.name = "Le prnéom est obligatoire";
+    if (values?.phone && !validator.isMobilePhone(values.phone)) error.phone = "Le numéro de téléphone n'est pas valide";
+    if (values?.mobile && !validator.isMobilePhone(values.mobile)) error.mobile = "Le numéro de téléphone n'est pas valide";
+    if (!validator.isEmail(values.email)) error.email = "L'adresse email n'est pas valide";
+    setErrors(error);
+    if (Object.keys(error).length > 0) return toastr.error("Le formulaire est incomplet");
+    setErrors({});
+    try {
+      const { data, ok } = await api.put("/referent", values);
+      if (ok) {
+        dispatch(setUser(data));
+        return toastr.success("Profil mis à jour !");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    toastr.error("Erreur");
+  };
+
   if (user === undefined) return <Loader />;
   return (
     <div className="m-8">
@@ -149,7 +170,9 @@ export default function Profil() {
                 }}>
                 Annuler
               </div>
-              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer">Enregistrer</div>
+              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onSubmit}>
+                Enregistrer
+              </div>
             </div>
           )}
         </div>
