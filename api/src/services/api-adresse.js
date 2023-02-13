@@ -1,4 +1,4 @@
-import { capture } from "../sentry";
+const { capture } = require("../sentry");
 
 const apiAdress = async (path, options = {}) => {
   try {
@@ -52,4 +52,4 @@ const putLocation = async (city, zip) => {
   };
 };
 
-export { apiAdress, putLocation };
+module.exports = { apiAdress, putLocation };
