@@ -9,6 +9,10 @@ export default async function downloadPDF({ url, body, fileName, redirectUrl = "
     const file = await api.openpdf(url, body);
     download(file, fileName);
   } catch (e) {
+    if (e?.code === "YOUNG_NOT_FOUND") {
+      toastr.warning("Aucun jeune n'est validé. Aucune attestations à télécharger.");
+      return;
+    }
     // We don't capture unauthorized. Just redirect.
     if (e?.message === "unauthorized") {
       return (window.location.href = redirectUrl);
