@@ -139,7 +139,6 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     const coordonneeSchema = {
       gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
-      frenchNationality: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       birthCountry: needRequired(Joi.string().trim(), isRequired),
       birthCity: needRequired(Joi.string().trim(), isRequired),
       birthCityZip: Joi.string().trim().allow(null, ""),
