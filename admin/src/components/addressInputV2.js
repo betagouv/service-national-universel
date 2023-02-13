@@ -7,6 +7,7 @@ import { department2region, departmentLookUp, departmentToAcademy, departmentLis
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
 import { toastr } from "react-redux-toastr";
+import { apiAdress } from "../services/api-adresse";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -106,29 +107,21 @@ export default function AddressInputV2({
     const text = item;
 
     setLoading(true);
-    let url = `https://api-adresse.data.gouv.fr/search/?q=${text}`;
+    let url = `${text}`;
     // For Nouvelle-Calédonie, we don't add the postcode to the query
     if (parseInt(values.zip.substr(0, 3)) !== 988) url = url.concat(`&postcode=${values.zip}`);
-    const response = await fetch(url, {
-      mode: "cors",
-      method: "GET",
-    });
-    const res = await response.json();
-    const arr = res.features;
+    const res = await apiAdress(url);
+    const arr = res?.features;
 
     setLoading(false);
-    if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+    if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
     else {
       // If no match with complete query, try with postcode only
-      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${values.zip}&limit=1&postcode=${values.zip}`, {
-        mode: "cors",
-        method: "GET",
-      });
-      const res = await response.json();
-      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+      const res = await apiAdress(`${values.zip}&limit=1&postcode=${values.zip}`);
+      const arr = res?.features.filter((e) => e.properties.type !== "municipality");
 
       setLoading(false);
-      if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+      if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
       else {
         toastr.error("Aucune adresse n'a été trouvée.");
         addressVerifiedHelpers.setValue("false");

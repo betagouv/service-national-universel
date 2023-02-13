@@ -37,9 +37,10 @@ const SubComponent = ({ setQuery, young, targetLocation }) => {
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
+      let url = `${q || postcode}`;
       if (postcode) url += `&postcode=${postcode}`;
-      const res = await fetch(url).then((response) => response.json());
+      const res = await apiAdress(`${encodeURIComponent(url)}`);
+
       const lon = res?.features[0]?.geometry?.coordinates[0] || null;
       const lat = res?.features[0]?.geometry?.coordinates[1] || null;
       return lon && lat && { lat, lon };

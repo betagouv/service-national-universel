@@ -5,6 +5,7 @@ import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
+import { apiAdress } from "../services/api-adresse";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
@@ -57,12 +58,9 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
 
   const getSuggestions = async (item) => {
     const text = item;
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
-      mode: "cors",
-      method: "GET",
-    });
-    const res = await response.json();
-    const arr = res.features.filter((e) => e.properties.type !== "municipality");
+    const res = await apiAdress(`${encodeURIComponent(text)}`);
+
+    const arr = res?.features.filter((e) => e.properties.type !== "municipality");
     arr.push("noresult");
     setSuggestions(arr);
   };
