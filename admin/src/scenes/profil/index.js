@@ -97,10 +97,19 @@ export default function Profil() {
   };
 
   const handlePasswordChange = (name, value) => {
-    setRightValues({ ...values, [name]: value });
+    setRightValues({ ...rightValues, [name]: value });
     setValuesRightHaveChanged(true);
   };
   const onPasswordSubmit = async () => {
+    const error = {};
+    console.log(rightValues);
+    if (!rightValues?.password) error.password = "Le mot de passe est obligatoire";
+    if (!rightValues?.newPassword) error.newPassword = "Le nouveau mot de passe est obligatoire";
+    if (!rightValues?.verifyPassword) error.verifyPassword = "La vérification du mot de passe est obligatoire";
+    if (rightValues?.newPassword !== rightValues?.verifyPassword) error.verifyPassword = "Les mots de passe ne correspondent pas";
+    setErrors(error);
+    if (Object.keys(error).length > 0) return toastr.error("Le formulaire est incomplet");
+    setErrors({});
     try {
       const { ok, code, user } = await api.post("/referent/reset_password", rightValues);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
@@ -209,6 +218,7 @@ export default function Profil() {
                 onClick={() => {
                   setRightValues({ password: "", newPassword: "", confirmPassword: "" });
                   setValuesRightHaveChanged(false);
+                  setErrors({});
                 }}>
                 Annuler
               </div>
