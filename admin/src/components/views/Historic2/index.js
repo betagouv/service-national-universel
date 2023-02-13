@@ -48,11 +48,11 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
         <thead>
           <tr className="uppercase border-t border-t-slate-100">
             {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-96">Action</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80">Détails</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-80"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-auto">Auteur</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-12"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
+            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
           </tr>
         </thead>
         <tbody>
