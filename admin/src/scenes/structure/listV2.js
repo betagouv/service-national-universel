@@ -133,7 +133,7 @@ export default function List() {
     <>
       <Breadcrumbs items={[{ label: "Structures" }]} />
       <header className="m-8 flex items-center justify-between">
-        <Title>Mes structures affiliées</Title>
+        {user.role === ROLES.SUPERVISOR ? <Title>Mes structures affiliées</Title> : <Title>Toutes les structures</Title>}
         <Link
           className="px-3 py-2 bg-blue-600 rounded-lg text-sm text-white hover:brightness-110 active:brightness-125"
           to="/structure/create"

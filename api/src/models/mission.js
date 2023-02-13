@@ -180,7 +180,7 @@ const Schema = new mongoose.Schema({
   },
   hebergement: {
     type: String,
-    enum: ["false", "true"],
+    enum: ["", "false", "true"],
     documentation: {
       description: "La mission propose un hébergement",
     },

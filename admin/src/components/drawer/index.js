@@ -108,10 +108,11 @@ function responsible({ user, onClick, from }) {
   );
 }
 
-function supervisor({ onClick, from }) {
+function supervisor({ user, onClick, from }) {
   return (
     <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to={`/structure/${user.structureId}`} title="Ma tête de réseau" onClick={onClick} />
+      <DrawerTab to="/structure" title="Structures affiliées" onClick={onClick} exact={true} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to={environment === "production" ? "/volontaire" : "/volontaire/list/all"} title="Mes candidatures" onClick={onClick} />
