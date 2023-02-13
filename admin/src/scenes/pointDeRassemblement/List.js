@@ -17,6 +17,7 @@ import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
 import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoubleProfil";
 import ExternalLink from "../../assets/icons/ExternalLink";
+import BusSvg from "../../assets/icons/Bus";
 
 const FILTERS = ["SEARCH", "COHORT", "REGION", "DEPARTMENT"];
 
@@ -324,6 +325,40 @@ const ListSessions = ({ user, firstSession }) => {
             }}
             icon={<BsDownload className="text-gray-400" />}
             transform={async (data) => {
+              let body1 = {
+                query: {
+                  bool: {
+                    filter: [
+                      { terms: { "meetingPointId.keyword": data.map((d) => d._id) } },
+                      { terms: { "status.keyword": ["VALIDATED"] } },
+                      { term: { "cohort.keyword": selectedCohort } },
+                    ],
+                  },
+                },
+                aggs: {
+                  group_by_meetingPointId: {
+                    terms: { field: "meetingPointId.keyword" },
+                  },
+                },
+                size: 0,
+              };
+
+              const { responses: responses1 } = await api.esQuery("young", body1);
+              const youngsByMettingPoints = responses1[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
+
+              let body2 = {
+                query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": data.map((d) => d._id) } }, { term: { "cohort.keyword": selectedCohort } }] } },
+                aggs: {
+                  group_by_meetingPointId: {
+                    terms: { field: "meetingPointsIds.keyword", size: ES_NO_LIMIT },
+                  },
+                },
+                size: 0,
+              };
+
+              const { responses: responses2 } = await api.esQuery("lignebus", body2);
+              const linesByMettingPoints = responses2[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
+
               let res = [];
               for (const item of data) {
                 res.push({
@@ -338,6 +373,8 @@ const ListSessions = ({ user, firstSession }) => {
                   "Code postal": item.zip,
                   Département: item.department,
                   Région: item.region,
+                  "Volontaires attendus sur le point": youngsByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
+                  "Lignes attendues sur le point": linesByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
                 });
               }
               return res;
@@ -410,7 +447,7 @@ const ListSessions = ({ user, firstSession }) => {
                   <div className="w-[35%]">Points de rassemblements</div>
                   <div className="w-[25%]">Cohortes</div>
                   <div className="w-[20%]">Volontaires attendus sur le point</div>
-                  <div className="w-[20%]">lignes attendues sur le point</div>
+                  <div className="w-[20%]">Lignes attendues sur le point</div>
                 </div>
                 {data?.map((hit) => {
                   return <HitSession key={hit._id} hit={hit} user={user} session={selectedCohort} />;
@@ -504,7 +541,7 @@ const HitSession = ({ hit, session }) => {
             <Loading width="w-1/2" />
           ) : (
             <div className="flex items-center gap-2">
-              <DoubleProfil className="text-gray-400" />
+              <BusSvg className="text-gray-400 -rotate-12" />
               <div className="text-gray-900 text-sm leading-5">{nbLines || 0} </div>
               <Link
                 to={`/ligne-de-bus?cohort=${session}&CODE_PDR=%5B"${hit.code}"%5D`}
