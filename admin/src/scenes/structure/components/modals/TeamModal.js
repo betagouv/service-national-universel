@@ -241,7 +241,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
   const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone;
 
   const roles = [ROLES.RESPONSIBLE];
-  if (structure.isNetwork === "true" && [ROLES.SUPERVISOR, ROLES.ADMIN].includes(user.role) && user.structureId === structure._id) {
+  if (structure.isNetwork === "true" && (user.role === ROLES.ADMIN || (user.role === ROLES.SUPERVISOR && user.structureId === structure._id))) {
     roles.push(ROLES.SUPERVISOR);
   }
   const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
