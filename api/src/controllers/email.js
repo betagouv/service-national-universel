@@ -126,7 +126,6 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     const uuid = emails.transactionalEmails[0].uuid;
-    console.log("🚀 ~ file: email.js:131 ~ router.get ~ uuid", uuid);
 
     const emailData = await getEmailContent(uuid);
     if (!emailData || emailData.code) {
