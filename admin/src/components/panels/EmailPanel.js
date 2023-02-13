@@ -17,7 +17,7 @@ export default function EmailPanel({ open, setOpen, email }) {
 
   async function getMail(email) {
     try {
-      const { ok, data } = await API.get("/email/" + email.messageId);
+      const { ok, data } = await API.get("/email/" + email._id);
       if (!ok) {
         capture("Impossible de récupérer les données de l'email" + JSON.stringify(email));
         toastr.error("Erreur", "Impossible de récupérer les données de l'email");

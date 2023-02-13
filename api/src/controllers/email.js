@@ -12,7 +12,7 @@ const EmailObject = require("../models/email");
 const { canViewEmailHistory } = require("snu-lib/roles");
 const { serializeEmail } = require("../utils/serializer");
 const { getEmailsList, getEmailContent } = require("../sendinblue");
-const { validateString } = require("../utils/validator");
+const { validateId } = require("../utils/validator");
 
 function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
@@ -110,37 +110,33 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 });
 
-router.get("/:email/:messageId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({
-      email: Joi.string().required(),
-      messageId: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
+    const { error, value } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { email, messageId } = value;
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
     if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const dateString = messageId.match(/^\d{8}/)[0]; // extract first 8 numbers
-    const date = new Date(dateString); // convert to date
-    const formattedDate = date.toISOString().slice(0, 10); // format in YYYY-MM-DD
-    if (!formattedDate) {
-      captureMessage("Error while getting date of email" + JSON.stringify(dateString));
+    // Get email from db
+    const mail = await EmailObject.findById(value);
+    if (!mail) {
+      captureMessage("Error finding email with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    const { email, messageId } = mail;
+
+    const year = messageId.slice(1, 5);
+    const month = messageId.slice(5, 7);
+    const day = messageId.slice(7, 9);
+    const formattedDate = `${year}-${month}-${day}`;
+
     const emails = await getEmailsList({ email, messageId, startDate: formattedDate, endDate: formattedDate });
     if (!emails?.count || emails.code) {
-      captureMessage("Error while fetching email" + JSON.stringify(emails));
+      captureMessage("Error while fetching email" + JSON.stringify({ emails, email, messageId, startDate: formattedDate, endDate: formattedDate }));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
