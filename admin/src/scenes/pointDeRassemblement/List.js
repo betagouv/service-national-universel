@@ -146,7 +146,8 @@ const ListPoints = ({ user }) => {
               let res = [];
               for (const item of data) {
                 res.push({
-                  Identifiant: item.code,
+                  Identifiant: item._id.toString(),
+                  Code: item.code,
                   Cohortes: item?.cohorts
                     .sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
                     ?.map((e) => e)
@@ -362,13 +363,12 @@ const ListSessions = ({ user, firstSession }) => {
               let res = [];
               for (const item of data) {
                 res.push({
-                  Identifiant: item.code,
-                  Cohortes: item?.cohorts
-                    .sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
-                    ?.map((e) => e)
-                    .join(", "),
+                  Identifiant: item._id.toString(),
+                  Code: item.code,
+                  Cohort: selectedCohort,
                   Nom: item.name,
                   Adresse: item.address,
+                  "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
                   Ville: item.city,
                   "Code postal": item.zip,
                   Département: item.department,
