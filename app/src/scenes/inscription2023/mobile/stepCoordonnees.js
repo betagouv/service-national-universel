@@ -311,9 +311,13 @@ export default function StepCoordonnees() {
 
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
-      const response = await getAddress(value);
-      const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
-      setBirthCityZipSuggestions(suggestions);
+      try {
+        const response = await getAddress(value);
+        const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
+        setBirthCityZipSuggestions(suggestions);
+      } catch (error) {
+        console.log(error);
+      }
     }, 500),
     [],
   );
