@@ -1,4 +1,4 @@
-import { capture } from "../sentry";
+const { capture } = require("../sentry");
 
 const apiAdress = async (path, options = {}) => {
   try {
@@ -13,43 +13,47 @@ const apiAdress = async (path, options = {}) => {
     });
     return await res.json();
   } catch (e) {
-    console.log("Erreur in api-adresse", e);
     capture(e);
   }
 };
 
 const putLocation = async (city, zip) => {
-  if (!city && !zip) return;
-  // try with municipality = city + zip
-  const resMunicipality = await apiAdress(`${encodeURIComponent(city + " " + zip)}&type=municipality`);
-  if (resMunicipality?.features?.length > 0) {
+  try {
+    if (!city && !zip) return;
+    // try with municipality = city + zip
+    const resMunicipality = await apiAdress(`${encodeURIComponent(city + " " + zip)}&type=municipality`);
+    if (resMunicipality?.features?.length > 0) {
+      return {
+        lon: resMunicipality.features[0].geometry.coordinates[0],
+        lat: resMunicipality.features[0].geometry.coordinates[1],
+      };
+    }
+    // try with locality = city + zip
+    const resLocality = await apiAdress(`${encodeURIComponent(zip + " " + city)}&type=locality`);
+    if (resLocality?.features?.length > 0) {
+      return {
+        lon: resLocality.features[0].geometry.coordinates[0],
+        lat: resLocality.features[0].geometry.coordinates[1],
+      };
+    }
+    // try with postcode = zip
+    let url = `${city || zip}`;
+    if (zip) url += `&postcode=${zip}`;
+    const resPostcode = await apiAdress(url);
+    if (resPostcode?.features?.length > 0) {
+      return {
+        lon: resPostcode.features[0].geometry.coordinates[0],
+        lat: resPostcode.features[0].geometry.coordinates[1],
+      };
+    }
     return {
-      lon: resMunicipality.features[0].geometry.coordinates[0],
-      lat: resMunicipality.features[0].geometry.coordinates[1],
+      lon: 2.352222,
+      lat: 48.856613,
     };
+  } catch (e) {
+    console.log("Erreur in putLocation", e);
+    capture(e);
   }
-  // try with locality = city + zip
-  const resLocality = await apiAdress(`${encodeURIComponent(zip + " " + city)}&type=locality`);
-  if (resLocality?.features?.length > 0) {
-    return {
-      lon: resLocality.features[0].geometry.coordinates[0],
-      lat: resLocality.features[0].geometry.coordinates[1],
-    };
-  }
-  // try with postcode = zip
-  let url = `${city || zip}`;
-  if (zip) url += `&postcode=${zip}`;
-  const resPostcode = await apiAdress(url);
-  if (resPostcode?.features?.length > 0) {
-    return {
-      lon: resPostcode.features[0].geometry.coordinates[0],
-      lat: resPostcode.features[0].geometry.coordinates[1],
-    };
-  }
-  return {
-    lon: 2.352222,
-    lat: 48.856613,
-  };
 };
 
-export { apiAdress, putLocation };
+module.exports = { apiAdress, putLocation };
