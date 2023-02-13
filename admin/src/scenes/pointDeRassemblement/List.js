@@ -407,10 +407,10 @@ const ListSessions = ({ user, firstSession }) => {
               <div className="flex w-full flex-col mt-6 mb-2">
                 <hr />
                 <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                  <div className="w-[30%]">Points de rassemblements</div>
-                  <div className="w-[20%]">Cohortes</div>
-                  <div className="w-[25%]">Volontaires attendus sur le point</div>
-                  <div className="w-[25%]">lignes attendues sur le point</div>
+                  <div className="w-[35%]">Points de rassemblements</div>
+                  <div className="w-[25%]">Cohortes</div>
+                  <div className="w-[20%]">Volontaires attendus sur le point</div>
+                  <div className="w-[20%]">lignes attendues sur le point</div>
                 </div>
                 {data?.map((hit) => {
                   return <HitSession key={hit._id} hit={hit} user={user} session={selectedCohort} />;
@@ -466,7 +466,7 @@ const HitSession = ({ hit, session }) => {
     <>
       <hr />
       <div className="flex py-2 items-center px-4 hover:bg-gray-50">
-        <div className="flex flex-col gap-1 w-[30%] cursor-pointer" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
+        <div className="flex flex-col gap-1 w-[35%] cursor-pointer" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
           <div className="font-medium text-sm leading-4 text-gray-500">
             {hit.address}, {hit.zip}, {hit.city}
@@ -475,14 +475,14 @@ const HitSession = ({ hit, session }) => {
             {hit.department}, {hit.region}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 w-[20%]">
+        <div className="flex flex-wrap gap-2 w-[25%]">
           <div
             onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${session}`)}
             className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]`}>
             {session}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 w-[25%]">
+        <div className="flex flex-wrap gap-2 w-[20%]">
           {loadingVolunteers ? (
             <Loading width="w-1/2" />
           ) : (
@@ -499,7 +499,7 @@ const HitSession = ({ hit, session }) => {
             </div>
           )}
         </div>
-        <div className="flex flex-wrap gap-2 w-[25%]">
+        <div className="flex flex-wrap gap-2 w-[20%]">
           {loadingLines ? (
             <Loading width="w-1/2" />
           ) : (
