@@ -122,7 +122,6 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
         <EditContact
           team={team}
           responsible={responsible}
-          structureId={structure._id}
           setResponsible={setResponsible}
           isLoading={isLoading}
           handleSubmit={handleSubmit}
@@ -178,7 +177,7 @@ const DisplayContact = ({ responsible, setResponsible }) => {
             {getInitials(responsible.firstName + " " + responsible.lastName)}
           </div>
           <div>
-            <div className="text-sm text-bold text-gray-900">{responsible.firstName + " " + responsible.lastName}</div>
+            <div className="text-sm text-bold text-gray-900 max-w-[200px] truncate">{responsible.firstName + " " + responsible.lastName}</div>
             <div className="text-xs text-gray-500">{translate(responsible.role)}</div>
           </div>
         </Link>
@@ -235,11 +234,16 @@ const Field = ({ isLoading, label, name, value, handleChange, type = "text", req
   </div>
 );
 
-const EditContact = ({ team, responsible, structureId, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
+const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
   const user = useSelector((state) => state.Auth.user);
+  const { structure } = useContext(StructureContext);
+
   const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone;
+
   const roles = [ROLES.RESPONSIBLE];
-  if (user.role === ROLES.SUPERVISOR && user.structureId === structureId) roles.push(ROLES.SUPERVISOR);
+  if (structure.isNetwork === "true" && [ROLES.SUPERVISOR, ROLES.ADMIN].includes(user.role) && user.structureId === structure._id) {
+    roles.push(ROLES.SUPERVISOR);
+  }
   const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
 
   return (
