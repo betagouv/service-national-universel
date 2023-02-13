@@ -1,3 +1,18 @@
+# [1.217.0](https://github.com/betagouv/service-national-universel/compare/v1.216.0...v1.217.0) (2023-02-10)
+
+
+### Bug Fixes
+
+* **admin:** prod redirection to feature in staging ([aaff84c](https://github.com/betagouv/service-national-universel/commit/aaff84c2425f9550ba9cdb7146906699adaecdbf))
+* **admin:** structure view responsible ([da446da](https://github.com/betagouv/service-national-universel/commit/da446da98aa85ed5c1b871e30b9b2f4feff0a4e8))
+* **app:** french nationality ([#2251](https://github.com/betagouv/service-national-universel/issues/2251)) ([10c0500](https://github.com/betagouv/service-national-universel/commit/10c050056ccb33396e614bf3cd3d6d0402b174d3))
+* **sib:** Delete contacts on soft-delete ([#2248](https://github.com/betagouv/service-national-universel/issues/2248)) ([9ff564b](https://github.com/betagouv/service-national-universel/commit/9ff564b01860ef5dfd62927f6f71e041fc53bd63))
+
+
+### Features
+
+* **app:** Modal confirmation de changement de PDR ([#2245](https://github.com/betagouv/service-national-universel/issues/2245)) ([6ce66fe](https://github.com/betagouv/service-national-universel/commit/6ce66fe9b320a907610bbabf8eaf7999ca5c8f38))
+
 # [1.216.0](https://github.com/betagouv/service-national-universel/compare/v1.215.0...v1.216.0) (2023-02-09)
 
 
