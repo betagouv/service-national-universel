@@ -46,6 +46,18 @@ const translateFieldStructure = (f) => {
       return "Id de la structure JVA";
     case "isJvaStructure":
       return "Structure JVA";
+    case "structureManager":
+      return "Représentant de la structure";
+    case "structureManager/email":
+      return "Email du représentant de la structure";
+    case "structureManager/firstName":
+      return "Prénom du représentant de la structure";
+    case "structureManager/lastName":
+      return "Nom du représentant de la structure";
+    case "structureManager/mobile":
+      return "Téléphone du représentant de la structure";
+    case "structureManager/role":
+      return "Rôle du représentant de la structure";
     default:
       return f;
   }

@@ -54,11 +54,11 @@ export default function CardRepresentant() {
               <div className="flex items-center gap-2">
                 <p className="text-sm">Représentant de la structure</p>
                 <Warning data-tip data-for="representant" />
-                <ReactTooltip id="representant" type="light" place="top">
-                  <span>
+                <ReactTooltip id="representant" type="light" place="top" effect="solid" className="shadow-sm custom-tooltip-radius" tooltipRadius="6">
+                  <div className="w-[400px] text-center">
                     Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au
                     sein de votre structure
-                  </span>
+                  </div>
                 </ReactTooltip>
               </div>
               <p className="text-sm text-gray-500">

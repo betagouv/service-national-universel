@@ -225,9 +225,10 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canModifyStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const structure = await StructureObject.findById(structureId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     structure.set({ structureManager: value });
     await structure.save({ fromUser: req.user });

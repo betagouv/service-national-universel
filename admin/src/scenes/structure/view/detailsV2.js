@@ -78,7 +78,7 @@ export default function DetailsView() {
     <StructureView tab="details">
       <div className="flex gap-4 my-4">
         <CardRepresentant />
-        <TeamCard structureId={structure._id} />
+        <TeamCard />
       </div>
       <main className="bg-white p-8 rounded-xl shadow-sm">
         <div className="flex justify-between w-full">
