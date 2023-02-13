@@ -178,6 +178,8 @@ export default function StepCoordonnees() {
         setSpecialSituation(true);
       }
 
+      setWasBornInFrance(young.birthCountry === FRANCE ? "true" : "false");
+
       setData({
         ...data,
         schooled: young.schooled || data.schooled,
@@ -302,7 +304,7 @@ export default function StepCoordonnees() {
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {
-        console.log(error);
+        capture(error);
       }
     }, 500),
     [],
