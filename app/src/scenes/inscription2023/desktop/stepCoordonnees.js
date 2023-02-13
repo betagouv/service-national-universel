@@ -14,7 +14,7 @@ import {
   youngActiveSituationOptions,
   countryOptions,
   hostRelationshipOptions,
-  frenchNationalityOptions,
+  inFranceOrAbroadOptions,
   genderOptions,
   booleanOptions,
   debounce,
@@ -56,22 +56,9 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [
-  "frenchNationality",
-  ...birthPlaceFields,
-  ...addressFields,
-  "gender",
-  "phone",
-  "situation",
-  "livesInFrance",
-  "handicap",
-  "allergies",
-  "ppsBeneficiary",
-  "paiBeneficiary",
-];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "phone", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
 
 const commonRequiredFields = [
-  "frenchNationality",
   ...birthPlaceFields,
   "gender",
   "phone",
@@ -93,13 +80,12 @@ const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCit
 const requiredMoreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
 const defaultState = {
-  frenchNationality: "true",
   birthCountry: FRANCE,
   birthCityZip: "",
   birthCity: "",
   gender: genderOptions[0].value,
   phone: "",
-  livesInFrance: frenchNationalityOptions[0].value,
+  livesInFrance: inFranceOrAbroadOptions[0].value,
   addressVerified: "false",
   address: "",
   zip: "",
@@ -128,11 +114,12 @@ const defaultState = {
 };
 
 export default function StepCoordonnees() {
+  const [wasBornInFrance, setWasBornInFrance] = useState("true");
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
-  const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
   const [situationOptions, setSituationOptions] = useState([]);
+  const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -143,7 +130,6 @@ export default function StepCoordonnees() {
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
   const {
-    frenchNationality,
     birthCountry,
     birthCityZip,
     birthCity,
@@ -173,7 +159,7 @@ export default function StepCoordonnees() {
     handicapInSameDepartment,
   } = data;
 
-  const isFrench = frenchNationality === "true";
+  const wasBornInFranceBool = wasBornInFrance === "true";
   const isFrenchResident = livesInFrance === "true";
 
   const isVerifyAddressDisabled = !address || !city || !zip;
@@ -188,11 +174,12 @@ export default function StepCoordonnees() {
         setSpecialSituation(true);
       }
 
+      setWasBornInFrance(young.birthCountry === FRANCE ? "true" : "false");
+
       setData({
         ...data,
         schooled: young.schooled || data.schooled,
         situation: young.situation || data.situation,
-        frenchNationality: young.frenchNationality || data.frenchNationality,
         birthCountry: young.birthCountry || data.birthCountry,
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
@@ -233,7 +220,7 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, frenchNationality, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -254,7 +241,7 @@ export default function StepCoordonnees() {
       errors.phone = errorMessages.phone;
     }
 
-    if (isFrench && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
+    if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
     }
     if (zip && !validator.isPostalCode(zip, "FR")) {
@@ -268,12 +255,13 @@ export default function StepCoordonnees() {
     return errors;
   };
 
-  const setFrenchNationality = (frenchNationality) => {
-    if (frenchNationality === "true") {
-      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE, frenchNationality });
+  const updateWasBornInFrance = (newWasBornInFrance) => {
+    if (newWasBornInFrance === "true") {
+      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE });
     } else {
-      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), frenchNationality });
+      setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields) });
     }
+    setWasBornInFrance(newWasBornInFrance);
   };
 
   const setLivesInFrance = (livesInFrance) => {
@@ -307,9 +295,13 @@ export default function StepCoordonnees() {
 
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
-      const response = await getAddress(value);
-      const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
-      setBirthCityZipSuggestions(suggestions);
+      try {
+        const response = await getAddress(value);
+        const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
+        setBirthCityZipSuggestions(suggestions);
+      } catch (error) {
+        capture(error);
+      }
     }, 500),
     [],
   );
@@ -372,6 +364,7 @@ export default function StepCoordonnees() {
 
       updates.country = FRANCE;
       updates.moreInformation = moreInformation.toString();
+      //@todo: Temporary fix, code should be refactored
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
@@ -524,15 +517,8 @@ export default function StepCoordonnees() {
       onCorrection={onCorrection}
       disabled={loading}
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
-      <RadioButton
-        label="Je suis né(e)..."
-        options={frenchNationalityOptions}
-        onChange={setFrenchNationality}
-        value={frenchNationality}
-        error={errors.frenchNationality}
-        correction={corrections?.frenchNationality}
-      />
-      {!isFrench && (
+      <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
+      {!wasBornInFranceBool && (
         <SearchableSelect
           label="Pays de naissance"
           value={birthCountry}
@@ -549,11 +535,11 @@ export default function StepCoordonnees() {
             list="suggestions"
             value={birthCity}
             label="Commune de naissance"
-            onChange={isFrench ? updateBirthCity : updateData("birthCity")}
+            onChange={wasBornInFranceBool ? updateBirthCity : updateData("birthCity")}
             error={errors.birthCity}
             correction={corrections.birthCity}
           />
-          {isFrench && (
+          {wasBornInFranceBool && (
             <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
                 <div
@@ -580,7 +566,7 @@ export default function StepCoordonnees() {
       <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} />
       <RadioButton
         label="Je réside..."
-        options={frenchNationalityOptions}
+        options={inFranceOrAbroadOptions}
         onChange={setLivesInFrance}
         value={livesInFrance}
         correction={corrections.livesInFrance}

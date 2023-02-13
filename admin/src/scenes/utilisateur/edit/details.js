@@ -30,6 +30,7 @@ import { RoundButton, PlainButton, BorderButton } from "../../phase0/components/
 import ConfirmationModal from "../../phase0/components/ConfirmationModal";
 import CustomSelect from "../composants/CustomSelect";
 import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "../utils";
+import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
@@ -486,17 +487,20 @@ export default function Details({ user, setUser, currentUser }) {
                     </div>
                   )}
                   {structures.length > 0 && (
-                    <CustomSelect
-                      className="mt-4"
-                      label="Structure"
-                      readOnly={mode !== MODE_EDITION || !(currentUser.role === ROLES.ADMIN)}
-                      options={structures.map((struct) => ({ label: struct.name, value: struct._id }))}
-                      placeholder={"Rechercher une structure..."}
-                      onChange={(newStructure) => {
-                        onChange("structureId")(newStructure.value);
-                      }}
-                      value={data?.structureId}
-                    />
+                    <>
+                      <CustomSelect
+                        className="mt-4"
+                        label="Structure"
+                        readOnly={mode !== MODE_EDITION || !(currentUser.role === ROLES.ADMIN)}
+                        options={structures.map((struct) => ({ label: struct.name, value: struct._id }))}
+                        placeholder={"Rechercher une structure..."}
+                        onChange={(newStructure) => {
+                          onChange("structureId")(newStructure.value);
+                        }}
+                        value={data?.structureId}
+                      />
+                      {data?.structureId && roleMode === MODE_DEFAULT && <ViewStructureLink structureId={data?.structureId} />}
+                    </>
                   )}
                 </>
               )}

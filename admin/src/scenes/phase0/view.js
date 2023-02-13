@@ -1696,7 +1696,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <div className="font-bold">Droit à l&apos;image</div>
             <div className="flex items-center">
               <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
-              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && !readonly && (
+              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && !readonly && young.parent1Email && (
                 <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
                   Modifier
                 </a>
@@ -1720,22 +1720,24 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                   }}>
                   Copier le lien du formulaire
                 </div>
-                <BorderButton
-                  mode="blue"
-                  onClick={async () => {
-                    try {
-                      const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
-                      if (response.ok) {
-                        toastr.success(translate("REMINDER_SENT"), "");
-                      } else {
-                        toastr.error(translate(response.code), "");
+                {young.parent1Email && (
+                  <BorderButton
+                    mode="blue"
+                    onClick={async () => {
+                      try {
+                        const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                        if (response.ok) {
+                          toastr.success(translate("REMINDER_SENT"), "");
+                        } else {
+                          toastr.error(translate(response.code), "");
+                        }
+                      } catch (error) {
+                        toastr.error(translate(error.code), "");
                       }
-                    } catch (error) {
-                      toastr.error(translate(error.code), "");
-                    }
-                  }}>
-                  Relancer
-                </BorderButton>
+                    }}>
+                    Relancer
+                  </BorderButton>
+                )}
               </div>
             )
         }
@@ -1759,22 +1761,24 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 }}>
                 Copier le lien du formulaire
               </div>
-              <BorderButton
-                mode="blue"
-                onClick={async () => {
-                  try {
-                    const response = await api.get(`/young-edition/${young._id}/remider/1`);
-                    if (response.ok) {
-                      toastr.success(translate("REMINDER_SENT"), "");
-                    } else {
-                      toastr.error(translate(response.code), "");
+              {young.parent1Email && (
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.get(`/young-edition/${young._id}/remider/1`);
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
                     }
-                  } catch (error) {
-                    toastr.error(translate(error.code), "");
-                  }
-                }}>
-                Relancer
-              </BorderButton>
+                  }}>
+                  Relancer
+                </BorderButton>
+              )}
             </div>
           )
         )}
@@ -1798,7 +1802,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                     <div className="font-bold">Droit à l&apos;image</div>
                     <div className="flex items-center">
                       <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
-                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && !readonly && (
+                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && !readonly && young.parent2Email && (
                         <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
                           Modifier
                         </a>
@@ -1820,22 +1824,24 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                         }}>
                         Copier le lien du formulaire
                       </div>
-                      <BorderButton
-                        mode="blue"
-                        onClick={async () => {
-                          try {
-                            const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 2 });
-                            if (response.ok) {
-                              toastr.success(translate("REMINDER_SENT"), "");
-                            } else {
-                              toastr.error(translate(response.code), "");
+                      {young.parent2Email && (
+                        <BorderButton
+                          mode="blue"
+                          onClick={async () => {
+                            try {
+                              const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 2 });
+                              if (response.ok) {
+                                toastr.success(translate("REMINDER_SENT"), "");
+                              } else {
+                                toastr.error(translate(response.code), "");
+                              }
+                            } catch (error) {
+                              toastr.error(translate(error.code), "");
                             }
-                          } catch (error) {
-                            toastr.error(translate(error.code), "");
-                          }
-                        }}>
-                        Relancer
-                      </BorderButton>
+                          }}>
+                          Relancer
+                        </BorderButton>
+                      )}
                     </div>
                   )
                 }
@@ -1859,22 +1865,24 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                       }}>
                       Copier le lien du formulaire
                     </div>
-                    <BorderButton
-                      mode="blue"
-                      onClick={async () => {
-                        try {
-                          const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                          if (response.ok) {
-                            toastr.success(translate("REMINDER_SENT"), "");
-                          } else {
-                            toastr.error(translate(response.code), "");
+                    {young.parent2Email && (
+                      <BorderButton
+                        mode="blue"
+                        onClick={async () => {
+                          try {
+                            const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                            if (response.ok) {
+                              toastr.success(translate("REMINDER_SENT"), "");
+                            } else {
+                              toastr.error(translate(response.code), "");
+                            }
+                          } catch (error) {
+                            toastr.error(translate(error.code), "");
                           }
-                        } catch (error) {
-                          toastr.error(translate(error.code), "");
-                        }
-                      }}>
-                      Relancer
-                    </BorderButton>
+                        }}>
+                        Relancer
+                      </BorderButton>
+                    )}
                   </div>
                 )
             }
@@ -2065,7 +2073,7 @@ function HonorCertificate({ young }) {
           <div className="py-[3px] px-[10px] border-[#CECECE] border-[1px] bg-[#FFFFFF] rounded-[100px] text-[12px] font-normal">
             {young.parentStatementOfHonorInvalidId === "true" ? "Validée" : "En attente"}
           </div>
-          {young.parentStatementOfHonorInvalidId !== "true" && (
+          {young.parentStatementOfHonorInvalidId !== "true" && young.parent1Email && (
             <BorderButton className="ml-[8px]" onClick={remind}>
               Relancer
             </BorderButton>

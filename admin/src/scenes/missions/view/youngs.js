@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import ReactTooltip from "react-tooltip";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
-import { apiURL } from "../../../config";
+import { apiURL, environment } from "../../../config";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import api from "../../../services/api";
 import MissionView from "./wrapper";
@@ -63,7 +63,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   };
 
   useEffect(() => {
-    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && environment !== "production") {
       history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
     }
   }, [user]);
