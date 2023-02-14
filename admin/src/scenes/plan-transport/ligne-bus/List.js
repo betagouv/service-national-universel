@@ -138,6 +138,7 @@ const ReactiveList = ({ cohort, history }) => {
     return {
       query: {
         bool: {
+          should: [],
           filter: [{ term: { "cohort.keyword": cohort } }],
         },
       },
@@ -313,13 +314,55 @@ const ReactiveList = ({ cohort, history }) => {
                   dataField="lineFillingRate"
                   react={{ and: FILTERS.filter((e) => e !== "TAUX_REMPLISSAGE") }}
                   renderItem={(e, count) => {
-                    return `${translateLineFillingRate(e)} (${count})`;
+                    return `${e} (${count})`;
+                  }}
+                  customQuery={function (value) {
+                    let rangeArray = [];
+                    let empty = false;
+                    if (Array.isArray(value)) {
+                      value?.map((e) => {
+                        if (e === "Vide") empty = true;
+                        else {
+                          const splitValue = e.split("-");
+                          const transformedArray = [parseInt(splitValue[0]), parseInt(splitValue[1].replace("%", ""))];
+                          rangeArray = rangeArray.concat([transformedArray]);
+                        }
+                      });
+                    }
+                    const body = getDefaultQuery();
+
+                    const filter = [];
+                    if (empty) filter.push({ term: { lineFillingRate: 0 } });
+                    if (rangeArray.length > 0) {
+                      rangeArray.map((e) => {
+                        filter.push({ range: { lineFillingRate: { gte: e[0] === 0 ? 1 : e[0], lte: e[1] } } });
+                      });
+                    }
+                    if (empty || rangeArray.length > 0) {
+                      body.query.bool.minimum_should_match = 1;
+                      body.query.bool.should = filter;
+                    }
+                    return body;
+                  }}
+                  transformData={(data) => {
+                    console.log(data);
+                    const newData = [];
+                    data.map((d) => {
+                      const dizaine = translateLineFillingRate(parseInt(d.key));
+                      const val = newData.find((e) => e.key === dizaine);
+                      if (val) {
+                        newData[newData.indexOf(val)].doc_count += d.doc_count;
+                      } else {
+                        newData.push({ key: dizaine, doc_count: d.doc_count });
+                      }
+                    });
+                    return newData;
                   }}
                   renderLabel={(items) => {
                     if (Object.keys(items).length === 0) return "Taux de remplissage";
                     const translated = Object.keys(items).map((item) => {
                       if (item === "Non renseigné") return item;
-                      return translateLineFillingRate(item);
+                      return item;
                     });
                     let value = translated.join(", ");
                     value = "Taux de remplissage : " + value;
