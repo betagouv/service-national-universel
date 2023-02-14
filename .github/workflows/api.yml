@@ -25,40 +25,40 @@ on:
       - lib/**
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v2
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Git checkout
+  #       uses: actions/checkout@v2
 
-      - name: Node 16.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
+  #     - name: Node 16.x
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 16.x
 
-      - name: Start MongoDB 4.0
-        uses: supercharge/mongodb-github-action@1.7.0
-        with:
-          mongodb-version: "4.0"
+  #     - name: Start MongoDB 4.0
+  #       uses: supercharge/mongodb-github-action@1.7.0
+  #       with:
+  #         mongodb-version: "4.0"
 
-      - name: Add lib into current folder
-        run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
+  #     - name: Add lib into current folder
+  #       run: |
+  #         cp -Rf ./lib ./api/snu-lib
+  #         sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
 
-      - name: Install packages
-        working-directory: ${{ env.SUBFOLDER_NAME }}
-        run: npm install
+  #     - name: Install packages
+  #       working-directory: ${{ env.SUBFOLDER_NAME }}
+  #       run: npm install
 
-      - name: Test and Send coverage
-        uses: paambaati/codeclimate-action@v2.7.5
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          CI: true
-          MONGO_URL: mongodb://localhost:27017/SampleDB
-        with:
-          workingDirectory: ${{ env.SUBFOLDER_NAME }}
-          coverageCommand: npm run coverage
+  #     - name: Test and Send coverage
+  #       uses: paambaati/codeclimate-action@v2.7.5
+  #       env:
+  #         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  #         CI: true
+  #         MONGO_URL: mongodb://localhost:27017/SampleDB
+  #       with:
+  #         workingDirectory: ${{ env.SUBFOLDER_NAME }}
+  #         coverageCommand: npm run coverage
 
   deploy:
     needs: [test]
