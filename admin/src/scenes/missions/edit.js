@@ -12,18 +12,7 @@ import AddressInput from "../../components/addressInputV2";
 import Toggle from "../../components/Toggle";
 
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import {
-  translate,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-  MISSION_DOMAINS,
-  PERIOD,
-  dateForDatePicker,
-  putLocation,
-  ROLES,
-  ENABLE_PM,
-  ES_NO_LIMIT,
-} from "../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, ROLES, ENABLE_PM, ES_NO_LIMIT } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -31,6 +20,7 @@ import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { capture } from "../../sentry";
+import { putLocation } from "../../services/api-adresse";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Missions");

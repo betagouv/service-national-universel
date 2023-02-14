@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Spinner } from "reactstrap";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import InfoIcon from "../../../components/InfoIcon";
+import { apiAdress } from "../../../services/api-adresse";
 import { BorderButton } from "./Buttons";
 
 export default function VerifyAddress({
@@ -23,15 +24,12 @@ export default function VerifyAddress({
   const getSuggestions = async (text) => {
     setLoading(true);
     try {
-      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
-        mode: "cors",
-        method: "GET",
-      });
-      const res = await response.json();
-      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+      const res = await apiAdress(`${encodeURIComponent(text)}`);
+
+      const arr = res?.features?.filter((e) => e.properties.type !== "municipality");
 
       setLoading(false);
-      if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+      if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
       else setSuggestion({ ok: false, status: "NOT_FOUND" });
     } catch (e) {
       setLoading(false);

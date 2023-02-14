@@ -22,6 +22,7 @@ import DeleteBtnComponent from "./components/DeleteBtnComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import { apiAdress } from "../../services/api-adresse";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
@@ -131,16 +132,10 @@ export default function Edit(props) {
           let id = values._id;
           // If the address was typed in manually, look for gps coordinates.
           if (!values.location) {
-            const response = await fetch(
-              `https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${values.address}, ${values.city} ${values.zip}&limit=1&postcode=${values.zip}`,
-              {
-                mode: "cors",
-                method: "GET",
-              },
-            );
-            const res = await response.json();
-            const arr = res.features[0];
-            if (arr.length === 0) return toastr.error("Impossible de trouver les coordonnées de votre structure.");
+            const res = await apiAdress(`${values.address}, ${values.city} ${values.zip}&limit=1&postcode=${values.zip}`);
+
+            const arr = res?.features[0];
+            if (!arr || arr?.length === 0) return toastr.error("Impossible de trouver les coordonnées de votre structure.");
             values.location = {
               lon: arr.geometry.coordinates[0],
               lat: arr.geometry.coordinates[1],
