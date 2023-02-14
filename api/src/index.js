@@ -49,6 +49,7 @@ const origin = [
   "https://inscription.snu.gouv.fr",
   "mmlalmlj-snu-app.baleen.cshield.net",
   "ttrbatwx-snu-admin.baleen.cshield.net",
+  "qylcfvov-snu-api.baleen.cshield.net",
 ];
 app.use(
   cors({
