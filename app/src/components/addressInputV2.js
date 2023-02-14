@@ -7,6 +7,7 @@ import { department2region, departmentLookUp, departmentToAcademy } from "../uti
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
 import validator from "validator";
+import { apiAdress } from "../services/api-adresse";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -86,15 +87,12 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     const text = item;
 
     setLoading(true);
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
-      mode: "cors",
-      method: "GET",
-    });
-    const res = await response.json();
-    const arr = res.features.filter((e) => e.properties.type !== "municipality");
+    const res = await apiAdress(`${encodeURIComponent(text)}`);
+
+    const arr = res?.features.filter((e) => e.properties.type !== "municipality");
 
     setLoading(false);
-    if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+    if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
     else addressVerifiedHelpers.setValue("true");
   };
 

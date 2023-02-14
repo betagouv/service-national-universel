@@ -11,13 +11,18 @@ import api from "../../services/api";
 import ExportBox from "./components/ExportBox";
 import { useSelector } from "react-redux";
 
-const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "long", day: "numeric" });
-
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
 const cohortOptions = sessions2023.map(({ id, dateStart, dateEnd }) => {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  const formatter = new Intl.DateTimeFormat("fr-FR", options);
+  const formattedStart = formatter.format(dateStart);
+  const formattedEnd = formatter.format(dateEnd);
+
+  const formattedRange = `${formattedStart} - ${formattedEnd}`;
+
   return {
-    label: `Séjour <b>${dateTimeFormat.formatRange(dateStart, dateEnd)}</b>`,
+    label: `Séjour <b>${formattedRange}</b>`,
     value: id,
   };
 });

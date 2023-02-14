@@ -34,6 +34,7 @@ import { capture } from "../../../../../src/sentry";
 import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
 import RadioInput from "../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
+import { apiAdress } from "../../../../services/api-adresse";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION", "HEBERGEMENT"];
 const DISTANCE_MAX = 100;
@@ -52,8 +53,8 @@ export default function List() {
 
   const callSingleAddressAPI = async (params) => {
     try {
-      const url = `https://api-adresse.data.gouv.fr/search/?q=${params}&limit=1`;
-      const res = await fetch(url).then((response) => response.json());
+      const url = `${params}&limit=1`;
+      const res = await apiAdress(`${encodeURIComponent(url)}`);
       return res?.features[0];
     } catch (e) {
       console.error(e);

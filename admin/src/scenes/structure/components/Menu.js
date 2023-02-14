@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import { canViewPatchesHistory } from "snu-lib";
+import { canViewPatchesHistory, ROLES } from "snu-lib";
 import { StructureContext } from "../view";
 import { useSelector } from "react-redux";
 import Clock from "../../../assets/Clock";
@@ -8,10 +8,11 @@ import Clock from "../../../assets/Clock";
 export default function Menu({ tab }) {
   const { structure } = useContext(StructureContext);
   const user = useSelector((state) => state.Auth.user);
-  const tabs = [
-    { label: "Détails", id: "details", src: `/structure/${structure._id}` },
-    // { label: "Missions", id: "missions", src: `/structure/${structure._id}/missions` },
-  ];
+
+  const tabs = [{ label: "Détails", id: "details", src: `/structure/${structure._id}` }];
+  if ([ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role)) {
+    tabs.push({ label: "Missions", id: "missions", src: `/structure/${structure._id}/missions` });
+  }
   if (canViewPatchesHistory(user)) {
     tabs.push({ label: "Historique", id: "historique", src: `/structure/${structure._id}/historique`, icon: Clock });
   }

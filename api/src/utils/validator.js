@@ -717,10 +717,7 @@ function validateStructureManager(structureManager) {
     .keys({
       firstName: validateFirstName().required(),
       lastName: Joi.string().uppercase().required(),
-      mobile: Joi.string()
-        .length(10)
-        .pattern(/^[0-9]+$/)
-        .required(),
+      mobile: Joi.string().required(),
       email: Joi.string().lowercase().trim().email().required(),
       role: Joi.string().allow(null, ""),
     })

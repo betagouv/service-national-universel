@@ -26,6 +26,7 @@ import { toastr } from "react-redux-toastr";
 import Toggle from "../../../components/Toggle";
 import plausibleEvent from "../../../services/plausible";
 import ReactLoading from "react-loading";
+import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
@@ -297,15 +298,7 @@ export default function CustomMission({ young, onChange }) {
                 }}
                 placeholder="Rechercher une structure"
               />
-              {values.structureId && (
-                <a
-                  target="_blank"
-                  rel="noreferrer"
-                  href={`${adminURL}/structure/${values.structureId}/edit`}
-                  className="inline-block w-full border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-3">
-                  Voir la structure
-                </a>
-              )}
+              {values.structureId && <ViewStructureLink structureId={values.structureId} className="mt-3" />}
             </div>
             <div className="my-5">
               <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
