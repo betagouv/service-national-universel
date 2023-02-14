@@ -116,7 +116,6 @@ export default function Emails({ email }) {
             </div>
           )}
         </div>
-
         <ReactiveList
           componentId="result"
           dataField="createdAt"
@@ -126,6 +125,7 @@ export default function Emails({ email }) {
           react={{ and: FILTERS }}
           showResultStats={false}
           sortBy="desc"
+          renderNoResults={() => <p className="p-4">Aucun email trouvé</p>}
           render={({ data }) => (
             <table className="table-auto w-full">
               <thead>
