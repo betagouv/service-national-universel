@@ -117,8 +117,7 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled =
-    (!corrections?.length && young.files.cniFiles != null && date != null && !loading && !error.text) || (corrections?.length && hasChanged && !loading && !error.text);
+  const isEnabled = corrections?.length ? hasChanged && !loading && !error.text : (young?.files?.cniFiles?.length || files?.length) && date && !loading && !error.text;
 
   if (!category) return <div>Loading</div>;
   return (
