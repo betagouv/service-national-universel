@@ -433,7 +433,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
     if (user.role === ROLES.HEAD_CENTER) {
       filter.push({
         bool: {
-          must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER] } }],
+          must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER, ROLES.REFERENT_DEPARTMENT] } }],
         },
       });
     }
