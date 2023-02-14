@@ -207,8 +207,9 @@ export default function Phase2Application({ young, onChange }) {
 
               <div className="flex flex-col justify-center items-center gap-1">
                 <div className="uppercase text-xs text-gray-400 tracking-wide">Heures de MIG réalisées</div>
-                <div className="flex items-center gap-2 font-bold text-2xl text-gray-800">
-                  <div>{application?.missionDuration || "0"}h</div>
+                <div className="grid grid-cols-3">
+                  <div />
+                  <p className="font-bold text-2xl text-gray-800">{application?.missionDuration || "0"}h</p>
                   {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) && (
                     <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
                       <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
@@ -244,7 +245,7 @@ export default function Phase2Application({ young, onChange }) {
                       <div>Contrat en brouillon</div>
                     </div>
                   ) : contractStatus === "VALIDATED" ? (
-                    <div className="text-xs font-normal px-2 bg-green-400 rounded-sm items-center flex text-white">
+                    <div className="text-xs font-normal px-2 bg-[#71C784] rounded-sm items-center flex text-white">
                       <Check />
                       <div>Contrat signé</div>
                     </div>
@@ -329,7 +330,7 @@ export default function Phase2Application({ young, onChange }) {
                       )}
                     </div>
                     {contractStatus === "VALIDATED" && (
-                      <button onClick={() => downloadContract()} className="py-2 px-3 rounded-md bg-green-400 items-center flex justify-center gap-2">
+                      <button onClick={() => downloadContract()} className="py-2 px-3 rounded-md bg-[#71C784] items-center flex justify-center gap-2">
                         {loadingContract ? (
                           <div className="flex items-center justify-center">
                             <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
@@ -459,18 +460,19 @@ export default function Phase2Application({ young, onChange }) {
 }
 
 const StatusContractPeople = ({ value, description, firstName, lastName, token, contract, target }) => (
-  <div className="w-56 space-y-1">
+  <div className="space-y-1">
     <div className="flex items-center gap-2" data-tip data-for={`${firstName}${lastName}-validation`}>
-      <div className="">{value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}</div>
+      <div className="w-8">
+        {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
+      </div>
       <div>
-        <div className="flex font-semibold space-x-2">
-          <div>{firstName}</div>
-          <div>{lastName?.toUpperCase()}</div>
-        </div>
-        <div className="text-gray-500 text-xs">{description}</div>
+        <p className="font-semibold max-w-[200px] truncate">
+          {firstName} {lastName?.toUpperCase()}
+        </p>
+        <p className="text-gray-500 text-xs">{description}</p>
       </div>
       {value !== "VALIDATED" ? (
-        <ReactTooltip id={`${firstName}${lastName}-validation`} type="light">
+        <ReactTooltip id={`${firstName}${lastName}-validation`} type="light" effect="solid">
           En attente de signature
         </ReactTooltip>
       ) : null}
@@ -531,7 +533,7 @@ function SendContractLink({ contract, target }) {
   );
 }
 
-function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false }) {
+function FileCard({ name, filled, icon, onClick, description, showNumber = false }) {
   return (
     <section className="bg-gray-50 w-64 h-64 rounded-xl text-center flex flex-col items-center justify-between px-4 pt-4">
       <FileIcon filled={filled} icon={icon} />

@@ -9,6 +9,9 @@ import api from "../../../../services/api";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES } from "../../../../utils";
 import { SelectStatusApplicationPhase2 } from "./components/SelectStatusApplicationPhase2";
+import Tag from "../../../../components/Tag";
+import ReactTooltip from "react-tooltip";
+
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
@@ -29,23 +32,18 @@ export default function ApplicationList({ young, onChangeApplication }) {
   };
 
   if (!applications) return <Loader />;
+  if (!applications.length) return <div className="italic text-center m-8">Aucune candidature n&apos;est liée à ce volontaire.</div>;
   return (
-    <div className="p-1">
-      {/* Mission card */}
-      <div className="mx-14 ">
-        {applications.map((hit, i) => (
-          <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
-        ))}
-
-        {applications.length ? null : <div className="italic text-center m-8">Aucune candidature n&apos;est liée à ce volontaire.</div>}
-      </div>
+    <div className="px-12 pt-6 pb-12">
+      {applications.map((hit, i) => (
+        <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
+      ))}
     </div>
   );
 }
 
 const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
-  const [tags, setTags] = useState();
   const [contract, setContract] = useState();
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const history = useHistory();
@@ -60,10 +58,6 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setMission(data);
-      const t = [];
-      data?.city && t.push(data?.city + (data?.zip ? ` - ${data?.zip}` : ""));
-      (data?.domains || []).forEach((d) => t.push(translate(d)));
-      setTags(t);
       if (!hit.contractId) return;
       const { ok: okContract, data: dataContract, code: codeContract } = await api.get(`/contract/${hit.contractId}`);
       if (!okContract) {
@@ -76,57 +70,40 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
 
   if (!mission) return null;
   return (
-    <div className="relative w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-white hover:border-gray-200 shadow-ninaButton mb-4">
-      {/* Choix*/}
-      <div className="text-gray-500 font-medium uppercase text-xs flex justify-end tracking-wider mb-2">
-        {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
+    <div className="bg-white shadow-ninaButton rounded-xl p-3 flex gap-6">
+      {/* icon */}
+      <div className="pl-2 my-auto">
+        <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
       </div>
-      <div className="flex justify-between">
-        <Link className="flex basis-[35%] items-center" to={`/mission/${hit.missionId}`}>
-          {/* icon */}
-          <div className="flex items-center mr-4">
-            <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+
+      <div className="flex-1 grid grid-rows-4">
+        <div className="flex items-center justify-between uppercase text-gray-500 font-medium text-xs tracking-wider">
+          <p className="">{mission.structureName}</p>
+          {/* Choix*/}
+          <p className="">{hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}</p>
+        </div>
+
+        <div className="row-span-2 flex justify-between items-center">
+          <div className="w-1/2 overflow-hidden">
+            <Link to={`/mission/${hit.missionId}`} className="text-lg font-semibold leading-6 my-auto text-gray-900">
+              {mission.name}
+            </Link>
           </div>
-          {/* mission info */}
-          <div className="flex flex-col flex-1 justify-center">
-            <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
-            <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
-            {/* tags */}
-            {tags && (
-              <div className=" inline-flex flex-wrap">
-                {tags.map((tag, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
-                      {tag}
-                    </div>
-                  );
-                })}
-                {mission.isMilitaryPreparation === "true" ? (
-                  <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
-                    Préparation militaire
-                  </div>
-                ) : null}
-              </div>
-            )}
-          </div>
-        </Link>
-        <div className="flex basis-[65%] justify-between items-center">
+
           {/* date */}
-          <div className="flex flex-col basis-[30%] justify-center">
+          <div className="w-1/6 text-xs font-medium space-y-1">
             <div>
-              <span className="text-gray-500 mr-1 text-xs">Du</span>
-              <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.startAt)}</span>
+              <span className="text-gray-500">Du </span>
+              <span className="text-gray-700">{formatStringDateTimezoneUTC(mission.startAt)}</span>
             </div>
             <div>
-              <span className="text-gray-500 text-xs mr-1">Au</span>
-              <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.endAt)}</span>
+              <span className="text-gray-500">Au </span>
+              <span className="text-gray-700">{formatStringDateTimezoneUTC(mission.endAt)}</span>
             </div>
           </div>
 
           {/* places disponibles */}
-          <div className="flex basis-[25%]">
+          <div className="w-1/6 flex justify-between">
             {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) ? (
               <div className="flex flex-col">
                 {contract?.invitationSent === "true" ? (
@@ -146,73 +123,80 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                   </div>
                 )}
               </div>
+            ) : mission.placesLeft <= 1 ? (
+              <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
             ) : (
-              <>
-                {mission.placesLeft <= 1 ? (
-                  <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
-                ) : (
-                  <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
-                )}
-              </>
+              <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
             )}
-          </div>
-          <div>
-            <NavLink
-              to={`/volontaire/${young._id.toString()}/phase2/application/${hit._id.toString()}`}
-              className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300">
-              <Eye width={16} height={16} />
-            </NavLink>
-          </div>
-          <div className="flex basis-[35%] justify-end">
-            {/* statut */}
-            <div onClick={(e) => e.stopPropagation()}>
-              <SelectStatusApplicationPhase2
-                hit={hit}
-                callback={(status) => {
-                  if (status === "VALIDATED") {
-                    history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-                  }
-                  onChangeApplication && onChangeApplication();
-                }}
-                dropdownClassName="right-3"
-              />
-              {hit.status === "WAITING_VALIDATION" && (
-                <div className="absolute right-6">
-                  <div
-                    className="text-blue-600 text-xs cursor-pointer underline mt-1"
-                    onClick={async () => {
-                      setModal({
-                        isOpen: true,
-                        title: "Renvoyer un mail",
-                        message: "Souhaitez-vous renvoyer un mail à la structure ?",
-                        onConfirm: async () => {
-                          try {
-                            const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
-                            if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                            toastr.success("L'email a bien été envoyé");
-                          } catch (e) {
-                            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                          }
-                        },
-                      });
-                    }}>
-                    Relancer la structure
-                  </div>
-                  <ModalConfirm
-                    isOpen={modal?.isOpen}
-                    title={modal?.title}
-                    message={modal?.message}
-                    onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-                    onConfirm={() => {
-                      modal?.onConfirm();
-                      setModal({ isOpen: false, onConfirm: null });
-                    }}
-                  />
-                </div>
-              )}
+            <div>
+              <NavLink
+                to={`/volontaire/${young._id.toString()}/phase2/application/${hit._id.toString()}`}
+                className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300"
+                data-tip=""
+                data-for="tooltip-application">
+                <Eye width={16} height={16} />
+              </NavLink>
+              <ReactTooltip id="tooltip-application" type="light" place="top" effect="solid" className="shadow-xl custom-tooltip-radius" tooltipRadius="6">
+                <div className="text-xs">Voir la candidature</div>
+              </ReactTooltip>
             </div>
           </div>
-          {/* end statut */}
+
+          {/* statut */}
+          <div className="w-1/6 flex" onClick={(e) => e.stopPropagation()}>
+            <div className="flex-1" />
+            <SelectStatusApplicationPhase2
+              hit={hit}
+              callback={(status) => {
+                if (status === "VALIDATED") {
+                  history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+                }
+                onChangeApplication && onChangeApplication();
+              }}
+              dropdownClassName="right-3"
+            />
+            {hit.status === "WAITING_VALIDATION" && (
+              <div className="absolute right-6">
+                <div
+                  className="text-blue-600 text-xs cursor-pointer underline mt-1"
+                  onClick={async () => {
+                    setModal({
+                      isOpen: true,
+                      title: "Renvoyer un mail",
+                      message: "Souhaitez-vous renvoyer un mail à la structure ?",
+                      onConfirm: async () => {
+                        try {
+                          const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
+                          if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                          toastr.success("L'email a bien été envoyé");
+                        } catch (e) {
+                          toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                        }
+                      },
+                    });
+                  }}>
+                  Relancer la structure
+                </div>
+                <ModalConfirm
+                  isOpen={modal?.isOpen}
+                  title={modal?.title}
+                  message={modal?.message}
+                  onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+                  onConfirm={() => {
+                    modal?.onConfirm();
+                    setModal({ isOpen: false, onConfirm: null });
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* tags */}
+        <div className="h-8 flex items-center gap-2">
+          <Tag tag={`${mission.city} ${mission.zip}`} />
+          {mission.domains && mission.domains.map((tag, index) => <Tag key={index} tag={translate(tag)} />)}
+          {mission.isMilitaryPreparation === "true" && <Tag tag="Préparation militaire" />}
         </div>
       </div>
     </div>

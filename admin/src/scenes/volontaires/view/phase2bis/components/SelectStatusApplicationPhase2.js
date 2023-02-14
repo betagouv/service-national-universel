@@ -34,7 +34,7 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
       WAITING_VALIDATION: "blue-100",
       WAITING_VERIFICATION: "blue-100",
       WAITING_ACCEPTATION: "orange-500",
-      VALIDATED: "green-500",
+      VALIDATED: "[#71C784]",
       DONE: "blue-500",
       REFUSED: "blue-800",
       CANCEL: "gray-100",
