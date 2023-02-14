@@ -372,9 +372,9 @@ export const translateEmails = (t) => {
     case "open":
       return "Ouvert";
     case "request":
-      return "Demande";
+      return "Envoyé";
     case "requests":
-      return "Demandes";
+      return "Envoyé";
     case "delivered":
       return "Remis";
     case "deferred":
