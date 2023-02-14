@@ -68,8 +68,7 @@ export default function EmailPanel({ open, setOpen, email }) {
                 </div>
               ))}
             </div>
-            <hr />
-            <iframe srcDoc={emailData.body} className="flex-1" />
+            <iframe srcDoc={emailData.body} className="flex-1 border-t" />
           </div>
         )
       )}

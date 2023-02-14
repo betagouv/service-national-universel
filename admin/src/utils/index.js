@@ -369,6 +369,8 @@ export const translateEmails = (t) => {
   switch (t) {
     case "opened":
       return "Ouvert";
+    case "open":
+      return "Ouvert";
     case "request":
       return "Demande";
     case "requests":

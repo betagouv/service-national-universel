@@ -117,34 +117,33 @@ export default function Emails({ email }) {
           )}
         </div>
 
-        <div className="reactive-result">
-          <ReactiveList
-            componentId="result"
-            dataField="createdAt"
-            pagination={false}
-            distinctField="messageId.keyword"
-            defaultQuery={getDefaultQuery}
-            react={{ and: FILTERS }}
-            showResultStats={false}
-            render={({ data }) => (
-              <table className="table-auto w-full">
-                <thead>
-                  <tr className="uppercase border-t border-t-slate-100">
-                    <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>
-                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Date d&apos;envoi</th>
-                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Template ID</th>
-                    {user.role === ROLES.ADMIN && <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data?.map((email, index) => (
-                    <Email key={index} email={email} />
-                  ))}
-                </tbody>
-              </table>
-            )}
-          />
-        </div>
+        <ReactiveList
+          componentId="result"
+          dataField="createdAt"
+          pagination={false}
+          distinctField="messageId.keyword"
+          defaultQuery={getDefaultQuery}
+          react={{ and: FILTERS }}
+          showResultStats={false}
+          sortBy="desc"
+          render={({ data }) => (
+            <table className="table-auto w-full">
+              <thead>
+                <tr className="uppercase border-t border-t-slate-100">
+                  <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>
+                  <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Template ID</th>
+                  {user.role === ROLES.ADMIN && <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>}
+                  <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Date{user.role === ROLES.ADMIN && " du dernier statut"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.map((email, index) => (
+                  <Email key={index} email={email} />
+                ))}
+              </tbody>
+            </table>
+          )}
+        />
       </ReactiveBase>
     </div>
   );
@@ -164,9 +163,9 @@ function Email({ email }) {
           <p className="text-sm font-semibold max-w-2xl truncate">{email.subject}</p>
           <p className="text-xs">{TEMPLATE_DESCRIPTIONS[email.templateId] || ""}</p>
         </td>
-        <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
         <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
         {user.role === ROLES.ADMIN && <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>}
+        <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
       </tr>
       <EmailPanel open={open} setOpen={setOpen} email={email} />
     </>
