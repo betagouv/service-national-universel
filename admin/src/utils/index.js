@@ -404,6 +404,8 @@ export const translateEmails = (t) => {
       return "Erreur";
     case "click":
       return "Clic";
+    case "proxy_open":
+      return "Ouverture par proxy";
     default:
       return t;
   }
