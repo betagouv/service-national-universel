@@ -41,16 +41,7 @@ function handleError(err, req, res, next) {
   res.status(statusCode).json(output);
 }
 
-const origin = [
-  APP_URL,
-  ADMIN_URL,
-  SUPPORT_URL,
-  KNOWLEDGEBASE_URL,
-  "https://inscription.snu.gouv.fr",
-  "mmlalmlj-snu-app.baleen.cshield.net",
-  "ttrbatwx-snu-admin.baleen.cshield.net",
-  "qylcfvov-snu-api.baleen.cshield.net",
-];
+const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL];
 app.use(
   cors({
     credentials: true,
