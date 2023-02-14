@@ -371,7 +371,7 @@ describe("Es", () => {
       passport.user.role = ROLES.HEAD_CENTER;
       let res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
-      expect(getFilter()[0].bool.must[0].terms["role.keyword"]).toStrictEqual([ROLES.HEAD_CENTER]);
+      expect(getFilter()[0].bool.must[0].terms["role.keyword"]).toStrictEqual([ROLES.HEAD_CENTER, ROLES.REFERENT_DEPARTMENT]);
 
       passport.user.role = ROLES.ADMIN;
     });
