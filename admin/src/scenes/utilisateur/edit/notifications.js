@@ -1,12 +1,14 @@
 import React from "react";
-import Emails from "../../../components/views/Emails";
+import Emails from "../../../components/views/Emails2";
 import UserHeader from "../composants/UserHeader";
 
 export default function Edit({ user, currentUser }) {
   return (
     <>
       <UserHeader user={user} currentUser={currentUser} tab="notifications" />
-      <Emails email={user.email} />
+      <div className="m-8">
+        <Emails email={user.email} />
+      </div>
     </>
   );
 }

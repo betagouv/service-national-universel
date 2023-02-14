@@ -16,7 +16,7 @@ import DateInput from "../../components/dateInput";
 import { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import Emails from "../../components/views/Emails";
+import Emails from "../../components/views/Emails2";
 import HistoricComponent from "../../components/views/Historic";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser as ReduxSetUser } from "../../redux/auth/actions";
