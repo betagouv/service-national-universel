@@ -253,6 +253,7 @@ function formatValue(path, value) {
     if (path.includes("correctionRequests")) return `${translateModelFields("young", value.field)} : ${value.message}`;
     if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;
     if (path.includes("notes")) return value.note?.substring(0, 100);
+    if (path.includes("structureManager")) return `${value.firstName} ${value.lastName}`;
     return JSON.stringify(value);
   }
   return value;

@@ -203,13 +203,15 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             <p className="font-medium text-[15px] leading-6 text-[#242526]">
               {pdr.department} • {pdr.region}
             </p>
-            <Link
-              to={`/point-de-rassemblement/${pdr._id}`}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}>
-              <ExternalLink className="text-[#9CA3AF]" />
-            </Link>
+            {user.role !== ROLES.TRANSPORTER && (
+              <Link
+                to={`/point-de-rassemblement/${pdr._id}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}>
+                <ExternalLink className="text-[#9CA3AF]" />
+              </Link>
+            )}
           </div>
           <p className="text-xs leading-4 text-[#738297] font-light">{pdr.name}</p>
           <p className="text-xs leading-4 text-[#738297] font-light">

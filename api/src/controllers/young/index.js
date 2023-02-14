@@ -39,7 +39,7 @@ const {
   deleteFile,
   updateSeatsTakenInBusLine,
 } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate, unsync } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
@@ -839,6 +839,8 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
         young.set({ [key]: undefined });
       }
     }
+
+    await unsync(young);
 
     young.set({ location: { lat: undefined, lon: undefined } });
     young.set({ schoolLocation: { lat: undefined, lon: undefined } });

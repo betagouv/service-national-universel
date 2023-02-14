@@ -17,6 +17,9 @@ import CloseSvg from "../../../../assets/Close";
 import { ModalContainer } from "../../../../components/modals/Modal";
 import { Modal } from "reactstrap";
 
+import ConfirmationModal from "../modals/ConfirmationModal";
+import Warning from "../../../../assets/icons/Warning";
+
 const ALONE_ARRIVAL_HOUR = "16h";
 const ALONE_DEPARTURE_HOUR = "11h";
 
@@ -31,6 +34,9 @@ export default function StepPDR({ young, center }) {
   const [error, setError] = useState(null);
   const [choosenMeetingPoint, setChoosenMeetingPoint] = useState(null);
   const [cohort, setCohort] = useState(null);
+
+  const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -93,6 +99,7 @@ export default function StepPDR({ young, center }) {
 
   async function saveChoice(choice) {
     try {
+      setLoading(true);
       const result = await api.put(`/young/${young._id}/point-de-rassemblement`, choice);
       if (result.ok) {
         toastr.success("Votre choix est enregistré");
@@ -102,7 +109,11 @@ export default function StepPDR({ young, center }) {
       } else {
         toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants.");
       }
+      setLoading(false);
+      setModalMeetingPoint({ isOpen: false, meetingPoint: null });
     } catch (err) {
+      setLoading(false);
+      setModalMeetingPoint({ isOpen: false, meetingPoint: null });
       capture(err);
       toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants.");
     }
@@ -110,6 +121,40 @@ export default function StepPDR({ young, center }) {
 
   return (
     <>
+      <ConfirmationModal
+        isOpen={modalMeetingPoint?.isOpen}
+        loading={loading}
+        icon={<Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />}
+        title={"Changement de PDR"}
+        confirmText="Confirmer le changement"
+        onCancel={() => setModalMeetingPoint({ isOpen: false, meetingPoint: null })}
+        onConfirm={() => {
+          if (modalMeetingPoint.meetingPoint) return chooseMeetingPoint(modalMeetingPoint.meetingPoint);
+          return chooseGoAlone();
+        }}>
+        <div className="flex flex-col gap-2  text-[14px] leading-[20px] text-gray-900 mt-[8px] text-center my-2">
+          {modalMeetingPoint.meetingPoint ? (
+            <>
+              <div>Vous vous apprêtez à changer votre point de rassemblement, souhaitez-vous confirmer cette action ? </div>
+              <div>
+                Après avoir cliquer sur &apos;<i>Confirmer le changement</i>&apos;, nous vous invitons à télécharger votre convocation qui a été mise à jour.
+              </div>
+            </>
+          ) : (
+            <>
+              <div> Vous vous apprêtez à choisir de vous rendre seul au centre, souhaitez-vous confirmer cette action ? </div>
+              <div>Après avoir cliquer sur &apos;Confirmer le changement&apos;, nous vous invitons à télécharger votre convocation qui a été mise à jour.</div>
+            </>
+          )}
+          {modalMeetingPoint.meetingPoint ? (
+            <div>
+              <div>Nouveau point de rassemblement :</div>
+              <div className="text-[#6B7280]">{modalMeetingPoint.meetingPoint.name + ", " + addressOf(modalMeetingPoint.meetingPoint)} </div>
+            </div>
+          ) : null}
+        </div>
+      </ConfirmationModal>
+
       {/* Desktop */}
       <div
         className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`}
@@ -164,7 +209,9 @@ export default function StepPDR({ young, center }) {
                 <MeetingPointChooser
                   key={mp._id}
                   meetingPoint={mp}
-                  onChoose={() => chooseMeetingPoint(mp)}
+                  onChoose={() => {
+                    return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
+                  }}
                   choosed={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
                   expired={pdrChoiceExpired}
                 />
@@ -172,7 +219,9 @@ export default function StepPDR({ young, center }) {
               <MeetingPointGoAloneDesktop
                 center={center}
                 young={young}
-                onChoose={chooseGoAlone}
+                onChoose={() => {
+                  return setModalMeetingPoint({ isOpen: true });
+                }}
                 choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
                 meetingPointsCount={meetingPoints.length}
@@ -250,7 +299,9 @@ export default function StepPDR({ young, center }) {
                     <MeetingPointChooser
                       key={mp._id}
                       meetingPoint={mp}
-                      onChoose={() => chooseMeetingPoint(mp)}
+                      onChoose={() => {
+                        return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
+                      }}
                       choosed={mp._id === young.meetingPointId}
                       expired={pdrChoiceExpired}
                     />
@@ -258,7 +309,9 @@ export default function StepPDR({ young, center }) {
                   <MeetingPointGoAloneMobile
                     center={center}
                     young={young}
-                    onChoose={chooseGoAlone}
+                    onChoose={() => {
+                      return setModalMeetingPoint({ isOpen: true });
+                    }}
                     choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                     expired={pdrChoiceExpired}
                   />

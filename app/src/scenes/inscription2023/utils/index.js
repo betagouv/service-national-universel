@@ -46,7 +46,7 @@ export const hostRelationshipOptions = [
   { label: "Autre", value: "Autre" },
 ];
 
-export const frenchNationalityOptions = [
+export const inFranceOrAbroadOptions = [
   { value: "true", label: "En France (Métropolitaine ou Outre-mer)" },
   { value: "false", label: "À l'étranger" },
 ];

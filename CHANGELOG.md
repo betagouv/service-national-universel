@@ -1,3 +1,36 @@
+# [1.218.0](https://github.com/betagouv/service-national-universel/compare/v1.217.0...v1.218.0) (2023-02-13)
+
+
+### Bug Fixes
+
+* **admin:** history columns width ([0f99e39](https://github.com/betagouv/service-national-universel/commit/0f99e395c2aaef5de7db1445ecf57a8ac095b580))
+* **admin:** pas de relance des parents s'ils n'ont pas d'email ([#2250](https://github.com/betagouv/service-national-universel/issues/2250)) ([987c9b7](https://github.com/betagouv/service-national-universel/commit/987c9b76590e7520bc297ef70f3d7682e106b265))
+* **admin:** Support for firefox 78 ([9c3236b](https://github.com/betagouv/service-national-universel/commit/9c3236b0acabb6529bfd4bd1dfc8492b0e0c9337))
+* **api/admin:** Retours structures - Carte représentant ([#2255](https://github.com/betagouv/service-national-universel/issues/2255)) ([e72d9b5](https://github.com/betagouv/service-national-universel/commit/e72d9b5edca3037f8be0f0dd567090e314a061c6))
+* **lib/admin:** Retours structures - gestion des rôles ([#2252](https://github.com/betagouv/service-national-universel/issues/2252)) ([7761b80](https://github.com/betagouv/service-national-universel/commit/7761b803956ffa3b3ad7541cb8548b3e24fe3a65))
+
+
+### Features
+
+* **admin:** add link to structure page on user form ([609d2e6](https://github.com/betagouv/service-national-universel/commit/609d2e606f10a0e081acec458da023a846c8320a))
+* **admin:** refonte historique structure ([2abda10](https://github.com/betagouv/service-national-universel/commit/2abda10768fda8781d09ede966577deb1f21e52f))
+* **admin:** remove old user page ([e7ec011](https://github.com/betagouv/service-national-universel/commit/e7ec011d167a62b8403cbd76d88c182a7468e739))
+
+# [1.217.0](https://github.com/betagouv/service-national-universel/compare/v1.216.0...v1.217.0) (2023-02-10)
+
+
+### Bug Fixes
+
+* **admin:** prod redirection to feature in staging ([aaff84c](https://github.com/betagouv/service-national-universel/commit/aaff84c2425f9550ba9cdb7146906699adaecdbf))
+* **admin:** structure view responsible ([da446da](https://github.com/betagouv/service-national-universel/commit/da446da98aa85ed5c1b871e30b9b2f4feff0a4e8))
+* **app:** french nationality ([#2251](https://github.com/betagouv/service-national-universel/issues/2251)) ([10c0500](https://github.com/betagouv/service-national-universel/commit/10c050056ccb33396e614bf3cd3d6d0402b174d3))
+* **sib:** Delete contacts on soft-delete ([#2248](https://github.com/betagouv/service-national-universel/issues/2248)) ([9ff564b](https://github.com/betagouv/service-national-universel/commit/9ff564b01860ef5dfd62927f6f71e041fc53bd63))
+
+
+### Features
+
+* **app:** Modal confirmation de changement de PDR ([#2245](https://github.com/betagouv/service-national-universel/issues/2245)) ([6ce66fe](https://github.com/betagouv/service-national-universel/commit/6ce66fe9b320a907610bbabf8eaf7999ca5c8f38))
+
 # [1.216.0](https://github.com/betagouv/service-national-universel/compare/v1.215.0...v1.216.0) (2023-02-09)
 
 

@@ -177,21 +177,17 @@ const ReactiveList = ({ cohort, history }) => {
               </div>
             </div>
             <div className="flex gap-2 items-center">
-              {environment !== "production" && (
-                <>
-                  <button
-                    className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-                    onClick={() => history.push("/ligne-de-bus/historique")}>
-                    <History className="text-gray-400" />
-                    Historique
-                  </button>
-                  <button
-                    className="text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-                    onClick={() => history.push("/ligne-de-bus/demande-de-modification")}>
-                    Demande de modification
-                  </button>
-                </>
-              )}
+              <button
+                className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
+                onClick={() => history.push("/ligne-de-bus/historique")}>
+                <History className="text-gray-400" />
+                Historique
+              </button>
+              <button
+                className="text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
+                onClick={() => history.push("/ligne-de-bus/demande-de-modification")}>
+                Demande de modification
+              </button>
               <ExportComponent
                 title="Exporter"
                 defaultQuery={getExportQuery}

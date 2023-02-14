@@ -155,7 +155,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
     <>
       <Breadcrumbs items={[{ label: "Mes candidatures", to: "/volontaire/list/all" }, { label: "Fiche candidature" }]} />
       <YoungHeader young={young} tab={"candidature"} onChange={onChange} isStructure={true} applicationId={application?._id} />
-      {ENABLE_PM && <Phase2MilitaryPreparation young={young} FileCard={FileCard} />}
+      {ENABLE_PM && mission?.isMilitaryPreparation === "true" && <Phase2MilitaryPreparation young={young} FileCard={FileCard} />}
 
       <div className="p-7">
         <div className="bg-white w-full h-full rounded-lg px-4">

@@ -30,6 +30,7 @@ import { toastr } from "react-redux-toastr";
 import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { MISSION_STATUS } from "snu-lib";
+import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -387,15 +388,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
                   />
-                  {values.structureName && (
-                    <a
-                      target="_blank"
-                      rel="noreferrer"
-                      href={`${adminURL}/structure/${values.structureId}/edit`}
-                      className="inline-block w-full border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4">
-                      Voir la structure
-                    </a>
-                  )}
+                  {values.structureName && <ViewStructureLink structureId={values.structureId} />}
                 </div>
                 <div className="mt-4">
                   <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>

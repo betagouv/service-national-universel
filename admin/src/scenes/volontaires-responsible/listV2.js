@@ -474,8 +474,9 @@ export default function List() {
                   }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Mission")}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Mission", "Mission")}</div>}
                 />
 
                 <MultiDropdownList
@@ -490,7 +491,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Tuteur")}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Tuteur", "Tuteur")}</div>}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -504,7 +505,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Statut", "Statut")}</div>}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -518,13 +519,19 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Pièces jointes", "Pièces jointes")}
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Pièces jointes", "Pièces jointes")}</div>}
                   showMissing={true}
                   missingLabel="Aucune pièce jointe"
                 />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" placeholder="Département du volontaire" />
+                <DepartmentFilter
+                  defaultQuery={getDefaultQuery}
+                  filters={FILTERS}
+                  dataField="youngDepartment.keyword"
+                  placeholder="Département du volontaire"
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
+                />
                 <RegionFilter
-                  customQuery={function (value, props) {
+                  customQuery={function (value) {
                     let departmentArray = [];
                     if (Array.isArray(value)) {
                       value?.map((e) => {
@@ -552,6 +559,7 @@ export default function List() {
                   filters={FILTERS}
                   dataField="youngDepartment.keyword"
                   placeholder="Région du volontaire"
+                  renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
                 />
                 <DeleteFilters />
               </div>
