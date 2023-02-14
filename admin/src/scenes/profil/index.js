@@ -136,8 +136,8 @@ export default function Profil() {
       const { data, ok } = await api.put("/referent", values);
       if (ok) {
         dispatch(setUser(data));
-        setValuesRightHaveChanged(false);
-        setValues();
+        setValuesLeftHaveChanged(false);
+        setValues(data);
         return toastr.success("Profil mis à jour !");
       }
     } catch (e) {
@@ -300,7 +300,15 @@ const Field = ({ onChange, value, label, disabled = false, error, readOnly = fal
           disabled={disabled}
           readOnly={readOnly}
         />
-        {eye && <>{eyeVisible ? <Eye onClick={() => setEyeVisible(!eyeVisible)} /> : <EyeSlash onClick={() => setEyeVisible(!eyeVisible)} />}</>}
+        {eye && (
+          <>
+            {eyeVisible ? (
+              <Eye className="text-gray-500" onClick={() => setEyeVisible(!eyeVisible)} />
+            ) : (
+              <EyeSlash className="text-gray-500" onClick={() => setEyeVisible(!eyeVisible)} />
+            )}
+          </>
+        )}
       </div>
 
       {error && <div className="text-[#EF4444]">{error}</div>}
