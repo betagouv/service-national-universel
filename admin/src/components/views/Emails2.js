@@ -126,23 +126,26 @@ export default function Emails({ email }) {
           showResultStats={false}
           sortBy="desc"
           renderNoResults={() => <p className="p-4">Aucun email trouvé</p>}
-          render={({ data }) => (
-            <table className="table-auto w-full">
-              <thead>
-                <tr className="uppercase border-t border-t-slate-100">
-                  <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>
-                  <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Template ID</th>
-                  {user.role === ROLES.ADMIN && <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>}
-                  <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Date{user.role === ROLES.ADMIN && " du dernier statut"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data?.map((email, index) => (
-                  <Email key={index} email={email} />
-                ))}
-              </tbody>
-            </table>
-          )}
+          render={({ data }) => {
+            if (!data || data.length === 0) return null;
+            return (
+              <table className="table-auto w-full">
+                <thead>
+                  <tr className="uppercase border-t border-t-slate-100">
+                    <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>
+                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Template ID</th>
+                    {user.role === ROLES.ADMIN && <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>}
+                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Date{user.role === ROLES.ADMIN && " du dernier statut"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.map((email, index) => (
+                    <Email key={index} email={email} />
+                  ))}
+                </tbody>
+              </table>
+            );
+          }}
         />
       </ReactiveBase>
     </div>
