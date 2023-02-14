@@ -204,6 +204,9 @@ export default function SchemaRepartition({ region, department }) {
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
         centerName: g.centerName,
+        centerAddress: g.centerAddress,
+        centerZip: g.centerZip,
+        centerCity: g.centerCity,
         centerDepartment: g.toDepartment,
         centerRegion: g.toRegion,
       };
@@ -252,6 +255,9 @@ export default function SchemaRepartition({ region, department }) {
       "Nombre de volontaires",
       "ID centre",
       "Nom du centre",
+      "Adresse du centre",
+      "Code Postal du centre",
+      "Commune du centre",
       "Département du centre",
       "Région du centre",
     ];
