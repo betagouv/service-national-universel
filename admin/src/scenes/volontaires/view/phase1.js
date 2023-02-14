@@ -229,7 +229,7 @@ export default function Phase1(props) {
                     name="youngPhase1Agreement"
                     label="Confirmation de la participation"
                     className="flex-1 min-w-[250px]"
-                    readOnly={!editing || !isYoungCheckinOpen}
+                    readOnly={!editing}
                     type="select"
                     setSelected={({ value }) =>
                       setModal({
@@ -284,7 +284,7 @@ export default function Phase1(props) {
                 <div className="flex-1 min-w-[250px] items-stretch">
                   <div
                     onClick={() => {
-                      if (!editing) return;
+                      if (!editing || !isYoungCheckinOpen) return;
                       setModalPointageDepart({ isOpen: true });
                     }}
                     className={` border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"} h-full`}>
