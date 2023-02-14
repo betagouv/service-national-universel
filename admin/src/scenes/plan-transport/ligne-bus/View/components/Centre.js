@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canEditLigneBusCenter, translate } from "snu-lib";
+import { canEditLigneBusCenter, ROLES, translate } from "snu-lib";
 import ExternalLink from "../../../../../assets/icons/ExternalLink";
 import Pencil from "../../../../../assets/icons/Pencil";
 import { capture } from "../../../../../sentry";
@@ -100,13 +100,15 @@ export default function Centre({ bus, setBus }) {
             <p className="font-medium text-[15px] leading-6 text-[#242526]">
               {bus.centerDetail.department} • {bus.centerDetail.region}
             </p>
-            <Link
-              to={`/centre/${bus.centerDetail._id}`}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}>
-              <ExternalLink className="text-[#9CA3AF]" />
-            </Link>
+            {user.role !== ROLES.TRANSPORTER && (
+              <Link
+                to={`/centre/${bus.centerDetail._id}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}>
+                <ExternalLink className="text-[#9CA3AF]" />
+              </Link>
+            )}
           </div>
           <p className="text-xs leading-4 text-[#738297] font-light">{bus.centerDetail.name}</p>
           <p className="text-xs leading-4 text-[#738297] font-light">

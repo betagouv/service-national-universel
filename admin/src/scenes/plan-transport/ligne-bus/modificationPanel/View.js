@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { ROLES, translate } from "snu-lib";
 import PanelV2 from "../../../../components/PanelV2";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
@@ -279,7 +279,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                   {getInitials(user.firstName + " " + user.lastName)}
                 </div>
                 <textarea rows={1} className="flex-1 appearance-none p-1" placeholder="Répondre" value={message} onChange={(e) => setMessage(e.target.value)} />
-                {modification?.opinion !== "true" && modification?.opinion !== "false" && message === "" && (
+                {modification?.opinion !== "true" && modification?.opinion !== "false" && message === "" && user.role !== ROLES.TRANSPORTER && (
                   <>
                     <button
                       data-tip

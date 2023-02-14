@@ -1,7 +1,16 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch, canViewBus, canSearchLigneBus } = require("snu-lib/roles");
+const {
+  ROLES,
+  canSearchAssociation,
+  canSearchSessionPhase1,
+  canSearchMeetingPoints,
+  canSearchInElasticSearch,
+  canViewBus,
+  canSearchLigneBus,
+  canViewEmailHistory,
+} = require("snu-lib/roles");
 const { region2department, department2region } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
 const esClient = require("../es");
@@ -424,7 +433,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
     if (user.role === ROLES.HEAD_CENTER) {
       filter.push({
         bool: {
-          must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER] } }],
+          must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER, ROLES.REFERENT_DEPARTMENT] } }],
         },
       });
     }
@@ -643,6 +652,31 @@ router.post("/bus/:action(_msearch|export)", passport.authenticate(["referent"],
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "bus", body: body });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/email/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+
+    if (!canViewEmailHistory(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    let filter = [];
+
+    if (user.role !== ROLES.ADMIN) {
+      filter.push({ term: { "event.keyword": "delivered" } });
+    }
+
+    if (req.params.action === "export") {
+      const response = await allRecords("email", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "email", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

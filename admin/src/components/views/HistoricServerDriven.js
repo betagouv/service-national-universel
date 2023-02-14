@@ -129,7 +129,7 @@ function FilterDrawer({ filters, changeFilters, filterOptions }) {
   return (
     <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
       <MultiSelect
-        options={filterOptions ? filterOptions.path.map((e) => ({ label: translateBusPatchesField(e) + " - " + e, value: e })) : []}
+        options={filterOptions ? filterOptions.path.map((e) => ({ label: translateBusPatchesField(e), value: e })) : []}
         value={filters.path}
         onChange={(path) => changeFilters((f) => ({ ...f, ...{ path } }))}
         label="Donnée modifiée"
