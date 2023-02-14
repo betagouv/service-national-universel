@@ -7,7 +7,7 @@ import Loader from "../../components/Loader";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, copyToClipboard } from "../../utils";
+import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, copyToClipboard } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
@@ -102,9 +102,9 @@ export default function Profil() {
   };
   const onPasswordSubmit = async () => {
     const error = {};
-    console.log(rightValues);
     if (!rightValues?.password) error.password = "Le mot de passe est obligatoire";
-    if (!rightValues?.newPassword) error.newPassword = "Le nouveau mot de passe est obligatoire";
+    const validateNewPassword = getPasswordErrorMessage(rightValues?.newPassword);
+    if (validateNewPassword) error.newPassword = validateNewPassword;
     if (!rightValues?.verifyPassword) error.verifyPassword = "La vérification du mot de passe est obligatoire";
     if (rightValues?.newPassword !== rightValues?.verifyPassword) error.verifyPassword = "Les mots de passe ne correspondent pas";
     setErrors(error);
@@ -216,7 +216,7 @@ export default function Profil() {
               <div
                 className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
                 onClick={() => {
-                  setRightValues({ password: "", newPassword: "", confirmPassword: "" });
+                  setRightValues({ password: "", newPassword: "", verifyPassword: "" });
                   setValuesRightHaveChanged(false);
                   setErrors({});
                 }}>
