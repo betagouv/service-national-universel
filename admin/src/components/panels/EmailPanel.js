@@ -12,8 +12,26 @@ export default function EmailPanel({ open, setOpen, email }) {
   const [emailData, setEmailData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [copied, setCopied] = React.useState(false);
+
   const regex = /<(.*)@smtp-relay.mailin.fr>/;
   const ID = email.messageId.match(regex)[1];
+  const events = formatEvents(emailData?.events) || [];
+
+  function formatEvents(events) {
+    if (!events) return [];
+    let formattedEvents = [];
+    let count = 1;
+    const arr = events?.reverse();
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].name === arr[i + 1]?.name) {
+        count++;
+      } else {
+        formattedEvents.push({ ...arr[i], count });
+        count = 1;
+      }
+    }
+    return formattedEvents;
+  }
 
   async function getMail(email) {
     try {
@@ -61,9 +79,13 @@ export default function EmailPanel({ open, setOpen, email }) {
               </button>
             </div>
             <div className="flex flex-wrap gap-8">
-              {emailData.events.map((event, index) => (
+              {events.map((event, index) => (
                 <div key={index} className="space-y-2">
-                  <p className="w-min mx-auto text-center text-gray-800 bg-gray-100 rounded-full px-3 py-1 m-1">{translateEmails(event.name)}</p>
+                  <p className="mx-auto text-center text-gray-800">
+                    <span className="bg-gray-100 rounded-full px-3 py-1">{translateEmails(event.name)}</span>
+                    <span> </span>
+                    {event.count > 1 && <span className="border rounded-full px-3 py-1">x {event.count}</span>}
+                  </p>
                   <p className="text-center text-gray-500">{formatLongDateFR(event.time)}</p>
                 </div>
               ))}
