@@ -8,7 +8,6 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Button from "../Button";
 import Field from "../../../missions/components/Field";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
-import { regexPhoneFrenchCountries } from "../../../../utils";
 
 export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
   const { structure } = useContext(StructureContext);
@@ -16,6 +15,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
   const [data, setData] = useState(structure.structureManager || {});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
   const [errors, setErrors] = useState({});
+  const regex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/gm;
 
   const handleChange = (e) => setData({ ...data, [e.target.name]: e.target.value });
 
@@ -26,7 +26,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
     if (!data.email) errors.email = "L'email est obligatoire";
     if (!validator.isEmail(data.email)) errors.email = "L'email n'est pas valide";
     if (!data.mobile) errors.mobile = "Le téléphone est obligatoire";
-    if (!validator.matches(data.mobile, regexPhoneFrenchCountries)) errors.mobile = "Le téléphone n'est pas valide (exemple : (+33)(0)642424242)";
+    if (!validator.matches(data.mobile, regex)) errors.mobile = "Le téléphone n'est pas valide (exemple : (+33)(0)642424242)";
 
     if (Object.keys(errors).length > 0) return setErrors(errors);
     setErrors({});
