@@ -135,7 +135,27 @@ async function loadSchemaGroups({ department, region, cohort }) {
       },
     },
     {
-      $project: { gpIds: 0 },
+      $addFields: { centerObjectId: { $toObjectId: "$centerId" } },
+    },
+    {
+      $lookup: {
+        from: "cohesioncenters",
+        localField: "centerObjectId",
+        foreignField: "_id",
+        as: "center",
+      },
+    },
+    {
+      $unwind: "$center",
+    },
+    {
+      $addFields: {
+        centerAddress: "$center.address",
+        centerZip: "$center.zip",
+      },
+    },
+    {
+      $project: { gpIds: 0, center: 0, centerObjectId: 0 },
     },
   ]);
 }
