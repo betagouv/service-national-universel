@@ -302,7 +302,7 @@ const ListSessions = ({ user, firstSession }) => {
       },
       aggs: {
         group_by_meetingPointId: {
-          terms: { field: "meetingPointId.keyword" },
+          terms: { field: "meetingPointId.keyword", size: ES_NO_LIMIT },
         },
       },
       size: 0,
