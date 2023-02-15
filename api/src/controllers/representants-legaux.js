@@ -176,6 +176,10 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    if (young.status === YOUNG_STATUS.REFUSED) {
+      return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     // --- fin du consentement ?
     let shouldSendToParent2 = false;
     let statusChanged = false;
