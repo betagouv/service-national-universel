@@ -35,8 +35,6 @@ export default function Profil() {
 
   const [values, setValues] = useState(user);
   const [rightValues, setRightValues] = useState({ password: "", newPassword: "", verifyPassword: "" });
-  const [valuesLeftHaveChanged, setValuesLeftHaveChanged] = useState(false);
-  const [valuesRightHaveChanged, setValuesRightHaveChanged] = useState(false);
   const [errors, setErrors] = useState({});
 
   const getSubRole = (role) => {
@@ -93,12 +91,10 @@ export default function Profil() {
 
   const handleChange = (name, value) => {
     setValues({ ...values, [name]: value });
-    setValuesLeftHaveChanged(true);
   };
 
   const handlePasswordChange = (name, value) => {
     setRightValues({ ...rightValues, [name]: value });
-    setValuesRightHaveChanged(true);
   };
   const onPasswordSubmit = async () => {
     const error = {};
@@ -136,7 +132,6 @@ export default function Profil() {
       const { data, ok } = await api.put("/referent", values);
       if (ok) {
         dispatch(setUser(data));
-        setValuesLeftHaveChanged(false);
         setValues(data);
         return toastr.success("Profil mis à jour !");
       }
@@ -164,29 +159,26 @@ export default function Profil() {
           {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR].includes(values.role) ? (
             <Select label="Fonction" selected={values.subRole} setSelected={(e) => handleChange("subRole", e.value)} options={getSubRole(values.role)} />
           ) : null}
-          {user.role === ROLES.REFERENT_DEPARTMENT ? <Field label="Département" value={values.department} readOnly /> : null}
-          {user.role === ROLES.REFERENT_REGION ? <Field label="Région" value={values.region} readOnly /> : null}
+          {user.role === ROLES.REFERENT_DEPARTMENT ? <Field disabled label="Département" value={values.department} readOnly /> : null}
+          {user.role === ROLES.REFERENT_REGION ? <Field disabled label="Région" value={values.region} readOnly /> : null}
           <Field label="Email" copy onChange={(e) => handleChange("email", e.target.value)} value={values.email} error={errors?.email} />
           <div className="flex flex-row justify-between items-center gap-4">
             <Field label="Téléphone mobile (facultatif)" onChange={(e) => handleChange("mobile", e.target.value)} value={values.mobile} error={errors?.mobile} />
             <Field label="Téléphone fixe (facultatif)" onChange={(e) => handleChange("phone", e.target.value)} value={values.phone ? values.phone : ""} error={errors?.phone} />
           </div>
-          {valuesLeftHaveChanged && (
-            <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
-              <div
-                className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
-                onClick={() => {
-                  setValues({ ...user });
-                  setValuesLeftHaveChanged(false);
-                  setErrors({});
-                }}>
-                Annuler
-              </div>
-              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onSubmit}>
-                Enregistrer
-              </div>
+          <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
+            <div
+              className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+              onClick={() => {
+                setValues({ ...user });
+                setErrors({});
+              }}>
+              Annuler
             </div>
-          )}
+            <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onSubmit}>
+              Enregistrer
+            </div>
+          </div>
         </div>
 
         <div className="hidden xl:flex justify-center items-center px-[56px]">
@@ -211,22 +203,19 @@ export default function Profil() {
             value={rightValues.verifyPassword}
             error={errors?.verifyPassword}
           />
-          {valuesRightHaveChanged && (
-            <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
-              <div
-                className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
-                onClick={() => {
-                  setRightValues({ password: "", newPassword: "", verifyPassword: "" });
-                  setValuesRightHaveChanged(false);
-                  setErrors({});
-                }}>
-                Annuler
-              </div>
-              <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onPasswordSubmit}>
-                Valider mon nouveau mot de passe
-              </div>
+          <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
+            <div
+              className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+              onClick={() => {
+                setRightValues({ password: "", newPassword: "", verifyPassword: "" });
+                setErrors({});
+              }}>
+              Annuler
             </div>
-          )}
+            <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onPasswordSubmit}>
+              Valider mon nouveau mot de passe
+            </div>
+          </div>
         </div>
       </div>
       <div className="flex justify-center items-center my-8">
