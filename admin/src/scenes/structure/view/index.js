@@ -4,13 +4,10 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
-import Details from "./details";
 import DetailsV2 from "./detailsV2";
 import Missions from "./missions";
-import Historic from "./history";
 import HistoricV2 from "./historyV2";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { environment } from "../../../config";
 
 export const StructureContext = createContext(null);
 

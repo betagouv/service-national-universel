@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import api from "../../../services/api";
-import StructureView from "./wrapper";
 import StructureViewV2 from "./wrapperv2";
 import Panel from "../../missions/panel";
 
 import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import Loader from "../../../components/Loader";
-import { environment } from "../../../config";
 
 export default function Mission({ structure }) {
   const [data, setData] = useState([]);
