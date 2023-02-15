@@ -181,7 +181,7 @@ export default function Phase2Application({ young, onChange }) {
                     <div className="text-font-gray-800 font-bold text-2xl">{mission.name}</div>
                     {/* tags */}
                     {tags && (
-                      <div className="inline-flex flex-wrap pt-2">
+                      <div className="inline-flex flex-wrap pt-2 gap-2">
                         {tags.map((tag, index) => (
                           <Tag key={index} tag={tag} />
                         ))}
