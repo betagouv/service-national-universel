@@ -1,27 +1,10 @@
-import React, {useState} from "react";
+import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { PlainButton } from "../../../components/Buttons";
 import ExcelColor from "../../components/Icons/ExcelColor.png";
-import api from "../../../../../services/api";
-import {download} from "snu-lib";
-import {toastr} from "react-redux-toastr";
+import { CDN_BASE_URL } from "../../../../../utils";
 
 export default function Download({ nextStep }) {
-  const [downloading, setDownloading] = useState(false);
-
-  async function downloadFile() {
-    setDownloading(true);
-    try {
-      const result = await api.get(``);
-      const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
-      download(blob, result.fileName);
-    } catch (err) {
-      toastr.error("Impossible de télécharger le fichier. Veuillez essayer dans quelques instants.");
-    }
-    setDownloading(false);
-  }
-
-
   return (
     <>
       <div className="flex flex-col w-full rounded-xl bg-white mt-8 pt-12 pb-24 px-8 gap-6">
@@ -42,7 +25,7 @@ export default function Download({ nextStep }) {
             <img src={ExcelColor} alt="Excel" className="w-[99px]" />
             <a
               className="flex items-center gap-3 text-blue-700 bg-white border !border-blue-600 py-2 rounded-md px-4 font-medium text-sm hover:shadow"
-              href={``}>
+              href={`${CDN_BASE_URL}/file/snu-plan-de-transport-model.xlsx`}>
               <BsDownload className="text-blue-600" />
               Télécharger le modèle
             </a>
