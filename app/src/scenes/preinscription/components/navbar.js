@@ -6,7 +6,9 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST } from "../../../utils/n
 
 const Navbar = () => {
   const { step } = useParams();
+  console.log("🚀 ~ file: navbar.js:9 ~ Navbar ~ step", step);
   const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST);
+  console.log("🚀 ~ file: navbar.js:10 ~ Navbar ~ currentStep", currentStep);
 
   return ["ELIGIBILITE", "SEJOUR", "PROFIL"].includes(currentStep) ? (
     <div className="bg-[#f9f6f2] px-3 py-3  text-[#161616] w-full">

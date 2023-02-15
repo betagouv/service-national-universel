@@ -1,8 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import useDevice from "../../hooks/useDevice";
 import { SentryRoute } from "../../sentry";
+
+import StepEligibilite from "./steps/stepEligibilite";
 
 import DesktopConfirm from "./desktop/stepConfirm";
 import DesktopDone from "./desktop/stepDone";
@@ -20,14 +22,11 @@ import MobileSejour from "./mobile/stepSejour";
 
 import { useSelector } from "react-redux";
 import { inscriptionCreationOpenForYoungs } from "snu-lib";
-import ModalMenu from "../../components/headerMenu";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import Footer from "./../../components/footerV2";
-import Header from "./../../components/header";
-import Navbar from "./components/navbar";
 
 function renderStep(step, device) {
-  if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
+  if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
+  // if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
   if (step === STEPS.INELIGIBLE) return device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />;
   if (step === STEPS.SEJOUR) return device === "desktop" ? <DesktopSejour /> : <MobileSejour />;
   if (step === STEPS.PROFIL) return device === "desktop" ? <DesktopProfil /> : <MobileProfil />;
@@ -36,7 +35,6 @@ function renderStep(step, device) {
 }
 
 const Step = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [data] = useContext(PreInscriptionContext);
   const device = useDevice();
   const { step } = useParams();
@@ -56,15 +54,7 @@ const Step = () => {
     return <Redirect to="/" />;
   }
 
-  return (
-    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
-      <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      <Navbar />
-      {renderStep(currentStep, device)}
-      {device === "desktop" && <Footer />}
-    </div>
-  );
+  return renderStep(currentStep, device);
 };
 
 export default function Index() {
