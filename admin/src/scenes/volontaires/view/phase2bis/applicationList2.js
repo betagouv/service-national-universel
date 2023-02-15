@@ -34,7 +34,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
   if (!applications) return <Loader />;
   if (!applications.length) return <div className="italic text-center m-8">Aucune candidature n&apos;est liée à ce volontaire.</div>;
   return (
-    <div className="px-12 pt-6 pb-12">
+    <div className="px-12 pt-6 pb-12 space-y-8">
       {applications.map((hit, i) => (
         <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
       ))}
