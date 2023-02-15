@@ -12,6 +12,7 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
 import { getPasswordErrorMessage } from "../../../utils";
+import { cohortsInit } from "../../../utils/cohorts";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -46,6 +47,7 @@ export default function Signin() {
         if (redirect?.startsWith("http")) return (window.location.href = redirect);
         if (token) api.setToken(token);
         dispatch(setYoung(young));
+        await cohortsInit();
       }
     } catch (e) {
       console.log(e);
