@@ -322,9 +322,8 @@ const ReactiveList = ({ cohort, history }) => {
                     let full = false;
                     if (Array.isArray(value)) {
                       value?.map((e) => {
-                        console.log(e);
                         if (e === "Vide") empty = true;
-                        if (e === "Rempli") full = true;
+                        else if (e === "Rempli") full = true;
                         else {
                           const splitValue = e.split("-");
                           const transformedArray = [parseInt(splitValue[0]), parseInt(splitValue[1].replace("%", ""))];
@@ -334,6 +333,8 @@ const ReactiveList = ({ cohort, history }) => {
                     }
                     const body = getDefaultQuery();
 
+                    console.log(rangeArray);
+
                     const filter = [];
                     if (empty) filter.push({ term: { lineFillingRate: 0 } });
                     if (full) filter.push({ term: { lineFillingRate: 100 } });
@@ -342,7 +343,7 @@ const ReactiveList = ({ cohort, history }) => {
                         filter.push({ range: { lineFillingRate: { gte: e[0] === 0 ? 1 : e[0], lte: e[1] } } });
                       });
                     }
-                    if (empty || rangeArray.length > 0) {
+                    if (empty || full || rangeArray.length > 0) {
                       body.query.bool.minimum_should_match = 1;
                       body.query.bool.should = filter;
                     }
