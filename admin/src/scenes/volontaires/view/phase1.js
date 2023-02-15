@@ -26,6 +26,8 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
+import ExternalLink from "../../../assets/icons/ExternalLink";
+import { adminURL } from "../../../config";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -286,7 +288,7 @@ export default function Phase1(props) {
                 <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
                   <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
                   <div className="flex flex-col gap-4 mb-4 w-full">
-                    <Field title="Code centre" value={cohesionCenter.code2022} />
+                    <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}`} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
@@ -305,7 +307,11 @@ export default function Phase1(props) {
                   <div className="flex flex-col gap-4 mb-4 text-sm text-gray-800 w-full ">
                     {meetingPoint ? (
                       <div className="flex flex-col gap-4">
-                        <Field title="Adresse" value={meetingPoint?.pointDeRassemblement.address} />
+                        <Field
+                          title="Adresse"
+                          value={meetingPoint?.pointDeRassemblement.address}
+                          externalLink={`${adminURL}/point-de-rassemblement/${meetingPoint?.pointDeRassemblement._id}`}
+                        />
                         <Field
                           title="Heure&nbsp;de&nbsp;départ"
                           value={dayjs(meetingPoint?.bus.departuredDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
@@ -314,7 +320,7 @@ export default function Phase1(props) {
                           title="Heure&nbsp;de&nbsp;retour"
                           value={dayjs(meetingPoint?.bus.returnDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
                         />
-                        <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} />
+                        <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
                       </div>
                     ) : young?.transportInfoGivenByLocal === "true" ? (
                       <div>Les informations de transport seront transmises par les services locaux.</div>
@@ -422,11 +428,21 @@ export default function Phase1(props) {
   );
 }
 
-const Field = ({ title, value }) => {
+const Field = ({ title, value, externalLink }) => {
   return (
     <div key={title} className="border-[1px] flex flex-col border-gray-300 p-2 rounded">
       <div className="text-gray-500 text-xs">{title}</div>
-      <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+
+      {externalLink ? (
+        <a target="_blank" rel="noreferrer" href={externalLink}>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+            <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+          </div>
+        </a>
+      ) : (
+        <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+      )}
     </div>
   );
 };
