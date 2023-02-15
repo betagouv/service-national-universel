@@ -151,7 +151,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (mail?.message == "email is missing in to" && isParentTemplate) throw new Error("Parent sans email : " + body?.to?.[0]?.name);
 
     if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
-    if (ENVIRONMENT !== "production") {
+    if (ENVIRONMENT !== "production" || force) {
       console.log(body, mail);
     }
     return mail;
