@@ -1,3 +1,23 @@
+# [1.219.0](https://github.com/betagouv/service-national-universel/compare/v1.218.0...v1.219.0) (2023-02-14)
+
+
+### Bug Fixes
+
+* **admin:** bus history filter ([9ea7c41](https://github.com/betagouv/service-national-universel/commit/9ea7c41cc27e663d9f88094204139fdb9fc0b73d))
+* **admin:** fixes to notifications ([a3ef26f](https://github.com/betagouv/service-national-universel/commit/a3ef26f6df892b8eda281da17886e7ae9a344630))
+* **admin:** notifs - no table render if no results ([4618c8c](https://github.com/betagouv/service-national-universel/commit/4618c8c5b7b8bb3139b984f7985c5ae536f93ff4))
+* **admin/api:** head center view ([0eaebe4](https://github.com/betagouv/service-national-universel/commit/0eaebe42b01fb5107a277839605010b1d8cae764))
+* **api:** test es head center ([f4f0731](https://github.com/betagouv/service-national-universel/commit/f4f0731943eb1c7d1c978cd14d37eefe070f1997))
+* **app:** fix disabled check for step upload button ([d6f2435](https://github.com/betagouv/service-national-universel/commit/d6f2435d43bbc3cffcbfdabc2351ce96a42ed7bf))
+* **lib:** Force redeploy ([8d0219d](https://github.com/betagouv/service-national-universel/commit/8d0219d556bc1035fee8586974d9a3b330876108))
+
+
+### Features
+
+* **admin/api:** retour test PDT + MSP demande de modif / historique ([6b93e46](https://github.com/betagouv/service-national-universel/commit/6b93e463568c747844aa58779bc2182c6345cb89))
+* **api,admin:** Ajout de colonnes dans l'export du schéma de répartition. ([#2259](https://github.com/betagouv/service-national-universel/issues/2259)) ([91c3319](https://github.com/betagouv/service-national-universel/commit/91c33194e0ed5dac423d5f0ebf7a40ec345afa2a))
+* **api/admin:** refonte onglet notifications avec panneau de mail envoyé ([#2240](https://github.com/betagouv/service-national-universel/issues/2240)) ([f284430](https://github.com/betagouv/service-national-universel/commit/f2844300fe1e99f8dd3503b98fbe70e51d346e97))
+
 # [1.218.0](https://github.com/betagouv/service-national-universel/compare/v1.217.0...v1.218.0) (2023-02-13)
 
 

@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const queryString = require("querystring");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
@@ -89,6 +90,40 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     }
   } catch (e) {
     console.log("Erreur in sendEmail", e);
+    capture(e);
+  }
+}
+
+async function getEmailsList({ email, templateId, messageId, startDate, endDate, sort, limit, offset } = {}) {
+  try {
+    const body = {
+      email,
+      templateId,
+      messageId,
+      startDate,
+      endDate,
+      sort,
+      limit,
+      offset,
+    };
+    const filteredBody = Object.entries(body)
+      .filter(([, value]) => value !== undefined)
+      .reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      }, {});
+    return await api(`/smtp/emails?${queryString.stringify(filteredBody)}`, { method: "GET" });
+  } catch (e) {
+    console.log("Erreur in getEmail", e);
+    capture(e);
+  }
+}
+
+async function getEmailContent(uuid) {
+  try {
+    return await api(`/smtp/emails/${uuid}`, { method: "GET" });
+  } catch (e) {
+    console.log("Erreur in getEmail", e);
     capture(e);
   }
 }
@@ -279,4 +314,4 @@ async function unsync(obj, { force } = { force: false }) {
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };

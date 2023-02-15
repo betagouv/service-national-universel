@@ -150,13 +150,9 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled = () => {
-    if (corrections?.length) {
-      return hasChanged && !loading && !error.text;
-    } else {
-      return (young?.files?.cniFiles?.length > 0 || [...recto, ...verso].length > 0) && date !== null && !loading && !error.text;
-    }
-  };
+  const isEnabled = corrections?.length
+    ? hasChanged && !loading && !error.text
+    : (young?.files?.cniFiles?.length || [...recto, ...verso].length) && date && !loading && !error.text;
 
   return (
     <>

@@ -366,6 +366,51 @@ export const getNetworkOptions = async (inputValue) => {
   });
 };
 
+export const translateEmails = (t) => {
+  switch (t) {
+    case "opened":
+      return "Ouvert";
+    case "open":
+      return "Ouvert";
+    case "request":
+      return "Envoyé";
+    case "requests":
+      return "Envoyé";
+    case "delivered":
+      return "Remis";
+    case "deferred":
+      return "Différé";
+    case "clicked":
+      return "Cliqué";
+    case "clicks":
+      return "Clics";
+    case "unique_opened":
+      return "Ouverture unique";
+    case "invalid_email":
+      return "Email invalide";
+    case "sent":
+      return "Envoyé";
+    case "soft_bounce":
+      return "Rebond (faible)";
+    case "hard_bounce":
+      return "Rebond (fort)";
+    case "unsubscribe":
+      return "Désinscrit";
+    case "complaint":
+      return "Plainte";
+    case "blocked":
+      return "Bloqué";
+    case "error":
+      return "Erreur";
+    case "click":
+      return "Clic";
+    case "proxy_open":
+      return "Ouverture par proxy";
+    default:
+      return t;
+  }
+};
+
 export const debounce = (fn, delay) => {
   let timeOutId;
   return function (...args) {
