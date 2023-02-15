@@ -38,7 +38,7 @@ const getUserAttributes = async (user) => {
     const centerLink = `${ADMIN_URL}/centre/${user.cohesionCenterId}`;
     const profilLink = isYoung(user) ? `${ADMIN_URL}/volontaire/${user._id}` : `${ADMIN_URL}/user/${user._id}`;
     const role = isYoung(user) ? "young" : user.role;
-    const userAttributes = [
+    let userAttributes = [
       { name: "date de création", value: user.createdAt },
       { name: "dernière connexion", value: user.lastLoginAt },
       { name: "lien vers profil", value: profilLink },
@@ -63,6 +63,22 @@ const getUserAttributes = async (user) => {
       if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
         userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
         userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
+
+        if (user.structureId) {
+          const structure = await StructureObject.findById(user.structureId).lean();
+          userAttributes = userAttributes.map((a) => {
+            if (a.name === "departement") {
+              return { name: "departement", value: structure?.department };
+            }
+            return a;
+          });
+          userAttributes = userAttributes.map((a) => {
+            if (a.name === "region") {
+              return { name: "region", value: structure?.region };
+            }
+            return a;
+          });
+        }
       }
       if (user.role === ROLES.HEAD_CENTER) {
         userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
