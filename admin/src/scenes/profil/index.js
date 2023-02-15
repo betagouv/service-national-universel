@@ -37,6 +37,9 @@ export default function Profil() {
   const [rightValues, setRightValues] = useState({ password: "", newPassword: "", verifyPassword: "" });
   const [errors, setErrors] = useState({});
 
+  const [loading, setLoading] = useState(false);
+  const [loadingPassord, setLoadingPassord] = useState(false);
+
   const getSubRole = (role) => {
     let subRole = [];
     if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
@@ -106,13 +109,16 @@ export default function Profil() {
     setErrors(error);
     if (Object.keys(error).length > 0) return toastr.error("Le formulaire est incomplet");
     setErrors({});
+    setLoadingPassord(true);
     try {
       const { ok, code, user } = await api.post("/referent/reset_password", rightValues);
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setUser(user));
       toastr.success("Mot de passe mis à jour!");
+      setLoadingPassord(false);
       return history.push("/dashboard");
     } catch (e) {
+      setLoadingPassord(false);
       console.log(e);
       toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
     }
@@ -128,16 +134,19 @@ export default function Profil() {
     setErrors(error);
     if (Object.keys(error).length > 0) return toastr.error("Le formulaire est incomplet");
     setErrors({});
+    setLoading(true);
     try {
       const { data, ok } = await api.put("/referent", values);
       if (ok) {
         dispatch(setUser(data));
         setValues(data);
+        setLoading(false);
         return toastr.success("Profil mis à jour !");
       }
     } catch (e) {
       console.log(e);
     }
+    setLoading(false);
     toastr.error("Erreur");
   };
 
@@ -167,17 +176,25 @@ export default function Profil() {
             <Field label="Téléphone fixe (facultatif)" onChange={(e) => handleChange("phone", e.target.value)} value={values.phone ? values.phone : ""} error={errors?.phone} />
           </div>
           <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
-            <div
-              className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
-              onClick={() => {
-                setValues({ ...user });
-                setErrors({});
-              }}>
-              Annuler
-            </div>
-            <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onSubmit}>
-              Enregistrer
-            </div>
+            {loading ? (
+              <div className="h-[38px] flex items-center justify-center w-full">
+                <Loader />
+              </div>
+            ) : (
+              <>
+                <div
+                  className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+                  onClick={() => {
+                    setValues({ ...user });
+                    setErrors({});
+                  }}>
+                  Annuler
+                </div>
+                <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onSubmit}>
+                  Enregistrer
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -204,17 +221,25 @@ export default function Profil() {
             error={errors?.verifyPassword}
           />
           <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
-            <div
-              className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
-              onClick={() => {
-                setRightValues({ password: "", newPassword: "", verifyPassword: "" });
-                setErrors({});
-              }}>
-              Annuler
-            </div>
-            <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onPasswordSubmit}>
-              Valider mon nouveau mot de passe
-            </div>
+            {loadingPassord ? (
+              <div className="h-[38px] flex items-center justify-center w-full">
+                <Loader />
+              </div>
+            ) : (
+              <>
+                <div
+                  className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+                  onClick={() => {
+                    setRightValues({ password: "", newPassword: "", verifyPassword: "" });
+                    setErrors({});
+                  }}>
+                  Annuler
+                </div>
+                <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onPasswordSubmit}>
+                  Valider mon nouveau mot de passe
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
