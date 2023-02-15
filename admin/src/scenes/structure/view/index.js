@@ -34,8 +34,8 @@ export default function Index({ ...props }) {
       <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
       <Switch>
         <SentryRoute path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
-        <SentryRoute path="/structure/:id/historique" component={() => (environment === "production" ? <Historic structure={structure} /> : <HistoricV2 />)} />
-        <SentryRoute path="/structure/:id" component={() => (environment === "production" ? <Details structure={structure} /> : <DetailsV2 />)} />
+        <SentryRoute path="/structure/:id/historique" component={() => <HistoricV2 />} />
+        <SentryRoute path="/structure/:id" component={() => <DetailsV2 />} />
       </Switch>
     </StructureContext.Provider>
   );
