@@ -646,7 +646,7 @@ function validateSelf(referent) {
       department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
-        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST]),
+        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"]),
       cohesionCenterId: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),
