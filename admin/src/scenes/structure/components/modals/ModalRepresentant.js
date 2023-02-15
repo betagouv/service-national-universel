@@ -8,6 +8,7 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Button from "../Button";
 import Field from "../../../missions/components/Field";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
+import { regexPhoneFrenchCountries } from "../../../../utils";
 
 export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
   const { structure } = useContext(StructureContext);
@@ -25,7 +26,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
     if (!data.email) errors.email = "L'email est obligatoire";
     if (!validator.isEmail(data.email)) errors.email = "L'email n'est pas valide";
     if (!data.mobile) errors.mobile = "Le téléphone est obligatoire";
-    if (!validator.matches(data.mobile, new RegExp(`([0-9]{8,11})`))) errors.mobile = "Le téléphone n'est pas valide (exemple : (+33)(0)642424242)";
+    if (!validator.matches(data.mobile, regexPhoneFrenchCountries)) errors.mobile = "Le téléphone n'est pas valide (exemple : (+33)(0)642424242)";
 
     if (Object.keys(errors).length > 0) return setErrors(errors);
     setErrors({});
