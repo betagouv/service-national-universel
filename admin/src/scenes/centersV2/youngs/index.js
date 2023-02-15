@@ -504,7 +504,7 @@ export default function CenterYoungIndex() {
               title="Tableau de pointage"
               to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`}
               extraIcon={!isYoungCheckinOpen ? <Warning className="text-red-900" /> : null}
-              extraTooltip="Le pointage n'est pas encore ouvert"
+              extraTooltip="Le pointage n'est pas ouvert"
             />
             <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire${urlParams && "?" + urlParams}`} />
           </nav>

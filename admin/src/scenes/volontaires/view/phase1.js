@@ -218,7 +218,7 @@ export default function Phase1(props) {
                     <Warning className="text-red-900" />
                     <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
                       <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
-                      Le pointage n&apos;est pas encore ouvert
+                      Le pointage n&apos;est pas ouvert
                     </div>
                   </div>
                 )}

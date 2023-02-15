@@ -105,10 +105,8 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
 
     // --- Bus
     if (withBus) {
-      console.log("with bus", young.ligneId, young.meetingPointId);
       const bus = await LigneBusModel.findById(young.ligneId);
       const ligneToPoint = await LigneToPointModel.findOne({ lineId: young.ligneId, meetingPointId: young.meetingPointId, deletedAt: { $exists: false } });
-      console.log("ltp: ", ligneToPoint);
       data = { ...pdr.toObject(), bus, ligneToPoint };
     } else {
       data = pdr.toObject();
