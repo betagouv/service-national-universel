@@ -828,10 +828,12 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
             <div
               className="flex gap-1 items-center group cursor-pointer"
               onClick={(e) => {
-                setModalPointageDepart({
-                  isOpen: true,
-                  value: e.target.value,
-                });
+                if (isYoungCheckinOpen) {
+                  setModalPointageDepart({
+                    isOpen: true,
+                    value: e.target.value,
+                  });
+                }
               }}>
               <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
               <div className="group-hover:underline">{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>

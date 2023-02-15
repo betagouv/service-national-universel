@@ -503,7 +503,7 @@ export default function CenterYoungIndex() {
               icon={<PencilAlt />}
               title="Tableau de pointage"
               to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`}
-              extraIcon={!isYoungCheckinOpen ? <Warning className="text-red-900" /> : null}
+              extraIcon={!isYoungCheckinOpen ? <Warning className="text-red-900 cursor-pointer" /> : null}
               extraTooltip="Le pointage n'est pas ouvert"
             />
             <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire${urlParams && "?" + urlParams}`} />
@@ -531,8 +531,8 @@ const TabItem = ({ to, title, icon, extraIcon, extraTooltip }) => (
         <div className="group relative">
           {extraIcon}
           {extraTooltip && (
-            <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
-              <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
+            <div className="hidden group-hover:block absolute bottom-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
+              <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 bottom-[-5px] shadow-sm"></div>
               {extraTooltip}
             </div>
           )}
