@@ -282,12 +282,66 @@ const Hit = ({ hit }) => {
 const ListSessions = ({ user, firstSession }) => {
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [selectedCohort, setSelectedCohort] = React.useState(firstSession);
+  const [pdrIds, setPdrIds] = React.useState([]);
+  const [nbYoungByPdr, setNbYoungByPdr] = React.useState([]);
+  const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
   };
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
+  const getYoungsByPdr = async (ids) => {
+    let body1 = {
+      query: {
+        bool: {
+          filter: [{ terms: { "meetingPointId.keyword": ids } }, { terms: { "status.keyword": ["VALIDATED"] } }, { term: { "cohort.keyword": selectedCohort } }],
+        },
+      },
+      aggs: {
+        group_by_meetingPointId: {
+          terms: { field: "meetingPointId.keyword" },
+        },
+      },
+      size: 0,
+    };
+
+    const { responses } = await api.esQuery("young", body1);
+    return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
+  };
+
+  const getLinesByPdr = async (ids) => {
+    let body2 = {
+      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": ids } }, { term: { "cohort.keyword": selectedCohort } }] } },
+      aggs: {
+        group_by_meetingPointId: {
+          terms: { field: "meetingPointsIds.keyword", size: ES_NO_LIMIT },
+        },
+      },
+      size: 0,
+    };
+
+    const { responses } = await api.esQuery("lignebus", body2);
+    return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
+  };
+
+  const getInfoPdr = async () => {
+    setLoading(true);
+    const nbYoung = await getYoungsByPdr(pdrIds);
+    const nbLines = await getLinesByPdr(pdrIds);
+    setNbYoungByPdr(nbYoung);
+    setNbLinesByPdr(nbLines);
+    setLoading(false);
+  };
+
+  React.useEffect(() => {
+    if (!pdrIds.length) {
+      setNbLinesByPdr([]);
+      setNbYoungByPdr([]);
+    } else getInfoPdr();
+  }, [pdrIds]);
 
   return (
     <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -326,39 +380,8 @@ const ListSessions = ({ user, firstSession }) => {
             }}
             icon={<BsDownload className="text-gray-400" />}
             transform={async (data) => {
-              let body1 = {
-                query: {
-                  bool: {
-                    filter: [
-                      { terms: { "meetingPointId.keyword": data.map((d) => d._id) } },
-                      { terms: { "status.keyword": ["VALIDATED"] } },
-                      { term: { "cohort.keyword": selectedCohort } },
-                    ],
-                  },
-                },
-                aggs: {
-                  group_by_meetingPointId: {
-                    terms: { field: "meetingPointId.keyword" },
-                  },
-                },
-                size: 0,
-              };
-
-              const { responses: responses1 } = await api.esQuery("young", body1);
-              const youngsByMettingPoints = responses1[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
-
-              let body2 = {
-                query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": data.map((d) => d._id) } }, { term: { "cohort.keyword": selectedCohort } }] } },
-                aggs: {
-                  group_by_meetingPointId: {
-                    terms: { field: "meetingPointsIds.keyword", size: ES_NO_LIMIT },
-                  },
-                },
-                size: 0,
-              };
-
-              const { responses: responses2 } = await api.esQuery("lignebus", body2);
-              const linesByMettingPoints = responses2[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
+              const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
+              const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
 
               let res = [];
               for (const item of data) {
@@ -440,6 +463,9 @@ const ListSessions = ({ user, firstSession }) => {
             react={{ and: FILTERS }}
             paginationAt="bottom"
             showTopResultStats={false}
+            onData={async ({ rawData }) => {
+              if (rawData?.hits?.hits) setPdrIds(rawData.hits.hits.map((pdr) => pdr._id));
+            }}
             render={({ data }) => (
               <div className="flex w-full flex-col mt-6 mb-2">
                 <hr />
@@ -450,7 +476,17 @@ const ListSessions = ({ user, firstSession }) => {
                   <div className="w-[20%]">Lignes attendues sur le point</div>
                 </div>
                 {data?.map((hit) => {
-                  return <HitSession key={hit._id} hit={hit} user={user} session={selectedCohort} />;
+                  return (
+                    <HitSession
+                      key={hit._id}
+                      hit={hit}
+                      user={user}
+                      session={selectedCohort}
+                      nbYoung={nbYoungByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
+                      nbLines={nbLinesByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
+                      loading={loading}
+                    />
+                  );
                 })}
                 <hr />
               </div>
@@ -462,43 +498,9 @@ const ListSessions = ({ user, firstSession }) => {
   );
 };
 
-const HitSession = ({ hit, session }) => {
+const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
   const history = useHistory();
-  const [loadingVolunteers, setLoadingVolunteers] = React.useState();
-  const [loadingLines, setLoadingLines] = React.useState();
-  const [nbYoung, setNbYoung] = React.useState(0);
-  const [nbLines, setNbLines] = React.useState(0);
 
-  const setYoungsFromES = async () => {
-    setLoadingVolunteers(true);
-    let body = {
-      query: {
-        bool: { filter: [{ term: { "meetingPointId.keyword": hit._id } }, { terms: { "status.keyword": ["VALIDATED"] } }, { term: { "cohort.keyword": session } }] },
-      },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("young", body);
-    setNbYoung(responses[0]?.hits?.total?.value);
-    setLoadingVolunteers(false);
-  };
-
-  const setLinesFromES = async () => {
-    setLoadingLines(true);
-    let body = {
-      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": [hit._id] } }, { term: { "cohort.keyword": session } }] } },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("lignebus", body);
-    setNbLines(responses[0]?.hits?.total?.value);
-    setLoadingLines(false);
-  };
-
-  React.useEffect(() => {
-    setYoungsFromES();
-    setLinesFromES();
-  }, []);
   return (
     <>
       <hr />
@@ -520,7 +522,7 @@ const HitSession = ({ hit, session }) => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 w-[20%]">
-          {loadingVolunteers ? (
+          {loading ? (
             <Loading width="w-1/2" />
           ) : (
             <div className="flex items-center gap-2">
@@ -537,7 +539,7 @@ const HitSession = ({ hit, session }) => {
           )}
         </div>
         <div className="flex flex-wrap gap-2 w-[20%]">
-          {loadingLines ? (
+          {loading ? (
             <Loading width="w-1/2" />
           ) : (
             <div className="flex items-center gap-2">
