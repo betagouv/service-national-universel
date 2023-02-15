@@ -332,9 +332,6 @@ const ReactiveList = ({ cohort, history }) => {
                       });
                     }
                     const body = getDefaultQuery();
-
-                    console.log(rangeArray);
-
                     const filter = [];
                     if (empty) filter.push({ term: { lineFillingRate: 0 } });
                     if (full) filter.push({ term: { lineFillingRate: 100 } });
@@ -350,7 +347,6 @@ const ReactiveList = ({ cohort, history }) => {
                     return body;
                   }}
                   transformData={(data) => {
-                    console.log(data);
                     const newData = [];
                     data.map((d) => {
                       const dizaine = translateLineFillingRate(parseInt(d.key));
