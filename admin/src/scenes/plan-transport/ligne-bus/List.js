@@ -319,9 +319,12 @@ const ReactiveList = ({ cohort, history }) => {
                   customQuery={function (value) {
                     let rangeArray = [];
                     let empty = false;
+                    let full = false;
                     if (Array.isArray(value)) {
                       value?.map((e) => {
+                        console.log(e);
                         if (e === "Vide") empty = true;
+                        if (e === "Rempli") full = true;
                         else {
                           const splitValue = e.split("-");
                           const transformedArray = [parseInt(splitValue[0]), parseInt(splitValue[1].replace("%", ""))];
@@ -333,6 +336,7 @@ const ReactiveList = ({ cohort, history }) => {
 
                     const filter = [];
                     if (empty) filter.push({ term: { lineFillingRate: 0 } });
+                    if (full) filter.push({ term: { lineFillingRate: 100 } });
                     if (rangeArray.length > 0) {
                       rangeArray.map((e) => {
                         filter.push({ range: { lineFillingRate: { gte: e[0] === 0 ? 1 : e[0], lte: e[1] } } });
