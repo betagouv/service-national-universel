@@ -19,6 +19,7 @@ const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
+const StructureObject = require("../models/structure");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 
@@ -414,7 +415,7 @@ const getUserAttributes = async (user) => {
   if (departmentReferentPhase2) departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
   const profilLink = isYoung(user) ? `${ADMIN_URL}/volontaire/${user._id}` : `${ADMIN_URL}/user/${user._id}`;
   const role = isYoung(user) ? "young" : user.role;
-  const userAttributes = [
+  let userAttributes = [
     { name: "date de création", value: user.createdAt },
     { name: "dernière connexion", value: user.lastLoginAt },
     { name: "lien vers profil", value: profilLink },
@@ -441,6 +442,21 @@ const getUserAttributes = async (user) => {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
       if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
+      if (user.structureId) {
+        const structure = await StructureObject.findById(user.structureId).lean();
+        userAttributes = userAttributes.map((a) => {
+          if (a.name === "departement") {
+            return { name: "departement", value: structure?.department };
+          }
+          return a;
+        });
+        userAttributes = userAttributes.map((a) => {
+          if (a.name === "region") {
+            return { name: "region", value: structure?.region };
+          }
+          return a;
+        });
+      }
     }
     if (user.role === ROLES.HEAD_CENTER) {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });

@@ -1,5 +1,6 @@
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
+const StructureObject = require("../models/structure");
 const zammood = require("../zammood");
 const { capture } = require("../sentry");
 const slack = require("../slack");
