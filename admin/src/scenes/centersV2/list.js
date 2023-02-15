@@ -30,6 +30,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { useHistory } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
+import { BaseFilter } from "../../components/filters/BaseFilter";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022", "TIMESCHEDULE"];
 
@@ -452,6 +453,12 @@ const ListCenter = ({ firstSession }) => {
             }}
           />
         </div>
+        <BaseFilter visible={filterVisible}>
+          <div>
+            <a>Général</a>
+            <div name="" />
+          </div>
+        </BaseFilter>
         <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
