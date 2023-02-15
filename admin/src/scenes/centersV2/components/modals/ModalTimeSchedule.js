@@ -171,8 +171,14 @@ function DropZone({ session, className = "", sessionChanged }) {
         </a>{" "}
         ou glisser-déposez
       </div>
-      <div className="mt-1 text-xs text-gray-500">PDF, PNG, JPG jusqu’à 5Mo</div>
-      <input type="file" accept="image/png, image/jpg, application/pdf" ref={fileInput} onChange={getFileFromInput} className="hidden" />
+      <div className="mt-1 text-xs text-gray-500">PDF, PNG, JPG, Excel jusqu’à 5Mo</div>
+      <input
+        type="file"
+        accept="image/png, image/jpg, application/pdf, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ref={fileInput}
+        onChange={getFileFromInput}
+        className="hidden"
+      />
       {dragActive && <div className="absolute left-[0] right-[0] top-[0] bottom-[0]" onDragEnter={dragIn} onDragOver={dragIn} onDragLeave={dragOut} onDrop={dropped}></div>}
       {uploading && (
         <div className="bg-gray-100 absolute left-[0] right-[0] top-[0] bottom-[0] flex flex-col items-center justify-center">
