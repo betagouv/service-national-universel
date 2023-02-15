@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useRef} from "react";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { TabItem, Title, translateStatus } from "../components/commons";
 import Select from "../components/Select";
@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { apiURL, environment } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT, getDepartmentNumber, getFilterLabel, ROLES, translate } from "snu-lib";
+import {ES_NO_LIMIT, getDepartmentNumber, getFilterLabel, MIME_TYPES, ROLES, translate} from "snu-lib";
 import History from "../../../assets/icons/History";
 import { useHistory } from "react-router-dom";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -45,6 +45,8 @@ const FILTERS = [
   "MODIFICATION_OPINION",
 ];
 
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
+
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
   { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
@@ -54,8 +56,8 @@ const cohortList = [
 ];
 
 const translateLineFillingRate = (e) => {
-  if (e == 0) return "Vide";
-  if (e == 100) return "Rempli";
+  if (e === 0) return "Vide";
+  if (e === 100) return "Rempli";
   return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
 };
 
@@ -64,8 +66,11 @@ export default function List() {
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState(null);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
+  const fileInput = useRef(null);
 
   const getPlanDetransport = async () => {
     try {
@@ -86,7 +91,52 @@ export default function List() {
     getPlanDetransport();
   }, [cohort]);
 
-  if (isLoading) return <Loader />;
+  function importFile(e) {
+    e.preventDefault();
+    if (fileInput && fileInput.current) {
+      fileInput.current.click();
+    }
+  }
+
+  function getFileFromInput(e) {
+    if (e && e.target && e.target.files && e.target.files.length > 0) {
+      uploadFile(e.target.files[0]);
+    }
+  }
+
+  async function uploadFile(file) {
+    setUploadError(null);
+    if (file.type !== MIME_TYPES.EXCEL) {
+      setUploadError("Le fichier doit être au format Excel.");
+      return;
+    }
+    if (file.size > FILE_SIZE_LIMIT) {
+      setUploadError("Votre fichier dépasse la limite de 5Mo.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const res = await api.uploadFile(`/plan-de-transport/import/${cohort}`, [file]);
+      if (res.code === "FILE_CORRUPTED") {
+        setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
+      } else if (!res.ok) {
+        capture(res.code);
+        setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
+      } else {
+        fileUploaded(res.data);
+      }
+    } catch (err) {
+      setUploadError("Une erreur est survenue. Nous n'avons pu enregistrer le fichier. Veuillez réessayer dans quelques instants.");
+    }
+    setIsUploading(false);
+  }
+
+  function fileUploaded(data) {
+    console.log("File Uploaded: ", data);
+  }
+
+  if (isLoading || isUploading) return <Loader />;
 
   return (
     <>
@@ -119,6 +169,8 @@ export default function List() {
                 <PlainButton className="mt-2" onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}`)}>
                   Importer mon fichier
                 </PlainButton>
+                <input type="file" accept="image/png, image/jpg, application/pdf" ref={fileInput} onChange={getFileFromInput} className="hidden" />
+                {uploadError && <div className="text-red-900 mt-8 text-center text-sm font-bold">{uploadError}</div>}
               </>
             )}
           </div>

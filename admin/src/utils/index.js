@@ -5,6 +5,7 @@ import slugify from "slugify";
 import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
+import {environment} from "../config";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
 
@@ -422,3 +423,6 @@ export const debounce = (fn, delay) => {
     }, delay);
   };
 };
+
+export const CDN_BASE_URL =
+  environment === "production" ? "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/cni-bucket-staging";
