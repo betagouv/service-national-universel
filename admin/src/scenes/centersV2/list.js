@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch, ReactiveComponent } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { BsDownload } from "react-icons/bs";
 import ExportComponent from "../../components/ExportXlsx";
@@ -453,12 +453,10 @@ const ListCenter = ({ firstSession }) => {
             }}
           />
         </div>
-        <BaseFilter visible={filterVisible}>
-          <div>
-            <a>Général</a>
-            <div name="" />
-          </div>
-        </BaseFilter>
+
+        <ReactiveComponent onValueChange={(data) => console.log(data)} componentId="COHORT" react={{ and: FILTERS.filter((e) => e !== "COHORT") }} defaultQuery={getDefaultQuery}>
+          <div>Mon component</div>
+        </ReactiveComponent>
         <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
