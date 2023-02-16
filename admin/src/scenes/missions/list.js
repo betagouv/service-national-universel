@@ -12,15 +12,14 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { DepartmentFilter, RegionFilter } from "../../components/filters";
 import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
-import { MultiLine } from "../../components/list";
 import Loader from "../../components/Loader";
 import ModalExport from "../../components/modals/ModalExport";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import SelectAction from "../../components/SelectAction";
-import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
 import { apiURL, supportURL } from "../../config";
 import api from "../../services/api";
 import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, getFilterLabel, ROLES, translate, translateVisibilty } from "../../utils";
+import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
 
 const FILTERS = [
   "DOMAIN",
@@ -494,7 +493,7 @@ export default function List() {
                 getExportQuery={getExportQuery}
               />
             </div>
-            <div className="flex flex-col bg-white gap-1 rounded-lg">
+            <div className="flex flex-col bg-white gap-1 rounded-xl">
               <div className=" pt-4 pb-1 px-4 ">
                 <div className="flex items-center gap-2 py-2">
                   <DataSearch
