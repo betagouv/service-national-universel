@@ -21,7 +21,7 @@ export default function UserCard({ user }) {
         <div className="shrink-0 rounded-full w-10 h-10 bg-slate-100 font-medium flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100 transition">
           {getAvatar(user)}
         </div>
-        <div className="flex flex-col gap-1 leading-5 w-10/12">
+        <div className="flex flex-col leading-5 w-10/12">
           <p className="font-medium truncate underline-offset-2 decoration-2 w-full">
             {user.firstName} {user.lastName && user.lastName}
           </p>
