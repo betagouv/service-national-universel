@@ -105,11 +105,6 @@ export default function PanelView({ onChange, value }) {
           <Link to={`/structure/${value._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          {environment === "production" && (
-            <Link to={`/structure/${value._id}/edit`}>
-              <PanelActionButton icon="pencil" title="Modifier" />
-            </Link>
-          )}
           <PanelActionButton onClick={() => onClickDelete(value)} icon="bin" title="Supprimer" />
         </div>
       </div>

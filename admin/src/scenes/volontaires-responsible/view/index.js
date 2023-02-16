@@ -30,38 +30,8 @@ export default function VolontaireResponsible({ ...props }) {
   return (
     <Switch>
       <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
-
-      {environment === "production" ? (
-        <>
-          {ENABLE_PM && (
-            <SentryRoute
-              path="/volontaire/:id/preparation-militaire"
-              component={() => (
-                <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-                  <Wrapper young={young} tab="militaryPreparation">
-                    <Phase2MilitaryPreparation young={young} />
-                  </Wrapper>
-                </div>
-              )}
-            />
-          )}
-          <SentryRoute
-            path="/volontaire/:id"
-            component={() => (
-              <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-                <Wrapper young={young} tab="details">
-                  <Details young={young} />
-                </Wrapper>
-              </div>
-            )}
-          />
-        </>
-      ) : (
-        <>
-          <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/dossier" component={() => <Application young={young} onChange={getYoung} currentTab="dossier" />} />
-          <SentryRoute path="/volontaire/:id/phase2/application/:applicationId" exact component={() => <Application young={young} onChange={getYoung} />} />
-        </>
-      )}
+      <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/dossier" component={() => <Application young={young} onChange={getYoung} currentTab="dossier" />} />
+      <SentryRoute path="/volontaire/:id/phase2/application/:applicationId" exact component={() => <Application young={young} onChange={getYoung} />} />
     </Switch>
   );
 }
