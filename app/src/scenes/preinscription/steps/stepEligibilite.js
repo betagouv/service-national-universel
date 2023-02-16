@@ -17,7 +17,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DatePickerList from "../components/DatePickerList";
-import SignupContainer from "../../../components/SignupContainer";
+import DSFRContainer from "../../../components/DSFRContainer";
 import SignupButtonContainer from "../../../components/SignupButtonContainer";
 
 export default function StepEligibilite() {
@@ -118,8 +118,10 @@ export default function StepEligibilite() {
     return history.push("/preinscription/sejour");
   };
 
+  const disabled = Object.keys(error).length > 0 || loading || !data?.frenchNationality || !data?.scolarity || !data?.birthDate;
+
   return (
-    <SignupContainer title="Vérifiez votre éligibilité au SNU" showHelp={false}>
+    <DSFRContainer title="Vérifiez votre éligibilité au SNU" showHelp={false}>
       <div className="space-y-5">
         <div className="flex flex-col flex-start">
           <div className="flex items-center">
@@ -187,8 +189,8 @@ export default function StepEligibilite() {
           </>
         )}
 
-        <SignupButtonContainer onClick={onSubmit} disabled={loading} />
+        <SignupButtonContainer onClick={onSubmit} disabled={disabled} />
       </div>
-    </SignupContainer>
+    </DSFRContainer>
   );
 }

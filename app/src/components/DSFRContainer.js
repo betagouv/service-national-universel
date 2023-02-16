@@ -8,7 +8,7 @@ import Footer from "./footerV2";
 
 import QuestionMarkBlueCircle from "../assets/icons/QuestionMarkBlueCircle";
 
-export default function DesktopPageContainer({ title, subTitle, children, onSave, questionMarckLink = `${appURL}public-besoin-d-aide/`, showHelp = true }) {
+export default function DSFRContainer({ title, subTitle, children, onSave, questionMarckLink = `${appURL}public-besoin-d-aide/`, showHelp = true }) {
   return (
     <div className="flex flex-col h-screen justify-between bg-[#f9f6f2] gap-0 md:gap-8">
       <Header />
