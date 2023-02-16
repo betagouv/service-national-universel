@@ -16,7 +16,7 @@ export default function Event({ e, index, model }) {
       <div className="w-[20%]">
         <p className="truncate w-10/12 text-gray-400">{translateHistory(e.path, e.originalValue)}</p>
       </div>
-      <div className="w-[10%]">
+      <div className="flex items-center justify-center w-[10%]">
         <HiOutlineArrowRight />
       </div>
       <div className="w-[20%]">
