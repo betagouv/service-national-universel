@@ -1,3 +1,21 @@
+# [1.221.0](https://github.com/betagouv/service-national-universel/compare/v1.220.0...v1.221.0) (2023-02-16)
+
+
+### Bug Fixes
+
+* **admin:** CardContact view necessary cohorts ([aa8d919](https://github.com/betagouv/service-national-universel/commit/aa8d91954df4f8f627677881d3e7bcbe0a7d8440))
+* **admin:** derniers fixes sur les structures avant MEP ([2e4abe0](https://github.com/betagouv/service-national-universel/commit/2e4abe08505cd369fba2f364f714914aa275555e))
+* **admin:** plan de transport aller / retour ([34313c7](https://github.com/betagouv/service-national-universel/commit/34313c734cb56815f8079fb38eed75e4435ee341))
+* **admin:** plein de petits fixes ([d0e3eae](https://github.com/betagouv/service-national-universel/commit/d0e3eaec1c110a0973bae32448256faca3bac30e))
+* **admin:** redirect to contrat ([0cdfd45](https://github.com/betagouv/service-national-universel/commit/0cdfd45784194af0bcc965d6e8fa280583763117))
+* **admin:** Remove panel for superviser/responsible in mission youngs view ([c4a6fa9](https://github.com/betagouv/service-national-universel/commit/c4a6fa9e49bcbbcabbfe010d38d115990f7f587a))
+
+
+### Features
+
+* **admin:** Open structure prod ([#2267](https://github.com/betagouv/service-national-universel/issues/2267)) ([46b182b](https://github.com/betagouv/service-national-universel/commit/46b182b0f6eef7ad611349918e8a4b1249db2154))
+* **admin:** update historique ([#2271](https://github.com/betagouv/service-national-universel/issues/2271)) ([6458602](https://github.com/betagouv/service-national-universel/commit/6458602132719c46ca125878f352c50614ed4b1f))
+
 # [1.220.0](https://github.com/betagouv/service-national-universel/compare/v1.219.0...v1.220.0) (2023-02-15)
 
 
