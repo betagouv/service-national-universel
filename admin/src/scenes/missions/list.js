@@ -20,7 +20,6 @@ import { apiURL, supportURL } from "../../config";
 import api from "../../services/api";
 import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, getFilterLabel, ROLES, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
-import ReactTooltip from "react-tooltip";
 
 const FILTERS = [
   "DOMAIN",
