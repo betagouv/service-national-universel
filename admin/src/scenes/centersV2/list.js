@@ -31,6 +31,7 @@ import { useHistory } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 import { BaseFilter } from "../../components/filters/BaseFilter";
+import MultiDropDownItem from "./MultiDropDownItem";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022", "TIMESCHEDULE"];
 
@@ -453,10 +454,23 @@ const ListCenter = ({ firstSession }) => {
             }}
           />
         </div>
-
-        <ReactiveComponent onValueChange={(data) => console.log(data)} componentId="COHORT" react={{ and: FILTERS.filter((e) => e !== "COHORT") }} defaultQuery={getDefaultQuery}>
-          <div>Mon component</div>
-        </ReactiveComponent>
+        <MultiDropDownItem
+          defaultQuery={getDefaultQuery}
+          className="dropdown-filter"
+          componentId="COHORT"
+          placeholder="Cohortes"
+          dataField="cohorts.keyword"
+          react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+          renderItem={(e, count) => {
+            return `${translate(e)} (${count})`;
+          }}
+          title=""
+          URLParams={true}
+          showSearch={false}
+          onValueChange={setFilterConhorts}
+          // defaultValue={[firstSession]}
+          renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
+        />
         <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
