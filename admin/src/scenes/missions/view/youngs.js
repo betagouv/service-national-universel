@@ -524,12 +524,14 @@ export default function Youngs({ mission, applications, updateMission }) {
             </div>
           </ReactiveBase>
         </MissionView>
-        <Panel
-          value={young}
-          onChange={() => {
-            setYoung(null);
-          }}
-        />
+        {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
+          <Panel
+            value={young}
+            onChange={() => {
+              setYoung(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

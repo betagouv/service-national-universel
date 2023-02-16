@@ -19,6 +19,8 @@ import { Link } from "react-router-dom";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
+  const user = useSelector((state) => state.Auth.user);
+  const isSupervisor = user.role === ROLES.SUPERVISOR && user.structureId === structure._id;
   const [responsible, setResponsible] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -135,7 +137,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
           <div className="h-88 overflow-auto">
             <div className="grid grid-cols-2 gap-6 overflow-auto">
               {team?.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
-              <AddContact setResponsible={setResponsible} />
+              <AddContact setResponsible={setResponsible} isSupervisor={isSupervisor} />
             </div>
           </div>
         </div>
@@ -214,13 +216,13 @@ const DisplayContact = ({ responsible, setResponsible }) => {
   );
 };
 
-const AddContact = ({ setResponsible }) => {
+const AddContact = ({ setResponsible, isSupervisor = false }) => {
   return (
     <div
       className="flex flex-row border-dashed border-blue-600 rounded-lg bg-[#ffffff] border-grey-200 border-[1px] px-2 items-center justify-center hover:cursor-pointer h-28 hover:bg-[#eff6ff]"
       onClick={() => setResponsible({})}>
       <HiPlus className="text-indigo-300" />
-      <div className="pl-2 text-blue-600 text-sm">Ajouter un responsable</div>
+      <div className="pl-2 text-blue-600 text-sm">Ajouter un {isSupervisor ? "membre" : "responsable"}</div>{" "}
     </div>
   );
 };

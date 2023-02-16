@@ -11,6 +11,7 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
+import { cohortsInit } from "../../../utils/cohorts";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -42,6 +43,7 @@ export default function Signin() {
         if (redirect?.startsWith("http")) return (window.location.href = redirect);
         if (token) api.setToken(token);
         dispatch(setYoung(young));
+        await cohortsInit();
       }
     } catch (e) {
       setPassword("");
