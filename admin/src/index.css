@@ -297,16 +297,16 @@ h4 {
   background-image: url("/src/assets/reactiveList-sort-arrow.svg");
   background-repeat: no-repeat;
   background-position-x: 100%;
-  background-position-y: 50%;
+  background-position-y: 54%;
   position: absolute;
   text-align: end;
-  top: -0 5rem;
-  right: 1rem;
+  top: 2.5rem;
+  right: 3rem;
   outline: 0;
-  padding: 0.2rem 1rem 0.2rem 0.5rem;
+  padding: 0.2rem 2rem 0.2rem 0.5rem;
   font-size: 0.7rem;
   color: #374151;
   min-width: 250px;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
 }
