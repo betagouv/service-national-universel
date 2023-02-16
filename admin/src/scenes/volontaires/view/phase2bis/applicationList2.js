@@ -143,8 +143,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           </div>
 
           {/* statut */}
-          <div className="w-1/6 flex" onClick={(e) => e.stopPropagation()}>
-            <div className="flex-1" />
+          <div className="w-1/6 flex flex-col ml-4 items-center" onClick={(e) => e.stopPropagation()}>
             <SelectStatusApplicationPhase2
               hit={hit}
               callback={(status) => {
@@ -156,27 +155,25 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
               dropdownClassName="right-3"
             />
             {hit.status === "WAITING_VALIDATION" && (
-              <div className="absolute right-6">
-                <div
-                  className="text-blue-600 text-xs cursor-pointer underline mt-1"
-                  onClick={async () => {
-                    setModal({
-                      isOpen: true,
-                      title: "Renvoyer un mail",
-                      message: "Souhaitez-vous renvoyer un mail à la structure ?",
-                      onConfirm: async () => {
-                        try {
-                          const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
-                          if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                          toastr.success("L'email a bien été envoyé");
-                        } catch (e) {
-                          toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                        }
-                      },
-                    });
-                  }}>
-                  Relancer la structure
-                </div>
+              <div
+                className="text-blue-600 text-xs cursor-pointer underline mt-1"
+                onClick={async () => {
+                  setModal({
+                    isOpen: true,
+                    title: "Renvoyer un mail",
+                    message: "Souhaitez-vous renvoyer un mail à la structure ?",
+                    onConfirm: async () => {
+                      try {
+                        const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
+                        if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                        toastr.success("L'email a bien été envoyé");
+                      } catch (e) {
+                        toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                      }
+                    },
+                  });
+                }}>
+                Relancer la structure
                 <ModalConfirm
                   isOpen={modal?.isOpen}
                   title={modal?.title}
