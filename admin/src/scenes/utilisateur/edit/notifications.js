@@ -1,5 +1,5 @@
 import React from "react";
-import Emails from "../../../components/views/Emails";
+import Emails from "../../../components/views/Emails2";
 import UserHeader from "../composants/UserHeader";
 
 export default function Edit({ user, currentUser }) {
