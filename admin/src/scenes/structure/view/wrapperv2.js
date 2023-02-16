@@ -20,7 +20,7 @@ export default function Wrapper({ tab, children }) {
         </div>
         {tab === "details" && <HeaderButtons />}
       </div>
-      <main className="m-8">{children}</main>
+      <main className="mx-8 mt-6 mb-16">{children}</main>
     </div>
   );
 }

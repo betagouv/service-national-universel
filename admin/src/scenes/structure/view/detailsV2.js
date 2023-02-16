@@ -76,7 +76,7 @@ export default function DetailsView() {
 
   return (
     <StructureView tab="details">
-      <div className="flex gap-4 my-4">
+      <div className="flex gap-6 my-4">
         <CardRepresentant />
         <TeamCard />
       </div>
