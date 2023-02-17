@@ -151,7 +151,7 @@ export default function List() {
           filters={FILTERS}
           getExportQuery={getExportQuery}
         />
-        <main className="bg-white rounded-lg m-8 shadow-sm">
+        <main className="bg-white rounded-xl m-8 shadow-sm">
           <div className="flex p-4 gap-4 border-b-[1px] border-gray-100 h-[90px]">
             <DataSearch
               defaultQuery={getDefaultQuery}

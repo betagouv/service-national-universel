@@ -1,23 +1,24 @@
 import React from "react";
+import { BiMailSend } from "react-icons/bi";
 import { formatStringDateTimezoneUTC, translate } from "snu-lib";
 import IconDomain from "../../../components/IconDomain";
 import Tag from "../../../components/Tag";
 
 export default function CardMission({ mission, onSend, sent = false }) {
   return (
-    <div className="bg-white shadow-ninaButton rounded-xl p-4 my-8">
+    <div className="bg-white shadow-ninaButton rounded-xl p-3 my-8">
       <div className="flex gap-6">
-        <div className="m-auto">
+        <div className="m-auto pl-2">
           <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
         </div>
 
-        <div className="w-full text-xs">
-          <div className="h-8 relative overflow-hidden">
-            <p className="uppercase text-gray-500 absolute bottom-0">{mission.structureName}</p>
+        <div className="w-full grid grid-rows-4 text-xs">
+          <div className="flex items-center">
+            <p className="uppercase text-gray-500">{mission.structureName}</p>
           </div>
 
-          <div className="flex justify-between items-center my-2">
-            <div className="h-12 w-1/2 overflow-hidden flex">
+          <div className="row-span-2 flex justify-between items-center">
+            <div className="w-1/2 overflow-hidden flex">
               <a href={"/mission/" + mission._id} className="text-lg font-semibold leading-6 my-auto">
                 {mission.name}
               </a>
@@ -40,7 +41,8 @@ export default function CardMission({ mission, onSend, sent = false }) {
                 <p className="text-green-500">Mission proposée</p>
               ) : (
                 <button className="bg-blue-600 px-3 py-2 rounded-md text-sm text-blue-50 hover:brightness-110 active:brightness-125" onClick={onSend}>
-                  Proposer la mission
+                  <BiMailSend className="w-4 h-4 block xl:hidden" />
+                  <p className="hidden xl:block">Proposer la mission</p>
                 </button>
               )}
             </div>

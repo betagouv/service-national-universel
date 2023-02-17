@@ -43,24 +43,18 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
           </div>
         )}
       </div>
-
-      <table className="table-fixed w-full">
-        <thead>
-          <tr className="uppercase border-t border-t-slate-100">
-            {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500 w-12"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
-            <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((e, index) => (
-            <Event key={index} e={e} index={index} model={model} refName={refName} />
-          ))}
-        </tbody>
-      </table>
+      <div className="flex w-full flex-col mt-6 mb-2 divide-y divide-gray-100 border-y-[1px] border-gray-100">
+        <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 ">
+          <div className="w-[25%]">Action</div>
+          <div className="w-[20%]">Détails</div>
+          <div className="w-[10%]"></div>
+          <div className="w-[20%]"></div>
+          <div className="w-[25%]">Auteur</div>
+        </div>
+        {filteredData.map((e, index) => (
+          <Event key={index} e={e} index={index} model={model} refName={refName} />
+        ))}
+      </div>
     </div>
   );
 }
