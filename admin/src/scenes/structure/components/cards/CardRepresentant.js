@@ -15,7 +15,7 @@ import { capture } from "../../../../sentry";
 
 export default function CardRepresentant() {
   const { structure, setStructure } = useContext(StructureContext);
-  const representant = structure.structureManager || null;
+  const representant = structure?.structureManager || null;
   const [isOpen, setIsOpen] = useState(false);
   const handleShowModal = () => setIsOpen(true);
 
@@ -63,7 +63,7 @@ function Representative({ representant, handleShowModal }) {
         <div className="flex items-center gap-2">
           <p className="text-sm">Représentant de la structure</p>
           <AiOutlineInfoCircle data-tip data-for="representant" className="text-gray-500" />
-          <ReactTooltip id="representant" type="light" place="top" effect="solid" className="shadow-sm custom-tooltip-radius" tooltipRadius="6">
+          <ReactTooltip id="representant" type="light" place="top" effect="solid" className="shadow-sm custom-tooltip-radius !opacity-100" tooltipRadius="6">
             <div className="w-[450px] text-center">
               Dans le cadre du contrat d&apos;engagement préalable à l&apos;engagement d&apos;un volontaire, vous pouvez préciser le signataire de l&apos;ensemble des contrats et
               sa fonction au sein de votre structure

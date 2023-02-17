@@ -8,7 +8,7 @@ function classNames(...classes) {
 }
 
 export default function Select({ options, selected, setSelected, label, readOnly = false, icon, error }) {
-  const borderColor = (readOnly, error) => {
+  const border = (readOnly, error) => {
     if (readOnly) return "border-gray-200";
     if (error) return "border-red-500";
     return "border-gray-400";
@@ -22,7 +22,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
           <div className="relative">
             <Listbox.Button className="relative w-full text-left">
               <div
-                className={`${readOnly ? "cursor-default" : "cursor-pointer"} ${borderColor(
+                className={`${open && "border-blue-500"} ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(
                   readOnly,
                   error,
                 )} bg-white py-2 px-2.5 items-center space-y-0 gap-0 flex rounded-lg border-[1px]`}>
@@ -30,12 +30,11 @@ export default function Select({ options, selected, setSelected, label, readOnly
                 <div className="w-full flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">{label}</p>
-                    <p className="block truncate">{selected?.label}</p>
+                    <p className="block truncate h-5">{selected?.label}</p>
                   </div>
-                  <div className="pointer-events-none flex items-center">
-                    {!readOnly && (
-                      <>{open ? <BsChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <BsChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}</>
-                    )}
+                  <div className="pointer-events-none flex items-center pr-2">
+                    {!readOnly && open && <BsChevronUp className="h-4 w-4 text-gray-900" aria-hidden="true" />}
+                    {!readOnly && !open && <BsChevronDown className="h-4 w-4 text-gray-900" aria-hidden="true" />}
                   </div>
                 </div>
               </div>
