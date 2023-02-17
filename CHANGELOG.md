@@ -1,3 +1,18 @@
+# [1.222.0](https://github.com/betagouv/service-national-universel/compare/v1.221.0...v1.222.0) (2023-02-17)
+
+
+### Bug Fixes
+
+* **admin:** check modif bus ([bfad4eb](https://github.com/betagouv/service-national-universel/commit/bfad4eb056fc2dceb14c2f0231bb1983f4ae0ad2))
+* **admin:** referent regional liste session ([7c89dc2](https://github.com/betagouv/service-national-universel/commit/7c89dc2ef2acd44a6609ab97dae708438e84f459))
+* **admin:** use contractStatus field on application export ([890cfc9](https://github.com/betagouv/service-national-universel/commit/890cfc9488ba78617d155606dac26cb3704ab19d))
+* **app:** [mission search] do not use focused address if no match from api-address ([0d7d5d6](https://github.com/betagouv/service-national-universel/commit/0d7d5d6ea6d379da8f322c643686c52bf8b6d89d))
+
+
+### Features
+
+* **admin:** liste mission ([#2270](https://github.com/betagouv/service-national-universel/issues/2270)) ([023e24a](https://github.com/betagouv/service-national-universel/commit/023e24a0d9c2a84893316c8516657b57485c5431))
+
 # [1.221.0](https://github.com/betagouv/service-national-universel/compare/v1.220.0...v1.221.0) (2023-02-16)
 
 
