@@ -92,13 +92,13 @@ export default function Done() {
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
                   </div>
                   <div className="flex gap-5 items-center">
-                    {!isCohortDone(young.cohort) ? (
+                    {!isCohortDone(young.cohort) && (
                       <button
                         className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500"
                         onClick={() => setModalOpen({ isOpen: true })}>
                         Mes informations de retour de séjour
                       </button>
-                    ) : null}
+                    )}
 
                     <div className="relative" ref={refAttestationButton}>
                       <button

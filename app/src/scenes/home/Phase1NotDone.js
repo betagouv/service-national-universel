@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { translate } from "../../utils";
+import { permissionPhase2, permissionReinscription, translate } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
@@ -43,31 +43,39 @@ export default function Phase1NotDone() {
                 <br />
                 vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;!
               </div>
-              <div className="text-base left-7 text-gray-800 mt-5">
-                Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
-                d&apos;intérêt général !
-              </div>
-              <div className="flex flex-col items-stretch w-fit">
-                <button
-                  className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-                  onClick={() => {
-                    plausibleEvent("Phase 2/CTA - Realiser ma mission");
-                    history.push("/phase2");
-                  }}>
-                  Réaliser ma mission d&apos;intérêt général
-                </button>
-                {loading ? (
-                  <Loader />
-                ) : (
-                  <button
-                    className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
-                    onClick={goToReinscription}>
-                    Se réinscrire à un autre séjour
-                  </button>
-                )}
-              </div>
+              {permissionPhase2(young) && (
+                <>
+                  <div className="text-base left-7 text-gray-800 mt-5">
+                    Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
+                    d&apos;intérêt général !
+                  </div>
+                  <div className="flex flex-col items-stretch w-fit">
+                    <button
+                      className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                      onClick={() => {
+                        plausibleEvent("Phase 2/CTA - Realiser ma mission");
+                        history.push("/phase2");
+                      }}>
+                      Réaliser ma mission d&apos;intérêt général
+                    </button>
+                  </div>
+                </>
+              )}
+              {permissionReinscription(young) && (
+                <div className="flex flex-col items-stretch w-fit">
+                  {loading ? (
+                    <Loader />
+                  ) : (
+                    <button
+                      className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
+                      onClick={goToReinscription}>
+                      Se réinscrire à un autre séjour
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
+            <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} alt="" />
           </div>
         </div>
       </div>
@@ -80,25 +88,31 @@ export default function Phase1NotDone() {
               <br />
               vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;!
             </div>
-            <div className="text-sm left-7 text-gray-800 mt-5">
-              Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
-              d&apos;intérêt général !
-            </div>
-            <button
-              className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-              onClick={() => {
-                plausibleEvent("Phase 2/CTA - Realiser ma mission");
-                history.push("/phase2");
-              }}>
-              Réaliser ma mission d&apos;intérêt général
-            </button>
-            <button
-              className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-              onClick={goToReinscription}>
-              Se réinscrire à un autre séjour
-            </button>
+            {permissionPhase2(young) && (
+              <>
+                <div className="text-sm left-7 text-gray-800 mt-5">
+                  Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
+                  d&apos;intérêt général !
+                </div>
+                <button
+                  className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                  onClick={() => {
+                    plausibleEvent("Phase 2/CTA - Realiser ma mission");
+                    history.push("/phase2");
+                  }}>
+                  Réaliser ma mission d&apos;intérêt général
+                </button>
+              </>
+            )}
+            {permissionReinscription(young) && (
+              <button
+                className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                onClick={goToReinscription}>
+                Se réinscrire à un autre séjour
+              </button>
+            )}
           </div>
-          <img src={require("../../assets/homePhase2Mobile.png")} />
+          <img src={require("../../assets/homePhase2Mobile.png")} alt="" />
         </div>
       </div>
     </>

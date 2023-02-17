@@ -6,17 +6,20 @@ import { Link, useHistory } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { translate } from "../../utils";
+import { permissionPhase2, permissionReinscription, translate } from "../../utils";
 import { setYoung } from "../../redux/auth/actions";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
+import { isCohortDone } from "../../utils/cohorts";
+import InfoConvocation from "./components/modals/InfoConvocation";
 
 export default function NotDone() {
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young) || {};
   const history = useHistory();
   const dispatch = useDispatch();
+  const [modalOpen, setModalOpen] = React.useState({ isOpen: false });
 
   async function goToReinscription() {
     try {
@@ -45,29 +48,43 @@ export default function NotDone() {
             <b>Votre phase 1 n&apos;est donc pas validée.</b>
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
+          {!isCohortDone(young.cohort) && (
+            <button
+              className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500 mt-8"
+              onClick={() => setModalOpen({ isOpen: true })}>
+              Voir mes informations de convocation
+            </button>
+          )}
           {youngCanChangeSession(young) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
           <div className="flex flex-col items-stretch w-fit">
-            <button
-              className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-              onClick={() => {
-                plausibleEvent("Phase 2/CTA - Realiser ma mission");
-                history.push("/phase2");
-              }}>
-              Réaliser ma mission d&apos;intérêt général
-            </button>
-            {loading ? (
-              <Loader />
-            ) : (
+            {permissionPhase2(young) && (
               <button
-                className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
-                onClick={goToReinscription}>
-                Se réinscrire à un autre séjour
+                className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                onClick={() => {
+                  plausibleEvent("Phase 2/CTA - Realiser ma mission");
+                  history.push("/phase2");
+                }}>
+                Réaliser ma mission d&apos;intérêt général
               </button>
+            )}
+            {permissionReinscription(young) && (
+              <>
+                {loading ? (
+                  <Loader />
+                ) : (
+                  <button
+                    className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
+                    onClick={goToReinscription}>
+                    Se réinscrire à un autre séjour
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
         <div className="thumb" />
       </Hero>
+      <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} title="Information de convocation" />
     </HeroContainer>
   );
 }
@@ -88,7 +105,6 @@ const Button = styled(Link)`
     font-size: 0.8rem;
   }
   display: block;
-  outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 2;

@@ -48,25 +48,18 @@ export default function Phase1(props) {
 
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
   const [cohort, setCohort] = useState();
-  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState(false);
 
-  const getDisplayCenterButton = async () => {
-    try {
-      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED"))
-        return setCohortOpenForAffection(false);
-      const { ok, data } = await api.get("/cohort/" + young.cohort);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-        captureMessage("Oups, une erreur est survenue lors de la récupération de la cohorte : " + JSON.stringify(data));
-        return setCohortOpenForAffection(false);
-      }
-      setCohort(data);
-      return setCohortOpenForAffection(canAssignManually(user, young, data));
-    } catch (e) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-      capture(e);
+  function getDisplayCenterButton() {
+    if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED")) {
+      setCohortOpenForAffection(false);
+    } else if (cohort) {
+      setCohortOpenForAffection(canAssignManually(user, young, cohort));
+    } else {
+      setCohortOpenForAffection(false);
     }
-  };
+  }
+
   const sendMail = async () => {
     try {
       setLoading(true);
@@ -90,26 +83,54 @@ export default function Phase1(props) {
   };
 
   useEffect(() => {
-    getDisplayCenterButton();
+    // --- get cohort.
+    (async () => {
+      try {
+        const { ok, data } = await api.get("/cohort/" + young.cohort);
+        if (!ok) {
+          toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+          captureMessage("Oups, une erreur est survenue lors de la récupération de la cohorte : " + JSON.stringify(data));
+          return setCohortOpenForAffection(false);
+        }
+        setCohort(data);
+      } catch (err) {
+        capture(err);
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+        setCohort(null);
+      }
+    })();
+
     if (!young?.sessionPhase1Id) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
-      if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
-      setCohesionCenter(data);
+      try {
+        const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
+        if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
+        setCohesionCenter(data);
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible de récupérer les informations du centre de cohésion");
+      }
     })();
 
     if (!young.meetingPointId || !young.ligneId) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
-      if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
-      setMeetingPoint(data);
-      console.log(data);
+      try {
+        const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
+        if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
+        setMeetingPoint(data);
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible de récupérer les informations du point de rassemblement");
+      }
     })();
   }, []);
 
   React.useEffect(() => {
+    getDisplayCenterButton();
+
     if (cohort) {
       const field = youngCheckinField[user.role];
+      console.log("youngCheckinField: ", field, cohort);
       if (field) {
         setIsYoungCheckinOpen(cohort[field] ? cohort[field] : false);
       } else {

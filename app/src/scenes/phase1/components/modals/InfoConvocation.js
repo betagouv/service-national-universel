@@ -14,7 +14,7 @@ import { capture } from "../../../../sentry";
 import { getCohort } from "../../../../utils/cohorts";
 import dayjs from "dayjs";
 
-export default function InfoConvocation({ isOpen, onCancel }) {
+export default function InfoConvocation({ isOpen, onCancel, title }) {
   const young = useSelector((state) => state.Auth.young) || {};
   const [selectOpen, setSelectOpen] = React.useState(false);
   const refSelect = React.useRef(null);
@@ -164,7 +164,7 @@ export default function InfoConvocation({ isOpen, onCancel }) {
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
       <div className="flex flex-col items-center justify-center p-4">
-        <div className="text-xl leading-7 font-medium text-gray-900 text-center">Mes informations de retour de séjour</div>
+        <div className="text-xl leading-7 font-medium text-gray-900 text-center">{title ? title : "Mes informations de retour de séjour"}</div>
         <div className="relative mt-4" ref={refSelect}>
           <button
             disabled={loadingConvocation}

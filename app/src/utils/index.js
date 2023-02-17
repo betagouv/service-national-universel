@@ -43,7 +43,9 @@ export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
-      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "NOT_DONE" || y.statusPhase1 === "EXEMPTED")) ||
+      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
+        [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1) ||
+        (y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif)))) ||
     y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ||
     y.cohesionStayPresence === "true"
   );
@@ -52,6 +54,10 @@ export function permissionPhase2(y) {
 export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
+}
+
+export function permissionReinscription(y) {
+  return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif);
 }
 
 export function isYoungCanApplyToPhase2Missions(young) {
