@@ -2,19 +2,19 @@ import React, { useState, useEffect } from "react";
 import { region2department } from "snu-lib";
 import api from "../../services/api";
 
-const fields = ["cohort", "region"];
-
 export default function test() {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [query, setQuery] = useState(null);
   const [filters, setFilters] = useState({});
   const [count, setCount] = useState(0);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [openedFilter, setOpenedFilter] = useState("");
 
   const getDefaultQuery = () => {
     return { query: { bool: { must: [{ match_all: {} }] }, track_total_hits: true } };
   };
   const getData = async () => {
-    const res = await buildMissions("id", selectedFilters, null, 1, 25, getDefaultQuery(), fields);
+    const res = await buildMissions("id", selectedFilters, null, 1, 25, getDefaultQuery(), filterArray);
     if (!res) return;
     setFilters({ ...filters, ...res.newFilters });
     setCount(res.count);
@@ -38,43 +38,48 @@ export default function test() {
     if (departmentArray.length > 0) return { terms: { "department.keyword": departmentArray } };
     return null;
   };
+  /* 
+  {label: "", name: "", customQuery, datafield: ""}
+  */
+  const filterArray = [
+    { title: "Cohorte", name: "cohort", datafield: "cohort.keyword", parentGroup: "Général" },
+    { title: "Région", name: "region", datafield: "cohort.keyword", parentGroup: "Général" },
+    { title: "Département", name: "department", datafield: "cohort.keyword", parentGroup: "Général" },
+    { title: "Classe", name: "grade", datafield: "cohort.keyword", parentGroup: "Dossier" },
+  ];
+  const orderFilters = (filters, search = "") => {
+    if (search === "") return filters;
+  };
   return (
-    <div>
+    <div className="bg-white">
       <div>Test Filtre sur Centres</div>
       <div>{count} résultats</div>
-      <Filter
-        //customQuery={getRegionCustomQuery(filters.region)}
-        filter={filters.region}
-        selectedFilters={selectedFilters}
-        setSelectedFilters={setSelectedFilters}
-        /*
-        transformData={(data) => {
-          const newData = [];
-          data.map((d) => {
-            const region = department2region[d.key];
-            const val = newData.find((e) => e.key === region);
-            if (val) {
-              newData[newData.indexOf(val)].doc_count += d.doc_count;
-            } else {
-              newData.push({ key: region, doc_count: d.doc_count });
-            }
-          });
-          return newData;
-        }}
-        */
-        defaultQuery={getDefaultQuery}
-        name="region.keyword"
-        title="Région"
-      />
-      <Filter title="Cohorte" name="cohort.keyword" filter={filters.cohorts} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+      <div className="ml-4">
+        <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
+        {filterVisible && (
+          <div className="mt-2 rounded-md border-gray-100 border-[1px]">
+            {/*  SearchBar */}
+            {orderFilters(filterArray).map((f, i) => (
+              <Filter
+                key={i}
+                title={f.title}
+                name={f.name}
+                openedFilter={openedFilter}
+                setOpenedFilter={setOpenedFilter}
+                filter={filters[f.name]}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-const Filter = ({ name, title, filter = [], selectedFilters, setSelectedFilters, customQuery = null }) => {
+const Filter = ({ name, title, filter = [], selectedFilters, setSelectedFilters, customQuery = null, openedFilter, setOpenedFilter }) => {
   // build query in filter and pass it to parent
-  const [open, setOpen] = useState(false);
-
   const handleSelect = (value) => {
     let newFilters = [];
     // store localement les filtres
@@ -118,25 +123,34 @@ const Filter = ({ name, title, filter = [], selectedFilters, setSelectedFilters,
     }
   };
   */
+  const selectedSubFilter = selectedFilters[name] ? selectedFilters[name].filter.length : 0;
   return (
-    <div>
-      <div className="border-gray-500 border-[1px] w-fit p-2 cursor-pointer" onClick={() => setOpen((open) => !open)}>
-        {title}
+    <div className="flex flex-row">
+      <div className="flex flex-row justify-around w-[288px] border-gray-500 border-[1px] p-2 cursor-pointer bg-red-50" onClick={() => setOpenedFilter(name)}>
+        <div className="self-start">{title}</div>
+        {selectedSubFilter > 0 ? <div className="bg-red-500 p-1 rounded-full text-white text-xs ml-2">{selectedSubFilter}</div> : <></>}
       </div>
-      {open && (
-        <div className=" bg-white">
-          {filter.map((f, i) => (
-            <div onClick={() => handleSelect(f.value)} key={i}>
-              {f.value} {f.count} {selectedFilters[name] && selectedFilters[name].filter.includes(f.value) && "selected"}
-            </div>
-          ))}
-        </div>
-      )}
+
+      <div className="absolute">
+        {openedFilter === name && (
+          <div className=" bg-white relative left-[288px]">
+            {filter.map((f, i) => (
+              <div onClick={() => handleSelect(f.value)} key={i} className="flex flex-row justify-between">
+                <div className="flex flex-row border-2">
+                  <input checked={selectedFilters[name] && selectedFilters[name].filter.includes(f.value)} className="cursor-pointer" type="checkbox" onChange={() => null} />
+                  <div>{f.value}</div>
+                </div>
+                <div>{f.count}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, query = null, fields) => {
+const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, query = null, filterArray) => {
   if (!query || !query.bool || !query.bool.must) query = { bool: { must: [{ match_all: {} }] } };
 
   let body = {
@@ -149,8 +163,8 @@ const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, q
   };
 
   //ajouter les aggregations pour count
-  fields.map((f) => {
-    body.aggs[f] = { terms: { field: `${f}.keyword` } };
+  filterArray.map((f) => {
+    body.aggs[f.name] = { terms: { field: `${f.name}.keyword` } };
   });
 
   if (selectedFilters && Object.keys(selectedFilters).length) {
@@ -186,9 +200,23 @@ const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, q
 
   // map a travers les aggregations pour recuperer les filtres
 
-  fields.map((f) => {
-    newFilters[f] = aggs[f].buckets.map((b) => ({ value: b.key, count: b.doc_count }));
+  filterArray.map((f) => {
+    if (!selectedFilters[f.name]) newFilters[f.name] = aggs[f.name].buckets.map((b) => ({ value: b.key, count: b.doc_count }));
   });
 
   return { data, count, newFilters };
 };
+
+function FilterButton({ onClick }) {
+  return (
+    <div onClick={onClick} className="cursor-pointer bg-[#F3F4F6] w-24 h-10 rounded-md flex flex-row justify-center items-center">
+      <svg width={12} height={11} viewBox="0 0 12 11" fill="#9CA3AF" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M0 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.252a1 1 0 0 1-.293.708l-4.08 4.08a1 1 0 0 0-.294.708v1.171a1 1 0 0 1-.293.707l-.666.667c-.63.63-1.707.184-1.707-.707V7.748a1 1 0 0 0-.293-.708L.293 2.96A1 1 0 0 1 0 2.252V1Z"
+          fill="#9CA3AF"
+        />
+      </svg>
+      <div className="ml-2 text-grey-700">Filtres</div>
+    </div>
+  );
+}
