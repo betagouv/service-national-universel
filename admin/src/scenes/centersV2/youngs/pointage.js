@@ -18,7 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalMultiPointagePresenceArrivee from "../components/modals/ModalMultiPointagePresenceArrivee";
 import ModalMultiPointageDepart from "../components/modals/ModalMultiPointageDepart";
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
-import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR, YOUNG_STATUS } from "../../../utils";
+import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR, YOUNG_STATUS } from "snu-lib";
 import Loader from "../../../components/Loader";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import SelectAction from "../../../components/SelectAction";
@@ -836,7 +836,7 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
                 }
               }}>
               <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
-              <div className="group-hover:underline">{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
           </div>
         </td>

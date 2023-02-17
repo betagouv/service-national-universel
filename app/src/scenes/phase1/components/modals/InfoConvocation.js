@@ -23,7 +23,7 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
   const [center, setCenter] = React.useState();
   const [isLoading, setIsLoading] = React.useState(false);
   const [loadingConvocation, setLoadingConvocation] = React.useState(false);
-  const [returnDate, setReturnDate] = React.useState({});
+  const [returnDate, setReturnDate] = React.useState(null);
 
   const getMeetingPoint = async () => {
     try {
@@ -201,12 +201,12 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
             </div>
           </div>
         </div>
-        {meetingPoint && (
+        {returnDate && (
           <div className="flex flex-col md:flex-row items-center mt-4 gap-6">
             <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
               <Calendar date={returnDate.date} month={returnDate.month} className="shadow-ninaBlock mx-3 w-7 h-10 md:w-11 md:h-12" />
               <div className="flex flex-col">
-                <div className="font-bold text-xs whitespace-nowrap">Retour à {returnDate.hour}</div>
+                <div className="font-bold text-xs whitespace-nowrap">Retour{returnDate.hour ? " à " + returnDate.hour : ""}</div>
                 <div className="text-xs text-gray-600 whitespace-nowrap">{returnDate.complete}</div>
               </div>
             </div>

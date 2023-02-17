@@ -62,5 +62,5 @@ export function getCohortDetail(cohortName) {
 
 export function isCohortDone(cohortName) {
   const cohort = getCohort(cohortName);
-  return cohort && cohort.dateEnd.valueOf() < Date.now();
+  return cohort && cohort.dateEnd && new Date(cohort.dateEnd).valueOf() < Date.now();
 }
