@@ -3,7 +3,8 @@ import { useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
-import DesktopConfirm from "./desktop/stepConfirm";
+import Confirm from "./stepConfirm";
+
 import DesktopConsentements from "./desktop/stepConsentements";
 import DesktopCoordonnees from "./desktop/stepCoordonnees";
 import DesktopDocuments from "./desktop/stepDocuments";
@@ -11,7 +12,6 @@ import DesktopDone from "./desktop/stepDone";
 import DesktopRepresentants from "./desktop/stepRepresentants";
 import DesktopUpload from "./desktop/stepUpload";
 
-import MobileConfirm from "./mobile/stepConfirm";
 import MobileConsentements from "./mobile/stepConsentements";
 import MobileCoordonnees from "./mobile/stepCoordonnees";
 import MobileDocuments from "./mobile/stepDocuments";
@@ -39,7 +39,7 @@ function renderStep(step, device) {
   if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
   if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
   if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
-  if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
+  if (step === STEPS.CONFIRM) return <Confirm device={device} />;
   if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
   if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
   return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;

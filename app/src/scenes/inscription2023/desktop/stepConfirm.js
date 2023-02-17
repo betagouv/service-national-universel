@@ -1,63 +1,18 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE, translate } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import ModalSejour from "../components/ModalSejour";
-import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
 import Error from "../../../components/error";
 import QuestionMark from "../../../assets/icons/QuestionMarkBlueCircle";
-import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
+import { capitalizeFirstLetter } from "../../../utils";
 
-export default function StepConfirm() {
+export default function StepConfirm({ hasHandicap, loading, error, setError, onSubmit }) {
   const young = useSelector((state) => state.Auth.young);
   const [modal, setModal] = React.useState({ isOpen: false });
-  const [hasHandicap, setHasHandicap] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState({});
   const history = useHistory();
-  const dispatch = useDispatch();
-
-  React.useEffect(() => {
-    if (
-      young.handicap ||
-      young.allergies ||
-      young.ppsBeneficiary ||
-      young.paiBeneficiary ||
-      young.specificAmenagment ||
-      young.reducedMobilityAccess ||
-      young.handicapInSameDepartment ||
-      young.highSkilledActivity ||
-      young.highSkilledActivityInSameDepartment
-    ) {
-      setHasHandicap(true);
-    }
-  }, []);
-
-  const onSubmit = async () => {
-    setLoading(true);
-    try {
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/confirm`);
-      if (!ok) {
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
-      dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - valider inscription");
-      history.push("/inscription2023/attente-consentement");
-    } catch (e) {
-      capture(e);
-      setError({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
-    }
-    setLoading(false);
-  };
 
   return (
     <>
@@ -172,10 +127,6 @@ export default function StepConfirm() {
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>
   );
-}
-
-function capitalizeFirstLetter(string) {
-  if (string) return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 const Details = ({ title, value }) => {
