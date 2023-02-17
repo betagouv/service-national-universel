@@ -18,7 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalMultiPointagePresenceArrivee from "../components/modals/ModalMultiPointagePresenceArrivee";
 import ModalMultiPointageDepart from "../components/modals/ModalMultiPointageDepart";
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
-import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR, YOUNG_STATUS } from "../../../utils";
+import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR, YOUNG_STATUS } from "snu-lib";
 import Loader from "../../../components/Loader";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import SelectAction from "../../../components/SelectAction";
@@ -48,7 +48,7 @@ const FILTERS = [
   "AUTOTEST",
 ];
 
-export default function Pointage({ updateFilter }) {
+export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
   const history = useHistory();
   const [young, setYoung] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
@@ -178,7 +178,6 @@ export default function Pointage({ updateFilter }) {
                                       } catch (e) {
                                         console.log(e);
                                         toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                                        return;
                                       }
                                     },
                                   });
@@ -214,7 +213,6 @@ export default function Pointage({ updateFilter }) {
                                       } catch (e) {
                                         console.log(e);
                                         toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                                        return;
                                       }
                                     },
                                   });
@@ -254,7 +252,6 @@ export default function Pointage({ updateFilter }) {
                                   } catch (e) {
                                     console.log(e);
                                     toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                                    return;
                                   }
                                 },
                                 render: (
@@ -287,7 +284,6 @@ export default function Pointage({ updateFilter }) {
                                   } catch (e) {
                                     console.log(e);
                                     toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                                    return;
                                   }
                                 },
                                 render: (
@@ -673,6 +669,7 @@ export default function Pointage({ updateFilter }) {
                                 })
                               }
                               selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
+                              isYoungCheckinOpen={isYoungCheckinOpen}
                             />
                           ))}
                         </tbody>
@@ -716,7 +713,7 @@ export default function Pointage({ updateFilter }) {
   );
 }
 
-const Line = ({ hit, onClick, opened, onSelect, selected }) => {
+const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) => {
   const [value, setValue] = useState(null);
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
@@ -765,57 +762,65 @@ const Line = ({ hit, onClick, opened, onSelect, selected }) => {
         </td>
         <td className={`${bgColor}`}>
           <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
-            <select
-              className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${cohesionStayPresenceBgColor} ${cohesionStayPresenceTextColor}`}
-              value={value.cohesionStayPresence || ""}
-              onChange={(e) => {
-                setModalPointagePresenceArrivee({
-                  isOpen: true,
-                  value: e.target.value,
-                });
-              }}
-              style={{ fontFamily: "Marianne" }}>
-              <option disabled label="Présence à l'arrivée">
-                Présence à l&apos;arrivée
-              </option>
-              {[
-                { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                { label: "Présent", value: "true" },
-                { label: "Absent", value: "false" },
-              ].map((option, i) => (
-                <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                  {option.label}
+            {isYoungCheckinOpen ? (
+              <select
+                className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${cohesionStayPresenceBgColor} ${cohesionStayPresenceTextColor}`}
+                value={value.cohesionStayPresence || ""}
+                onChange={(e) => {
+                  setModalPointagePresenceArrivee({
+                    isOpen: true,
+                    value: e.target.value,
+                  });
+                }}
+                style={{ fontFamily: "Marianne" }}>
+                <option disabled label="Présence à l'arrivée">
+                  Présence à l&apos;arrivée
                 </option>
-              ))}
-            </select>
+                {[
+                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                  { label: "Présent", value: "true" },
+                  { label: "Absent", value: "false" },
+                ].map((option, i) => (
+                  <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="">{value.cohesionStayPresence === "true" ? "Présent" : value.cohesionStayPresence === "false" ? "Absent" : "Non renseigné"}</div>
+            )}
           </div>
         </td>
         <td className={`${bgColor}`}>
           <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
-            <select
-              className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:text-gray-500 disabled:cursor-auto`}
-              value={value.presenceJDM || ""}
-              disabled={value.cohesionStayPresence === "false"}
-              onChange={(e) => {
-                setModalPointagePresenceJDM({
-                  isOpen: true,
-                  value: e.target.value,
-                });
-              }}
-              style={{ fontFamily: "Marianne" }}>
-              <option disabled label="Présence JDM">
-                Présence JDM
-              </option>
-              {[
-                { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                { label: "Présent", value: "true" },
-                { label: "Absent", value: "false" },
-              ].map((option, i) => (
-                <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                  {option.label}
+            {isYoungCheckinOpen ? (
+              <select
+                className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:text-gray-500 disabled:cursor-auto`}
+                value={value.presenceJDM || ""}
+                disabled={value.cohesionStayPresence === "false"}
+                onChange={(e) => {
+                  setModalPointagePresenceJDM({
+                    isOpen: true,
+                    value: e.target.value,
+                  });
+                }}
+                style={{ fontFamily: "Marianne" }}>
+                <option disabled label="Présence JDM">
+                  Présence JDM
                 </option>
-              ))}
-            </select>
+                {[
+                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                  { label: "Présent", value: "true" },
+                  { label: "Absent", value: "false" },
+                ].map((option, i) => (
+                  <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="">{value.presenceJDM === "true" ? "Présent" : value.presenceJDM === "false" ? "Absent" : "Non renseigné"}</div>
+            )}
           </div>
         </td>
         <td className={`${bgColor} rounded-r-lg mr-2`}>
@@ -823,13 +828,15 @@ const Line = ({ hit, onClick, opened, onSelect, selected }) => {
             <div
               className="flex gap-1 items-center group cursor-pointer"
               onClick={(e) => {
-                setModalPointageDepart({
-                  isOpen: true,
-                  value: e.target.value,
-                });
+                if (isYoungCheckinOpen) {
+                  setModalPointageDepart({
+                    isOpen: true,
+                    value: e.target.value,
+                  });
+                }
               }}>
               <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
-              <div className="group-hover:underline">{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
           </div>
         </td>

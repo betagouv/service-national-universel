@@ -422,3 +422,10 @@ export const debounce = (fn, delay) => {
     }, delay);
   };
 };
+
+export const youngCheckinField = {
+  [ROLES.ADMIN]: "youngCheckinForAdmin",
+  [ROLES.HEAD_CENTER]: "youngCheckinForHeadOfCenter",
+  [ROLES.REFERENT_REGION]: "youngCheckinForRegionReferent",
+  [ROLES.REFERENT_DEPARTMENT]: "youngCheckinForDepartmentReferent",
+};
