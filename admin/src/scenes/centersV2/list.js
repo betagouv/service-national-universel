@@ -104,7 +104,7 @@ const ListSession = ({ firstSession }) => {
     } else if (user.role === ROLES.REFERENT_REGION) {
       return {
         size: ES_NO_LIMIT,
-        query: { bool: { filter: [{ terms: { "region.keyword": user.region } }] } },
+        query: { bool: { filter: [{ term: { "region.keyword": user.region } }] } },
         track_total_hits: true,
       };
     }
