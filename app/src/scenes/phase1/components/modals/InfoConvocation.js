@@ -86,7 +86,7 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
       date = meetingPoint.bus.returnDate;
     }
 
-    const hour = meetingPoint && meetingPoint.ligneToPoint ? meetingPoint.ligneToPoint.returnHour : null;
+    const hour = meetingPoint && meetingPoint.ligneToPoint ? meetingPoint.ligneToPoint.returnHour : "11h";
 
     if (date) {
       const d = dayjs(date).locale("fr");
@@ -206,7 +206,7 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
             <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
               <Calendar date={returnDate.date} month={returnDate.month} className="shadow-ninaBlock mx-3 w-7 h-10 md:w-11 md:h-12" />
               <div className="flex flex-col">
-                <div className="font-bold text-xs whitespace-nowrap">Retour{returnDate.hour ? " à " + returnDate.hour : ""}</div>
+                <div className="font-bold text-xs whitespace-nowrap">Retour à {returnDate.hour}</div>
                 <div className="text-xs text-gray-600 whitespace-nowrap">{returnDate.complete}</div>
               </div>
             </div>
