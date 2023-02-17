@@ -57,7 +57,8 @@ export function permissionPhase3(y) {
 }
 
 export function permissionReinscription(y) {
-  return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif);
+  // return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif);
+  return false;
 }
 
 export function isYoungCanApplyToPhase2Missions(young) {
