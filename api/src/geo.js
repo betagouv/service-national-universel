@@ -39,7 +39,7 @@ async function getQPV(postcode, commune, adresse) {
         .then((res) => {
           if (res.status !== 200) {
             capture(res);
-            return reject();
+            throw new Error("Request failed with status " + res.status);
           }
           return res.json();
         })
@@ -50,6 +50,9 @@ async function getQPV(postcode, commune, adresse) {
           }
           if (json.reponses.length && json.reponses[0].code_reponse === "OUI") return resolve(true);
           return resolve(false);
+        })
+        .catch((err) => {
+          reject(err);
         });
     });
   } catch (e) {
