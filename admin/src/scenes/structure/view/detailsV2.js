@@ -7,12 +7,12 @@ import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 import { StructureContext } from "../view";
 
 import EditButton from "../../../components/buttons/EditButton";
-import MultiSelect from "../components/MultiSelect";
+import MultiSelect from "../../../components/forms/MultiSelect";
 import AsyncSelect from "react-select/async";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
-import Field from "../../missions/components/Field";
-import Select from "../../centersV2/components/Select";
-import Toggle from "../../centersV2/components/Toggle";
+import Field from "../../../components/forms/Field";
+import Select from "../../../components/TailwindSelect";
+import Toggle from "../../../components/forms/Toggle";
 import StructureView from "./wrapperv2";
 import TeamCard from "../components/cards/TeamCard";
 import CardRepresentant from "../components/cards/CardRepresentant";
