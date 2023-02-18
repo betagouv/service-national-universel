@@ -1,6 +1,6 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-import { sessions2023 } from "snu-lib";
+import { oldSessions, sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;
@@ -61,6 +61,7 @@ export function getCohortDetail(cohortName) {
 }
 
 export function isCohortDone(cohortName) {
-  const cohort = getCohort(cohortName);
+  const cohort = [...oldSessions, ...sessions2023].find((c) => c.name === cohortName);
+  if (!cohort.dateEnd) return true;
   return cohort && cohort.dateEnd && new Date(cohort.dateEnd).valueOf() < Date.now();
 }
