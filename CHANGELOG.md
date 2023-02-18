@@ -1,3 +1,10 @@
+## [1.222.1](https://github.com/betagouv/service-national-universel/compare/v1.222.0...v1.222.1) (2023-02-18)
+
+
+### Bug Fixes
+
+* **app:** allow young to apply if no endDate in cohort data ([#2279](https://github.com/betagouv/service-national-universel/issues/2279)) ([0c6ba95](https://github.com/betagouv/service-national-universel/commit/0c6ba952ec2e6455ddf49e53a82657ded34f6809))
+
 # [1.222.0](https://github.com/betagouv/service-national-universel/compare/v1.221.0...v1.222.0) (2023-02-17)
 
 
