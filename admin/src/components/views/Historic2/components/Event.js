@@ -4,28 +4,27 @@ import { formatLongDateFR, translateAction } from "snu-lib";
 import { translateHistory, translateModelFields } from "../../../../utils";
 import UserCard from "../../../UserCard";
 
-export default function Event({ e, index, model, refName, path }) {
+export default function Event({ e, index, model }) {
   return (
-    <tr key={index} className="border-t border-t-slate-100 hover:bg-slate-50 cursor-default">
-      {refName && (
-        <td className="px-4 py-3 cursor-pointer">
-          <a href={`/${path}/${e.ref}`}>{e.ref}</a>
-        </td>
-      )}
-      <td className="px-4 py-3">
+    <div key={index} className="flex items-center hover:bg-slate-50 cursor-default px-4 py-3">
+      <div className="w-[25%]">
         <p className="text-gray-400">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
-        <p className="max-w-xs truncate">{translateModelFields(model, e.path)}</p>
-      </td>
-      <td className="px-4 py-3 max-w-xs truncate text-gray-400">{translateHistory(e.path, e.originalValue)}</td>
-      <td className="px-4 py-3">
+        <p className="truncate w-10/12">{translateModelFields(model, e.path)}</p>
+      </div>
+      <div className="w-[20%]">
+        <p className="truncate w-10/12 text-gray-400">{translateHistory(e.path, e.originalValue)}</p>
+      </div>
+      <div className="flex items-center justify-center w-[10%]">
         <HiOutlineArrowRight />
-      </td>
-      <td className="px-4 py-3 max-w-xs truncate">{translateHistory(e.path, e.value)}</td>
-      <td className="px-4 py-3">
+      </div>
+      <div className="w-[20%]">
+        <p className="truncate w-10/12 text-gray-900">{translateHistory(e.path, e.value)}</p>
+      </div>
+      <div className="w-[25%]">
         <UserCard user={e.user} />
-      </td>
-    </tr>
+      </div>
+    </div>
   );
 }

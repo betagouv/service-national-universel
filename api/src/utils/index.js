@@ -35,6 +35,7 @@ const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { SUB_ROLES } = require("snu-lib/roles");
 const { getAge } = require("snu-lib/date");
 const { capture } = require("../sentry");
+const { getCohortValidationDate } = require("./cohort");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -87,15 +88,17 @@ function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
 
 const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
   const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
-  const p = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
     const params = { Bucket: bucket, Key: name };
     s3bucket.getObject(params, (err, data) => {
-      if (err) return reject(err);
-      resolve(data);
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
     });
   });
-  return p;
 };
 
 function uploadPublicPicture(path, file) {
@@ -630,34 +633,31 @@ async function notifDepartmentChange(department, template, young, extraParams = 
 }
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
-  const dateDeValidation = {
-    2019: new Date("06/28/2019"),
-    2020: new Date("07/02/2021"),
-    2021: new Date("07/02/2021"),
-    "Juin 2022": new Date(2022, 5, 20, 18), //20 juin 2022 à 18h
-    "Juillet 2022": new Date(2022, 6, 11, 18), //11 juillet 2022 à 18h
-  };
+  // const dateDeValidation = {
+  //   2019: new Date("06/28/2019"),
+  //   2020: new Date("07/02/2021"),
+  //   2021: new Date("07/02/2021"),
+  //   "Juin 2022": new Date(2022, 5, 20, 18), //20 juin 2022 à 18h
+  //   "Juillet 2022": new Date(2022, 6, 11, 18), //11 juillet 2022 à 18h
+  // };
+  //
+  // const dateDeValidationTerminale = {
+  //   2019: new Date("06/28/2019"),
+  //   2020: new Date("07/02/2021"),
+  //   2021: new Date("07/02/2021"),
+  //   "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
+  //   "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
+  // };
+  const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
 
-  const dateDeValidationTerminale = {
-    2019: new Date("06/28/2019"),
-    2020: new Date("07/02/2021"),
-    2021: new Date("07/02/2021"),
-    "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
-    "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
-  };
-
-  if (!dateDeValidation[sessionPhase1.cohort] || !dateDeValidationTerminale[sessionPhase1.cohort]) return;
+  if (!dateDeValidation || !dateDeValidationTerminale) return;
 
   const now = new Date();
-  if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
+  if ((now >= dateDeValidation && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
-        (now >= dateDeValidation[sessionPhase1.cohort] &&
-          young?.grade !== "Terminale" &&
-          (!young?.departSejourAt || young?.departSejourAt > dateDeValidation[sessionPhase1.cohort])) ||
-        (now >= dateDeValidationTerminale[sessionPhase1.cohort] &&
-          young?.grade === "Terminale" &&
-          (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort]))
+        (now >= dateDeValidation && young?.grade !== "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidation)) ||
+        (now >= dateDeValidationTerminale && young?.grade === "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale))
       ) {
         if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
           young.set({ statusPhase1: "NOT_DONE" });

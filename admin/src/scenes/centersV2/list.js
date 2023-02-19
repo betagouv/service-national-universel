@@ -96,23 +96,17 @@ const ListSession = ({ firstSession }) => {
   const [cohesionCenter, setCohesionCenter] = useState([]);
   const getDefaultQuery = () => {
     if (user.role === ROLES.ADMIN) {
-      return { query: { match_all: {} }, track_total_hits: true };
+      return { size: ES_NO_LIMIT, query: { match_all: {} }, track_total_hits: true };
     } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
       return {
-        query: {
-          terms: {
-            department: user.department,
-          },
-        },
+        size: ES_NO_LIMIT,
+        query: { bool: { filter: [{ terms: { "department.keyword": user.department } }] } },
         track_total_hits: true,
       };
     } else if (user.role === ROLES.REFERENT_REGION) {
       return {
-        query: {
-          bool: {
-            must: { match: { region: user.region } },
-          },
-        },
+        size: ES_NO_LIMIT,
+        query: { bool: { filter: [{ term: { "region.keyword": user.region } }] } },
         track_total_hits: true,
       };
     }

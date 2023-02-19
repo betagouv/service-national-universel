@@ -16,7 +16,7 @@ import {
   APPLICATION_STATUS,
   SENDINBLUE_TEMPLATES,
   translateAddFilePhase2WithoutPreposition,
-  COHESION_STAY_END,
+  isYoungCanApplyToPhase2Missions,
 } from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import ApplyDoneModal from "./components/ApplyDoneModal";
@@ -511,11 +511,7 @@ export default function viewDesktop() {
 
 const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
-    if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
-      return true;
-    }
-
-    return false;
+    return obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION");
   }).length;
 
   if (applicationsCount >= 15)
@@ -530,8 +526,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       </div>
     );
 
-  const now = new Date();
-  if (now < COHESION_STAY_END[young.cohort])
+  if (!isYoungCanApplyToPhase2Missions(young))
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Pour candidater, vous devez avoir terminé votre séjour de cohésion">
@@ -810,7 +805,6 @@ const InfoStructure = ({ title, structure }) => {
       const { ok, data, code } = await api.get(`/structure/${structure}`);
       if (!ok) toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       else setValue(data.description);
-      return;
     })();
   }, []);
   if (!value) return <div />;

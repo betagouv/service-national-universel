@@ -298,7 +298,7 @@ export default function List() {
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      setFilter((prev) => ({ ...prev, LOCATION: location }));
+      if (location) setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
 

@@ -69,7 +69,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   function onClickDelete() {
     setConfirmModal({
       isOpen: true,
-      onConfirm: onConfirmDelete,
       loadingText: "La suppresion peut prendre une minute...",
       title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
       message: "Cette action est irréversible.",
@@ -91,17 +90,15 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     }
   };
 
-  function onSelectStatus(status) {
+  const onSelectStatus = (status) => {
     setWithdrawn({ reason: "", message: "", error: null });
-
     setConfirmModal({
       icon: <Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />,
       title: "Modification de statut",
       message: `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utlisateur.`,
       type: status,
-      onConfirm: () => onConfirmStatus(status),
     });
-  }
+  };
 
   const withdrawnReasonOptions = [
     <option key="none" value="">
@@ -114,8 +111,8 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     )),
   ];
 
-  const onConfirmStatus = async (type) => {
-    if (type === YOUNG_STATUS.WITHDRAWN) {
+  const onConfirmStatus = async () => {
+    if (confirmModal.type === YOUNG_STATUS.WITHDRAWN) {
       if (withdrawn.reason === "") {
         setWithdrawn({ ...withdrawn, error: "Vous devez obligatoirement sélectionner un motif." });
         return;
@@ -125,9 +122,9 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         setWithdrawn({ ...withdrawn, error: null });
       }
-      await changeStatus(type, { withdrawnReason: withdrawn.reason, withdrawnMessage: withdrawn.message });
+      await changeStatus(confirmModal.type, { withdrawnReason: withdrawn.reason, withdrawnMessage: withdrawn.message });
     } else {
-      await changeStatus(type);
+      await changeStatus(confirmModal.type);
     }
   };
 
@@ -335,13 +332,15 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           loadingText={confirmModal.loadingText}
           confirmMode={confirmModal.confirmColor || "blue"}
           onCancel={() => setConfirmModal(null)}
-          onConfirm={confirmModal.onConfirm}>
+          onConfirm={confirmModal.type ? onConfirmStatus : onConfirmDelete}>
           {confirmModal.type === YOUNG_STATUS.WITHDRAWN && (
             <div className="mt-[24px]">
               <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
                 <select
                   value={withdrawn.reason}
-                  onChange={(e) => setWithdrawn({ ...withdrawn, reason: e.target.value })}
+                  onChange={(e) => {
+                    setWithdrawn({ ...withdrawn, reason: e.target.value });
+                  }}
                   className="block grow p-[15px] bg-[transparent] appearance-none">
                   {withdrawnReasonOptions}
                 </select>
@@ -349,7 +348,9 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               </div>
               <textarea
                 value={withdrawn.message}
-                onChange={(e) => setWithdrawn({ ...withdrawn, message: e.target.value })}
+                onChange={(e) => {
+                  setWithdrawn({ ...withdrawn, message: e.target.value });
+                }}
                 className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
                 rows="5"
                 placeholder="Précisez la raison de votre refus ici"
