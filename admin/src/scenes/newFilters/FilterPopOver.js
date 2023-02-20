@@ -50,7 +50,12 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
               "flex items-center justify-between transition rounded-lg duration-150 ease-in-out hover:bg-gray-50 cursor-pointer py-2 px-4 outline-none w-full",
             )}>
             <p className="text-gray-700 text-sm leading-5">{filter.title}</p>
-            <BsChevronRight className="text-gray-400" />
+            <div className="flex items-center gap-2">
+              {selectedFilters[filter?.name]?.filter?.length > 0 && (
+                <div className="flex items-center justify-center text-blue-600 bg-indigo-100 rounded-full font-normal w-6 h-6">{selectedFilters[filter?.name]?.filter?.length}</div>
+              )}
+              <BsChevronRight className="text-gray-400" />
+            </div>
           </Popover.Button>
 
           <Transition
