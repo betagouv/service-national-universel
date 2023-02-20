@@ -82,6 +82,7 @@ export default function test() {
       <div>{count} résultats</div>
       <div className="flex flex-col gap-8 m-4">
         <ListFiltersPopOver filters={filterArray} data={filters} setSelectedFilters={setSelectedFilters} selectedFilters={selectedFilters} onChangeFilter={getData} />
+        {/* display currentfilters */}
       </div>
     </div>
   );
