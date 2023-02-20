@@ -52,7 +52,9 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
             <p className="text-gray-700 text-sm leading-5">{filter.title}</p>
             <div className="flex items-center gap-2">
               {selectedFilters[filter?.name]?.filter?.length > 0 && (
-                <div className="flex items-center justify-center text-blue-600 bg-indigo-100 rounded-full font-normal w-6 h-6">{selectedFilters[filter?.name]?.filter?.length}</div>
+                <div className="flex items-center justify-center text-blue-600 bg-indigo-100 rounded-full font-normal w-6 h-6 text-xs">
+                  {selectedFilters[filter?.name]?.filter?.length}
+                </div>
               )}
               <BsChevronRight className="text-gray-400" />
             </div>
