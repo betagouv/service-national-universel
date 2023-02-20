@@ -50,6 +50,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
     setCategories(newCategories);
   }, [filtersVisible]);
 
+  // text for tooltip save
   const saveTitle = Object.keys(selectedFilters).map((key) => {
     if (selectedFilters[key].filter.length > 0) {
       return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";

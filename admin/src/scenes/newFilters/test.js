@@ -20,7 +20,7 @@ export default function test() {
     { title: "Custom", name: "example", datafield: "example.keyword", parentGroup: "Dossier", customComponent: "example" },
   ];
   const getDefaultQuery = () => {
-    return { query: { bool: { must: [{ match_all: {} }] }, track_total_hits: true } };
+    return { query: { bool: { must: [{ match_all: {} }] } } };
   };
 
   const init = async () => {
@@ -89,11 +89,10 @@ export default function test() {
 }
 
 //extarct dans utils ou logique du filtre ? en passant l'index en param ?
-const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, query = null, filterArray) => {
-  if (!query || !query.bool || !query.bool.must) query = { bool: { must: [{ match_all: {} }] } };
-
+const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, defaultQuery = null, filterArray) => {
+  if (!defaultQuery) defaultQuery = { query: { bool: { must: [{ match_all: {} }] } } };
   let bodyQuery = {
-    query,
+    query: defaultQuery.query,
     aggs: {},
     size: size,
     from: size * (page - 1),
@@ -102,7 +101,7 @@ const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, q
   };
 
   let bodyAggs = {
-    query: { bool: { must: [{ match_all: {} }] } },
+    query: defaultQuery.query,
     aggs: {},
     size: 0,
     track_total_hits: true,
