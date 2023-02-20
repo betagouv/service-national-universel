@@ -17,7 +17,7 @@ export default function test() {
     { title: "Région", name: "region", datafield: "region.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
     { title: "Département", name: "department", datafield: "department.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
     { title: "Classe", name: "grade", datafield: "grade.keyword", parentGroup: "Dossier", translate: translateGrade, missingLabel: "Non renseignée" },
-    { title: "Custom", name: "department", datafield: "department.keyword", parentGroup: "Dossier", customComponent: "example" },
+    { title: "Custom", name: "example", datafield: "example.keyword", parentGroup: "Dossier", customComponent: "example" },
   ];
   const getDefaultQuery = () => {
     return { query: { bool: { must: [{ match_all: {} }] }, track_total_hits: true } };
