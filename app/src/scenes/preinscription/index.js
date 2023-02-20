@@ -13,8 +13,8 @@ import StepDone from "./steps/stepDone";
 import { useSelector } from "react-redux";
 import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import Header from "../../components/header";
 import Footer from "../../components/footerV2";
+import Header from "../../components/header";
 
 function renderStep(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
