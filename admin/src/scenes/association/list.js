@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 
+import { capture } from "../../sentry";
+
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import { translate, ES_NO_LIMIT, ROLES, getFilterLabel } from "../../utils";
@@ -69,6 +71,7 @@ export default function List() {
           }
         }
       } catch (err) {
+        capture(err);
         console.log(err);
         toastr.error("Erreur lors de la récupération des missions");
         for (const association of associations) {

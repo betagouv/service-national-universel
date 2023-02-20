@@ -1,3 +1,43 @@
+## [1.222.1](https://github.com/betagouv/service-national-universel/compare/v1.222.0...v1.222.1) (2023-02-18)
+
+
+### Bug Fixes
+
+* **app:** allow young to apply if no endDate in cohort data ([#2279](https://github.com/betagouv/service-national-universel/issues/2279)) ([0c6ba95](https://github.com/betagouv/service-national-universel/commit/0c6ba952ec2e6455ddf49e53a82657ded34f6809))
+
+# [1.222.0](https://github.com/betagouv/service-national-universel/compare/v1.221.0...v1.222.0) (2023-02-17)
+
+
+### Bug Fixes
+
+* **admin:** check modif bus ([bfad4eb](https://github.com/betagouv/service-national-universel/commit/bfad4eb056fc2dceb14c2f0231bb1983f4ae0ad2))
+* **admin:** referent regional liste session ([7c89dc2](https://github.com/betagouv/service-national-universel/commit/7c89dc2ef2acd44a6609ab97dae708438e84f459))
+* **admin:** use contractStatus field on application export ([890cfc9](https://github.com/betagouv/service-national-universel/commit/890cfc9488ba78617d155606dac26cb3704ab19d))
+* **app:** [mission search] do not use focused address if no match from api-address ([0d7d5d6](https://github.com/betagouv/service-national-universel/commit/0d7d5d6ea6d379da8f322c643686c52bf8b6d89d))
+
+
+### Features
+
+* **admin:** liste mission ([#2270](https://github.com/betagouv/service-national-universel/issues/2270)) ([023e24a](https://github.com/betagouv/service-national-universel/commit/023e24a0d9c2a84893316c8516657b57485c5431))
+
+# [1.221.0](https://github.com/betagouv/service-national-universel/compare/v1.220.0...v1.221.0) (2023-02-16)
+
+
+### Bug Fixes
+
+* **admin:** CardContact view necessary cohorts ([aa8d919](https://github.com/betagouv/service-national-universel/commit/aa8d91954df4f8f627677881d3e7bcbe0a7d8440))
+* **admin:** derniers fixes sur les structures avant MEP ([2e4abe0](https://github.com/betagouv/service-national-universel/commit/2e4abe08505cd369fba2f364f714914aa275555e))
+* **admin:** plan de transport aller / retour ([34313c7](https://github.com/betagouv/service-national-universel/commit/34313c734cb56815f8079fb38eed75e4435ee341))
+* **admin:** plein de petits fixes ([d0e3eae](https://github.com/betagouv/service-national-universel/commit/d0e3eaec1c110a0973bae32448256faca3bac30e))
+* **admin:** redirect to contrat ([0cdfd45](https://github.com/betagouv/service-national-universel/commit/0cdfd45784194af0bcc965d6e8fa280583763117))
+* **admin:** Remove panel for superviser/responsible in mission youngs view ([c4a6fa9](https://github.com/betagouv/service-national-universel/commit/c4a6fa9e49bcbbcabbfe010d38d115990f7f587a))
+
+
+### Features
+
+* **admin:** Open structure prod ([#2267](https://github.com/betagouv/service-national-universel/issues/2267)) ([46b182b](https://github.com/betagouv/service-national-universel/commit/46b182b0f6eef7ad611349918e8a4b1249db2154))
+* **admin:** update historique ([#2271](https://github.com/betagouv/service-national-universel/issues/2271)) ([6458602](https://github.com/betagouv/service-national-universel/commit/6458602132719c46ca125878f352c50614ed4b1f))
+
 # [1.220.0](https://github.com/betagouv/service-national-universel/compare/v1.219.0...v1.220.0) (2023-02-15)
 
 

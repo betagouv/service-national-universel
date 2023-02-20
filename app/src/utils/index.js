@@ -1,12 +1,13 @@
-import passwordValidator from "password-validator";
+import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
+import { isCohortDone } from "./cohorts";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
-  const schema = new passwordValidator();
+  const schema = new PasswordValidator();
   schema
     .is()
     .min(12) // Minimum length 12
@@ -42,7 +43,7 @@ export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
-      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")) ||
+      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1))) ||
     y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ||
     y.cohesionStayPresence === "true"
   );
@@ -53,6 +54,16 @@ export function permissionPhase3(y) {
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
+// eslint-disable-next-line no-unused-vars
+export function permissionReinscription(_y) {
+  // return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif);
+  return false;
+}
+
+export function isYoungCanApplyToPhase2Missions(young) {
+  return isCohortDone(young.cohort);
+}
+
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_CHOOSE_MEETING_POINT = false;
@@ -60,13 +71,12 @@ export const ENABLE_CHOOSE_MEETING_POINT = false;
 export const ENABLE_PM = true;
 
 export const htmlCleaner = (text) => {
-  const clean = sanitizeHtml(text, {
+  return sanitizeHtml(text, {
     allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
     allowedAttributes: {
       a: ["href", "target", "rel"],
     },
   });
-  return clean;
 };
 
 export function urlWithScheme(url) {
@@ -97,7 +107,7 @@ export function slugifyFileName(str) {
 }
 
 export const getDistance = (lat1, lon1, lat2, lon2) => {
-  if (lat1 == lat2 && lon1 == lon2) {
+  if (lat1 === lat2 && lon1 === lon2) {
     return 0;
   } else {
     let radlat1 = (Math.PI * lat1) / 180;

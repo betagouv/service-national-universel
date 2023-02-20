@@ -9,7 +9,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { apiURL } from "../../config";
+import { adminURL, apiURL } from "../../config";
 import api from "../../services/api";
 import { Loading, TabItem, Title } from "./components/common";
 import ModalCreation from "./components/ModalCreation";
@@ -528,13 +528,9 @@ const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
             <div className="flex items-center gap-2">
               <DoubleProfil className="text-gray-400" />
               <div className="text-gray-900 text-sm leading-5">{nbYoung || 0} </div>
-              <Link
-                to={`/ligne-de-bus/volontaires/point-de-rassemblement/${hit._id.toString()}?cohort=${session}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}>
+              <a target="_blank" rel="noreferrer" href={`${adminURL}/ligne-de-bus/volontaires/point-de-rassemblement/${hit._id.toString()}?cohort=${session}`}>
                 <ExternalLink className="text-gray-400" />
-              </Link>
+              </a>
             </div>
           )}
         </div>
@@ -545,13 +541,9 @@ const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
             <div className="flex items-center gap-2">
               <BusSvg className="text-gray-400 -rotate-12" />
               <div className="text-gray-900 text-sm leading-5">{nbLines || 0} </div>
-              <Link
-                to={`/ligne-de-bus?cohort=${session}&CODE_PDR=%5B"${hit.code}"%5D`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}>
+              <a href={`${adminURL}/ligne-de-bus?cohort=${session}&CODE_PDR=%5B"${hit.code}"%5D`} target="_blank" rel="noreferrer">
                 <ExternalLink className="text-gray-400" />
-              </Link>
+              </a>
             </div>
           )}
         </div>

@@ -21,10 +21,10 @@ import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import {
   APPLICATION_STATUS,
-  COHESION_STAY_END,
   copyToClipboard,
   formatStringDateTimezoneUTC,
   htmlCleaner,
+  isYoungCanApplyToPhase2Missions,
   SENDINBLUE_TEMPLATES,
   translate,
   translateAddFilePhase2WithoutPreposition,
@@ -530,11 +530,7 @@ const ApplyButton = ({
   hebergementPayant,
 }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
-    if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
-      return true;
-    }
-
-    return false;
+    return obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION");
   }).length;
 
   if (applicationsCount >= 15)
@@ -550,8 +546,7 @@ const ApplyButton = ({
       </div>
     );
 
-  const now = new Date();
-  if (now < COHESION_STAY_END[young.cohort])
+  if (!isYoungCanApplyToPhase2Missions(young)) {
     return (
       <div className="flex flex-col items-center justify-center gap-2">
         <div className="text-red-500 text-xs text-center">Pour candidater, vous devez avoir terminé votre séjour de cohésion</div>
@@ -563,7 +558,7 @@ const ApplyButton = ({
         </div>
       </div>
     );
-
+  }
   if (disabledAge)
     return (
       <div className="flex flex-col items-center justify-center gap-2">
@@ -843,9 +838,11 @@ const InfoStructure = ({ title, structure }) => {
   useEffect(() => {
     (async () => {
       const { ok, data, code } = await api.get(`/structure/${structure}`);
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
-      else setValue(data.description);
-      return;
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
+      } else {
+        setValue(data.description);
+      }
     })();
   }, []);
   if (!value) return <div />;

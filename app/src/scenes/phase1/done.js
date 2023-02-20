@@ -12,11 +12,12 @@ import Download from "../../assets/icons/Download";
 import Unlock from "../../assets/icons/Unlock";
 import XCircleFill from "../../assets/icons/XCircleFill";
 import api from "../../services/api";
-import { COHESION_STAY_END, translate } from "../../utils";
+import { translate } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 import InfoConvocation from "./components/modals/InfoConvocation";
 import plausibleEvent from "../../services/plausible";
 import { capture } from "../../sentry";
+import { isCohortDone } from "../../utils/cohorts";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -30,7 +31,6 @@ export default function Done() {
 
   const refAttestationButton = React.useRef();
   const history = useHistory();
-  const now = new Date();
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,13 +92,13 @@ export default function Done() {
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
                   </div>
                   <div className="flex gap-5 items-center">
-                    {now < COHESION_STAY_END[young.cohort] ? (
+                    {!isCohortDone(young.cohort) && (
                       <button
                         className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500"
                         onClick={() => setModalOpen({ isOpen: true })}>
                         Mes informations de retour de séjour
                       </button>
-                    ) : null}
+                    )}
 
                     <div className="relative" ref={refAttestationButton}>
                       <button
@@ -144,7 +144,7 @@ export default function Done() {
               </div>
             </div>
             <div className="flex items-start justify-center lg:items-start flex-shrink-0 w-full lg:w-1/3">
-              <img className="object-scale-down h-80" src={require("../../assets/validatedPhase2.png")} />
+              <img className="object-scale-down h-80" src={require("../../assets/validatedPhase2.png")} alt="" />
             </div>
           </div>
           <div className="flex px-8 pt-8 pb-12 justify-between flex-col items-stretch lg:!flex-row gap-8">
@@ -319,7 +319,7 @@ export default function Done() {
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
           </div>
           <div className="flex flex-col gap-3 items-center py-3">
-            {now < COHESION_STAY_END[young.cohort] ? (
+            {!isCohortDone(young.cohort) ? (
               <button
                 className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium whitespace-nowrap"
                 onClick={() => setModalOpen({ isOpen: true })}>

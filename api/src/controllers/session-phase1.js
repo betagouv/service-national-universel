@@ -256,11 +256,15 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       </div>
     </div>`;
 
+    if (!youngs || youngs.length === 0) {
+      return res.status(400).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    const data = [];
     const d = COHESION_STAY_END[youngs[0].cohort];
     const ministresData = getMinistres(d);
     const template = ministresData.template;
     const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-    const data = [];
     for (const young of youngs) {
       data.push(
         subHtml
