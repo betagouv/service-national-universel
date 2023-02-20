@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import Button from "../Button";
 import { Link } from "react-router-dom";
 import Field from "../../../missions/components/Field";
+import { AiOutlineClose } from "react-icons/ai";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
@@ -134,7 +135,15 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
         />
       ) : (
         <div className="space-y-8">
-          <p className="text-lg font-medium text-center">L&apos;équipe</p>
+          <div className="grid grid-cols-6">
+            <div />
+            <p className="text-lg font-medium text-center col-span-4">L&apos;équipe</p>
+            <div className="flex items-center justify-end">
+              <button onClick={onCancel}>
+                <AiOutlineClose className="text-gray-500" />
+              </button>
+            </div>
+          </div>
           <div className="h-88 overflow-auto">
             <div className="grid grid-cols-2 gap-6 overflow-auto">
               {team?.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}

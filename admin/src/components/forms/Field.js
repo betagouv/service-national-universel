@@ -9,11 +9,12 @@ export default function Field({ name, label, value, className = "", type = "text
   const border = (readOnly, error) => {
     if (readOnly) return "border-gray-200";
     if (error) return "border-red-500";
-    return "border-gray-400";
+    return "border-gray-300 focus-within:border-blue-500";
   };
+
   return (
     <div className={className}>
-      <div className={`relative focus-within:border-blue-500 px-2.5 border-[1px] w-full rounded-md py-2 ${border(readOnly, errors[name])}`} key={name}>
+      <div className={`relative px-2.5 border-[1px] w-full rounded-md py-2 ${border(readOnly, errors[name])}`} key={name}>
         <div className="w-full flex justify-between">
           {label && <p className="font-normal text-xs text-[#6B7280]">{label}</p>}
           {copy && value && (

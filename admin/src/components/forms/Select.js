@@ -8,25 +8,21 @@ function classNames(...classes) {
 }
 
 export default function Select({ options, selected, setSelected, label, readOnly = false, icon, error }) {
-  const border = (readOnly, error) => {
+  const border = (open) => {
     if (readOnly) return "border-gray-200";
     if (error) return "border-red-500";
-    return "border-gray-400";
+    if (open) return "border-blue-500";
+    return "border-gray-300";
   };
 
   return (
-    // <div className="coucou">
     <Listbox value={selected} onChange={setSelected}>
       {({ open }) => (
         <>
           <div className="relative">
             <Listbox.Button className="relative w-full text-left">
-              <div
-                className={`${open && "border-blue-500"} ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(
-                  readOnly,
-                  error,
-                )} bg-white py-2 px-2.5 items-center space-y-0 gap-0 flex rounded-lg border-[1px]`}>
-                {icon ? icon : null}
+              <div className={` ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(open)} bg-white py-2 px-2.5 items-center space-y-0 gap-0 flex rounded-lg border-[1px]`}>
+                {icon && icon}
                 <div className="w-full flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">{label}</p>
@@ -38,7 +34,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                   </div>
                 </div>
               </div>
-              {error ? <div className="text-[#EF4444]">{error}</div> : null}
+              {error && <div className="text-[#EF4444]">{error}</div>}
             </Listbox.Button>
 
             <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
@@ -51,11 +47,11 @@ export default function Select({ options, selected, setSelected, label, readOnly
                     {({ selected, active }) => (
                       <>
                         <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{option.label}</span>
-                        {selected ? (
+                        {selected && (
                           <span className={classNames(active ? "text-white" : "text-blue-600", "absolute inset-y-0 right-0 flex items-center pr-4")}>
                             <AiOutlineCheck className="h-5 w-5" aria-hidden="true" />
                           </span>
-                        ) : null}
+                        )}
                       </>
                     )}
                   </Listbox.Option>
@@ -66,6 +62,5 @@ export default function Select({ options, selected, setSelected, label, readOnly
         </>
       )}
     </Listbox>
-    // </div>
   );
 }
