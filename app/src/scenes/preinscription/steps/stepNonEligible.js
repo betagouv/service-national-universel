@@ -6,8 +6,8 @@ import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import StickyButton from "../../../components/inscription/stickyButton";
-import Footer from "../../../components/footerV2";
+import DSFRContainer from "../../../components/DSFRContainer";
+import SignupButtonContainer from "../../../components/SignupButtonContainer";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -50,56 +50,55 @@ export default function NonEligible() {
   };
 
   return (
-    <>
-      <div className="bg-white p-4">
-        <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-        {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
-        <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-        <div className="overflow-x-auto flex space-x-6">
-          {engagementPrograms.map((program, index) => {
-            const [isOpen, setIsOpen] = useState(false);
-
-            return (
-              <div key={index} className="flex w-96">
-                <div className="w-64 h-min-[700px] ">
-                  <div className="w-full h-[155px] ">
-                    <a href={program.link} target="_blank" rel="noreferrer">
-                      <img src={program.picture} className="object-cover w-full h-full" />
-                    </a>
-                  </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
-                    <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
-                      {" "}
-                      <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-                        {program.description}
-                      </a>
-                    </div>
-                    <div
-                      className="text-[13px] flex justify-between pr-2"
-                      onClick={() => {
-                        setIsOpen(!isOpen);
-                      }}>
-                      {" "}
-                      <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
-                      <img src={arrowRightBlue} className="w-3" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div
-          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+    <DSFRContainer showHelp={false}>
+      <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
+      {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
+      <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
+      <div className="overflow-x-auto flex md:grid md:grid-cols-2 gap-8">
+        {engagementPrograms.map((program, index) => (
+          <CardEngagement program={program} key={index} />
+        ))}
+      </div>
+      <dic className="flex justify-center mt-6">
+        <button
+          className="w-full md:w-96 mx-auto text-blue-france-sun-113 text-center border-[1px] border-blue-france-sun-113 hover:text-blue-france-sun-113-hover hover:border-blue-france-sun-113-hover hove my-4 p-2"
           onClick={() => {
             history.push("/public-engagements");
           }}>
           Voir plus de formes d’engagement
+        </button>
+      </dic>
+      <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
+    </DSFRContainer>
+  );
+}
+
+function CardEngagement({ program }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="min-w-[16rem] md:w-full h-min-[700px] ">
+      <div className="w-full h-[155px] ">
+        <a href={program.link} target="_blank" rel="noreferrer">
+          <img src={program.picture} className="object-cover w-full h-full" />
+        </a>
+      </div>
+      <div className={`min-h-min px-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
+        <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
+        <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+          <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
+            {program.description}
+          </a>
+        </div>
+        <div
+          className="text-[13px] flex justify-between pr-2"
+          onClick={() => {
+            setIsOpen(!isOpen);
+          }}>
+          <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
+          <img src={arrowRightBlue} className="w-3" />
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Revenir à l'accueil" onClick={onClickButton} />
-    </>
+    </div>
   );
 }

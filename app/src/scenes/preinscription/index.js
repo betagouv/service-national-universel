@@ -1,42 +1,32 @@
 import React, { useContext } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
-import useDevice from "../../hooks/useDevice";
 import { SentryRoute } from "../../sentry";
 
 import StepEligibilite from "./steps/stepEligibilite";
-
-import DesktopConfirm from "./desktop/stepConfirm";
-import DesktopDone from "./desktop/stepDone";
-import DesktopEligibilite from "./desktop/stepEligibilite";
-import DesktopNonEligible from "./desktop/stepNonEligible";
-import DesktopProfil from "./desktop/stepProfil";
-import DesktopSejour from "./desktop/stepSejour";
-
-import MobileConfirm from "./mobile/stepConfirm";
-import MobileDone from "./mobile/stepDone";
-import MobileEligibilite from "./mobile/stepEligibilite";
-import MobileNonEligible from "./mobile/stepNonEligible";
-import MobileProfil from "./mobile/stepProfil";
-import MobileSejour from "./mobile/stepSejour";
+import StepNonEligible from "./steps/stepNonEligible";
+import StepSejour from "./steps/stepSejour";
+import StepProfil from "./steps/stepProfil";
+import StepConfirm from "./steps/stepConfirm";
+import StepDone from "./steps/stepDone";
 
 import { useSelector } from "react-redux";
 import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
+import Header from "../../components/header";
+import Footer from "../../components/footerV2";
 
-function renderStep(step, device) {
+function renderStep(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
-  // if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
-  if (step === STEPS.INELIGIBLE) return device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />;
-  if (step === STEPS.SEJOUR) return device === "desktop" ? <DesktopSejour /> : <MobileSejour />;
-  if (step === STEPS.PROFIL) return device === "desktop" ? <DesktopProfil /> : <MobileProfil />;
-  if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
-  if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
+  if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
+  if (step === STEPS.SEJOUR) return <StepSejour />;
+  if (step === STEPS.PROFIL) return <StepProfil />;
+  if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.DONE) return <StepDone />;
 }
 
 const Step = () => {
   const [data] = useContext(PreInscriptionContext);
-  const device = useDevice();
   const { step } = useParams();
 
   const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
@@ -54,7 +44,7 @@ const Step = () => {
     return <Redirect to="/" />;
   }
 
-  return renderStep(currentStep, device);
+  return renderStep(currentStep);
 };
 
 export default function Index() {
@@ -64,10 +54,14 @@ export default function Index() {
 
   return (
     <PreInscriptionContextProvider>
-      <Switch>
-        <SentryRoute path="/preinscription/:step" component={Step} />;
-        <SentryRoute path="/preinscription" component={Step} />;
-      </Switch>
+      <div className="flex flex-col min-h-screen justify-between bg-beige-gris-galet-975">
+        <Header />
+        <Switch>
+          <SentryRoute path="/preinscription/:step" component={Step} />;
+          <SentryRoute path="/preinscription" component={Step} />;
+        </Switch>
+        <Footer />
+      </div>
     </PreInscriptionContextProvider>
   );
 }

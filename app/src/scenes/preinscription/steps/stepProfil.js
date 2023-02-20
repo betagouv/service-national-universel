@@ -3,11 +3,10 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "../../../components/footerV2";
+import DSFRContainer from "../../../components/DSFRContainer";
 import CheckBox from "../../../components/inscription/checkbox";
 import Input from "../../../components/inscription/input";
-import StickyButton from "../../../components/inscription/stickyButton";
+import SignupButtonContainer from "../../../components/SignupButtonContainer";
 import { appURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
@@ -16,6 +15,7 @@ import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
+  console.log("🚀 ~ file: stepProfil.js:18 ~ StepProfil ~ data", data);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
@@ -43,9 +43,11 @@ export default function StepProfil() {
     return errors;
   };
 
+  const disabled = !data?.firstName || !data?.lastName || !data?.email || !data?.emailConfirm || !data?.password || !data?.confirmPassword || Object.values(error).length;
+
   React.useEffect(() => {
     setError(validate());
-  }, [data.email, data.emailConfirm, data.password, data.confirmPassword]);
+  }, [data.email, data.emailConfirm, data.password, data.confirmPassword, data.acceptCGU, data.rulesYoung]);
 
   const onSubmit = async () => {
     let errors = {};
@@ -73,26 +75,20 @@ export default function StepProfil() {
   };
 
   return (
-    <>
-      <div className="bg-white px-4 pt-4 pb-12">
-        <div className="w-full flex justify-between items-center">
-          <h1 className="text-xl text-[#161616]">Créez votre compte</h1>
-          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
+    <DSFRContainer title="Créez votre compte" showHelp={false}>
+      <div className="space-y-5">
+        <div className="flex flex-col gap-1">
+          <label>Prénom</label>
+          <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
+          {error.firstName && <span className="text-red-500 text-sm">{error.firstName}</span>}
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <label className="text-[#161616] text-base">Prénom</label>
-            <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
-            {error.firstName && <span className="text-red-500 text-sm">{error.firstName}</span>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[#161616] text-base">Nom</label>
-            <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
-            {error.lastName && <span className="text-red-500 text-sm">{error.lastName}</span>}
-          </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[#161616] text-base">Nom</label>
+          <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
+          {error.lastName && <span className="text-red-500 text-sm">{error.lastName}</span>}
+        </div>
+
+        <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">E-mail</label>
             <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} />
@@ -103,6 +99,9 @@ export default function StepProfil() {
             <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} />
             {error.emailConfirm ? <span className="text-red-500 text-sm">{error.emailConfirm}</span> : null}
           </div>
+        </div>
+
+        <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">Mot de passe</label>
             <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
@@ -139,35 +138,35 @@ export default function StepProfil() {
             </div>
             {error.confirmPassword ? <span className="text-red-500 text-sm">{error.confirmPassword}</span> : null}
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-4">
-              <CheckBox checked={data?.acceptCGU === "true"} onChange={(e) => setData({ ...data, acceptCGU: e ? "true" : "false" })} />
-              <span className="text-sm text-[#3A3A3A]  flex-1 inline leading-5">
-                J&apos;ai lu et j&apos;accepte les{" "}
-                <a className="underline " href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
-                  Conditions Générales d&apos;Utilisation (CGU)
-                </a>{" "}
-                de la plateforme du Service National Universel.
-              </span>
-            </div>
-            {error.acceptCGU ? <span className="text-red-500 text-sm">{error.acceptCGU}</span> : null}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-4">
+            <CheckBox checked={data?.acceptCGU === "true"} onChange={(e) => setData({ ...data, acceptCGU: e ? "true" : "false" })} />
+            <span className="text-sm text-[#3A3A3A]  flex-1 inline leading-5">
+              J&apos;ai lu et j&apos;accepte les{" "}
+              <a className="underline " href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
+                Conditions Générales d&apos;Utilisation (CGU)
+              </a>{" "}
+              de la plateforme du Service National Universel.
+            </span>
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-4">
-              <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" })} />
-              <span className="text-sm text-[#3A3A3A] flex-1 inline leading-5">
-                J&apos;ai pris connaissance des{" "}
-                <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
-                  modalités de traitement de mes données personnelles
-                </a>
-              </span>
-            </div>
-            {error.rulesYoung ? <span className="text-red-500 text-sm">{error.rulesYoung}</span> : null}
+          {error.acceptCGU ? <span className="text-red-500 text-sm">{error.acceptCGU}</span> : null}
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-4">
+            <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" })} />
+            <span className="text-sm text-[#3A3A3A] flex-1 inline leading-5">
+              J&apos;ai pris connaissance des{" "}
+              <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
+                modalités de traitement de mes données personnelles
+              </a>
+            </span>
           </div>
+          {error.rulesYoung ? <span className="text-red-500 text-sm">{error.rulesYoung}</span> : null}
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClick={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/eligibilite")} />
-    </>
+      <SignupButtonContainer onClickNext={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/sejour")} disabled={disabled} />
+    </DSFRContainer>
   );
 }

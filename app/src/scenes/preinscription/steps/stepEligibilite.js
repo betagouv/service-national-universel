@@ -22,7 +22,6 @@ import SignupButtonContainer from "../../../components/SignupButtonContainer";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
-  console.log("🚀 ~ file: stepEligibilite.js:25 ~ StepEligibilite ~ data", data);
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -135,7 +134,7 @@ export default function StepEligibilite() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full md:w-1/2">
             <SearchableSelect
               label="Niveau de scolarité"
               value={data.scolarity}
@@ -147,7 +146,7 @@ export default function StepEligibilite() {
             />
             {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
           </div>
-          <label className="flex flex-col flex-start text-base mt-2">
+          <label className="flex flex-col flex-start text-base mt-2 w-full md:w-1/2">
             Date de naissance
             <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
             {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
@@ -188,8 +187,7 @@ export default function StepEligibilite() {
             ) : null}
           </>
         )}
-
-        <SignupButtonContainer onClick={onSubmit} disabled={disabled} />
+        <SignupButtonContainer onClickNext={onSubmit} disabled={disabled} />
       </div>
     </DSFRContainer>
   );
