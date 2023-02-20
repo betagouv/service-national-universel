@@ -675,7 +675,7 @@ const Line = ({ hit, currentTab, setPanel }) => {
           <div className="flex flex-col">
             <div className="text-sm font-medium">{hit.busId}</div>
             <div className="text-xs text-gray-400">
-              {currentTab === "retour" ? `${hit.pointDeRassemblements[0].region} > ${hit.centerRegion}` : `${hit.centerRegion} > ${hit.pointDeRassemblements[0].region}`}
+              {currentTab === "aller" ? `${hit.pointDeRassemblements[0].region} > ${hit.centerRegion}` : `${hit.centerRegion} > ${hit.pointDeRassemblements[0].region}`}
             </div>
           </div>
         </div>

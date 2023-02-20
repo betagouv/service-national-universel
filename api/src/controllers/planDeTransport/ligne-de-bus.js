@@ -459,7 +459,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
             {
               $match: {
                 $expr: {
-                  $and: [{ $eq: ["$ligneId", "$$id"] }],
+                  $and: [{ $eq: ["$ligneId", "$$id"] }, { $eq: ["$status", "VALIDATED"] }],
                 },
               },
             },

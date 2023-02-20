@@ -9,7 +9,7 @@ import Pencil from "../../../assets/icons/Pencil";
 import downloadPDF from "../../../utils/download-pdf";
 
 import api from "../../../services/api";
-import { formatDateFR, ROLES, translate, canAssignManually, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../../../utils";
+import { formatDateFR, ROLES, translate, canAssignManually, translatePhase1, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1, youngCheckinField } from "../../../utils";
 import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
@@ -26,6 +26,9 @@ import { CiMail } from "react-icons/ci";
 import { BsDownload } from "react-icons/bs";
 import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
+import ExternalLink from "../../../assets/icons/ExternalLink";
+import { adminURL } from "../../../config";
+import Warning from "../../../assets/icons/Warning";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -45,24 +48,18 @@ export default function Phase1(props) {
 
   const [cohortOpenForAffectation, setCohortOpenForAffection] = useState(false);
   const [cohort, setCohort] = useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState(false);
 
-  const getDisplayCenterButton = async () => {
-    try {
-      if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED"))
-        return setCohortOpenForAffection(false);
-      const { ok, data } = await api.get("/cohort/" + young.cohort);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-        captureMessage("Oups, une erreur est survenue lors de la récupération de la cohorte : " + JSON.stringify(data));
-        return setCohortOpenForAffection(false);
-      }
-      setCohort(data);
-      return setCohortOpenForAffection(canAssignManually(user, young, data));
-    } catch (e) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-      capture(e);
+  function getDisplayCenterButton() {
+    if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED")) {
+      setCohortOpenForAffection(false);
+    } else if (cohort) {
+      setCohortOpenForAffection(canAssignManually(user, young, cohort));
+    } else {
+      setCohortOpenForAffection(false);
     }
-  };
+  }
+
   const sendMail = async () => {
     try {
       setLoading(true);
@@ -86,22 +83,63 @@ export default function Phase1(props) {
   };
 
   useEffect(() => {
-    getDisplayCenterButton();
+    // --- get cohort.
+    (async () => {
+      try {
+        const { ok, data } = await api.get("/cohort/" + young.cohort);
+        if (!ok) {
+          toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+          captureMessage("Oups, une erreur est survenue lors de la récupération de la cohorte : " + JSON.stringify(data));
+          return setCohortOpenForAffection(false);
+        }
+        setCohort(data);
+      } catch (err) {
+        capture(err);
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+        setCohort(null);
+      }
+    })();
+
     if (!young?.sessionPhase1Id) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
-      if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
-      setCohesionCenter(data);
+      try {
+        const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
+        if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
+        setCohesionCenter(data);
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible de récupérer les informations du centre de cohésion");
+      }
     })();
 
     if (!young.meetingPointId || !young.ligneId) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
-      if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
-      setMeetingPoint(data);
-      console.log(data);
+      try {
+        const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
+        if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
+        setMeetingPoint(data);
+      } catch (err) {
+        capture(err);
+        toastr.error("Impossible de récupérer les informations du point de rassemblement");
+      }
     })();
   }, []);
+
+  React.useEffect(() => {
+    getDisplayCenterButton();
+
+    if (cohort) {
+      const field = youngCheckinField[user.role];
+      console.log("youngCheckinField: ", field, cohort);
+      if (field) {
+        setIsYoungCheckinOpen(cohort[field] ? cohort[field] : false);
+      } else {
+        setIsYoungCheckinOpen(false);
+      }
+    } else {
+      setIsYoungCheckinOpen(false);
+    }
+  }, [cohort]);
 
   const onConfirmationYoungAgreement = async (value) => {
     setLoading(true);
@@ -196,7 +234,18 @@ export default function Phase1(props) {
               <EditTop />
             </div>
             <div className="mt-3">
-              <div className="text-xs text-gray-900 font-medium">Présence</div>
+              <div className="text-xs text-gray-900 font-medium flex items-center">
+                Présence
+                {!isYoungCheckinOpen && (
+                  <div className="group relative ml-2">
+                    <Warning className="text-red-900" />
+                    <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
+                      <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
+                      Le pointage n&apos;est pas ouvert
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="flex flex-row gap-4 mt-2 flex-wrap w-full items-stretch">
                 <div className="flex-1 min-w-[250px]">
                   <TailwindSelect
@@ -226,7 +275,7 @@ export default function Phase1(props) {
                   <TailwindSelect
                     name="cohesionStayPresence"
                     label="Présence à l'arrivée"
-                    readOnly={!editing}
+                    readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
                     className="flex-1 min-w-[250px]"
                     icon={<SpeakerPhone className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
@@ -243,7 +292,7 @@ export default function Phase1(props) {
                   <TailwindSelect
                     name="presenceJDM"
                     label="Présence JDM"
-                    readOnly={!editing}
+                    readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
                     icon={<BadgeCheck className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
                     setSelected={({ value }) => setModalPointagePresenceJDM({ isOpen: true, value })}
@@ -258,7 +307,7 @@ export default function Phase1(props) {
                 <div className="flex-1 min-w-[250px] items-stretch">
                   <div
                     onClick={() => {
-                      if (!editing) return;
+                      if (!editing || !isYoungCheckinOpen) return;
                       setModalPointageDepart({ isOpen: true });
                     }}
                     className={` border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"} h-full`}>
@@ -286,7 +335,7 @@ export default function Phase1(props) {
                 <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
                   <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
                   <div className="flex flex-col gap-4 mb-4 w-full">
-                    <Field title="Code centre" value={cohesionCenter.code2022} />
+                    <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}`} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
@@ -305,7 +354,11 @@ export default function Phase1(props) {
                   <div className="flex flex-col gap-4 mb-4 text-sm text-gray-800 w-full ">
                     {meetingPoint ? (
                       <div className="flex flex-col gap-4">
-                        <Field title="Adresse" value={meetingPoint?.pointDeRassemblement.address} />
+                        <Field
+                          title="Adresse"
+                          value={meetingPoint?.pointDeRassemblement.address}
+                          externalLink={`${adminURL}/point-de-rassemblement/${meetingPoint?.pointDeRassemblement._id}`}
+                        />
                         <Field
                           title="Heure&nbsp;de&nbsp;départ"
                           value={dayjs(meetingPoint?.bus.departuredDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
@@ -314,7 +367,7 @@ export default function Phase1(props) {
                           title="Heure&nbsp;de&nbsp;retour"
                           value={dayjs(meetingPoint?.bus.returnDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
                         />
-                        <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} />
+                        <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
                       </div>
                     ) : young?.transportInfoGivenByLocal === "true" ? (
                       <div>Les informations de transport seront transmises par les services locaux.</div>
@@ -422,11 +475,21 @@ export default function Phase1(props) {
   );
 }
 
-const Field = ({ title, value }) => {
+const Field = ({ title, value, externalLink }) => {
   return (
     <div key={title} className="border-[1px] flex flex-col border-gray-300 p-2 rounded">
       <div className="text-gray-500 text-xs">{title}</div>
-      <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+
+      {externalLink ? (
+        <a target="_blank" rel="noreferrer" href={externalLink}>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+            <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+          </div>
+        </a>
+      ) : (
+        <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+      )}
     </div>
   );
 };

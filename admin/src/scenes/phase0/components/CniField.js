@@ -60,10 +60,13 @@ export function CniField({
   const reasons = [
     { value: "UNREADABLE", label: "Pièce illisible (supprimer le(s) fichier(s))" },
     { value: "MISSING_FRONT", label: "Recto à fournir" },
-    { value: "MISSING_BACK", label: "Verso à fournir" },
     { value: "NOT_SUITABLE", label: "Pièce ne convenant pas... (supprimer le(s) fichier(s))", defaultMessage: "Passeport ou carte nationale d'identité requis." },
     { value: "OTHER", label: "Autre (supprimer le(s) fichier(s))" },
   ];
+
+  if (young?.latestCNIFileCategory !== "PASSPORT") {
+    reasons.push({ value: "MISSING_BACK", label: "Verso à fournir" });
+  }
 
   function cniModalClose(changes) {
     setCniModalOpened(false);

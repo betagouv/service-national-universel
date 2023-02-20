@@ -102,7 +102,7 @@ function responsible({ user, onClick, from }) {
     <>
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to={environment === "production" ? "/volontaire" : "/volontaire/list/all"} title="Mes candidatures" onClick={onClick} />
+      <DrawerTab to={"/volontaire/list/all"} title="Mes candidatures" onClick={onClick} />
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -115,7 +115,7 @@ function supervisor({ user, onClick, from }) {
       <DrawerTab to="/structure" title="Structures affiliées" onClick={onClick} exact={true} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to={environment === "production" ? "/volontaire" : "/volontaire/list/all"} title="Mes candidatures" onClick={onClick} />
+      <DrawerTab to={"/volontaire/list/all"} title="Mes candidatures" onClick={onClick} />
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
