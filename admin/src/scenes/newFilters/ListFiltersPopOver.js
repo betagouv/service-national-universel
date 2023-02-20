@@ -15,7 +15,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
   React.useEffect(() => {
     const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
     setFiltersVisible(newFilters);
-  }, [search, filtersVisible]);
+  }, [search]);
 
   React.useEffect(() => {
     if (filtersVisible.length === 0) {
@@ -64,17 +64,15 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
                   />
                   <div className="flex flex-col max-h-[590px] overflow-y-auto">
                     {categories.map((category, index) => (
-                      <>
+                      <div key={category}>
                         {index !== 0 && <hr className="my-2 border-gray-100" />}
-                        <div key={category} className="px-4 text-gray-500 text-xs leading-5 font-light">
-                          {category}
-                        </div>
+                        <div className="px-4 text-gray-500 text-xs leading-5 font-light">{category}</div>
                         {filtersVisible
                           ?.filter((f) => f.parentGroup === category)
                           ?.map((item) => (
                             <FilterPopOver key={item.title} filter={item} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} data={data[item?.name] || []} />
                           ))}
-                      </>
+                      </div>
                     ))}
                   </div>
                 </div>
