@@ -43,7 +43,16 @@ export default function StepProfil() {
     return errors;
   };
 
-  const disabled = !data?.firstName || !data?.lastName || !data?.email || !data?.emailConfirm || !data?.password || !data?.confirmPassword || Object.values(error).length;
+  const disabled =
+    !data?.firstName ||
+    !data?.lastName ||
+    !data?.email ||
+    !data?.emailConfirm ||
+    !data?.password ||
+    !data?.confirmPassword ||
+    data.acceptCGU !== "true" ||
+    data.rulesYoung !== "true" ||
+    Object.values(error).length;
 
   React.useEffect(() => {
     setError(validate());
@@ -75,7 +84,7 @@ export default function StepProfil() {
   };
 
   return (
-    <DSFRContainer title="Créez votre compte" showHelp={false}>
+    <DSFRContainer title="Créez votre compte">
       <div className="space-y-5">
         <div className="flex flex-col gap-1">
           <label>Prénom</label>

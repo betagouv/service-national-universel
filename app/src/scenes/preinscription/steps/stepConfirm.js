@@ -72,7 +72,7 @@ export default function StepDone() {
   };
 
   return (
-    <DSFRContainer title="Ces informations sont-elles correctes ?" showHelp={false}>
+    <DSFRContainer title="Ces informations sont-elles correctes ?">
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
       <div className="space-y-4">

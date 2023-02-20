@@ -50,7 +50,7 @@ export default function NonEligible() {
   };
 
   return (
-    <DSFRContainer showHelp={false}>
+    <DSFRContainer>
       <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
       {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
       <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>

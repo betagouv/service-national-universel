@@ -39,7 +39,7 @@ export default function StepDone() {
   }
 
   return (
-    <DSFRContainer showHelp={false}>
+    <DSFRContainer>
       <h1 className="text-2xl font-semibold text-[#161616]">Bienvenue {data.firstName} ! Vous avez complété votre pré-inscription.</h1>
       <p className="mt-4 text-[#3A3A3A] text-sm">
         Vous pouvez dès à présent <strong>compléter</strong> votre inscription ou <strong>la reprendre à tout moment</strong> depuis le mail envoyé à {data.email}, ou depuis

@@ -120,7 +120,7 @@ export default function StepEligibilite() {
   const disabled = Object.keys(error).length > 0 || loading || !data?.frenchNationality || !data?.scolarity || !data?.birthDate;
 
   return (
-    <DSFRContainer title="Vérifiez votre éligibilité au SNU" showHelp={false}>
+    <DSFRContainer title="Vérifiez votre éligibilité au SNU">
       <div className="space-y-5">
         <div className="flex flex-col flex-start">
           <div className="flex items-center">

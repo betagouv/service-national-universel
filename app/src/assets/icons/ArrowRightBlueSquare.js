@@ -1,8 +1,9 @@
 import * as React from "react";
 
+// eslint-disable-next-line no-unused-vars
 const ArrowRightBlueSquare = (props) => (
   <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-    <rect width="40" height="40" transform="translate(0 -0.000976562)" fill={props.fill || "#000091"} />
+    <rect width="40" height="40" transform="translate(0 -0.000976562)" className="fill-blue-france-sun-113 hover:fill-blue-france-sun-113-hover" />
     <path
       fillRule="evenodd"
       clipRule="evenodd"

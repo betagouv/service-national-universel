@@ -14,7 +14,7 @@ export default function StepSejour() {
   const [data] = React.useContext(PreInscriptionContext);
 
   return (
-    <DSFRContainer title="Choisissez la date du séjour" showHelp={false}>
+    <DSFRContainer title="Choisissez la date du séjour">
       <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
       <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
       <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
