@@ -33,15 +33,15 @@ export default function Resum({ summary, cohort }) {
         <div className="flex items-stretch justify-center gap-6 pt-6 pb-12">
           <div className="flex flex-col px-4 rounded-xl bg-gray-100 w-52 h-32 justify-center">
             <div className="text-[42px] leading-[120%] font-extrabold text-gray-800">{summary.busLineCount}</div>
-            <dic className="text-xs leading-5 font-medium text-gray-800">lignes de transport</dic>
+            <div className="text-xs leading-5 font-medium text-gray-800">lignes de transport</div>
           </div>
           <div className="flex flex-col px-4 rounded-xl bg-gray-100 w-52 h-32 justify-center">
             <div className="text-[42px] leading-[120%] font-extrabold text-gray-800">{summary.centerCount}</div>
-            <dic className="text-xs leading-5 font-medium text-gray-800">centres de cohésion</dic>
+            <div className="text-xs leading-5 font-medium text-gray-800">centres de cohésion</div>
           </div>
           <div className="flex flex-col px-4 rounded-xl bg-gray-100 w-52 h-32 justify-center">
             <div className="text-[42px] leading-[120%] font-extrabold text-gray-800">{summary.pdrCount}</div>
-            <dic className="text-xs leading-5 font-medium text-gray-800">points de rassemblement</dic>
+            <div className="text-xs leading-5 font-medium text-gray-800">points de rassemblement</div>
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRep
 const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 
 /** ---------------------------------------------------------------------
  * ROUTE /plan-de-transport/import/:cohortName
@@ -672,9 +673,32 @@ async function executeImportation(importData) {
           sessionId,
           meetingPointsIds: pdrIds,
         };
-
         const newBusLine = new LigneBusModel(newBusLineData);
-        await newBusLine.save();
+        const busLine = await newBusLine.save();
+        console.log("busline = ", busLine.toObject());
+
+        let col = PDT_COLUMNS_BUS.length + 1;
+        for (let i = 0, n = countPdrInLine(line, importData.maxPdrPerLine); i < n; ++i) {
+          const newLineToPointData = {
+            lineId: busLine._id.toString(),
+            meetingPointId: line[(col + 1).toString()],
+            transportType: line[(col + 2).toString()],
+            busArrivalHour: line[(col + 4).toString()],
+            departureHour: line[(col + 5).toString()],
+            meetingHour: line[(col + 4).toString()], // je sais pas comment on le calcule sinon, ca n'est pas dans le modèle du plan
+            returnHour: line[(col + 6).toString()],
+            stepPoints: [
+              {
+                address: line[(col + 3).toString()],
+                departureHour: line[(col + 5).toString()],
+                returnHour: line[(col + 6).toString()],
+                transportType: line[(col + 2).toString()],
+              },
+            ],
+          };
+          const newLineToPoint = new LigneToPointModel(newLineToPointData);
+          await newLineToPoint.save();
+        }
 
         ++importedCount;
       }

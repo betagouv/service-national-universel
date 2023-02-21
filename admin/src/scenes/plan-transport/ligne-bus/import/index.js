@@ -52,7 +52,7 @@ export default function Index(props) {
         <NavBar steps={steps} />
         {steps[0].status === "current" && <Download nextStep={nextStep} />}
         {steps[1].status === "current" && <Import cohort={cohort} onFileVerified={fileVerified} />}
-        {steps[2].status === "current" && <Resum nextStep={nextStep} summary={summary} />}
+        {steps[2].status === "current" && <Resum cohort={cohort} summary={summary} />}
       </div>
     </div>
   );
