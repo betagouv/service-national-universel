@@ -8,7 +8,7 @@ const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
-const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
+const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren, isSupervisor } = require("snu-lib/roles");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
@@ -66,6 +66,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     }
 
     if (!canCreateStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (isSupervisor(req.user)) {
+      checkedStructure.networkId = req.user.structureId;
+    }
+
     const data = await StructureObject.create(checkedStructure);
     await updateNetworkName(data, req.user);
     await updateResponsibleAndSupervisorRole(data, req.user);
