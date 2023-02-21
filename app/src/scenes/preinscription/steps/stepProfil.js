@@ -3,10 +3,10 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
-import DSFRContainer from "../../../components/DSFRContainer";
+import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import CheckBox from "../../../components/inscription/checkbox";
 import Input from "../../../components/inscription/input";
-import SignupButtonContainer from "../../../components/SignupButtonContainer";
+import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 import { appURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
@@ -15,7 +15,6 @@ import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
-  console.log("🚀 ~ file: stepProfil.js:18 ~ StepProfil ~ data", data);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
@@ -42,17 +41,6 @@ export default function StepProfil() {
     }
     return errors;
   };
-
-  const disabled =
-    !data?.firstName ||
-    !data?.lastName ||
-    !data?.email ||
-    !data?.emailConfirm ||
-    !data?.password ||
-    !data?.confirmPassword ||
-    data.acceptCGU !== "true" ||
-    data.rulesYoung !== "true" ||
-    Object.values(error).length;
 
   React.useEffect(() => {
     setError(validate());
@@ -126,7 +114,7 @@ export default function StepProfil() {
                 <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />
               )}
             </div>
-            <p className={`text-sm ${error?.password ? "text-[#CE0500]" : " text-[#3A3A3A]"}`}>
+            <p className={`text-sm ${error?.password ? "text-red-500" : " text-[#3A3A3A]"}`}>
               Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
             </p>
           </div>
@@ -175,7 +163,7 @@ export default function StepProfil() {
           {error.rulesYoung ? <span className="text-red-500 text-sm">{error.rulesYoung}</span> : null}
         </div>
       </div>
-      <SignupButtonContainer onClickNext={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/sejour")} disabled={disabled} />
+      <SignupButtonContainer onClickNext={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/sejour")} />
     </DSFRContainer>
   );
 }

@@ -17,8 +17,8 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DatePickerList from "../components/DatePickerList";
-import DSFRContainer from "../../../components/DSFRContainer";
-import SignupButtonContainer from "../../../components/SignupButtonContainer";
+import DSFRContainer from "../../../components/inscription/DSFRContainer";
+import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -117,8 +117,6 @@ export default function StepEligibilite() {
     return history.push("/preinscription/sejour");
   };
 
-  const disabled = Object.keys(error).length > 0 || loading || !data?.frenchNationality || !data?.scolarity || !data?.birthDate;
-
   return (
     <DSFRContainer title="Vérifiez votre éligibilité au SNU">
       <div className="space-y-5">
@@ -187,7 +185,7 @@ export default function StepEligibilite() {
             ) : null}
           </>
         )}
-        <SignupButtonContainer onClickNext={onSubmit} disabled={disabled} />
+        <SignupButtonContainer onClickNext={onSubmit} disabled={loading} />
       </div>
     </DSFRContainer>
   );

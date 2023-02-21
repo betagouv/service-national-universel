@@ -8,8 +8,8 @@ import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
-import DSFRContainer from "../../../components/DSFRContainer";
-import SignupButtonContainer from "../../../components/SignupButtonContainer";
+import DSFRContainer from "../../../components/inscription/DSFRContainer";
+import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 
 export default function StepDone() {
   // eslint-disable-next-line no-unused-vars
