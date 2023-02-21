@@ -96,8 +96,9 @@ const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, d
     query = { query: { bool: { must: [{ match_all: {} }] } } };
     aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
   } else {
-    query = JSON.parse(JSON.stringify(defaultQuery.query));
-    aggsQuery = JSON.parse(JSON.stringify(defaultQuery.query));
+    // deep copy
+    query = Object.assign({}, defaultQuery.query);
+    query = Object.assign({}, defaultQuery.query);
   }
 
   let bodyQuery = {
