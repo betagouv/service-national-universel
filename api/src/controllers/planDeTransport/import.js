@@ -675,7 +675,6 @@ async function executeImportation(importData) {
         };
         const newBusLine = new LigneBusModel(newBusLineData);
         const busLine = await newBusLine.save();
-        console.log("busline = ", busLine.toObject());
 
         let col = PDT_COLUMNS_BUS.length + 1;
         for (let i = 0, n = countPdrInLine(line, importData.maxPdrPerLine); i < n; ++i) {
