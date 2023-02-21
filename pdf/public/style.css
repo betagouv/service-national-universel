@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "Marianne";
+  src: url('fonts/marianne/woff2/Marianne-Regular.woff') format('woff');
+}
+
 * {
   font-family: "Arial", "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
@@ -310,4 +315,8 @@ img.bg {
 p.attributes {
   color: #372f78;
   display: inline;
+}
+
+.certificate p {
+  font-family: "Marianne", sans-serif;
 }
