@@ -16,6 +16,8 @@ import Select from "../../../centersV2/components/Select";
 import { useSelector } from "react-redux";
 import Button from "../Button";
 import { Link } from "react-router-dom";
+import Field from "../../../missions/components/Field";
+import { AiOutlineClose } from "react-icons/ai";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const { structure } = useContext(StructureContext);
@@ -133,7 +135,15 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
         />
       ) : (
         <div className="space-y-8">
-          <p className="text-lg font-medium text-center">L&apos;équipe</p>
+          <div className="grid grid-cols-6">
+            <div />
+            <p className="text-lg font-medium text-center col-span-4">L&apos;équipe</p>
+            <div className="flex items-center justify-end">
+              <button onClick={onCancel}>
+                <AiOutlineClose className="text-gray-500" />
+              </button>
+            </div>
+          </div>
           <div className="h-88 overflow-auto">
             <div className="grid grid-cols-2 gap-6 overflow-auto">
               {team?.length && team.map((responsible) => <DisplayContact key={responsible._id} responsible={responsible} setResponsible={setResponsible} />)}
@@ -227,15 +237,6 @@ const AddContact = ({ setResponsible, isSupervisor = false }) => {
   );
 };
 
-const Field = ({ isLoading, label, name, value, handleChange, type = "text", required = false }) => (
-  <div className={`border-[1px] rounded-lg py-2 px-3 ${isLoading && "bg-gray-200"}`}>
-    <label htmlFor="name" className="w-full m-0 text-left text-xs text-gray-500">
-      {label}
-    </label>
-    <input required={required} disabled={isLoading} className="w-full disabled:bg-gray-200" name={name} id={name} onChange={handleChange} value={value[name]} type={type} />
-  </div>
-);
-
 const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
   const user = useSelector((state) => state.Auth.user);
   const { structure } = useContext(StructureContext);
@@ -249,17 +250,17 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
   const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
 
   return (
-    <div className="h-full flex flex-col space-y-4" onSubmit={handleSubmit}>
+    <div className="h-full flex flex-col space-y-6" onSubmit={handleSubmit}>
       <p className="text-lg font-medium text-center">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
       {!responsible._id && (
         <p className="text-center text-gray-500">Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.</p>
       )}
 
       <div className="grid grid-cols-2 gap-6">
-        <Field isLoading={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible} required={true} />
-        <Field isLoading={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible} required={true} />
-        <Field isLoading={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible} required={!responsible.phone} />
-        <Field isLoading={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible} required={!responsible.email} type="tel" />
+        <Field readOnly={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible.firstName} required={true} />
+        <Field readOnly={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible.lastName} required={true} />
+        <Field readOnly={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible.email} required={!responsible.phone} />
+        <Field readOnly={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible.phone} required={!responsible.email} type="tel" />
         {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
           <Select
             label="Sélectionnez un rôle"
@@ -270,7 +271,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
         )}
       </div>
 
-      <div className="mt-auto space-y-4">
+      <div className="mt-auto space-y-6">
         {responsible._id && team.length > 1 && (
           <button disabled={isLoading} className="items-center gap-2 flex ml-auto text-red-500" onClick={() => handleDelete(responsible)}>
             <HiOutlineTrash className="text-lg" />
