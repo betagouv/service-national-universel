@@ -12,6 +12,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
   const [search, setSearch] = React.useState("");
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
+  const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
 
   const [isShowing, setIsShowing] = React.useState(false);
   const ref = React.useRef(null);
@@ -56,6 +57,11 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
       return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
     }
   });
+
+  const handleFilterShowing = (value) => {
+    setIsShowing(value);
+    setModalSaveVisible(false);
+  };
   return (
     <div>
       <Popover className="relative">
@@ -63,7 +69,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
           <>
             <Popover.Button
               ref={ref}
-              onClick={() => setIsShowing(!isShowing)}
+              onClick={() => handleFilterShowing(!isShowing)}
               className={classNames(
                 open ? "ring-2 ring-blue-500 ring-offset-2" : "",
                 "flex gap-2 items-center px-3 py-2.5 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
@@ -83,7 +89,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1">
               <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
-                <div className="rounded-lg shadow-lg ">
+                <div className="rounded-lg shadow-lg">
                   <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
                     <input
                       type="text"
@@ -107,7 +113,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
                                 setSelectedFilters={setSelectedFilters}
                                 data={data[item?.name] || []}
                                 isShowing={isShowing === item.name}
-                                setIsShowing={setIsShowing}
+                                setIsShowing={handleFilterShowing}
                               />
                             ))}
                         </div>
@@ -122,26 +128,14 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
       </Popover>
       <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
         {/* icon de save */}
-        {hasSomeFilterSelected && (
-          <>
-            <ReactTooltip id="tooltip-saveFilter" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
-              <div>
-                <div className="text-xs text-gray-600">Enregistrer cette vue...</div>
-                <div className="text-gray-600 font-bold">{saveTitle.join(", ")}</div>
-              </div>
-            </ReactTooltip>
-            <div data-tip="" data-for="tooltip-saveFilter" className="p-2 h-[42px] w-[42px] bg-gray-100 rounded flex items-center justify-center cursor-pointer">
-              <FloppyDisk />
-            </div>
-          </>
-        )}
+        {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
         {/* Display des filtres sélectionnés */}
         {filtersVisible
           .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
           .map((filter, index) => (
             <div
               key={filter.title}
-              onClick={() => setIsShowing(filter.name)}
+              onClick={() => handleFilterShowing(filter.name)}
               className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
               <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
               {selectedFilters[filter.name].filter.map((item, index) => {
@@ -149,15 +143,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
                   if (index === selectedFilters[filter.name].filter.length - 1) {
                     return (
                       <div key={item}>
-                        <ReactTooltip id="tooltip-filtre" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
-                          <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
-                            {selectedFilters[filter.name].filter.map((item, index) => (
-                              <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
-                                {item}
-                              </div>
-                            ))}
-                          </div>
-                        </ReactTooltip>
+                        <ToolTipView selectedFilters={selectedFilters} filter={filter} />
                         <div data-tip="" data-for="tooltip-filtre" className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
                           +{index - 2}
                         </div>
@@ -178,6 +164,63 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
     </div>
   );
 }
+
+const ToolTipView = ({ selectedFilters, filter }) => {
+  return (
+    <ReactTooltip id="tooltip-filtre" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+      <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
+        {selectedFilters[filter.name].filter.map((item, index) => (
+          <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
+            {item}
+          </div>
+        ))}
+      </div>
+    </ReactTooltip>
+  );
+};
+
+const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible }) => {
+  // handle click outside
+  const ref = React.useRef();
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setModalSaveVisible(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
+  return (
+    <>
+      <ReactTooltip id="tooltip-saveFilter" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+        <div>
+          <div className="text-xs text-gray-600">Enregistrer cette vue...</div>
+          <div className="text-gray-600 font-bold">{saveTitle.join(", ")}</div>
+        </div>
+      </ReactTooltip>
+      <div className="relative">
+        <div
+          data-tip=""
+          data-for="tooltip-saveFilter"
+          onClick={() => setModalSaveVisible(true)}
+          className="p-2 h-[42px] w-[42px] bg-gray-100 rounded flex items-center justify-center cursor-pointer">
+          <FloppyDisk />
+        </div>
+
+        {modalSaveVisible && (
+          <div className="absolute left-0 z-10 mt-2 bg-white w-[492px] h-[240px] rounded-lg shadow-lg px-8" ref={ref}>
+            <div className="font-bold text-sm text-gray-800 mt-8">Enregistrer une nouvelle (groupe de filtres)</div>
+            <div className="font-medium text-xs mt-4">Nommez la vue</div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
 
 const FloppyDisk = () => {
   return (
