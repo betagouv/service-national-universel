@@ -19,14 +19,13 @@ export default function test() {
     { title: "Classe", name: "grade", datafield: "grade.keyword", parentGroup: "Dossier", translate: translateGrade, missingLabel: "Non renseignée" },
     { title: "Custom", name: "example", datafield: "example.keyword", parentGroup: "Dossier", customComponent: "example" },
   ];
-  const getDefaultQuery = () => {
-    return { query: { bool: { must: [{ match_all: {} }] } } };
-  };
+
+  const defaultQuery = { query: { bool: { must: [{ match_all: {} }] } } };
 
   const init = async () => {
     const filters = getURLParam();
     setSelectedFilters(filters);
-    const res = await buildMissions("id", filters, null, 1, 25, getDefaultQuery(), filterArray);
+    const res = await buildMissions("id", filters, null, 1, 25, defaultQuery, filterArray);
     if (!res) return;
     setFilters({ ...filters, ...res.newFilters });
     setCount(res.count);
@@ -34,7 +33,7 @@ export default function test() {
   };
 
   const getData = async () => {
-    const res = await buildMissions("id", selectedFilters, null, 1, 25, getDefaultQuery(), filterArray);
+    const res = await buildMissions("id", selectedFilters, null, 1, 25, defaultQuery, filterArray);
     if (!res) return;
     setFilters({ ...filters, ...res.newFilters });
     setCount(res.count);
@@ -90,25 +89,26 @@ export default function test() {
 
 //extarct dans utils ou logique du filtre ? en passant l'index en param ?
 const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, defaultQuery = null, filterArray) => {
-  let query;
-  let aggsQuery;
+  let query = {};
+  let aggsQuery = {};
   if (!defaultQuery) {
     query = { query: { bool: { must: [{ match_all: {} }] } } };
     aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
   } else {
-    // deep copy
-    query = Object.assign({}, defaultQuery.query);
-    query = Object.assign({}, defaultQuery.query);
+    query = structuredClone(defaultQuery.query);
+    aggsQuery = structuredClone(defaultQuery.query);
   }
 
   let bodyQuery = {
-    query,
+    query: query,
     aggs: {},
     size: size,
     from: size * (page - 1),
     sort: [{ createdAt: { order: "desc" } }],
     track_total_hits: true,
   };
+
+  console.log("bodyQuery", bodyQuery);
 
   console.log("dafault query is ", defaultQuery.query);
   let bodyAggs = {
