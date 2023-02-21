@@ -152,8 +152,13 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
       });
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");
       toastr.success("Filtre sauvegardé");
+      getDBFilters();
+      setModalSaveVisible(false);
+      return;
     } catch (error) {
-      console.log(error);
+      console.log("???", error);
+      if (error.code === "ALREADY_EXISTS") return toastr.error("Oops, le filtre existe déjà");
+      return;
     }
     // save url params
   };
@@ -298,6 +303,7 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter
   const ref = React.useRef();
   const [nameView, setNameView] = React.useState("");
   const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -314,10 +320,12 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter
     if (nameView) return setError("");
   }, [nameView]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nameView) return setError("Veuillez saisir un nom pour votre vue");
     setError("");
-    saveFilter(nameView);
+    setLoading(true);
+    const res = await saveFilter(nameView);
+    setLoading(false);
   };
 
   return (

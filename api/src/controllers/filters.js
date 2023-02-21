@@ -26,7 +26,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { page, url, name } = value;
 
     //check if filter already exists
-    const filter = await FilterModel.findOne({ page, url, userId: req.user._id });
+    const filter = await FilterModel.findOne({ page, name, userId: req.user._id });
     if (filter) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
     const newFilter = await FilterModel.create({ page, url, userId: req.user._id, name });
@@ -51,6 +51,30 @@ router.get("/:page", passport.authenticate("referent", { session: false, failWit
     const filters = await FilterModel.find({ page, userId: req.user._id });
 
     return res.status(200).send({ ok: true, data: filters });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const { id } = value;
+
+    const filter = await FilterModel.findById(id);
+    if (!filter) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (filter.userId.toString() !== req.user._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    await filter.remove();
+
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
