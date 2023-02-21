@@ -4,7 +4,6 @@ import ExcelColor from "../../components/Icons/ExcelColor.png";
 import ReactLoading from "react-loading";
 import { HiOutlineChevronDown } from "react-icons/hi";
 import { GrCircleInformation } from "react-icons/gr";
-import ReactTooltip from "react-tooltip";
 import { MIME_TYPES, PDT_COLUMNS_BUS, PDT_COLUMNS_PDR, PDT_COLUMNS_CENTER, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
 import api from "../../../../../services/api";
 import { capture } from "../../../../../sentry";
@@ -17,6 +16,7 @@ export default function Import({ nextStep, cohort }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [countPdr, setCountPdr] = useState(0);
+  const [importedFileName, setImportedFileName] = useState(null);
   const fileInput = useRef(null);
 
   function importFile(e) {
@@ -35,8 +35,9 @@ export default function Import({ nextStep, cohort }) {
   }
 
   async function uploadFile(file) {
-    // console.log("upload file", file);
+    console.log("upload file", file);
     setUploadError(null);
+    setImportedFileName(file.name);
     if (file.type !== MIME_TYPES.EXCEL) {
       setUploadError("Le fichier doit être au format Excel.");
       return;
@@ -70,6 +71,16 @@ export default function Import({ nextStep, cohort }) {
     setIsUploading(false);
   }
 
+  function getErrorsCount() {
+    let count = 0;
+    if (importErrors) {
+      for (const errors of Object.values(importErrors)) {
+        count += Object.keys(errors).length;
+      }
+    }
+    return count + (count > 1 ? " erreurs détectées" : " erreur détectée");
+  }
+
   function fileUploaded(data) {
     console.log("File Uploaded: ", data);
   }
@@ -83,8 +94,8 @@ export default function Import({ nextStep, cohort }) {
             <div className="flex items-center">
               <img src={ExcelColor} alt="Excel" className="w-[56px]" />
               <div className="flex flex-col">
-                <div className="text-sm leading-5 text-gray-900">plan_transport_2023.xlsx</div>
-                <div className="text-xs leading-5 text-gray-500">13 erreurs détectées</div>
+                <div className="text-sm leading-5 text-gray-900">{importedFileName}</div>
+                <div className="text-xs leading-5 text-gray-500">{getErrorsCount()}</div>
               </div>
             </div>
             <button
@@ -144,7 +155,6 @@ const ErrorBlock = ({ column, errors, countPdr }) => {
     error: getErrorText(entry[1].error, entry[1].extra),
     tooltip: getErrorTooltip(entry[1].error),
   }));
-  console.log("Errors list = ", errorList);
   const colName = getColumnName(column, countPdr);
 
   return (
@@ -167,10 +177,13 @@ const ErrorBlock = ({ column, errors, countPdr }) => {
               <div className="text-sm leading-5 font-medium text-gray-800">{item.line}</div>
               <div className="flex grow items-center gap-4 w-1/4 justify-end">
                 <div className="text-sm leading-5 font-normal text-gray-800">{item.error}</div>
-                <GrCircleInformation data-tip data-for="info" className="text-gray-500 h-3 w-3 cursor-pointer" />
-                <ReactTooltip id="info" className="rounded-lg bg-white drop-shadow-sm" arrowColor="white" place="top">
-                  <div className="text-[#414458] text-xs">{item.tooltip}</div>
-                </ReactTooltip>
+                <div className="group relative">
+                  <GrCircleInformation data-tip data-for="info" className="text-gray-500 h-3 w-3 cursor-pointer" />
+                  <div className="hidden group-hover:block absolute bottom-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[300px] text-center">
+                    <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 bottom-[-5px] shadow-sm"></div>
+                    {item.tooltip}
+                  </div>
+                </div>
               </div>
             </div>
           </React.Fragment>
@@ -184,7 +197,6 @@ function getColumnName(column, countPdr) {
   let colName;
   const colNum = parseInt(column) - 1;
   const centerIndex = PDT_COLUMNS_BUS.length + countPdr * PDT_COLUMNS_PDR.length;
-  console.log("getColumnName: ", column, countPdr, colNum, centerIndex);
 
   if (colNum < 0 || colNum >= PDT_COLUMNS_BUS.length + countPdr * PDT_COLUMNS_PDR.length + PDT_COLUMNS_CENTER) {
     capture("Import de plan de transport: numéro de colonne en dehors des limites");

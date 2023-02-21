@@ -181,14 +181,8 @@ function formatCell(col, value) {
     }
     case PDT_CELL_FORMAT.transportType:
       return value.toString().trim().toLowerCase();
-    case PDT_CELL_FORMAT.integer: {
-      const val = parseInt(value);
-      if (isNaN(val)) {
-        return value;
-      } else {
-        return val;
-      }
-    }
+    case PDT_CELL_FORMAT.integer:
+      return /^\d+$/.test(value) ? parseInt(value) : value;
     case PDT_CELL_FORMAT.boolean:
       return ["oui", "non"].includes(value.toLowerCase()) ? (value.toLowerCase() === "oui" ? "true" : "false") : null;
     default:
@@ -258,9 +252,9 @@ function verifyCellFormat(col, value) {
       return null;
     }
     case PDT_CELL_FORMAT.integer:
-      return /^\d+$/.test(value) ? null : PDT_IMPORT_ERRORS.BAD_FORMAT;
+      return typeof value === "number" && value >= 0 ? null : PDT_IMPORT_ERRORS.BAD_FORMAT;
     case PDT_CELL_FORMAT.boolean:
-      return ["oui", "non"].includes(value.toLowerCase()) ? null : PDT_IMPORT_ERRORS.BAD_FORMAT;
+      return ["true", "false"].includes(value.toLowerCase()) ? null : PDT_IMPORT_ERRORS.BAD_FORMAT;
     default:
       return PDT_IMPORT_ERRORS.UNKNOWN_COLUM_TYPE;
   }
