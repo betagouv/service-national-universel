@@ -90,10 +90,18 @@ export default function test() {
 
 //extarct dans utils ou logique du filtre ? en passant l'index en param ?
 const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, defaultQuery = null, filterArray) => {
-  if (!defaultQuery) defaultQuery = { query: { bool: { must: [{ match_all: {} }] } } };
-  console.log("?? ", defaultQuery.query);
+  let query;
+  let aggsQuery;
+  if (!defaultQuery) {
+    query = { query: { bool: { must: [{ match_all: {} }] } } };
+    aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
+  } else {
+    query = JSON.parse(JSON.stringify(defaultQuery.query));
+    aggsQuery = JSON.parse(JSON.stringify(defaultQuery.query));
+  }
+
   let bodyQuery = {
-    query: defaultQuery.query,
+    query,
     aggs: {},
     size: size,
     from: size * (page - 1),
@@ -103,7 +111,7 @@ const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, d
 
   console.log("dafault query is ", defaultQuery.query);
   let bodyAggs = {
-    query: defaultQuery.query,
+    query: aggsQuery,
     aggs: {},
     size: 0,
     track_total_hits: true,
