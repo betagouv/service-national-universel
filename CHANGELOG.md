@@ -1,3 +1,12 @@
+## [1.222.3](https://github.com/betagouv/service-national-universel/compare/v1.222.2...v1.222.3) (2023-02-21)
+
+
+### Bug Fixes
+
+* **admin:** retours design sur formulaire structure ([7d5fc56](https://github.com/betagouv/service-national-universel/commit/7d5fc567ef5aeb92c12fd01e1edef12e57cbb9a7))
+* **lib:** autoriser les jeunes statusPhase1:affected et status:validated à changer le séjour ([9fe2269](https://github.com/betagouv/service-national-universel/commit/9fe2269be0446c83afa13445636c4b9a31ead17e))
+* **pdf:** corrections sur l'attestation de réalisation de phase 1 ([#2286](https://github.com/betagouv/service-national-universel/issues/2286)) ([5dd27c3](https://github.com/betagouv/service-national-universel/commit/5dd27c34497a200b699602ff4ee3d1b66dcd9f74))
+
 ## [1.222.2](https://github.com/betagouv/service-national-universel/compare/v1.222.1...v1.222.2) (2023-02-20)
 
 
