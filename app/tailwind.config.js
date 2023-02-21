@@ -3,6 +3,7 @@ const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: ["w-full", "w-auto", "w-10"],
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {
@@ -52,6 +53,11 @@ module.exports = {
         warmGray: colors.stone,
         trueGray: colors.neutral,
         coolGray: colors.gray,
+        "beige-gris-galet-975": "#f9f6f2",
+        "blue-france-sun-113": "#000091",
+        "blue-france-sun-113-hover": "#1212ff",
+        "grey-625": "#929292",
+        "grey-925": "#e5e5e5",
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],
