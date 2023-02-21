@@ -45,7 +45,7 @@ export default function Index(props) {
       <div className="flex flex-col w-full mt-4">
         <NavBar steps={steps} />
         {steps[0].status === "current" && <Download nextStep={nextStep} />}
-        {steps[1].status === "current" && <Import nextStep={nextStep} />}
+        {steps[1].status === "current" && <Import nextStep={nextStep} cohort={cohort} />}
         {steps[2].status === "current" && <Resum nextStep={nextStep} />}
       </div>
     </div>
