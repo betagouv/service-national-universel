@@ -49,7 +49,7 @@ export default function ViewPopOver({ setIsShowing, isShowing, savedView, handle
                       <div className=" hover:bg-gray-50 cursor-pointer w-full" onClick={() => handleSelect(view?.url)}>
                         <div className="text-gray-700 text-sm">{view.name}</div>
                       </div>
-                      <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
+                      <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={() => handleDelete(view._id)} />
                     </div>
                   ))}
                 </div>

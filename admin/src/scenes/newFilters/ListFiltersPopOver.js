@@ -151,7 +151,7 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
         name: name,
       });
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");
-      toastr.success("Filtre sauvegardé");
+      toastr.success("Filtre sauvegardé avec succès");
       getDBFilters();
       setModalSaveVisible(false);
       return;
@@ -161,6 +161,18 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
       return;
     }
     // save url params
+  };
+
+  const handleDeleteFilter = async (id) => {
+    try {
+      const res = await api.remove("/filters/" + id);
+      if (!res.ok) return toastr.error("Oops, une erreur est survenue");
+      toastr.success("Filtre supprimé avec succès");
+      getDBFilters();
+      return;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSelectUrl = (url) => {
@@ -208,7 +220,13 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
                 <div className="rounded-lg shadow-lg">
                   <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
                     {savedView.length > 0 && (
-                      <ViewPopOver setIsShowing={handleFilterShowing} isShowing={isShowing === "view"} savedView={savedView} handleSelect={handleSelectUrl} />
+                      <ViewPopOver
+                        setIsShowing={handleFilterShowing}
+                        isShowing={isShowing === "view"}
+                        savedView={savedView}
+                        handleSelect={handleSelectUrl}
+                        handleDelete={handleDeleteFilter}
+                      />
                     )}
                     <input
                       type="text"
