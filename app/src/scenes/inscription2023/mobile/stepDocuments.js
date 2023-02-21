@@ -43,6 +43,8 @@ export default function StepDocuments() {
     },
   ];
 
+  const disabled = !young?.files?.cniFiles?.length || !young?.latestCNIFileExpirationDate;
+
   async function onSubmit() {
     const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate });
     if (!ok) {
@@ -102,7 +104,7 @@ export default function StepDocuments() {
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={young.files.cniFiles.length === 0} />
+      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={disabled} />
     </>
   );
 }

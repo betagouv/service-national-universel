@@ -225,7 +225,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       busId,
       departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
       returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
-      lineFillingRate: planDeTransport.youngCapacity && Math.floor((planDeTransport.youngSeatsTaken / planDeTransport.youngCapacity) * 100),
+      lineFillingRate: youngCapacity && Math.floor((planDeTransport.youngSeatsTaken / youngCapacity) * 100),
       youngCapacity,
       totalCapacity,
       followerCapacity,
@@ -459,7 +459,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
             {
               $match: {
                 $expr: {
-                  $and: [{ $eq: ["$ligneId", "$$id"] }],
+                  $and: [{ $eq: ["$ligneId", "$$id"] }, { $eq: ["$status", "VALIDATED"] }],
                 },
               },
             },

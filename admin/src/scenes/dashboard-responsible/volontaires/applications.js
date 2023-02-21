@@ -34,7 +34,7 @@ export default function Applications() {
     return "-";
   };
 
-  const link = environment === "production" ? "/volontaire" : "/volontaire/list/all";
+  const link = "/volontaire/list/all";
 
   return (
     <>

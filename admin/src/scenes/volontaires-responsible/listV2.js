@@ -639,7 +639,7 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
   const history = useHistory();
 
   const onChangeApplication = (status) => {
-    if (status === "VALIDATED" && currentTab === "all") history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}/contrat`);
+    if (status === "VALIDATED" && ["all", "pending"].includes(currentTab)) history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}/contrat`);
     else history.go(0);
   };
 

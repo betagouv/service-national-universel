@@ -424,5 +424,12 @@ export const debounce = (fn, delay) => {
   };
 };
 
+export const youngCheckinField = {
+  [ROLES.ADMIN]: "youngCheckinForAdmin",
+  [ROLES.HEAD_CENTER]: "youngCheckinForHeadOfCenter",
+  [ROLES.REFERENT_REGION]: "youngCheckinForRegionReferent",
+  [ROLES.REFERENT_DEPARTMENT]: "youngCheckinForDepartmentReferent",
+};
+
 export const CDN_BASE_URL =
   environment === "production" ? "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/cni-bucket-staging";

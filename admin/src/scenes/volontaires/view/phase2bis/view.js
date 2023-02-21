@@ -219,7 +219,7 @@ export default function Phase2({ young, onChange }) {
           "Choix - Ordre de la candidature": data.priority,
           "Candidature créée le": formatLongDateUTC(data.createdAt),
           "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
-          "Statut du contrat d'engagement": translate(data.young.statusPhase2Contract),
+          "Statut du contrat d'engagement": translate(data.contractStatus),
           "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
           "Statut du dossier d'éligibilité PM": translate(data.young.statusMilitaryPreparationFiles),
         },

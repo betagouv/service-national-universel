@@ -35,7 +35,9 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
 
   return (
     <div className={`mt-[80px] ${className}`}>
-      <div className="text-gray-800 text-lg font-bold mb-2 text-center">Masquer les volontaires accueillis en {department}</div>
+      <div className="text-gray-800 text-lg font-bold mb-2 text-center">
+        {shown ? "Masquer" : "Afficher"} les volontaires accueillis en {department}
+      </div>
       <div className="flex items-center justify-center">
         <div
           className="w-[38px] h-[38px] bf-[#FFFFFF] shadow rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-700 hover:text-[#FFFFFF] cursor-pointer"

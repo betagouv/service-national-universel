@@ -143,7 +143,7 @@ export default function changeSejour() {
                             .map((status) => {
                               return (
                                 <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
-                                  Séjour {status}
+                                  Séjour {translateCohort(status)}
                                 </DropdownItem>
                               );
                             })}

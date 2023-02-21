@@ -248,7 +248,7 @@ export default function StepUpload() {
             ))}
         </div>
         <div className="w-full flex items-center justify-center mb-4">
-          <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
+          {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
         </div>
         <input
           type="file"

@@ -29,6 +29,7 @@ import Check from "../../../../assets/icons/Check";
 import FileIcon from "../../../../assets/FileIcon";
 import Download from "../../../../assets/icons/Download";
 import Bell from "../../../../assets/icons/Bell";
+import Tag from "../../../../components/Tag";
 
 export default function Phase2Application({ young, onChange }) {
   const [application, setApplication] = React.useState(null);
@@ -139,240 +140,218 @@ export default function Phase2Application({ young, onChange }) {
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
-      <div className="p-7">
-        <div className="bg-white w-full h-full rounded-lg px-4">
-          <div className="flex items-center justify-between py-6">
+      <div className="m-8 p-8 shadow-sm bg-white rounded-xl">
+        <div className="grid grid-cols-6">
+          <div>
             <button
               onClick={history.goBack}
               className="h-8 w-8 flex items-center justify-center space-x-1 bg-gray-100 rounded-full border-[1px] border-gray-100 hover:border-gray-300">
               <LeftArrow stroke={"#374151"} width={15} />
             </button>
-            <div className="flex items-center gap-3 text-2xl font-bold">
-              <div>Espace&nbsp;candidature </div>
-              <div className="flex items-center justify-end">
-                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-1.5 py-[5px] rounded-sm`}>
-                  {translateApplication(application.status)}
-                </div>
-              </div>
-            </div>
-            {application?.contractId ? (
+          </div>
+          <div className="col-span-4 flex gap-4 items-center justify-center">
+            <p className="text-2xl font-bold pb-1">Espace&nbsp;candidature</p>
+            <p className={`text-xs font-normal px-2 py-1 h-min rounded-sm ${theme.background[application.status]} ${theme.text[application.status]} `}>
+              {translateApplication(application.status)}
+            </p>
+          </div>
+          {application?.contractId && (
+            <div className="flex justify-end">
               <button
                 className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
                 onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
                 <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
               </button>
-            ) : (
-              <div />
-            )}
-          </div>
-          <hr />
-          <div className="flex relative items-center justify-center w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
-            {/* Choix*/}
-            <div className="flex flex-col w-full pr-2 flex-1 justify-between basis-[60%] h-full">
-              <div className="w-full flex justify-end">
-                <button
-                  className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
-                  onClick={() => history.push(`/mission/${mission._id.toString()}`)}>
-                  <div className="text-xs text-gray-800 ">Voir la mission</div>
-                </button>
-              </div>
-              <Link className="flex flex-col w-full" to={`/mission/${application.missionId}`}>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-16">
+          <>
+            <div className="grid grid-cols-3 grid-rows-2 border-t border-b my-8">
+              <div className="col-span-2 row-span-2 py-4 pr-4 border-r flex flex-col justify-center relative w-full">
                 {/* mission info */}
-                <div className="flex flex-1 justify-between items-start">
+                <div className="flex gap-5">
                   {/* icon */}
-                  <div className="flex items-center mr-4">
+                  <div className="flex items-center">
                     <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
                   </div>
-                  <div className="flex flex-col flex-1 justify-center">
-                    <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
-                    <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
+                  <div className="space-y-2">
+                    <div className="uppercase text-gray-400 font-medium text-xs tracking-wide">{mission.structureName}</div>
+                    <div className="text-font-gray-800 font-bold text-2xl">{mission.name}</div>
                     {/* tags */}
                     {tags && (
-                      <div className=" inline-flex flex-wrap">
-                        {tags.map((tag, index) => {
-                          return (
-                            <div
-                              key={index}
-                              className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
-                              {tag}
-                            </div>
-                          );
-                        })}
-                        {mission.isMilitaryPreparation === "true" ? (
-                          <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
-                            Préparation militaire
-                          </div>
-                        ) : null}
+                      <div className="inline-flex flex-wrap pt-2 gap-2">
+                        {tags.map((tag, index) => (
+                          <Tag key={index} tag={tag} />
+                        ))}
+                        {mission.isMilitaryPreparation === "true" && <Tag tag="Préparation militaire" />}
                       </div>
                     )}
                   </div>
                 </div>
-              </Link>
-              <div className="flex flex-1 py-2" />
-            </div>
-            <div className="border-x border-x-gray-200 basis-[40%] items-center justify-center my-4">
-              <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
-                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
-                {/* get duration du contrat ou de la mission ? */}
-                <div className="font-bold text-2xl text-[#242526]">{contract?.missionDuration || "0"}h</div>
+
+                <div className="flex justify-end absolute z-10 inset-0 h-14 pt-4 px-4">
+                  <a
+                    className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300 text-xs text-gray-800"
+                    href={`/mission/${mission._id}`}>
+                    Voir la mission
+                  </a>
+                </div>
               </div>
-              <div className="flex flex-col justify-center items-center p-4 m-0">
-                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
-                <div className="flex items-center gap-2 font-bold text-2xl text-[#242526]">
-                  <div>{application?.missionDuration || "0"}h</div>
-                  {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
+
+              <div className="flex flex-col justify-center items-center border-b gap-1 h-28">
+                <div className="uppercase text-xs text-gray-400 tracking-wide">Heures de MIG prévisionnelles</div>
+                <div className="font-bold text-2xl text-gray-800">{contract?.missionDuration || "0"}h</div>
+              </div>
+
+              <div className="flex flex-col justify-center items-center gap-1">
+                <div className="uppercase text-xs text-gray-400 tracking-wide">Heures de MIG réalisées</div>
+                <div className="grid grid-cols-3">
+                  <div />
+                  <p className="font-bold text-2xl text-gray-800">{application?.missionDuration || "0"}h</p>
+                  {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) && (
                     <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
                       <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
                         <Pencil width={16} height={16} />
                       </div>
                     </div>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </div>
-          <hr className="mb-4" />
-          {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
-            <>
-              <div className="p-4">
-                <div className="bg-gray-50 rounded-lg  px-10 py-6">
-                  <div className="flex justify-between">
-                    <div className="flex flex-row items-center justify-center gap-4">
-                      <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-                      {contractStatus === "SENT" ? (
-                        <div
-                          onClick={() => {
-                            history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
-                          }}
-                          className="flex flex-row items-center justify-center gap-2 text-blue-500 text-xs cursor-pointer">
-                          <Pencil width={14} height={14} />
-                          <div>Modifier le contrat</div>
-                        </div>
-                      ) : null}
-                    </div>
-                    {contractStatus === "SENT" ? (
-                      <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
-                        <AiFillClockCircle className="text-sky-500" />
-                        <div>Contrat envoyé</div>
-                      </div>
-                    ) : contractStatus === "DRAFT" ? (
-                      <div className="text-xs font-normal px-2  bg-orange-500 text-white rounded-sm items-center flex space-x-1">
-                        <Bell />
-                        <div>Contrat en brouillon</div>
-                      </div>
-                    ) : contractStatus === "VALIDATED" ? (
-                      <div className="text-xs font-normal px-2  bg-green-400 rounded-sm items-center flex space-x-1">
-                        <Check className="text-white" />
-                        <div className="text-white">Contrat signé</div>
-                      </div>
-                    ) : null}
-                  </div>
-                  {contractStatus === "DRAFT" ? (
-                    <div className="text-sm mt-1">
-                      Vous devez renseigner ce contrat d&apos;engagement puis l&apos;envoyer pour validation aux représentant(s) légal(aux) du volontaire, au tuteur de la mission
-                      et au représentant de l&apos;État
-                    </div>
-                  ) : null}
-                  {contractStatus === "SENT" ? (
-                    <div className="text-sm mt-1">
-                      Ce contrat doit être validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
-                    </div>
-                  ) : null}
-                  {contractStatus === "VALIDATED" ? (
-                    <div className="text-sm mt-1">
-                      Ce contrat a été validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
-                    </div>
-                  ) : null}
-
-                  {contract?.invitationSent ? (
-                    <div>
-                      <div className="grid gap-4 grid-cols-4 mt-4">
-                        <StatusContractPeople
-                          value={contract?.projectManagerStatus}
-                          description="Représentant de l’État"
-                          firstName={contract?.projectManagerFirstName}
-                          lastName={contract?.projectManagerLastName}
-                          target="projectManager"
-                          contract={contract}
-                          status={contract?.projectManagerStatus}
-                          token={contract?.projectManagerToken}
-                          validationDate={contract?.projectManagerValidationDate}
-                        />
-                        <StatusContractPeople
-                          value={contract?.structureManagerStatus}
-                          description="Représentant de la structure"
-                          firstName={contract?.structureManagerFirstName}
-                          lastName={contract?.structureManagerLastName}
-                          target="structureManager"
-                          contract={contract}
-                          status={contract?.structureManagerStatus}
-                          token={contract?.structureManagerToken}
-                          validationDate={contract?.structureManagerValidationDate}
-                        />
-                        {contract?.isYoungAdult === "true" ? (
-                          <StatusContractPeople
-                            value={contract?.youngContractStatus}
-                            description="Volontaire"
-                            firstName={contract?.youngFirstName}
-                            lastName={contract?.youngLastName}
-                          />
-                        ) : (
-                          <>
-                            <StatusContractPeople
-                              value={contract?.parent1Status}
-                              description="Représentant légal 1"
-                              firstName={contract?.parent1FirstName}
-                              lastName={contract?.parent1LastName}
-                              target="parent1"
-                              contract={contract}
-                              status={contract?.parent1Status}
-                              token={contract?.parent1Token}
-                              validationDate={contract?.parent1ValidationDate}
-                            />
-                            {contract?.parent2Email && (
-                              <StatusContractPeople
-                                value={contract?.parent2Status}
-                                description="Représentant légal 2"
-                                firstName={contract?.parent2FirstName}
-                                lastName={contract?.parent2LastName}
-                                target="parent2"
-                                contract={contract}
-                                status={contract?.parent2Status}
-                                token={contract?.parent2Token}
-                                validationDate={contract?.parent2ValidationDate}
-                              />
-                            )}
-                          </>
-                        )}
-                      </div>
-                      {contractStatus === "VALIDATED" ? (
-                        <div onClick={() => downloadContract()} className="cursor-pointer py-2 rounded-md mt-7 h-10 bg-green-400 w-48 max-w-xs items-center flex justify-center">
-                          {loadingContract ? (
-                            <div className="h-10 flex items-center justify-center">
-                              <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
-                            </div>
-                          ) : (
-                            <div className="text-white">Télécharger le contrat</div>
-                          )}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => {
-                        history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
-                      }}
-                      className="cursor-pointer py-2 rounded-md mt-7 bg-blue-600 w-48 max-w-xs items-center flex justify-center">
-                      <div className="text-white">Editer</div>
-                    </div>
                   )}
                 </div>
               </div>
-              <div className="mx-8 mt-8 pb-8">
+            </div>
+          </>
+          {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
+            <>
+              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
                 <div className="flex justify-between">
-                  <div className="text-lg leading-6 font-semibold">Documents</div>
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+                    {contractStatus === "SENT" && (
+                      <Link to={`/volontaire/${young._id}/phase2/application/${application._id}/contrat`} className="flex items-center justify-center gap-2 text-blue-600 text-xs">
+                        <Pencil width={14} height={14} />
+                        <div>Modifier le contrat</div>
+                      </Link>
+                    )}
+                  </div>
+                  {contractStatus === "SENT" ? (
+                    <div className="text-xs font-normal px-2 bg-sky-100 text-sky-600 rounded-sm items-center flex">
+                      <AiFillClockCircle className="text-sky-400" />
+                      <div>Contrat envoyé</div>
+                    </div>
+                  ) : contractStatus === "DRAFT" ? (
+                    <div className="text-xs font-normal px-2 bg-orange-500 text-white rounded-sm items-center flex">
+                      <Bell />
+                      <div>Contrat en brouillon</div>
+                    </div>
+                  ) : contractStatus === "VALIDATED" ? (
+                    <div className="text-xs font-normal px-2 bg-[#71C784] rounded-sm items-center flex text-white">
+                      <Check />
+                      <div>Contrat signé</div>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full items-stretch">
+                {contractStatus === "DRAFT" && (
+                  <div className="text-sm">
+                    Vous devez renseigner ce contrat d&apos;engagement puis l&apos;envoyer pour validation aux représentant(s) légal(aux) du volontaire, au tuteur de la mission et
+                    au représentant de l&apos;État
+                  </div>
+                )}
+                {contractStatus === "SENT" && (
+                  <div className="text-sm">
+                    Ce contrat doit être validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
+                  </div>
+                )}
+                {contractStatus === "VALIDATED" && (
+                  <div className="text-sm">
+                    Ce contrat a été validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
+                  </div>
+                )}
+
+                {contract?.invitationSent ? (
+                  <div className="space-y-6">
+                    <div className="flex gap-10">
+                      <StatusContractPeople
+                        value={contract?.projectManagerStatus}
+                        description="Représentant de l’État"
+                        firstName={contract?.projectManagerFirstName}
+                        lastName={contract?.projectManagerLastName}
+                        target="projectManager"
+                        contract={contract}
+                        status={contract?.projectManagerStatus}
+                        token={contract?.projectManagerToken}
+                        validationDate={contract?.projectManagerValidationDate}
+                      />
+                      <StatusContractPeople
+                        value={contract?.structureManagerStatus}
+                        description="Représentant de la structure"
+                        firstName={contract?.structureManagerFirstName}
+                        lastName={contract?.structureManagerLastName}
+                        target="structureManager"
+                        contract={contract}
+                        status={contract?.structureManagerStatus}
+                        token={contract?.structureManagerToken}
+                        validationDate={contract?.structureManagerValidationDate}
+                      />
+                      {contract?.isYoungAdult === "true" ? (
+                        <StatusContractPeople
+                          value={contract?.youngContractStatus}
+                          description="Volontaire"
+                          firstName={contract?.youngFirstName}
+                          lastName={contract?.youngLastName}
+                        />
+                      ) : (
+                        <>
+                          <StatusContractPeople
+                            value={contract?.parent1Status}
+                            description="Représentant légal 1"
+                            firstName={contract?.parent1FirstName}
+                            lastName={contract?.parent1LastName}
+                            target="parent1"
+                            contract={contract}
+                            status={contract?.parent1Status}
+                            token={contract?.parent1Token}
+                            validationDate={contract?.parent1ValidationDate}
+                          />
+                          {contract?.parent2Email && (
+                            <StatusContractPeople
+                              value={contract?.parent2Status}
+                              description="Représentant légal 2"
+                              firstName={contract?.parent2FirstName}
+                              lastName={contract?.parent2LastName}
+                              target="parent2"
+                              contract={contract}
+                              status={contract?.parent2Status}
+                              token={contract?.parent2Token}
+                              validationDate={contract?.parent2ValidationDate}
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                    {contractStatus === "VALIDATED" && (
+                      <button onClick={() => downloadContract()} className="py-2 px-3 rounded-md bg-[#71C784] items-center flex justify-center gap-2">
+                        {loadingContract ? (
+                          <div className="flex items-center justify-center">
+                            <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
+                          </div>
+                        ) : (
+                          <div className="text-white">Télécharger le contrat</div>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <a
+                    href={`/volontaire/${young._id}/phase2/application/${application._id}/contrat`}
+                    className="py-2 rounded-md bg-blue-600 w-48 items-center flex justify-center text-white hover:brightness-110 active:brightness-125">
+                    Editer
+                  </a>
+                )}
+              </div>
+              <div className="space-y-6">
+                <p className="text-lg leading-6 font-semibold">Documents</p>
+                <div className="flex overflow-x-auto gap-6 w-full">
                   {optionsType.map(
                     (option, index) =>
                       application[option].length > 0 && (
@@ -396,19 +375,19 @@ export default function Phase2Application({ young, onChange }) {
                       ),
                   )}
                   {optionsType.reduce((acc, option) => acc + (application[option].length > 0 ? 1 : 0), 0) < optionsType.length && (
-                    <section
+                    <div
                       onClick={() => {
                         setModalDocument({
                           isOpen: true,
                           stepOne: true,
                         });
                       }}
-                      className={`group basis-1/4 min-h-[230px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
-                      <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
+                      className="w-64 h-64 group border-[1px] border-dashed border-blue-600 rounded-lg text-center flex flex-col items-center justify-center hover:border-solid hover:bg-blue-50 cursor-pointer transition">
+                      <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white hover:brightness-110 active:brightness-125 transition">
                         <HiPlus />
                         Ajouter une pièce jointe
                       </div>
-                    </section>
+                    </div>
                   )}
                 </div>
                 <ModalPJ
@@ -452,7 +431,10 @@ export default function Phase2Application({ young, onChange }) {
                   placeholder="Nombre d'heures"
                   onConfirm={async (duration) => {
                     try {
-                      const { ok, code, data } = await api.put("/application", { _id: application._id, missionDuration: duration });
+                      const { ok, code, data } = await api.put("/application", {
+                        _id: application._id,
+                        missionDuration: duration,
+                      });
                       if (!ok) {
                         toastr.error("Une erreur s'est produite :", translate(code));
                       } else {
@@ -478,28 +460,27 @@ export default function Phase2Application({ young, onChange }) {
 }
 
 const StatusContractPeople = ({ value, description, firstName, lastName, token, contract, target }) => (
-  <div className="flex flex-col justify-center items-start ">
-    <div className="flex flex-col justify-center items-start " data-tip data-for={`${firstName}${lastName}-validation`}>
-      <div className="mr-2">
+  <div className="space-y-1">
+    <div className="flex items-center gap-2" data-tip data-for={`${firstName}${lastName}-validation`}>
+      <div className="w-8">
         {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
       </div>
       <div>
-        <div className="flex font-semibold space-x-2">
-          <div>{firstName}</div>
-          <div>{lastName?.toUpperCase()}</div>
-        </div>
-        <div className="text-gray-500 text-xs">{description}</div>
+        <p className="font-semibold max-w-[200px] truncate">
+          {firstName} {lastName?.toUpperCase()}
+        </p>
+        <p className="text-gray-500 text-xs">{description}</p>
       </div>
       {value !== "VALIDATED" ? (
-        <ReactTooltip id={`${firstName}${lastName}-validation`} type="light">
+        <ReactTooltip id={`${firstName}${lastName}-validation`} type="light" effect="solid">
           En attente de signature
         </ReactTooltip>
       ) : null}
     </div>
     {value !== "VALIDATED" ? (
-      <div className="mt-4">
+      <div className="mt-2">
         <div
-          className="text-xs text-blue-500 cursor-pointer hover:underline"
+          className="text-xs text-blue-600 cursor-pointer"
           onClick={() => {
             copyToClipboard(`${appURL}/validate-contract?token=${token}`);
             toastr.success("Le lien a été copié dans le presse papier.");
@@ -518,7 +499,7 @@ function SendContractLink({ contract, target }) {
   return (
     <>
       <div
-        className="text-xs text-blue-500 cursor-pointer hover:underline"
+        className="text-xs text-blue-600 cursor-pointer"
         onClick={async () => {
           try {
             const email = contract[target + "Email"];
@@ -536,7 +517,7 @@ function SendContractLink({ contract, target }) {
             toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
           }
         }}>
-        ✉️ Renvoyer le lien par email
+        Renvoyer le lien par email
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
@@ -552,9 +533,9 @@ function SendContractLink({ contract, target }) {
   );
 }
 
-function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false }) {
+function FileCard({ name, filled, icon, onClick, description, showNumber = false }) {
   return (
-    <section className={`basis-1/4  bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw}`}>
+    <section className="bg-gray-50 w-64 h-64 rounded-xl text-center flex flex-col items-center justify-between px-4 pt-4">
       <FileIcon filled={filled} icon={icon} />
       <section>
         <p className="text-base font-bold mt-2">{name}</p>

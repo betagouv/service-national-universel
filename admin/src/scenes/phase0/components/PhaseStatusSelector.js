@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import ChevronRight from "../../../assets/icons/ChevronRight";
-import { translate } from "snu-lib";
+import { translate, translatePhase1 } from "snu-lib";
 import Check from "../../../assets/icons/Check";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
@@ -41,7 +41,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
     let tags;
     switch (statusOpened) {
       case 1:
-        tags = ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN"]; //"WAITING_LIST"
+        tags = ["AFFECTED", "WAITING_AFFECTATION", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN"]; //"WAITING_LIST", "WAITING_ACCEPTATION", "CANCEL"
         break;
       case 2:
         tags = ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"];
@@ -63,7 +63,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
           }`}
           onClick={() => confirmChangePhaseStatus(statusOpened, t)}>
           {young[`statusPhase${statusOpened}`] === t && <Check />}
-          <div className="ml-[6px]">{translate(t)}</div>
+          <div className="ml-[6px]">{statusOpened === 1 ? translatePhase1(t) : translate(t)}</div>
         </div>
       )),
     );
@@ -119,7 +119,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
               }`}
               onClick={() => setStatusOpened(1)}>
               <div className="text-[14px] text-[#111827] mr-[9px]">Phase 1</div>
-              <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase1)}</div>
+              <div className="grow text-[12px] text-[#6B7280]">{translatePhase1(young.statusPhase1)}</div>
               <ChevronRight className="text-[#1F2937] ml-[9px]" />
             </div>
             <div
