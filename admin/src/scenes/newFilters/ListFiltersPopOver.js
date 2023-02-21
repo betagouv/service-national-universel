@@ -4,20 +4,30 @@ import FilterSvg from "../../assets/icons/Filter";
 import FilterPopOver from "./FilterPopOver";
 import ReactTooltip from "react-tooltip";
 import Field from "../../components/forms/Field";
-
+import { ES_NO_LIMIT } from "snu-lib";
 import { useHistory } from "react-router-dom";
+
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
+import ViewPopOver from "./ViewPopOver";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({ pageId, filters, data, selectedFilters, setSelectedFilters }) {
+export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getCount }) {
   const [search, setSearch] = React.useState("");
+  // data correspond to filters
+  const [data, setData] = React.useState([]);
+  const [selectedFilters, setSelectedFilters] = React.useState({});
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
+  const mounted = React.useRef(false);
   const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
+
+  const [savedView, setSavedView] = React.useState([]);
+
+  const [count, setCount] = React.useState(0);
 
   const urlParams = new URLSearchParams(window.location.search);
   const history = useHistory();
@@ -34,6 +44,13 @@ export default function ListFiltersPopOver({ pageId, filters, data, selectedFilt
   }, [search]);
 
   React.useEffect(() => {
+    // send count back to parent
+    getCount(count);
+  }, [count]);
+
+  React.useEffect(() => {
+    init();
+    getDBFilters();
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target) && refFilter.current && !refFilter.current.contains(event.target)) {
         setIsShowing(false);
@@ -58,12 +75,43 @@ export default function ListFiltersPopOver({ pageId, filters, data, selectedFilt
     });
     setCategories(newCategories);
   }, [filtersVisible]);
+  React.useEffect(() => {
+    if (mounted.current) {
+      getData();
+      setURL();
+    }
+  }, [selectedFilters]);
+
+  const init = async () => {
+    const initialFilters = getURLParam();
+    setSelectedFilters(initialFilters);
+    const res = await buildMissions("id", initialFilters, null, 1, 25, defaultQuery, filters);
+    if (!res) return;
+    setData({ ...data, ...res.newFilters });
+    setCount(res.count);
+    mounted.current = true;
+  };
+
+  const getData = async () => {
+    const res = await buildMissions("id", selectedFilters, null, 1, 25, defaultQuery, filters);
+    if (!res) return;
+    setData({ ...data, ...res.newFilters });
+    setCount(res.count);
+  };
+
+  const getURLParam = () => {
+    const filters = {};
+    urlParams.forEach((value, key) => {
+      filters[key] = { filter: value.split(",") };
+    });
+    setSelectedFilters(filters);
+    return filters;
+  };
 
   const currentFilterAsUrl = () => {
     const length = Object.keys(selectedFilters).length;
     let index = 0;
     const url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
-      console.log(selectedFilters[curr]);
       if (selectedFilters[curr]?.filter?.length > 0) {
         acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
       }
@@ -77,10 +125,6 @@ export default function ListFiltersPopOver({ pageId, filters, data, selectedFilt
     history.replace({ search: `?${currentFilterAsUrl()}` });
   };
 
-  React.useEffect(() => {
-    setURL();
-  }, [selectedFilters]);
-
   // text for tooltip save
   const saveTitle = Object.keys(selectedFilters).map((key) => {
     if (selectedFilters[key].filter.length > 0) {
@@ -91,19 +135,20 @@ export default function ListFiltersPopOver({ pageId, filters, data, selectedFilt
   const getDBFilters = async () => {
     try {
       const res = await api.get("/filters/" + pageId);
-      console.log(res);
+      if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
+      setSavedView(res.data);
     } catch (error) {
       console.log(error);
+      toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
     }
   };
 
-  const saveFilter = async () => {
-    console.log(urlParams);
-    console.log(currentFilterAsUrl);
+  const saveFilter = async (name) => {
     try {
       const res = await api.post("/filters", {
         page: pageId,
         url: currentFilterAsUrl(),
+        name: name,
       });
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");
       toastr.success("Filtre sauvegardé");
@@ -111,6 +156,17 @@ export default function ListFiltersPopOver({ pageId, filters, data, selectedFilt
       console.log(error);
     }
     // save url params
+  };
+
+  const handleSelectUrl = (url) => {
+    history.replace({ search: url });
+    const urlParams = new URLSearchParams(window.location.search);
+    const filters = {};
+    urlParams.forEach((value, key) => {
+      filters[key] = { filter: value.split(",") };
+    });
+    setSelectedFilters(filters);
+    setIsShowing(false);
   };
 
   const handleFilterShowing = (value) => {
@@ -146,6 +202,9 @@ export default function ListFiltersPopOver({ pageId, filters, data, selectedFilt
               <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
                 <div className="rounded-lg shadow-lg">
                   <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
+                    {savedView.length > 0 && (
+                      <ViewPopOver setIsShowing={handleFilterShowing} isShowing={isShowing === "view"} savedView={savedView} handleSelect={handleSelectUrl} />
+                    )}
                     <input
                       type="text"
                       value={search}
@@ -258,7 +317,7 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter
   const handleSave = () => {
     if (!nameView) return setError("Veuillez saisir un nom pour votre vue");
     setError("");
-    saveFilter();
+    saveFilter(nameView);
   };
 
   return (
@@ -304,4 +363,98 @@ const FloppyDisk = () => {
       />
     </svg>
   );
+};
+const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, defaultQuery = null, filterArray) => {
+  let query = {};
+  let aggsQuery = {};
+  if (!defaultQuery) {
+    query = { query: { bool: { must: [{ match_all: {} }] } } };
+    aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
+  } else {
+    query = structuredClone(defaultQuery.query);
+    aggsQuery = structuredClone(defaultQuery.query);
+  }
+
+  let bodyQuery = {
+    query: query,
+    aggs: {},
+    size: size,
+    from: size * (page - 1),
+    sort: [{ createdAt: { order: "desc" } }],
+    track_total_hits: true,
+  };
+
+  let bodyAggs = {
+    query: aggsQuery,
+    aggs: {},
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const getAggsFilters = (name) => {
+    let aggregfiltersObject = {
+      bool: {
+        must: [],
+      },
+    };
+    Object.keys(selectedFilters).map((key) => {
+      if (key === name) return;
+      if (selectedFilters[key].filter.length > 0) {
+        let datafield = filterArray.find((f) => f.name === key).datafield;
+        aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+      }
+    });
+    return aggregfiltersObject;
+  };
+
+  //ajouter les aggregations pour count
+  filterArray.map((f) => {
+    bodyAggs.aggs[f.name] = {
+      filter: { ...getAggsFilters(f.name) },
+      aggs: {
+        names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: filterArray.find((e) => f.name === e.name).missingLabel, size: ES_NO_LIMIT } },
+      },
+    };
+  });
+
+  if (selectedFilters && Object.keys(selectedFilters).length) {
+    Object.keys(selectedFilters).forEach((key) => {
+      if (selectedFilters[key].customQuery) {
+        // on a une custom query
+        console.log("CUSTOM");
+        //body.query.bool.must.push(selectedFilters[key].customQuery);
+      } else if (selectedFilters[key].filter.length > 0) {
+        let datafield = filterArray.find((f) => f.name === key).datafield;
+        bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+      }
+    });
+  }
+
+  /* 
+  if (search) {
+    body[1].query.bool.must.push({
+      multi_match: { query: search, fields: ["title", "clientId", "organizationName"], type: "best_fields", operator: "or", fuzziness: 2 },
+    });
+  }
+  */
+
+  //maybe piquet le cal de l'api engagement pour dexu body en une req
+  const resAggs = await api.esQuery("young", bodyAggs);
+  if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+
+  const resQuery = await api.esQuery("young", bodyQuery);
+  if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+
+  const aggs = resAggs.responses[0].aggregations;
+  const data = resQuery.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id }));
+  const count = resQuery.responses[0].hits.total.value;
+  const newFilters = {};
+
+  // map a travers les aggregations pour recuperer les filtres
+
+  filterArray.map((f) => {
+    newFilters[f.name] = aggs[f.name].names.buckets.map((b) => ({ value: b.key, count: b.doc_count }));
+  });
+
+  return { data, count, newFilters };
 };

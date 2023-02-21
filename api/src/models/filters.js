@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 
-const MODELNAME = "filtre";
+const MODELNAME = "filter";
 
 const Schema = new mongoose.Schema({
   userId: {
@@ -18,6 +18,12 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Page sur laquelle se trouve le filtre",
+    },
+  },
+  name: {
+    type: String,
+    documentation: {
+      description: "Nom de la sauvegarde des filtres",
     },
   },
   createdAt: { type: Date, default: Date.now },
