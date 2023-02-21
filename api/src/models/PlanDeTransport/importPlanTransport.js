@@ -30,6 +30,12 @@ const Schema = new mongoose.Schema({
       description: "Nombre de centres de cohésion concernés",
     },
   },
+  maxPdrPerLine: {
+    type: Number,
+    documentation: {
+      description: "Nombre de PDR max par ligne de bus sur cet import",
+    },
+  },
   lines: {
     type: [Object],
     documentation: {

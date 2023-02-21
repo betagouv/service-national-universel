@@ -17,7 +17,14 @@ const CohesionCenterModel = require("../../models/cohesionCenter");
 const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const SessionPhase1Model = require("../../models/sessionPhase1");
 
+/** ---------------------------------------------------------------------
+ * ROUTE /plan-de-transport/import/:cohortName
+ *
+ * Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
+ */
 router.post(
   "/:cohortName",
   passport.authenticate("referent", { session: false, failWithError: true }),
@@ -90,7 +97,7 @@ router.post(
       // first pass : format
       let hasError = verifyFormats(lines, countPdr, errors);
       // second pass : coherence
-      hasError = (await verifyCoherence(lines, countPdr, errors)) || hasError;
+      hasError = (await verifyCoherence(lines, countPdr, cohortName, errors)) || hasError;
       // third pass : volume
       hasError = (await verifyVolume(lines, countPdr, cohortName, errors)) || hasError;
       // console.log("ERRORS: ", errors);
@@ -126,13 +133,15 @@ function verifyFormats(lines, countPdr, errors) {
         hasError = addError(errors, l + 3, i + 1, error) || hasError;
       }
       let col = PDT_COLUMNS_BUS.length;
-      for (let j = 0; j < countPdr; ++j) {
+      const pdrInLine = countPdrInLine(lines[l], countPdr);
+      for (let j = 0; j < Math.max(1, pdrInLine); ++j) {
         for (let i = 0, n = PDT_COLUMNS_PDR.length; i < n; ++i) {
           const error = verifyCellFormat(PDT_COLUMNS_PDR[i], line[(i + col + 1).toString()]);
           hasError = addError(errors, l + 3, i + col + 1, error) || hasError;
         }
         col += PDT_COLUMNS_PDR.length;
       }
+      col = PDT_COLUMNS_BUS.length + countPdr * PDT_COLUMNS_PDR.length;
       for (let i = 0, n = PDT_COLUMNS_CENTER.length; i < n; ++i) {
         const error = verifyCellFormat(PDT_COLUMNS_CENTER[i], line[(i + col + 1).toString()]);
         hasError = addError(errors, l + 3, i + col + 1, error) || hasError;
@@ -141,6 +150,24 @@ function verifyFormats(lines, countPdr, errors) {
   }
 
   return hasError;
+}
+
+function countPdrInLine(line, countPdr) {
+  let count = 0;
+
+  let col = PDT_COLUMNS_BUS.length + 1;
+  for (let i = 0; i < countPdr; ++i) {
+    for (let c = col, n = c + PDT_COLUMNS_PDR.length; c < n; ++c) {
+      const key = c.toString();
+      if (line[key] !== null && line[key] !== undefined && line[key] !== "") {
+        count = i + 1;
+        break;
+      }
+    }
+    col += PDT_COLUMNS_PDR.length;
+  }
+
+  return count;
 }
 
 function cleanLine(line, countPdr) {
@@ -263,7 +290,7 @@ function verifyCellFormat(col, value) {
 // ---------------------------------------------------------------------
 // COHERENCE
 
-async function verifyCoherence(lines, countPdr, errors) {
+async function verifyCoherence(lines, countPdr, cohort, errors) {
   let hasError = false;
 
   // verify sum in CAPACITE_TOTALE
@@ -273,7 +300,7 @@ async function verifyCoherence(lines, countPdr, errors) {
   hasError = verifyCoherenceBusLine(lines, errors) || hasError;
 
   // Verify center id and pdr id exists
-  hasError = (await verifyCoherenceIds(lines, countPdr, errors)) || hasError;
+  hasError = (await verifyCoherenceIds(lines, countPdr, cohort, errors)) || hasError;
 
   // Verify not 2 same pdr id in one bus line
   hasError = verifyCoherencePdrDoublons(lines, countPdr, errors) || hasError;
@@ -320,7 +347,7 @@ function verifyCoherenceBusLine(lines, errors) {
   return hasError;
 }
 
-async function verifyCoherenceIds(lines, countPdr, errors) {
+async function verifyCoherenceIds(lines, countPdr, cohort, errors) {
   // get all center & pdr ids
   const centerIdCol = PDT_COLUMNS_BUS.length + countPdr * PDT_COLUMNS_PDR.length + PDT_COLUMNS_CENTER.findIndex((c) => c.id === "CENTRE_ID") + 1;
   const basePdrCol = PDT_COLUMNS_BUS.length + 1;
@@ -396,6 +423,20 @@ async function verifyCoherenceIds(lines, countPdr, errors) {
           hasError = true;
         }
       }
+    }
+  }
+
+  // --- search for sessions
+  const sessions = await SessionPhase1Model.find({ cohort: cohort, cohesionCenterId: { $in: centerIds } }, { _id: 1, cohesionCenterId: 1 });
+  const sessionSet = {};
+  for (const session of sessions) {
+    sessionSet[session.cohesionCenterId] = session._id.toString();
+  }
+  for (let i = 0, n = lines.length; i < n; ++i) {
+    const centerId = lines[i][centerIdCol];
+    if (!sessionSet[centerId]) {
+      addError(errors, i + 3, centerIdCol, PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, centerId);
+      hasError = true;
     }
   }
 
@@ -536,5 +577,109 @@ function getCounts(lines, countPdr) {
     busLineCount: lines.length,
     pdrCount: Object.keys(pdrs).length,
     centerCount: Object.keys(centers).length,
+    maxPdrPerLine: countPdr,
   };
+}
+
+/** ---------------------------------------------------------------------
+ * ROUTE /plan-de-transport/import/:importId/execute
+ *
+ * Importe un plan de transport vérifié et enregistré dans importplandetransport.
+ */
+router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // --- validate entries
+    const { error, value } = Joi.object({
+      importId: Joi.string().required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { importId } = value;
+
+    // --- get object
+    const importData = await ImportPlanTransportModel.findById(importId);
+    if (!importData) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // --- verify rights
+    if (!canSendPlanDeTransport(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // --- execute importation
+    const data = await executeImportation(importData);
+
+    // --- return
+    res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+async function executeImportation(importData) {
+  let importedCount = 0;
+
+  if (importData.lines && importData.lines.length > 0) {
+    const centerCol = PDT_COLUMNS_BUS.length + importData.maxPdrPerLine * PDT_COLUMNS_PDR.length + 1;
+
+    // --- find session ids of center in bus lines.
+    let centerIdsSet = {};
+    for (const line of importData.lines) {
+      const centerId = line[(centerCol + 1).toString()];
+      centerIdsSet[centerId] = true;
+    }
+    const centerIds = Object.keys(centerIdsSet);
+    const sessions = await SessionPhase1Model.find({ cohort: importData.cohort, cohesionCenterId: { $in: centerIds } }, { _id: 1, cohesionCenterId: 1 });
+    const sessionSet = {};
+    for (const session of sessions) {
+      sessionSet[session.cohesionCenterId] = session._id.toString();
+    }
+
+    // --- create bus lines.
+    for (const line of importData.lines) {
+      // compute pdr ids and center id.
+      let pdrIds = [];
+      let col = PDT_COLUMNS_BUS.length + 1;
+      for (let i = 0; i < importData.maxPdrPerLine; ++i) {
+        const pdrId = line[(col + 1).toString()];
+        if (pdrId !== null && pdrId !== undefined && pdrId !== "") {
+          pdrIds.push(pdrId);
+        }
+        col += PDT_COLUMNS_PDR.length;
+      }
+      const centerId = line[(centerCol + 1).toString()];
+      const sessionId = sessionSet[centerId];
+      if (sessionId) {
+        let newBusLineData = {
+          cohort: importData.cohort,
+          busId: line["1"],
+          departuredDate: line["2"],
+          returnDate: line["3"],
+          centerId,
+          centerArrivalTime: line[(centerCol + 3).toString()],
+          centerDepartureTime: line[(centerCol + 4).toString()],
+          followerCapacity: line[(centerCol + 5).toString()],
+          youngCapacity: line[(centerCol + 6).toString()],
+          totalCapacity: line[(centerCol + 7).toString()],
+          youngSeatsTaken: 0,
+          lunchBreak: line[(centerCol + 8).toString()] === "true",
+          lunchBreakReturn: line[(centerCol + 9).toString()] === "true",
+          travelTime: line[(centerCol + 10).toString()],
+          sessionId,
+          meetingPointsIds: pdrIds,
+        };
+
+        const newBusLine = new LigneBusModel(newBusLineData);
+        await newBusLine.save();
+
+        ++importedCount;
+      }
+    }
+  }
+
+  return importedCount;
 }

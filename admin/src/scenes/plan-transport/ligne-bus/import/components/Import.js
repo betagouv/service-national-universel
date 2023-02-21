@@ -10,7 +10,7 @@ import { capture } from "../../../../../sentry";
 
 const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
-export default function Import({ nextStep, cohort }) {
+export default function Import({ cohort, onFileVerified }) {
   const [isLoading, setIsLoading] = useState(false);
   const [importErrors, setImportErrors] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -28,14 +28,13 @@ export default function Import({ nextStep, cohort }) {
   }
 
   function getFileFromInput(e) {
-    console.log("getFileFromInput");
     if (e && e.target && e.target.files && e.target.files.length > 0) {
       uploadFile(e.target.files[0]);
     }
   }
 
   async function uploadFile(file) {
-    console.log("upload file", file);
+    // console.log("upload file", file);
     setUploadError(null);
     setImportedFileName(file.name);
     if (file.type !== MIME_TYPES.EXCEL) {
@@ -63,7 +62,7 @@ export default function Import({ nextStep, cohort }) {
           setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
         }
       } else {
-        fileUploaded(res.data);
+        onFileVerified && onFileVerified(res.data);
       }
     } catch (err) {
       setUploadError("Une erreur est survenue. Nous n'avons pu enregistrer le fichier. Veuillez réessayer dans quelques instants.");
@@ -79,10 +78,6 @@ export default function Import({ nextStep, cohort }) {
       }
     }
     return count + (count > 1 ? " erreurs détectées" : " erreur détectée");
-  }
-
-  function fileUploaded(data) {
-    console.log("File Uploaded: ", data);
   }
 
   return importErrors ? (
@@ -137,11 +132,6 @@ export default function Import({ nextStep, cohort }) {
             <ReactLoading className="mt-2" type="spin" color="#2563EB" width={"40px"} height={"40px"} />
           )}
         </div>
-      </div>
-      <div className="flex justify-end mt-4">
-        <PlainButton className="w-52" onClick={nextStep}>
-          Suivant
-        </PlainButton>
       </div>
     </>
   );

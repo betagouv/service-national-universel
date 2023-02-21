@@ -21,6 +21,7 @@ export default function Index(props) {
     { id: "étape 2", name: "Import du fichier", status: "upcoming" },
     { id: "étape 3", name: "Résumé de l’import", status: "upcoming" },
   ]);
+  const [summary, setSummary] = React.useState(null);
 
   const nextStep = () => {
     let nextStep = false;
@@ -36,6 +37,11 @@ export default function Index(props) {
     setSteps(newSteps);
   };
 
+  function fileVerified(data) {
+    setSummary(data);
+    nextStep();
+  }
+
   return (
     <div className="flex flex-col w-full px-8 pb-8 ">
       <div className="py-8 flex items-center justify-between">
@@ -45,8 +51,8 @@ export default function Index(props) {
       <div className="flex flex-col w-full mt-4">
         <NavBar steps={steps} />
         {steps[0].status === "current" && <Download nextStep={nextStep} />}
-        {steps[1].status === "current" && <Import nextStep={nextStep} cohort={cohort} />}
-        {steps[2].status === "current" && <Resum nextStep={nextStep} />}
+        {steps[1].status === "current" && <Import cohort={cohort} onFileVerified={fileVerified} />}
+        {steps[2].status === "current" && <Resum nextStep={nextStep} summary={summary} />}
       </div>
     </div>
   );
