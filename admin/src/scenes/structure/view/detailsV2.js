@@ -101,62 +101,64 @@ function StructureForm() {
             <div className="text-xs font-medium leading-4 text-gray-900">Nom de la structure</div>
             <Field
               name="name"
-              readOnly={!isEditing}
               label="Nom de la structure"
-              handleChange={(e) => setData({ ...data, name: e.target.value })}
               value={data.name}
+              handleChange={(e) => setData({ ...data, name: e.target.value })}
+              readOnly={!isEditing}
               errors={errors}
-              error={errors?.name}
             />
           </div>
 
           <div className="space-y-2 my-4">
             <div className="text-xs font-medium leading-4 text-gray-900">Présentation de la structure (facultatif)</div>
             <Field
-              readOnly={!isEditing}
+              name="description"
               label="Précisez les informations complémentaires à préciser au volontaire. "
-              handleChange={(e) => setData({ ...data, description: e.target.value })}
               value={data.description || ""}
               type="textarea"
+              handleChange={(e) => setData({ ...data, description: e.target.value })}
+              readOnly={!isEditing}
             />
           </div>
 
           <div className="space-y-3">
             <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
             <Field
-              readOnly={!isEditing}
+              name="address"
               label="Adresse"
-              handleChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
               value={data.address}
-              error={errors?.address}
+              handleChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
+              readOnly={!isEditing}
+              errors={errors}
             />
             <div className="grid grid-cols-2 gap-3">
               <Field
                 name="zip"
-                readOnly={!isEditing}
                 label="Code postal"
-                handleChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
                 value={data.zip}
-                error={errors?.zip}
+                handleChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
+                readOnly={!isEditing}
+                errors={errors}
               />
               <Field
                 name="city"
-                readOnly={!isEditing}
                 label="Ville"
-                handleChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
                 value={data.city}
-                error={errors?.city}
+                handleChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
+                readOnly={!isEditing}
+                errors={errors}
               />
             </div>
             {data.addressVerified && (
               <div className="grid grid-cols-2 gap-3">
                 <Field
-                  readOnly={true}
+                  name="department"
                   label="Département"
+                  value={data.department}
                   className="w-full"
                   handleChange={(e) => setData({ ...data, department: e.target.value })}
-                  value={data.department}
-                  disabled={true}
+                  readOnly={true}
+                  errors={errors}
                 />
                 <Field readOnly={true} label="Région" className="w-full" handleChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
               </div>
@@ -205,7 +207,14 @@ function StructureForm() {
                 setSelected={(e) => setData({ ...data, types: e.map((e) => e.value) })}
               />
             )}
-            <Field readOnly={!isEditing} label="Numéro de SIRET (si disponible)" handleChange={(e) => setData({ ...data, siret: e.target.value })} value={data.siret || ""} />
+            <Field
+              name="siret"
+              label="Numéro de SIRET (si disponible)"
+              value={data.siret || ""}
+              handleChange={(e) => setData({ ...data, siret: e.target.value })}
+              readOnly={!isEditing}
+              errors={errors}
+            />
 
             {(!data.isNetwork || data.isNetwork === "false") && (
               <div className="space-y-2 my-3">
@@ -258,10 +267,38 @@ function StructureForm() {
             <div className="space-y-2 my-3">
               <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Field readOnly={!isEditing} label="Site Internet" handleChange={(e) => setData({ ...data, website: e.target.value })} value={data.website || ""} copy={true} />
-                <Field readOnly={!isEditing} label="Facebook" handleChange={(e) => setData({ ...data, facebook: e.target.value })} value={data.facebook || ""} copy={true} />
-                <Field readOnly={!isEditing} label="Twitter" handleChange={(e) => setData({ ...data, twitter: e.target.value })} value={data.twitter || ""} copy={true} />
-                <Field readOnly={!isEditing} label="Instagram" handleChange={(e) => setData({ ...data, instagram: e.target.value })} value={data.instagram || ""} copy={true} />
+                <Field
+                  name="website"
+                  label="Site Internet"
+                  value={data.website || ""}
+                  handleChange={(e) => setData({ ...data, website: e.target.value })}
+                  readOnly={!isEditing}
+                  copy={true}
+                />
+                <Field
+                  name="fb"
+                  label="Facebook"
+                  value={data.facebook || ""}
+                  handleChange={(e) => setData({ ...data, facebook: e.target.value })}
+                  readOnly={!isEditing}
+                  copy={true}
+                />
+                <Field
+                  name="twitter"
+                  label="Twitter"
+                  value={data.twitter || ""}
+                  handleChange={(e) => setData({ ...data, twitter: e.target.value })}
+                  readOnly={!isEditing}
+                  copy={true}
+                />
+                <Field
+                  name="instagram"
+                  label="Instagram"
+                  value={data.instagram || ""}
+                  handleChange={(e) => setData({ ...data, instagram: e.target.value })}
+                  readOnly={!isEditing}
+                  copy={true}
+                />
               </div>
             </div>
           </div>

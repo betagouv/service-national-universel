@@ -33,7 +33,7 @@ export default function TeamCard() {
   if (!team?.length) return <div />;
   return (
     <>
-      <Card className="w-64">
+      <Card className="w-64 h-36">
         <div className="relative h-full cursor-pointer" onClick={() => setIsOpen(true)}>
           <div className="absolute my-6 px-7">
             <p className="mb-1 text-sm">L&apos;équipe</p>

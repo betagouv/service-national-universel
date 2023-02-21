@@ -46,7 +46,7 @@ export default function CardRepresentant() {
 
   return (
     <>
-      <Card className="w-96">
+      <Card className="w-96 h-36">
         {representant ? <Representative representant={representant} handleShowModal={handleShowModal} /> : <CreateRepresentative handleShowModal={handleShowModal} />}
       </Card>
       <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} />
