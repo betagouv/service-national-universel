@@ -3,6 +3,7 @@ import React, { Fragment } from "react";
 import FilterSvg from "../../assets/icons/Filter";
 import FilterPopOver from "./FilterPopOver";
 import ReactTooltip from "react-tooltip";
+import Field from "../../components/forms/Field";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -182,6 +183,7 @@ const ToolTipView = ({ selectedFilters, filter }) => {
 const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible }) => {
   // handle click outside
   const ref = React.useRef();
+  const [nameView, setNameView] = React.useState("");
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -212,9 +214,13 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible }) => {
         </div>
 
         {modalSaveVisible && (
-          <div className="absolute left-0 z-10 mt-2 bg-white w-[492px] h-[240px] rounded-lg shadow-lg px-8" ref={ref}>
-            <div className="font-bold text-sm text-gray-800 mt-8">Enregistrer une nouvelle (groupe de filtres)</div>
-            <div className="font-medium text-xs mt-4">Nommez la vue</div>
+          <div className="absolute left-0 z-10 mt-2 bg-white w-[492px]  rounded-lg shadow-lg px-8" ref={ref}>
+            <div className="font-bold text-sm text-gray-800 mt-6">Enregistrer une nouvelle (groupe de filtres)</div>
+            <div className="font-medium text-xs mt-3 mb-2">Nommez la vue</div>
+            <Field name="nameView" label="Nom de la vue" value={nameView} handleChange={(e) => setNameView(e.target.value)} />
+            <div className="flex justify-end items-center">
+              <div className="bg-blue-600 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer">Enregistrer</div>
+            </div>
           </div>
         )}
       </div>
