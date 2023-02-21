@@ -90,6 +90,7 @@ app.use("/demande-de-modification", require("./controllers/planDeTransport/deman
 app.use("/young-edition", require("./controllers/young-edition"));
 app.use("/tags", require("./controllers/tags"));
 app.use("/cohort", require("./controllers/cohort"));
+app.use("/filters", require("./controllers/filters"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

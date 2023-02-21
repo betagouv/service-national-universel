@@ -5,15 +5,22 @@ import FilterPopOver from "./FilterPopOver";
 import ReactTooltip from "react-tooltip";
 import Field from "../../components/forms/Field";
 
+import { useHistory } from "react-router-dom";
+import api from "../../services/api";
+import { toastr } from "react-redux-toastr";
+
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({ filters, data, selectedFilters, setSelectedFilters }) {
+export default function ListFiltersPopOver({ pageId, filters, data, selectedFilters, setSelectedFilters }) {
   const [search, setSearch] = React.useState("");
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
   const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const history = useHistory();
 
   const [isShowing, setIsShowing] = React.useState(false);
   const ref = React.useRef(null);
@@ -52,12 +59,59 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
     setCategories(newCategories);
   }, [filtersVisible]);
 
+  const currentFilterAsUrl = () => {
+    const length = Object.keys(selectedFilters).length;
+    let index = 0;
+    const url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+      console.log(selectedFilters[curr]);
+      if (selectedFilters[curr]?.filter?.length > 0) {
+        acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
+      }
+      index++;
+      return acc;
+    }, "");
+    return url;
+  };
+
+  const setURL = () => {
+    history.replace({ search: `?${currentFilterAsUrl()}` });
+  };
+
+  React.useEffect(() => {
+    setURL();
+  }, [selectedFilters]);
+
   // text for tooltip save
   const saveTitle = Object.keys(selectedFilters).map((key) => {
     if (selectedFilters[key].filter.length > 0) {
       return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
     }
   });
+
+  const getDBFilters = async () => {
+    try {
+      const res = await api.get("/filters/" + pageId);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const saveFilter = async () => {
+    console.log(urlParams);
+    console.log(currentFilterAsUrl);
+    try {
+      const res = await api.post("/filters", {
+        page: pageId,
+        url: currentFilterAsUrl(),
+      });
+      if (!res.ok) return toastr.error("Oops, une erreur est survenue");
+      toastr.success("Filtre sauvegardé");
+    } catch (error) {
+      console.log(error);
+    }
+    // save url params
+  };
 
   const handleFilterShowing = (value) => {
     setIsShowing(value);
@@ -129,7 +183,7 @@ export default function ListFiltersPopOver({ filters, data, selectedFilters, set
       </Popover>
       <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
         {/* icon de save */}
-        {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
+        {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} saveFilter={saveFilter} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
         {/* Display des filtres sélectionnés */}
         {filtersVisible
           .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
@@ -180,10 +234,11 @@ const ToolTipView = ({ selectedFilters, filter }) => {
   );
 };
 
-const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible }) => {
+const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter }) => {
   // handle click outside
   const ref = React.useRef();
   const [nameView, setNameView] = React.useState("");
+  const [error, setError] = React.useState("");
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -195,6 +250,16 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible }) => {
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (nameView) return setError("");
+  }, [nameView]);
+
+  const handleSave = () => {
+    if (!nameView) return setError("Veuillez saisir un nom pour votre vue");
+    setError("");
+    saveFilter();
+  };
 
   return (
     <>
@@ -217,9 +282,11 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible }) => {
           <div className="absolute left-0 z-10 mt-2 bg-white w-[492px]  rounded-lg shadow-lg px-8" ref={ref}>
             <div className="font-bold text-sm text-gray-800 mt-6">Enregistrer une nouvelle (groupe de filtres)</div>
             <div className="font-medium text-xs mt-3 mb-2">Nommez la vue</div>
-            <Field name="nameView" label="Nom de la vue" value={nameView} handleChange={(e) => setNameView(e.target.value)} />
+            <Field name="nameView" label="Nom de la vue" value={nameView} errors={{ nameView: error }} handleChange={(e) => setNameView(e.target.value)} />
             <div className="flex justify-end items-center">
-              <div className="bg-blue-600 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer">Enregistrer</div>
+              <div onClick={handleSave} className="bg-blue-600 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer">
+                Enregistrer
+              </div>
             </div>
           </div>
         )}
