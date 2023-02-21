@@ -8,7 +8,7 @@ export default function DSFRContainer({ title, subtitle, children, onSave, suppo
     <>
       <Navbar onSave={onSave} />
       <div className="text-[#161616]">
-        <main className="w-full md:w-[56rem] bg-white mx-auto px-[1rem] md:px-[6rem] py-[1rem] md:py-[4rem] shadow-sm">
+        <main className="w-full md:w-[56rem] bg-white mx-auto px-[1rem] md:px-[6rem] py-[2rem] md:pt-[4rem] shadow-sm">
           {title && (
             <>
               <div className="flex justify-between items-center">

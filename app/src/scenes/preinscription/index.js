@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute } from "../../sentry";
@@ -31,6 +31,8 @@ import useDevice from "../../hooks/useDevice";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
 import { environment } from "../../config";
+import ModalMenu from "../../components/headerMenu";
+import Navbar from "./components/navbar";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -51,6 +53,7 @@ function renderStep(step, device) {
 }
 
 const Step = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const [data] = useContext(PreInscriptionContext);
   const device = useDevice();
   const { step } = useParams();
@@ -70,7 +73,16 @@ const Step = () => {
     return <Redirect to="/" />;
   }
 
-  if (environment === "production") return renderStep(currentStep, device);
+  if (environment === "production")
+    return (
+      <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
+        <ModalMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+        <Header setIsOpen={setIsOpen} />
+        <Navbar />
+        {renderStep(currentStep, device)}
+        {device === "desktop" && <Footer />}
+      </div>
+    );
   return renderStepResponsive(currentStep);
 };
 
