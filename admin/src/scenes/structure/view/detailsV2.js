@@ -230,7 +230,7 @@ export default function DetailsView() {
                       multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                       indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                     }}
-                    defaultOptions={false}
+                    defaultOptions
                     onChange={(e) => setData({ ...data, networkName: e?.label || "", networkId: e?._id || "" })}
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
