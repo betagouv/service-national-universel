@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
@@ -54,7 +54,7 @@ const phase1 = async (young) => {
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
-    .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+    .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort].getYear() + 1900))
     .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
     .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))

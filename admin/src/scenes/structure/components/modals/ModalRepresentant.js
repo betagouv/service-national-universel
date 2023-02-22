@@ -8,6 +8,7 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import Button from "../Button";
 import Field from "../../../missions/components/Field";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
+import { AiOutlineClose } from "react-icons/ai";
 
 export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
   const { structure } = useContext(StructureContext);
@@ -55,7 +56,15 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
   return (
     <>
       <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[800px] min-h-[500px] px-8 py-7 flex flex-col gap-4">
-        <p className="text-lg font-medium text-center">Représentant de la structure</p>
+        <div className="grid grid-cols-6">
+          <div />
+          <p className="text-lg font-medium text-center col-span-4">Représentant de la structure</p>
+          <div className="flex items-center justify-end">
+            <button onClick={handleCancel}>
+              <AiOutlineClose className="text-gray-500" />
+            </button>
+          </div>
+        </div>
         <p className="text-gray-500 text-sm text-center">
           Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
           votre structure.

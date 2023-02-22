@@ -1,3 +1,21 @@
+## [1.222.3](https://github.com/betagouv/service-national-universel/compare/v1.222.2...v1.222.3) (2023-02-21)
+
+
+### Bug Fixes
+
+* **admin:** retours design sur formulaire structure ([7d5fc56](https://github.com/betagouv/service-national-universel/commit/7d5fc567ef5aeb92c12fd01e1edef12e57cbb9a7))
+* **lib:** autoriser les jeunes statusPhase1:affected et status:validated à changer le séjour ([9fe2269](https://github.com/betagouv/service-national-universel/commit/9fe2269be0446c83afa13445636c4b9a31ead17e))
+* **pdf:** corrections sur l'attestation de réalisation de phase 1 ([#2286](https://github.com/betagouv/service-national-universel/issues/2286)) ([5dd27c3](https://github.com/betagouv/service-national-universel/commit/5dd27c34497a200b699602ff4ee3d1b66dcd9f74))
+
+## [1.222.2](https://github.com/betagouv/service-national-universel/compare/v1.222.1...v1.222.2) (2023-02-20)
+
+
+### Bug Fixes
+
+* **admin:** remplacement du mot "masquer" par "afficher" quand détails masqués sur page schema répartition ([#2283](https://github.com/betagouv/service-national-universel/issues/2283)) ([19c7988](https://github.com/betagouv/service-national-universel/commit/19c7988f3982b8c72c17ba05821845c1485cce9b))
+* **app:** remplacement des dates mensuelles par les dates complètes dans le sélecteur du changement de séjour ([#2284](https://github.com/betagouv/service-national-universel/issues/2284)) ([e5107b2](https://github.com/betagouv/service-national-universel/commit/e5107b2b8c9194ec1c62c9e92524480cf735ab9b))
+* **app:** remplacement du mot "fournir" par "télécharger" sur bouton fiche sanitaire sur page accueil volontaire ([#2282](https://github.com/betagouv/service-national-universel/issues/2282)) ([a76fb08](https://github.com/betagouv/service-national-universel/commit/a76fb082846442be0423857ca2875acc8b83fe37))
+
 ## [1.222.1](https://github.com/betagouv/service-national-universel/compare/v1.222.0...v1.222.1) (2023-02-18)
 
 

@@ -3,7 +3,7 @@ import Pencil from "../../assets/icons/Pencil";
 
 export default function EditButton({ isEditing, setIsEditing, isLoading, onSubmit, defaultData, setData, setErrors }) {
   const style = (color) => {
-    return `flex items-center gap-2 rounded-full text-xs font-medium px-3 py-2.5 shadow-sm border-[1px] border-${color}-100 text-${color}-600 bg-${color}-100 hover:border-${color}-600 disabled:opacity-50 disabled:cursor-not-allowed`;
+    return `flex items-center gap-2 rounded-full text-xs font-medium px-3 py-2 shadow-sm border-[1px] border-${color}-100 text-${color}-600 bg-${color}-100 hover:border-${color}-600 disabled:opacity-50 disabled:cursor-not-allowed`;
   };
 
   if (isEditing)
@@ -20,7 +20,7 @@ export default function EditButton({ isEditing, setIsEditing, isLoading, onSubmi
           Annuler
         </button>
         <button className={style("blue")} onClick={onSubmit} disabled={isLoading}>
-          <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+          <Pencil className="h-3 w-3" />
           Enregistrer les changements
         </button>
       </div>
@@ -28,7 +28,7 @@ export default function EditButton({ isEditing, setIsEditing, isLoading, onSubmi
 
   return (
     <button className={style("blue")} onClick={() => setIsEditing(true)} disabled={isLoading}>
-      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+      <Pencil className="h-3 w-3" />
       Modifier
     </button>
   );
