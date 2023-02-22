@@ -19,24 +19,10 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       knowledgeBaseArticle: item._id,
       isPositive: true,
     };
-    // const requestOptions = {
-    //   method: "POST",
-    // headers: {
-    //   "Content-type": "application/json",
-    // },
-    //   body: JSON.stringify(data),
-    // };
-    // const response = await API.post({ path: `/feedback`, body: { data } });
-    console.log("data", data);
-    const response = await API.post({ path: `/feedback`, body: { data } });
-    console.log("HIHI", response);
-    // const response = await fetch("http://localhost:3000/feedback", requestOptions);
-    if (response.status === 200) {
-      console.log("RESPONSE1", response);
+    const response = await API.post({ path: `/feedback`, body: data });
+    if (response.ok) {
       setIsThumbsUp(!isThumbsUp);
-      return response;
     } else {
-      console.log("Response2", response.status);
       alert("Une erreure s'est produite veuillez nous excusez");
     }
   }
