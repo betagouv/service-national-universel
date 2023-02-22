@@ -18,12 +18,12 @@ jest.setTimeout(10_000);
 
 describe("Young", () => {
   describe("PUT /young/inscription2023/consentement", () => {
-    it("should return return 400 when no body is sent", async () => {
+    it("Should return 400 when no body is sent", async () => {
       let res = await request(getAppHelper()).put("/young/inscription2023/consentement");
       expect(res.status).toBe(400);
     });
 
-    it("should return return 400 when the body sent is invalid", async () => {
+    it("Should return 400 when the body sent is invalid", async () => {
       const consentementObj = {
         consentment1: "invalid value",
         consentment2: ["another", "invalid", "value"],
