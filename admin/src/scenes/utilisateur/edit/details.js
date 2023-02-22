@@ -343,7 +343,7 @@ export default function Details({ user, setUser, currentUser }) {
         <Box className="p-6">
           <div className="flex justify-between mb-6">
             <div className="font-medium text-lg">Informations générales</div>
-            {!isSaving && (
+            {roleMode === mode && !isSaving && (
               <>
                 {mode === MODE_EDITION ? (
                   <div className="flex items-center">
@@ -462,7 +462,7 @@ export default function Details({ user, setUser, currentUser }) {
                       )}
                       {roleMode === MODE_EDITION && currentUser.role === ROLES.ADMIN && !newCenter && (
                         <AddButton onClick={addNewCenter} className={`self-end mt-4 ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
-                          Ajouter un centre
+                          Ajouter un centreuh
                         </AddButton>
                       )}
                       {roleMode === MODE_EDITION && newCenter && (
