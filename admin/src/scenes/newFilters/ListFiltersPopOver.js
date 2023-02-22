@@ -15,14 +15,14 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getCount, searchBarObject = null }) {
+export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getCount, searchBarObject = null, setData }) {
   // search for filters
   const [search, setSearch] = React.useState("");
 
   // searchBar
   const [searchBar, setSearchBar] = React.useState("");
   // data correspond to filters
-  const [data, setData] = React.useState([]);
+  const [dataFilter, setDataFilter] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
@@ -91,7 +91,8 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
     setSelectedFilters(initialFilters);
     const res = await buildMissions("id", initialFilters, searchBar, 1, 25, defaultQuery, filters, searchBarObject);
     if (!res) return;
-    setData({ ...data, ...res.newFilters });
+    setDataFilter({ ...dataFilter, ...res.newFilters });
+    setData(res.data);
     setCount(res.count);
     mounted.current = true;
   };
@@ -99,8 +100,9 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
   const getData = async () => {
     const res = await buildMissions("id", selectedFilters, searchBar, 1, 25, defaultQuery, filters, searchBarObject);
     if (!res) return;
-    setData({ ...data, ...res.newFilters });
+    setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
+    setData(res.data);
   };
 
   const getURLParam = () => {
@@ -265,7 +267,7 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
                                   filter={item}
                                   selectedFilters={selectedFilters}
                                   setSelectedFilters={setSelectedFilters}
-                                  data={data[item?.name] || []}
+                                  data={dataFilter[item?.name] || []}
                                   isShowing={isShowing === item.name}
                                   setIsShowing={handleFilterShowing}
                                 />

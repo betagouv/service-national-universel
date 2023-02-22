@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { translateGrade } from "snu-lib";
 import ListFiltersPopOver from "./ListFiltersPopOver";
 
@@ -22,6 +23,10 @@ export default function test() {
   const getCount = (value) => {
     setCount(value);
   };
+
+  useEffect(() => {
+    console.log("data", data);
+  }, [data]);
   //extract dans utils ou logique du filtre ?
 
   return (
@@ -34,8 +39,8 @@ export default function test() {
           defaultQuery={defaultQuery}
           filters={filterArray}
           getCount={getCount}
+          setData={(value) => setData(value)}
           searchBarObject={searchBarObject}
-          getData={(value) => setData(value)}
         />
         {/* display currentfilters */}
       </div>
