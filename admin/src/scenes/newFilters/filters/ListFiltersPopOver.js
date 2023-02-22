@@ -15,7 +15,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getCount, searchBarObject = null, setData }) {
+export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getCount, searchBarObject = null, setData, page = 1, size = 25 }) {
   // search for filters
   const [search, setSearch] = React.useState("");
 
@@ -84,12 +84,12 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
       getData();
       setURL();
     }
-  }, [selectedFilters, searchBar]);
+  }, [selectedFilters, searchBar, page]);
 
   const init = async () => {
     const initialFilters = getURLParam();
     setSelectedFilters(initialFilters);
-    const res = await buildMissions("id", initialFilters, searchBar, 1, 25, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions("id", initialFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setData(res.data);
@@ -98,7 +98,7 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
   };
 
   const getData = async () => {
-    const res = await buildMissions("id", selectedFilters, searchBar, 1, 25, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions("id", selectedFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
@@ -412,9 +412,10 @@ const FloppyDisk = () => {
     </svg>
   );
 };
-const buildMissions = async (id, selectedFilters, search, page = 1, size = 25, defaultQuery = null, filterArray, searchBarObject) => {
+const buildMissions = async (id, selectedFilters, search, page, size, defaultQuery = null, filterArray, searchBarObject) => {
   let query = {};
   let aggsQuery = {};
+  console.log("current page is ", page);
   if (!defaultQuery) {
     query = { query: { bool: { must: [{ match_all: {} }] } } };
     aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };

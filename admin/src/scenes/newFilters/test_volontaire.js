@@ -21,6 +21,8 @@ import { translate, translatePhase1, YOUNG_STATUS_COLORS, getAge, ROLES, colors,
 export default function test_volontaire() {
   const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
 
   const [volontaire, setVolontaire] = useState(null);
 
@@ -59,8 +61,15 @@ export default function test_volontaire() {
           getCount={getCount}
           setData={(value) => setData(value)}
           searchBarObject={searchBarObject}
+          page={page}
+          size={size}
         />
         <ResultTable
+          setPage={setPage}
+          count={count}
+          currentCount={data?.length}
+          size={size}
+          page={page}
           render={
             <Table>
               <thead>
