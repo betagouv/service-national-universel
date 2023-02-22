@@ -1112,10 +1112,17 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     setErrors({});
   }
 
+  const trimmedPhones = {};
+  if (data.parent1Phone) trimmedPhones[1] = data.parent1Phone.replace(/\s/g, "");
+  if (data.parent2Phone) trimmedPhones[2] = data.parent2Phone.replace(/\s/g, "");
+
   async function onSave() {
     setSaving(true);
     if (validate()) {
       try {
+        if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
+        if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
+
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
@@ -1141,12 +1148,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      console;
-      if (
-        (data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") &&
-        !validator.matches(data[`parent${parent}Phone`], regexPhoneFrenchCountries)
-      ) {
-        errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
+      if ((data[`parent${parent}ContactPreference`] === "phone" || trimmedPhones[parent] !== "") && !validator.matches(data[`parent${parent}Phone`], regexPhoneFrenchCountries)) {
+        errors[`parent${parent}Phone`] = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
         result = false;
       }
       result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
