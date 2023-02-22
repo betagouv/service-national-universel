@@ -49,7 +49,7 @@ import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 import * as Sentry from "@sentry/react";
-import test from "./scenes/newFilters/test";
+import test from "./scenes/newFilters";
 
 initSentry();
 initApi();

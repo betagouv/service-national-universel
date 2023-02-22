@@ -1,13 +1,13 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
-import FilterSvg from "../../assets/icons/Filter";
+import FilterSvg from "../../../assets/icons/Filter";
 import FilterPopOver from "./FilterPopOver";
 import ReactTooltip from "react-tooltip";
-import Field from "../../components/forms/Field";
+import Field from "../../../components/forms/Field";
 import { ES_NO_LIMIT } from "snu-lib";
 import { useHistory } from "react-router-dom";
 
-import api from "../../services/api";
+import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import ViewPopOver from "./ViewPopOver";
 
@@ -370,7 +370,7 @@ const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter
 
   return (
     <>
-      <ReactTooltip id="tooltip-saveFilter" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+      <ReactTooltip id="tooltip-saveFilter" className="bg-white !rounded-lg shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
         <div>
           <div className="text-xs text-gray-600">Enregistrer cette vue...</div>
           <div className="text-gray-600 font-bold">{saveTitle.join(", ")}</div>
