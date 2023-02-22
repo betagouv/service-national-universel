@@ -21,6 +21,8 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 
+const PDR_MEETING_HOUR_OFFSET = 60; // en minutes
+
 /** ---------------------------------------------------------------------
  * ROUTE /plan-de-transport/import/:cohortName
  *
@@ -684,7 +686,7 @@ async function executeImportation(importData) {
             transportType: line[(col + 2).toString()],
             busArrivalHour: line[(col + 4).toString()],
             departureHour: line[(col + 5).toString()],
-            meetingHour: line[(col + 4).toString()], // je sais pas comment on le calcule sinon, ca n'est pas dans le modèle du plan
+            meetingHour: getPDRMeetingHour(line[(col + 5).toString()]),
             returnHour: line[(col + 6).toString()],
             stepPoints: [
               {
@@ -705,4 +707,16 @@ async function executeImportation(importData) {
   }
 
   return importedCount;
+}
+
+function getPDRMeetingHour(departureHour) {
+  const parts = departureHour.split(":", 2);
+  const hh = parseInt(parts[0]);
+  const mm = parseInt(parts[1]);
+  const minutes = hh * 60 + mm;
+  const meetingMinutes = minutes - PDR_MEETING_HOUR_OFFSET;
+  const new_hh = Math.floor(meetingMinutes / 60);
+  const new_mm = meetingMinutes % 60;
+
+  return (new_hh < 10 ? "0" : "") + new_hh + ":" + new_mm;
 }
