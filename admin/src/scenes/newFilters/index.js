@@ -4,6 +4,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
 import Test from "./test";
+import Test_custom from "./test_customQuery";
 import Test_volontaire from "./test_volontaire.js";
 
 export default function User() {
@@ -12,6 +13,7 @@ export default function User() {
   return (
     <Switch>
       <SentryRoute path="/filters/volontaire" component={Test_volontaire} />
+      <SentryRoute path="/filters/custom" component={Test_custom} />
       <SentryRoute path="/filters" component={Test} />
     </Switch>
   );

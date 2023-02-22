@@ -15,7 +15,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getCount, searchBarObject = null, setData, page = 1, size = 25 }) {
+export default function ListFiltersPopOver({ esId, pageId, filters, defaultQuery, getCount, searchBarObject = null, setData, page = 1, size = 25 }) {
   // search for filters
   const [search, setSearch] = React.useState("");
 
@@ -89,7 +89,7 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
   const init = async () => {
     const initialFilters = getURLParam();
     setSelectedFilters(initialFilters);
-    const res = await buildMissions("id", initialFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions(esId, initialFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setData(res.data);
@@ -98,7 +98,7 @@ export default function ListFiltersPopOver({ pageId, filters, defaultQuery, getC
   };
 
   const getData = async () => {
-    const res = await buildMissions("id", selectedFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions(esId, selectedFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
@@ -412,7 +412,7 @@ const FloppyDisk = () => {
     </svg>
   );
 };
-const buildMissions = async (id, selectedFilters, search, page, size, defaultQuery = null, filterArray, searchBarObject) => {
+const buildMissions = async (esId, selectedFilters, search, page, size, defaultQuery = null, filterArray, searchBarObject) => {
   let query = {};
   let aggsQuery = {};
   console.log("current page is ", page);
@@ -486,10 +486,10 @@ const buildMissions = async (id, selectedFilters, search, page, size, defaultQue
   }
 
   //maybe piquet le cal de l'api engagement pour dexu body en une req
-  const resAggs = await api.esQuery("young", bodyAggs);
+  const resAggs = await api.esQuery(esId, bodyAggs);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
-  const resQuery = await api.esQuery("young", bodyQuery);
+  const resQuery = await api.esQuery(esId, bodyQuery);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
   const aggs = resAggs.responses[0].aggregations;

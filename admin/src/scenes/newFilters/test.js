@@ -33,8 +33,14 @@ export default function test() {
 
   return (
     <>
-      <div className="py-2 px-3 bg-blue-600 text-white w-fit cursor-pointer rounded" onClick={() => history.push("/filters/volontaire")}>
-        Test Volontaire
+      <div className="flex flex-row gap-4 items-center">
+        <div className="py-2 px-3 bg-blue-600 text-white w-fit cursor-pointer rounded" onClick={() => history.push("/filters/volontaire")}>
+          Test Volontaire
+        </div>
+
+        <div className="py-2 px-3 bg-blue-600 text-white w-fit cursor-pointer rounded" onClick={() => history.push("/filters/custom")}>
+          Test Custom
+        </div>
       </div>
 
       <div className="bg-white h-full">
