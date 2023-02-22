@@ -67,7 +67,7 @@ export default function test_volontaire() {
         <ResultTable
           setPage={setPage}
           count={count}
-          currentCount={data?.length}
+          currentEntryOnPage={data?.length}
           size={size}
           page={page}
           render={
