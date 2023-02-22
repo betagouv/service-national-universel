@@ -215,44 +215,44 @@ function StructureForm() {
               readOnly={!isEditing}
               errors={errors}
             />
-              {(!data.isNetwork || data.isNetwork === "false") && (
-                <div className="space-y-2 my-3">
-                  <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
-                  <p className="text-xs font-medium leading-4 text-gray-400">
-                    Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
-                    superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
-                  </p>
-                  <AsyncSelect
-                    isClearable
-                    label="Réseau national"
-                    value={{ label: data.networkName }}
-                    loadOptions={getNetworkOptions}
-                    isDisabled={!isEditing}
-                    noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
-                    styles={{
-                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      placeholder: (styles) => ({ ...styles, color: "black" }),
-                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
-                      singleValue: (styles) => ({ ...styles, color: "black" }),
-                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
-                    }}
-                    defaultOptions
-                    onChange={(e) => setData({ ...data, networkName: e?.label || "", networkId: e?._id || "" })}
-                    placeholder="Rechercher une structure"
-                    error={errors.structureName}
-                  />
+            {(!data.isNetwork || data.isNetwork === "false") && (
+              <div className="space-y-2 my-3">
+                <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
+                <p className="text-xs font-medium leading-4 text-gray-400">
+                  Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
+                  superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
+                </p>
+                <AsyncSelect
+                  isClearable
+                  label="Réseau national"
+                  value={{ label: data.networkName }}
+                  loadOptions={getNetworkOptions}
+                  isDisabled={!isEditing}
+                  noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
+                  styles={{
+                    dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                    placeholder: (styles) => ({ ...styles, color: "black" }),
+                    control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                    singleValue: (styles) => ({ ...styles, color: "black" }),
+                    multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                    indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                  }}
+                  defaultOptions
+                  onChange={(e) => setData({ ...data, networkName: e?.label || "", networkId: e?._id || "" })}
+                  placeholder="Rechercher une structure"
+                  error={errors.structureName}
+                />
+              </div>
+            )}
+            {user.role === ROLES.ADMIN && (
+              <div className="flex justify-between my-3">
+                <p className="text-gray-500">Tête de réseau</p>
+                <div className="flex gap-2 items-center">
+                  <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
+                  {data.isNetwork ? "Oui" : "Non"}
                 </div>
-              )}
-              {user.role === ROLES.ADMIN && (
-                <div className="flex justify-between my-3">
-                  <p className="text-gray-500">Tête de réseau</p>
-                  <div className="flex gap-2 items-center">
-                    <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
-                    {data.isNetwork ? "Oui" : "Non"}
-                  </div>
-                </div>
-              )}
+              </div>
+            )}
             <div className="flex justify-between my-3">
               <p className="text-gray-500">Préparation militaire</p>
               <div className="flex gap-2 items-center">
