@@ -18,7 +18,7 @@ jest.setTimeout(10_000);
 
 describe("Young", () => {
   describe("PUT /young/inscription2023/representants/:type", () => {
-    it("should return return 400 when type is wrong in url params", async () => {
+    it("Should return 400 when type is wrong in url params", async () => {
       let res = await request(getAppHelper()).put("/young/inscription2023/representants/something-wrong");
       expect(res.status).toBe(400);
     });
