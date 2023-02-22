@@ -55,6 +55,7 @@ export default function Create() {
         instagram: "",
         legalStatus: "",
         isMilitaryPreparation: "false",
+        networkId: user.structureId,
       }}
       onSubmit={async (values) => {
         try {
@@ -290,7 +291,7 @@ export default function Create() {
                       Si l’organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettez ainsi au superviseur
                       de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
                     </p>
-                    <Field component="select" name="networkId" value={values.networkId} onChange={handleChange}>
+                    <Field component="select" name="networkId" disabled={user.role !== ROLES.ADMIN} value={values.networkId} onChange={handleChange}>
                       <option key="" value="" />
                       {networks &&
                         networks.map((network) => {
