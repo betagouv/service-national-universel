@@ -5,6 +5,11 @@ import ListFiltersPopOver from "./ListFiltersPopOver";
 export default function test() {
   const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
+
+  const searchBarObject = {
+    placeholder: "Rechercher par prénom, nom, email, ville...",
+    datafield: ["lastName.keyword", "firstName.keyword", "email.keyword", "city.keyword"],
+  };
   const filterArray = [
     { title: "Cohorte", name: "cohort", datafield: "cohort.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
     { title: "Région", name: "region", datafield: "region.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
@@ -23,7 +28,15 @@ export default function test() {
     <div className="bg-white h-full">
       <div className="flex flex-col gap-8 m-4">
         <div>{count} résultats</div>
-        <ListFiltersPopOver pageId="young" esId="young" defaultQuery={defaultQuery} filters={filterArray} getCount={getCount} getData={(value) => setData(value)} />
+        <ListFiltersPopOver
+          pageId="young"
+          esId="young"
+          defaultQuery={defaultQuery}
+          filters={filterArray}
+          getCount={getCount}
+          searchBarObject={searchBarObject}
+          getData={(value) => setData(value)}
+        />
         {/* display currentfilters */}
       </div>
     </div>

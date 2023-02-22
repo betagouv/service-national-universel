@@ -45,8 +45,8 @@ export default function ViewPopOver({ setIsShowing, isShowing, savedView, handle
                 <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100 px-3">
                   <div className="text-xs text-gray-500">Activer une vue annulera tous les filtres en cours</div>
                   {savedView.map((view) => (
-                    <div key={view._id} className="flex items-center justify-between py-2 ">
-                      <div className=" hover:bg-gray-50 cursor-pointer w-full" onClick={() => handleSelect(view?.url)}>
+                    <div key={view._id} className="flex items-center justify-between">
+                      <div className=" hover:bg-gray-50 cursor-pointer w-full py-2" onClick={() => handleSelect(view?.url)}>
                         <div className="text-gray-700 text-sm">{view.name}</div>
                       </div>
                       <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={() => handleDelete(view._id)} />
