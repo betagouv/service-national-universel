@@ -18,7 +18,7 @@ jest.setTimeout(10_000);
 
 describe("Young", () => {
   describe("PUT /young/inscription2023/confirm", () => {
-    it("Should return return 404 when young is not found", async () => {
+    it("Should return 404 when young is not found", async () => {
       let res = await request(getAppHelper()).put("/young/inscription2023/confirm");
       expect(res.status).toBe(404);
     });
