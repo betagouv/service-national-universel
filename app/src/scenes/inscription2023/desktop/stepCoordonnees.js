@@ -234,15 +234,12 @@ export default function StepCoordonnees() {
     };
   }, []);
 
+  const trimmedPhone = phone.replace(/\s/g, "");
+
   const getErrors = () => {
     let errors = {};
 
-    console.log("🚀 ~ file: stepCoordonnees.js:241 ~ getErrors ~ phone:", phone.replaceAll(" ", ""));
-    console.log(
-      "🚀 ~ file: stepCoordonnees.js:242 ~ getErrors ~ validator.matches(phone.replaceAll(), regexPhoneFrenchCountries):",
-      validator.matches(phone.replaceAll(" ", ""), regexPhoneFrenchCountries),
-    );
-    if (phone && !validator.matches(phone.replaceAll(" ", ""), regexPhoneFrenchCountries)) {
+    if (phone && !validator.matches(trimmedPhone, regexPhoneFrenchCountries)) {
       errors.phone = errorMessages.phone;
     }
 
@@ -479,6 +476,7 @@ export default function StepCoordonnees() {
 
     updates.country = FRANCE;
     updates.moreInformation = moreInformation.toString();
+    updates.phone = trimmedPhone;
 
     try {
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/save", updates);

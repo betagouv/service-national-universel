@@ -40,7 +40,7 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { copyToClipboard } from "../../utils";
+import { copyToClipboard, regexPhoneFrenchCountries } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
@@ -1141,9 +1141,10 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
+      console;
       if (
         (data[`parent${parent}ContactPreference`] === "phone" || data[`parent${parent}Phone`] !== "") &&
-        !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])
+        !validator.matches(data[`parent${parent}Phone`], regexPhoneFrenchCountries)
       ) {
         errors[`parent${parent}Phone`] = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
         result = false;

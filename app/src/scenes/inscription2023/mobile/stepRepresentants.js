@@ -75,6 +75,9 @@ export default function StepRepresentants() {
     }
   }, [young]);
 
+  const trimmedParent1Phone = data.parent1Phone && data.parent1Phone.replace(/\s/g, "");
+  const trimmedParent2Phone = data.parent2Phone && data.parent2Phone.replace(/\s/g, "");
+
   const getErrors = () => {
     let errors = {};
     if (data.parent1Phone && !validator.matches(data.parent1Phone, regexPhoneFrenchCountries)) {
@@ -118,6 +121,10 @@ export default function StepRepresentants() {
         }
       }
     }
+
+    if (data.parent1Phone) data.parent1Phone = trimmedParent1Phone;
+    if (data.parent2Phone) data.parent2Phone = trimmedParent2Phone;
+
     for (const key in error) {
       if (error[key] === undefined) {
         delete error[key];
