@@ -237,7 +237,12 @@ export default function StepCoordonnees() {
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !validator.matches(phone, regexPhoneFrenchCountries)) {
+    console.log("🚀 ~ file: stepCoordonnees.js:241 ~ getErrors ~ phone:", phone.replaceAll(" ", ""));
+    console.log(
+      "🚀 ~ file: stepCoordonnees.js:242 ~ getErrors ~ validator.matches(phone.replaceAll(), regexPhoneFrenchCountries):",
+      validator.matches(phone.replaceAll(" ", ""), regexPhoneFrenchCountries),
+    );
+    if (phone && !validator.matches(phone.replaceAll(" ", ""), regexPhoneFrenchCountries)) {
       errors.phone = errorMessages.phone;
     }
 
