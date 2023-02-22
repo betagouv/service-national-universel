@@ -607,14 +607,14 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
 
 const validateCorrectionRequest = (young, keyList) => {
   const result = {};
-  result.correctionRequests = young.correctionRequests.map((cr) => {
+  result.correctionRequests = young.correctionRequests?.map((cr) => {
     if (keyList.includes(cr.field)) {
       cr.status = "CORRECTED";
       cr.correctedAt = new Date();
     }
     return cr;
   });
-  const updateStatus = result.correctionRequests.every((cr) => cr.status === "CORRECTED");
+  const updateStatus = result.correctionRequests?.every((cr) => cr.status === "CORRECTED");
   if (updateStatus) result.status = YOUNG_STATUS.WAITING_VALIDATION;
 
   return result;
