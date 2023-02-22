@@ -428,7 +428,7 @@ const buildMissions = async (id, selectedFilters, search, page, size, defaultQue
     query: query,
     aggs: {},
     size: size,
-    from: size * (page - 1),
+    from: size * page,
     sort: [{ createdAt: { order: "desc" } }],
     track_total_hits: true,
   };
