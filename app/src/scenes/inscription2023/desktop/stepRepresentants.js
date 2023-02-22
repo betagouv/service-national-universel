@@ -73,15 +73,18 @@ export default function StepRepresentants() {
     }
   }, [young]);
 
+  const trimmedParent1Phone = data.parent1Phone && data.parent1Phone.replace(/\s/g, "");
+  const trimmedParent2Phone = data.parent2Phone && data.parent2Phone.replace(/\s/g, "");
+
   const getErrors = () => {
     let errors = {};
-    if (data.parent1Phone && !validator.matches(data.parent1Phone, regexPhoneFrenchCountries)) {
+    if (data.parent1Phone && !validator.matches(trimmedParent1Phone, regexPhoneFrenchCountries)) {
       errors.parent1Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
-    if (data.parent2Phone && !validator.matches(data.parent2Phone, regexPhoneFrenchCountries)) {
+    if (data.parent2Phone && !validator.matches(trimmedParent2Phone, regexPhoneFrenchCountries)) {
       errors.parent2Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
@@ -116,6 +119,10 @@ export default function StepRepresentants() {
         }
       }
     }
+
+    if (data.parent1Phone) data.parent1Phone = trimmedParent1Phone;
+    if (data.parent2Phone) data.parent2Phone = trimmedParent2Phone;
+
     for (const key in error) {
       if (error[key] === undefined) {
         delete error[key];
