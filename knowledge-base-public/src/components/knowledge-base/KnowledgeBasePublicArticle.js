@@ -1,17 +1,73 @@
 import TextEditor from "../TextEditor";
 import { useState } from "react";
+import API from "../../services/api";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const [isThumbsUp, setIsThumbsUp] = useState(false);
   const [isThumbsDown, setIsThumbsDown] = useState(false);
   const [validated, setIsValidated] = useState(false);
   const [counter, setCounter] = useState(0);
+  const [comment, setComment] = useState("");
 
-  const sendQuestion = () => {
-    setIsValidated(true);
-    setIsThumbsDown(false);
-    setIsThumbsUp(true);
+  const myComment = (e) => {
+    setCounter(e.target.value.length);
+    setComment(e.target.value);
   };
+
+  async function postGoodFeedback() {
+    const data = {
+      knowledgeBaseArticle: item._id,
+      isPositive: true,
+    };
+    // const requestOptions = {
+    //   method: "POST",
+    // headers: {
+    //   "Content-type": "application/json",
+    // },
+    //   body: JSON.stringify(data),
+    // };
+    // const response = await API.post({ path: `/feedback`, body: { data } });
+    console.log("data", data);
+    const response = await API.post({ path: `/feedback`, body: { data } });
+    console.log("HIHI", response);
+    // const response = await fetch("http://localhost:3000/feedback", requestOptions);
+    if (response.status === 200) {
+      console.log("RESPONSE1", response);
+      setIsThumbsUp(!isThumbsUp);
+      return response;
+    } else {
+      console.log("Response2", response.status);
+      alert("Une erreure s'est produite veuillez nous excusez");
+    }
+  }
+
+  async function postBadFeedback() {
+    const data = {
+      knowledgeBaseArticle: item._id,
+      isPositive: false,
+      comment: comment,
+    };
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+    // const response = await API.get({ path: `/knowledge-base/${restriction}/search`, query: { search } });
+
+    const response = await fetch("http://localhost:3000/feedback", requestOptions);
+    if (response.status === 200) {
+      setIsValidated(true);
+      setIsThumbsDown(false);
+      setIsThumbsUp(true);
+      return response;
+    } else {
+      console.log("Response", response.status);
+      alert("Une erreure s'est produite veuillez nous excusez");
+    }
+    return response;
+  }
 
   if (isLoading) return <ArticleLoader />;
   return (
@@ -34,7 +90,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
           <div className="mt-3 flex flex-row">
             <div
               className="mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
-              onClick={() => setIsThumbsUp(!isThumbsUp)}
+              onClick={() => postGoodFeedback()}
             >
               👍
             </div>
@@ -62,7 +118,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <textarea
                 className={`h-24 w-full rounded-md border-2 ${counter <= 125 ? "border-gray-200" : "border-[#EF4444]"} p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
                 placeholder="Describe yourself here..."
-                onChange={(e) => setCounter(e.target.value.length)}
+                onChange={(e) => myComment(e)}
               ></textarea>
               <p className={`relative -mt-8 mr-4 mb-8 self-end text-end text-xs font-medium leading-6 ${counter <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"}`}>{counter}/125</p>
               <div className="mt-3 flex w-full flex-row">
@@ -73,8 +129,12 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                   Annuler
                 </div>
                 <div
-                  className="ml-1 flex h-12 w-6/12 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 bg-[#4F46E5] text-sm font-medium leading-5 text-[#FFFFFF]"
-                  onClick={() => sendQuestion()}
+                  className={`${
+                    counter > 125 && "pointer-events-none"
+                  } ml-1 flex h-12 w-6/12 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 ${
+                    counter > 125 ? "bg-indigo-200" : "bg-[#4F46E5]"
+                  } text-sm font-medium leading-5 text-[#FFFFFF]`}
+                  onClick={() => postBadFeedback()}
                 >
                   Envoyer
                 </div>
