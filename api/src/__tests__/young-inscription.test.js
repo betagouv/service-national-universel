@@ -112,20 +112,17 @@ describe("Young", () => {
       expect(res.status).toBe(200);
       const nextResponseData = res.body.data;
       const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
-      delete coordonneeObj.livesInFrance;
-      delete coordonneeObj.moreInformation;
-      expect(nextUpdatedYoung).toMatchObject(coordonneeObj);
-      expect(nextResponseData).toMatchObject(coordonneeObj);
 
-      coordonneeObj.livesInFrance = "true";
-      coordonneeObj.moreInformation = "false";
       typeUrlParam = "correction";
       res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
       expect(res.status).toBe(200);
       const correctionResponseData = res.body.data;
       const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+
       delete coordonneeObj.livesInFrance;
       delete coordonneeObj.moreInformation;
+      expect(nextUpdatedYoung).toMatchObject(coordonneeObj);
+      expect(nextResponseData).toMatchObject(coordonneeObj);
       expect(correctionUpdatedYoung).toMatchObject(coordonneeObj);
       expect(correctionResponseData).toMatchObject(coordonneeObj);
     });
