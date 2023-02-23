@@ -39,13 +39,6 @@ export default function test_volontaire() {
   ];
 
   const defaultQuery = { query: { bool: { must: [{ match_all: {} }] } } };
-  const getCount = (value) => {
-    setCount(value);
-  };
-
-  useEffect(() => {
-    console.log("data", data);
-  }, [data]);
   //extract dans utils ou logique du filtre ?
 
   return (
@@ -58,7 +51,7 @@ export default function test_volontaire() {
           esId="young"
           defaultQuery={defaultQuery}
           filters={filterArray}
-          getCount={getCount}
+          getCount={setCount}
           setData={(value) => setData(value)}
           searchBarObject={searchBarObject}
           page={page}
