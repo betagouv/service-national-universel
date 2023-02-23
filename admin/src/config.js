@@ -10,9 +10,9 @@ let SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
 let SENTRY_TRACING_SAMPLE_RATE = 1.0;
 
 if (environment === "staging") {
-  apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
-  appURL = "https://app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io";
-  adminURL = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
+  apiURL = "https://api.beta-snu.dev";
+  appURL = "https://app.beta-snu.dev";
+  adminURL = "https://admin.beta-snu.dev";
   supportURL = "https://app-9266b532-ff6e-4a6a-aeeb-e6ff7bb67f60.cleverapps.io";
   SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
   SENTRY_TRACING_SAMPLE_RATE = 1.0;
