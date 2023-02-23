@@ -253,7 +253,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
   const user = useSelector((state) => state.Auth.user);
   const { structure } = useContext(StructureContext);
 
-  const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone;
+  const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email;
 
   const roles = [ROLES.RESPONSIBLE];
   if (structure.isNetwork === "true" && (user.role === ROLES.ADMIN || (user.role === ROLES.SUPERVISOR && user.structureId === structure._id))) {
@@ -272,12 +272,12 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
         <Field readOnly={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible.firstName} required={true} errors={errors} />
         <Field readOnly={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible.lastName} required={true} errors={errors} />
         <Field readOnly={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible.email} required={true} errors={errors} />
-        <Field readOnly={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible.phone} errors={errors} />
+        <Field readOnly={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible.phone} type="tel" errors={errors} />
         {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
           <Select
             label="Sélectionnez un rôle"
             options={rolesOptions}
-            selected={rolesOptions.find((e) => e.value === responsible.role || "")}
+            selected={rolesOptions.find((e) => e.value === responsible.role || { label: "Responsable", value: ROLES.RESPONSIBLE })}
             setSelected={(e) => setResponsible({ ...responsible, role: e.value })}
           />
         )}
