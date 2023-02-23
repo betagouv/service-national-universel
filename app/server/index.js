@@ -25,7 +25,7 @@ app.use(
   forceDomain({
     hostname: "moncompte.snu.gouv.fr",
     protocol: "https",
-    excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)|(moncompte\.beta-snu\.dev)/,
+    excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)|(snu\.dev)/,
   }),
 );
 
