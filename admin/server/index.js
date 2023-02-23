@@ -27,7 +27,6 @@ if (process.env.STAGING) {
     forceDomain({
       hostname: "admin.beta-snu.dev",
       protocol: "https",
-      excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)/,
     }),
   );
 }
