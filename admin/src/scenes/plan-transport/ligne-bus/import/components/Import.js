@@ -4,7 +4,7 @@ import ExcelColor from "../../components/Icons/ExcelColor.png";
 import ReactLoading from "react-loading";
 import { HiOutlineChevronDown } from "react-icons/hi";
 import { GrCircleInformation } from "react-icons/gr";
-import { MIME_TYPES, PDT_COLUMNS_BUS, PDT_COLUMNS_PDR, PDT_COLUMNS_CENTER, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
+import { MIME_TYPES, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
 import api from "../../../../../services/api";
 import { capture } from "../../../../../sentry";
 
@@ -15,7 +15,6 @@ export default function Import({ cohort, onFileVerified }) {
   const [importErrors, setImportErrors] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
-  const [countPdr, setCountPdr] = useState(0);
   const [importedFileName, setImportedFileName] = useState(null);
   const fileInput = useRef(null);
 
@@ -55,7 +54,6 @@ export default function Import({ cohort, onFileVerified }) {
         setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
       } else if (!res.ok) {
         if (res.code === "INVALID_BODY" && res.errors) {
-          setCountPdr(res.countPdr);
           setImportErrors(res.errors);
         } else {
           capture(res.code);
@@ -102,9 +100,11 @@ export default function Import({ cohort, onFileVerified }) {
               Importer un nouveau fichier
             </button>
           </div>
-          {Object.keys(importErrors).map((col) => (
-            <ErrorBlock column={col} errors={importErrors[col]} countPdr={countPdr} key={col} />
-          ))}
+          {Object.entries(importErrors)
+            .filter(([, errors]) => errors?.length)
+            .map(([col, errors]) => (
+              <ErrorBlock column={col} errors={errors} key={col} />
+            ))}
         </div>
       </div>
       <div className="flex justify-end mt-4">
@@ -137,15 +137,16 @@ export default function Import({ cohort, onFileVerified }) {
   );
 }
 
-const ErrorBlock = ({ column, errors, countPdr }) => {
+const ErrorBlock = ({ column, errors }) => {
   const [open, setOpen] = useState(false);
 
-  const errorList = Object.entries(errors).map((entry) => ({
-    line: entry[0],
-    error: getErrorText(entry[1].error, entry[1].extra),
-    tooltip: getErrorTooltip(entry[1].error),
+  const errorList = errors.map((e) => ({
+    line: e.line,
+    error: getErrorText(e.error),
+    tooltip: getErrorTooltip(e.error),
   }));
-  const colName = getColumnName(column, countPdr);
+
+  const colName = column;
 
   return (
     <div className="flex flex-col w-[700px]">
@@ -164,7 +165,7 @@ const ErrorBlock = ({ column, errors, countPdr }) => {
           <React.Fragment key={"item-" + item.line}>
             {index !== 0 && <hr className="border-gray-200" />}
             <div className="flex items-center px-4 py-2 w-full">
-              <div className="text-sm leading-5 font-medium text-gray-800">{item.line}</div>
+              <div className="text-sm leading-5 font-medium text-gray-800">Ligne {item.line}</div>
               <div className="flex grow items-center gap-4 w-1/4 justify-end">
                 <div className="text-sm leading-5 font-normal text-gray-800">{item.error}</div>
                 <div className="group relative">
@@ -182,27 +183,6 @@ const ErrorBlock = ({ column, errors, countPdr }) => {
     </div>
   );
 };
-
-function getColumnName(column, countPdr) {
-  let colName;
-  const colNum = parseInt(column) - 1;
-  const centerIndex = PDT_COLUMNS_BUS.length + countPdr * PDT_COLUMNS_PDR.length;
-
-  if (colNum < 0 || colNum >= PDT_COLUMNS_BUS.length + countPdr * PDT_COLUMNS_PDR.length + PDT_COLUMNS_CENTER) {
-    capture("Import de plan de transport: numéro de colonne en dehors des limites");
-    colName = column;
-  } else if (colNum < PDT_COLUMNS_BUS.length) {
-    colName = PDT_COLUMNS_BUS[colNum].name;
-  } else if (colNum >= centerIndex) {
-    colName = PDT_COLUMNS_CENTER[colNum - centerIndex].name;
-  } else {
-    const colPdrNum = (colNum - PDT_COLUMNS_BUS.length) % PDT_COLUMNS_PDR.length;
-    const pdrIndex = Math.floor((colNum - PDT_COLUMNS_BUS.length) / PDT_COLUMNS_PDR.length);
-    colName = PDT_COLUMNS_PDR[colPdrNum].name.replace("%n", pdrIndex + 1);
-  }
-
-  return colName;
-}
 
 function getErrorText(error, extra) {
   const err = PDT_IMPORT_ERRORS_TRANSLATION[error];
