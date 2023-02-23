@@ -369,10 +369,8 @@ router.post(
         // Count total unique PDR
         const pdrCount = lines.reduce((acc, line) => {
           for (let i = 1; i <= countPdr; i++) {
-            console.log(`ID PDR ${i}`, line[`ID PDR ${i}`]);
             if (line[`ID PDR ${i}`]) acc.push(line[`ID PDR ${i}`]);
           }
-          console.log(acc);
           return acc;
         }, []).length;
         // Save import plan
@@ -399,8 +397,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     }
     const { importId } = value;
 
-    console.log("importId", value);
-
     const importData = await ImportPlanTransportModel.findById(importId);
     if (!importData) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -412,8 +408,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
     const lines = importData.lines;
     const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
-    console.log("countPdr", countPdr);
-    console.log(lines[0]);
 
     for (const line of importData.lines) {
       const pdrIds = [];
@@ -424,7 +418,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
 
       const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: line["ID CENTRE"] });
-      console.log(session, importData.cohort, line["ID CENTRE"]);
       const busLineData = {
         cohort: importData.cohort,
         busId: line["NUMERO DE LIGNE"],
@@ -449,7 +442,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       for (let i = 1; i <= countPdr; i++) {
         // Skip empty PDR
         if (i > 1 && !line[`ID PDR ${i}`]) continue;
-        console.log(line[`TYPE DE TRANSPORT PDR ${i}`], `TYPE DE TRANSPORT PDR ${i}`);
         const newLineToPointData = {
           lineId: busLine._id.toString(),
           meetingPointId: line[`ID PDR ${i}`],
