@@ -57,11 +57,6 @@ export default function SchemaRepartition({ region, department }) {
     }
   }
 
-  const handleChangeCohort = (value) => {
-    history.push(`/schema-repartition/${region}?cohort=${value}`);
-    setCohort(value);
-  };
-
   useEffect(() => {
     loadData();
   }, [cohort]);
@@ -286,6 +281,11 @@ export default function SchemaRepartition({ region, department }) {
     // const workbook = { Sheets: { data: sheet }, SheetNames: ["Schema de repartition"] };
     return { workbook, fileName };
   }
+
+  const handleChangeCohort = (value) => {
+    history.push(`/schema-repartition/${region}?cohort=${value}`);
+    setCohort(value);
+  };
 
   return (
     <div>
