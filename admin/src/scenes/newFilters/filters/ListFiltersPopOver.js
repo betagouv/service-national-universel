@@ -446,6 +446,11 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
         must: [],
       },
     };
+    if (search) {
+      aggregfiltersObject.bool.must.push({
+        multi_match: { query: search, fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
+      });
+    }
     Object.keys(selectedFilters).map((key) => {
       if (key === name) return;
       if (selectedFilters[key].filter.length > 0) {
