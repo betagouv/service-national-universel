@@ -56,7 +56,7 @@ export default function StepDone() {
           <div className="text-[#3A3A3A] text-sm">Pièce d’identité (ou passeport)</div>
         </div>
       </div>
-      <SignupButtonContainer onClickNext={handleClick} labelNext="Continuer mon inscription" onClickPrevious={logout} labelPrevious="Plus tard" />
+      <SignupButtonContainer onClickNext={handleClick} labelNext="Compléter mon inscription" onClickPrevious={logout} labelPrevious="Plus tard" />
     </DSFRContainer>
   );
 }

@@ -163,7 +163,7 @@ export default function StepProfil() {
           {error.rulesYoung ? <span className="text-red-500 text-sm">{error.rulesYoung}</span> : null}
         </div>
       </div>
-      <SignupButtonContainer onClickNext={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/sejour")} />
+      <SignupButtonContainer onClickNext={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/sejour")} labelPrevious="Retour au choix du séjour" />
     </DSFRContainer>
   );
 }
