@@ -30,8 +30,6 @@ const S3PREFIX = "";
 function getEnvironment() {
   if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
   if (window.location.href.indexOf("admin.beta-snu.dev") !== -1) return "staging";
-  console.log("🚀 ~ file: config.js:33 ~ getEnvironment ~ window.location.href.indexOf(admin.beta-snu.dev)", window.location.href.indexOf("admin.beta-snu.dev"));
-  console.log("🚀 ~ file: config.js:33 ~ getEnvironment ~ window.location.href", window.location.href);
   return "production";
 }
 
