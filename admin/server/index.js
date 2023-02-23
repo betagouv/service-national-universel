@@ -22,6 +22,16 @@ if (process.env.PROD) {
   );
 }
 
+if (process.env.STAGING) {
+  app.use(
+    forceDomain({
+      hostname: "admin.beta-snu.dev",
+      protocol: "https",
+      excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)/,
+    }),
+  );
+}
+
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));
 
