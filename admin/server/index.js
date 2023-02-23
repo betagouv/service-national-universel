@@ -3,7 +3,7 @@ const path = require("path");
 const hsts = require("hsts");
 const { forceDomain } = require("forcedomain");
 const helmet = require("helmet");
-import { environment } from "../src/config";
+const { environment } = require("../src/config");
 
 const app = express();
 const port = 8080;
