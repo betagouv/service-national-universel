@@ -57,6 +57,11 @@ export default function SchemaRepartition({ region, department }) {
     }
   }
 
+  const handleChangeCohort = (value) => {
+    history.push(`/schema-repartition/${region}?cohort=${value}`);
+    setCohort(value);
+  };
+
   useEffect(() => {
     loadData();
   }, [cohort]);
@@ -293,7 +298,7 @@ export default function SchemaRepartition({ region, department }) {
             onGoToNational={goToNational}
             onGoToRegion={goToRegion}
           />
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
         </div>
         <div className="flex my-[40px]">
           <div className="flex flex-col grow">
