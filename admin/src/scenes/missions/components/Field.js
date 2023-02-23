@@ -29,10 +29,10 @@ export default function Field({ name, label, value, className = "", type = "text
         {type === "date" && (
           <DatePickerList disabled={readOnly || isJvaMission} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />
         )}
-        {type === "text" && (
+        {["text", "tel"].includes(type) && (
           <input
             readOnly={(readOnly || isJvaMission) && "readonly"}
-            type="text"
+            type={type}
             name={name}
             value={value}
             onChange={handleChange}

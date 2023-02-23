@@ -29,10 +29,12 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+  const [errors, setErrors] = useState({});
 
   const resetState = () => {
     setResponsible(null);
     setIsLoading(false);
+    setErrors({});
   };
 
   const handleDelete = (target) => {
@@ -77,12 +79,15 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone) {
-        return toastr.error("Vous devez remplir tous les champs", "nom, prénom, télephone et e-mail");
-      }
-      if (!validator.matches(responsible.phone, regexPhoneFrenchCountries)) {
-        return toastr.error("Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX");
-      }
+      let error = {};
+      if (!responsible?.firstName?.trim()) error.firstName = "Le prénom est obligatoire";
+      if (!responsible?.lastName?.trim()) error.lastName = "Le nom est obligatoire";
+      if (!responsible?.email?.trim()) error.email = "L'email est obligatoire";
+      if (responsible?.email?.trim() && !validator.isEmail(responsible?.email?.trim())) error.email = "L'email est au mauvais format";
+      if (responsible.phone && !validator.matches(responsible.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format";
+
+      setErrors(error);
+      if (Object.keys(error).length > 0) return;
 
       setIsLoading(true);
       if (responsible._id) {
@@ -121,7 +126,13 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const handleChange = (e) => setResponsible({ ...responsible, [e.target.name]: e.target.value });
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl w-[800px] h-[500px] p-8">
+    <ModalTailwind
+      isOpen={isOpen}
+      onClose={() => {
+        onCancel();
+        setErrors({});
+      }}
+      className="bg-white rounded-xl shadow-xl w-[800px] h-[500px] p-8">
       {responsible ? (
         <EditContact
           team={team}
@@ -132,6 +143,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
           handleChange={handleChange}
           handleDelete={handleDelete}
           onChange={resetState}
+          errors={errors}
         />
       ) : (
         <div className="space-y-8">
@@ -237,11 +249,11 @@ const AddContact = ({ setResponsible, isSupervisor = false }) => {
   );
 };
 
-const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange }) => {
+const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange, errors }) => {
   const user = useSelector((state) => state.Auth.user);
   const { structure } = useContext(StructureContext);
 
-  const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email || !responsible.phone;
+  const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email;
 
   const roles = [ROLES.RESPONSIBLE];
   if (structure.isNetwork === "true" && (user.role === ROLES.ADMIN || (user.role === ROLES.SUPERVISOR && user.structureId === structure._id))) {
@@ -257,15 +269,15 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
       )}
 
       <div className="grid grid-cols-2 gap-6">
-        <Field readOnly={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible.firstName} required={true} />
-        <Field readOnly={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible.lastName} required={true} />
-        <Field readOnly={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible.email} required={!responsible.phone} />
-        <Field readOnly={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible.phone} required={!responsible.email} type="tel" />
+        <Field readOnly={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible.firstName} required={true} errors={errors} />
+        <Field readOnly={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible.lastName} required={true} errors={errors} />
+        <Field readOnly={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible.email} required={true} errors={errors} />
+        <Field readOnly={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible.phone} type="tel" errors={errors} />
         {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
           <Select
             label="Sélectionnez un rôle"
             options={rolesOptions}
-            selected={rolesOptions.find((e) => e.value === responsible.role || "")}
+            selected={rolesOptions.find((e) => e.value === responsible.role || { label: "Responsable", value: ROLES.RESPONSIBLE })}
             setSelected={(e) => setResponsible({ ...responsible, role: e.value })}
           />
         )}
