@@ -142,7 +142,7 @@ const ErrorBlock = ({ column, errors }) => {
 
   const errorList = errors.map((e) => ({
     line: e.line,
-    error: getErrorText(e.error),
+    error: getErrorText(e.error, e.extra),
     tooltip: getErrorTooltip(e.error),
   }));
 

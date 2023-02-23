@@ -12,30 +12,6 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
-  busLineCount: {
-    type: Number,
-    documentation: {
-      description: "Nombre de lignes de bus à importer",
-    },
-  },
-  pdrCount: {
-    type: Number,
-    documentation: {
-      description: "Nombre de points de rassemblements concernés",
-    },
-  },
-  centerCount: {
-    type: Number,
-    documentation: {
-      description: "Nombre de centres de cohésion concernés",
-    },
-  },
-  maxPdrPerLine: {
-    type: Number,
-    documentation: {
-      description: "Nombre de PDR max par ligne de bus sur cet import",
-    },
-  },
   lines: {
     type: [Object],
     documentation: {

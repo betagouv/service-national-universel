@@ -8,6 +8,7 @@ const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp 
 const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../../config");
+const { parse: parseDate } = require("date-fns");
 const NodeClam = require("clamscan");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
@@ -15,6 +16,10 @@ const mongoose = require("mongoose");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
+const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const SessionPhase1Model = require("../../models/sessionPhase1");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 
 function isValidDate(date) {
   return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);
@@ -99,7 +104,7 @@ router.post(
       }
 
       // Count columns that start with "ID PDR" to know how many PDRs there are.
-      const countPdr = Object.values(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
 
       const errors = {
         "NUMERO DE LIGNE": [],
@@ -113,7 +118,7 @@ router.post(
           [`HEURE ALLER ARRIVÉE AU PDR ${i + 1}`]: [],
           [`HEURE DEPART DU PDR ${i + 1}`]: [],
           [`HEURE DE RETOUR ARRIVÉE AU PDR ${i + 1}`]: [],
-        })),
+        })).reduce((acc, cur) => ({ ...acc, ...cur }), {}),
         "N° DU DEPARTEMENT DU CENTRE": [],
         "ID CENTRE": [],
         "NOM + ADRESSE DU CENTRE": [],
@@ -127,13 +132,13 @@ router.post(
         "TEMPS DE ROUTE": [],
       };
 
-      console.log(errors);
+      const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
       // Format errors.
       // Check format, add errors for each line
       for (const [i, line] of lines.entries()) {
         // We need to have the "line number" as of the excel file, so we add 2 to the index.
-        const index = i + 2;
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         if (!line["NUMERO DE LIGNE"]) {
           errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
         }
@@ -155,11 +160,14 @@ router.post(
 
         // Check each PDR
         for (let i = 1; i <= countPdr; i++) {
+          // Skip empty PDR
+          if (i > 1 && !line[`ID PDR ${i}`]) continue;
+
           if (!line[`N° DE DEPARTEMENT PDR ${i}`]) {
             errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
           }
           if (line[`N° DE DEPARTEMENT PDR ${i}`] && !isValidDepartment(line[`N° DE DEPARTEMENT PDR ${i}`])) {
-            errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_DEPARTMENT });
+            errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_DEPARTMENT, extra: line[`N° DE DEPARTEMENT PDR ${i}`] });
           }
           if (!line[`ID PDR ${i}`]) {
             errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -171,7 +179,7 @@ router.post(
             errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
           }
           if (line[`TYPE DE TRANSPORT PDR ${i}`] && !["bus", "train", "avion"].includes(line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase())) {
-            errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_TRANSPORT_TYPE });
+            errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_TRANSPORT_TYPE, extra: line[`TYPE DE TRANSPORT PDR ${i}`] });
           }
           if (!line[`NOM + ADRESSE DU PDR ${i}`]) {
             errors[`NOM + ADRESSE DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -268,7 +276,8 @@ router.post(
 
       // Coherence errors.
       // Check "CAPACITE TOTALE LIGNE" = "TOTAL ACCOMPAGNATEURS" + "CAPACITÉ VOLONTAIRE TOTALE"
-      for (const [index, line] of lines.entries()) {
+      for (const [i, line] of lines.entries()) {
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         if (line["TOTAL ACCOMPAGNATEURS"] && line["CAPACITÉ VOLONTAIRE TOTALE"] && line["CAPACITE TOTALE LIGNE"]) {
           const totalAccompagnateurs = parseInt(line["TOTAL ACCOMPAGNATEURS"]);
           const capaciteVolontaireTotale = parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
@@ -285,41 +294,49 @@ router.post(
         }
         return acc;
       }, {});
-      for (const [index, line] of lines.entries()) {
+      for (const [i, line] of lines.entries()) {
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         if (line["NUMERO DE LIGNE"] && duplicateLines[line["NUMERO DE LIGNE"]] > 1) {
-          errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_BUSNUM });
+          errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_BUSNUM, extra: line["NUMERO DE LIGNE"] });
         }
       }
       // Check if "ID CENTRE" exists in DB
-      for (const [index, line] of lines.entries()) {
+      for (const [i, line] of lines.entries()) {
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         if (line["ID CENTRE"] && mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
           const center = await CohesionCenterModel.findById(line["ID CENTRE"]);
           if (!center) {
-            errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID });
+            errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
+          }
+          const session = await SessionPhase1Model.findOne({ cohort, cohesionCenterId: line["ID CENTRE"] });
+          if (!session) {
+            errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
           }
         }
       }
       // Check if `ID PDR ${i}` exists in DB
-      for (const [index, line] of lines.entries()) {
-        for (let i = 1; i <= countPdr; i++) {
-          if (line[`ID PDR ${i}`] && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
-            const pdr = await PdrModel.findOne({ where: { id: line[`ID PDR ${i}`] } });
+      for (const [i, line] of lines.entries()) {
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
+        for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
+          if (line[`ID PDR ${pdrNumber}`] && mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
+            const pdr = await PdrModel.findById(line[`ID PDR ${pdrNumber}`]);
             if (!pdr) {
-              errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID });
+              errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
             }
           }
         }
       }
       // Check if there is a PDR duplicate in a line
-      for (const [index, line] of lines.entries()) {
+      for (const [i, line] of lines.entries()) {
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
-        for (let i = 1; i <= countPdr; i++) {
-          if (line[`ID PDR ${i}`]) {
-            pdrIds.push(line[`ID PDR ${i}`]);
+        for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
+          if (line[`ID PDR ${pdrNumber}`]) {
+            pdrIds.push(line[`ID PDR ${pdrNumber}`]);
           }
         }
         if (pdrIds.length !== new Set(pdrIds).size) {
-          errors[`ID PDR 1`].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_PDR });
+          errors[`ID PDR 1`].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_PDR_ON_LINE, extra: line[`ID PDR 1`] });
         }
       }
 
@@ -335,7 +352,8 @@ router.post(
         const groups = await SchemaRepartitionModel.find({ cohort, center: centerId });
         const sum = groups.reduce((acc, group) => acc + group.youngsVolume, 0);
         if (total < sum) {
-          for (const [index, line] of lines.entries()) {
+          for (const [i, line] of lines.entries()) {
+            const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
             if (line["ID CENTRE"] === centerId) {
               errors["CAPACITÉ VOLONTAIRE TOTALE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_VOLUME });
             }
@@ -348,9 +366,19 @@ router.post(
       if (hasError) {
         res.status(200).send({ ok: false, code: ERRORS.INVALID_BODY, errors });
       } else {
-        // save import
-        // const importData = await saveImport(lines, countPdr, cohort);
-        // res.status(200).send({ ok: true, data: { ...importData, countPdr, lines: undefined } });
+        // Count total unique PDR
+        const pdrCount = lines.reduce((acc, line) => {
+          for (let i = 1; i <= countPdr; i++) {
+            console.log(`ID PDR ${i}`, line[`ID PDR ${i}`]);
+            if (line[`ID PDR ${i}`]) acc.push(line[`ID PDR ${i}`]);
+          }
+          console.log(acc);
+          return acc;
+        }, []).length;
+        // Save import plan
+        const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
+        // Send response (summary)
+        res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id } });
       }
     } catch (error) {
       capture(error);
@@ -358,5 +386,109 @@ router.post(
     }
   },
 );
+
+// Importe un plan de transport vérifié et enregistré dans importplandetransport.
+router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      importId: Joi.string().required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { importId } = value;
+
+    console.log("importId", value);
+
+    const importData = await ImportPlanTransportModel.findById(importId);
+    if (!importData) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (!canSendPlanDeTransport(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const lines = importData.lines;
+    const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+    console.log("countPdr", countPdr);
+    console.log(lines[0]);
+
+    for (const line of importData.lines) {
+      const pdrIds = [];
+      for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
+        if (line[`ID PDR ${pdrNumber}`]) {
+          pdrIds.push(line[`ID PDR ${pdrNumber}`]);
+        }
+      }
+
+      const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: line["ID CENTRE"] });
+      console.log(session, importData.cohort, line["ID CENTRE"]);
+      const busLineData = {
+        cohort: importData.cohort,
+        busId: line["NUMERO DE LIGNE"],
+        departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
+        returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),
+        centerId: line["ID CENTRE"],
+        centerArrivalTime: line["HEURE D'ARRIVEE AU CENTRE"],
+        centerDepartureTime: line["HEURE DE DÉPART DU CENTRE"],
+        followerCapacity: line["TOTAL ACCOMPAGNATEURS"],
+        youngCapacity: line["CAPACITÉ VOLONTAIRE TOTALE"],
+        totalCapacity: line["CAPACITE TOTALE LIGNE"],
+        youngSeatsTaken: 0,
+        lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase === "oui",
+        lunchBreakReturn: line["PAUSE DÉJEUNER RETOUR" || ""].toLowerCase === "oui",
+        travelTime: line["TEMPS DE ROUTE"],
+        sessionId: session?._id.toString(),
+        meetingPointsIds: pdrIds,
+      };
+      const newBusLine = new LigneBusModel(busLineData);
+      const busLine = await newBusLine.save();
+
+      for (let i = 1; i <= countPdr; i++) {
+        // Skip empty PDR
+        if (i > 1 && !line[`ID PDR ${i}`]) continue;
+        console.log(line[`TYPE DE TRANSPORT PDR ${i}`], `TYPE DE TRANSPORT PDR ${i}`);
+        const newLineToPointData = {
+          lineId: busLine._id.toString(),
+          meetingPointId: line[`ID PDR ${i}`],
+          transportType: line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase(),
+          busArrivalHour: line[`HEURE ALLER ARRIVÉE AU PDR ${i}`],
+          departureHour: line[`HEURE DEPART DU PDR ${i}`],
+          meetingHour: getPDRMeetingHour(line[`HEURE DEPART DU PDR ${i}`]),
+          returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`],
+          stepPoints: [
+            {
+              address: line[`NOM + ADRESSE DU PDR ${i}`],
+              departureHour: line[`HEURE DEPART DU PDR ${i}`],
+              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`],
+              transportType: line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase(),
+            },
+          ],
+        };
+        const newLineToPoint = new LigneToPointModel(newLineToPointData);
+        await newLineToPoint.save();
+      }
+    }
+
+    res.status(200).send({ ok: true, data: lines.length });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+// Add one hour to departure hour
+function getPDRMeetingHour(departureHour) {
+  const [hour, minute] = departureHour.split(":");
+  const date = new Date();
+  date.setHours(hour);
+  date.setMinutes(minute);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  date.setHours(date.getHours() + 1);
+  return date.toTimeString().split(" ")[0];
+}
 
 module.exports = router;
