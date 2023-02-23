@@ -547,7 +547,7 @@ function inSevenDays() {
 }
 
 const getBaseUrl = () => {
-  if (ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
+  if (ENVIRONMENT === "staging") return "https://api.beta-snu.dev";
   if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
   return "http://localhost:8080";
 };
