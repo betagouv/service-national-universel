@@ -171,6 +171,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  cohorts: {
+    type: [String],
+    documentation: {
+      description: "Identifiant des cohortes de l'utilisateur, si chef de centre",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

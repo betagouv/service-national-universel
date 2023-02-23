@@ -78,6 +78,15 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!canCreateOrUpdateSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await SessionPhase1Model.create(value);
+
+    // add cohort to head center
+    const headCenter = await ReferentModel.findById(data.headCenterId);
+    if (!headCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!headCenter.cohorts.includes(data.cohort)) {
+      headCenter.set({ cohorts: [...headCenter.cohorts, data.cohort] });
+      await headCenter.save({ fromUser: req.user });
+    }
+
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
@@ -182,6 +191,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // update cohorts in head center
+    if (value.cohort !== sessionPhase1.cohort) {
+      const headCenter = await ReferentModel.findById(sessionPhase1.headCenterId);
+      if (!headCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      headCenter.set({ cohorts: headCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
+      headCenter.set({ cohorts: [...headCenter.cohorts, value.cohort] });
+      await headCenter.save({ fromUser: req.user });
+    }
 
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
@@ -317,6 +335,12 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
     cohesionCenter.save({ fromUser: req.user });
+
+    // delete cohort in head center
+    const headCenter = await ReferentModel.findById(sessionPhase1.headCenterId);
+    headCenter.set({ cohorts: headCenter.cohorts.filter((s) => s !== sessionPhase1.cohort) });
+    headCenter.save({ fromUser: req.user });
+
     await sessionPhase1.remove();
     res.status(200).send({ ok: true });
   } catch (error) {
