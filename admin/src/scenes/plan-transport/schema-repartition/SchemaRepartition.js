@@ -142,6 +142,9 @@ export default function SchemaRepartition({ region, department }) {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
     }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
+    }
   }
 
   function goToRegion() {
@@ -287,9 +290,18 @@ export default function SchemaRepartition({ region, department }) {
     setCohort(value);
   };
 
+  const getSchemaRepartitionRoute = () => {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+      return `/schema-repartition?cohort=${cohort}`;
+    }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      return `/schema-repartition/${region}?cohort=${cohort}`;
+    }
+  };
+
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Schéma de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Schéma de répartition", to: getSchemaRepartitionRoute() }]} />
       <div className="p-[30px]">
         <div className="flex items-center justify-between">
           <PlanTransportBreadcrumb
