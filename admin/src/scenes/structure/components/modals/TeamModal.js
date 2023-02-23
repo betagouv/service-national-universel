@@ -34,6 +34,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const resetState = () => {
     setResponsible(null);
     setIsLoading(false);
+    setErrors({});
   };
 
   const handleDelete = (target) => {
@@ -85,7 +86,8 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
       if (responsible?.email?.trim() && !validator.isEmail(responsible?.email?.trim())) error.email = "L'email est au mauvais format";
       if (responsible.phone && !validator.matches(responsible.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format";
 
-      if (Object.keys(error).length > 0) return setErrors(error);
+      setErrors(error);
+      if (Object.keys(error).length > 0) return;
 
       setIsLoading(true);
       if (responsible._id) {
@@ -124,7 +126,13 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
   const handleChange = (e) => setResponsible({ ...responsible, [e.target.name]: e.target.value });
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="bg-white rounded-xl shadow-xl w-[800px] h-[500px] p-8">
+    <ModalTailwind
+      isOpen={isOpen}
+      onClose={() => {
+        onCancel();
+        setErrors({});
+      }}
+      className="bg-white rounded-xl shadow-xl w-[800px] h-[500px] p-8">
       {responsible ? (
         <EditContact
           team={team}
