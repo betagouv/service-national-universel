@@ -415,7 +415,6 @@ const FloppyDisk = () => {
 const buildMissions = async (esId, selectedFilters, search, page, size, defaultQuery = null, filterArray, searchBarObject) => {
   let query = {};
   let aggsQuery = {};
-  console.log("current page is ", page);
   if (!defaultQuery) {
     query = { query: { bool: { must: [{ match_all: {} }] } } };
     aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
@@ -463,12 +462,24 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
 
   //ajouter les aggregations pour count
   filterArray.map((f) => {
-    bodyAggs.aggs[f.name] = {
-      filter: { ...getAggsFilters(f.name) },
-      aggs: {
-        names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: filterArray.find((e) => f.name === e.name).missingLabel, size: ES_NO_LIMIT } },
-      },
-    };
+    const datafield = filterArray.find((e) => f.name === e.name).datafield;
+    if (datafield.includes(".keyword")) {
+      bodyAggs.aggs[f.name] = {
+        filter: { ...getAggsFilters(f.name) },
+        aggs: {
+          names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: filterArray.find((e) => f.name === e.name).missingLabel, size: ES_NO_LIMIT } },
+        },
+      };
+    } else {
+      bodyAggs.aggs[f.name] = {
+        filter: { ...getAggsFilters(f.name) },
+        aggs: {
+          names: {
+            histogram: { field: filterArray.find((e) => f.name === e.name).datafield, interval: 1, min_doc_count: 1 },
+          },
+        },
+      };
+    }
   });
 
   if (selectedFilters && Object.keys(selectedFilters).length) {
@@ -494,6 +505,8 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
   const resAggs = await api.esQuery(esId, bodyAggs);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
+  console.log(resAggs.responses[0].aggregations);
+
   const resQuery = await api.esQuery(esId, bodyQuery);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
@@ -503,9 +516,8 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
   const newFilters = {};
 
   // map a travers les aggregations pour recuperer les filtres
-
   filterArray.map((f) => {
-    newFilters[f.name] = aggs[f.name].names.buckets.map((b) => ({ value: b.key, count: b.doc_count }));
+    newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ value: b.key, count: b.doc_count }));
   });
 
   return { data, count, newFilters };

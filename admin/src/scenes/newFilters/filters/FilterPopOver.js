@@ -89,25 +89,30 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                         placeholder={`Rechercher un(e) ${filter?.title.toLowerCase()}...`}
                       />
                       <div className="flex flex-col max-h-[400px] overflow-y-auto">
-                        {optionsVisible?.length === 0 && (
+                        {optionsVisible?.length === 0 ? (
                           <div className="flex items-center justify-center py-2 px-3">
                             <p className="text-gray-500 text-xs leading-5">Aucun résultat</p>
                           </div>
+                        ) : (
+                          <>
+                            {optionsVisible
+                              ?.sort((a, b) => {
+                                a.value.toString().localeCompare(b.value.toString());
+                              })
+                              ?.map((option) => (
+                                <div
+                                  className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                                  key={option?.value}
+                                  onClick={() => handleSelect(option?.value)}>
+                                  <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                                    <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.value)} />
+                                    {option.value === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.value) : option?.value}
+                                  </div>
+                                  <div className="text-gray-500 text-xs leading-5">{option.count}</div>
+                                </div>
+                              ))}
+                          </>
                         )}
-                        {optionsVisible
-                          ?.sort((a, b) => a.value.localeCompare(b.value))
-                          ?.map((option) => (
-                            <div
-                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
-                              key={option?.value}
-                              onClick={() => handleSelect(option?.value)}>
-                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                                <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.value)} />
-                                {option.value === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.value) : option?.value}
-                              </div>
-                              <div className="text-gray-500 text-xs leading-5">{option.count}</div>
-                            </div>
-                          ))}
                       </div>
                     </>
                   )}
