@@ -16,7 +16,7 @@ import Select from "../../../centersV2/components/Select";
 import { useSelector } from "react-redux";
 import Button from "../Button";
 import { Link } from "react-router-dom";
-import Field from "../../../missions/components/Field";
+import Field from "../../../../components/forms/Field";
 import { AiOutlineClose } from "react-icons/ai";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
