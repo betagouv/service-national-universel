@@ -64,19 +64,11 @@ export default function test() {
       }
     }
 
-    const response = await api.get("/ligne-de-bus/all");
-    const meetingPoints = response ? response.data.meetingPoints : [];
-    const ligneBus = response ? response.data.ligneBus : [];
-
     return all.map((data) => {
       let center = {};
 
       let meetingPoint = {};
       let bus = {};
-      if (data.meetingPointId && meetingPoints) {
-        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-        bus = ligneBus.find((lb) => lb._id === data.ligneId);
-      }
 
       if (!data.domains) data.domains = [];
       if (!data.periodRanking) data.periodRanking = [];
@@ -183,21 +175,21 @@ export default function test() {
           "Dernier statut le": formatLongDateFR(data.lastStatusAt),
         },
         phase1Affectation: {
-          "ID centre": center._id || "",
-          "Code centre (2021)": center.code || "",
-          "Code centre (2022)": center.code2022 || "",
-          "Nom du centre": center.name || "",
-          "Ville du centre": center.city || "",
-          "Département du centre": center.department || "",
-          "Région du centre": center.region || "",
+          "ID centre": center?._id || "",
+          "Code centre (2021)": center?.code || "",
+          "Code centre (2022)": center?.code2022 || "",
+          "Nom du centre": center?.name || "",
+          "Ville du centre": center?.city || "",
+          "Département du centre": center?.department || "",
+          "Région du centre": center?.region || "",
         },
         phase1Transport: {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
           "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
-          "Bus n˚": bus?.busId,
-          "Adresse point de rassemblement": meetingPoint?.address,
-          "Date aller": formatDateFR(bus?.departuredDate),
-          "Date retour": formatDateFR(bus?.returnDate),
+          "Bus n˚": bus?.busId || "",
+          "Adresse point de rassemblement": meetingPoint?.address || "",
+          "Date aller": formatDateFR(bus?.departuredDate) || "",
+          "Date retour": formatDateFR(bus?.returnDate) || "",
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
