@@ -15,7 +15,19 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({ esId, pageId, filters, defaultQuery, getCount, searchBarObject = null, setData, page = 1, size = 25 }) {
+export default function ListFiltersPopOver({
+  esId,
+  pageId,
+  filters,
+  defaultQuery,
+  getCount,
+  searchBarObject = null,
+  setData,
+  page = 1,
+  size = 25,
+  selectedFilters,
+  setSelectedFilters,
+}) {
   // search for filters
   const [search, setSearch] = React.useState("");
 
@@ -23,7 +35,6 @@ export default function ListFiltersPopOver({ esId, pageId, filters, defaultQuery
   const [searchBar, setSearchBar] = React.useState("");
   // data correspond to filters
   const [dataFilter, setDataFilter] = React.useState([]);
-  const [selectedFilters, setSelectedFilters] = React.useState({});
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
   const mounted = React.useRef(false);
@@ -289,7 +300,7 @@ export default function ListFiltersPopOver({ esId, pageId, filters, defaultQuery
         {/* Display des filtres sélectionnés */}
         {filtersVisible
           .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
-          .map((filter, index) => (
+          .map((filter) => (
             <div
               key={filter.title}
               onClick={() => handleFilterShowing(filter.name)}
@@ -326,7 +337,7 @@ const ToolTipView = ({ selectedFilters, filter }) => {
   return (
     <ReactTooltip id="tooltip-filtre" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
       <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
-        {selectedFilters[filter.name].filter.map((item, index) => (
+        {selectedFilters[filter.name].filter.map((item) => (
           <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
             {item}
           </div>
