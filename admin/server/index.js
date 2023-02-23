@@ -3,7 +3,6 @@ const path = require("path");
 const hsts = require("hsts");
 const { forceDomain } = require("forcedomain");
 const helmet = require("helmet");
-const { environment } = require("../src/config");
 
 const app = express();
 const port = 8080;
@@ -14,7 +13,7 @@ app.use(
   }),
 );
 
-if (environment === "production") {
+if (process.env.PROD) {
   app.use(
     forceDomain({
       hostname: "admin.snu.gouv.fr",
