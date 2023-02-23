@@ -26,14 +26,9 @@ export default function Import({ cohort, onFileVerified }) {
     }
   }
 
-  function getFileFromInput(e) {
-    if (e && e.target && e.target.files && e.target.files.length > 0) {
-      uploadFile(e.target.files[0]);
-    }
-  }
-
-  async function uploadFile(file) {
-    // console.log("upload file", file);
+  async function upload(e) {
+    if (!e?.target?.files?.length) return;
+    const file = e.target.files[0];
     setUploadError(null);
     setImportedFileName(file.name);
     if (file.type !== MIME_TYPES.EXCEL) {
@@ -48,7 +43,6 @@ export default function Import({ cohort, onFileVerified }) {
     setIsUploading(true);
     setImportErrors(null);
     try {
-      // console.log("FILE: ", file);
       const res = await api.uploadFile(`/plan-de-transport/import/${cohort}`, [file]);
       if (res.code === "FILE_CORRUPTED") {
         setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
@@ -125,7 +119,7 @@ export default function Import({ cohort, onFileVerified }) {
                 Téléversez votre fichier
               </div>
               <div className="text-xs leading-4 font-normal text-gray-500">XLSX jusqu’à 5Mo</div>
-              <input type="file" accept={MIME_TYPES.EXCEL} ref={fileInput} onChange={getFileFromInput} className="hidden" />
+              <input type="file" accept={MIME_TYPES.EXCEL} ref={fileInput} onChange={upload} className="hidden" />
               {uploadError && <div className="text-red-900 mt-8 text-center text-sm font-bold">{uploadError}</div>}
             </>
           ) : (
