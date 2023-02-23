@@ -14,8 +14,11 @@ const {
   ligneBusCanEditStatusDemandeDeModification,
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
+  SENDINBLUE_TEMPLATES,
 } = require("snu-lib");
 const { ObjectId } = require("mongodb");
+const { sendTemplate } = require("../../sendinblue");
+const config = require("../../config");
 
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
@@ -55,6 +58,17 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const copyModif = JSON.parse(JSON.stringify(modificationBus));
     if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [copyModif];
     else planDeTransport.modificationBuses.push(copyModif);
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.DEMANDE_DE_MODIFICATION, {
+      emailTo: [{ name: `${"contactFirstname"} ${"contactLastname"}`, email: "contactEmail" }],
+      params: {
+        busId: lineId,
+        requestUserFirstname: req.user.firstName,
+        requestUserLastname: req.user.lastName,
+        region: req.user.region,
+        cta: `${config.APP_URL}/ligne-de-bus/${lineId}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+672+effectuer`,
+      },
+    });
 
     await planDeTransport.save({ fromUser: req.user });
 
