@@ -18,27 +18,40 @@ import Badge from "../../components/Badge";
 
 import { translate, translatePhase1, YOUNG_STATUS_COLORS, getAge, ROLES, colors, YOUNG_STATUS, translatePhase2 } from "../../utils";
 
+import ArrowUp from "../../assets/ArrowUp";
+import Comment from "../../assets/comment";
+
+import { getTransportIcon } from "../plan-transport/util";
+
 export default function test_volontaire() {
   const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(20);
 
-  const [volontaire, setVolontaire] = useState(null);
+  const [currentTab, setCurrentTab] = React.useState("aller");
 
   const searchBarObject = {
-    placeholder: "Rechercher par prénom, nom, email, ville...",
-    datafield: ["lastName.keyword", "firstName.keyword", "email.keyword", "city.keyword"],
+    placeholder: "Rechercher une ligne (numéro, ville, region)",
+    datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
   };
   const filterArray = [
-    { title: "Cohorte", name: "cohort", datafield: "cohort.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
-    { title: "Région", name: "region", datafield: "region.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
-    { title: "Département", name: "department", datafield: "department.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
-    { title: "Classe", name: "grade", datafield: "grade.keyword", parentGroup: "Dossier", translate: translateGrade, missingLabel: "Non renseignée" },
-    { title: "Custom", name: "example", datafield: "example.keyword", parentGroup: "Dossier", customComponent: "example" },
+    { title: "Numéro de la ligne", name: "busId", datafield: "busId.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
+    { title: "Date aller", name: "departureString", datafield: "departureString.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
+    { title: "Date retour", name: "returnString", datafield: "returnString.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
+    { title: "Taux de remplissage", name: "lineFillingRate", datafield: "lineFillingRate", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
   ];
 
-  const defaultQuery = { query: { bool: { must: [{ match_all: {} }] } } };
+  const getDefaultQuery = () => {
+    return {
+      query: {
+        bool: {
+          must: [{ term: { "cohort.keyword": "Février 2023 - C" } }],
+        },
+      },
+      track_total_hits: true,
+    };
+  };
   const getCount = (value) => {
     setCount(value);
   };
@@ -54,9 +67,9 @@ export default function test_volontaire() {
         <div>{count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <ListFiltersPopOver
-          pageId="young"
-          esId="young"
-          defaultQuery={defaultQuery}
+          pageId="plandetransport"
+          esId="plandetransport"
+          defaultQuery={getDefaultQuery()}
           filters={filterArray}
           getCount={getCount}
           setData={(value) => setData(value)}
@@ -71,21 +84,20 @@ export default function test_volontaire() {
           size={size}
           page={page}
           render={
-            <Table>
-              <thead>
-                <tr>
-                  <th width="25%">Volontaire</th>
-                  <th>Cohorte</th>
-                  <th>Contextes</th>
-                  <th width="10%">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((hit) => (
-                  <Hit key={hit._id} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
-                ))}
-              </tbody>
-            </Table>
+            <div className="flex w-full flex-col mt-6 mb-2">
+              <hr />
+              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full">
+                <div className="w-[30%]">Lignes</div>
+                <div className="w-[40%]">Points de rassemblements</div>
+                <div className="w-[15%]">Centres de destinations</div>
+                <div className="w-[10%]">Taux de remplissage</div>
+                <div className="w-[5%] h-1"></div>
+              </div>
+              {data?.map((hit) => {
+                return <Line key={hit._id} hit={hit} currentTab={currentTab} />;
+              })}
+              <hr />
+            </div>
           }
         />
       </div>
@@ -93,124 +105,135 @@ export default function test_volontaire() {
   );
 }
 
-const Hit = ({ hit, onClick, selected }) => {
-  const getBackgroundColor = () => {
-    if (selected) return colors.lightBlueGrey;
-    if (hit.status === "WITHDRAWN" || hit.status === YOUNG_STATUS.DELETED) return colors.extraLightGrey;
-  };
-
-  if (hit.status === YOUNG_STATUS.DELETED) {
-    return (
-      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
-        <td>
-          <MultiLine>
-            <span className="font-bold text-black">Compte supprimé</span>
-            <p>{hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null}</p>
-          </MultiLine>
-        </td>
-        <td>
-          <Badge
-            color="#0C7CFF"
-            backgroundColor="#F9FCFF"
-            text={hit.cohort}
-            tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
-            style={{ cursor: "default" }}
-            icon={hit.originalCohort ? <IconChangementCohorte /> : null}
-          />
-        </td>
-        <td>
-          <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />
-
-          <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={"opacity-50"} />
-          <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} style={"opacity-50"} />
-          <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} style={"opacity-50"} />
-        </td>
-        <td onClick={(e) => e.stopPropagation()}>
-          <Action hit={hit} />
-        </td>
-      </tr>
-    );
-  } else {
-    return (
-      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
-        <td>
-          <MultiLine>
-            <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
-            <p>
-              {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
-            </p>
-          </MultiLine>
-        </td>
-        <td>
-          <Badge
-            color="#0C7CFF"
-            backgroundColor="#F9FCFF"
-            text={hit.cohort}
-            tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
-            style={{ cursor: "default" }}
-            icon={hit.originalCohort ? <IconChangementCohorte /> : null}
-          />
-        </td>
-        <td>
-          {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
-          <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
-          <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
-          <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
-        </td>
-        <td onClick={(e) => e.stopPropagation()}>
-          <Action hit={hit} />
-        </td>
-      </tr>
-    );
-  }
-};
-
-const BadgePhase = ({ text, value, redirect, style }) => {
+const Line = ({ hit, currentTab }) => {
   const history = useHistory();
-  const translator = () => {
-    if (text === "Phase 1") {
-      return translatePhase1(value);
-    } else if (text === "Phase 2") {
-      return translatePhase2(value);
-    } else {
-      return translate(value);
-    }
-  };
+
+  const meetingPoints =
+    currentTab === "aller"
+      ? //sort meetingPoints by meetingHour
+        hit.pointDeRassemblements.sort((a, b) => a.meetingHour.replace(":", "") - b.meetingHour.replace(":", ""))
+      : hit.pointDeRassemblements.sort((a, b) => a.returnHour.replace(":", "") - b.returnHour.replace(":", ""));
+
+  const hasPendingModification = hit.modificationBuses?.some((modification) => modification.status === "PENDING");
 
   return (
-    <Badge
-      onClick={() => history.push(redirect)}
-      minify
-      text={text}
-      tooltipText={translator()}
-      minTooltipText={`${text}: ${translate(value)}`}
-      color={YOUNG_STATUS_COLORS[value]}
-      className={style}
-    />
+    <>
+      <hr />
+      <div className="flex py-6 items-center px-4 hover:bg-gray-50">
+        <div className="w-[30%] cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${hit._id.toString()}`)}>
+          <div className="flex flex-col">
+            <div className="text-sm font-medium">{hit.busId}</div>
+            <div className="text-xs text-gray-400">
+              {currentTab === "aller" ? `${hit.pointDeRassemblements[0].region} > ${hit.centerRegion}` : `${hit.centerRegion} > ${hit.pointDeRassemblements[0].region}`}
+            </div>
+          </div>
+        </div>
+        <div className="w-[40%]">
+          <div className="flex gap-2">
+            {meetingPoints.map((meetingPoint) => {
+              return (
+                <TooltipMeetingPoint key={meetingPoint.meetingPointId} meetingPoint={meetingPoint} currentTab={currentTab}>
+                  <a
+                    href={`/point-de-rassemblement/${meetingPoint.meetingPointId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
+                    {meetingPoint.city}
+                    <ArrowUp />
+                  </a>
+                </TooltipMeetingPoint>
+              );
+            })}
+          </div>
+        </div>
+        <div className="w-[15%]">
+          <div className="flex gap-2">
+            <TooltipCenter key={hit.centerId} name={hit.centerName} region={hit.centerRegion} department={hit.centerDepartment}>
+              <a
+                href={`/centre/${hit.centerId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center">
+                {hit.centerCode}
+                <ArrowUp />
+              </a>
+            </TooltipCenter>
+          </div>
+        </div>
+        <div className="w-[10%] flex gap-4 items-center">
+          <div className="text-sm font-normal">{hit.lineFillingRate}%</div>
+          <div className="flex flex-col items-center">
+            <svg className="-rotate-90 w-9 h-9" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#F0F0F0" strokeDashoffset={`calc(100 - 0)`} strokeWidth="15" />
+              <circle
+                className="percent fifty"
+                strokeDasharray={100}
+                strokeDashoffset={`calc(100 - ${Math.round(hit.lineFillingRate)})`}
+                cx="60"
+                cy="60"
+                r="40"
+                fill="none"
+                stroke="#1E40AF"
+                strokeWidth="15"
+                pathLength="100"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+        </div>
+        <div className="w-[5%] flex justify-center">
+          {hit.modificationBuses?.length > 0 ? (
+            <div className={`flex p-2 rounded-full cursor-pointer ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}>
+              <Comment stroke={hasPendingModification && "white"} />
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </>
   );
 };
 
-const Action = ({ hit }) => {
-  const user = useSelector((state) => state.Auth.user);
+const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) => {
+  if (!meetingPoint) return children;
 
   return (
-    <ActionBox color={"#444"}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          Choisissez&nbsp;une&nbsp;action
-          <Chevron color="#444" />
-        </DropdownToggle>
-        <DropdownMenu>
-          <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
-            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
-          </Link>
-          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
-            <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
-            </DropdownItem>
-          ) : null}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
+    <div className="relative flex flex-col items-center group " {...props}>
+      {children}
+      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center left-0">
+        <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
+          <div className="flex items-center justify-between w-[524px]">
+            <div className="flex items-center">
+              <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">
+                {currentTab === "aller" ? meetingPoint.meetingHour : meetingPoint.returnHour}
+              </div>
+              <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
+                <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="#F5F5F5" />
+              </svg>
+              <div className="flex flex-col ml-1">
+                <div className="text-sm font-medium">{meetingPoint.name}</div>
+                <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
+              </div>
+            </div>
+            {getTransportIcon(meetingPoint.transportType)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TooltipCenter = ({ children, name, region, department, ...props }) => {
+  return (
+    <div className="relative flex flex-col items-center group" {...props}>
+      {children}
+      <div className="absolute flex-col hidden group-hover:flex !top-8 mb-3 items-center left-0">
+        <div className="relative py-3 px-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
+          <div className="flex flex-col">
+            <div className="text-sm font-medium">{`${name}`}</div>
+            <div className="text-xs text-gray-400">{`${region} • ${department}`}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
