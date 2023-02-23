@@ -281,9 +281,7 @@ export default function test() {
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
             />
-            <button
-              className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
-              onClick={() => setIsExportOpen(true)}>
+            <button className="rounded-md py-2 px-4 text-sm text-white bg-blue-600 hover:bg-snu-purple-700 hover:drop-shadow font-semibold" onClick={() => setIsExportOpen(true)}>
               Exporter les volontaires
             </button>
             <ModalExportV2
