@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { canCreateStructure, translate } from "snu-lib";
 import API from "../../../services/api";
-import { getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
+import { getNetworkOptions, legalStatus, typesStructure, ROLES } from "../../../utils";
 import { StructureContext } from "../view";
 
 import EditButton from "../../../components/buttons/EditButton";
@@ -215,7 +215,6 @@ function StructureForm() {
               readOnly={!isEditing}
               errors={errors}
             />
-
             {(!data.isNetwork || data.isNetwork === "false") && (
               <div className="space-y-2 my-3">
                 <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
@@ -226,9 +225,7 @@ function StructureForm() {
                 <AsyncSelect
                   isClearable
                   label="Réseau national"
-                  value={{
-                    label: data.networkName,
-                  }}
+                  value={{ label: data.networkName }}
                   loadOptions={getNetworkOptions}
                   isDisabled={!isEditing}
                   noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
@@ -247,15 +244,15 @@ function StructureForm() {
                 />
               </div>
             )}
-
-            <div className="flex justify-between my-3">
-              <p className="text-gray-500">Tête de réseau</p>
-              <div className="flex gap-2 items-center">
-                <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
-                {data.isNetwork ? "Oui" : "Non"}
+            {user.role === ROLES.ADMIN && (
+              <div className="flex justify-between my-3">
+                <p className="text-gray-500">Tête de réseau</p>
+                <div className="flex gap-2 items-center">
+                  <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
+                  {data.isNetwork ? "Oui" : "Non"}
+                </div>
               </div>
-            </div>
-
+            )}
             <div className="flex justify-between my-3">
               <p className="text-gray-500">Préparation militaire</p>
               <div className="flex gap-2 items-center">

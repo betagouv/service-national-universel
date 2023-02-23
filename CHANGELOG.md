@@ -1,3 +1,11 @@
+## [1.222.4](https://github.com/betagouv/service-national-universel/compare/v1.222.3...v1.222.4) (2023-02-22)
+
+
+### Bug Fixes
+
+* **admin/api:** auto-sélection du réseau à l'invitation d'une nouvelle structure par le superviseur ([#2287](https://github.com/betagouv/service-national-universel/issues/2287)) ([af8d956](https://github.com/betagouv/service-national-universel/commit/af8d956b61a8e3d15338cacdbc117af19d5891a7))
+* **app:** ajout de la possibilité de saisir des numéros de tel dans les DOM ([1d08474](https://github.com/betagouv/service-national-universel/commit/1d084742cca0740d661351a041fa3dbd2ef906c1))
+
 ## [1.222.3](https://github.com/betagouv/service-national-universel/compare/v1.222.2...v1.222.3) (2023-02-21)
 
 

@@ -8,9 +8,9 @@ let supportURL = "http://localhost:8083";
 let baseDeConnaissanceURL = "http://localhost:8084";
 
 if (environment === "staging") {
-  snuApiUrl = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
-  adminURL = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
-  appURL = "https://app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io";
+  snuApiUrl = "https://api.beta-snu.dev";
+  adminURL = "https://admin.beta-snu.dev";
+  appURL = "https://app.beta-snu.dev";
 }
 if (environment === "production") {
   snuApiUrl = "https://api.snu.gouv.fr";

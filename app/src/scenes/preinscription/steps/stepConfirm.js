@@ -136,7 +136,13 @@ export default function StepDone() {
         </div>
       </div>
 
-      <SignupButtonContainer onClickNext={() => onSubmit()} onClickPrevious={() => history.push("/preinscription/profil")} disabled={Object.values(error).length} />
+      <SignupButtonContainer
+        onClickNext={() => onSubmit()}
+        labelNext="M'inscrire au SNU"
+        onClickPrevious={() => history.push("/preinscription/profil")}
+        disabled={Object.values(error).length}
+        collapsePrevious={true}
+      />
     </DSFRContainer>
   );
 }
