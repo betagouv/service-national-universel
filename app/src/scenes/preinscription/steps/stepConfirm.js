@@ -141,6 +141,7 @@ export default function StepDone() {
         labelNext="M'inscrire au SNU"
         onClickPrevious={() => history.push("/preinscription/profil")}
         disabled={Object.values(error).length}
+        collapsePrevious={true}
       />
     </DSFRContainer>
   );
