@@ -3,6 +3,7 @@ const path = require("path");
 const hsts = require("hsts");
 const { forceDomain } = require("forcedomain");
 const helmet = require("helmet");
+import { environment } from "../src/config";
 
 const app = express();
 const port = 8080;
@@ -13,13 +14,14 @@ app.use(
   }),
 );
 
-app.use(
-  forceDomain({
-    hostname: "admin.snu.gouv.fr",
-    protocol: "https",
-    excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)|(snu\.dev)/,
-  }),
-);
+if (environment === "production") {
+  app.use(
+    forceDomain({
+      hostname: "admin.snu.gouv.fr",
+      protocol: "https",
+    }),
+  );
+}
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));
