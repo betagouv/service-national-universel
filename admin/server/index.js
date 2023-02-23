@@ -10,15 +10,15 @@ const port = 8080;
 app.use(
   helmet({
     contentSecurityPolicy: false,
-  })
+  }),
 );
 
 app.use(
   forceDomain({
     hostname: "admin.snu.gouv.fr",
     protocol: "https",
-    excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
-  })
+    excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)|(beta-snu\.dev)/,
+  }),
 );
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));

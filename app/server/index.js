@@ -10,7 +10,7 @@ const port = 8080;
 app.use(
   helmet({
     contentSecurityPolicy: false,
-  })
+  }),
 );
 
 app.use(function (req, res, next) {
@@ -25,8 +25,8 @@ app.use(
   forceDomain({
     hostname: "moncompte.snu.gouv.fr",
     protocol: "https",
-    excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
-  })
+    excludeRule: /([a-zA-Z0-9-]+\.cleverapps\.io)|(beta-snu\.dev)/,
+  }),
 );
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
