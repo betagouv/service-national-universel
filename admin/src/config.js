@@ -29,7 +29,7 @@ const S3PREFIX = "";
 
 function getEnvironment() {
   if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
-  if (window.location.href.indexOf("app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io") !== -1) return "staging";
+  if (window.location.href.indexOf("admin.beta-snu.dev") !== -1) return "staging";
   return "production";
 }
 
