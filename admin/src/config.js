@@ -11,7 +11,7 @@ let SENTRY_TRACING_SAMPLE_RATE = 1.0;
 
 if (environment === "staging") {
   apiURL = "https://api.beta-snu.dev";
-  appURL = "https://app.beta-snu.dev";
+  appURL = "https://moncompte.beta-snu.dev";
   adminURL = "https://admin.beta-snu.dev";
   supportURL = "https://app-9266b532-ff6e-4a6a-aeeb-e6ff7bb67f60.cleverapps.io";
   SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
