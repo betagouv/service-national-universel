@@ -9,7 +9,7 @@ export default function SignupButtonContainer({ onClickNext, onClickPrevious, la
         {onClickPrevious && (
           <button
             className={`${
-              labelNext ? "w-full" : "w-auto"
+              labelNext ? "w-full md:w-auto" : "w-auto"
             } flex items-center justify-center py-2 px-4 text-blue-france-sun-113 hover:text-blue-france-sun-113-hover border-[1px] border-blue-france-sun-113 hover:border-blue-france-sun-113-hover`}
             onClick={onClickPrevious}>
             {onClickNext && !labelPrevious ? <FiChevronLeft className="block md:hidden" /> : <p className="w-64 block md:hidden">{labelPrevious}</p>}
@@ -18,7 +18,7 @@ export default function SignupButtonContainer({ onClickNext, onClickPrevious, la
         )}
         {onClickNext && (
           <button
-            className="w-full flex items-center justify-center py-2 px-4 text-white bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover disabled:bg-grey-925 disabled:text-grey-625"
+            className="w-full md:w-auto flex items-center justify-center py-2 px-4 text-white bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover disabled:bg-grey-925 disabled:text-grey-625"
             onClick={onClickNext}
             disabled={disabled}>
             {labelNext}
