@@ -436,7 +436,7 @@ export default function List() {
     <>
       <Breadcrumbs items={[{ label: "Missions" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="flex flex-row mb-8" style={{ fontFamily: "Marianne" }}>
+        <div className="flex flex-row mb-8 w-full" style={{ fontFamily: "Marianne" }}>
           <div className="flex flex-1 flex-col w-full px-8">
             <div className="py-8 flex items-center justify-between">
               <div className="text-2xl font-bold text-[#242526] leading-7">Missions</div>
