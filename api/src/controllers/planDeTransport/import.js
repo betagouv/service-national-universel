@@ -20,6 +20,7 @@ const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPla
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 
 function isValidDate(date) {
   return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);
@@ -473,6 +474,34 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         const newLineToPoint = new LigneToPointModel(lineToPoint);
         await newLineToPoint.save();
       }
+
+      // * Update slave PlanTransport
+      const center = await CohesionCenterModel.findById(busLine.centerId);
+      await PlanTransportModel.create({
+        _id: busLine._id,
+        cohort: busLine.cohort,
+        busId: busLine.busId,
+        departureString: busLine.departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+        returnString: busLine.returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+        youngCapacity: busLine.youngCapacity,
+        totalCapacity: busLine.totalCapacity,
+        fillingRate: 0,
+        followerCapacity: busLine.followerCapacity,
+        travelTime: busLine.travelTime,
+        lunchBreak: busLine.lunchBreak,
+        lunchBreakReturn: busLine.lunchBreakReturn,
+        centerId: busLine.centerId,
+        centerRegion: center?.region,
+        centerDepartment: center?.department,
+        centerZip: center?.zip,
+        centerAddress: center?.address,
+        centerName: center?.name,
+        centerCode: center?.code2022,
+        centerArrivalTime: busLine.centerArrivalTime,
+        centerDepartureTime: busLine.centerDepartureTime,
+        pointDeRassemblements: busLine.meetingPointsIds,
+      });
+      // * End update slave PlanTransport
     }
 
     res.status(200).send({ ok: true, data: lines.length });
