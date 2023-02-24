@@ -823,7 +823,7 @@ const Hit = ({ hit, callback }) => {
             <img src={require("../../assets/logo-snu.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
           )}
           <div className="flex flex-col gap-1 w-full">
-            <p className="font-bold leading-6 text-gray-900 truncate w-10/12">{hit.name}</p>
+            <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
             <p className="font-normal text-sm leading-4 text-gray-500">
               {hit.address} • {hit.city} ({hit.department})
             </p>
