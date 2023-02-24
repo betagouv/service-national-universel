@@ -172,8 +172,12 @@ router.post(
           if (!line[`ID PDR ${i}`]) {
             errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
           }
-          if (line[`ID PDR ${i}`] && !mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
-            errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+          if (line[`ID PDR ${i}`]) {
+            const isValidObjectId = mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`]);
+            const isValidCorrespondance = i > 1 && line[`ID PDR ${i}`].toLowerCase() === "correspondance";
+            if (!(isValidObjectId || isValidCorrespondance)) {
+              errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+            }
           }
           if (!line[`TYPE DE TRANSPORT PDR ${i}`]) {
             errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -369,7 +373,9 @@ router.post(
         // Count total unique PDR
         const pdrCount = lines.reduce((acc, line) => {
           for (let i = 1; i <= countPdr; i++) {
-            if (line[`ID PDR ${i}`]) acc.push(line[`ID PDR ${i}`]);
+            if (line[`ID PDR ${i}`] && !acc.includes(line[`ID PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
+              acc.push(line[`ID PDR ${i}`]);
+            }
           }
           return acc;
         }, []).length;
@@ -439,27 +445,32 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       const newBusLine = new LigneBusModel(busLineData);
       const busLine = await newBusLine.save();
 
-      for (let i = 1; i <= countPdr; i++) {
-        // Skip empty PDR
-        if (i > 1 && !line[`ID PDR ${i}`]) continue;
-        const newLineToPointData = {
-          lineId: busLine._id.toString(),
-          meetingPointId: line[`ID PDR ${i}`],
-          transportType: line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase(),
-          busArrivalHour: line[`HEURE ALLER ARRIVÉE AU PDR ${i}`],
-          departureHour: line[`HEURE DEPART DU PDR ${i}`],
-          meetingHour: getPDRMeetingHour(line[`HEURE DEPART DU PDR ${i}`]),
-          returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`],
-          stepPoints: [
-            {
-              address: line[`NOM + ADRESSE DU PDR ${i}`],
-              departureHour: line[`HEURE DEPART DU PDR ${i}`],
-              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`],
-              transportType: line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase(),
-            },
-          ],
-        };
-        const newLineToPoint = new LigneToPointModel(newLineToPointData);
+      const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
+        if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;
+        if (line[`ID PDR ${pdrNumber}`].toLowerCase() !== "correspondance") {
+          acc.push({
+            lineId: busLine._id.toString(),
+            meetingPointId: line[`ID PDR ${pdrNumber}`],
+            transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+            busArrivalHour: line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`],
+            departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+            meetingHour: getPDRMeetingHour(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
+            returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+            stepPoints: [],
+          });
+        } else {
+          acc[acc.length - 1].stepPoints.push({
+            address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
+            departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+            returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+            transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+          });
+        }
+        return acc;
+      }, []);
+
+      for (const lineToPoint of lineToPointWithCorrespondance) {
+        const newLineToPoint = new LigneToPointModel(lineToPoint);
         await newLineToPoint.save();
       }
     }
