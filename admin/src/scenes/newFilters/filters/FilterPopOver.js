@@ -17,7 +17,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
   }, [data]);
 
   React.useEffect(() => {
-    const newData = search !== "" ? data.filter((f) => f.value.toLowerCase().includes(search.toLowerCase())) : data;
+    const newData = search !== "" ? data.filter((f) => f.key.toLowerCase().includes(search.toLowerCase())) : data;
     setOptionsVisible(newData);
   }, [search]);
 
@@ -97,18 +97,18 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                           <>
                             {optionsVisible
                               ?.sort((a, b) => {
-                                a.value.toString().localeCompare(b.value.toString());
+                                a.key.toString().localeCompare(b.key.toString());
                               })
                               ?.map((option) => (
                                 <div
                                   className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
-                                  key={option?.value}
-                                  onClick={() => handleSelect(option?.value)}>
+                                  key={option?.key}
+                                  onClick={() => handleSelect(option?.key)}>
                                   <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                                    <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.value)} />
-                                    {option.value === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.value) : option?.value}
+                                    <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key)} />
+                                    {option.value === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                                   </div>
-                                  <div className="text-gray-500 text-xs leading-5">{option.count}</div>
+                                  <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
                                 </div>
                               ))}
                           </>

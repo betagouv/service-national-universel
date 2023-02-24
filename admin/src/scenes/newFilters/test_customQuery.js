@@ -30,6 +30,7 @@ export default function test_volontaire() {
   const [size, setSize] = useState(20);
 
   const [currentTab, setCurrentTab] = React.useState("aller");
+  const [selectedFilters, setSelectedFilters] = React.useState({});
 
   const translateLineFillingRate = (e) => {
     if (e == 0) return "Vide";
@@ -37,6 +38,7 @@ export default function test_volontaire() {
     return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
   };
   const transformDataTaux = (data) => {
+    console.log("data", data);
     const newData = [];
     data.map((d) => {
       const dizaine = translateLineFillingRate(parseInt(d.key));
@@ -47,6 +49,7 @@ export default function test_volontaire() {
         newData.push({ key: dizaine, doc_count: d.doc_count });
       }
     });
+    console.log("newData", newData);
     return newData;
   };
 
@@ -95,8 +98,8 @@ export default function test_volontaire() {
       datafield: "lineFillingRate",
       parentGroup: "Ligne de Bus",
       missingLabel: "Non renseignée",
-      transformData: transformDataTaux(),
-      customQuery: customQuery(),
+      transformData: (value) => transformDataTaux(value),
+      customQuery: (value) => customQuery(value),
     },
   ];
 
@@ -135,6 +138,8 @@ export default function test_volontaire() {
           searchBarObject={searchBarObject}
           page={page}
           size={size}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
         />
         <ResultTable
           setPage={setPage}
