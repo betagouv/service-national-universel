@@ -471,8 +471,22 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
       if (key === "searchbar") return;
       if (key === name) return;
       if (selectedFilters[key].filter.length > 0) {
-        let datafield = filterArray.find((f) => f.name === key).datafield;
-        aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+        const currentFilter = filterArray.find((f) => f.name === key);
+        if (currentFilter.customQuery) {
+          // on a une custom query
+          const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
+          Object.keys(currentQuery?.bool).forEach((key) => {
+            if (aggregfiltersObject.bool[key]) {
+              aggregfiltersObject.bool[key] = aggregfiltersObject.bool[key].concat(currentQuery.bool[key]);
+            } else {
+              aggregfiltersObject.bool[key] = currentQuery.bool[key];
+            }
+          });
+          // cust
+        } else {
+          let datafield = currentFilter.datafield;
+          aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+        }
       }
     });
     return aggregfiltersObject;
@@ -504,11 +518,20 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
     Object.keys(selectedFilters).forEach((key) => {
       if (key === "searchbar") return;
       if (selectedFilters[key].customQuery) {
+      const currentFilter = filterArray.find((f) => f.name === key);
+      if (currentFilter.customQuery) {
         // on a une custom query
-        console.log("CUSTOM", selectedFilters[key].customQuery);
+        const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
+        Object.keys(currentQuery?.bool).forEach((key) => {
+          if (bodyQuery.query.bool[key]) {
+            bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
+          } else {
+            bodyQuery.query.bool[key] = currentQuery.bool[key];
+          }
+        });
         //body.query.bool.must.push(selectedFilters[key].customQuery);
       } else if (selectedFilters[key].filter.length > 0) {
-        let datafield = filterArray.find((f) => f.name === key).datafield;
+        let datafield = currentFilter.datafield;
         bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
       }
     });
@@ -523,8 +546,6 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
   //maybe piquet le cal de l'api engagement pour dexu body en une req
   const resAggs = await api.esQuery(esId, bodyAggs);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
-
-  console.log(resAggs.responses[0].aggregations);
 
   const resQuery = await api.esQuery(esId, bodyQuery);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
@@ -544,6 +565,5 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
     }
   });
 
-  console.log(newFilters);
   return { data, count, newFilters };
 };
