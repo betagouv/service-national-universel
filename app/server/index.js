@@ -10,24 +10,34 @@ const port = 8080;
 app.use(
   helmet({
     contentSecurityPolicy: false,
-  })
+  }),
 );
 
-app.use(function (req, res, next) {
-  if (req.headers.host === "inscription.snu.gouv.fr") {
-    res.redirect(301, "https://moncompte.snu.gouv.fr");
-  } else {
-    next();
-  }
-});
+if (process.env.PROD) {
+  app.use(function (req, res, next) {
+    if (req.headers.host === "inscription.snu.gouv.fr") {
+      res.redirect(301, "https://moncompte.snu.gouv.fr");
+    } else {
+      next();
+    }
+  });
 
-app.use(
-  forceDomain({
-    hostname: "moncompte.snu.gouv.fr",
-    protocol: "https",
-    excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
-  })
-);
+  app.use(
+    forceDomain({
+      hostname: "moncompte.snu.gouv.fr",
+      protocol: "https",
+    }),
+  );
+}
+
+if (process.env.STAGING) {
+  app.use(
+    forceDomain({
+      hostname: "moncompte.beta-snu.dev",
+      protocol: "https",
+    }),
+  );
+}
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));

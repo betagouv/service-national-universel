@@ -10,16 +10,26 @@ const port = 8080;
 app.use(
   helmet({
     contentSecurityPolicy: false,
-  })
+  }),
 );
 
-app.use(
-  forceDomain({
-    hostname: "admin.snu.gouv.fr",
-    protocol: "https",
-    excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
-  })
-);
+if (process.env.PROD) {
+  app.use(
+    forceDomain({
+      hostname: "admin.snu.gouv.fr",
+      protocol: "https",
+    }),
+  );
+}
+
+if (process.env.STAGING) {
+  app.use(
+    forceDomain({
+      hostname: "admin.beta-snu.dev",
+      protocol: "https",
+    }),
+  );
+}
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));

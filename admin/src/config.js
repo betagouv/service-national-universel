@@ -11,7 +11,7 @@ let SENTRY_TRACING_SAMPLE_RATE = 1.0;
 
 if (environment === "staging") {
   apiURL = "https://api.beta-snu.dev";
-  appURL = "https://app.beta-snu.dev";
+  appURL = "https://moncompte.beta-snu.dev";
   adminURL = "https://admin.beta-snu.dev";
   supportURL = "https://app-9266b532-ff6e-4a6a-aeeb-e6ff7bb67f60.cleverapps.io";
   SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
@@ -29,7 +29,7 @@ const S3PREFIX = "";
 
 function getEnvironment() {
   if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
-  if (window.location.href.indexOf("app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io") !== -1) return "staging";
+  if (window.location.href.indexOf("admin.beta-snu.dev") !== -1) return "staging";
   return "production";
 }
 
