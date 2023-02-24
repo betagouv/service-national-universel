@@ -261,16 +261,21 @@ export default function List() {
       // Add applications info
       const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
       const queryApplication = {
-        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": applicationStatusFilter } }] } },
+        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
         track_total_hits: true,
         size: ES_NO_LIMIT,
       };
+
+      if (applicationStatusFilter?.length) {
+        queryApplication.query.bool.filter.push({ terms: { "status.keyword": applicationStatusFilter } });
+      }
 
       const resultApplications = await api.post(`/es/application/export`, {
         ...queryApplication,
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
       if (resultApplications?.data?.length) {
+        console.log("🚀 ~ file: list.js:278 ~ transformCandidature ~ resultApplications:", resultApplications);
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
       } else {
         all = all.map((item) => ({ ...item, candidatures: [] }));
