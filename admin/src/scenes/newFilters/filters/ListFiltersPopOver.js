@@ -518,21 +518,22 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
     Object.keys(selectedFilters).forEach((key) => {
       if (key === "searchbar") return;
       if (selectedFilters[key].customQuery) {
-      const currentFilter = filterArray.find((f) => f.name === key);
-      if (currentFilter.customQuery) {
-        // on a une custom query
-        const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
-        Object.keys(currentQuery?.bool).forEach((key) => {
-          if (bodyQuery.query.bool[key]) {
-            bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
-          } else {
-            bodyQuery.query.bool[key] = currentQuery.bool[key];
-          }
-        });
-        //body.query.bool.must.push(selectedFilters[key].customQuery);
-      } else if (selectedFilters[key].filter.length > 0) {
-        let datafield = currentFilter.datafield;
-        bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+        const currentFilter = filterArray.find((f) => f.name === key);
+        if (currentFilter.customQuery) {
+          // on a une custom query
+          const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
+          Object.keys(currentQuery?.bool).forEach((key) => {
+            if (bodyQuery.query.bool[key]) {
+              bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
+            } else {
+              bodyQuery.query.bool[key] = currentQuery.bool[key];
+            }
+          });
+          //body.query.bool.must.push(selectedFilters[key].customQuery);
+        } else if (selectedFilters[key].filter.length > 0) {
+          let datafield = currentFilter.datafield;
+          bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+        }
       }
     });
   }

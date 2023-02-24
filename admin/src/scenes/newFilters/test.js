@@ -263,6 +263,10 @@ export default function test() {
         <div className="py-2 px-3 bg-blue-600 text-white w-fit cursor-pointer rounded" onClick={() => history.push("/filters/custom")}>
           Test Custom
         </div>
+
+        <div className="py-2 px-3 bg-blue-600 text-white w-fit cursor-pointer rounded" onClick={() => history.push("/filters/customComponent")}>
+          Test Custom Component
+        </div>
       </div>
 
       <div className="bg-white h-full">
