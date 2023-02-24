@@ -1,3 +1,19 @@
+## [1.223.1](https://github.com/betagouv/service-national-universel/compare/v1.223.0...v1.223.1) (2023-02-24)
+
+
+### Bug Fixes
+
+* **admin:** export des candidatures ([e7ecdb3](https://github.com/betagouv/service-national-universel/commit/e7ecdb39abb6b2a14836a9c76f98c63b8f90a643))
+* **admin:** fix du fix des exports de candidature ([1ef9eba](https://github.com/betagouv/service-national-universel/commit/1ef9ebad60f4548151bd8353c4c0e0630fb7a631))
+* **admin:** list mission only 1 line ([277cc60](https://github.com/betagouv/service-national-universel/commit/277cc60d4f28d0f14a262895bd94dc1c01bbb7eb))
+* **admin:** liste mission largeur ([7b86cfa](https://github.com/betagouv/service-national-universel/commit/7b86cfaead818765a0b48e9f446f97a75ccfc13c))
+* **admin:** prod style mission ? ([4c0ee18](https://github.com/betagouv/service-national-universel/commit/4c0ee184545315f64cd6553b22e0ed252bf3a676))
+* **admin:** translate application filter ([bf242a0](https://github.com/betagouv/service-national-universel/commit/bf242a02de42f97c6e7b5252889ba3f2d75560b1))
+* **admin:** utilisation du regex pour les pages de consentement ([9b896e0](https://github.com/betagouv/service-national-universel/commit/9b896e080a1218f5ff41cf9c00d8ce76cc6b4601))
+* **api:** Add try catch ([#2311](https://github.com/betagouv/service-national-universel/issues/2311)) ([e24e2bc](https://github.com/betagouv/service-national-universel/commit/e24e2bcef4f2e90d73c480f83e1309611762099c))
+* **api:** cron parentConsentReminder kill SMS ([6d6b2af](https://github.com/betagouv/service-national-universel/commit/6d6b2aff9edd27f435870c05bb967e29d5dfcd6e))
+* **api:** update computeGoalsInscription ([b9b4540](https://github.com/betagouv/service-national-universel/commit/b9b4540f89d767ce5b52f506936ab3dcbf54e966))
+
 # [1.223.0](https://github.com/betagouv/service-national-universel/compare/v1.222.4...v1.223.0) (2023-02-23)
 
 
