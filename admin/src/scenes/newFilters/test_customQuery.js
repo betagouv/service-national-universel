@@ -31,6 +31,56 @@ export default function test_volontaire() {
 
   const [currentTab, setCurrentTab] = React.useState("aller");
 
+  const translateLineFillingRate = (e) => {
+    if (e == 0) return "Vide";
+    if (e == 100) return "Rempli";
+    return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
+  };
+  const transformDataTaux = (data) => {
+    const newData = [];
+    data.map((d) => {
+      const dizaine = translateLineFillingRate(parseInt(d.key));
+      const val = newData.find((e) => e.key === dizaine);
+      if (val) {
+        newData[newData.indexOf(val)].doc_count += d.doc_count;
+      } else {
+        newData.push({ key: dizaine, doc_count: d.doc_count });
+      }
+    });
+    return newData;
+  };
+
+  const customQuery = (value) => {
+    let rangeArray = [];
+    let empty = false;
+    let full = false;
+    if (Array.isArray(value)) {
+      value?.map((e) => {
+        if (e === "Vide") empty = true;
+        else if (e === "Rempli") full = true;
+        else {
+          const splitValue = e.split("-");
+          const transformedArray = [parseInt(splitValue[0]), parseInt(splitValue[1].replace("%", ""))];
+          rangeArray = rangeArray.concat([transformedArray]);
+        }
+      });
+    }
+    const body = getDefaultQuery();
+    const filter = [];
+    if (empty) filter.push({ term: { lineFillingRate: 0 } });
+    if (full) filter.push({ term: { lineFillingRate: 100 } });
+    if (rangeArray.length > 0) {
+      rangeArray.map((e) => {
+        filter.push({ range: { lineFillingRate: { gte: e[0] === 0 ? 1 : e[0], lte: e[1] } } });
+      });
+    }
+    if (empty || full || rangeArray.length > 0) {
+      body.query.bool.minimum_should_match = 1;
+      body.query.bool.should = filter;
+    }
+    return body;
+  };
+
   const searchBarObject = {
     placeholder: "Rechercher une ligne (numéro, ville, region)",
     datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
@@ -39,13 +89,22 @@ export default function test_volontaire() {
     { title: "Numéro de la ligne", name: "busId", datafield: "busId.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
     { title: "Date aller", name: "departureString", datafield: "departureString.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
     { title: "Date retour", name: "returnString", datafield: "returnString.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
-    { title: "Taux de remplissage", name: "lineFillingRate", datafield: "lineFillingRate", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
+    {
+      title: "Taux de remplissage",
+      name: "lineFillingRate",
+      datafield: "lineFillingRate",
+      parentGroup: "Ligne de Bus",
+      missingLabel: "Non renseignée",
+      transformData: transformDataTaux(),
+      customQuery: customQuery(),
+    },
   ];
 
   const getDefaultQuery = () => {
     return {
       query: {
         bool: {
+          should: [],
           must: [{ term: { "cohort.keyword": "Février 2023 - C" } }],
         },
       },
