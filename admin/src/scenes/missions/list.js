@@ -822,11 +822,15 @@ const Hit = ({ hit, callback }) => {
           ) : (
             <img src={require("../../assets/logo-snu.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
           )}
-          <div className="flex flex-col gap-1 w-full">
-            <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
-            <p className="font-normal text-sm leading-4 text-gray-500">
-              {hit.address} • {hit.city} ({hit.department})
-            </p>
+          <div className="flex flex-col w-full gap-1  justify-center">
+            <div className="table table-fixed w-full border-collapse m-0">
+              <div className="font-bold text-gray-900 truncate table-cell">{hit.name}</div>
+            </div>
+            <div className="table table-fixed w-full border-collapse m-0">
+              <div className="font-normal text-sm leading-4 text-gray-500 truncate table-cel ">
+                {hit.address} • {hit.city} ({hit.department})
+              </div>
+            </div>
           </div>
         </div>
         <div className="w-[5%]">
