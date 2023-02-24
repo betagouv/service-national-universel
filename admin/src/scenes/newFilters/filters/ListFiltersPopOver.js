@@ -51,6 +51,8 @@ export default function ListFiltersPopOver({
   const ref = React.useRef(null);
   const refFilter = React.useRef(null);
 
+  console.log(selectedFilters);
+
   const hasSomeFilterSelected = Object.values(selectedFilters).find((item) => item.filter.length > 0);
 
   React.useEffect(() => {
@@ -497,7 +499,7 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
     Object.keys(selectedFilters).forEach((key) => {
       if (selectedFilters[key].customQuery) {
         // on a une custom query
-        console.log("CUSTOM");
+        console.log("CUSTOM", selectedFilters[key].customQuery);
         //body.query.bool.must.push(selectedFilters[key].customQuery);
       } else if (selectedFilters[key].filter.length > 0) {
         let datafield = filterArray.find((f) => f.name === key).datafield;
@@ -528,8 +530,14 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
 
   // map a travers les aggregations pour recuperer les filtres
   filterArray.map((f) => {
-    newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ value: b.key, count: b.doc_count }));
+    newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
+
+    // check for any transformData function
+    if (f.transformData) {
+      newFilters[f.name] = f.transformData(newFilters[f.name]);
+    }
   });
 
+  console.log(newFilters);
   return { data, count, newFilters };
 };
