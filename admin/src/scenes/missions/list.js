@@ -509,7 +509,7 @@ export default function List() {
                   { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
                 ]}
                 render={({ data }) => (
-                  <div className="flex flex-col bg-white gap-1 rounded-xl">
+                  <div className="flex flex-col bg-white gap-1 rounded-xl w-full">
                     <div className=" pt-4 pb-1 px-4 ">
                       <div className="flex items-center gap-2 py-2">
                         <DataSearch
@@ -551,7 +551,7 @@ export default function List() {
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Statut")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Statut")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -587,7 +587,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Visibilité", "Visibilité")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Visibilité", "Visibilité")} </div>}
                             />
                           </div>
                           <div className="flex items-center flex-wrap gap-2">
@@ -605,7 +605,7 @@ export default function List() {
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Domaine d'action principal", "Domaine d'action principal")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Domaine d'action principal", "Domaine d'action principal")} </div>}
                               showMissing
                               missingLabel="Non renseigné"
                             />
@@ -621,7 +621,7 @@ export default function List() {
                               showSearch={false}
                               sortBy="asc"
                               selectAllLabel="Tout sélectionner"
-                              renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -647,7 +647,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Préparation Militaire")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -661,7 +661,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Hébergement")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Hébergement")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -675,7 +675,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Hébergement Payant")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Hébergement Payant")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -690,24 +690,23 @@ export default function List() {
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Place occupées", "Place occupées")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Place occupées", "Place occupées")} </div>}
                               showMissing
                               missingLabel="Non renseigné"
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
                               className="dropdown-filter"
-                              placeholder="Place occupées"
                               componentId="APPLICATIONSTATUS"
                               dataField="applicationStatus.keyword"
                               react={{ and: FILTERS.filter((e) => e !== "APPLICATIONSTATUS") }}
                               renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
+                                return `${translateApplication(e)} (${count})`;
                               }}
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Statut de candidature", "Statut de candidature")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Statut de candidature", "Statut de candidature")}</div>}
                               showMissing
                               missingLabel="Aucune candidature ni proposition"
                               onValueChange={(e) => {
