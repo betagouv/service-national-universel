@@ -32,7 +32,6 @@ export default function ListFiltersPopOver({
   const [search, setSearch] = React.useState("");
 
   // searchBar
-  const [searchBar, setSearchBar] = React.useState("");
   // data correspond to filters
   const [dataFilter, setDataFilter] = React.useState([]);
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
@@ -51,9 +50,7 @@ export default function ListFiltersPopOver({
   const ref = React.useRef(null);
   const refFilter = React.useRef(null);
 
-  console.log(selectedFilters);
-
-  const hasSomeFilterSelected = Object.values(selectedFilters).find((item) => item.filter.length > 0);
+  const hasSomeFilterSelected = Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
 
   React.useEffect(() => {
     const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
@@ -92,17 +89,18 @@ export default function ListFiltersPopOver({
     });
     setCategories(newCategories);
   }, [filtersVisible]);
+
   React.useEffect(() => {
     if (mounted.current) {
       getData();
       setURL();
     }
-  }, [selectedFilters, searchBar, page]);
+  }, [selectedFilters, page]);
 
   const init = async () => {
     const initialFilters = getURLParam();
     setSelectedFilters(initialFilters);
-    const res = await buildMissions(esId, initialFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions(esId, initialFilters, page, size, defaultQuery, filters, searchBarObject);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setData(res.data);
@@ -111,7 +109,7 @@ export default function ListFiltersPopOver({
   };
 
   const getData = async () => {
-    const res = await buildMissions(esId, selectedFilters, searchBar, page, size, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
@@ -131,6 +129,7 @@ export default function ListFiltersPopOver({
     const length = Object.keys(selectedFilters).length;
     let index = 0;
     const url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+      if (curr === "searchbar" && selectedFilters[curr]?.filter?.length > 0 && selectedFilters[curr]?.filter[0].trim() === "") return acc;
       if (selectedFilters[curr]?.filter?.length > 0) {
         acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
       }
@@ -146,6 +145,10 @@ export default function ListFiltersPopOver({
 
   // text for tooltip save
   const saveTitle = Object.keys(selectedFilters).map((key) => {
+    if (key === "searchbar") {
+      if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
+      return;
+    }
     if (selectedFilters[key].filter.length > 0) {
       return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
     }
@@ -209,6 +212,7 @@ export default function ListFiltersPopOver({
     setIsShowing(value);
     setModalSaveVisible(false);
   };
+
   return (
     <div>
       <div className="flex flex-row items-center justify-start gap-2">
@@ -217,8 +221,8 @@ export default function ListFiltersPopOver({
             <input
               name={"searchbar"}
               placeholder={searchBarObject.placeholder}
-              value={searchBar}
-              onChange={(e) => setSearchBar(e.target.value)}
+              value={selectedFilters?.searchbar?.filter[0] || ""}
+              onChange={(e) => setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value?.trim()] } })}
               className={`w-full h-full text-xs text-gray-600`}
             />
           </div>
@@ -425,7 +429,7 @@ const FloppyDisk = () => {
     </svg>
   );
 };
-const buildMissions = async (esId, selectedFilters, search, page, size, defaultQuery = null, filterArray, searchBarObject) => {
+const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject) => {
   let query = {};
   let aggsQuery = {};
   if (!defaultQuery) {
@@ -458,12 +462,13 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
         must: [],
       },
     };
-    if (search) {
+    if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
       aggregfiltersObject.bool.must.push({
-        multi_match: { query: search, fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
+        multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
       });
     }
     Object.keys(selectedFilters).map((key) => {
+      if (key === "searchbar") return;
       if (key === name) return;
       if (selectedFilters[key].filter.length > 0) {
         let datafield = filterArray.find((f) => f.name === key).datafield;
@@ -497,6 +502,7 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
 
   if (selectedFilters && Object.keys(selectedFilters).length) {
     Object.keys(selectedFilters).forEach((key) => {
+      if (key === "searchbar") return;
       if (selectedFilters[key].customQuery) {
         // on a une custom query
         console.log("CUSTOM", selectedFilters[key].customQuery);
@@ -508,9 +514,9 @@ const buildMissions = async (esId, selectedFilters, search, page, size, defaultQ
     });
   }
 
-  if (search) {
+  if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     bodyQuery.query.bool.must.push({
-      multi_match: { query: search, fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
+      multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
 
