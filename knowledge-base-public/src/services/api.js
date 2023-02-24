@@ -29,7 +29,7 @@ class ApiService {
         },
       };
 
-      if (body) options.body = JSON.stringify(body);
+      if (body) options.body = JSON.stringify(body.data);
       if (credentials) options.credentials = credentials;
 
       const url = this.getUrl({ origin, path, query });

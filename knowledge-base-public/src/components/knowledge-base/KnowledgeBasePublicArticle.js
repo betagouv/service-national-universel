@@ -1,6 +1,8 @@
 import TextEditor from "../TextEditor";
 import { useState } from "react";
 import API from "../../services/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const [isThumbsUp, setIsThumbsUp] = useState(false);
@@ -14,59 +16,37 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
     setComment(e.target.value);
   };
 
-  async function postGoodFeedback() {
+  const showToastMessage = () => {
+    toast.error("Une erreure s'est produite veuillez nous excusez", {
+      position: toast.POSITION.TOP_RIGHT,
+    });
+  };
+
+  async function postFeedback(e) {
     const data = {
       knowledgeBaseArticle: item._id,
       isPositive: true,
     };
-    // const requestOptions = {
-    //   method: "POST",
-    // headers: {
-    //   "Content-type": "application/json",
-    // },
-    //   body: JSON.stringify(data),
-    // };
-    // const response = await API.post({ path: `/feedback`, body: { data } });
-    console.log("data", data);
-    const response = await API.post({ path: `/feedback`, body: { data } });
-    console.log("HIHI", response);
-    // const response = await fetch("http://localhost:3000/feedback", requestOptions);
-    if (response.status === 200) {
-      console.log("RESPONSE1", response);
-      setIsThumbsUp(!isThumbsUp);
-      return response;
+    if (e.target.id === "ThumbsUp") {
+      const response = await API.post({ path: `/feedback`, body: { data } });
+      if (response.ok) {
+        setIsThumbsUp(!isThumbsUp);
+      } else {
+        showToastMessage();
+      }
     } else {
-      console.log("Response2", response.status);
-      alert("Une erreure s'est produite veuillez nous excusez");
-    }
-  }
+      data.comment = comment;
+      data.isPositive = false;
+      const response = await API.post({ path: `/feedback`, body: { data } });
 
-  async function postBadFeedback() {
-    const data = {
-      knowledgeBaseArticle: item._id,
-      isPositive: false,
-      comment: comment,
-    };
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    };
-    // const response = await API.get({ path: `/knowledge-base/${restriction}/search`, query: { search } });
-
-    const response = await fetch("http://localhost:3000/feedback", requestOptions);
-    if (response.status === 200) {
-      setIsValidated(true);
-      setIsThumbsDown(false);
-      setIsThumbsUp(true);
-      return response;
-    } else {
-      console.log("Response", response.status);
-      alert("Une erreure s'est produite veuillez nous excusez");
+      if (response.ok) {
+        setIsValidated(true);
+        setIsThumbsDown(false);
+        setIsThumbsUp(true);
+      } else {
+        showToastMessage();
+      }
     }
-    return response;
   }
 
   if (isLoading) return <ArticleLoader />;
@@ -82,6 +62,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       )}
       <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
       <div className="border-[rgba(0, 0, 0, 0.1)] mt-10 mb-12 w-full border-t-2"></div>
+      <ToastContainer />
       {isThumbsUp === isThumbsDown ? (
         <div className="flex flex h-48 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
           <>
@@ -89,8 +70,9 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
           </>
           <div className="mt-3 flex flex-row">
             <div
+              id="ThumbsUp"
               className="mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
-              onClick={() => postGoodFeedback()}
+              onClick={(e) => postFeedback(e)}
             >
               👍
             </div>
@@ -129,12 +111,13 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                   Annuler
                 </div>
                 <div
+                  id="ThumbsDown"
                   className={`${
-                    counter > 125 && "pointer-events-none"
+                    counter > 125 || counter < 1 ? "pointer-events-none" : null
                   } ml-1 flex h-12 w-6/12 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 ${
-                    counter > 125 ? "bg-indigo-200" : "bg-[#4F46E5]"
+                    counter > 125 || counter < 1 ? "bg-indigo-200" : "bg-[#4F46E5]"
                   } text-sm font-medium leading-5 text-[#FFFFFF]`}
-                  onClick={() => postBadFeedback()}
+                  onClick={(e) => postFeedback(e)}
                 >
                   Envoyer
                 </div>
