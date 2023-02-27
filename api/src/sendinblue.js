@@ -131,12 +131,14 @@ async function getEmailContent(uuid) {
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, { force } = { force: false }) {
   try {
+    if (!id) throw new Error("No template id provided");
+
     const body = { templateId: parseInt(id) };
     if (!force && ENVIRONMENT !== "production") {
       console.log("emailTo before filter:", emailTo);
       const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       emailTo = emailTo.filter((e) => e.email.match(regexp));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
+      if (cc?.length) cc = cc.filter((egit st) => e.email.match(regexp));
       if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
     }
     if (emailTo) body.to = emailTo;

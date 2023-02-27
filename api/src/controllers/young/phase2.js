@@ -196,6 +196,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`];
+    if (!template) {
+      capture(`Template not found for EQUIVALENCE_${value.status}`);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
