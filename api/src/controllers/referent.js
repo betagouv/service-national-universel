@@ -984,6 +984,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    if (value.role !== ROLES.HEAD_CENTER) value.cohorts = [];
+    if (value.role !== ROLES.REFERENT_DEPARTMENT) value.department = null;
+
     referent.set(value);
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -1004,6 +1007,9 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     }
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (value.role !== ROLES.HEAD_CENTER) value.cohorts = [];
+    if (value.role !== ROLES.REFERENT_DEPARTMENT) value.department = null;
+
     user.set(value);
     await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);

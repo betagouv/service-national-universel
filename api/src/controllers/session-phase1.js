@@ -67,6 +67,15 @@ const destinataireLabel = ({ firstName, lastName }, ministres) => {
   return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
 };
 
+const updateReferent = async (headCenterId, user) => {
+  const headCenter = await ReferentModel.findById(headCenterId);
+  if (!headCenter) return;
+  const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
+  const cohorts = sessions.map((s) => s.cohort);
+  headCenter.set({ cohorts });
+  await headCenter.save({ fromUser: user });
+};
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateSessionPhase1(req.body);
@@ -78,14 +87,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!canCreateOrUpdateSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await SessionPhase1Model.create(value);
-
-    // add cohort to head center
-    const headCenter = await ReferentModel.findById(data.headCenterId);
-    if (!headCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!headCenter.cohorts.includes(data.cohort)) {
-      headCenter.set({ cohorts: [...headCenter.cohorts, data.cohort] });
-      await headCenter.save({ fromUser: req.user });
-    }
+    await updateReferent(data.headCenterId, req.user);
 
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
@@ -192,17 +194,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    // update cohorts in head center
-    if (value.cohort !== sessionPhase1.cohort) {
-      const headCenter = await ReferentModel.findById(sessionPhase1.headCenterId);
-      if (!headCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      headCenter.set({ cohorts: headCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
-      headCenter.set({ cohorts: [...headCenter.cohorts, value.cohort] });
-      await headCenter.save({ fromUser: req.user });
-    }
+    let oldHeadCenterId = value.headCenterId;
+    const hasHeadCenterChanged = sessionPhase1.headCenterId !== value.headCenterId;
 
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
+    await updateReferent(sessionPhase1.headCenterId, req.user);
+    if (hasHeadCenterChanged) {
+      await updateReferent(oldHeadCenterId, req.user);
+    }
 
     const data = await updatePlacesSessionPhase1(sessionPhase1, req.user);
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
@@ -336,12 +336,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
     cohesionCenter.save({ fromUser: req.user });
 
-    // delete cohort in head center
-    const headCenter = await ReferentModel.findById(sessionPhase1.headCenterId);
-    headCenter.set({ cohorts: headCenter.cohorts.filter((s) => s !== sessionPhase1.cohort) });
-    headCenter.save({ fromUser: req.user });
-
     await sessionPhase1.remove();
+    await updateReferent(sessionPhase1.headCenterId, req.user);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -516,6 +512,7 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
 
     sessionPhase1.set({ headCenterId: checkedIdHeadCenter });
     await sessionPhase1.save({ fromUser: req.user });
+    await updateReferent(checkedIdHeadCenter, req.user);
 
     res.status(200).send({ ok: true });
   } catch (error) {
@@ -536,6 +533,7 @@ router.delete("/:id/headCenter", passport.authenticate("referent", { session: fa
 
     sessionPhase1.set({ headCenterId: undefined });
     await sessionPhase1.save({ fromUser: req.user });
+    await updateReferent(sessionPhase1.headCenterId, req.user);
 
     res.status(200).send({ ok: true });
   } catch (error) {
