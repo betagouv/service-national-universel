@@ -4,6 +4,7 @@ const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
+const ReferentModel = require("../../models/referent");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -15,6 +16,7 @@ const {
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
   SENDINBLUE_TEMPLATES,
+  ROLES,
 } = require("snu-lib");
 const { ObjectId } = require("mongodb");
 const { sendTemplate } = require("../../sendinblue");
@@ -59,16 +61,20 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [copyModif];
     else planDeTransport.modificationBuses.push(copyModif);
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.DEMANDE_DE_MODIFICATION, {
-      emailTo: [{ name: `${"contactFirstname"} ${"contactLastname"}`, email: "contactEmail" }],
-      params: {
-        busId: lineId,
-        requestUserFirstname: req.user.firstName,
-        requestUserLastname: req.user.lastName,
-        region: req.user.region,
-        cta: `${config.APP_URL}/ligne-de-bus/${lineId}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+672+effectuer`,
-      },
-    });
+    const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
+
+    for (const referentTransporter of referentTransporters) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.DEMANDE_DE_MODIFICATION, {
+        emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
+        params: {
+          busId: line.busId,
+          requestUserFirstname: req.user.firstName,
+          requestUserLastname: req.user.lastName,
+          region: req.user.region,
+          cta: `${config.ADMIN_URL}/ligne-de-bus/${lineId}`,
+        },
+      });
+    }
 
     await planDeTransport.save({ fromUser: req.user });
 
