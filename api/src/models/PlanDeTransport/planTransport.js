@@ -62,7 +62,6 @@ const Schema = new mongoose.Schema({
 
   busId: {
     type: String,
-    unique: true,
     required: true,
     documentation: {
       description: "Numero de bus",

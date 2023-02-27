@@ -500,7 +500,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         returnString: busLine.returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
         youngCapacity: busLine.youngCapacity,
         totalCapacity: busLine.totalCapacity,
-        fillingRate: 0,
+        lineFillingRate: 0,
         followerCapacity: busLine.followerCapacity,
         travelTime: busLine.travelTime,
         lunchBreak: busLine.lunchBreak,
