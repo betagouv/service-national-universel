@@ -70,8 +70,6 @@ router.post("/knowledgeBase/feedback", async (req, res) => {
     });
     if (!ok) return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
-    console.log("data", data);
-
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
