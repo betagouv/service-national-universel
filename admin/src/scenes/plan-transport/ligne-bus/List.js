@@ -54,8 +54,8 @@ const cohortList = [
 ];
 
 const translateLineFillingRate = (e) => {
-  if (e == 0) return "Vide";
-  if (e == 100) return "Rempli";
+  if (e === 0) return "Vide";
+  if (e === 100) return "Rempli";
   return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
 };
 
