@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -15,6 +15,8 @@ import ModalConfirm from "../components/modals/ModalConfirm";
 import PasswordEye from "../components/PasswordEye";
 import { appURL } from "../config";
 import { putLocation } from "../services/api-adresse";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import DeleteAccountButton from "../components/buttons/DeleteAccountButton";
 
 export default function Account() {
   const young = useSelector((state) => state.Auth.young);
@@ -203,7 +205,7 @@ export default function Account() {
                 validateField={validateField}
               />
             </div>
-            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Représentant Légal</h2>
+            <h2 className="md:text-3xl text-2xl font-bold mb-6">Représentant Légal</h2>
             <FormRow>
               <Select
                 name="parent1Status"
@@ -285,6 +287,15 @@ export default function Account() {
           </>
         )}
       </Formik>
+      <div className="flex justify-center gap-8 mt-12">
+        {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
+        [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
+          <ChangeStayButton to="/changer-de-sejour">Changer de séjour</ChangeStayButton>
+        ) : null}
+        {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
+          <DeleteAccountButton young={young}>Se désister du SNU</DeleteAccountButton>
+        ) : null}
+      </div>
     </Wrapper>
   );
 }
@@ -373,10 +384,29 @@ const ContinueButton = styled.button`
   font-size: 14px;
   display: block;
   width: auto;
-  outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   align-self: flex-end;
   :hover {
     opacity: 0.9;
   }
+`;
+
+const ChangeStayButton = styled(Link)`
+  @media (max-width: 767px) {
+    margin: 1rem 0;
+  }
+  padding: 10px 40px;
+  border: 0;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  display: block;
+  width: auto;
+  align-self: flex-end;
+  :hover {
+    opacity: 0.9;
+  }
+  border: 1px solid #d1d5db;
+  color: #374151;
 `;
