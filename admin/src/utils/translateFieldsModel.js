@@ -498,6 +498,10 @@ const translateFieldReferent = (f) => {
       return "créé(e) le";
     case "updatedAt":
       return "mis(e) à jour le";
+    case "email":
+      return "Email";
+    case "cohorts":
+      return "Cohortes";
     default:
       return f;
   }
