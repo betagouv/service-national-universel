@@ -2,7 +2,6 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Switch } from "react-router-dom";
 import { ROLES } from "snu-lib";
-import { SentryRoute } from "../../../sentry";
 import RestrictedChildRoute from "../../../utils/components/RestrictedChildRoute";
 import SchemaRepartition from "./SchemaRepartition";
 
@@ -19,8 +18,18 @@ export default function SchemaRepartitionIndex(props) {
 
   return (
     <Switch>
-      <SentryRoute path="/schema-repartition/:region/:department" component={() => <SchemaRepartition region={region} department={department} />} />
-      <SentryRoute path="/schema-repartition/:region" component={() => <SchemaRepartition region={region} />} />
+      <RestrictedChildRoute
+        path="/schema-repartition/:region/:department"
+        component={() => <SchemaRepartition region={region} department={department} />}
+        allowedRoles={[ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT]}
+        redirectUnauthorizedTo={redirectUnauthorizedToObject}
+      />
+      <RestrictedChildRoute
+        path="/schema-repartition/:region"
+        component={() => <SchemaRepartition region={region} />}
+        allowedRoles={[ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT]}
+        redirectUnauthorizedTo={redirectUnauthorizedToObject}
+      />
       <RestrictedChildRoute
         path="/schema-repartition"
         component={() => <SchemaRepartition />}
