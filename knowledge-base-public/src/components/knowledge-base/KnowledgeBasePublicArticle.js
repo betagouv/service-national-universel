@@ -3,6 +3,8 @@ import { useState } from "react";
 import API from "../../services/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useUser from "../../hooks/useUser";
+import { snuApiUrl } from "../../config";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const [isThumbsUp, setIsThumbsUp] = useState(false);
@@ -10,6 +12,9 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const [validated, setIsValidated] = useState(false);
   const [counter, setCounter] = useState(0);
   const [comment, setComment] = useState("");
+  const { user } = useUser();
+
+  console.log("user", user);
 
   const myComment = (e) => {
     setCounter(e.target.value.length);
@@ -26,9 +31,10 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
     const data = {
       knowledgeBaseArticle: item._id,
       isPositive: true,
+      contactEmail: user.isLoggedIn && user.email,
     };
     if (e.target.id === "ThumbsUp") {
-      const response = await API.post({ path: `/feedback`, body: { data } });
+      const response = await API.post({ origin: snuApiUrl, path: `/zammood/knowledgeBase/feedback`, body: { data } });
       if (response.ok) {
         setIsThumbsUp(!isThumbsUp);
       } else {
@@ -37,7 +43,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
     } else {
       data.comment = comment;
       data.isPositive = false;
-      const response = await API.post({ path: `/feedback`, body: { data } });
+      const response = await API.post({ origin: snuApiUrl, path: `/zammood/knowledgeBase/feedback`, body: { data } });
 
       if (response.ok) {
         setIsValidated(true);

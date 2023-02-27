@@ -61,6 +61,24 @@ router.get("/knowledgeBase/search", async (req, res) => {
   }
 });
 
+router.post("/knowledgeBase/feedback", async (req, res) => {
+  try {
+    const { ok, data } = await zammood.api(`/feedback`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(req.body),
+    });
+    if (!ok) return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
+
+    console.log("data", data);
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket/search`, {
