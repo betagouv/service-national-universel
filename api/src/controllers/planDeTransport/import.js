@@ -477,6 +477,21 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
       // * Update slave PlanTransport
       const center = await CohesionCenterModel.findById(busLine.centerId);
+      let pointDeRassemblements = [];
+      for (let i = 0, n = lineToPointWithCorrespondance.length; i < n; ++i) {
+        const ltp = lineToPointWithCorrespondance[i];
+        const pdr = await PdrModel.findById(ltp.meetingPointId);
+        if (pdr) {
+          pointDeRassemblements.push({
+            ...pdr.toObject(),
+            meetingPointId: ltp.meetingPointId,
+            busArrivalHour: ltp.busArrivalHour,
+            meetingHour: ltp.meetingHour,
+            returnHour: ltp.returnHour,
+            transportType: ltp.transportType,
+          });
+        }
+      }
       await PlanTransportModel.create({
         _id: busLine._id,
         cohort: busLine.cohort,
@@ -499,7 +514,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         centerCode: center?.code2022,
         centerArrivalTime: busLine.centerArrivalTime,
         centerDepartureTime: busLine.centerDepartureTime,
-        pointDeRassemblements: busLine.meetingPointsIds,
+        pointDeRassemblements,
       });
       // * End update slave PlanTransport
     }
