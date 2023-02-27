@@ -138,7 +138,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
       console.log("emailTo before filter:", emailTo);
       const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       emailTo = emailTo.filter((e) => e.email.match(regexp));
-      if (cc?.length) cc = cc.filter((egit st) => e.email.match(regexp));
+      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
       if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
     }
     if (emailTo) body.to = emailTo;
