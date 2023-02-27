@@ -100,7 +100,7 @@ export default function ListFiltersPopOver({
       getData();
       setURL();
     }
-  }, [selectedFilters, page]);
+  }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
     const initialFilters = getURLParam();
@@ -114,7 +114,7 @@ export default function ListFiltersPopOver({
   };
 
   const getData = async () => {
-    const res = await buildMissions(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject);
+    const res = await buildMissions(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject, sortSelected);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
@@ -443,7 +443,7 @@ const FloppyDisk = () => {
     </svg>
   );
 };
-const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject) => {
+const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
   let query = {};
   let aggsQuery = {};
   if (!defaultQuery) {
@@ -459,7 +459,7 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
     aggs: {},
     size: size,
     from: size * page,
-    sort: [{ createdAt: { order: "desc" } }],
+    sort: sortSelected ? [{ [sortSelected.dataField]: { order: sortSelected.sortBy } }] : [{ createdAt: { order: "desc" } }],
     track_total_hits: true,
   };
 
