@@ -1,12 +1,12 @@
 import React from "react";
 
 import PaginationServerDriven from "../../components/PaginationServerDriven";
-export default function ResultTable({ render, currentEntryOnPage, setPage, pagination = true, size, page, count }) {
+export default function ResultTable({ render, currentEntryOnPage, setPage, pagination = true, size = 25, page, count, sortOptions = null }) {
   const pageCount = Math.ceil(count / size);
 
   return (
     <div>
-      {render}{" "}
+      {render}
       {pagination && (
         <PaginationServerDriven pageCount={pageCount} currentPage={page} changePage={setPage} count={count} itemsPerPage={size} itemsCount={currentEntryOnPage} className="p-4" />
       )}

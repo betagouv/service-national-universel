@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import ViewPopOver from "./ViewPopOver";
+import { BiChevronDown } from "react-icons/bi";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -28,6 +29,7 @@ export default function ListFiltersPopOver({
   setPage,
   selectedFilters,
   setSelectedFilters,
+  sortOptions = null,
 }) {
   // search for filters
   const [search, setSearch] = React.useState("");
@@ -52,6 +54,8 @@ export default function ListFiltersPopOver({
   const refFilter = React.useRef(null);
 
   const hasSomeFilterSelected = Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
+
+  const [sortSelected, setSortSelected] = React.useState(sortOptions ? sortOptions[0] : null);
 
   React.useEffect(() => {
     const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
@@ -344,6 +348,7 @@ export default function ListFiltersPopOver({
             </div>
           ))}
       </div>
+      {sortOptions && <SortOptionComponent sortOptions={sortOptions} sortSelected={sortSelected} setSortSelected={setSortSelected} />}
     </div>
   );
 }
@@ -581,4 +586,43 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
   });
 
   return { data, count, newFilters };
+};
+
+const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const ref = React.useRef();
+
+  const handleClick = (value) => {
+    setSortSelected(value);
+    setIsOpen(false);
+  };
+  React.useEffect(() => {
+    if (!ref) return;
+    const handleClickOutside = (event) => {
+      if (ref?.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+  return (
+    <div className="relative" ref={ref}>
+      <div className="flex flex-row items-center gap-2 cursor-pointer" onClick={() => setIsOpen((isOpen) => !isOpen)}>
+        <div>{sortSelected.label}</div>
+        <BiChevronDown size={20} />
+      </div>
+      {isOpen && (
+        <div className="absolute bg-white shadow-sm">
+          {sortOptions.map((item) => (
+            <div key={item.value} onClick={() => handleClick(item)} className="flex flex-row items-center gap-2 p-2 cursor-pointer hover:bg-gray-100">
+              <div>{item.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };

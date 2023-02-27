@@ -22,8 +22,11 @@ export default function test_volontaire() {
   const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
-  const [size, setSize] = useState(20);
   const [selectedFilters, setSelectedFilters] = React.useState({});
+
+  // filtre non obligatoire
+  const [selectedSort, setSelectedSort] = React.useState({});
+  const size = 20;
 
   const [volontaire, setVolontaire] = useState(null);
 
@@ -39,28 +42,43 @@ export default function test_volontaire() {
     { title: "Custom", name: "example", datafield: "example.keyword", parentGroup: "Dossier", customComponent: "example" },
   ];
 
+  const sortOptions = [
+    { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
+    { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
+    { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
+    { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
+    { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+    { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+    { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
+    { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
+  ];
+
   const defaultQuery = { query: { bool: { must: [{ match_all: {} }] } } };
   //extract dans utils ou logique du filtre ?
 
   return (
     <div className="bg-white h-full">
-      <div className="flex flex-col gap-8 m-4">
+      <div className="flex flex-col  m-4">
         <div>{count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
-        <ListFiltersPopOver
-          pageId="young"
-          esId="young"
-          defaultQuery={defaultQuery}
-          filters={filterArray}
-          getCount={setCount}
-          setData={(value) => setData(value)}
-          searchBarObject={searchBarObject}
-          selectedFilters={selectedFilters}
-          setSelectedFilters={setSelectedFilters}
-          page={page}
-          setPage={setPage}
-          size={size}
-        />
+        <div className="p-[15px]">
+          <ListFiltersPopOver
+            pageId="young"
+            esId="young"
+            defaultQuery={defaultQuery}
+            filters={filterArray}
+            getCount={setCount}
+            setData={(value) => setData(value)}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            page={page}
+            setPage={setPage}
+            size={size}
+            sortOptions={sortOptions}
+          />
+        </div>
+
         <ResultTable
           setPage={setPage}
           count={count}
