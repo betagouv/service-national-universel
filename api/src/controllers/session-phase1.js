@@ -14,7 +14,7 @@ const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
 const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
-const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib/constants");
 
 const {
   canCreateOrUpdateSessionPhase1,
@@ -245,7 +245,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
     </head>
 
-    <body style="margin: 0;">
+    <body style="margin: 0; font-family: Marianne">
       {{BODY}}
     </body>
 </html>`;
@@ -255,7 +255,8 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
       <div class="container">
         <div class="text-center l4">
-          <p>{{TO}}, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+        <br />
+          <p>{{TO}}, volontaire à l'édition {{COHORT}},</p>
           <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
           <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
           <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
@@ -278,7 +279,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       data.push(
         subHtml
           .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
-          .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+          .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort]?.getYear() + 1900))
           .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
           .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
           .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))

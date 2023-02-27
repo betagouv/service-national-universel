@@ -131,6 +131,8 @@ async function getEmailContent(uuid) {
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, { force } = { force: false }) {
   try {
+    if (!id) throw new Error("No template id provided");
+
     const body = { templateId: parseInt(id) };
     if (!force && ENVIRONMENT !== "production") {
       console.log("emailTo before filter:", emailTo);

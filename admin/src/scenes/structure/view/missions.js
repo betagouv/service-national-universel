@@ -102,7 +102,7 @@ export default function Mission({ structure }) {
                           title=""
                           URLParams={true}
                           showSearch={false}
-                          renderLabel={(items) => getFilterLabel(items, "Statut")}
+                          renderLabel={(items) => <div>{getFilterLabel(items, "Statut")} </div>}
                         />
                         <MultiDropdownList
                           defaultQuery={getDefaultQuery}
@@ -116,7 +116,7 @@ export default function Mission({ structure }) {
                           }}
                           title=""
                           URLParams={true}
-                          renderLabel={(items) => getFilterLabel(items, "Visibilité", "Visibilité")}
+                          renderLabel={(items) => <div>{getFilterLabel(items, "Visibilité", "Visibilité")} </div>}
                         />
                       </div>
 
@@ -132,7 +132,7 @@ export default function Mission({ structure }) {
                         showSearch={false}
                         sortBy="asc"
                         selectAllLabel="Tout sélectionner"
-                        renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
+                        renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")} </div>}
                       />
                       <MultiDropdownList
                         defaultQuery={getDefaultQuery}
@@ -160,7 +160,7 @@ export default function Mission({ structure }) {
                         title=""
                         URLParams={true}
                         showSearch={false}
-                        renderLabel={(items) => getFilterLabel(items, "Place occupées", "Place occupées")}
+                        renderLabel={(items) => <div>{getFilterLabel(items, "Place occupées", "Place occupées")} </div>}
                         showMissing
                         missingLabel="Non renseigné"
                       />
