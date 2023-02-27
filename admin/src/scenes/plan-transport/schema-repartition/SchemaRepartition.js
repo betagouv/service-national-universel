@@ -285,11 +285,6 @@ export default function SchemaRepartition({ region, department }) {
     return { workbook, fileName };
   }
 
-  const handleChangeCohort = (value) => {
-    history.push(`/schema-repartition/${region}?cohort=${value}`);
-    setCohort(value);
-  };
-
   const getSchemaRepartitionRoute = () => {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
       return `/schema-repartition?cohort=${cohort}`;
@@ -297,6 +292,17 @@ export default function SchemaRepartition({ region, department }) {
     if (region && user.role === ROLES.REFERENT_REGION) {
       return `/schema-repartition/${region}?cohort=${cohort}`;
     }
+  };
+
+  const handleChangeCohort = (value) => {
+    console.log(value, user.role);
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+      history.push(`/schema-repartition?cohort=${value}`);
+    }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      history.push(`/schema-repartition/${region}?cohort=${value}`);
+    }
+    setCohort(value);
   };
 
   return (
