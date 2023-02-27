@@ -58,6 +58,7 @@ export default function test_volontaire() {
           selectedFilters={selectedFilters}
           setSelectedFilters={setSelectedFilters}
           page={page}
+          setPage={setPage}
           size={size}
         />
         <ResultTable

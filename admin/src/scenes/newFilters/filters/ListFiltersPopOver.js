@@ -25,6 +25,7 @@ export default function ListFiltersPopOver({
   setData,
   page = 1,
   size = 25,
+  setPage,
   selectedFilters,
   setSelectedFilters,
 }) {
@@ -113,13 +114,19 @@ export default function ListFiltersPopOver({
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
+    if (count !== res.count) setPage(0);
     setData(res.data);
   };
 
   const getURLParam = () => {
     const filters = {};
     urlParams.forEach((value, key) => {
-      filters[key] = { filter: value.split(",") };
+      if (key === "page") {
+        const int = parseInt(value.split(",")[0]);
+        setPage(int - 1);
+      } else {
+        filters[key] = { filter: value.split(",") };
+      }
     });
     setSelectedFilters(filters);
     return filters;
@@ -128,7 +135,7 @@ export default function ListFiltersPopOver({
   const currentFilterAsUrl = () => {
     const length = Object.keys(selectedFilters).length;
     let index = 0;
-    const url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+    let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
       if (curr === "searchbar" && selectedFilters[curr]?.filter?.length > 0 && selectedFilters[curr]?.filter[0].trim() === "") return acc;
       if (selectedFilters[curr]?.filter?.length > 0) {
         acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
@@ -136,6 +143,8 @@ export default function ListFiltersPopOver({
       index++;
       return acc;
     }, "");
+    // add pagination to url
+    url += `&page=${page + 1}`;
     return url;
   };
 

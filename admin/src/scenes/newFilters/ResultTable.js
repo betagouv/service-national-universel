@@ -1,11 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import PaginationServerDriven from "../../components/PaginationServerDriven";
 export default function ResultTable({ render, currentEntryOnPage, setPage, pagination = true, size, page, count }) {
   const pageCount = Math.ceil(count / size);
-  useEffect(() => {
-    setPage(0);
-  }, [count]);
+
   return (
     <div>
       {render}{" "}
