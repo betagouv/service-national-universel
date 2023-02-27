@@ -1,3 +1,21 @@
+# [1.224.0](https://github.com/betagouv/service-national-universel/compare/v1.223.1...v1.224.0) (2023-02-27)
+
+
+### Bug Fixes
+
+* **admin:** corrections de mise en forme pour l'édition d'attestations multiples ([be061d3](https://github.com/betagouv/service-national-universel/commit/be061d3eccd08f2cb6fba218a96fc1576274a606))
+* **api:** import plan de transport ([e455361](https://github.com/betagouv/service-national-universel/commit/e455361f5c78a500d3ae89a3bed398d9064cf49b))
+* **api:** remplissage des PDR dans le modèle PlanTransport à la fin de l'import ([#2315](https://github.com/betagouv/service-national-universel/issues/2315)) ([611b4fb](https://github.com/betagouv/service-national-universel/commit/611b4fb55301ce084b786315a2f6612e256087c5))
+* **api:** Secure calls with sendTemplate ([bdfe0f7](https://github.com/betagouv/service-national-universel/commit/bdfe0f7ae99e547eef9a55bc1f0b309175c3006b))
+* **api:** Wrong ([318a5e5](https://github.com/betagouv/service-national-universel/commit/318a5e5bee6ad8894c393f83cd1ae37a36223672))
+* **app:** remplacement du wording du cta de téléchargement ficher sanitaire "Non Téléchargée" par "Télécharger" ([#2317](https://github.com/betagouv/service-national-universel/issues/2317)) ([8ffa06c](https://github.com/betagouv/service-national-universel/commit/8ffa06c1e651d872d330d262268a9c3a0b5dbe97))
+
+
+### Features
+
+* **admin:** open import plan de transport prod ([c4f70d5](https://github.com/betagouv/service-national-universel/commit/c4f70d524aa56f7d38d32db535e9f67b36ceb156))
+* import plan de transport ([#2308](https://github.com/betagouv/service-national-universel/issues/2308)) ([ba0a795](https://github.com/betagouv/service-national-universel/commit/ba0a795f286dc4420661bbc5f07b72ceb1c70566))
+
 ## [1.223.1](https://github.com/betagouv/service-national-universel/compare/v1.223.0...v1.223.1) (2023-02-24)
 
 
