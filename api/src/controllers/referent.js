@@ -71,6 +71,7 @@ const {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
+  ROLES_TO_FIELDS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 
@@ -93,6 +94,18 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
       }
     }
   }
+}
+
+function cleanReferentData(referent) {
+  const fieldsToKeep = new Set(Object.values(ROLES_TO_FIELDS).reduce((acc, fields) => [...acc, ...fields], []));
+  const fieldsToRemove = [...fieldsToKeep].filter((field) => !ROLES_TO_FIELDS[referent.role].includes(field));
+
+  for (const key of Object.keys(referent)) {
+    if (fieldsToRemove.includes(key)) {
+      delete referent[key];
+    }
+  }
+  return referent;
 }
 
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
@@ -984,10 +997,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    if (value.role !== ROLES.HEAD_CENTER) value.cohorts = [];
-    if (value.role !== ROLES.REFERENT_DEPARTMENT) value.department = null;
-
-    referent.set(value);
+    referent.set(cleanReferentData(value));
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
     res.status(200).send({ ok: true, data: referent });
@@ -1007,10 +1017,8 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     }
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (value.role !== ROLES.HEAD_CENTER) value.cohorts = [];
-    if (value.role !== ROLES.REFERENT_DEPARTMENT) value.department = null;
 
-    user.set(value);
+    user.set(cleanReferentData(value));
     await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
     res.status(200).send({ ok: true, data: user });
