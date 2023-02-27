@@ -38,7 +38,6 @@ export default function test_volontaire() {
     return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
   };
   const transformDataTaux = (data) => {
-    console.log("data", data);
     const newData = [];
     data.map((d) => {
       const dizaine = translateLineFillingRate(parseInt(d.key));
@@ -49,7 +48,6 @@ export default function test_volontaire() {
         newData.push({ key: dizaine, doc_count: d.doc_count });
       }
     });
-    console.log("newData", newData);
     return newData;
   };
 
@@ -118,9 +116,6 @@ export default function test_volontaire() {
     setCount(value);
   };
 
-  useEffect(() => {
-    console.log("data", data);
-  }, [data]);
   //extract dans utils ou logique du filtre ?
 
   return (

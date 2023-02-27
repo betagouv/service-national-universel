@@ -23,6 +23,7 @@ export default function test_volontaire() {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(20);
+  const [selectedFilters, setSelectedFilters] = React.useState({});
 
   const [volontaire, setVolontaire] = useState(null);
 
@@ -54,6 +55,8 @@ export default function test_volontaire() {
           getCount={setCount}
           setData={(value) => setData(value)}
           searchBarObject={searchBarObject}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
           page={page}
           size={size}
         />

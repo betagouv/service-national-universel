@@ -472,6 +472,7 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
       if (key === name) return;
       if (selectedFilters[key].filter.length > 0) {
         const currentFilter = filterArray.find((f) => f.name === key);
+        console.log(currentFilter);
         if (currentFilter.customQuery) {
           // on a une custom query
           const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
@@ -484,6 +485,7 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
           });
           // cust
         } else {
+          console.log("no custom component");
           let datafield = currentFilter.datafield;
           aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
         }
@@ -514,29 +516,32 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
     }
   });
 
+  //apply filters to query
   if (selectedFilters && Object.keys(selectedFilters).length) {
     Object.keys(selectedFilters).forEach((key) => {
+      console.log(key);
       if (key === "searchbar") return;
-      if (selectedFilters[key].customQuery) {
-        const currentFilter = filterArray.find((f) => f.name === key);
-        if (currentFilter.customQuery) {
-          // on a une custom query
-          const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
-          Object.keys(currentQuery?.bool).forEach((key) => {
-            if (bodyQuery.query.bool[key]) {
-              bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
-            } else {
-              bodyQuery.query.bool[key] = currentQuery.bool[key];
-            }
-          });
-          //body.query.bool.must.push(selectedFilters[key].customQuery);
-        } else if (selectedFilters[key].filter.length > 0) {
-          let datafield = currentFilter.datafield;
-          bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
-        }
+      const currentFilter = filterArray.find((f) => f.name === key);
+      if (currentFilter.customQuery) {
+        // on a une custom query
+        const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
+        Object.keys(currentQuery?.bool).forEach((key) => {
+          if (bodyQuery.query.bool[key]) {
+            bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
+          } else {
+            bodyQuery.query.bool[key] = currentQuery.bool[key];
+          }
+        });
+        //body.query.bool.must.push(selectedFilters[key].customQuery);
+      } else if (selectedFilters[key].filter.length > 0) {
+        let datafield = currentFilter.datafield;
+        console.log("datafield", datafield);
+        bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
       }
     });
   }
+
+  console.log(bodyQuery);
 
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     bodyQuery.query.bool.must.push({
