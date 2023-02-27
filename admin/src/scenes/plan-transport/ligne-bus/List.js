@@ -1,28 +1,28 @@
-import React from "react";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import { TabItem, Title, translateStatus } from "../components/commons";
-import Select from "../components/Select";
-import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
-import api from "../../../services/api";
-import { apiURL, environment } from "../../../config";
-import FilterSvg from "../../../assets/icons/Filter";
-import ExportComponent from "../../../components/ExportXlsx";
-import { ES_NO_LIMIT, getDepartmentNumber, getFilterLabel, ROLES, translate } from "snu-lib";
-import History from "../../../assets/icons/History";
-import { useHistory } from "react-router-dom";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { toastr } from "react-redux-toastr";
-import { capture } from "../../../sentry";
-import Loader from "../../../components/Loader";
-import Excel from "./components/Icons/Excel.png";
+import React from "react";
+import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { PlainButton } from "../components/Buttons";
-import DeleteFilters from "../../../components/buttons/DeleteFilters";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
+import { ES_NO_LIMIT, getDepartmentNumber, getFilterLabel, ROLES, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
-import ListPanel from "./modificationPanel/List";
+import FilterSvg from "../../../assets/icons/Filter";
+import History from "../../../assets/icons/History";
+import Breadcrumbs from "../../../components/Breadcrumbs";
+import DeleteFilters from "../../../components/buttons/DeleteFilters";
+import ExportComponent from "../../../components/ExportXlsx";
+import Loader from "../../../components/Loader";
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import { apiURL } from "../../../config";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import { PlainButton } from "../components/Buttons";
+import { TabItem, Title, translateStatus } from "../components/commons";
+import Select from "../components/Select";
 import { getTransportIcon } from "../util";
+import Excel from "./components/Icons/Excel.png";
+import ListPanel from "./modificationPanel/List";
 
 const FILTERS = [
   "SEARCH",
@@ -111,7 +111,7 @@ export default function List() {
           <div className="flex flex-col items-center justify-center pt-12 gap-4 w-[450px] m-auto">
             <img src={Excel} alt="Excel" className="w-32 bg-[#f4f5f7]" />
             <div className="font-bold text-2xl leading-7 text-gray-800">Aucun document importé</div>
-            {environment !== "production" && [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
+            {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
               <>
                 <div className="text-gray-800 text-sm leading-5 text-center">
                   Importez votre plan de transport au format .xls (fichier Excel) afin de voir apparaître ici le plan de transport.
