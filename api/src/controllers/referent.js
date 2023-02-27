@@ -180,6 +180,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       cohesionCenterName: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),
+      cohorts: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -195,7 +196,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone } = value;
+    const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
     const referentProperties = {};
     if (email) referentProperties.email = email.trim().toLowerCase();
     if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
@@ -211,6 +212,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       referentProperties.phone = phone;
       referentProperties.mobile = phone;
     }
+    if (cohorts) referentProperties.cohorts = cohorts;
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
@@ -291,6 +293,7 @@ router.post("/signup_verify", async (req, res) => {
   }
 });
 router.post("/signup_invite", async (req, res) => {
+  // Elle sert encore cette route ?
   try {
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
@@ -299,6 +302,7 @@ router.post("/signup_invite", async (req, res) => {
       lastName: Joi.string().allow(null, ""),
       invitationToken: Joi.string().required(),
       acceptCGU: Joi.string().required(),
+      cohorts: Joi.array().items(Joi.string().required()),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
@@ -306,7 +310,7 @@ router.post("/signup_invite", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { email, password, firstName, lastName, invitationToken, acceptCGU } = value;
+    const { email, password, firstName, lastName, invitationToken, acceptCGU, cohorts } = value;
 
     const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
@@ -322,6 +326,7 @@ router.post("/signup_invite", async (req, res) => {
       invitationToken: "",
       invitationExpires: null,
       acceptCGU,
+      cohorts,
     });
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
