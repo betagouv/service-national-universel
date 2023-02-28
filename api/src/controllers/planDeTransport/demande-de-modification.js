@@ -30,18 +30,21 @@ const updateModificationDependencies = async (modif, fromUser) => {
   await planDeTransport.save({ fromUser });
 };
 
-const fixedReferents = [
-  {
-    firstName: "Edouard",
-    lastName: "VIZCAINO",
-    email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
-  },
-  {
-    firstName: "Christelle",
-    lastName: "BIGNON",
-    email: "christelle.bignon@jeunesse-sports.gouv.fr",
-  },
-];
+const fixedReferents =
+  config.ENVIRONMENT === "production"
+    ? [
+        {
+          firstName: "Edouard",
+          lastName: "VIZCAINO",
+          email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
+        },
+        {
+          firstName: "Christelle",
+          lastName: "BIGNON",
+          email: "christelle.bignon@jeunesse-sports.gouv.fr",
+        },
+      ]
+    : [];
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
