@@ -135,15 +135,10 @@ router.post(
 
       const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
-      //Checl columns names
-
+      //Check columns names
       const columns = Object.keys(lines[0]);
-      console.log("columns", columns);
       const expectedColumns = Object.keys(errors);
-      console.log("expectedColumns", expectedColumns);
       const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
-
-      console.log("missingColumns", missingColumns);
 
       if (missingColumns.length) {
         missingColumns.forEach((e) => {
