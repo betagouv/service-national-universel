@@ -1,10 +1,60 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { ROLES_LIST } from "snu-lib";
 import { SentryRoute } from "../../sentry";
 
-const RestrictedChildRoute = ({ component: Component, allowedRoles = ROLES_LIST, redirectUnauthorizedTo = "/dashboard", ...rest }) => {
+const validateRestrictionRules = (restrictionRules) => {
+  if (typeof restrictionRules === "boolean") {
+    return restrictionRules;
+  }
+
+  const [restrictionOperator] = Object.keys(restrictionRules);
+
+  if (!restrictionRules || !restrictionOperator) {
+    return true;
+  }
+
+  let finalCondition = false;
+
+  for (const rule of restrictionRules[restrictionOperator]) {
+    if (typeof rule !== "boolean" && "$and" in rule === false && "$or" in rule === false) {
+      throw new Error("RESTRICTION ROUTE VALIDATION ERROR: Please set valid rules using boolean or operators ('$and' or '$or').");
+    }
+
+    if (typeof rule === "boolean") {
+      if (restrictionOperator === "$or") {
+        if (rule) {
+          finalCondition = true;
+          break;
+        }
+      } else if (restrictionOperator === "$and") {
+        finalCondition = true;
+        if (!rule) {
+          finalCondition = false;
+          break;
+        }
+      }
+    } else {
+      const nestedCondition = validateRestrictionRules(rule);
+      if (restrictionOperator === "$or") {
+        finalCondition = finalCondition || nestedCondition;
+        if (finalCondition) {
+          break;
+        }
+      }
+      if (restrictionOperator === "$and") {
+        finalCondition = finalCondition && nestedCondition;
+        if (!finalCondition) {
+          break;
+        }
+      }
+    }
+  }
+
+  return finalCondition;
+};
+
+const RestrictedChildRoute = ({ component: Component, redirectUnauthorizedTo = "/dashboard", restrictionRules = true, ...rest }) => {
   const user = useSelector((state) => state.Auth.user);
 
   let redirectTo = redirectUnauthorizedTo;
@@ -29,13 +79,12 @@ const RestrictedChildRoute = ({ component: Component, allowedRoles = ROLES_LIST,
     }
   }
 
-  if (!allowedRoles.includes(user.role)) {
+  const areRestrictionRulesPassing = validateRestrictionRules(restrictionRules);
+
+  if (!areRestrictionRulesPassing) {
     return <Redirect to={redirectTo} />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    return <Redirect to={redirectTo} />;
-  }
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Switch } from "react-router-dom";
-import { ROLES } from "snu-lib";
+import { department2region, ROLES } from "snu-lib";
 import RestrictedChildRoute from "../../../utils/components/RestrictedChildRoute";
 import SchemaRepartition from "./SchemaRepartition";
 
@@ -13,7 +13,7 @@ export default function SchemaRepartitionIndex(props) {
 
   const redirectUnauthorizedToObject = {
     [`/schema-repartition/${user.region}`]: [ROLES.REFERENT_REGION],
-    [`/schema-repartition/${user.region}/${user.department}`]: ROLES.REFERENT_DEPARTMENT,
+    [`/schema-repartition/${department2region[user.department[0]]}/${user.department[0]}`]: ROLES.REFERENT_DEPARTMENT,
   };
 
   return (
@@ -21,19 +21,36 @@ export default function SchemaRepartitionIndex(props) {
       <RestrictedChildRoute
         path="/schema-repartition/:region/:department"
         component={() => <SchemaRepartition region={region} department={department} />}
-        allowedRoles={[ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT]}
+        restrictionRules={{
+          $or: [
+            [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role),
+            {
+              $and: [ROLES.REFERENT_REGION === user.role, region === user.region],
+            },
+            {
+              $and: [ROLES.REFERENT_DEPARTMENT === user.role, user.department.includes(department), department2region[department] === region],
+            },
+          ],
+        }}
         redirectUnauthorizedTo={redirectUnauthorizedToObject}
       />
       <RestrictedChildRoute
         path="/schema-repartition/:region"
         component={() => <SchemaRepartition region={region} />}
-        allowedRoles={[ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT]}
+        restrictionRules={{
+          $or: [
+            [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role),
+            {
+              $and: [ROLES.REFERENT_REGION === user.role, region === user.region],
+            },
+          ],
+        }}
         redirectUnauthorizedTo={redirectUnauthorizedToObject}
       />
       <RestrictedChildRoute
         path="/schema-repartition"
         component={() => <SchemaRepartition />}
-        allowedRoles={[ROLES.ADMIN, ROLES.TRANSPORTER]}
+        restrictionRules={[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)}
         redirectUnauthorizedTo={redirectUnauthorizedToObject}
       />
     </Switch>
