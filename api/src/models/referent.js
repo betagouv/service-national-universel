@@ -120,7 +120,9 @@ const Schema = new mongoose.Schema({
     enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"],
   },
 
-  // Regional referent and Departmental referent only
+  // Specific fields
+
+  // Regional and departmental referent
   region: {
     type: String,
     default: "",
@@ -135,7 +137,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // Responsible and Supervisor only
+  // Responsible and Supervisor
   structureId: {
     type: String,
     documentation: {
@@ -143,7 +145,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // Head center only
+  // Head center
   sessionPhase1Id: {
     type: String,
     documentation: {

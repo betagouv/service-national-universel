@@ -1004,14 +1004,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const cleanRef = cleanReferentData(value);
-    console.log("🚀 ~ file: referent.js:1000 ~ router.put ~ cleanRef:", cleanRef);
-    referent.set(cleanRef);
+
+    referent.set(cleanReferentData(value));
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
-    console.log("🚀 ~ file: referent.js:1005 ~ router.put ~ error:", error);
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
