@@ -1,3 +1,16 @@
+## [1.224.1](https://github.com/betagouv/service-national-universel/compare/v1.224.0...v1.224.1) (2023-02-28)
+
+
+### Bug Fixes
+
+* **admin:** mission superviseur, probleme taille liste ([e615d5b](https://github.com/betagouv/service-national-universel/commit/e615d5be33fd1971dba5c051a016e8b5fc177a98))
+* **admin:** track total hits volontaire responsible mission ([a2f2afc](https://github.com/betagouv/service-national-universel/commit/a2f2afc65403035eb9ea741204392aff98611cf3))
+* **admin:** Update applications informations on mission update ([571ad04](https://github.com/betagouv/service-national-universel/commit/571ad040afb11e67504eb9d9624245746ebe4373))
+* **admin:** volontaire-responsible filters visible on missionName searchParams ([82b13ec](https://github.com/betagouv/service-national-universel/commit/82b13ec572545920ec6602a88be4076c40f04f7e))
+* **api:** enregistrement du schoolId dans l'édition phase 0 ([eb65873](https://github.com/betagouv/service-national-universel/commit/eb65873c9cac51ad3fd56bd875b802988da6aa09))
+* **api:** Update check PDT on colums and duplicate PDR ([#2321](https://github.com/betagouv/service-national-universel/issues/2321)) ([39bee2e](https://github.com/betagouv/service-national-universel/commit/39bee2e65acffd95a5e3c76fbd8095e1b912befb))
+* **app:** Mise en place bouton suppression du compte et ajout du bouton changement de séjour dans page de profil  ([#2318](https://github.com/betagouv/service-national-universel/issues/2318)) ([dcd1e0e](https://github.com/betagouv/service-national-universel/commit/dcd1e0ea5e02a9ff7cfd7fffa39ea9463784f492))
+
 # [1.224.0](https://github.com/betagouv/service-national-universel/compare/v1.223.1...v1.224.0) (2023-02-27)
 
 
