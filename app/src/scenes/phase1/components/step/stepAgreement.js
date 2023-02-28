@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { useDispatch } from "react-redux";
@@ -15,18 +15,9 @@ import plausibleEvent from "../../../../services/plausible";
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
-  const [valid, setValid] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const valid = young?.youngPhase1Agreement === "true";
+  const enabled = young?.meetingPointId !== null || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true";
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (young) {
-      setValid(young.youngPhase1Agreement === "true");
-      setEnabled(
-        (young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true",
-      );
-    }
-  }, [young]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,9 +33,7 @@ export default function StepAgreement({ young }) {
   return (
     <>
       {/* Desktop */}
-      <div
-        className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`}
-        onClick={() => setStateDesktop(enabled && !valid ? !stateDesktop : false)}>
+      <div className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`} onClick={() => setStateDesktop(enabled ? !stateDesktop : false)}>
         <div className="flex flex-1 flex-row py-4 items-center">
           {valid ? (
             <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
@@ -58,7 +47,7 @@ export default function StepAgreement({ young }) {
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>Vous devez confirmer votre participation au séjour avant votre départ.</p>
           </div>
         </div>
-        {enabled && !valid ? (
+        {enabled ? (
           stateDesktop ? (
             <div className="flex items-center justify-center bg-gray-100 h-9 w-9 rounded-full hover:scale-110">
               <HiOutlineChevronUp className="h-5 w-5" />
@@ -73,7 +62,7 @@ export default function StepAgreement({ young }) {
       {/* Mobile */}
       <div
         className={`md:hidden flex items-center border-[1px] mb-3 ml-4 rounded-xl h-36 cursor-pointer ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
-        onClick={() => setStateMobil(enabled && !valid ? !stateMobil : false)}>
+        onClick={() => setStateMobil(enabled ? !stateMobil : false)}>
         <div className="-translate-x-5 flex flex-row items-center w-full">
           {valid ? (
             <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
@@ -119,8 +108,8 @@ const content = ({ handleSubmit, young }) => {
     );
   };
   return (
-    <div className="flex flex-col lg:flex-row flex-shrink flex-wrap mb-2 p-2 gap-6 justify-center md:justify-start">
-      <div className="flex flex-col border-[1px] border-blue-600 shadow-sm rounded-2xl py-5 px-5 lg:w-1/3 md:max-w-screen-1/2">
+    <div className="flex flex-col lg:flex-row p-2 mb-2 gap-6 items-center md:justify-start">
+      <div className="flex flex-col border-[1px] border-blue-600 shadow-sm rounded-xl p-4 w-auto md:w-[300px] h-[300px]">
         <h1 className="text-xl leading-7 font-bold pb-4">Je confirme</h1>
         <div className="text-gray-600 text-sm">
           <p className="pb-2">
@@ -135,18 +124,21 @@ const content = ({ handleSubmit, young }) => {
             </p>
           ) : null}
         </div>
-        <button className="bg-indigo-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-white hover:scale-105 hover:shadow-md" onClick={handleSubmit}>
+        <button
+          className="bg-blue-600 rounded-md px-4 py-1.5 mt-auto justify-self-end text-white hover:scale-105 hover:shadow-md disabled:bg-blue-300 disabled:cursor-not-allowed disabled:hover:scale-100"
+          disabled={young?.youngPhase1Agreement === "true"}
+          onClick={handleSubmit}>
           Valider
         </button>
       </div>
-      <div className="flex flex-col border-[1px] border-gray-100 shadow-sm rounded-2xl py-5 px-5 lg:w-1/3 md:max-w-screen-1/2">
+      <div className="flex flex-col border-[1px] border-gray-100 shadow-sm rounded-xl p-4 md:w-[300px] h-[300px]">
         <h1 className="text-xl leading-7 font-bold pb-4">J&apos;ai changé d&apos;avis</h1>
-        <p className="pb-3 text-sm text-gray-600">Mes dates ne me correspondent pas ({translateCohort(young.cohort)})</p>
-        <Link to="/changer-de-sejour" className="pb-4 text-sm text-blue-700 whitespace-nowrap hover:underline hover:underline-offset-2 text-now">
+        <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({translateCohort(young.cohort)})</p>
+        <Link to="/changer-de-sejour" className="pb-4 text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
           Changer de séjour &gt;
         </Link>
         <p className="pb-3 text-sm text-gray-600">Je ne souhaite plus participer au SNU</p>
-        <Link to="/desistement" className="text-sm text-blue-700 whitespace-nowrap hover:underline hover:underline-offset-2">
+        <Link to="/desistement" className="text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
           Me désister &gt;
         </Link>
       </div>
