@@ -71,7 +71,6 @@ const {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
-  ROLES_TO_FIELDS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 
@@ -97,11 +96,20 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
 }
 
 function cleanReferentData(referent) {
-  const fieldsToKeep = new Set(Object.values(ROLES_TO_FIELDS).reduce((acc, fields) => [...acc, ...fields], []));
-  const fieldsToRemove = [...fieldsToKeep].filter((field) => !ROLES_TO_FIELDS[referent.role].includes(field));
+  const fieldsToDelete = {
+    head_center: ["department", "region", "structureId"],
+    referent_department: ["sessionPhase1Id", "cohorts", "structureId"],
+    referent_region: ["sessionPhase1Id", "cohorts", "structureId"],
+    responsible: ["department", "region", "sessionPhase1Id", "cohorts"],
+    supervisor: ["department", "region", "sessionPhase1Id", "cohorts"],
+  };
+
+  if (!referent.role || !Object.keys(fieldsToDelete).includes(referent.role)) {
+    return referent;
+  }
 
   for (const key of Object.keys(referent)) {
-    if (fieldsToRemove.includes(key)) {
+    if (fieldsToDelete[referent.role].includes(key)) {
       delete referent[key];
     }
   }
@@ -996,12 +1004,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    referent.set(cleanReferentData(value));
+    const cleanRef = cleanReferentData(value);
+    console.log("🚀 ~ file: referent.js:1000 ~ router.put ~ cleanRef:", cleanRef);
+    referent.set(cleanRef);
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
+    console.log("🚀 ~ file: referent.js:1005 ~ router.put ~ error:", error);
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
