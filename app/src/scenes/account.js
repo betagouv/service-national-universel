@@ -239,7 +239,7 @@ export default function Account() {
                 errors={errors}
               />
             </FormRow>
-            <FormRow>
+            <FormRow margin="0">
               <Select
                 name="parent2Status"
                 values={values}
