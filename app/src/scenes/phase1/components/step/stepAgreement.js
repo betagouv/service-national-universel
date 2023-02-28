@@ -108,8 +108,8 @@ const content = ({ handleSubmit, young }) => {
     );
   };
   return (
-    <div className="flex flex-col lg:flex-row p-2 mb-2 gap-6 items-center md:justify-start">
-      <div className="flex flex-col border-[1px] border-blue-600 shadow-sm rounded-xl p-4 w-auto md:w-[300px] h-[300px]">
+    <div className="flex flex-col lg:flex-row flex-shrink flex-wrap mb-2 p-2 gap-6 justify-center md:justify-start">
+      <div className="flex flex-col border-[1px] border-blue-600 shadow-sm rounded-2xl py-5 px-5 lg:w-1/3 md:max-w-screen-1/2">
         <h1 className="text-xl leading-7 font-bold pb-4">Je confirme</h1>
         <div className="text-gray-600 text-sm">
           <p className="pb-2">
@@ -131,7 +131,7 @@ const content = ({ handleSubmit, young }) => {
           Valider
         </button>
       </div>
-      <div className="flex flex-col border-[1px] border-gray-100 shadow-sm rounded-xl p-4 md:w-[300px] h-[300px]">
+      <div className="flex flex-col border-[1px] border-gray-100 shadow-sm rounded-2xl py-5 px-5 lg:w-1/3 md:max-w-screen-1/2">
         <h1 className="text-xl leading-7 font-bold pb-4">J&apos;ai changé d&apos;avis</h1>
         <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({translateCohort(young.cohort)})</p>
         <Link to="/changer-de-sejour" className="pb-4 text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
