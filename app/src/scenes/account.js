@@ -290,7 +290,11 @@ export default function Account() {
       <div className="md:flex justify-center md:gap-8 mt-12 text-center">
         {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
         [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
-          <ChangeStayButton to="/changer-de-sejour">Changer de séjour</ChangeStayButton>
+          <Link
+            to="/changer-de-sejour"
+            className="my-4 md:my-0 h-fit border-[1px] border-gray-300 text-gray-700 outline-none rounded-md font-semibold text-sm block w-auto py-[10px] px-10 hover:text-gray-700">
+            Changer de séjour
+          </Link>
         ) : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
           <DeleteAccountButton young={young}>Se désister du SNU</DeleteAccountButton>
@@ -389,24 +393,4 @@ const ContinueButton = styled.button`
   :hover {
     opacity: 0.9;
   }
-`;
-
-const ChangeStayButton = styled(Link)`
-  @media (max-width: 767px) {
-    margin: 1rem 0;
-  }
-  padding: 10px 40px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  display: block;
-  width: auto;
-  align-self: flex-end;
-  :hover {
-    opacity: 0.9;
-  }
-  border: 1px solid #d1d5db;
-  color: #374151;
 `;
