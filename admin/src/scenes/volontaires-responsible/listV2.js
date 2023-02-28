@@ -99,6 +99,7 @@ export default function List() {
     const body = {
       query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
       sort: [{ "youngLastName.keyword": "asc" }],
+      track_total_hits: true,
     };
     if (tab === "pending") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
