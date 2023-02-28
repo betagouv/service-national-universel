@@ -112,11 +112,9 @@ function cleanReferentData(referent) {
     visitor: ["region"],
   };
 
-  const fieldsToDelete = fields.filter((field) => !fieldsToKeep[referent.role].includes(field));
+  if (!Object.keys(fieldsToDelete).includes(referent.role)) return referent;
 
-  if (!Object.keys(fieldsToDelete).includes(referent.role)) {
-    return referent;
-  }
+  const fieldsToDelete = fields.filter((field) => !fieldsToKeep[referent.role].includes(field));
 
   for (const key of Object.keys(referent)) {
     if (fieldsToDelete[referent.role].includes(key)) {
