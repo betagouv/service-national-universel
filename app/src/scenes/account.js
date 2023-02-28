@@ -287,7 +287,7 @@ export default function Account() {
           </>
         )}
       </Formik>
-      <div className="flex justify-center gap-8 mt-12">
+      <div className="md:flex justify-center md:gap-8 mt-12 text-center">
         {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
         [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
           <ChangeStayButton to="/changer-de-sejour">Changer de séjour</ChangeStayButton>
