@@ -63,7 +63,22 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
 
-    for (const referentTransporter of referentTransporters) {
+    const fixedReferents = [
+      {
+        firstName: "Edouard",
+        lastName: "VIZCAINO",
+        email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
+      },
+      {
+        firstName: "Christelle",
+        lastName: "BIGNON",
+        email: "christelle.bignon@jeunesse-sports.gouv.fr",
+      },
+    ];
+
+    await planDeTransport.save({ fromUser: req.user });
+
+    for (const referentTransporter of [...referentTransporters, ...fixedReferents]) {
       await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.DEMANDE_DE_MODIFICATION, {
         emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
         params: {
@@ -75,8 +90,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         },
       });
     }
-
-    await planDeTransport.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -111,6 +124,37 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
     await modif.save({ fromUser: req.user });
 
     await updateModificationDependencies(modif, req.user);
+
+    const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
+
+    const fixedReferents = [
+      {
+        firstName: "Edouard",
+        lastName: "VIZCAINO",
+        email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
+      },
+      {
+        firstName: "Christelle",
+        lastName: "BIGNON",
+        email: "christelle.bignon@jeunesse-sports.gouv.fr",
+      },
+    ];
+
+    for (const referentTransporter of [...referentTransporters, ...fixedReferents]) {
+      await sendTemplate(
+        (status === "ACCEPTED" && SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_ACCEPTEE) || (status === "REJECTED" && SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_REFUSEE),
+        {
+          emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
+          params: {
+            busId: modif.lineName,
+            requestUserFirstname: req.user.firstName,
+            requestUserLastname: req.user.lastName,
+            region: req.user.region,
+            cta: `${config.ADMIN_URL}/ligne-de-bus/${modif.lineId}`,
+          },
+        },
+      );
+    }
 
     return res.status(200).send({ ok: true });
   } catch (error) {
