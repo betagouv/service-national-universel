@@ -53,6 +53,7 @@ import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
+import Navbar from "./components/navbar";
 
 initSentry();
 initApi();
@@ -177,43 +178,42 @@ const Espace = () => {
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
-    <>
-      <div style={{ display: "flex" }}>
-        <Drawer open={menuVisible} onOpen={setMenuVisible} />
-        <Content>
-          <Header
-            onClickBurger={() => {
-              setMenuVisible(!menuVisible);
-            }}
-          />
-          <Switch>
-            <SentryRoute path="/account" component={Account} />
-            <SentryRoute path="/phase1" component={Phase1} />
-            <SentryRoute path="/phase2" component={Phase2} />
-            <SentryRoute path="/phase3" component={Phase3} />
-            <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/preferences" component={Preferences} />
-            <SentryRoute path="/mission" component={Missions} />
-            <SentryRoute path="/candidature" component={Candidature} />
-            <SentryRoute path="/desistement" component={Desistement} />
-            <SentryRoute path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-            {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-            <SentryRoute path="/" component={Home} />
-          </Switch>
-        </Content>
-        <ModalCGU
-          isOpen={modal?.isOpen}
-          title={modal?.title}
-          message={modal?.message}
-          confirmText={modal?.confirmText}
-          onConfirm={() => {
-            modal?.onConfirm();
-            setModal({ isOpen: false, onConfirm: null });
+    <div className="block md:flex">
+      <Navbar />
+      {/* <Drawer open={menuVisible} onOpen={setMenuVisible} /> */}
+      {/* <Content> */}
+      {/* <Header
+          onClickBurger={() => {
+            setMenuVisible(!menuVisible);
           }}
-        />
-      </div>
-    </>
+        /> */}
+      <Switch>
+        <SentryRoute path="/account" component={Account} />
+        <SentryRoute path="/phase1" component={Phase1} />
+        <SentryRoute path="/phase2" component={Phase2} />
+        <SentryRoute path="/phase3" component={Phase3} />
+        <SentryRoute path="/les-programmes" component={Engagement} />
+        <SentryRoute path="/preferences" component={Preferences} />
+        <SentryRoute path="/mission" component={Missions} />
+        <SentryRoute path="/candidature" component={Candidature} />
+        <SentryRoute path="/desistement" component={Desistement} />
+        <SentryRoute path="/diagoriente" component={Diagoriente} />
+        {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+        {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+        <SentryRoute path="/" component={Home} />
+      </Switch>
+      {/* </Content> */}
+      <ModalCGU
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        confirmText={modal?.confirmText}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </div>
   );
 };
 
