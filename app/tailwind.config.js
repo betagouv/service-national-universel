@@ -58,6 +58,8 @@ module.exports = {
         "blue-france-sun-113-hover": "#1212ff",
         "grey-625": "#929292",
         "grey-925": "#e5e5e5",
+        "snu-primary": "#42389d",
+        "snu-primary-2": "#5145cd",
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],

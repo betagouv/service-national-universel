@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { Row, Col } from "reactstrap";
+import { Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
-import styled from "styled-components";
 import api from "../services/api";
 import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
@@ -16,7 +15,8 @@ import PasswordEye from "../components/PasswordEye";
 import { appURL } from "../config";
 import { putLocation } from "../services/api-adresse";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import DeleteAccountButton from "../components/buttons/DeleteAccountButton";
+import FormRow from "../components/forms/FormRow";
+import { ChangeStayButton, ContinueButton, DeleteAccountButton } from "../components/buttons";
 
 export default function Account() {
   const young = useSelector((state) => state.Auth.young);
@@ -42,11 +42,11 @@ export default function Account() {
   };
 
   return (
-    <Wrapper>
-      <Heading>
-        <span>{`${young.firstName} ${young.lastName}`}</span>
-        <h1>Mes paramètres</h1>
-      </Heading>
+    <div className="py-5 px-10 rounded-sm drop-shadow-lg bg-white">
+      <div className="mb-[30px]">
+        <span className="text-snu-primary text-base font-bold mb-[5px]">{`${young.firstName} ${young.lastName}`}</span>
+        <h1 className="text-[#161e2e] mb-0 text-3xl md:text-5xl font-extrabold">Mes paramètres</h1>
+      </div>
       <Formik
         initialValues={young}
         validateOnChange={false}
@@ -79,7 +79,7 @@ export default function Account() {
                 errors={errors}
                 touched={touched}
               />
-              <ContinueButton style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+              <ContinueButton onClick={handleSubmit} disabled={isSubmitting}>
                 Enregistrer
               </ContinueButton>
             </FormRow>
@@ -290,24 +290,20 @@ export default function Account() {
       <div className="md:flex justify-center md:gap-8 mt-12 text-center">
         {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
         [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
-          <Link
-            to="/changer-de-sejour"
-            className="my-4 md:my-0 h-fit border-[1px] border-gray-300 text-gray-700 outline-none rounded-md font-semibold text-sm block w-auto py-[10px] px-10 hover:text-gray-700">
-            Changer de séjour
-          </Link>
+          <ChangeStayButton />
         ) : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
-          <DeleteAccountButton young={young}>Se désister du SNU</DeleteAccountButton>
+          <DeleteAccountButton young={young} />
         ) : null}
       </div>
-    </Wrapper>
+    </div>
   );
 }
 
 const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (
     <Col md={4} style={{ marginTop: 20 }}>
-      <Label>{title}</Label>
+      <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>
       {children || <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />}
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
@@ -317,7 +313,7 @@ const Item = ({ title, name, values, handleChange, errors, touched, validate, ty
 const Select = ({ title, name, values, handleChange, errors, touched, validate, options }) => {
   return (
     <Col md={4} style={{ marginTop: 20 }}>
-      <Label>{title}</Label>
+      <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>
       <select className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate}>
         {options.map((o, i) => (
           <option key={i} value={o.value}>
@@ -329,68 +325,3 @@ const Select = ({ title, name, values, handleChange, errors, touched, validate, 
     </Col>
   );
 };
-
-const Wrapper = styled.div`
-  padding: 20px 40px;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-`;
-const Heading = styled.div`
-  margin-bottom: 30px;
-  span {
-    color: #42389d;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-  h1 {
-    color: #161e2e;
-    margin-bottom: 0;
-    font-size: 3rem;
-    @media (max-width: 767px) {
-      font-size: 1.8rem;
-    }
-    font-weight: 800;
-  }
-`;
-
-const FormRow = styled(Row)`
-  border-top: 1px solid #e5e7eb;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  align-items: ${({ align }) => align};
-  text-align: left;
-  input[type="text"] {
-    max-width: 500px;
-  }
-  margin-bottom: 40px;
-`;
-
-const Label = styled.div`
-  color: #374151;
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 5px;
-`;
-
-const ContinueButton = styled.button`
-  @media (max-width: 767px) {
-    margin: 1rem 0;
-  }
-  color: #fff;
-  background-color: #5145cd;
-  padding: 10px 40px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  display: block;
-  width: auto;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  align-self: flex-end;
-  :hover {
-    opacity: 0.9;
-  }
-`;
