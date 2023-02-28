@@ -135,8 +135,8 @@ export default function National() {
   };
 
   const handleChangeCohort = (value) => {
-    history.push(`/table-repartition?cohort=${value}`);
     setCohort(value);
+    history.push(`/table-repartition?cohort=${value}`);
   };
 
   return (

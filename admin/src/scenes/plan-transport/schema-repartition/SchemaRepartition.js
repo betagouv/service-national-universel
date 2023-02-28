@@ -101,7 +101,6 @@ export default function SchemaRepartition({ region, department }) {
     if (department) {
       return [];
     } else if (region) {
-      console.log(region);
       return region2department[region].map(createEmptyRow);
     } else {
       return regionList.map(createEmptyRow);
@@ -297,12 +296,7 @@ export default function SchemaRepartition({ region, department }) {
 
   const handleChangeCohort = (value) => {
     setCohort(value);
-    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
-      history.push(`/schema-repartition?cohort=${value}`);
-    }
-    if (region && user.role === ROLES.REFERENT_REGION) {
-      history.push(`/schema-repartition/${region}?cohort=${value}`);
-    }
+    history.replace({ pathname: location.pathname, search: `?cohort=${value}` });
   };
 
   return (
