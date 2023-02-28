@@ -157,6 +157,9 @@ export default function List() {
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
     initMissions(user.structureId);
+    const urlParams = new URLSearchParams(window.location.search);
+    const mission_name = urlParams.get("MISSION_NAME");
+    if (mission_name) setFilterVisible(true);
   }, []);
   const RenderText = (text) => {
     return (
