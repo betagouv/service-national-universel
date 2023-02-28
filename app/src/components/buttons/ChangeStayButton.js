@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+// This button could be a generic button
+// It could be named `SecondaryOutlinedButton` for example
 const ChangeStayButton = () => {
   return (
     <Link

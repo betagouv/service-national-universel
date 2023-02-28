@@ -16,7 +16,9 @@ import { appURL } from "../config";
 import { putLocation } from "../services/api-adresse";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import FormRow from "../components/forms/FormRow";
-import { ChangeStayButton, ContinueButton, DeleteAccountButton } from "../components/buttons";
+import ContinueButton from "../components/buttons/ContinueButton";
+import DeleteAccountButton from "../components/buttons/DeleteAccountButton";
+import ChangeStayButton from "../components/buttons/ChangeStayButton";
 
 export default function Account() {
   const young = useSelector((state) => state.Auth.young);

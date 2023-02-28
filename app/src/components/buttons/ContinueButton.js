@@ -1,5 +1,7 @@
 import React from "react";
 
+// This button could be a generic button
+// It could be named `PrimaryButton` for example
 const ContinueButton = ({ children, ...rest }) => {
   return (
     <button
