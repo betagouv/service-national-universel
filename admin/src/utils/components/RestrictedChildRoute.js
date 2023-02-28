@@ -21,11 +21,12 @@ const RestrictedChildRoute = ({ component: Component, allowedRoles = ROLES_LIST,
 
     if (!routeRule) {
       redirectTo = redirectUnauthorizedTo.default || "/dashboard";
-      return;
     }
 
-    const [routeRuleKey] = routeRule;
-    redirectTo = routeRuleKey;
+    if (routeRule) {
+      const [routeRuleKey] = routeRule;
+      redirectTo = routeRuleKey;
+    }
   }
 
   if (!allowedRoles.includes(user.role)) {
