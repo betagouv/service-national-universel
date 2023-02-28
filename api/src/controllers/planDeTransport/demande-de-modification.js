@@ -30,6 +30,19 @@ const updateModificationDependencies = async (modif, fromUser) => {
   await planDeTransport.save({ fromUser });
 };
 
+const fixedReferents = [
+  {
+    firstName: "Edouard",
+    lastName: "VIZCAINO",
+    email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
+  },
+  {
+    firstName: "Christelle",
+    lastName: "BIGNON",
+    email: "christelle.bignon@jeunesse-sports.gouv.fr",
+  },
+];
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -62,19 +75,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     else planDeTransport.modificationBuses.push(copyModif);
 
     const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
-
-    const fixedReferents = [
-      {
-        firstName: "Edouard",
-        lastName: "VIZCAINO",
-        email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
-      },
-      {
-        firstName: "Christelle",
-        lastName: "BIGNON",
-        email: "christelle.bignon@jeunesse-sports.gouv.fr",
-      },
-    ];
 
     await planDeTransport.save({ fromUser: req.user });
 
@@ -126,19 +126,6 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
     await updateModificationDependencies(modif, req.user);
 
     const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
-
-    const fixedReferents = [
-      {
-        firstName: "Edouard",
-        lastName: "VIZCAINO",
-        email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
-      },
-      {
-        firstName: "Christelle",
-        lastName: "BIGNON",
-        email: "christelle.bignon@jeunesse-sports.gouv.fr",
-      },
-    ];
 
     for (const referentTransporter of [...referentTransporters, ...fixedReferents]) {
       await sendTemplate(
