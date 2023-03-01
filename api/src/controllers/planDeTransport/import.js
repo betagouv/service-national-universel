@@ -349,7 +349,7 @@ router.post(
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`]) {
+          if (line[`ID PDR ${pdrNumber}`] && line[`ID PDR ${pdrNumber}`]?.toLowerCase() !== "correspondance") {
             pdrIds.push(line[`ID PDR ${pdrNumber}`]);
           }
         }
@@ -550,8 +550,10 @@ function getPDRMeetingHour(departureHour) {
   date.setMinutes(minute);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  date.setHours(date.getHours() + 1);
-  return date.toTimeString().split(" ")[0];
+  date.setHours(date.getHours() - 1);
+  let meetingHour = date.toTimeString().split(" ")[0];
+  meetingHour = meetingHour.substring(0, meetingHour.length - 3);
+  return meetingHour;
 }
 
 module.exports = router;
