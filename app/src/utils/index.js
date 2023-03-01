@@ -31,6 +31,11 @@ const permissionApp = (y) => {
   return y?.status !== YOUNG_STATUS.REFUSED;
 };
 
+export function wasYoungExpelled(y) {
+  if (!permissionApp(y)) return false;
+  return y?.departSejourMotif === "Exclusion";
+}
+
 export function permissionChangeCohort(y) {
   if (!permissionApp(y)) return false;
   return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && (!y.departSejourMotif || y.departSejourMotif !== "Exclusion");

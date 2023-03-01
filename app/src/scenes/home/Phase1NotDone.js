@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { permissionChangeCohort, permissionPhase2, permissionReinscription, translate } from "../../utils";
+import { permissionChangeCohort, permissionPhase2, permissionReinscription, translate, wasYoungExpelled } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
+import ChevronRight from "../../assets/icons/ChevronRight";
+import Engagement from "./components/Engagement";
 
 export default function Phase1NotDone() {
   const [loading, setLoading] = useState(false);
@@ -34,30 +36,28 @@ export default function Phase1NotDone() {
   return (
     <>
       {/* DESKTOP */}
-      <div className="hidden lg:flex">
-        <div className="m-10 w-full">
-          <div className="flex justify-between items-center rounded-xl shadow-md bg-white ">
-            <div className="w-1/2 p-12">
-              <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-900">
+      <div className="relative hidden lg:flex justify-between m-10 rounded-xl shadow-md bg-white overflow-hidden">
+        {wasYoungExpelled(young) ? (
+          <div className="m-16 space-y-10">
+            <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
+              <strong>{young.firstName}, </strong>
+              votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion
+            </p>
+            <p>
+              <strong>Vous ne pouvez donc pas poursuivre votre parcours d’engagement au sein du SNU.</strong>
+              <br />
+              Nous vous proposons de découvrir les autres formes d’engagement possible.
+            </p>
+            <Engagement />
+          </div>
+        ) : (
+          <>
+            <div className="z-10 ml-16 my-16 space-y-10">
+              <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-lg bg-[#ffffff] bg-opacity-50">
                 <strong>{young.firstName}, </strong>
-                vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;!
-              </div>
-              {permissionChangeCohort(young) && (
-                <>
-                  <div className="my-12 font-bold leading-7">
-                    <p className="text-xl">Votre phase 1 n’est donc pas validée.</p>
-                    <p className="text-gray-500 text-base max-w-sm">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
-                  </div>
-                  <Link
-                    to="changer-de-sejour"
-                    className="bg-blue-600 rounded-md text-white text-sm shadow-sm px-3 py-2 hover:brightness-110 active:brightness-125 drop-shadow-[0px_8px_15px_rgba(50,70,255,0.3)]">
-                    Choisir un nouveau séjour
-                  </Link>
-                  <Link>
-                    <p className="mt-16 text-xs text-blue-600">Se désister du SNU</p>
-                  </Link>
-                </>
-              )}
+                vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
+              </p>
+              {permissionChangeCohort(young) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
                 <>
                   <div className="text-base left-7 text-gray-800 mt-5">
@@ -90,46 +90,80 @@ export default function Phase1NotDone() {
                 </div>
               )}
             </div>
-            <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} alt="" />
-          </div>
-        </div>
+            <img className="absolute right-0 object-fit h-full" src={require("../../assets/homePhase2Desktop.png")} alt="" />
+          </>
+        )}
       </div>
       {/* MOBILE */}
-      <div className="flex lg:hidden w-full">
-        <div className="flex flex-col-reverse ">
-          <div className="px-4 pb-4">
-            <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-              <strong>{young.firstName},</strong>
+      <div className="flex flex-col-reverse lg:hidden w-full bg-white">
+        {wasYoungExpelled(young) ? (
+          <div className="p-4 space-y-10">
+            <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
+              <strong>{young.firstName}, </strong>
+              votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion
+            </p>
+            <p>
+              <strong>Vous ne pouvez donc pas poursuivre votre parcours d’engagement au sein du SNU.</strong>
               <br />
-              vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;!
-            </div>
-            {permissionPhase2(young) && (
-              <>
-                <div className="text-sm left-7 text-gray-800 mt-5">
-                  Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
-                  d&apos;intérêt général !
-                </div>
+              Nous vous proposons de découvrir les autres formes d’engagement possible.
+            </p>
+            <Engagement />
+          </div>
+        ) : (
+          <>
+            <div className="px-4 pb-4">
+              <p className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
+                <strong>{young.firstName}, </strong> vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
+              </p>
+              {permissionChangeCohort(young) && <ChangeCohortPrompt />}
+              {permissionPhase2(young) && (
+                <>
+                  <div className="text-sm left-7 text-gray-800 mt-5">
+                    Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
+                    d&apos;intérêt général !
+                  </div>
+                  <button
+                    className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                    onClick={() => {
+                      plausibleEvent("Phase 2/CTA - Realiser ma mission");
+                      history.push("/phase2");
+                    }}>
+                    Réaliser ma mission d&apos;intérêt général
+                  </button>
+                </>
+              )}
+              {permissionReinscription(young) && (
                 <button
                   className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-                  onClick={() => {
-                    plausibleEvent("Phase 2/CTA - Realiser ma mission");
-                    history.push("/phase2");
-                  }}>
-                  Réaliser ma mission d&apos;intérêt général
+                  onClick={goToReinscription}>
+                  Se réinscrire à un autre séjour
                 </button>
-              </>
-            )}
-            {permissionReinscription(young) && (
-              <button
-                className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-                onClick={goToReinscription}>
-                Se réinscrire à un autre séjour
-              </button>
-            )}
-          </div>
-          <img src={require("../../assets/homePhase2Mobile.png")} alt="" />
-        </div>
+              )}
+            </div>
+            <img src={require("../../assets/homePhase2Mobile.png")} alt="" />
+          </>
+        )}
       </div>
     </>
+  );
+}
+
+function ChangeCohortPrompt() {
+  return (
+    <div className="space-y-10 md:space-y-16 w-fit">
+      <div className="font-bold leading-7 bg-[#ffffff] bg-opacity-50 mt-8 space-y-2">
+        <p className="text-lg md:text-xl">Votre phase 1 n’est donc pas validée.</p>
+        <p className="text-gray-500 text-sm max-w-sm">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
+      </div>
+      <div className="w-full md:w-auto bg-blue-600 rounded-md text-white text-sm px-3 py-2 hover:brightness-110 active:brightness-125 shadow-ninaBlue transition flex justify-center items-center">
+        <Link to="changer-de-sejour">Choisir un nouveau séjour</Link>
+      </div>
+      <div className="text-xs text-blue-600">
+        <Link to="desistement" className="flex items-center justify-center md:justify-start gap-4">
+          <span>Se désister du SNU</span>
+          <ChevronRight />
+        </Link>
+      </div>
+    </div>
   );
 }
