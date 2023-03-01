@@ -476,6 +476,8 @@ export default function List() {
                     return `${e} (${count})`;
                   }}
                   title=""
+                  aggregationSize={ES_NO_LIMIT}
+                  size={ES_NO_LIMIT}
                   URLParams={true}
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
