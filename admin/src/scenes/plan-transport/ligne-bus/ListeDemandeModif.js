@@ -273,7 +273,7 @@ const Line = ({ modification, tagsOptions, user }) => {
     <>
       <hr />
       <div className="flex py-4 items-center px-4 hover:bg-gray-50 gap-6">
-        <div className="w-[35%] flex flex-col gap-1">
+        <div className="w-[35%] flex flex-col gap-1 cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}?demande=${modification._id.toString()}`)}>
           <div className="line-clamp-3 text-sm text-[#242526] text-start">{modification.requestMessage}</div>
           <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
         </div>
