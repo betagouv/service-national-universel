@@ -89,7 +89,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
           requestUserFirstname: req.user.firstName,
           requestUserLastname: req.user.lastName,
           region: req.user.region,
-          cta: `${config.ADMIN_URL}/ligne-de-bus/${lineId}`,
+          cta: `${config.ADMIN_URL}/ligne-de-bus/${lineId}?demande=${modificationBus._id}`,
         },
       });
     }
@@ -140,7 +140,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
           requestUserFirstname: req.user.firstName,
           requestUserLastname: req.user.lastName,
           region: req.user.region,
-          cta: `${config.ADMIN_URL}/ligne-de-bus/${modif.lineId}`,
+          cta: `${config.ADMIN_URL}/ligne-de-bus/${modif.lineId}?demande=${modif._id}`,
         },
       });
     }
