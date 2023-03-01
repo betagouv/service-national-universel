@@ -130,20 +130,19 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
 
+    const template = status === "ACCEPTED" ? SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_ACCEPTEE : SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_REFUSEE;
+
     for (const referentTransporter of [...referentTransporters, ...fixedReferents]) {
-      await sendTemplate(
-        (status === "ACCEPTED" && SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_ACCEPTEE) || (status === "REJECTED" && SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_REFUSEE),
-        {
-          emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
-          params: {
-            busId: modif.lineName,
-            requestUserFirstname: req.user.firstName,
-            requestUserLastname: req.user.lastName,
-            region: req.user.region,
-            cta: `${config.ADMIN_URL}/ligne-de-bus/${modif.lineId}`,
-          },
+      await sendTemplate(template, {
+        emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
+        params: {
+          busId: modif.lineName,
+          requestUserFirstname: req.user.firstName,
+          requestUserLastname: req.user.lastName,
+          region: req.user.region,
+          cta: `${config.ADMIN_URL}/ligne-de-bus/${modif.lineId}`,
         },
-      );
+      });
     }
 
     return res.status(200).send({ ok: true });
