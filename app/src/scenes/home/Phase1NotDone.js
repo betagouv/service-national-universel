@@ -53,7 +53,7 @@ export default function Phase1NotDone() {
         ) : (
           <>
             <div className="z-10 ml-16 my-16 space-y-10">
-              <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-lg bg-[#ffffff] bg-opacity-50">
+              <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-lg">
                 <strong>{young.firstName}, </strong>
                 vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
               </p>
@@ -151,13 +151,15 @@ export default function Phase1NotDone() {
 function ChangeCohortPrompt() {
   return (
     <div className="space-y-10 md:space-y-16 w-fit">
-      <div className="font-bold leading-7 bg-[#ffffff] bg-opacity-50 mt-8 space-y-2">
+      <div className="font-bold leading-7 mt-8 space-y-2">
         <p className="text-lg md:text-xl">Votre phase 1 n’est donc pas validée.</p>
         <p className="text-gray-500 text-sm max-w-sm">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
       </div>
-      <div className="w-full md:w-auto bg-blue-600 rounded-md text-white text-sm px-3 py-2 hover:brightness-110 active:brightness-125 shadow-ninaBlue transition flex justify-center items-center">
-        <Link to="changer-de-sejour">Choisir un nouveau séjour</Link>
-      </div>
+      <Link
+        to="changer-de-sejour"
+        className="w-full md:w-auto bg-blue-600 rounded-md text-white text-sm px-3 py-2 hover:brightness-110 active:brightness-125 shadow-ninaBlue transition flex justify-center items-center">
+        Choisir un nouveau séjour
+      </Link>
       <div className="text-xs text-blue-600">
         <Link to="desistement" className="flex items-center justify-center md:justify-start gap-4">
           <span>Se désister du SNU</span>

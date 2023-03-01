@@ -38,13 +38,15 @@ export function wasYoungExpelled(y) {
 
 export function permissionChangeCohort(y) {
   if (!permissionApp(y)) return false;
-  return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && (!y.departSejourMotif || y.departSejourMotif !== "Exclusion");
+  return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && (!y.departSejourMotif || !y.departSejourMotif !== "Exclusion");
 }
 
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
   return (
-    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(y.status) ||
+    (![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(y.status) &&
+      y.statusPhase1 !== YOUNG_STATUS_PHASE1.NOT_DONE &&
+      !wasYoungExpelled(y)) ||
     y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE
   );
 }
