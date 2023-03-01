@@ -226,6 +226,10 @@ export default function ListFiltersPopOver({
     setModalSaveVisible(false);
   };
 
+  const setQuery = (query) => {
+    console.log(query);
+  };
+
   return (
     <div>
       <div className="flex flex-row items-center justify-start gap-2">
@@ -300,6 +304,7 @@ export default function ListFiltersPopOver({
                                   data={dataFilter[item?.name] || []}
                                   isShowing={isShowing === item.name}
                                   setIsShowing={handleFilterShowing}
+                                  setQuery={setQuery}
                                 />
                               ))}
                           </div>
@@ -532,8 +537,13 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
 
   //apply filters to query
   if (selectedFilters && Object.keys(selectedFilters).length) {
+    // ajouts des bases dans les querys
+    if (!bodyQuery.query?.bool) bodyQuery.query.bool = { must: [], filter: [] };
+    if (!bodyQuery.query.bool?.fitler) bodyQuery.query.bool.filter = [];
+    if (!bodyQuery.query.bool?.must) bodyQuery.query.bool.must = [];
+    //
+
     Object.keys(selectedFilters).forEach((key) => {
-      console.log(key);
       if (key === "searchbar") return;
       const currentFilter = filterArray.find((f) => f.name === key);
       if (currentFilter.customQuery) {
@@ -546,10 +556,21 @@ const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = n
             bodyQuery.query.bool[key] = currentQuery.bool[key];
           }
         });
-        //body.query.bool.must.push(selectedFilters[key].customQuery);
+      } else if (currentFilter.customComponent) {
+        const currentQuery = selectedFilters[key].filter?.query?.query;
+        console.log("custom component", currentQuery);
+        if (currentQuery) {
+          Object.keys(currentQuery?.bool).forEach((key) => {
+            if (bodyQuery.query.bool[key]) {
+              bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
+            } else {
+              bodyQuery.query.bool[key] = currentQuery.bool[key];
+            }
+          });
+        }
+        console.log(bodyQuery);
       } else if (selectedFilters[key].filter.length > 0) {
         let datafield = currentFilter.datafield;
-        console.log("datafield", datafield);
         bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
       }
     });

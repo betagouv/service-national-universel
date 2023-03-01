@@ -40,6 +40,10 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [] } });
   };
 
+  const handleCustomQuery = (query) => {
+    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query } });
+  };
+
   return (
     <Popover className="">
       {({ open }) => (
@@ -74,9 +78,10 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
               <div className="rounded-lg shadow-lg ">
                 <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
                   {filter?.customComponent ? (
-                    getCustomComponent(filter?.customComponent)
+                    getCustomComponent(filter?.customComponent, handleCustomQuery, selectedFilters[filter?.name])
                   ) : (
                     <>
+                      {console.log("se refresh")}
                       <div className="flex items-center justify-between py-2 mb-1 px-3">
                         <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
                         <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
