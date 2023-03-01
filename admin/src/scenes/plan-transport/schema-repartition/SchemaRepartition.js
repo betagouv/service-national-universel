@@ -142,6 +142,9 @@ export default function SchemaRepartition({ region, department }) {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
     }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
+    }
   }
 
   function goToRegion() {
@@ -282,9 +285,23 @@ export default function SchemaRepartition({ region, department }) {
     return { workbook, fileName };
   }
 
+  const getSchemaRepartitionRoute = () => {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+      return `/schema-repartition?cohort=${cohort}`;
+    }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      return `/schema-repartition/${region}?cohort=${cohort}`;
+    }
+  };
+
+  const handleChangeCohort = (value) => {
+    setCohort(value);
+    history.replace({ pathname: location.pathname, search: `?cohort=${value}` });
+  };
+
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Schéma de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Schéma de répartition", to: getSchemaRepartitionRoute() }]} />
       <div className="p-[30px]">
         <div className="flex items-center justify-between">
           <PlanTransportBreadcrumb
@@ -293,7 +310,7 @@ export default function SchemaRepartition({ region, department }) {
             onGoToNational={goToNational}
             onGoToRegion={goToRegion}
           />
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
         </div>
         <div className="flex my-[40px]">
           <div className="flex flex-col grow">

@@ -4,16 +4,16 @@ import FlagFr from "../../../assets/flags/FlagFr";
 export default function PlanTransportBreadcrumb({ className = "", region = null, department = null, onGoToRegion = () => {}, onGoToNational = () => {} }) {
   return (
     <div className={`flex ${className}`}>
-      <Crumb color="#E5E7EB" onClick={onGoToNational} className="z-[2]" key="national">
+      <Crumb color="#E5E7EB" onClick={onGoToNational} className="z-[2] hover:cursor-pointer" key="national">
         <FlagFr />
       </Crumb>
       {region && (
-        <Crumb color="#D1D5DB" onClick={onGoToRegion} className="ml-[-12px] z-[1]" key="region">
+        <Crumb color="#D1D5DB" onClick={onGoToRegion} className="ml-[-12px] z-[1] hover:cursor-pointer" key="region">
           {region.label}
         </Crumb>
       )}
       {department && (
-        <Crumb color="#9CA3AF" className="ml-[-12px] z-0" key="department">
+        <Crumb color="#9CA3AF" className="ml-[-12px] z-0 hover:cursor-pointer" key="department">
           {department.label}
         </Crumb>
       )}

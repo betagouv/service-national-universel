@@ -11,6 +11,7 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/plausible";
 import { environment } from "../../config";
 import ModalInfo from "../modals/ModalInfo";
+import { department2region } from "snu-lib";
 
 const DrawerTab = ({ title, to, onClick, beta, exact }) => {
   if (environment === "production" && beta) return null;
@@ -188,7 +189,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       {user.role === ROLES.REFERENT_DEPARTMENT ? (
-        <DrawerTab to={`/schema-repartition/${user.region}/${user.department}`} title="Schéma de répartition" onClick={onClick} />
+        <DrawerTab to={`/schema-repartition/${department2region[user.department[0]]}/${user.department[0]}`} title="Schéma de répartition" onClick={onClick} />
       ) : user.role === ROLES.REFERENT_REGION ? (
         <DrawerTab to={`/schema-repartition/${user.region}`} title="Schéma de répartition" onClick={onClick} />
       ) : (
