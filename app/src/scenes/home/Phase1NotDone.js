@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { permissionPhase2, permissionReinscription, translate } from "../../utils";
+import { permissionChangeCohort, permissionPhase2, permissionReinscription, translate } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
@@ -35,14 +35,29 @@ export default function Phase1NotDone() {
     <>
       {/* DESKTOP */}
       <div className="hidden lg:flex">
-        <div className="my-12 mx-10 w-full">
-          <div className="flex justify-between items-center rounded-lg bg-white ">
-            <div className="w-1/2 pl-10 py-12">
-              <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong>
-                <br />
+        <div className="m-10 w-full">
+          <div className="flex justify-between items-center rounded-xl shadow-md bg-white ">
+            <div className="w-1/2 p-12">
+              <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-900">
+                <strong>{young.firstName}, </strong>
                 vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;!
               </div>
+              {permissionChangeCohort(young) && (
+                <>
+                  <div className="my-12 font-bold leading-7">
+                    <p className="text-xl">Votre phase 1 n’est donc pas validée.</p>
+                    <p className="text-gray-500 text-base max-w-sm">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
+                  </div>
+                  <Link
+                    to="changer-de-sejour"
+                    className="bg-blue-600 rounded-md text-white text-sm shadow-sm px-3 py-2 hover:brightness-110 active:brightness-125 drop-shadow-[0px_8px_15px_rgba(50,70,255,0.3)]">
+                    Choisir un nouveau séjour
+                  </Link>
+                  <Link>
+                    <p className="mt-16 text-xs text-blue-600">Se désister du SNU</p>
+                  </Link>
+                </>
+              )}
               {permissionPhase2(young) && (
                 <>
                   <div className="text-base left-7 text-gray-800 mt-5">
