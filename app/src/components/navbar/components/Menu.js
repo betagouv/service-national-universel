@@ -1,66 +1,34 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link, NavLink } from "react-router-dom";
-import IconFacebook from "../assets/IconFacebook";
-import IconHelp from "../assets/IconHelp";
+import { NavLink } from "react-router-dom";
 import IconHome from "../assets/IconHome";
-import IconInstagram from "../assets/IconInstagram";
 import IconPhase1 from "../assets/IconPhase1";
 import IconPhase2 from "../assets/IconPhase2";
 import IconPhase3 from "../assets/IconPhase3";
-import IconTwitter from "../assets/IconTwitter";
+import IconHelp from "../assets/IconHelp";
 import LogoDiagoriente from "../assets/logoDiagoriente.svg";
+import Socials from "./Socials";
 
 export default function Menu() {
   const young = useSelector((state) => state.Auth.young);
-  console.log("🚀 ~ file: Menu.js:39 ~ Menu ~ user:", young);
-
-  const steps = [
-    {
-      url: "phase1",
-      icon: <IconPhase1 />,
-      text: "Phase 1 - Séjour",
-      status: young.statusPhase1,
-    },
-    {
-      url: "phase2",
-      icon: <IconPhase2 />,
-      text: "Phase 2 - MIG",
-      status: young.statusPhase2,
-    },
-    {
-      url: "phase3",
-      icon: <IconPhase3 />,
-      text: "Phase 3 - Engagement",
-      status: young.statusPhase3,
-    },
-  ];
 
   return (
-    <>
-      <nav className="my-3">
-        <ul>
-          <PageLink to="/" icon={<IconHome />} text="Accueil" disabled={false} />
-          {steps.map((step) => {
-            return <PageLink key={step.url} to={step.url} icon={step.icon} text={step.text} status={step.status} />;
-          })}
-          <div className="m-8" />
-          <PageLink to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" disabled={false} />
-        </ul>
-      </nav>
-
-      <Link to="/">
-        <div className="my-24 flex flex-col items-center justify-center border-[1px] border-[#4E6295] rounded-xl m-6 text-xs text-[#7C95D2] py-3 gap-1 hover:bg-[#1B243D] hover:border-[#1B243D] hover:text-[#7C95D2] transition-colors duration-200">
-          <img src={LogoDiagoriente} />
-          <span>Outil d&apos;aide à l&apos;orientation</span>
-        </div>
-      </Link>
-      <Socials />
-    </>
+    <nav className="my-3">
+      <ul>
+        <MenuItem to="/" icon={<IconHome />} text="Accueil" />
+        <MenuItem to="phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" status={young.statusPhase1} />
+        <MenuItem to="phase2" icon={<IconPhase2 />} text="Phase 2 - MIG" status={young.statusPhase2} />
+        <MenuItem to="phase3" icon={<IconPhase3 />} text="Phase 3 - Engagement" status={young.statusPhase3} />
+        <div className="m-8" />
+        <MenuItem to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
+        <Diagoriente />
+        <Socials />
+      </ul>
+    </nav>
   );
 }
 
-function PageLink({ to, icon, text, status }) {
+function MenuItem({ to, icon, text, status }) {
   const disabled = status ? !["DONE", "VALIDATED", "IN_PROGRESS"].includes(status) : false;
 
   return (
@@ -86,18 +54,15 @@ function PageLink({ to, icon, text, status }) {
   );
 }
 
-function Socials() {
+function Diagoriente() {
   return (
-    <div className="flex justify-end p-4 gap-6 items-center text-[#7A90C3]">
-      <a href="https://www.facebook.com/snu.jemengage/" target="_blank" rel="noreferrer">
-        <IconFacebook className="hover:text-[#D1DAEF]" />
-      </a>
-      <a href="https://twitter.com/snujemengage" target="_blank" rel="noreferrer">
-        <IconTwitter className="hover:text-[#D1DAEF]" />
-      </a>
-      <a href="https://www.instagram.com/snujemengage/" target="_blank" rel="noreferrer">
-        <IconInstagram className="hover:text-[#D1DAEF]" />
-      </a>
-    </div>
+    <li>
+      <NavLink to="diagoriente">
+        <div className="my-24 flex flex-col items-center justify-center border-[1px] border-[#4E6295] rounded-xl m-6 text-xs text-[#7C95D2] py-3 gap-1 hover:bg-[#1B243D] hover:border-[#1B243D] hover:text-[#7C95D2] transition-colors duration-200">
+          <img src={LogoDiagoriente} alt="logo diagoriente" />
+          <span>Outil d&apos;aide à l&apos;orientation</span>
+        </div>
+      </NavLink>
+    </li>
   );
 }

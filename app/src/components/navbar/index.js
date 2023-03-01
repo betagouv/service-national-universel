@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./components/Header";
 import Menu from "./components/Menu";
-import UserCard from "./components/UserCard";
+import User from "./components/User";
 
 export default function Navbar() {
   return (
@@ -10,7 +10,7 @@ export default function Navbar() {
       <div className="hidden md:block w-64">
         <Header />
         <Menu />
-        <UserCard />
+        <User />
       </div>
     </div>
   );

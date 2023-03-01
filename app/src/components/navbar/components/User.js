@@ -19,7 +19,9 @@ export default function UserCard() {
         <p className="text-xs text-[#768BAC]">Volontaire</p>
       </div>
       <button
-        className="ml-auto rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center rotate-180 transition-colors duration-200"
+        className={`${
+          !open && "rotate-180"
+        } ml-auto rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center transition-all duration-200`}
         onClick={() => setOpen(!open)}>
         <ChevronDown />
       </button>
@@ -36,7 +38,7 @@ function Menu({ open }) {
   }
 
   return (
-    <nav className={`${open ? "block" : "hidden"} py-2 rounded-lg w-56 bg-white transition absolute right-4 shadow overflow-hidden z-50 bottom-16`}>
+    <nav className={`${open ? "block" : "hidden"} py-2 rounded-lg w-56 bg-white transition absolute right-4 shadow overflow-hidden z-50 bottom-20`}>
       <Link to="account">
         <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 text-gray-900">Mon profil</p>
       </Link>
