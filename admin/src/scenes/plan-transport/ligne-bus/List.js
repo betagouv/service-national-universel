@@ -99,9 +99,7 @@ export default function List() {
             value={cohort}
             onChange={(e) => {
               setCohort(e);
-              history.replace({
-                search: null,
-              });
+              history.replace({ search: `?cohort=${e}` });
             }}
           />
         </div>
@@ -180,13 +178,13 @@ const ReactiveList = ({ cohort, history }) => {
             <div className="flex gap-2 items-center">
               <button
                 className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-                onClick={() => history.push("/ligne-de-bus/historique")}>
+                onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
                 <History className="text-gray-400" />
                 Historique
               </button>
               <button
                 className="text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-                onClick={() => history.push("/ligne-de-bus/demande-de-modification")}>
+                onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
                 Demande de modification
               </button>
               <ExportComponent

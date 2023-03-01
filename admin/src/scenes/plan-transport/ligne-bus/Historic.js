@@ -7,18 +7,21 @@ import { Title } from "../components/commons";
 import Select from "../components/Select";
 import { cohortList } from "../util";
 import { createEvent } from "../../../utils";
+import { useHistory } from "react-router-dom";
 
 let filterOptionsCache = null;
 
 export default function Historic() {
   const [loading, setLoading] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
+  const urlParams = new URLSearchParams(window.location.search);
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [data, setData] = React.useState([]);
   const [pagination, setPagination] = React.useState({ count: 0, page: 0, pageCount: 0 });
   const [currentPage, setCurrentPage] = React.useState(0);
   const [filters, setFilters] = React.useState({ op: [], userId: [], path: [], query: "" });
   const [options, setOptions] = React.useState(filterOptionsCache);
+  const history = useHistory();
 
   useEffect(() => {
     (async function () {
@@ -92,11 +95,18 @@ export default function Historic() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: "/ligne-de-bus" }, { label: "Historique du plan de transport" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Historique du plan de transport" }]} />
       <div className="w-full px-8 pt-3 pb-4">
         <div className="flex pb-6 items-center justify-between">
           <Title>Historique du plan de transport</Title>
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select
+            options={cohortList}
+            value={cohort}
+            onChange={(e) => {
+              setCohort(e);
+              history.replace({ search: `?cohort=${e}` });
+            }}
+          />
         </div>
         <HistoryComponent
           loading={loading}
