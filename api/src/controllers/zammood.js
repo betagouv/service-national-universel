@@ -22,6 +22,7 @@ const YoungObject = require("../models/young");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
+const optionalAuth = require("../middlewares/optionalAuth");
 
 const router = express.Router();
 
@@ -61,12 +62,12 @@ router.get("/knowledgeBase/search", async (req, res) => {
   }
 });
 
-router.post("/knowledgeBase/feedback", async (req, res) => {
+router.post("/knowledgeBase/feedback", optionalAuth, async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/feedback`, {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({ ...req.body, contactEmail: req.user?.email }),
     });
     if (!ok) return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
 

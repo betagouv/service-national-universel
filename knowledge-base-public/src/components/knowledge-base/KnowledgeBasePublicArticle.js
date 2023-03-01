@@ -3,38 +3,33 @@ import React, { useState } from "react";
 import API from "../../services/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import useUser from "../../hooks/useUser";
-import { snuApiUrl } from "../../config";
+import { snuApiUrl, environment } from "../../config";
+import { Button } from "../Buttons";
 
 const defaultFeedback = { isPositive: true };
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
-  const { user } = useUser();
-
   const [feedback, setFeedback] = useState({ ...defaultFeedback });
   const [hasSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const showToastMessage = () => {
-    toast.error("Une erreure s'est produite veuillez nous excusez", {
-      position: toast.POSITION.TOP_RIGHT,
-    });
-  };
-
   async function postFeedback() {
     try {
+      setSubmitting(true);
       const response = await API.post({
         origin: snuApiUrl,
         path: `/zammood/knowledgeBase/feedback`,
-        body: { data: { ...feedback, knowledgeBaseArticle: item?._id, contactEmail: user.isLoggedIn ? user.email : undefined } },
+        body: { data: { ...feedback, knowledgeBaseArticle: item?._id } },
       });
       if (response.ok) {
         setSubmitted(true);
       } else {
-        showToastMessage();
+        toast.error("Une erreure s'est produite veuillez nous excusez");
       }
     } catch (error) {
-      showToastMessage();
+      toast.error("Une erreure s'est produite veuillez nous excusez");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -52,7 +47,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
       <div className="border-[rgba(0, 0, 0, 0.1)] mt-10 mb-12 w-full border-t-2"></div>
       <ToastContainer />
-      {!hasSubmitted && (
+      {environment !== "production" && !hasSubmitted && (
         <>
           {feedback.isPositive && (
             <div className="flex  h-48 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
@@ -102,23 +97,15 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                 {feedback.comment?.length || 0}/125
               </p>
               <div className="mt-3 flex w-full flex-row">
-                <div
-                  className="mr-1 flex h-12 w-6/12 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-sm font-medium leading-5 text-[#6B7280]"
+                <button
+                  className="border-1 mr-1 flex flex-1 items-center justify-center border-gray-200 bg-white text-[#6B7280]"
                   onClick={() => setFeedback({ ...defaultFeedback })}
                 >
                   Annuler
-                </div>
-                <div
-                  id="ThumbsDown"
-                  className={`${
-                    feedback.comment?.length > 125 || feedback.comment?.length < 1 ? "pointer-events-none" : null
-                  } ml-1 flex h-12 w-6/12 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 ${
-                    feedback.comment?.length > 125 || feedback.comment?.length < 1 ? "bg-indigo-200" : "bg-[#4F46E5]"
-                  } text-sm font-medium leading-5 text-[#FFFFFF]`}
-                  onClick={(e) => postFeedback(e)}
-                >
+                </button>
+                <Button className="flex-1" onClick={postFeedback} loading={isSubmitting} disabled={feedback.comment?.length > 125}>
                   Envoyer
-                </div>
+                </Button>
               </div>
             </div>
           )}
