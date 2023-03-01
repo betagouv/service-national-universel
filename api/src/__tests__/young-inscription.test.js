@@ -389,7 +389,7 @@ describe("Young", () => {
       const nextResponseData = res.body.data;
       const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
 
-      res = await request(getAppHelper()).put("/young/inscription2023/representants/next").send(representantObj);
+      res = await request(getAppHelper()).put("/young/inscription2023/representants/correction").send(representantObj);
       expect(res.status).toBe(200);
       const correctionResponseData = res.body.data;
       const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
