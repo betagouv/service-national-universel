@@ -1,3 +1,22 @@
+# [1.225.0](https://github.com/betagouv/service-national-universel/compare/v1.224.1...v1.225.0) (2023-03-01)
+
+
+### Bug Fixes
+
+* **admin:** add redirect to modification on list modification ([b3fd308](https://github.com/betagouv/service-national-universel/commit/b3fd308341d201afef1984b05dd9562ddd1e5fd6))
+* **admin:** aggregationSize volontaire responsible Mes candidatures ([fac5b6d](https://github.com/betagouv/service-national-universel/commit/fac5b6dedc5217e9a799f82db2167feeacb44c88))
+* **admin:** cohort query param plan de transport ([208b664](https://github.com/betagouv/service-national-universel/commit/208b6646dd40d55f4dc456dd7fe5857a9c0b7340))
+* **admin:** correction du selecteur de cohort sur schema et table repartition et gestion des droits ([#2309](https://github.com/betagouv/service-national-universel/issues/2309)) ([d79b74f](https://github.com/betagouv/service-national-universel/commit/d79b74f5d5513af886f66415128608bed9849f18))
+* **api:** pause dej plan de transport ([cc3adbd](https://github.com/betagouv/service-national-universel/commit/cc3adbdcd5b9dff26ba36dab101c42884545e980))
+* **api:** plan de transport import ([c80f379](https://github.com/betagouv/service-national-universel/commit/c80f379891efdade984f8e58675108bf2a61a765))
+* **app:** Changement d'épaisseur de texte sur les boutons suppression de compte et changement de séjour ([#2324](https://github.com/betagouv/service-national-universel/issues/2324)) ([72f2c09](https://github.com/betagouv/service-national-universel/commit/72f2c09c323dd5f85c94cbc54e506337566cd6aa))
+
+
+### Features
+
+* **admin:** ajouter les infos sur les sessions dans le panneau des chefs de centre ([#2302](https://github.com/betagouv/service-national-universel/issues/2302)) ([4779a0b](https://github.com/betagouv/service-national-universel/commit/4779a0b5af4b8c6e0ae3bbe570070216b293c34a))
+* **api:** Ajout d'envoi notification par email au transporteur à l'ouverture nouvelle demande de modification sur plan de transport ([#2316](https://github.com/betagouv/service-national-universel/issues/2316)) ([927ce96](https://github.com/betagouv/service-national-universel/commit/927ce96fa10a86cf64939d2d1d1d585b84d23943))
+
 ## [1.224.1](https://github.com/betagouv/service-national-universel/compare/v1.224.0...v1.224.1) (2023-02-28)
 
 
