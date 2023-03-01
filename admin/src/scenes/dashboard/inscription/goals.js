@@ -157,7 +157,7 @@ export default function Goal({ filter }) {
         </Col>
         <Col>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}} className="h-full">
-            <CardTitle>Nombre de dossiers validés (liste principale) {filter.cohort === "2021" && "*"}</CardTitle>
+            <CardTitle>Nombre de dossiers validés sur liste principale {filter.cohort === "2021" && "*"}</CardTitle>
             <CardValueWrapper>
               <CardValue>{totalInscription || "0"}</CardValue>
               <CardArrow />
