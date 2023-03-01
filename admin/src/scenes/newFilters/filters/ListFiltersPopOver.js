@@ -132,15 +132,24 @@ export default function ListFiltersPopOver({
         filters[key] = { filter: value.split(",") };
       }
     });
+    console.log("filters are ", filters);
     setSelectedFilters(filters);
     return filters;
   };
 
   const currentFilterAsUrl = () => {
+    console.log(selectedFilters);
     const length = Object.keys(selectedFilters).length;
     let index = 0;
     let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+      console.log("curr is ", selectedFilters[curr]);
+
       if (curr === "searchbar" && selectedFilters[curr]?.filter?.length > 0 && selectedFilters[curr]?.filter[0].trim() === "") return acc;
+      // check if custom component
+      if (selectedFilters[curr]?.filter?.value?.length > 0 && selectedFilters[curr]?.filter?.value[0]?.trim() !== "") {
+        acc += `${curr}=${selectedFilters[curr]?.filter?.value.join(",")}${index < length - 1 ? "&" : ""}`;
+      } else return acc;
+
       if (selectedFilters[curr]?.filter?.length > 0) {
         acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
       }

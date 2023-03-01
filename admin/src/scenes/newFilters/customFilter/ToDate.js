@@ -86,7 +86,6 @@ export default function DatePickerWrapper(props) {
 
   return (
     <>
-      <DateFilter title="Date de début" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
       <DateFilter title="Date de fin" value={toDate} onChange={(e) => setToDate(e.target.value)} />
     </>
   );

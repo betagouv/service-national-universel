@@ -69,7 +69,8 @@ export default function List() {
   };
   const filterArray = [
     { title: "Statut", name: "statut", datafield: "status.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée", translate: translate },
-    { title: "Date", name: "date", datafield: "", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée", customComponent: "dateRange" },
+    { title: "Date de début", name: "fromDate", datafield: "", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "fromDate" },
+    { title: "Date de fin", name: "toDate", datafield: "", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "toDate" },
   ];
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
