@@ -31,6 +31,7 @@ export default function DatePickerWrapper(props) {
         },
       },
     };
+    if (fromDate === "") return;
     value = [fromDate];
     // a executer seulement si value !== props.value
     if (JSON.stringify(value) !== JSON.stringify(props.value)) {
