@@ -1,0 +1,47 @@
+import React from "react";
+import { BorderButton, PlainButton } from "../../../scenes/phase0/components/Buttons";
+import Loader from "../../Loader";
+import Modal from "./Modal";
+
+const ConfirmationModal = ({
+  isOpen,
+  icon,
+  title,
+  children,
+  onCancel,
+  onConfirm,
+  loading = false,
+  loadingText = "Chargement...",
+  confirmText = "Confirmer",
+  confirmMode = "blue",
+  cancelText = "Annuler",
+}) => {
+  return (
+    <Modal isOpen={isOpen}>
+      {loading ? (
+        <>
+          <div className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{loadingText}</div>
+          <Loader />
+        </>
+      ) : (
+        <div className="bg-white rounded-[8px]">
+          <div className="px-[24px] pt-[24px]">
+            {icon && <div className="flex justify-center">{icon}</div>}
+            <h2 className="text-[20px] leading-[28px] text-[#111827] mt-[24px] text-center">{title}</h2>
+            {children}
+          </div>
+          <div className="flex p-[24px] items-center justify-between">
+            <BorderButton onClick={onCancel} className="mr-[6px] grow">
+              {cancelText}
+            </BorderButton>
+            <PlainButton onClick={onConfirm} className="ml-[6px] grow" mode={confirmMode}>
+              {confirmText}
+            </PlainButton>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+};
+
+export default ConfirmationModal;

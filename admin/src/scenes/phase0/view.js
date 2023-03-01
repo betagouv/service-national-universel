@@ -26,6 +26,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
 import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
+import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
@@ -45,6 +46,7 @@ import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
 import { capture } from "../../sentry";
+import Button from "../../components/ui/buttons/Button";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -379,10 +381,10 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
 
   async function validate() {
     try {
-      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?getAllSessions=true`);
+      const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
       if (!res.ok) throw new Error(res);
-      const session = res.data.find(({ name }) => name === young.cohort);
-      if (session?.isFull) {
+      const fillingRate = res.data;
+      if (fillingRate >= 1.05) {
         return setConfirmModal({
           icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
           title: "Objectif d'inscription régional atteint",
@@ -392,9 +394,9 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
         });
       }
       return setConfirmModal({
-        icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-        title: "Valider le dossier",
-        message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
+        icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+        title: `L'objectif d'inscription de votre département n'a pas été atteint à 105%. Le dossier d'inscription de ${young.firstName} ${young.lastName} va être validé sur liste principale.`,
+        message: `Souhaitez-vous confirmer l'action ?`,
         type: "VALIDATED",
       });
     } catch (e) {
@@ -488,17 +490,14 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
         </div>
         <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d’inscription.</p>
       </div>
-      <div className="flex">
-        <PlainButton spinner={processing} onClick={validate} mode="green" className="ml-[8px]">
+      <div className="flex gap-2">
+        <PlainButton spinner={processing} onClick={validate} mode="green">
           <CheckCircle className="text-[#10B981]" />
           Valider
         </PlainButton>
-        <PlainButton spinner={processing} onClick={reject} mode="red" className="ml-[8px]">
+        <PlainButton spinner={processing} onClick={reject} mode="red">
           <XCircle className="text-[#EF4444]" />
           Refuser
-        </PlainButton>
-        <PlainButton spinner={processing} onClick={waitingList} mode="white" className="ml-[8px]">
-          Placer sur liste complémentaire
         </PlainButton>
       </div>
       {confirmModal && (
