@@ -1,13 +1,14 @@
 .DS_Store
 
+node_modules
+
+.turbo
+build/**
+dist/**
+.next/**
+
 .github/.DS_Store
-api/.env
-api/.env-prod
-api/.env-staging
-api/*scripts*
-api/.env-testing
-api/.env*
-api/coverage
+
 .vscode
 .env*
 .cache_ggshield
