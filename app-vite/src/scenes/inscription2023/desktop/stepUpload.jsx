@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import { ID } from "../utils";
 import { supportURL } from "../../../config";
-import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
+import { formatDateFR, sessions2023, translateCorrectionReason } from "~/../../lib-module";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import DesktopPageContainer from "../components/DesktopPageContainer";

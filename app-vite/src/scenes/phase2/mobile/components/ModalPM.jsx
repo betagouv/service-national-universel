@@ -9,7 +9,7 @@ import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES } = require("~/../../lib-module");
 
 export default function ModalPM({ theme, open, setOpen, young }) {
   const dispatch = useDispatch();

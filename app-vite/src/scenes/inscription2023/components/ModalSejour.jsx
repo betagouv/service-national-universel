@@ -3,7 +3,7 @@ import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import { formatStringDate } from "snu-lib";
+import { formatStringDate } from "~/../../lib-module";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";

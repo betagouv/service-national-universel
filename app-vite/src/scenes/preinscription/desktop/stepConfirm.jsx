@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory, Link } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import api from "../../../services/api";
-import { translate, translateGrade, formatDateFR } from "snu-lib";
+import { translate, translateGrade, formatDateFR } from "~/../../lib-module";
 import plausibleEvent from "../../../services/plausible";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";

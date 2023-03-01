@@ -31,7 +31,7 @@ import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS } from "~/../../lib-module";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { getAddress } from "../api";
 

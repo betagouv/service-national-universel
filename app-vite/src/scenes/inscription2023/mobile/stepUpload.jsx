@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { ID } from "../utils";
-import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
+import { formatDateFR, sessions2023, translateCorrectionReason } from "~/../../lib-module";
 
 import CheckBox from "../../../components/inscription/checkbox";
 import DatePickerList from "../../preinscription/components/DatePickerList";

@@ -4,7 +4,7 @@ import { RiErrorWarningFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession } from "~/../../lib-module";
 import edit from "../../assets/editIcon.svg";
 import CheckCircleFill from "../../assets/icons/CheckCircleFill";
 import ChevronDown from "../../assets/icons/ChevronDown";

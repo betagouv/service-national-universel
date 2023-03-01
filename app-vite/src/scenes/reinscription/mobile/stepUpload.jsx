@@ -6,7 +6,7 @@ import { supportURL } from "../../../config";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { formatDateFR, sessions2023 } from "snu-lib";
+import { formatDateFR, sessions2023 } from "~/../../lib-module";
 import { translate } from "../../../utils";
 import { ID } from "../../inscription2023/utils";
 

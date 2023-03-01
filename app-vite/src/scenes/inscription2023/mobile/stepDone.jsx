@@ -11,7 +11,7 @@ import Avatar from "../assets/avatar.png";
 import ErrorPic from "../assets/error.png";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import Footer from "../../../components/footerV2";

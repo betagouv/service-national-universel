@@ -49,7 +49,7 @@ import GoogleTags from "./components/GoogleTags";
 import "./index.css";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
+import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "~/../../lib-module";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";

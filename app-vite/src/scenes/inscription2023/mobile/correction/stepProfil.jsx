@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { translate, YOUNG_STATUS } from "snu-lib";
+import { translate, YOUNG_STATUS } from "~/../../lib-module";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import Footer from "../../../../components/footerV2";

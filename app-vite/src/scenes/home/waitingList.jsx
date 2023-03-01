@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 import Check from "../../assets/icons/Check";
 import plausibleEvent from "../../services/plausible";
 import { COHESION_STAY_LIMIT_DATE } from "../../utils";

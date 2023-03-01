@@ -3,7 +3,7 @@ import { Redirect, useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "snu-lib";
+import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "~/../../lib-module";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 

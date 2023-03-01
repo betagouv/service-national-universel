@@ -1,6 +1,6 @@
 import React from "react";
 import { Spinner } from "reactstrap";
-import { FORMAT, MISSION_DOMAINS, PERIOD, translate } from "snu-lib";
+import { FORMAT, MISSION_DOMAINS, PERIOD, translate } from "~/../../lib-module";
 import Sante from "../../assets/mission-domaines/sante";
 import Sport from "../../assets/mission-domaines/sport";
 import Solidarite from "../../assets/mission-domaines/solidarite";

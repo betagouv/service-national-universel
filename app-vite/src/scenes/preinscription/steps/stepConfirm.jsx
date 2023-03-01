@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { formatDateFR, translate, translateGrade } from "snu-lib";
+import { formatDateFR, translate, translateGrade } from "~/../../lib-module";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";

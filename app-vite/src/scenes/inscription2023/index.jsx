@@ -31,7 +31,7 @@ import HeaderMenu from "../../components/headerMenu";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "~/../../lib-module";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;

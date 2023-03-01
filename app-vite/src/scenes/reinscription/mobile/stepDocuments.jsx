@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 import { supportURL } from "../../../config";
 
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";

@@ -3,7 +3,15 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import {
+  translateField,
+  translateCorrectionReason,
+  formatDateFR,
+  PHASE1_YOUNG_ACCESS_LIMIT,
+  translate,
+  YOUNG_STATUS,
+  inscriptionModificationOpenForYoungs,
+} from "~/../../lib-module";
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 

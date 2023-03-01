@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { COHESION_STAY_START, translate } from "snu-lib";
+import { COHESION_STAY_START, translate } from "~/../../lib-module";
 import Footer from "../../../components/footerV2";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Loader from "../../../components/Loader";

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession } from "~/../../lib-module";
 import clock from "../../assets/clock.svg";
 import edit from "../../assets/editIcon.svg";
 import hero from "../../assets/hero.png";

@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, translate } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, translate } from "~/../../lib-module";
 import EditPen from "../../../assets/icons/EditPen";
 import ModalSejour from "../components/ModalSejour";
 import { setYoung } from "../../../redux/auth/actions";

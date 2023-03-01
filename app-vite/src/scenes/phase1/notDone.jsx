@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
-import { youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession } from "~/../../lib-module";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
 import { permissionPhase2, permissionReinscription, translate } from "../../utils";

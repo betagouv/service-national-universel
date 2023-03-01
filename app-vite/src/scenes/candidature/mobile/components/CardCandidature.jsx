@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { translateApplication, translate } from "../../../../utils";
-import { translateApplicationForYoungs } from "snu-lib/translation";
+import { translateApplicationForYoungs } from "~/../../lib-module/translation";
 import LocationMarker from "../../../../assets/icons/LocationMarker";
 import EyeOff from "../../../../assets/icons/EyeOff";
 import Eye from "../../../../assets/icons/Eye";

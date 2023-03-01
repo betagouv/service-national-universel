@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "~/../../lib-module";
 import Clock from "../../assets/icons/Clock";
 import PrepareSejour from "../../assets/icons/PrepareSejour";
 

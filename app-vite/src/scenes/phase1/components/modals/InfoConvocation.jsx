@@ -9,7 +9,7 @@ import Loader from "../../../../components/Loader";
 import api from "../../../../services/api";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 import { capture } from "../../../../sentry";
 import { getCohort } from "../../../../utils/cohorts";
 import dayjs from "dayjs";

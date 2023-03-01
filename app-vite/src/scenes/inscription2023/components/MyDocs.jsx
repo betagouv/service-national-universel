@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import Bin from "../../../assets/icons/Bin";

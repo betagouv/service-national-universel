@@ -15,7 +15,7 @@ import api from "../../../../services/api";
 import Convocation from "../Convocation";
 import plausibleEvent from "../../../../services/plausible";
 import { capture } from "../../../../sentry";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 
 export default function StepConvocation({ young }) {
   const [showConvocation, setShowConvocation] = useState(false);

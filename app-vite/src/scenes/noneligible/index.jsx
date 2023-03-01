@@ -11,7 +11,7 @@ import useDevice from "../../hooks/useDevice";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS } from "~/../../lib-module";
 
 const ComponentNonEligible = () => {
   const device = useDevice();

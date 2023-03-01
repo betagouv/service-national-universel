@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { translate } from "snu-lib";
+import { translate } from "~/../../lib-module";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import jeVauxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";

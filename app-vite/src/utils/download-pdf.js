@@ -1,6 +1,6 @@
 import { toastr } from "react-redux-toastr";
 import * as Sentry from "@sentry/react";
-import { download } from "snu-lib";
+import { download } from "~/../../lib-module";
 
 import api from "../services/api";
 
