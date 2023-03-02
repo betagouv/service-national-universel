@@ -46,7 +46,7 @@ export function permissionChangeCohort(y) {
   if (wasYoungExpelled(y)) return false;
   const now = new Date();
   const limit = addOneDay(END_DATE_PHASE1[y.cohort]);
-  if (y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && now > limit) return false;
+  if (y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && now < limit) return false;
   return true;
 }
 
