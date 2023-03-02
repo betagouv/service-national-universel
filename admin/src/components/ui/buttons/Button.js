@@ -32,6 +32,7 @@ const Button = ({
   variant = "primary",
   displayMode = "plain",
   shape = "rouded",
+  type = "button",
   isLoading = false,
   disabled = false,
   icon,
@@ -53,7 +54,7 @@ const Button = ({
     if (typeof buttonVariant !== "string" && displayMode in buttonVariant) {
       return buttonVariant[displayMode];
     }
-    return buttonVariants.primary.plan;
+    return buttonVariants.primary.plain;
   };
 
   const getButtonShape = () => {
@@ -104,6 +105,7 @@ const Button = ({
       } ${className}`}
       disabled={isLoading ? true : disabled}
       onClick={handleClick}
+      type={type}
       {...rest}>
       {isLoading ? <BiLoaderAlt className="animate-spin" /> : icon}
       {children}
