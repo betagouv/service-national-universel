@@ -1,13 +1,7 @@
 .DS_Store
 
 .github/.DS_Store
-api/.env
-api/.env-prod
-api/.env-staging
-api/*scripts*
-api/.env-testing
-api/.env*
-api/coverage
+
 .vscode
 .env*
 .cache_ggshield
@@ -15,3 +9,4 @@ Zammadwebhook.json
 requestZammad.json
 
 .idea
+node_modules
