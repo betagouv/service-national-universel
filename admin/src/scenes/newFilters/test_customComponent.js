@@ -60,7 +60,6 @@ export default function List() {
   const [selectedFilters, setSelectedFilters] = React.useState({});
 
   // filtre non obligatoire
-  const [selectedSort, setSelectedSort] = React.useState({});
   const size = 20;
 
   const searchBarObject = {

@@ -118,10 +118,8 @@ export default function ListFiltersPopOver({
 
   const getData = async () => {
     const res = await buildMissions(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject, sortSelected);
-    console.log("res is ", selectedFilters);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
-    console.log({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
     if (count !== res.count) setPage(0);
     setData(res.data);
@@ -292,7 +290,7 @@ export default function ListFiltersPopOver({
         {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} saveFilter={saveFilter} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
         {/* Display des filtres sélectionnés */}
         {filtersVisible
-          .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
+          .filter((item) => selectedFilters[item.name] && (selectedFilters[item.name].filter.length > 0 || selectedFilters[item.name].filter?.filter?.value.length > 0))
           .map((filter) => (
             <div
               key={filter.title}

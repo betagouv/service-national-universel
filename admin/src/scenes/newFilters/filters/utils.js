@@ -108,7 +108,8 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
           }
         });
       } else if (currentFilter.customComponent) {
-        const currentQuery = selectedFilters[key].filter?.query?.query;
+        console.log("selectedFilter", selectedFilters);
+        const currentQuery = selectedFilters[key].customQuery?.query?.query;
         if (currentQuery) {
           Object.keys(currentQuery?.bool).forEach((key) => {
             if (bodyQuery.query.bool[key]) {
@@ -122,7 +123,6 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
         let datafield = currentFilter.datafield;
         if (selectedFilters[key].filter.includes("N/A")) {
           const filterWithoutNR = selectedFilters[key].filter.filter((e) => e !== "N/A");
-          console.log(filterWithoutNR);
           bodyQuery.query.bool.filter.push({
             bool: {
               should: [{ bool: { must_not: { exists: { field: datafield } } } }, { terms: { [datafield]: filterWithoutNR } }],
@@ -135,7 +135,7 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
     });
   }
 
-  console.log(bodyQuery);
+  console.log("bodyQuery", bodyQuery);
 
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     bodyQuery.query.bool.must.push({

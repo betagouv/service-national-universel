@@ -41,7 +41,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
   };
 
   const handleCustomQuery = (query) => {
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query } });
+    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query.value, customQuery: query } });
   };
 
   return (
