@@ -187,19 +187,17 @@ export const getURLParam = (urlParams, setPage, filters) => {
   return localFilters;
 };
 export const currentFilterAsUrl = (selectedFilters, page) => {
-  console.log(selectedFilters);
   const length = Object.keys(selectedFilters).length;
   let index = 0;
   let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
     if (curr === "searchbar" && selectedFilters[curr]?.filter?.length > 0 && selectedFilters[curr]?.filter[0].trim() === "") return acc;
-    // check if custom component
-    if (selectedFilters[curr]?.filter?.value?.length > 0 && selectedFilters[curr]?.filter?.value[0]?.trim() !== "") {
+    if (selectedFilters[curr]?.filter?.length > 0) {
+      acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
+      // check if custom component
+    } else if (selectedFilters[curr]?.filter?.value?.length > 0 && selectedFilters[curr]?.filter?.value[0]?.trim() !== "") {
       acc += `${curr}=${selectedFilters[curr]?.filter?.value.join(",")}${index < length - 1 ? "&" : ""}`;
     } else return acc;
 
-    if (selectedFilters[curr]?.filter?.length > 0) {
-      acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
-    }
     index++;
     return acc;
   }, "");
