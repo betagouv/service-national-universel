@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
 import CloseSvg from "../../../../assets/Close";
-import Download from "../../../../assets/icons/Download.js";
+import Download from "../../../../assets/icons/Download";
 import ModalButton from "../../../../components/buttons/ModalButton";
 import LoadingButton from "../../../../components/buttons/LoadingButton";
 import { Footer, ModalContainer } from "../../../../components/modals/Modal";

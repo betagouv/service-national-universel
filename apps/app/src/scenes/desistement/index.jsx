@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
 import ModalButton from "../../components/buttons/ModalButton";
 import RoundWarning from "../../assets/RoundWarning";
-import { supportURL } from "../../config.js";
+import { supportURL } from "../../config";
 
 export default function Desistement() {
   const history = useHistory();

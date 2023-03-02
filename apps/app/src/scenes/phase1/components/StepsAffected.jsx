@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { HiBell } from "react-icons/hi";
-import StepAgreement from "./step/stepAgreement.js";
-import StepConvocation from "./step/stepConvocation.js";
-import StepMedicalField from "./step/stepMedicalFile.js";
+import StepAgreement from "./step/stepAgreement";
+import StepConvocation from "./step/stepConvocation";
+import StepMedicalField from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
 
 export default function StepsAffected({ young, center }) {

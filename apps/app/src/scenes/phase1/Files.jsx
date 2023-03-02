@@ -34,7 +34,7 @@ export default function DocumentsPhase1({ young }) {
               filled={young.cohesionStayMedicalFileDownload === "true"}
               color={young.cohesionStayMedicalFileDownload === "true" ? "bg-white text-indigo-700" : "bg-indigo-700 text-white"}
               status={
-                young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau" : "Télécharger"
+                young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau" : "Non Téléchargée"
               }
               onClick={() => setIsOpenMed(true)}
             />

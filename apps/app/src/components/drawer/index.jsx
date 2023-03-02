@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -204,6 +204,11 @@ export default function Drawer(props) {
               </DownloadAttestationButton>
             </DrawerButton>
           ) : null} */}
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
+              <DrawerButton>
+                <DeleteAccountButton young={young} />
+              </DrawerButton>
+            ) : null}
           </div>
           <div>
             {isDiagorienteReady() && (
@@ -221,6 +226,14 @@ export default function Drawer(props) {
     </>
   );
 }
+
+const DeleteAccountButton = ({ young }) => {
+  const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+  const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : inscriptionStatus ? "Abandonner mon inscription" : "Se désister du SNU");
+
+  return <Link to="/desistement">{getLabel()}</Link>;
+};
 
 const SocialMedia = () => {
   const medias = [
@@ -435,6 +448,43 @@ const Close = styled.div`
   padding: 0 15px;
   @media (max-width: 767px) {
     display: block;
+  }
+`;
+
+const DrawerButton = styled.li`
+  margin-bottom: 0.5rem;
+  padding: 2px 20px;
+  > * {
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 12px 15px;
+    border-radius: 6px;
+    color: ${({ color }) => (color ? color : "#fff")};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    &.active,
+    :hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
+      border: ${({ color }) => (color ? "" : "none")};
+    }
+    &.disabled {
+      cursor: default;
+    }
+    &.disabled:hover {
+      background-color: transparent;
+      box-shadow: none;
+    }
+    .icon {
+      height: 24px;
+      width: 24px;
+      margin-right: 20px;
+      svg {
+        stroke: #8da2fb;
+      }
+    }
   }
 `;
 

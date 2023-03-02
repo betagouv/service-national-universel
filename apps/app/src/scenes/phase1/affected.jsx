@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BsArrowUpShort } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import Iceberg from "../../assets/Iceberg.js";
+import Iceberg from "../../assets/Iceberg";
 import edit from "../../assets/editIcon.svg";
 import { AlertBoxInformation } from "../../components/Content";
 import { supportURL } from "../../config";
