@@ -435,7 +435,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     for (const line of importData.lines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-        if (line[`ID PDR ${pdrNumber}`]) {
+        if (line[`ID PDR ${pdrNumber}`] && line[`ID PDR ${pdrNumber}`]?.toLowerCase() !== "correspondance") {
           pdrIds.push(line[`ID PDR ${pdrNumber}`]);
         }
       }
