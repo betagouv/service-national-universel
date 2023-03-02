@@ -81,7 +81,6 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                     getCustomComponent(filter?.customComponent, handleCustomQuery, selectedFilters[filter?.name])
                   ) : (
                     <>
-                      {console.log("se refresh")}
                       <div className="flex items-center justify-between py-2 mb-1 px-3">
                         <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
                         <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
@@ -111,7 +110,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                                   onClick={() => handleSelect(option?.key)}>
                                   <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
                                     <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key)} />
-                                    {option.value === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
+                                    {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                                   </div>
                                   <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
                                 </div>

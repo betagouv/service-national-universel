@@ -3,20 +3,10 @@ import { translateGrade } from "snu-lib";
 import ListFiltersPopOver from "./filters/ListFiltersPopOver";
 import ResultTable from "./ResultTable";
 
-import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
-import api from "../../services/api";
-import { apiURL, appURL, supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
-import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
-
-import Badge from "../../components/Badge";
-
-import { translate, translatePhase1, YOUNG_STATUS_COLORS, getAge, ROLES, colors, YOUNG_STATUS, translatePhase2 } from "../../utils";
+import { translateStatus } from "../plan-transport/components/commons";
 
 import ArrowUp from "../../assets/ArrowUp";
 import Comment from "../../assets/comment";
@@ -87,7 +77,7 @@ export default function test_volontaire() {
     datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
   };
   const filterArray = [
-    { title: "Numéro de la ligne", name: "busId", datafield: "busId.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
+    { title: "Numéro de la ligne", name: "busId", datafield: "busId.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseigné" },
     { title: "Date aller", name: "departureString", datafield: "departureString.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
     { title: "Date retour", name: "returnString", datafield: "returnString.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée" },
     {
@@ -95,9 +85,17 @@ export default function test_volontaire() {
       name: "lineFillingRate",
       datafield: "lineFillingRate",
       parentGroup: "Ligne de Bus",
-      missingLabel: "Non renseignée",
+      missingLabel: "Non renseigné",
       transformData: (value) => transformDataTaux(value),
       customQuery: (value) => customQuery(value),
+    },
+    {
+      title: "Statut de la modification",
+      name: "status",
+      datafield: "modificationBuses.status.keyword",
+      parentGroup: "Modification de Statut",
+      missingLabel: "Non renseigné",
+      translate: (value) => translateStatus(value),
     },
   ];
 
