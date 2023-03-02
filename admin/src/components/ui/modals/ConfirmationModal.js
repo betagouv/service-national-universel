@@ -1,6 +1,6 @@
 import React from "react";
-import { BorderButton, PlainButton } from "../../../scenes/phase0/components/Buttons";
 import Loader from "../../Loader";
+import Button from "../buttons/Button";
 import Modal from "./Modal";
 
 const ConfirmationModal = ({
@@ -10,34 +10,42 @@ const ConfirmationModal = ({
   children,
   onCancel,
   onConfirm,
-  loading = false,
+  isLoading = false,
+  size = "md",
   loadingText = "Chargement...",
-  confirmText = "Confirmer",
-  confirmMode = "blue",
+  variant = "primary",
+  confirmButtonChildren = "Confirmer",
   cancelText = "Annuler",
+  infoLink = null,
 }) => {
   return (
-    <Modal isOpen={isOpen}>
-      {loading ? (
+    <Modal isOpen={isOpen} size={size}>
+      {isLoading ? (
         <>
-          <div className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{loadingText}</div>
+          <div className="leading-5 text-sm text-gray-500 mt-2 text-center">{loadingText}</div>
           <Loader />
         </>
       ) : (
-        <div className="bg-white rounded-[8px]">
-          <div className="px-[24px] pt-[24px]">
-            {icon && <div className="flex justify-center">{icon}</div>}
-            <h2 className="text-[20px] leading-[28px] text-[#111827] mt-[24px] text-center">{title}</h2>
-            {children}
-          </div>
-          <div className="flex p-[24px] items-center justify-between">
-            <BorderButton onClick={onCancel} className="mr-[6px] grow">
-              {cancelText}
-            </BorderButton>
-            <PlainButton onClick={onConfirm} className="ml-[6px] grow" mode={confirmMode}>
-              {confirmText}
-            </PlainButton>
-          </div>
+        <div className="bg-white rounded-lg">
+          <Modal.Header icon={icon} title={title} />
+          <Modal.Content>{children}</Modal.Content>
+          <Modal.Footer className="flex gap-2 items-center justify-between">
+            {cancelText && (
+              <Button variant="light" className="grow" onClick={onCancel}>
+                {cancelText}
+              </Button>
+            )}
+            <Button onClick={onConfirm} variant={variant} className="grow">
+              {confirmButtonChildren}
+            </Button>
+          </Modal.Footer>
+          {infoLink && (
+            <Modal.Footer className="flex items-center justify-center">
+              <Button displayMode="link" href={infoLink.href} to={infoLink.to} target={infoLink.target || "_self"}>
+                {infoLink.text}
+              </Button>
+            </Modal.Footer>
+          )}
         </div>
       )}
     </Modal>

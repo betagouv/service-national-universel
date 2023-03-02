@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import YoungHeader from "./components/YoungHeader";
-import { PlainButton, RoundButton, BorderButton } from "./components/Buttons";
+import { RoundButton, BorderButton } from "./components/Buttons";
 import Pencil from "../../assets/icons/Pencil";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import { MiniTitle } from "./components/commons";
@@ -30,7 +30,7 @@ import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import HourGlass from "../../assets/icons/HourGlass";
+import { default as TwConfirmationModal } from "../../components/ui/modals/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
@@ -74,7 +74,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [oldCohort, setOldCohort] = useState(false);
-  const [action, setAction] = useState();
 
   useEffect(() => {
     if (young) {
@@ -192,7 +191,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   async function processRegistration(state, data) {
     setProcessing(true);
     try {
-      if (state === "SESSION_FULL") state = action;
+      if (state === "SESSION_FULL") state = "WAITING_LIST";
 
       let body = {
         lastStatusAt: Date.now(),
@@ -209,7 +208,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       }
 
       await api.put(`/referent/young/${young._id}`, body);
-      if (action === "WAITING_LIST") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
 
       //Notify young
       switch (state) {
@@ -217,6 +215,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
           break;
         case "WAITING_LIST":
+          await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
           break;
         case "VALIDATED":
@@ -275,7 +274,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
             <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
           )}
           {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} action={action} setAction={setAction} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
         </>
       )}
     </>
@@ -320,9 +319,9 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
         </p>
       </div>
       <div>
-        <PlainButton spinner={sending} onClick={onSendPending}>
+        <Button spinner={sending} onClick={onSendPending}>
           Envoyer la demande de correction
-        </PlainButton>
+        </Button>
       </div>
     </div>
   );
@@ -373,7 +372,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
+function FooterNoRequest({ processing, onProcess, young }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
@@ -384,34 +383,42 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
       if (!res.ok) throw new Error(res);
       const fillingRate = res.data;
-      if (fillingRate >= 1.05) {
+      if (fillingRate) {
         return setConfirmModal({
-          icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-          title: "Objectif d'inscription régional atteint",
-          message:
-            "L'objectif d'inscription de votre région a été atteint. Merci de placer le jeune sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider son inscription.",
+          icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+          title: (
+            <span>
+              L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+              <strong className="text-bold">validé sur liste complémentaire</strong>.
+            </span>
+          ),
+          message: `Souhaitez-vous confirmer l'action ?`,
           type: "SESSION_FULL",
+          infoLink: {
+            to: "/dashboard",
+            text: "Des questions sur ce fonctionnement ?",
+          },
         });
       }
       return setConfirmModal({
         icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-        title: `L'objectif d'inscription de votre département n'a pas été atteint à 105%. Le dossier d'inscription de ${young.firstName} ${young.lastName} va être validé sur liste principale.`,
+        title: (
+          <span>
+            L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+            <strong className="text-bold">validé sur liste principale</strong>.
+          </span>
+        ),
         message: `Souhaitez-vous confirmer l'action ?`,
         type: "VALIDATED",
+        infoLink: {
+          to: "/dashboard",
+          text: "Des questions sur ce fonctionnement ?",
+        },
       });
     } catch (e) {
       capture(e);
       toastr.error(e.message);
     }
-  }
-
-  function waitingList() {
-    setConfirmModal({
-      icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-      title: "Valider le dossier (liste complémentaire)",
-      message: `Vous vous apprêtez à valider le dossier d'inscription de ${young.firstName} ${young.lastName}. Il sera placé sur liste complémentaire. Un email sera automatiquement envoyé au volontaire.`,
-      type: "WAITING_LIST",
-    });
   }
 
   const rejectionReasonOptions = [
@@ -429,18 +436,6 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
     </option>,
   ];
 
-  const actions = [
-    <option value="NO_CHOICE" key="NO_CHOICE">
-      Que souhaitez-vous faire ?{" "}
-    </option>,
-    <option value="WAITING_LIST" key="WAITING_LIST">
-      Placer sur liste complémentaire
-    </option>,
-    <option value="VALIDATED" key="VALIDATED">
-      Inscrire le volontaire
-    </option>,
-  ];
-
   function reject() {
     setRejectionReason("");
     setRejectionMessage("");
@@ -451,7 +446,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       message: `Vous vous apprêtez à refuser le dossier d’inscription de ${young.firstName} ${young.lastName}. Dites-lui pourquoi ci-dessous. Un email sera automatiquement envoyé au volontaire.`,
       type: "REFUSED",
       confirmLabel: "Confirmer le refus",
-      confirmColor: "red",
+      confirmColor: "danger",
     });
   }
 
@@ -466,9 +461,6 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       } else {
         setError(null);
       }
-    }
-    if (confirmModal.type === "SESSION_FULL" && (!action || action === "NO_CHOICE")) {
-      return toastr.error("Veuillez choisir un statut", "Merci de choisir entre valider l'inscription ou placer le volontaire sur liste complémentaire.");
     }
     onProcess(
       confirmModal.type,
@@ -488,28 +480,27 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
         <div className="flex items-center">
           <span className="text-[#242526] text-[18px] font-medium leading-snug">Le dossier est-il conforme&nbsp;?</span>
         </div>
-        <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d’inscription.</p>
+        <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d&apos;inscription.</p>
       </div>
       <div className="flex gap-2">
-        <PlainButton spinner={processing} onClick={validate} mode="green">
-          <CheckCircle className="text-[#10B981]" />
+        <Button isLoading={processing} onClick={validate} variant="success" icon={<CheckCircle className="text-green-500" />}>
           Valider
-        </PlainButton>
-        <PlainButton spinner={processing} onClick={reject} mode="red">
-          <XCircle className="text-[#EF4444]" />
+        </Button>
+        <Button isLoading={processing} onClick={reject} variant="danger" icon={<XCircle className="text-red-500" />}>
           Refuser
-        </PlainButton>
+        </Button>
       </div>
       {confirmModal && (
-        <ConfirmationModal
+        <TwConfirmationModal
           isOpen={true}
           icon={confirmModal.icon}
           title={confirmModal.title}
-          message={confirmModal.message}
           confirmText={confirmModal.confirmLabel || "Confirmer"}
-          confirmMode={confirmModal.confirmColor || "blue"}
+          variant={confirmModal.confirmColor || "primary"}
           onCancel={() => setConfirmModal(null)}
+          infoLink={confirmModal.infoLink}
           onConfirm={confirm}>
+          {(confirmModal.type === "VALIDATED" || confirmModal.type === "SESSION_FULL") && <p className="leading-7 text-xl mb-0 text-center">{confirmModal.message}</p>}
           {confirmModal.type === "REFUSED" && (
             <div className="mt-[24px]">
               <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
@@ -530,17 +521,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
               {error && <div className="text-[#EF4444]">{error}</div>}
             </div>
           )}
-          {confirmModal.type === "SESSION_FULL" && (
-            <div className="mt-[24px]">
-              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
-                <select value={action} onChange={(e) => setAction(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
-                  {actions}
-                </select>
-                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
-              </div>
-            </div>
-          )}
-        </ConfirmationModal>
+        </TwConfirmationModal>
       )}
     </div>
   );
