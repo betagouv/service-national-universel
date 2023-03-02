@@ -170,6 +170,8 @@ export const translateStatus = (status) => {
       return "Validée";
     case "REJECTED":
       return "Refusée";
+    default:
+      return "À traiter";
   }
 };
 
