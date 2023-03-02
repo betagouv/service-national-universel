@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { formatToActualTime } from "snu-lib/date";
+import { formatToActualTime } from "../../../../../../packages/snu-lib/date";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
@@ -12,6 +12,7 @@ import Error from "../../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { cohortsInit } from "../../../utils/cohorts";
+import { YOUNG_STATUS } from "snu-lib";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -64,7 +65,7 @@ export default function Signin() {
     <div className="bg-[#F9F6F2] py-6 flex">
       <div className="bg-white basis-[50%] mx-auto my-0 px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-[#161616] text-[32px] font-bold mb-1">Me connecter</div>
+        <div className="text-[#161616] text-[32px] font-bold mb-1">{YOUNG_STATUS.WAITING_VALIDATION}</div>
         <div className="flex items-center mb-2 gap-4">
           <RightArrow />
           <div className="text-[#161616] text-[21px] font-bold">Mon espace volontaire</div>

@@ -12,7 +12,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
-import { formatToActualTime } from "snu-lib/date";
+import { formatToActualTime, YOUNG_STATUS } from "snu-lib";
 
 export default function Signin() {
   const dispatch = useDispatch();
@@ -32,7 +32,7 @@ export default function Signin() {
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
           <div>
-            <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
+            <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">{YOUNG_STATUS.WAITING_VALIDATION}</h1>
             <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
 
             {maintenance && !localStorage?.getItem("override_maintenance") ? (

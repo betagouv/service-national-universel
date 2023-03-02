@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const logger = require("morgan");
 const passport = require("passport");
+const { YOUNG_STATUS } = require("snu-lib");
 require("./mongo");
 
 const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, ENVIRONMENT } = require("./config.js");
@@ -109,7 +110,7 @@ app.get("/", async (req, res) => {
   // };
 
   const d = new Date();
-  res.status(200).send("SNU " + d.toLocaleString());
+  res.status(200).send(YOUNG_STATUS.WAITING_VALIDATION);
 });
 
 registerSentryErrorHandler();
