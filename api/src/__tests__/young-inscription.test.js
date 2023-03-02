@@ -225,17 +225,27 @@ describe("Young", () => {
       const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
 
       typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
+
+      const correctCoordonneeObj = {
+        ...coordonneeObj,
+        gender: "male",
+        handicap: "false",
+        phone: "0601020304",
+      };
+
+      res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(correctCoordonneeObj);
       expect(res.status).toBe(200);
       const correctionResponseData = res.body.data;
       const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
 
       delete coordonneeObj.livesInFrance;
       delete coordonneeObj.moreInformation;
+      delete correctCoordonneeObj.livesInFrance;
+      delete correctCoordonneeObj.moreInformation;
       expect(nextUpdatedYoung).toMatchObject(coordonneeObj);
       expect(nextResponseData).toMatchObject(coordonneeObj);
-      expect(correctionUpdatedYoung).toMatchObject(coordonneeObj);
-      expect(correctionResponseData).toMatchObject(coordonneeObj);
+      expect(correctionUpdatedYoung).toMatchObject(correctCoordonneeObj);
+      expect(correctionResponseData).toMatchObject(correctCoordonneeObj);
     });
   });
 
