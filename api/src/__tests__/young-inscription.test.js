@@ -399,16 +399,23 @@ describe("Young", () => {
       const nextResponseData = res.body.data;
       const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
 
-      res = await request(getAppHelper()).put("/young/inscription2023/representants/correction").send(representantObj);
+      const correctRepresentantObj = {
+        ...representantObj,
+        parent1Phone: "0602050844",
+        parent1Email: "jane.doe@snu.fr",
+      };
+
+      res = await request(getAppHelper()).put("/young/inscription2023/representants/correction").send(correctRepresentantObj);
       expect(res.status).toBe(200);
       const correctionResponseData = res.body.data;
       const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
 
       delete representantObj.parent2;
+      delete correctRepresentantObj.parent2;
       expect(nextUpdatedYoung).toMatchObject({ ...representantObj, inscriptionStep2023: STEPS2023.DOCUMENTS });
       expect(nextResponseData).toMatchObject({ ...representantObj, inscriptionStep2023: STEPS2023.DOCUMENTS });
-      expect(correctionUpdatedYoung).toMatchObject(representantObj);
-      expect(correctionResponseData).toMatchObject(representantObj);
+      expect(correctionUpdatedYoung).toMatchObject(correctRepresentantObj);
+      expect(correctionResponseData).toMatchObject(correctRepresentantObj);
     });
   });
 
