@@ -112,16 +112,30 @@ export default function List() {
 
   const getApplicationCount = async () => {
     try {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
-        sort: [{ "youngLastName.keyword": "asc" }],
-        size: ES_NO_LIMIT,
+      let body = {
+        query: { bool: { must: { match_all: {} } } },
+        aggs: {
+          all: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } },
+          pending: {
+            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
+            aggs: { pending: { filter: { terms: { "status.keyword": ["WAITING_VALIDATION"] } } } },
+          },
+          follow: {
+            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
+            aggs: { follow: { filter: { terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } } } },
+          },
+        },
+        size: 0,
+        track_total_hits: true,
       };
-      const { responses } = await api.esQuery("application", body);
-      const applicationList = responses[0].hits.hits.map((e) => e._source);
-      setCountAll(applicationList.length);
-      setCountFollow(applicationList.filter((e) => ["IN_PROGRESS", "VALIDATED"].includes(e.status)).length);
-      setCountPending(applicationList.filter((e) => e.status === "WAITING_VALIDATION").length);
+
+      // aggs: { filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] },
+      const resAggs = await api.esQuery("application", body);
+      if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+      const aggs = resAggs.responses[0].aggregations;
+      setCountAll(aggs.all.doc_count);
+      setCountFollow(aggs.follow.follow.doc_count);
+      setCountPending(aggs.pending.pending.doc_count);
     } catch (error) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures");
       console.log(error);
