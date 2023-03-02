@@ -620,6 +620,7 @@ function validateReferent(referent) {
       mobile: Joi.string().allow(null, ""),
       structureId: Joi.string().allow(null, ""),
       acceptCGU: Joi.string().allow(null, ""),
+      cohorts: Joi.array().items(Joi.string().allow(null, "")),
     })
     .validate(referent, { stripUnknown: true });
 }

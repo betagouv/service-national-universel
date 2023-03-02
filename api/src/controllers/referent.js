@@ -116,12 +116,10 @@ function cleanReferentData(referent) {
 
   const fieldsToDelete = fields.filter((field) => !fieldsToKeep[referent.role].includes(field));
 
-  for (const key of Object.keys(referent)) {
-    if (fieldsToDelete.includes(key)) {
-      if (Array.isArray(referent[key])) referent[key] = [];
-      else referent[key] = undefined;
-    }
+  for (const field of fieldsToDelete) {
+    referent[field] = undefined;
   }
+
   return referent;
 }
 
@@ -1014,7 +1012,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    referent.set(cleanReferentData(value));
+    referent.set(value);
+    referent.set(cleanReferentData(referent));
+
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
     res.status(200).send({ ok: true, data: referent });
