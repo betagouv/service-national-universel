@@ -1,9 +1,15 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, END_DATE_PHASE1 } from "snu-lib";
 export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
+
+function addOneDay(date) {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + 1);
+  return newDate;
+}
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
@@ -32,13 +38,16 @@ const permissionApp = (y) => {
 };
 
 export function wasYoungExpelled(y) {
-  if (!permissionApp(y)) return false;
   return y?.departSejourMotif === "Exclusion";
 }
 
 export function permissionChangeCohort(y) {
   if (!permissionApp(y)) return false;
-  return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && (!y.departSejourMotif || !y.departSejourMotif !== "Exclusion");
+  if (wasYoungExpelled(y)) return false;
+  const now = new Date();
+  const limit = addOneDay(END_DATE_PHASE1[y.cohort]);
+  if (y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && now > limit) return false;
+  return true;
 }
 
 export function permissionPhase1(y) {
