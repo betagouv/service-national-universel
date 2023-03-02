@@ -247,7 +247,7 @@ export default function VolontaireList() {
         },
         phase1Affectation: {
           "ID centre": center._id || "",
-          "Code centre (2021)": center.code || "",
+          // "Code centre (2021)": center.code || "",
           "Code centre (2022)": center.code2022 || "",
           "Nom du centre": center.name || "",
           "Ville du centre": center.city || "",
