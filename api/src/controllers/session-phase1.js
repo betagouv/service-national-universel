@@ -522,10 +522,11 @@ router.delete("/:id/headCenter", passport.authenticate("referent", { session: fa
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const oldHeadCenterId = sessionPhase1.headCenterId;
 
     sessionPhase1.set({ headCenterId: undefined });
     await sessionPhase1.save({ fromUser: req.user });
-    await updateHeadCenter(sessionPhase1.headCenterId, req.user);
+    await updateHeadCenter(oldHeadCenterId, req.user);
 
     res.status(200).send({ ok: true });
   } catch (error) {
