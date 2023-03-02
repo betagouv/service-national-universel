@@ -98,12 +98,12 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
 function cleanReferentData(referent) {
   if (!referent.role) return referent;
 
-  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohesionCenterId", "structureId"];
+  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohesionCenterId", "cohesionCenterName", "structureId"];
 
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
-    head_center: ["cohesionCenterId", "cohorts", "sessionPhase1Id"],
+    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
     responsible: ["structureId"],
@@ -118,7 +118,8 @@ function cleanReferentData(referent) {
 
   for (const key of Object.keys(referent)) {
     if (fieldsToDelete.includes(key)) {
-      delete referent[key];
+      if (Array.isArray(referent[key])) referent[key] = [];
+      else referent[key] = undefined;
     }
   }
   return referent;
