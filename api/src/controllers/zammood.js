@@ -22,6 +22,7 @@ const YoungObject = require("../models/young");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
+const optionalAuth = require("../middlewares/optionalAuth");
 
 const router = express.Router();
 
@@ -54,6 +55,22 @@ router.get("/knowledgeBase/search", async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/knowledgeBase/feedback", optionalAuth, async (req, res) => {
+  try {
+    const { ok, data } = await zammood.api(`/feedback`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ ...req.body, contactEmail: req.user?.email }),
+    });
+    if (!ok) return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
