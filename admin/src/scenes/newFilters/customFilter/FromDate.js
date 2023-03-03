@@ -6,9 +6,9 @@ export default function DatePickerWrapper(props) {
   const isFirstRun = useRef(true);
 
   useEffect(() => {
-    console.log("compoennt mount", props);
     let length = props.value?.length || 0;
     if (length > 0) setFromDate(props.value[0]);
+    else setFromDate("");
   }, []);
 
   useEffect(() => {
@@ -18,11 +18,11 @@ export default function DatePickerWrapper(props) {
     }
 
     if (props.value === null) {
-      console.log("props.value === null");
       setFromDate("");
     } else {
       let length = props.value?.length || 0;
       if (length > 0) setFromDate(props.value[0]);
+      else setFromDate("");
     }
   }, [props.value]);
 
