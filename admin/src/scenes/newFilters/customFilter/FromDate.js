@@ -20,6 +20,9 @@ export default function DatePickerWrapper(props) {
     if (props.value === null) {
       console.log("props.value === null");
       setFromDate("");
+    } else {
+      let length = props.value?.length || 0;
+      if (length > 0) setFromDate(props.value[0]);
     }
   }, [props.value]);
 
