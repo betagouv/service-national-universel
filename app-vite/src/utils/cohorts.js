@@ -1,6 +1,6 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-import { oldSessions, sessions2023 } from "~/../../lib-module";
+import { oldSessions, sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;

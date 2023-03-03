@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Spinner } from "reactstrap";
-import { department2region, departmentLookUp } from "~/../../lib-module/region-and-departments";
+import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
 import GhostButton from "./GhostButton";

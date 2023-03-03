@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "~/../../lib-module";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { setYoung } from "../../redux/auth/actions";
 import { capture } from "../../sentry";
 import API from "../../services/api";

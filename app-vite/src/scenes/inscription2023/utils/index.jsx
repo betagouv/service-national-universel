@@ -1,5 +1,5 @@
-import constants from "~/../../lib-module/constants";
-import translation from "~/../../lib-module/translation";
+import constants from "snu-lib/constants";
+import translation from "snu-lib/translation";
 import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });

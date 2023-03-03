@@ -21,7 +21,7 @@ import DesktopUpload from "./desktop/stepUpload";
 
 import useDevice from "../../hooks/useDevice";
 
-import { reInscriptionModificationOpenForYoungs } from "~/../../lib-module";
+import { reInscriptionModificationOpenForYoungs } from "snu-lib";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";

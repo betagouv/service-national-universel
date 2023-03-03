@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../inscription2023/components/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/inscription/toggle";
-import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "~/../../lib-module";
+import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";

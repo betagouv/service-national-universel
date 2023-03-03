@@ -25,7 +25,7 @@ import StepConfirm from "./steps/stepConfirm";
 import StepDone from "./steps/stepDone";
 
 import { useSelector } from "react-redux";
-import { inscriptionCreationOpenForYoungs } from "~/../../lib-module";
+import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import useDevice from "../../hooks/useDevice";
 import Footer from "../../components/footerV2";

@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Check from "../components/Check";
-import { COHESION_STAY_START, translate } from "~/../../lib-module";
+import { COHESION_STAY_START, translate } from "snu-lib";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import Loader from "../../../components/Loader";

@@ -7,7 +7,7 @@ import FranceConnectButton from "../../inscription2023/components/FranceConnectB
 import Input from "../../inscription2023/components/Input";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/inscription/toggle";
-import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "~/../../lib-module";
+import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, isReturningParent, CDN_BASE_URL } from "../commons";

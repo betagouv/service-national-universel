@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "~/../../lib-module";
+import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "snu-lib";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DesktopPageContainer from "../components/DesktopPageContainer";

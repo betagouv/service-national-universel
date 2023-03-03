@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/SearchableSelect";
 import CreatableSelect from "../../../components/CreatableSelect";
-import { ES_NO_LIMIT } from "~/../../lib-module";
+import { ES_NO_LIMIT } from "snu-lib";
 import Input from "./Input";
 import VerifyAddress from "./VerifyAddress";
 import GhostButton from "./GhostButton";

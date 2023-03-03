@@ -2,7 +2,7 @@ import React from "react";
 import { BigTitle, Box, PlainButton, Section, Title, PREF_DOMAINS, MiniTitle, PREF_FORMATS, translateEnumToOptions, PREF_PERIOD_ICONS } from "./commons";
 import DomainSelector from "./components/DomainSelector";
 import ToggleGroup from "./components/ToggleGroup";
-import { PERIOD, TRANSPORT, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate } from "~/../../lib-module";
+import { PERIOD, TRANSPORT, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate } from "snu-lib";
 import MultiGroup from "./components/MultiGroup";
 import SimpleSelect from "./components/SimpleSelect";
 import SimpleInput from "./components/SimpleInput";

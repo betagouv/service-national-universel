@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import LinkTo from "../../../assets/icons/LinkTo";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import CalendarBig from "../../../assets/icons/CalendarBig";
-import { COHESION_STAY_LIMIT_DATE } from "~/../../lib-module/constants";
+import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import { BorderButton, PlainButton } from "../components/Buttons";
 import { isReturningParent } from "../commons";
 

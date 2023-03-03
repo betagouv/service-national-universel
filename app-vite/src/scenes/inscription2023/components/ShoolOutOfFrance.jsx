@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ES_NO_LIMIT } from "~/../../lib-module";
+import { ES_NO_LIMIT } from "snu-lib";
 import CreatableSelect from "../../../components/CreatableSelect";
 import api from "../../../services/api";
 

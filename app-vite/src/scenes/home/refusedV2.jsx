@@ -8,7 +8,7 @@ import reserveArmee from "../../assets/programmes-engagement/reserve-armees.jpg"
 import reserveGendarmerie from "../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../assets/programmes-engagement/service-civique.jpg";
 
-import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate } from "~/../../lib-module";
+import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 

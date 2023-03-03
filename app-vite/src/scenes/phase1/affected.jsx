@@ -7,7 +7,7 @@ import edit from "../../assets/editIcon.svg";
 import { AlertBoxInformation } from "../../components/Content";
 import { supportURL } from "../../config";
 import api from "../../services/api";
-import { translate, translateCohort, youngCanChangeSession } from "~/../../lib-module";
+import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import StepsAffected from "./components/StepsAffected";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { Link } from "react-router-dom";

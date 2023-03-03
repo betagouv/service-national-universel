@@ -2,7 +2,7 @@ import queryString from "query-string";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { formatToActualTime } from "~/../../lib-module/date";
+import { formatToActualTime } from "snu-lib/date";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";

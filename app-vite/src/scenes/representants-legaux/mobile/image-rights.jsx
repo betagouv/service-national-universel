@@ -7,7 +7,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../inscription2023/components/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/inscription/toggle";
-import { translate } from "~/../../lib-module";
+import { translate } from "snu-lib";
 import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";

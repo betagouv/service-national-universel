@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { COHESION_STAY_LIMIT_DATE, getDepartmentByZip, translate, translateGrade } from "~/../../lib-module";
+import { COHESION_STAY_LIMIT_DATE, getDepartmentByZip, translate, translateGrade } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 

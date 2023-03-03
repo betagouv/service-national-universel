@@ -3,7 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import plausibleEvent from "../../../services/plausible";
-import { formatStringDate } from "~/../../lib-module";
+import { formatStringDate } from "snu-lib";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";

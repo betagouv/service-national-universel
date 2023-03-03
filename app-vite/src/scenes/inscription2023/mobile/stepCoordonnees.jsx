@@ -35,7 +35,7 @@ import { translate, regexPhoneFrenchCountries } from "../../../utils";
 import { capture } from "../../../sentry";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { supportURL } from "../../../config";
-import { YOUNG_STATUS } from "~/../../lib-module";
+import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { getAddress } from "../api";
 

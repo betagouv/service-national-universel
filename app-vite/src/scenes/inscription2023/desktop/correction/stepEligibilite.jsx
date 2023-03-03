@@ -15,7 +15,7 @@ import Input from "../../components/Input";
 import Select from "../../components/Select";
 
 import { useDispatch, useSelector } from "react-redux";
-import { YOUNG_STATUS } from "~/../../lib-module";
+import { YOUNG_STATUS } from "snu-lib";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";

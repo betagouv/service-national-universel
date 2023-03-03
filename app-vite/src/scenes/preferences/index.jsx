@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import plausibleEvent from "../../services/plausible";
 import api from "../../services/api";
-import { TRANSPORT, translate, PROFESSIONNAL_PROJECT, PERIOD } from "~/../../lib-module";
+import { TRANSPORT, translate, PROFESSIONNAL_PROJECT, PERIOD } from "snu-lib";
 import View from "./View";
 import { PREF_FORMATS } from "./commons";
 

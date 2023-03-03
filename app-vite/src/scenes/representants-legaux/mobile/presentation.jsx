@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE } from "~/../../lib-module/constants";
+import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import LinkTo from "../../../assets/icons/LinkTo";
