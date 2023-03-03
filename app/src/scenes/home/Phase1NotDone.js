@@ -20,7 +20,6 @@ export default function Phase1NotDone() {
   const [sessionEndDate, setSessionEndDate] = useState(null);
 
   async function getSessionEndDate(cohort) {
-    console.log("🚀 ~ file: Phase1NotDone.js:24 ~ getSessionEndDate ~ cohort:", cohort);
     const { ok, data } = await API.get(`/cohort/${cohort}`);
     if (!ok) return null;
     return dayjs(data.dateEnd);
