@@ -29,7 +29,7 @@ import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
-  const user = useSelector((state) => state.Auth.user);
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const [structureIds, setStructureIds] = useState();
   const [structures, setStructures] = useState();
   const [services, setServices] = useState();
@@ -37,6 +37,24 @@ export default function List() {
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, track_total_hits: true };
+    if (user.role === ROLES.HEAD_CENTER)
+      return {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }] } },
+                    { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "cohorts.keyword": [sessionPhase1?.cohort] } }] } },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        track_total_hits: true,
+      };
     else return { query: { match_all: {} }, track_total_hits: true };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -59,6 +77,7 @@ export default function List() {
     })();
   }, []);
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
+  if (user.role === ROLES.HEAD_CENTER && !sessionPhase1) return <Loader />;
 
   return (
     <div>
