@@ -68,14 +68,14 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
     if (currentFilter.customComponent) return;
     if (currentFilter.datafield.includes(".keyword")) {
       bodyAggs.aggs[f.name] = {
-        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, currentFilter) },
+        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
         aggs: {
           names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: "N/A", size: ES_NO_LIMIT } },
         },
       };
     } else {
       bodyAggs.aggs[f.name] = {
-        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, currentFilter) },
+        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
         aggs: {
           names: {
             histogram: { field: filterArray.find((e) => f.name === e.name).datafield, interval: 1, min_doc_count: 1 },
@@ -209,11 +209,10 @@ export const currentFilterAsUrl = (selectedFilters, page) => {
   return url;
 };
 
-const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, currentFilter) => {
+const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filterArray) => {
   let aggregfiltersObject = {
     bool: {
       must: [],
-      filter: [],
     },
   };
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
@@ -230,6 +229,8 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, curren
 
     if (key === "searchbar") return;
     if (key === name) return;
+
+    const currentFilter = filterArray.find((f) => f.name === key);
 
     // check pour une customQuery
     if (currentFilter.customQuery) {

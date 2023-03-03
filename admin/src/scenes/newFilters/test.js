@@ -268,41 +268,6 @@ export default function test() {
           Test Custom Component
         </div>
       </div>
-
-      <div className="bg-white h-full">
-        <div className="flex flex-col gap-8 m-4">
-          <div>{count} résultats</div>
-          {/* display filtter button + currentfilters + searchbar */}
-          <div className="flex flex-row gap-4 items-center justify-between">
-            <ListFiltersPopOver
-              pageId="young"
-              esId="young"
-              defaultQuery={defaultQuery}
-              filters={filterArray}
-              getCount={getCount}
-              setData={(value) => setData(value)}
-              searchBarObject={searchBarObject}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-            />
-            <button className="rounded-md py-2 px-4 text-sm text-white bg-blue-600 hover:bg-snu-purple-700 hover:drop-shadow font-semibold" onClick={() => setIsExportOpen(true)}>
-              Exporter les volontaires
-            </button>
-            <ModalExportV2
-              defaultQuery={defaultQuery}
-              isOpen={isExportOpen}
-              setIsOpen={setIsExportOpen}
-              index="young"
-              transform={transformVolontaires}
-              exportFields={youngExportFields}
-              selectedFilters={selectedFilters}
-              totalHits={count}
-              filterArray={filterArray}
-              searchBarObject={searchBarObject}
-            />
-          </div>
-        </div>
-      </div>
     </>
   );
 }
