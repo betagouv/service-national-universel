@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import FilterSvg from "../../../assets/icons/Filter";
 import FilterPopOver from "./FilterPopOver";
 
@@ -14,6 +14,7 @@ import { buildMissions, getURLParam, currentFilterAsUrl } from "./utils";
 import ReactTooltip from "react-tooltip";
 
 import { SortOptionComponent } from "./SortOptionComponent";
+import { getCustomComponent } from "../customFilter";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -99,10 +100,8 @@ export default function ListFiltersPopOver({
   }, [filtersVisible]);
 
   React.useEffect(() => {
-    if (mounted.current) {
-      getData();
-      setURL();
-    }
+    getData();
+    setURL();
   }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
@@ -117,6 +116,7 @@ export default function ListFiltersPopOver({
   };
 
   const getData = async () => {
+    console.log("getData", selectedFilters);
     const res = await buildMissions(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject, sortSelected);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -189,6 +189,7 @@ export default function ListFiltersPopOver({
     urlParams.forEach((value, key) => {
       filters[key] = { filter: value.split(",") };
     });
+    console.log("filters", filters);
     setSelectedFilters(filters);
     setIsShowing(false);
   };
@@ -198,8 +199,24 @@ export default function ListFiltersPopOver({
     setModalSaveVisible(false);
   };
 
+  const handleCustomComponent = (query, f) => {
+    console.log("handleCustomComponent? in listeFiltersPopover", query, f);
+    setSelectedFilters({ ...selectedFilters, [f?.name]: { filter: query.value, customComponentQuery: query } });
+  };
+
   return (
     <div>
+      {/* TRICK DE FOU FURIEUX POUR RENDER LES CUSTOM COMPONENTS AU LOADING ET EXECUTER LA QUERY*/}
+      {selectedFilters &&
+        filters
+          .filter((f) => f.customComponent)
+          .map((f) => {
+            return (
+              <div className="hidden" key={f.name}>
+                {getCustomComponent(f.customComponent, (value) => handleCustomComponent(value, f), selectedFilters[f?.name])}
+              </div>
+            );
+          })}
       <div className="flex flex-row items-center justify-start gap-2">
         {searchBarObject && (
           <div className="h-[38px] w-[305px] border-[1px] rounded-md border-gray-300 overflow-hidden px-2.5">
