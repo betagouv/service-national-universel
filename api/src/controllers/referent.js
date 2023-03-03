@@ -1035,7 +1035,8 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    user.set(cleanReferentData(value));
+    user.set(value);
+    user.set(cleanReferentData(user));
     await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
     res.status(200).send({ ok: true, data: user });
