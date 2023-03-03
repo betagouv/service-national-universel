@@ -249,7 +249,7 @@ export default function changeSejour() {
             </Hero>
           ) : (
             <Wrapper>
-              <h2>Vous n&apos;êtes élégible à aucun séjour de cohésion pour le moment.</h2>
+              <h2>Vous n&apos;êtes éligible à aucun séjour de cohésion pour le moment.</h2>
               <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
                 En savoir plus sur les séjours où je suis éligible.
               </a>
