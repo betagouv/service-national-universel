@@ -1,3 +1,19 @@
+# [1.226.0](https://github.com/betagouv/service-national-universel/compare/v1.225.1...v1.226.0) (2023-03-03)
+
+
+### Bug Fixes
+
+* **admin:** Tableau des établissements pb de comptage jeunes ds depart ([92fcc9c](https://github.com/betagouv/service-national-universel/commit/92fcc9c368ddb462781ff67ad2ef489083046752))
+* **analytics:** Dependabot issues fix sequelize ([570c22c](https://github.com/betagouv/service-national-universel/commit/570c22c1b72353514b053fdb2a429200457647ed))
+* **api:** Change in lib in dev mode auto refresh ([#2332](https://github.com/betagouv/service-national-universel/issues/2332)) ([1763715](https://github.com/betagouv/service-national-universel/commit/1763715b303be8191af0d115cd738778b63fe39e))
+
+
+### Features
+
+* **admin:** CENTRE - Consultation des utilisateurs (autres chefs de centre) [#2334](https://github.com/betagouv/service-national-universel/issues/2334) ([b6a552e](https://github.com/betagouv/service-national-universel/commit/b6a552e0bef01836be17c27d91229b7284d51869))
+* **api:** ajout de la liste des cohortes dans le modèle référent (chef de centre) ([#2310](https://github.com/betagouv/service-national-universel/issues/2310)) ([2cf74f6](https://github.com/betagouv/service-national-universel/commit/2cf74f655ec7240dfd5199d9a4cf0537efd04c24))
+* **app:** Permettre aux volontaires en statut "Phase 1 non réalisée" de choisir un autre séjour ([#2326](https://github.com/betagouv/service-national-universel/issues/2326)) ([e7ad8df](https://github.com/betagouv/service-national-universel/commit/e7ad8dfd45fb19376b1a7add798926ca7f16a595))
+
 ## [1.225.1](https://github.com/betagouv/service-national-universel/compare/v1.225.0...v1.225.1) (2023-03-03)
 
 
