@@ -11,17 +11,17 @@ export default function UserCard() {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="relative flex border-t-[1px] border-[#1A243C] p-6 gap-3 items-center cursor-default">
+    <div className="relative md:w-full flex border-t-[1px] border-[#1A243C] py-3 md:py-6 px-6 gap-3 items-center cursor-default justify-between">
       <Menu open={open} />
       <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{initials}</p>
-      <div>
+      <div className="hidden md:block">
         <p className="font-semibold">{user.firstName}</p>
         <p className="text-xs text-[#768BAC]">Volontaire</p>
       </div>
       <button
-        className={`${
+        className={`hidden md:flex ml-auto rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 text-center items-center justify-center transition-all duration-200 ${
           !open && "rotate-180"
-        } ml-auto rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center transition-all duration-200`}
+        }`}
         onClick={() => setOpen(!open)}>
         <ChevronDown />
       </button>

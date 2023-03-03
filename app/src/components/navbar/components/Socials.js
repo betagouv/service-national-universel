@@ -5,7 +5,7 @@ import IconTwitter from "../assets/IconTwitter";
 
 export default function Socials() {
   return (
-    <div className="flex justify-end px-4 gap-6 items-center text-[#7A90C3]">
+    <div className="flex justify-end gap-8 md:pr-4 items-center text-[#7A90C3]">
       <a href="https://www.facebook.com/snu.jemengage/" target="_blank" rel="noreferrer">
         <IconFacebook className="hover:text-[#D1DAEF] transition-colors duration-200" />
       </a>

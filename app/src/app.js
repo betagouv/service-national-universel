@@ -4,13 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
 import queryString from "query-string";
-import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
 
-import Drawer from "./components/drawer";
-import Footer from "./components/footer";
-import Header from "./components/header/index";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -102,7 +98,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className="main">
+        <div className="main overscroll-none">
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
@@ -126,7 +122,7 @@ export default function App() {
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
-          <Footer />
+          {/* <Footer /> */}
         </div>
       </Router>
     </Sentry.ErrorBoundary>
@@ -134,7 +130,6 @@ export default function App() {
 }
 
 const Espace = () => {
-  const [menuVisible, setMenuVisible] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const young = useSelector((state) => state.Auth.young);
@@ -178,15 +173,8 @@ const Espace = () => {
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
-    <div className="block md:flex">
+    <div className="block md:flex overscroll-none">
       <Navbar />
-      {/* <Drawer open={menuVisible} onOpen={setMenuVisible} /> */}
-      {/* <Content> */}
-      {/* <Header
-          onClickBurger={() => {
-            setMenuVisible(!menuVisible);
-          }}
-        /> */}
       <Switch>
         <SentryRoute path="/account" component={Account} />
         <SentryRoute path="/phase1" component={Phase1} />
@@ -202,7 +190,7 @@ const Espace = () => {
         {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
         <SentryRoute path="/" component={Home} />
       </Switch>
-      {/* </Content> */}
+
       <ModalCGU
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -229,15 +217,3 @@ function ScrollToTop() {
 
   return null;
 }
-
-const Content = styled.div`
-  margin-left: auto;
-  width: 85%;
-  max-width: calc(100% - 250px);
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 0;
-    overflow-x: hidden;
-    max-width: 100%;
-  }
-`;
