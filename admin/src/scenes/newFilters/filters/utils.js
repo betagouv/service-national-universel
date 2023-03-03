@@ -179,7 +179,7 @@ export const getURLParam = (urlParams, setPage, filters) => {
     } else {
       // on check si c'est un custom component
       const customComponent = filters.find((f) => f.customComponent === key);
-      console.log("custom component", customComponent, value.split(","));
+      console.log("custom component", customComponent, key, value.split(","));
       if (customComponent) {
         localFilters[key] = { filter: value.split(",") };
       } else {
@@ -213,6 +213,7 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
   let aggregfiltersObject = {
     bool: {
       must: [],
+      filter: [],
     },
   };
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
@@ -241,7 +242,17 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
       if (selectedFilters[key].customComponentQuery) {
         aggregfiltersObject = setAggs(selectedFilters[key].customComponentQuery.query.query, aggregfiltersObject);
       } else {
-        aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+        // deal with missingLabel
+        if (selectedFilters[key].filter.includes("N/A")) {
+          const filterWithoutNR = selectedFilters[key].filter.filter((e) => e !== "N/A");
+          aggregfiltersObject.bool.filter.push({
+            bool: {
+              should: [{ bool: { must_not: { exists: { field: datafield } } } }, { terms: { [datafield]: filterWithoutNR } }],
+            },
+          });
+        } else {
+          aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+        }
       }
     }
   });
