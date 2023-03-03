@@ -135,6 +135,19 @@ router.post(
 
       const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
+      //Check columns names
+      const columns = Object.keys(lines[0]);
+      const expectedColumns = Object.keys(errors);
+      const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
+
+      if (missingColumns.length) {
+        missingColumns.forEach((e) => {
+          errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
+        });
+        console.log("errors", errors);
+        return res.status(200).send({ ok: false, code: ERRORS.INVALID_BODY, errors });
+      }
+
       // Format errors.
       // Check format, add errors for each line
       for (const [i, line] of lines.entries()) {
@@ -336,12 +349,15 @@ router.post(
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`]) {
+          if (line[`ID PDR ${pdrNumber}`] && line[`ID PDR ${pdrNumber}`]?.toLowerCase() !== "correspondance") {
             pdrIds.push(line[`ID PDR ${pdrNumber}`]);
           }
         }
-        if (pdrIds.length !== new Set(pdrIds).size) {
-          errors[`ID PDR 1`].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_PDR_ON_LINE, extra: line[`ID PDR 1`] });
+        //check and return duplicate pdr
+        for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
+          if (line[`ID PDR ${pdrNumber}`] && pdrIds.filter((pdrId) => pdrId === line[`ID PDR ${pdrNumber}`]).length > 1) {
+            errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_PDR_ON_LINE, extra: line[`ID PDR ${pdrNumber}`] });
+          }
         }
       }
 
@@ -419,7 +435,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     for (const line of importData.lines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-        if (line[`ID PDR ${pdrNumber}`]) {
+        if (line[`ID PDR ${pdrNumber}`] && line[`ID PDR ${pdrNumber}`]?.toLowerCase() !== "correspondance") {
           pdrIds.push(line[`ID PDR ${pdrNumber}`]);
         }
       }
@@ -437,8 +453,8 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         youngCapacity: line["CAPACITÉ VOLONTAIRE TOTALE"],
         totalCapacity: line["CAPACITE TOTALE LIGNE"],
         youngSeatsTaken: 0,
-        lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase === "oui",
-        lunchBreakReturn: line["PAUSE DÉJEUNER RETOUR" || ""].toLowerCase === "oui",
+        lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase() === "oui",
+        lunchBreakReturn: line["PAUSE DÉJEUNER RETOUR" || ""].toLowerCase() === "oui",
         travelTime: line["TEMPS DE ROUTE"],
         sessionId: session?._id.toString(),
         meetingPointsIds: pdrIds,
@@ -534,8 +550,10 @@ function getPDRMeetingHour(departureHour) {
   date.setMinutes(minute);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  date.setHours(date.getHours() + 1);
-  return date.toTimeString().split(" ")[0];
+  date.setHours(date.getHours() - 1);
+  let meetingHour = date.toTimeString().split(" ")[0];
+  meetingHour = meetingHour.substring(0, meetingHour.length - 3);
+  return meetingHour;
 }
 
 module.exports = router;

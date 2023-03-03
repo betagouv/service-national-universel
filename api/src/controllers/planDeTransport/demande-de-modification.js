@@ -4,6 +4,7 @@ const passport = require("passport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
+const ReferentModel = require("../../models/referent");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -14,8 +15,12 @@ const {
   ligneBusCanEditStatusDemandeDeModification,
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
+  SENDINBLUE_TEMPLATES,
+  ROLES,
 } = require("snu-lib");
 const { ObjectId } = require("mongodb");
+const { sendTemplate } = require("../../sendinblue");
+const config = require("../../config");
 
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
@@ -24,6 +29,22 @@ const updateModificationDependencies = async (modif, fromUser) => {
   modificationBus.set({ ...copyModif });
   await planDeTransport.save({ fromUser });
 };
+
+const fixedReferents =
+  config.ENVIRONMENT === "production"
+    ? [
+        {
+          firstName: "Edouard",
+          lastName: "VIZCAINO",
+          email: "edouard.vizcaino@jeunesse-sports.gouv.fr",
+        },
+        {
+          firstName: "Christelle",
+          lastName: "BIGNON",
+          email: "christelle.bignon@jeunesse-sports.gouv.fr",
+        },
+      ]
+    : [];
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -56,7 +77,22 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!planDeTransport.modificationBuses) planDeTransport.modificationBuses = [copyModif];
     else planDeTransport.modificationBuses.push(copyModif);
 
+    const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
+
     await planDeTransport.save({ fromUser: req.user });
+
+    for (const referentTransporter of [...referentTransporters, ...fixedReferents]) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.DEMANDE_DE_MODIFICATION, {
+        emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
+        params: {
+          busId: line.busId,
+          requestUserFirstname: req.user.firstName,
+          requestUserLastname: req.user.lastName,
+          region: req.user.region,
+          cta: `${config.ADMIN_URL}/ligne-de-bus/${lineId}?demande=${modificationBus._id}`,
+        },
+      });
+    }
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -91,6 +127,23 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
     await modif.save({ fromUser: req.user });
 
     await updateModificationDependencies(modif, req.user);
+
+    const referentTransporters = await ReferentModel.find({ role: ROLES.TRANSPORTER });
+
+    const template = status === "ACCEPTED" ? SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_ACCEPTEE : SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_REFUSEE;
+
+    for (const referentTransporter of [...referentTransporters, ...fixedReferents]) {
+      await sendTemplate(template, {
+        emailTo: [{ name: `${referentTransporter.firstName} ${referentTransporter.lastName}`, email: referentTransporter.email }],
+        params: {
+          busId: modif.lineName,
+          requestUserFirstname: req.user.firstName,
+          requestUserLastname: req.user.lastName,
+          region: req.user.region,
+          cta: `${config.ADMIN_URL}/ligne-de-bus/${modif.lineId}?demande=${modif._id}`,
+        },
+      });
+    }
 
     return res.status(200).send({ ok: true });
   } catch (error) {

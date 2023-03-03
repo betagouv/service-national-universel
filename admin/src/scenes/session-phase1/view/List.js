@@ -113,7 +113,7 @@ export default function List({ data }) {
               Icon={<FilterSvg className="text-gray-400" />}
               value={filter?.status || ""}
               onChange={(e) => updateFilter({ status: e })}
-              placeholder="Filtrer par status"
+              placeholder="Filtrer par statut"
               alignItems="left"
               options={activeStatus.map((s) => {
                 return {
@@ -275,7 +275,7 @@ const Line = ({ hit }) => {
       </td>
       <td className="rounded-r-lg">
         <div>
-          <Badge text={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
+          <Badge text={translatePhase1(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
         </div>
       </td>
     </tr>

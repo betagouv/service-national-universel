@@ -90,7 +90,7 @@ export default function View(props) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: "/ligne-de-bus" }, { label: "Fiche ligne" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
       <div className="flex flex-col m-8 gap-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
