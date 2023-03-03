@@ -70,7 +70,11 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
   const inviteChefDeCentre = async (user) => {
     try {
-      const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.HEAD_CENTER]}`, { ...user, role: ROLES.HEAD_CENTER });
+      const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.HEAD_CENTER]}`, {
+        ...user,
+        role: ROLES.HEAD_CENTER,
+        cohorts: [focusedSession?.cohort],
+      });
       if (!responseInvitation?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
       const responseSession = await api.put(`/session-phase1/${focusedSession._id}`, { headCenterId: responseInvitation?.data?._id });
       if (!responseSession?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));

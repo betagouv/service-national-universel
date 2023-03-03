@@ -766,6 +766,15 @@ const updateYoungApplicationFilesType = async (application, user) => {
   await young.save({ fromUser: user });
 };
 
+const updateHeadCenter = async (headCenterId, user) => {
+  const headCenter = await ReferentModel.findById(headCenterId);
+  if (!headCenter) return;
+  const sessions = await SessionPhase1.find({ headCenterId }, { cohort: 1 });
+  const cohorts = new Set(sessions.map((s) => s.cohort));
+  headCenter.set({ cohorts: [...cohorts] });
+  await headCenter.save({ fromUser: user });
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -892,4 +901,5 @@ module.exports = {
   SUPPORT_BUCKET_CONFIG,
   cancelPendingApplications,
   updateYoungApplicationFilesType,
+  updateHeadCenter,
 };
