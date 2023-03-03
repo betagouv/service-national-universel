@@ -90,7 +90,7 @@ export default function Schools({ filter }) {
 const CardSchool = ({ school, totalHits, filter }) => {
   const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
   const total = school.doc_count;
-  const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
+  const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {};
   const inDepartment = isThereDep.doc_count || 0;
   const outDepartment = total - inDepartment;
 
