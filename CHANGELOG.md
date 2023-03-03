@@ -1,3 +1,14 @@
+## [1.225.1](https://github.com/betagouv/service-national-universel/compare/v1.225.0...v1.225.1) (2023-03-03)
+
+
+### Bug Fixes
+
+* **admin:** aggregation volontaire-responsible Mes candidatures ([30f285f](https://github.com/betagouv/service-national-universel/commit/30f285f71a1063d509cd62977fd083571ec9072b))
+* **admin:** remove code centre 2021 export volontaire ([6daa256](https://github.com/betagouv/service-national-universel/commit/6daa256cb505938c39a43fc313186873baa63b04))
+* **admin:** typo session-phase1-partage ([38ac90f](https://github.com/betagouv/service-national-universel/commit/38ac90fd61feb278f65c64a5290d22ae4662d073))
+* **api:** import PDT correspondance ([075ef63](https://github.com/betagouv/service-national-universel/commit/075ef6392230b14819793c77138bf658c508db94))
+* **lib:** sameGeography ([8b80577](https://github.com/betagouv/service-national-universel/commit/8b8057724f2a41444b3932bac380b94510e3aa4e))
+
 # [1.225.0](https://github.com/betagouv/service-national-universel/compare/v1.224.1...v1.225.0) (2023-03-01)
 
 
