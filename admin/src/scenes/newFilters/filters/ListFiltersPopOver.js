@@ -135,7 +135,7 @@ export default function ListFiltersPopOver({
       if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
       return;
     }
-    if (selectedFilters[key].filter.length > 0) {
+    if (selectedFilters[key]?.filter?.length > 0) {
       return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
     }
   });
@@ -290,7 +290,7 @@ export default function ListFiltersPopOver({
         {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} saveFilter={saveFilter} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
         {/* Display des filtres sélectionnés */}
         {filtersVisible
-          .filter((item) => selectedFilters[item.name] && (selectedFilters[item.name].filter.length > 0 || selectedFilters[item.name].filter?.filter?.value.length > 0))
+          .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
           .map((filter) => (
             <div
               key={filter.title}

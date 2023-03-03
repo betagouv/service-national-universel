@@ -40,8 +40,8 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [] } });
   };
 
-  const handleCustomQuery = (query) => {
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query.value, customQuery: query } });
+  const handleCustomComponent = (query) => {
+    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query.value, customComponentQuery: query } });
   };
 
   return (
@@ -77,14 +77,14 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
             <Popover.Panel className="absolute left-[101%] z-20 w-[305px] -translate-y-[36px]">
               <div className="rounded-lg shadow-lg ">
                 <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
+                  <div className="flex items-center justify-between py-2 mb-1 px-3">
+                    <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
+                    <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
+                  </div>
                   {filter?.customComponent ? (
-                    getCustomComponent(filter?.customComponent, handleCustomQuery, selectedFilters[filter?.name])
+                    getCustomComponent(filter?.customComponent, handleCustomComponent, selectedFilters[filter?.name])
                   ) : (
                     <>
-                      <div className="flex items-center justify-between py-2 mb-1 px-3">
-                        <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
-                        <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
-                      </div>
                       <input
                         type="text"
                         value={search}

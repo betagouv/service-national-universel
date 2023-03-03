@@ -64,17 +64,18 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
   };
   //ajouter les aggregations pour count
   filterArray.map((f) => {
-    const datafield = filterArray.find((e) => f.name === e.name).datafield;
-    if (datafield.includes(".keyword")) {
+    const currentFilter = filterArray.find((e) => f.name === e.name);
+    if (currentFilter.customComponent) return;
+    if (currentFilter.datafield.includes(".keyword")) {
       bodyAggs.aggs[f.name] = {
-        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
+        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, currentFilter) },
         aggs: {
           names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: "N/A", size: ES_NO_LIMIT } },
         },
       };
     } else {
       bodyAggs.aggs[f.name] = {
-        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
+        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, currentFilter) },
         aggs: {
           names: {
             histogram: { field: filterArray.find((e) => f.name === e.name).datafield, interval: 1, min_doc_count: 1 },
@@ -83,6 +84,8 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
       };
     }
   });
+
+  console.log("bodyAggs", bodyAggs);
 
   //apply filters to query
   if (selectedFilters && Object.keys(selectedFilters).length) {
@@ -108,8 +111,7 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
           }
         });
       } else if (currentFilter.customComponent) {
-        console.log("selectedFilter", selectedFilters);
-        const currentQuery = selectedFilters[key].customQuery?.query?.query;
+        const currentQuery = selectedFilters[key].customComponentQuery?.query?.query;
         if (currentQuery) {
           Object.keys(currentQuery?.bool).forEach((key) => {
             if (bodyQuery.query.bool[key]) {
@@ -135,8 +137,6 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
     });
   }
 
-  console.log("bodyQuery", bodyQuery);
-
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     bodyQuery.query.bool.must.push({
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
@@ -157,6 +157,7 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
 
   // map a travers les aggregations pour recuperer les filtres
   filterArray.map((f) => {
+    if (f.customComponent) return;
     newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
 
     // check for any transformData function
@@ -176,9 +177,10 @@ export const getURLParam = (urlParams, setPage, filters) => {
       setPage(int - 1);
     } else {
       // on check si c'est un custom component
-      const filter = filters.find((f) => f.customComponent === key);
-      if (filter) {
-        localFilters[key] = { filter: { value: value.split(",") } };
+      const customComponent = filters.find((f) => f.customComponent === key);
+      console.log("custom component", customComponent, value.split(","));
+      if (customComponent) {
+        localFilters[key] = { filter: value.split(",") };
       } else {
         localFilters[key] = { filter: value.split(",") };
       }
@@ -206,7 +208,7 @@ export const currentFilterAsUrl = (selectedFilters, page) => {
   return url;
 };
 
-const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filterArray) => {
+const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, currentFilter) => {
   let aggregfiltersObject = {
     bool: {
       must: [],
@@ -224,35 +226,25 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
 
     if (key === "searchbar") return;
     if (key === name) return;
-    if (selectedFilters[key].filter.length > 0) {
-      const currentFilter = filterArray.find((f) => f.name === key);
-      if (currentFilter.customQuery) {
-        // on a une custom query
-        const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
-        Object.keys(currentQuery?.bool).forEach((key) => {
-          if (aggregfiltersObject.bool[key]) {
-            aggregfiltersObject.bool[key] = aggregfiltersObject.bool[key].concat(currentQuery.bool[key]);
-          } else {
-            aggregfiltersObject.bool[key] = currentQuery.bool[key];
-          }
-        });
-        // normal filter
-      } else {
-        let datafield = currentFilter.datafield;
-        aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
-      }
-      // customComponent
-    } else if (selectedFilters[key].filter?.value?.length > 0) {
-      const currentQuery = selectedFilters[key].filter?.query?.query;
-      if (currentQuery) {
-        Object.keys(currentQuery?.bool).forEach((key) => {
-          if (aggregfiltersObject.bool[key]) {
-            aggregfiltersObject.bool[key] = aggregfiltersObject.bool[key].concat(currentQuery.bool[key]);
-          } else {
-            aggregfiltersObject.bool[key] = currentQuery.bool[key];
-          }
-        });
-      }
+
+    // check pour une customQuery
+    if (currentFilter.customQuery) {
+      const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
+      aggregfiltersObject = setAggs(currentQuery, aggregfiltersObject);
+    } else if (selectedFilters[key].filter.length > 0) {
+      let datafield = currentFilter.datafield;
+      aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+    }
+  });
+  return aggregfiltersObject;
+};
+
+const setAggs = (currentQuery, aggregfiltersObject) => {
+  Object.keys(currentQuery?.bool).forEach((key) => {
+    if (aggregfiltersObject.query.bool[key]) {
+      aggregfiltersObject.query.bool[key] = aggregfiltersObject.query.bool[key].concat(currentQuery.bool[key]);
+    } else {
+      aggregfiltersObject.query.bool[key] = currentQuery.bool[key];
     }
   });
   return aggregfiltersObject;

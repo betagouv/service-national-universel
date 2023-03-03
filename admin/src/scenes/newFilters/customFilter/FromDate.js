@@ -6,6 +6,7 @@ export default function DatePickerWrapper(props) {
   const isFirstRun = useRef(true);
 
   useEffect(() => {
+    console.log("compoennt mount", props);
     let length = props.value?.length || 0;
     if (length > 0) setFromDate(props.value[0]);
   }, []);
@@ -17,11 +18,13 @@ export default function DatePickerWrapper(props) {
     }
 
     if (props.value === null) {
+      console.log("props.value === null");
       setFromDate("");
     }
   }, [props.value]);
 
   useEffect(() => {
+    console.log("FROM DATE", fromDate);
     let query = null;
     let value = [];
     query = {
@@ -34,9 +37,7 @@ export default function DatePickerWrapper(props) {
     if (fromDate === "") return;
     value = [fromDate];
     // a executer seulement si value !== props.value
-    if (JSON.stringify(value) !== JSON.stringify(props.value)) {
-      props.setQuery({ query, value });
-    }
+    props.setQuery({ query, value });
   }, [fromDate]);
 
   return (
