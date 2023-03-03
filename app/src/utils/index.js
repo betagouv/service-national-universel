@@ -1,5 +1,5 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, END_DATE_PHASE1 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
@@ -37,15 +37,15 @@ const permissionApp = (y) => {
   return y?.status !== YOUNG_STATUS.REFUSED;
 };
 
-export function wasYoungExpelled(y) {
+export function wasYoungExcluded(y) {
   return y?.departSejourMotif === "Exclusion";
 }
 
-export function permissionChangeCohort(y) {
+export function permissionChangeCohort(y, date) {
   if (!permissionApp(y)) return false;
-  if (wasYoungExpelled(y)) return false;
+  if (wasYoungExcluded(y)) return false;
   const now = new Date();
-  const limit = addOneDay(END_DATE_PHASE1[y.cohort]);
+  const limit = addOneDay(date);
   if (y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && now < limit) return false;
   return true;
 }
@@ -55,7 +55,7 @@ export function permissionPhase1(y) {
   return (
     (![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(y.status) &&
       y.statusPhase1 !== YOUNG_STATUS_PHASE1.NOT_DONE &&
-      !wasYoungExpelled(y)) ||
+      !wasYoungExcluded(y)) ||
     y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE
   );
 }

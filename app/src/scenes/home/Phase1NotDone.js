@@ -3,19 +3,33 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { permissionChangeCohort, permissionPhase2, permissionReinscription, translate, wasYoungExpelled } from "../../utils";
+import { permissionChangeCohort, permissionPhase2, permissionReinscription, translate, wasYoungExcluded } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
 import ChevronRight from "../../assets/icons/ChevronRight";
 import Engagement from "./components/Engagement";
+import dayjs from "dayjs";
 
 export default function Phase1NotDone() {
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
+  const [sessionEndDate, setSessionEndDate] = useState(null);
+
+  async function getSessionEndDate(cohort) {
+    console.log("🚀 ~ file: Phase1NotDone.js:24 ~ getSessionEndDate ~ cohort:", cohort);
+    const { ok, data } = await API.get(`/cohort/${cohort}`);
+    if (!ok) return null;
+    return dayjs(data.dateEnd);
+  }
+
+  React.useEffect(() => {
+    if (!young?.cohort) return;
+    getSessionEndDate(young.cohort).then((date) => setSessionEndDate(date));
+  }, [young]);
 
   async function goToReinscription() {
     try {
@@ -36,8 +50,8 @@ export default function Phase1NotDone() {
   return (
     <>
       {/* DESKTOP */}
-      <div className="relative hidden lg:flex justify-between m-10 rounded-xl shadow-md bg-white overflow-hidden">
-        {wasYoungExpelled(young) ? (
+      <div className="relative hidden lg:flex justify-between m-10 rounded-xl shadow-md bg-white overflow-hidden min-h-[700px]">
+        {wasYoungExcluded(young) ? (
           <div className="m-16 space-y-10">
             <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
               <strong>{young.firstName}, </strong>
@@ -57,7 +71,7 @@ export default function Phase1NotDone() {
                 <strong>{young.firstName}, </strong>
                 vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
               </p>
-              {permissionChangeCohort(young) && <ChangeCohortPrompt />}
+              {permissionChangeCohort(young, sessionEndDate) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
                 <>
                   <div className="text-base left-7 text-gray-800 mt-5">
@@ -96,7 +110,7 @@ export default function Phase1NotDone() {
       </div>
       {/* MOBILE */}
       <div className="flex flex-col-reverse lg:hidden w-full bg-white">
-        {wasYoungExpelled(young) ? (
+        {wasYoungExcluded(young) ? (
           <div className="p-4 space-y-10">
             <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
               <strong>{young.firstName}, </strong>
@@ -115,7 +129,7 @@ export default function Phase1NotDone() {
               <p className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName}, </strong> vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
               </p>
-              {permissionChangeCohort(young) && <ChangeCohortPrompt />}
+              {permissionChangeCohort(young, sessionEndDate) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
                 <>
                   <div className="text-sm left-7 text-gray-800 mt-5">
