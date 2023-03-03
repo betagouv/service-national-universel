@@ -85,8 +85,6 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
     }
   });
 
-  console.log("bodyAggs", bodyAggs);
-
   //apply filters to query
   if (selectedFilters && Object.keys(selectedFilters).length) {
     // ajouts des bases dans les querys
@@ -142,6 +140,9 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+
+  console.log("bodyAggs", bodyAggs);
+  console.log("bodyQuery", bodyQuery);
 
   //maybe piquet le cal de l'api engagement pour dexu body en une req
   const resAggs = await api.esQuery(esId, bodyAggs);
@@ -212,6 +213,7 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, curren
   let aggregfiltersObject = {
     bool: {
       must: [],
+      filter: [],
     },
   };
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
@@ -219,10 +221,12 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, curren
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+  if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
+  if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
+  if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];
+
   Object.keys(selectedFilters).map((key) => {
-    if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
-    if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
-    if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];
+    if (selectedFilters.customComponentQuery) return;
 
     if (key === "searchbar") return;
     if (key === name) return;
@@ -233,7 +237,11 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, curren
       aggregfiltersObject = setAggs(currentQuery, aggregfiltersObject);
     } else if (selectedFilters[key].filter.length > 0) {
       let datafield = currentFilter.datafield;
-      aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+      if (selectedFilters[key].customComponentQuery) {
+        aggregfiltersObject = setAggs(selectedFilters[key].customComponentQuery.query.query, aggregfiltersObject);
+      } else {
+        aggregfiltersObject.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
+      }
     }
   });
   return aggregfiltersObject;
@@ -241,10 +249,10 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, curren
 
 const setAggs = (currentQuery, aggregfiltersObject) => {
   Object.keys(currentQuery?.bool).forEach((key) => {
-    if (aggregfiltersObject.query.bool[key]) {
-      aggregfiltersObject.query.bool[key] = aggregfiltersObject.query.bool[key].concat(currentQuery.bool[key]);
+    if (aggregfiltersObject?.bool[key]) {
+      aggregfiltersObject.bool[key] = aggregfiltersObject.bool[key].concat(currentQuery.bool[key]);
     } else {
-      aggregfiltersObject.query.bool[key] = currentQuery.bool[key];
+      aggregfiltersObject.bool[key] = currentQuery.bool[key];
     }
   });
   return aggregfiltersObject;
