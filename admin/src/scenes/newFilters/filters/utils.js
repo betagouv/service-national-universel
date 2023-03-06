@@ -37,16 +37,8 @@ import api from "../../../services/api";
 */
 
 export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
-  let query = {};
-  let aggsQuery = {};
-  console.log("defaultQuery", defaultQuery);
-  if (!defaultQuery) {
-    query = { query: { bool: { must: [{ match_all: {} }] } } };
-    aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
-  } else {
-    query = structuredClone(defaultQuery.query);
-    aggsQuery = structuredClone(defaultQuery.query);
-  }
+  let query = structuredClone(defaultQuery.query);
+  let aggsQuery = structuredClone(defaultQuery.query);
 
   let bodyQuery = {
     query: query,
@@ -102,26 +94,18 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
       if (currentFilter.customQuery) {
         // on a une custom query
         const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
-        Object.keys(currentQuery?.bool).forEach((key) => {
-          if (bodyQuery.query.bool[key]) {
-            bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
-          } else {
-            bodyQuery.query.bool[key] = currentQuery.bool[key];
-          }
-        });
+        if (currentQuery) {
+          // fonction qui va ajouter la query à la query principale
+          bodyQuery.query = setPropertyToObject(currentQuery, bodyQuery.query);
+        }
       } else if (currentFilter.customComponent) {
         const currentQuery = selectedFilters[key].customComponentQuery?.query?.query;
         if (currentQuery) {
-          Object.keys(currentQuery?.bool).forEach((key) => {
-            if (bodyQuery.query.bool[key]) {
-              bodyQuery.query.bool[key] = bodyQuery.query.bool[key].concat(currentQuery.bool[key]);
-            } else {
-              bodyQuery.query.bool[key] = currentQuery.bool[key];
-            }
-          });
+          bodyQuery.query = setPropertyToObject(currentQuery, bodyQuery.query);
         }
       } else if (selectedFilters[key].filter.length > 0) {
         let datafield = currentFilter.datafield;
+        // non renseigné
         if (selectedFilters[key].filter.includes("N/A")) {
           const filterWithoutNR = selectedFilters[key].filter.filter((e) => e !== "N/A");
           bodyQuery.query.bool.filter.push({
@@ -136,6 +120,7 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
     });
   }
 
+  // query sur la searchBar
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     bodyQuery.query.bool.must.push({
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
@@ -146,8 +131,6 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
 
 export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
   const { bodyAggs, bodyQuery } = buildBodyAggs(esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
-  console.log("bodyAggs", bodyAggs);
-  console.log("bodyQuery", bodyQuery);
 
   //maybe piquet le cal de l'api engagement pour dexu body en une req
   const resAggs = await api.esQuery(esId, bodyAggs);
@@ -243,11 +226,11 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
     // check pour une customQuery
     if (currentFilter.customQuery) {
       const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
-      aggregfiltersObject = setAggs(currentQuery, aggregfiltersObject);
+      aggregfiltersObject = setPropertyToObject(currentQuery, aggregfiltersObject);
     } else if (selectedFilters[key].filter.length > 0) {
       let datafield = currentFilter.datafield;
       if (selectedFilters[key].customComponentQuery) {
-        aggregfiltersObject = setAggs(selectedFilters[key].customComponentQuery.query.query, aggregfiltersObject);
+        aggregfiltersObject = setPropertyToObject(selectedFilters[key].customComponentQuery.query.query, aggregfiltersObject);
       } else {
         // deal with missingLabel
         if (selectedFilters[key].filter.includes("N/A")) {
@@ -266,13 +249,13 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
   return aggregfiltersObject;
 };
 
-const setAggs = (currentQuery, aggregfiltersObject) => {
+const setPropertyToObject = (currentQuery, object) => {
   Object.keys(currentQuery?.bool).forEach((key) => {
-    if (aggregfiltersObject?.bool[key]) {
-      aggregfiltersObject.bool[key] = aggregfiltersObject.bool[key].concat(currentQuery.bool[key]);
+    if (object?.bool[key]) {
+      object.bool[key] = object.bool[key].concat(currentQuery.bool[key]);
     } else {
-      aggregfiltersObject.bool[key] = currentQuery.bool[key];
+      object.bool[key] = currentQuery.bool[key];
     }
   });
-  return aggregfiltersObject;
+  return object;
 };
