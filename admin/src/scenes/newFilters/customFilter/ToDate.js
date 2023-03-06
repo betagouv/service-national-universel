@@ -2,29 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import DateFilter from "../../../components/filters/DatePickerList";
 
 export default function DatePickerWrapper(props) {
-  const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const isFirstRun = useRef(true);
 
   useEffect(() => {
     let length = props.value?.length || 0;
-    switch (length) {
-      case 4:
-        setFromDate(props.value[1]);
-        setToDate(props.value[3]);
-        break;
-      case 2:
-        if (props.value[0] === "FROMDATE") {
-          setFromDate(props.value[1]);
-        } else {
-          setToDate(props.value[1]);
-        }
-        break;
-      default:
-        setFromDate("");
-        setToDate("");
-        break;
-    }
+    if (length > 0) setToDate(props.value[0]);
+    else setToDate("");
   }, []);
 
   useEffect(() => {
@@ -34,55 +18,30 @@ export default function DatePickerWrapper(props) {
     }
 
     if (props.value === null) {
-      setFromDate("");
       setToDate("");
+    } else {
+      let length = props.value?.length || 0;
+      if (length > 0) setToDate(props.value[0]);
+      else setToDate("");
     }
   }, [props.value]);
 
   useEffect(() => {
+    console.log("FROM DATE", toDate);
     let query = null;
     let value = [];
-    if (fromDate && !toDate) {
-      query = {
-        query: {
-          bool: {
-            filter: [{ range: { startAt: { gte: fromDate } } }, { range: { endAt: { gte: fromDate } } }],
-          },
+    query = {
+      query: {
+        bool: {
+          filter: [{ range: { startAt: { gte: null } } }, { range: { endAt: { gte: toDate } } }],
         },
-      };
-      value = ["FROMDATE", fromDate];
-      // a executer seulement si value !== props.value
-      if (JSON.stringify(value) !== JSON.stringify(props.value)) {
-        props.setQuery({ query, value });
-      }
-    } else if (!fromDate && toDate) {
-      query = {
-        query: {
-          bool: {
-            filter: [{ range: { startAt: { lte: toDate } } }, { range: { endAt: { lte: toDate } } }],
-          },
-        },
-      };
-      value = ["TODATE", toDate];
-      // a executer seulement si value !== props.value
-      if (JSON.stringify(value) !== JSON.stringify(props.value)) {
-        props.setQuery({ query, value });
-      }
-    } else if (fromDate && toDate) {
-      query = {
-        query: {
-          bool: {
-            filter: [{ range: { startAt: { lte: toDate } } }, { range: { endAt: { gte: fromDate } } }],
-          },
-        },
-      };
-      value = ["FROMDATE", fromDate, "TODATE", toDate];
-      // a executer seulement si value !== props.value
-      if (JSON.stringify(value) !== JSON.stringify(props.value)) {
-        props.setQuery({ query, value });
-      }
-    }
-  }, [fromDate, toDate]);
+      },
+    };
+    if (toDate === "") return;
+    value = [toDate];
+    // a executer seulement si value !== props.value
+    props.setQuery({ query, value });
+  }, [toDate]);
 
   return (
     <>
