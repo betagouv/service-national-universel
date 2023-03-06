@@ -530,7 +530,7 @@ export default function ListFiltersPopOver({
         {/* Export Component */}
         {exportComponent && (
           <>
-            <div onClick={() => setModalExportVisible(true)}>Exporter les candidature</div>
+            <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
             <ModalExport
               isOpen={modalExportVisible}
               setIsOpen={setModalExportVisible}
