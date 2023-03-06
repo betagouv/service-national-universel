@@ -26,7 +26,7 @@ export default function UserMenu({ setIsOpen }) {
         <MenuItem setOpen={setIsOpen} to="account" text="Mon Profil" />
         <MenuItem setOpen={setIsOpen} to="preferences" text="Mes préférences de mission" />
         <div onClick={logout}>
-          <MenuItem setOpen={setIsOpen} to="" text="Déconnexion" />
+          <MenuItem setOpen={setIsOpen} to="logout" text="Déconnexion" />
         </div>
       </ul>
     </nav>

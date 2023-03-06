@@ -14,7 +14,7 @@ export default function NavigationMenu({ setIsOpen = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
 
   return (
-    <nav className="p-[24px] md:p-[8px] pb-6 bg-[#212B44] w-full transition-all flex-none md:flex-1 flex flex-col">
+    <nav className="p-[24px] md:p-[8px] md:pb-[24px] bg-[#212B44] w-full transition-all flex-none md:flex-1 flex flex-col">
       <ul>
         <MenuItem setOpen={setIsOpen} to="/" icon={<IconHome />} text="Accueil" />
         <MenuItem setOpen={setIsOpen} to="phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} />
@@ -25,7 +25,7 @@ export default function NavigationMenu({ setIsOpen = () => {} }) {
       </ul>
       <div className="flex flex-col h-auto flex-none md:flex-1">
         <Diagoriente />
-        <div className="md:pr-4 mt-auto bottom-0">
+        <div className="md:pr-4 mt-auto">
           <Socials />
         </div>
       </div>

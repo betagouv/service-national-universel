@@ -71,6 +71,19 @@ function MobileNavbar() {
   );
 }
 
+function MobileDrawer({ children, isOpen, setIsOpen }) {
+  return (
+    <div className={`fixed top-0 w-full z-50 ease-in-out duration-200 ${isOpen ? "translate-y-0" : "-translate-y-full"}`}>
+      <div className="bg-[#212B44] h-16 flex justify-end items-center">
+        <button onClick={() => setIsOpen(false)} className="pr-4 pl-6 h-full">
+          <Close className="text-[#828EAC]" />
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function DesktopNavbar() {
   return (
     <header className="text-[#D2DAEF] text-sm w-64 h-screen z-50 bg-[#212B44] hidden md:flex flex-col justify-start">
@@ -84,18 +97,5 @@ function DesktopNavbar() {
         <User />
       </div>
     </header>
-  );
-}
-
-function MobileDrawer({ children, isOpen, setIsOpen }) {
-  return (
-    <div className={`fixed top-0 w-full z-50 ease-in-out duration-200 ${isOpen ? "translate-y-0" : "-translate-y-full"}`}>
-      <div className="bg-[#212B44] h-16 flex justify-end items-center">
-        <button onClick={() => setIsOpen(false)} className="pr-4 pl-6 h-full">
-          <Close className="text-[#828EAC]" />
-        </button>
-      </div>
-      {children}
-    </div>
   );
 }
