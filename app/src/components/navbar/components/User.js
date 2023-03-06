@@ -5,13 +5,13 @@ import ChevronDown from "../../../assets/icons/ChevronDown";
 import { setYoung } from "../../../redux/auth/actions";
 import API from "../../../services/api";
 
-export default function UserCard() {
+export default function User() {
   const user = useSelector((state) => state.Auth.young);
   const initials = user.firstName[0] + user.lastName[0];
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="relative md:w-full flex border-t-[1px] border-[#1A243C] py-3 md:py-6 px-6 gap-3 items-center cursor-default justify-between">
+    <div className="relative w-full h-16 flex md:border-t-[1px] border-[#1A243C] px-3 md:p-6 gap-3 items-center cursor-default justify-end md:justify-between">
       <Menu open={open} />
       <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{initials}</p>
       <div className="hidden md:block">
