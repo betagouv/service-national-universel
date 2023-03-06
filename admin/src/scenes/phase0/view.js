@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import YoungHeader from "./components/YoungHeader";
-import { RoundButton, BorderButton } from "./components/Buttons";
+import { RoundButton, BorderButton, PlainButton } from "./components/Buttons";
 import Pencil from "../../assets/icons/Pencil";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import { MiniTitle } from "./components/commons";
@@ -46,7 +46,6 @@ import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
 import { capture } from "../../sentry";
-import Button from "../../components/ui/buttons/Button";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -319,9 +318,9 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
         </p>
       </div>
       <div>
-        <Button spinner={sending} onClick={onSendPending}>
+        <PlainButton spinner={sending} onClick={onSendPending}>
           Envoyer la demande de correction
-        </Button>
+        </PlainButton>
       </div>
     </div>
   );
@@ -483,12 +482,14 @@ function FooterNoRequest({ processing, onProcess, young }) {
         <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d&apos;inscription.</p>
       </div>
       <div className="flex gap-2">
-        <Button isLoading={processing} onClick={validate} variant="success" icon={<CheckCircle className="text-green-500" />}>
+        <PlainButton spinner={processing} onClick={validate} mode="green" className="ml-[8px]">
+          <CheckCircle className="text-[#10B981]" />
           Valider
-        </Button>
-        <Button isLoading={processing} onClick={reject} variant="danger" icon={<XCircle className="text-red-500" />}>
+        </PlainButton>
+        <PlainButton spinner={processing} onClick={reject} mode="red" className="ml-[8px]">
+          <XCircle className="text-[#EF4444]" />
           Refuser
-        </Button>
+        </PlainButton>
       </div>
       {confirmModal && (
         <TwConfirmationModal
