@@ -30,7 +30,6 @@ import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import { default as TwConfirmationModal } from "../../components/ui/modals/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
@@ -46,6 +45,10 @@ import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
 import { capture } from "../../sentry";
+import Modal from "../../components/ui/modals/Modal";
+import ButtonLight from "../../components/ui/buttons/ButtonLight";
+import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
+import { Link } from "react-router-dom";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -491,39 +494,58 @@ function FooterNoRequest({ processing, onProcess, young }) {
           Refuser
         </PlainButton>
       </div>
-      {confirmModal && (
-        <TwConfirmationModal
-          isOpen={true}
-          icon={confirmModal.icon}
-          title={confirmModal.title}
-          confirmText={confirmModal.confirmLabel || "Confirmer"}
-          variant={confirmModal.confirmColor || "primary"}
-          onCancel={() => setConfirmModal(null)}
-          infoLink={confirmModal.infoLink}
-          onConfirm={confirm}>
-          {(confirmModal.type === "VALIDATED" || confirmModal.type === "SESSION_FULL") && <p className="leading-7 text-xl mb-0 text-center">{confirmModal.message}</p>}
-          {confirmModal.type === "REFUSED" && (
-            <div className="mt-[24px]">
-              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
-                <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
-                  {rejectionReasonOptions}
-                </select>
-                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
-              </div>
-              {rejectionReason === "OTHER" && (
-                <textarea
-                  value={rejectionMessage}
-                  onChange={(e) => setRejectionMessage(e.target.value)}
-                  className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
-                  rows="5"
-                  placeholder="Précisez la raison de votre refus ici"
-                />
+      <Modal isOpen={confirmModal ? true : false}>
+        {confirmModal && (
+          <div className="bg-white rounded-lg">
+            <Modal.Header className="flex-col">
+              {confirmModal.icon && <div className="flex justify-center mb-auto">{confirmModal.icon}</div>}
+              <h2 className="leading-7 text-xl text-center m-0">{confirmModal.title}</h2>
+            </Modal.Header>
+            <Modal.Content>
+              {(confirmModal.type === "VALIDATED" || confirmModal.type === "SESSION_FULL") && <p className="leading-7 text-xl mb-0 text-center">{confirmModal.message}</p>}
+              {confirmModal.type === "REFUSED" && (
+                <div className="mt-[24px]">
+                  <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+                    <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
+                      {rejectionReasonOptions}
+                    </select>
+                    <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+                  </div>
+                  {rejectionReason === "OTHER" && (
+                    <textarea
+                      value={rejectionMessage}
+                      onChange={(e) => setRejectionMessage(e.target.value)}
+                      className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+                      rows="5"
+                      placeholder="Précisez la raison de votre refus ici"
+                    />
+                  )}
+                  {error && <div className="text-[#EF4444]">{error}</div>}
+                </div>
               )}
-              {error && <div className="text-[#EF4444]">{error}</div>}
-            </div>
-          )}
-        </TwConfirmationModal>
-      )}
+            </Modal.Content>
+            <Modal.Footer>
+              <div className="flex gap-2 items-center justify-between">
+                <ButtonLight className="grow" onClick={() => setConfirmModal(null)}>
+                  Annuler
+                </ButtonLight>
+                <ButtonPrimary onClick={confirm} className="grow">
+                  {confirmModal.confirmLabel || "Confirmer"}
+                </ButtonPrimary>
+              </div>
+              {confirmModal.infoLink && (
+                <div className="flex items-center justify-center pt-6">
+                  <Link
+                    href={confirmModal.infoLink.href}
+                    className="px-3 py-2 drop-shadow-sm disabled:opacity-60 bg-transparent text-blue-600 hover:text-blue-700 hover:underline hover:cursor-pointer disabled:hover:text-blue-600 disabled:hover:no-underline">
+                    {confirmModal.infoLink.text}
+                  </Link>
+                </div>
+              )}
+            </Modal.Footer>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
