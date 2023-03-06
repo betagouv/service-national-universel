@@ -1,3 +1,145 @@
+# [1.226.0](https://github.com/betagouv/service-national-universel/compare/v1.225.1...v1.226.0) (2023-03-03)
+
+
+### Bug Fixes
+
+* **admin:** Tableau des établissements pb de comptage jeunes ds depart ([92fcc9c](https://github.com/betagouv/service-national-universel/commit/92fcc9c368ddb462781ff67ad2ef489083046752))
+* **analytics:** Dependabot issues fix sequelize ([570c22c](https://github.com/betagouv/service-national-universel/commit/570c22c1b72353514b053fdb2a429200457647ed))
+* **api:** Change in lib in dev mode auto refresh ([#2332](https://github.com/betagouv/service-national-universel/issues/2332)) ([1763715](https://github.com/betagouv/service-national-universel/commit/1763715b303be8191af0d115cd738778b63fe39e))
+
+
+### Features
+
+* **admin:** CENTRE - Consultation des utilisateurs (autres chefs de centre) [#2334](https://github.com/betagouv/service-national-universel/issues/2334) ([b6a552e](https://github.com/betagouv/service-national-universel/commit/b6a552e0bef01836be17c27d91229b7284d51869))
+* **api:** ajout de la liste des cohortes dans le modèle référent (chef de centre) ([#2310](https://github.com/betagouv/service-national-universel/issues/2310)) ([2cf74f6](https://github.com/betagouv/service-national-universel/commit/2cf74f655ec7240dfd5199d9a4cf0537efd04c24))
+* **app:** Permettre aux volontaires en statut "Phase 1 non réalisée" de choisir un autre séjour ([#2326](https://github.com/betagouv/service-national-universel/issues/2326)) ([e7ad8df](https://github.com/betagouv/service-national-universel/commit/e7ad8dfd45fb19376b1a7add798926ca7f16a595))
+
+## [1.225.1](https://github.com/betagouv/service-national-universel/compare/v1.225.0...v1.225.1) (2023-03-03)
+
+
+### Bug Fixes
+
+* **admin:** aggregation volontaire-responsible Mes candidatures ([30f285f](https://github.com/betagouv/service-national-universel/commit/30f285f71a1063d509cd62977fd083571ec9072b))
+* **admin:** remove code centre 2021 export volontaire ([6daa256](https://github.com/betagouv/service-national-universel/commit/6daa256cb505938c39a43fc313186873baa63b04))
+* **admin:** typo session-phase1-partage ([38ac90f](https://github.com/betagouv/service-national-universel/commit/38ac90fd61feb278f65c64a5290d22ae4662d073))
+* **api:** import PDT correspondance ([075ef63](https://github.com/betagouv/service-national-universel/commit/075ef6392230b14819793c77138bf658c508db94))
+* **lib:** sameGeography ([8b80577](https://github.com/betagouv/service-national-universel/commit/8b8057724f2a41444b3932bac380b94510e3aa4e))
+
+# [1.225.0](https://github.com/betagouv/service-national-universel/compare/v1.224.1...v1.225.0) (2023-03-01)
+
+
+### Bug Fixes
+
+* **admin:** add redirect to modification on list modification ([b3fd308](https://github.com/betagouv/service-national-universel/commit/b3fd308341d201afef1984b05dd9562ddd1e5fd6))
+* **admin:** aggregationSize volontaire responsible Mes candidatures ([fac5b6d](https://github.com/betagouv/service-national-universel/commit/fac5b6dedc5217e9a799f82db2167feeacb44c88))
+* **admin:** cohort query param plan de transport ([208b664](https://github.com/betagouv/service-national-universel/commit/208b6646dd40d55f4dc456dd7fe5857a9c0b7340))
+* **admin:** correction du selecteur de cohort sur schema et table repartition et gestion des droits ([#2309](https://github.com/betagouv/service-national-universel/issues/2309)) ([d79b74f](https://github.com/betagouv/service-national-universel/commit/d79b74f5d5513af886f66415128608bed9849f18))
+* **api:** pause dej plan de transport ([cc3adbd](https://github.com/betagouv/service-national-universel/commit/cc3adbdcd5b9dff26ba36dab101c42884545e980))
+* **api:** plan de transport import ([c80f379](https://github.com/betagouv/service-national-universel/commit/c80f379891efdade984f8e58675108bf2a61a765))
+* **app:** Changement d'épaisseur de texte sur les boutons suppression de compte et changement de séjour ([#2324](https://github.com/betagouv/service-national-universel/issues/2324)) ([72f2c09](https://github.com/betagouv/service-national-universel/commit/72f2c09c323dd5f85c94cbc54e506337566cd6aa))
+
+
+### Features
+
+* **admin:** ajouter les infos sur les sessions dans le panneau des chefs de centre ([#2302](https://github.com/betagouv/service-national-universel/issues/2302)) ([4779a0b](https://github.com/betagouv/service-national-universel/commit/4779a0b5af4b8c6e0ae3bbe570070216b293c34a))
+* **api:** Ajout d'envoi notification par email au transporteur à l'ouverture nouvelle demande de modification sur plan de transport ([#2316](https://github.com/betagouv/service-national-universel/issues/2316)) ([927ce96](https://github.com/betagouv/service-national-universel/commit/927ce96fa10a86cf64939d2d1d1d585b84d23943))
+
+## [1.224.1](https://github.com/betagouv/service-national-universel/compare/v1.224.0...v1.224.1) (2023-02-28)
+
+
+### Bug Fixes
+
+* **admin:** mission superviseur, probleme taille liste ([e615d5b](https://github.com/betagouv/service-national-universel/commit/e615d5be33fd1971dba5c051a016e8b5fc177a98))
+* **admin:** track total hits volontaire responsible mission ([a2f2afc](https://github.com/betagouv/service-national-universel/commit/a2f2afc65403035eb9ea741204392aff98611cf3))
+* **admin:** Update applications informations on mission update ([571ad04](https://github.com/betagouv/service-national-universel/commit/571ad040afb11e67504eb9d9624245746ebe4373))
+* **admin:** volontaire-responsible filters visible on missionName searchParams ([82b13ec](https://github.com/betagouv/service-national-universel/commit/82b13ec572545920ec6602a88be4076c40f04f7e))
+* **api:** enregistrement du schoolId dans l'édition phase 0 ([eb65873](https://github.com/betagouv/service-national-universel/commit/eb65873c9cac51ad3fd56bd875b802988da6aa09))
+* **api:** Update check PDT on colums and duplicate PDR ([#2321](https://github.com/betagouv/service-national-universel/issues/2321)) ([39bee2e](https://github.com/betagouv/service-national-universel/commit/39bee2e65acffd95a5e3c76fbd8095e1b912befb))
+* **app:** Mise en place bouton suppression du compte et ajout du bouton changement de séjour dans page de profil  ([#2318](https://github.com/betagouv/service-national-universel/issues/2318)) ([dcd1e0e](https://github.com/betagouv/service-national-universel/commit/dcd1e0ea5e02a9ff7cfd7fffa39ea9463784f492))
+
+# [1.224.0](https://github.com/betagouv/service-national-universel/compare/v1.223.1...v1.224.0) (2023-02-27)
+
+
+### Bug Fixes
+
+* **admin:** corrections de mise en forme pour l'édition d'attestations multiples ([be061d3](https://github.com/betagouv/service-national-universel/commit/be061d3eccd08f2cb6fba218a96fc1576274a606))
+* **api:** import plan de transport ([e455361](https://github.com/betagouv/service-national-universel/commit/e455361f5c78a500d3ae89a3bed398d9064cf49b))
+* **api:** remplissage des PDR dans le modèle PlanTransport à la fin de l'import ([#2315](https://github.com/betagouv/service-national-universel/issues/2315)) ([611b4fb](https://github.com/betagouv/service-national-universel/commit/611b4fb55301ce084b786315a2f6612e256087c5))
+* **api:** Secure calls with sendTemplate ([bdfe0f7](https://github.com/betagouv/service-national-universel/commit/bdfe0f7ae99e547eef9a55bc1f0b309175c3006b))
+* **api:** Wrong ([318a5e5](https://github.com/betagouv/service-national-universel/commit/318a5e5bee6ad8894c393f83cd1ae37a36223672))
+* **app:** remplacement du wording du cta de téléchargement ficher sanitaire "Non Téléchargée" par "Télécharger" ([#2317](https://github.com/betagouv/service-national-universel/issues/2317)) ([8ffa06c](https://github.com/betagouv/service-national-universel/commit/8ffa06c1e651d872d330d262268a9c3a0b5dbe97))
+
+
+### Features
+
+* **admin:** open import plan de transport prod ([c4f70d5](https://github.com/betagouv/service-national-universel/commit/c4f70d524aa56f7d38d32db535e9f67b36ceb156))
+* import plan de transport ([#2308](https://github.com/betagouv/service-national-universel/issues/2308)) ([ba0a795](https://github.com/betagouv/service-national-universel/commit/ba0a795f286dc4420661bbc5f07b72ceb1c70566))
+
+## [1.223.1](https://github.com/betagouv/service-national-universel/compare/v1.223.0...v1.223.1) (2023-02-24)
+
+
+### Bug Fixes
+
+* **admin:** export des candidatures ([e7ecdb3](https://github.com/betagouv/service-national-universel/commit/e7ecdb39abb6b2a14836a9c76f98c63b8f90a643))
+* **admin:** fix du fix des exports de candidature ([1ef9eba](https://github.com/betagouv/service-national-universel/commit/1ef9ebad60f4548151bd8353c4c0e0630fb7a631))
+* **admin:** list mission only 1 line ([277cc60](https://github.com/betagouv/service-national-universel/commit/277cc60d4f28d0f14a262895bd94dc1c01bbb7eb))
+* **admin:** liste mission largeur ([7b86cfa](https://github.com/betagouv/service-national-universel/commit/7b86cfaead818765a0b48e9f446f97a75ccfc13c))
+* **admin:** prod style mission ? ([4c0ee18](https://github.com/betagouv/service-national-universel/commit/4c0ee184545315f64cd6553b22e0ed252bf3a676))
+* **admin:** translate application filter ([bf242a0](https://github.com/betagouv/service-national-universel/commit/bf242a02de42f97c6e7b5252889ba3f2d75560b1))
+* **admin:** utilisation du regex pour les pages de consentement ([9b896e0](https://github.com/betagouv/service-national-universel/commit/9b896e080a1218f5ff41cf9c00d8ce76cc6b4601))
+* **api:** Add try catch ([#2311](https://github.com/betagouv/service-national-universel/issues/2311)) ([e24e2bc](https://github.com/betagouv/service-national-universel/commit/e24e2bcef4f2e90d73c480f83e1309611762099c))
+* **api:** cron parentConsentReminder kill SMS ([6d6b2af](https://github.com/betagouv/service-national-universel/commit/6d6b2aff9edd27f435870c05bb967e29d5dfcd6e))
+* **api:** update computeGoalsInscription ([b9b4540](https://github.com/betagouv/service-national-universel/commit/b9b4540f89d767ce5b52f506936ab3dcbf54e966))
+
+# [1.223.0](https://github.com/betagouv/service-national-universel/compare/v1.222.4...v1.223.0) (2023-02-23)
+
+
+### Bug Fixes
+
+* **admin:** Deploy on condition ([ae2721f](https://github.com/betagouv/service-national-universel/commit/ae2721ff600a17f64abc00fc6a6afac0a6e53ea9))
+* **admin:** Force domain only on production ([58d2b42](https://github.com/betagouv/service-national-universel/commit/58d2b428e7dfdef763de4360617829fa53673fc6))
+* **admin:** Impossibilité d’ajouter nouvel utilisateur structure ([#2307](https://github.com/betagouv/service-national-universel/issues/2307)) ([dcdfab8](https://github.com/betagouv/service-national-universel/commit/dcdfab89be03bf59af4284fd733ffa562674d297))
+* **admin:** Prendre la place staging ([c14ef3a](https://github.com/betagouv/service-national-universel/commit/c14ef3ab61145ece6de7bb146deb6914db9e988f))
+* **admin:** Use env var in deployment script ([4a2011d](https://github.com/betagouv/service-national-universel/commit/4a2011d7d48071d0da007aab5e638049bdd5889e))
+* **admin/app:** Autoredirect from staging ([45b0e21](https://github.com/betagouv/service-national-universel/commit/45b0e21d48fe83534248d19d4d846e03339bbf5f))
+* **admin/app:** Disable force redirect ([d27e6e4](https://github.com/betagouv/service-national-universel/commit/d27e6e4d99af63025a8b157d8156fb152691baf6))
+* **admin/app:** Force redirect to url in staging ([379eb85](https://github.com/betagouv/service-national-universel/commit/379eb85c30e84704441cbc78f33d2df9cc0186d4))
+* **app:** button style ([d1593e3](https://github.com/betagouv/service-national-universel/commit/d1593e3eddb05bdd93c092bfdb16992a2c8d5cca))
+* **app/admin:** Disable redirect for staging ([8d2fbd5](https://github.com/betagouv/service-national-universel/commit/8d2fbd51a663c0ce036efd7ccf30cd6bed4b2ee8))
+* **app/admin:** Disable redirect for staging ([8347ff9](https://github.com/betagouv/service-national-universel/commit/8347ff95fd82589fe31303cadba70499d307cd30))
+* **app/admin:** Redirect rules updated ([395373f](https://github.com/betagouv/service-national-universel/commit/395373f0ee153a30feda9810dc68f48b38735db9))
+
+
+### Features
+
+* **all:** Update staging URL ([#2306](https://github.com/betagouv/service-national-universel/issues/2306)) ([b95c127](https://github.com/betagouv/service-national-universel/commit/b95c127d1aec1e4b58a2262d650ee983618f54b2))
+
+## [1.222.4](https://github.com/betagouv/service-national-universel/compare/v1.222.3...v1.222.4) (2023-02-22)
+
+
+### Bug Fixes
+
+* **admin/api:** auto-sélection du réseau à l'invitation d'une nouvelle structure par le superviseur ([#2287](https://github.com/betagouv/service-national-universel/issues/2287)) ([af8d956](https://github.com/betagouv/service-national-universel/commit/af8d956b61a8e3d15338cacdbc117af19d5891a7))
+* **app:** ajout de la possibilité de saisir des numéros de tel dans les DOM ([1d08474](https://github.com/betagouv/service-national-universel/commit/1d084742cca0740d661351a041fa3dbd2ef906c1))
+
+## [1.222.3](https://github.com/betagouv/service-national-universel/compare/v1.222.2...v1.222.3) (2023-02-21)
+
+
+### Bug Fixes
+
+* **admin:** retours design sur formulaire structure ([7d5fc56](https://github.com/betagouv/service-national-universel/commit/7d5fc567ef5aeb92c12fd01e1edef12e57cbb9a7))
+* **lib:** autoriser les jeunes statusPhase1:affected et status:validated à changer le séjour ([9fe2269](https://github.com/betagouv/service-national-universel/commit/9fe2269be0446c83afa13445636c4b9a31ead17e))
+* **pdf:** corrections sur l'attestation de réalisation de phase 1 ([#2286](https://github.com/betagouv/service-national-universel/issues/2286)) ([5dd27c3](https://github.com/betagouv/service-national-universel/commit/5dd27c34497a200b699602ff4ee3d1b66dcd9f74))
+
+## [1.222.2](https://github.com/betagouv/service-national-universel/compare/v1.222.1...v1.222.2) (2023-02-20)
+
+
+### Bug Fixes
+
+* **admin:** remplacement du mot "masquer" par "afficher" quand détails masqués sur page schema répartition ([#2283](https://github.com/betagouv/service-national-universel/issues/2283)) ([19c7988](https://github.com/betagouv/service-national-universel/commit/19c7988f3982b8c72c17ba05821845c1485cce9b))
+* **app:** remplacement des dates mensuelles par les dates complètes dans le sélecteur du changement de séjour ([#2284](https://github.com/betagouv/service-national-universel/issues/2284)) ([e5107b2](https://github.com/betagouv/service-national-universel/commit/e5107b2b8c9194ec1c62c9e92524480cf735ab9b))
+* **app:** remplacement du mot "fournir" par "télécharger" sur bouton fiche sanitaire sur page accueil volontaire ([#2282](https://github.com/betagouv/service-national-universel/issues/2282)) ([a76fb08](https://github.com/betagouv/service-national-universel/commit/a76fb082846442be0423857ca2875acc8b83fe37))
+
 ## [1.222.1](https://github.com/betagouv/service-national-universel/compare/v1.222.0...v1.222.1) (2023-02-18)
 
 

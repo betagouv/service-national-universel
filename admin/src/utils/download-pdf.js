@@ -10,7 +10,7 @@ export default async function downloadPDF({ url, body, fileName, redirectUrl = "
     download(file, fileName);
   } catch (e) {
     if (e?.code === "YOUNG_NOT_FOUND") {
-      toastr.warning("Aucun jeune n'est validé. Aucune attestations à télécharger.");
+      toastr.warning("Aucun jeune n'est validé. Aucune attestation à télécharger.");
       return;
     }
     // We don't capture unauthorized. Just redirect.

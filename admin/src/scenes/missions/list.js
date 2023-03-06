@@ -261,16 +261,21 @@ export default function List() {
       // Add applications info
       const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
       const queryApplication = {
-        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": applicationStatusFilter } }] } },
+        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
         track_total_hits: true,
         size: ES_NO_LIMIT,
       };
+
+      if (applicationStatusFilter?.length) {
+        queryApplication.query.bool.filter.push({ terms: { "status.keyword": applicationStatusFilter } });
+      }
 
       const resultApplications = await api.post(`/es/application/export`, {
         ...queryApplication,
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
       if (resultApplications?.data?.length) {
+        console.log("🚀 ~ file: list.js:278 ~ transformCandidature ~ resultApplications:", resultApplications);
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
       } else {
         all = all.map((item) => ({ ...item, candidatures: [] }));
@@ -436,7 +441,7 @@ export default function List() {
     <>
       <Breadcrumbs items={[{ label: "Missions" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="flex flex-row mb-8" style={{ fontFamily: "Marianne" }}>
+        <div className="flex flex-row mb-8 w-full" style={{ fontFamily: "Marianne" }}>
           <div className="flex flex-1 flex-col w-full px-8">
             <div className="py-8 flex items-center justify-between">
               <div className="text-2xl font-bold text-[#242526] leading-7">Missions</div>
@@ -509,7 +514,7 @@ export default function List() {
                   { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
                 ]}
                 render={({ data }) => (
-                  <div className="flex flex-col bg-white gap-1 rounded-xl">
+                  <div className="flex flex-col bg-white gap-1 rounded-xl w-full">
                     <div className=" pt-4 pb-1 px-4 ">
                       <div className="flex items-center gap-2 py-2">
                         <DataSearch
@@ -551,7 +556,7 @@ export default function List() {
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Statut")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Statut")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -587,7 +592,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Visibilité", "Visibilité")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Visibilité", "Visibilité")} </div>}
                             />
                           </div>
                           <div className="flex items-center flex-wrap gap-2">
@@ -605,7 +610,7 @@ export default function List() {
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Domaine d'action principal", "Domaine d'action principal")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Domaine d'action principal", "Domaine d'action principal")} </div>}
                               showMissing
                               missingLabel="Non renseigné"
                             />
@@ -621,7 +626,7 @@ export default function List() {
                               showSearch={false}
                               sortBy="asc"
                               selectAllLabel="Tout sélectionner"
-                              renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -647,7 +652,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Préparation Militaire")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -661,7 +666,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Hébergement")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Hébergement")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -675,7 +680,7 @@ export default function List() {
                               }}
                               title=""
                               URLParams={true}
-                              renderLabel={(items) => getFilterLabel(items, "Hébergement Payant")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Hébergement Payant")} </div>}
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
@@ -690,24 +695,23 @@ export default function List() {
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Place occupées", "Place occupées")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Place occupées", "Place occupées")} </div>}
                               showMissing
                               missingLabel="Non renseigné"
                             />
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
                               className="dropdown-filter"
-                              placeholder="Place occupées"
                               componentId="APPLICATIONSTATUS"
                               dataField="applicationStatus.keyword"
                               react={{ and: FILTERS.filter((e) => e !== "APPLICATIONSTATUS") }}
                               renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
+                                return `${translateApplication(e)} (${count})`;
                               }}
                               title=""
                               URLParams={true}
                               showSearch={false}
-                              renderLabel={(items) => getFilterLabel(items, "Statut de candidature", "Statut de candidature")}
+                              renderLabel={(items) => <div>{getFilterLabel(items, "Statut de candidature", "Statut de candidature")}</div>}
                               showMissing
                               missingLabel="Aucune candidature ni proposition"
                               onValueChange={(e) => {
@@ -823,11 +827,15 @@ const Hit = ({ hit, callback }) => {
           ) : (
             <img src={require("../../assets/logo-snu.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
           )}
-          <div className="flex flex-col gap-1 w-full">
-            <p className="font-bold leading-6 text-gray-900 truncate w-10/12">{hit.name}</p>
-            <p className="font-normal text-sm leading-4 text-gray-500">
-              {hit.address} • {hit.city} ({hit.department})
-            </p>
+          <div className="flex flex-col w-full gap-1  justify-center">
+            <div className="table table-fixed w-full border-collapse m-0">
+              <div className="font-bold text-gray-900 truncate table-cell">{hit.name}</div>
+            </div>
+            <div className="table table-fixed w-full border-collapse m-0">
+              <div className="font-normal text-sm leading-4 text-gray-500 truncate table-cel ">
+                {hit.address} • {hit.city} ({hit.department})
+              </div>
+            </div>
           </div>
         </div>
         <div className="w-[5%]">

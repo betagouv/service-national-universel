@@ -20,6 +20,7 @@ export default function National() {
   const [searchRegion, setSearchRegion] = React.useState("");
   const [regions, setRegions] = React.useState(regionList);
   const [data, setData] = React.useState([]);
+  const history = useHistory();
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
@@ -133,6 +134,11 @@ export default function National() {
     }
   };
 
+  const handleChangeCohort = (value) => {
+    setCohort(value);
+    history.push(`/table-repartition?cohort=${value}`);
+  };
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Table de répartition" }]} />
@@ -142,7 +148,7 @@ export default function National() {
             <Title>Table de répartition</Title>
             {user.role == ROLES.ADMIN && <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>}
           </div>
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
         </div>
         <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
           <div className="flex px-4 py-3 items-center justify-between w-full">

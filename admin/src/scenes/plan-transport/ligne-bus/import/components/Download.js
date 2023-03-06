@@ -2,6 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { PlainButton } from "../../../components/Buttons";
 import ExcelColor from "../../components/Icons/ExcelColor.png";
+import { CDN_BASE_URL } from "../../../../../utils";
 
 export default function Download({ nextStep }) {
   return (
@@ -22,10 +23,12 @@ export default function Download({ nextStep }) {
           </div>
           <div className="flex flex-col w-[45%] gap-4 text-center justify-center items-center py-4">
             <img src={ExcelColor} alt="Excel" className="w-[99px]" />
-            <button className="flex items-center gap-3 text-blue-700 bg-white border !border-blue-600 py-2 rounded-md px-4 font-medium text-sm hover:shadow">
+            <a
+              className="flex items-center gap-3 text-blue-700 bg-white border !border-blue-600 py-2 rounded-md px-4 font-medium text-sm hover:shadow"
+              href={`${CDN_BASE_URL}/file/snu-plan-de-transport-model.xlsx`}>
               <BsDownload className="text-blue-600" />
               Télécharger le modèle
-            </button>
+            </a>
           </div>
         </div>
       </div>

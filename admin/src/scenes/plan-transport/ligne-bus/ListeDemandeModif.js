@@ -29,10 +29,12 @@ const cohortList = [
 ];
 
 export default function ListeDemandeModif() {
-  const [cohort, setCohort] = React.useState("Février 2023 - C");
+  const urlParams = new URLSearchParams(window.location.search);
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [filterVisible, setFilterVisible] = React.useState(false);
   const [tagsOptions, setTagsOptions] = React.useState([]);
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
 
   const getTags = async () => {
     try {
@@ -65,11 +67,18 @@ export default function ListeDemandeModif() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: "/ligne-de-bus" }, { label: "Toutes les demandes de modifications" }]} />
+      <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Toutes les demandes de modifications" }]} />
       <div className="flex flex-col w-full px-8 pb-8 ">
         <div className="py-8 flex items-center justify-between">
           <Title>Demandes de modifications</Title>
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <Select
+            options={cohortList}
+            value={cohort}
+            onChange={(e) => {
+              setCohort(e);
+              history.replace({ search: `?cohort=${e}` });
+            }}
+          />
         </div>
 
         <ReactiveBase url={`${apiURL}/es`} app="modificationbus" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -273,7 +282,7 @@ const Line = ({ modification, tagsOptions, user }) => {
     <>
       <hr />
       <div className="flex py-4 items-center px-4 hover:bg-gray-50 gap-6">
-        <div className="w-[35%] flex flex-col gap-1">
+        <div className="w-[35%] flex flex-col gap-1 cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}?demande=${modification._id.toString()}`)}>
           <div className="line-clamp-3 text-sm text-[#242526] text-start">{modification.requestMessage}</div>
           <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
         </div>

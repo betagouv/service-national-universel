@@ -3,6 +3,7 @@ const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: ["w-full", "w-auto", "w-10"],
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {
@@ -38,6 +39,7 @@ module.exports = {
         ninaButton: "0px 4px 10px 3px rgba(0, 0, 0, 0.07);",
         ninaBlock: "0px 2px 15px 2px rgba(0, 0, 0, 0.09);",
         ninaInverted: "0px -16px 16px -16px rgba(0, 0, 0, 0.32), 0px -8px 16px rgba(0, 0, 0, 0.1)",
+        ninaBlue: "0px 8px 15px rgba(50,70,255,0.3)",
       },
       fontSize: {
         0: "0px",
@@ -52,6 +54,13 @@ module.exports = {
         warmGray: colors.stone,
         trueGray: colors.neutral,
         coolGray: colors.gray,
+        "beige-gris-galet-975": "#f9f6f2",
+        "blue-france-sun-113": "#000091",
+        "blue-france-sun-113-hover": "#1212ff",
+        "grey-625": "#929292",
+        "grey-925": "#e5e5e5",
+        "snu-primary": "#42389d",
+        "snu-primary-2": "#5145cd",
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],

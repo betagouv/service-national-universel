@@ -139,6 +139,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     // --- validate data
     const bodySchema = Joi.object().keys({
       situation: Joi.string().valid(...Object.keys(YOUNG_SITUATIONS)),
+      schoolId: Joi.string().trim().allow(""),
       schoolName: Joi.string().trim().allow(""),
       schoolCity: Joi.string().trim().allow(""),
       schoolCountry: Joi.string().trim().allow(""),
@@ -187,6 +188,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
+    console.log("🚀 ~ file: young-edition.js:191 ~ router.put ~ value:", value);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });

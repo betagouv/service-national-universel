@@ -8,7 +8,17 @@ const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
-const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
+const {
+  ROLES,
+  canModifyStructure,
+  canDeleteStructure,
+  canCreateStructure,
+  canViewMission,
+  canViewStructures,
+  canViewStructureChildren,
+  isSupervisor,
+  isAdmin,
+} = require("snu-lib/roles");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
@@ -66,6 +76,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     }
 
     if (!canCreateStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (isSupervisor(req.user)) {
+      checkedStructure.networkId = req.user.structureId;
+    }
+
     const data = await StructureObject.create(checkedStructure);
     await updateNetworkName(data, req.user);
     await updateResponsibleAndSupervisorRole(data, req.user);
@@ -91,6 +106,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
     if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    // Only admin user can change the networkId of a structure
+    if (!isAdmin(req.user)) {
+      delete checkedStructure.networkId;
+    }
 
     structure.set(checkedStructure);
     await structure.save({ fromUser: req.user });

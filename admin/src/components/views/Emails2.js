@@ -31,9 +31,9 @@ export default function Emails({ email }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md text-gray-700">
+    <div className="bg-white rounded-xl shadow-md text-gray-900">
       <ReactiveBase url={`${apiURL}/es`} app="email" headers={{ Authorization: `JWT ${API.getToken()}` }}>
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-6 font-marianne">
           <div className="flex gap-4">
             <DataSearch
               defaultQuery={getDefaultQuery}
@@ -49,7 +49,7 @@ export default function Emails({ email }) {
             />
             <button onClick={() => setOpen(!open)} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
               <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
-              <p className="text-gray-400 group-hover:text-gray-100 transition">Filtres</p>
+              <p className="text-gray-400 group-hover:text-gray-100 font-marianne">Filtres</p>
             </button>
           </div>
 
@@ -129,7 +129,7 @@ export default function Emails({ email }) {
           render={({ data }) => {
             if (!data || data.length === 0) return null;
             return (
-              <table className="table-auto w-full">
+              <table className="table-auto w-full font-marianne">
                 <thead>
                   <tr className="uppercase border-t border-t-slate-100">
                     <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>

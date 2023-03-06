@@ -1,32 +1,33 @@
 import React from "react";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import humanCoorperation from "../../../assets/humanCooperation.svg";
+import humanCooperation from "../../../assets/humanCooperation.svg";
 import { appURL } from "../../../config";
-import useDevice from "../../../hooks/useDevice";
 
-const Help = () => {
-  const mobile = useDevice() === "mobile";
-  return mobile ? (
-    <div className="bg-[#F9F6F2] px-4 pt-4 pb-12 text-[#161616]">
-      <div className="flex justify-end">
-        <img src={humanCoorperation} alt="" />
-      </div>
-      <a href={`${appURL}/besoin-d-aide?from=/`} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
+export default function Help() {
+  return (
+    <a href={`${appURL}/besoin-d-aide?from=/`} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
+      <div className="bg-[#F9F6F2] px-4 pt-4 pb-12 text-[#161616] md:hidden">
+        <div className="flex justify-end">
+          <img src={humanCooperation} alt="" />
+        </div>
         <img src={arrowRightBlue} className="mb-2" />
-        <div className="text-lg mb-2">Besoin d&apos;aide ?</div>
-        <div className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</div>
-      </a>
-    </div>
-  ) : (
-    <div className="bg-white px-4 pt-4 pb-12 text-[#161616] flex items-center justify-between w-full cursor-pointer">
-      <img src={humanCoorperation} alt="" />
-      <a href={`${appURL}/besoin-d-aide?from=/`} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
-        <div className="text-lg mb-2">Besoin d&apos;aide ?</div>
-        <div className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</div>
-      </a>
-      <img src={arrowRightBlue} className="mb-2" />
-    </div>
-  );
-};
+        <div>
+          <p className="text-lg font-bold my-2">Besoin d&apos;aide ?</p>
+          <p className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</p>
+        </div>
+      </div>
 
-export default Help;
+      <div className="w-[56rem] bg-white mx-auto my-8 p-4 shadow-sm hidden md:flex text-[#161616] justify-between items-center">
+        <img src={arrowRightBlue} className="w-4 h-4 md:hidden" />
+        <div className="flex items-center gap-2">
+          <img src={humanCooperation} alt="" className="w-20 h-20 hidden md:block" />
+          <div>
+            <p className="text-lg font-bold">Besoin d&apos;aide ?</p>
+            <p className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</p>
+          </div>
+        </div>
+        <img src={arrowRightBlue} className="w-6 h-6 mr-8" />
+      </div>
+    </a>
+  );
+}

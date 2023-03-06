@@ -237,6 +237,7 @@ export default function UserPanel({ onChange, value }) {
           </Info>
         </React.Fragment>
       ) : null}
+      {value?.role === ROLES.HEAD_CENTER && <Sessions user={value} />}
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -316,3 +317,33 @@ const TeamMember = styled.li`
   display: flex;
   align-items: center;
 `;
+
+function Sessions({ user }) {
+  const [sessions, setSessions] = useState([]);
+  async function getSessions(user) {
+    const { ok, data } = await api.get(`/referent/${user?._id}/session-phase1`);
+    if (!ok) return toastr.error("Une erreur est survenue lors de la récupération des sessions");
+    return setSessions(data);
+  }
+
+  useEffect(() => {
+    getSessions(user);
+  }, [user]);
+
+  if (!sessions.length) return null;
+
+  return (
+    <Info title="Centres">
+      <div className="mt-2 space-y-4">
+        {sessions.map((e) => {
+          return (
+            <div key={e._id} className="space-y-2">
+              <p className="font-semibold">{e.nameCentre}</p>
+              <p className="w-fit bg-blue-50 rounded-full border-[1px] border-blue-500 text-blue-500 text-xs px-3 py-1">{e.cohort}</p>
+            </div>
+          );
+        })}
+      </div>
+    </Info>
+  );
+}

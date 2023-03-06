@@ -42,6 +42,7 @@ function handleError(err, req, res, next) {
 }
 
 const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
+
 app.use(
   cors({
     credentials: true,
@@ -91,6 +92,7 @@ app.use("/young-edition", require("./controllers/young-edition"));
 app.use("/tags", require("./controllers/tags"));
 app.use("/cohort", require("./controllers/cohort"));
 app.use("/filters", require("./controllers/filters"));
+app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

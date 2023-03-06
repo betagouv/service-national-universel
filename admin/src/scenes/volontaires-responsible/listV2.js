@@ -99,7 +99,7 @@ export default function List() {
     const body = {
       query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
       sort: [{ "youngLastName.keyword": "asc" }],
-      size: ES_NO_LIMIT,
+      track_total_hits: true,
     };
     if (tab === "pending") {
       body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
@@ -112,16 +112,30 @@ export default function List() {
 
   const getApplicationCount = async () => {
     try {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
-        sort: [{ "youngLastName.keyword": "asc" }],
-        size: ES_NO_LIMIT,
+      let body = {
+        query: { bool: { must: { match_all: {} } } },
+        aggs: {
+          all: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } },
+          pending: {
+            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
+            aggs: { pending: { filter: { terms: { "status.keyword": ["WAITING_VALIDATION"] } } } },
+          },
+          follow: {
+            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
+            aggs: { follow: { filter: { terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } } } },
+          },
+        },
+        size: 0,
+        track_total_hits: true,
       };
-      const { responses } = await api.esQuery("application", body);
-      const applicationList = responses[0].hits.hits.map((e) => e._source);
-      setCountAll(applicationList.length);
-      setCountFollow(applicationList.filter((e) => ["IN_PROGRESS", "VALIDATED"].includes(e.status)).length);
-      setCountPending(applicationList.filter((e) => e.status === "WAITING_VALIDATION").length);
+
+      // aggs: { filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] },
+      const resAggs = await api.esQuery("application", body);
+      if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+      const aggs = resAggs.responses[0].aggregations;
+      setCountAll(aggs.all.doc_count);
+      setCountFollow(aggs.follow.follow.doc_count);
+      setCountPending(aggs.pending.pending.doc_count);
     } catch (error) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des candidatures");
       console.log(error);
@@ -157,6 +171,9 @@ export default function List() {
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
     initMissions(user.structureId);
+    const urlParams = new URLSearchParams(window.location.search);
+    const mission_name = urlParams.get("MISSION_NAME");
+    if (mission_name) setFilterVisible(true);
   }, []);
   const RenderText = (text) => {
     return (
@@ -292,7 +309,7 @@ export default function List() {
           "Choix - Ordre de la candidature": data.priority,
           "Candidature créée le": formatLongDateUTC(data.createdAt),
           "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
-          "Statut du contrat d'engagement": translate(data.young.statusPhase2Contract),
+          "Statut du contrat d'engagement": translate(data.contractStatus),
           "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
           "Statut du dossier d'éligibilité PM": translate(data.young.statusMilitaryPreparationFiles),
         },
@@ -473,6 +490,8 @@ export default function List() {
                     return `${e} (${count})`;
                   }}
                   title=""
+                  aggregationSize={ES_NO_LIMIT}
+                  size={ES_NO_LIMIT}
                   URLParams={true}
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
