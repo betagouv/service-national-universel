@@ -22,7 +22,7 @@ export default function ExportComponent({
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const query = useRef(defaultQuery().query);
+  const query = useRef(defaultQuery.query);
   let loading = false;
 
   const onClick = () => {
@@ -38,9 +38,9 @@ export default function ExportComponent({
 
   useEffect(() => {
     if (searchType === "_msearch") {
-      query.current = defaultQuery().query;
+      query.current = defaultQuery.query;
     }
-  }, [defaultQuery()]);
+  }, [defaultQuery]);
 
   if (exporting) {
     return (

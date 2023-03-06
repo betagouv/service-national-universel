@@ -11,7 +11,7 @@ export function getCustomComponent(component, setQuery, selectedFilters) {
     case "fromDate":
       return <FromDate setQuery={setQuery} value={selectedFilters?.filter} />;
     case "toDate":
-      return <ToDate setQuery={setQuery} value={selectedFilters?.filter} />;
+      return <FromDate setQuery={setQuery} value={selectedFilters?.filter} />;
     default:
       return null;
   }

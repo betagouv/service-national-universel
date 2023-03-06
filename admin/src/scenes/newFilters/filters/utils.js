@@ -13,7 +13,7 @@ import api from "../../../services/api";
 
     
   - Query vers ES pour récupérer les données + aggregations
-      const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected)
+      const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected)
         esId: id de l'index elastic
         selectedFilters: filtres selectionnés par l'utilisateur
         page: page actuelle (pour la pagination)
@@ -36,9 +36,10 @@ import api from "../../../services/api";
 
 */
 
-export const buildMissions = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
   let query = {};
   let aggsQuery = {};
+  console.log("defaultQuery", defaultQuery);
   if (!defaultQuery) {
     query = { query: { bool: { must: [{ match_all: {} }] } } };
     aggsQuery = { query: { bool: { must: [{ match_all: {} }] } } };
@@ -140,7 +141,11 @@ export const buildMissions = async (esId, selectedFilters, page, size, defaultQu
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+  return { bodyAggs, bodyQuery };
+};
 
+export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+  const { bodyAggs, bodyQuery } = buildBodyAggs(esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   console.log("bodyAggs", bodyAggs);
   console.log("bodyQuery", bodyQuery);
 
@@ -221,6 +226,8 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+  console.log(bodyAggs);
+
   if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
   if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
   if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];

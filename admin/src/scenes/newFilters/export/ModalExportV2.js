@@ -6,8 +6,9 @@ import plausibleEvent from "../../../services/plausible";
 import { capitalizeFirstLetter } from "../../../utils";
 import ExportComponent from "./ExportXlsxV2";
 
-export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, filterArray, defaultQuery }) {
+export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, defaultQuery }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
+  console.log("exportFields", exportFields);
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
   const [hasFilter, setHasFilter] = useState(false);
   console.log(Object.keys(selectedFilters));
@@ -65,7 +66,7 @@ export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exp
           <ExportComponent
             handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
             title={`Exporter les ${exportTitle || translateIndexes(index)}`}
-            defaultQuery={() => buildExportQuery({ selectedFilters, defaultQuery, filterArray })}
+            defaultQuery={defaultQuery.bodyQuery}
             exportTitle={exportTitle ? capitalizeFirstLetter(exportTitle) : capitalizeFirstLetter(translateIndexes(index))}
             index={index}
             transform={(data) => transform(data, selectedFields)}
