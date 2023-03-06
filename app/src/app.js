@@ -221,7 +221,7 @@ const Espace = () => {
 
   return (
     <div className="block md:flex">
-      <div className="fixed top-0 left-0 z-10">
+      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
         <Navbar />
       </div>
       <div className="flex-1 mt-16 md:mt-0 md:ml-64">
