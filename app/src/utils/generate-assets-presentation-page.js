@@ -1,3 +1,5 @@
+// noinspection HtmlUnknownAttribute
+
 const path = require("path");
 const fs = require("fs/promises");
 const slugify = require("slugify");
@@ -88,9 +90,41 @@ function createView(context) {
   let imports = [];
   const folderView = createFolderView(context, imports);
 
-  return `/* eslint-disable prettier/prettier */\nimport React from "react";\n${imports.join(
-    "\n",
-  )}\n\nexport default function AssetsPresentationPage() {\n\treturn (\n<div className="${pageClass}">${folderView}</div>\n\t);\n}\n`;
+  const input =
+    '<div className="flex items-center justify-center">' +
+    '<div className="mr-2 text-[#BBBBBB]">Filtre :</div>' +
+    '<input type="text" value={filter} onChange={changeFilter} className="p-1 border-[1px] border-[#BBBBBB] rounded-md" />' +
+    '<div className="ml-2 w-[24px] h-[24px] text-[#BBBBBB] hover:border-[1px] hover:border-[#DDDDDD] rounded-md hover:text-[#808080] cursor-pointer flex items-center justify-center" onClick={resetFilter}><div className="w-[10px] h-[10px]"><Close_1 /></div></div>' +
+    "</div>";
+
+  return (
+    `/* eslint-disable prettier/prettier */\nimport React, { useState, useEffect } from "react";\n${imports.join("\n")}\n\n` +
+    "export default function AssetsPresentationPage() {\n" +
+    'const [filter, setFilter] = useState("");\n' +
+    "\tuseEffect(() => {\n" +
+    '\t\tconst filterText = filter && filter.trim().length > 0 ? filter.trim().toLowerCase() : "";\n' +
+    "\t\tif(filterText && filterText.length > 0) {\n" +
+    '\t\t\tdocument.querySelectorAll("[data-name]").forEach((element) => {\n' +
+    '\t\t\t\tif (element.getAttribute("data-name").indexOf(filterText) >= 0) {\n' +
+    '\t\t\t\t\telement.style.display = "block";\n' +
+    "\t\t\t\t} else {\n" +
+    '\t\t\t\t\telement.style.display = "none";\n' +
+    "\t\t\t\t}\n" +
+    "\t\t\t});\n" +
+    "\t\t} else {\n" +
+    '\t\t\tdocument.querySelectorAll("[data-name]").forEach((element) => {\n' +
+    '\t\t\t\telement.style.display = "block";\n' +
+    "\t\t\t});\n" +
+    "\t\t}\n" +
+    "\t}, [filter]);\n" +
+    "\tfunction changeFilter(e) {\n" +
+    "\t\tsetFilter(e.target.value);\n" +
+    "\t}\n" +
+    "\tfunction resetFilter() {\n" +
+    '\t\tsetFilter("");\n' +
+    "\t}" +
+    `\treturn (\n<div className="${pageClass}">${input}\n${folderView}</div>\n\t);\n}\n`
+  );
 }
 
 function createFolderView(context, imports) {
@@ -103,7 +137,7 @@ function createFolderView(context, imports) {
         imports.push(`import ${compName} from "${item.require[compName]}";`);
       }
     }
-    components.push(`<div className="${itemClass}">${item.item}<div className="${itemNameClass}">${item.name}</div></div>`);
+    components.push(`<div className="${itemClass}" data-name="${item.name.toLowerCase()}">${item.item}<div className="${itemNameClass}">${item.name}</div></div>`);
   }
   const folders = context.folders.map((folder) => createFolderView(folder, imports));
 
