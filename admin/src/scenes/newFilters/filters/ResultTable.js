@@ -1,7 +1,7 @@
 import React from "react";
 
-import PaginationServerDriven from "../../components/PaginationServerDriven";
-export default function ResultTable({ render, currentEntryOnPage, setPage, pagination = true, size = 25, page, count, sortOptions = null }) {
+import PaginationServerDriven from "../../../components/PaginationServerDriven";
+export default function ResultTable({ render, currentEntryOnPage, setPage, pagination = true, size = 25, page, count }) {
   const pageCount = Math.ceil(count / size);
 
   return (

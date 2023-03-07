@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { translateGrade } from "snu-lib";
 import ListFiltersPopOver from "./filters/ListFiltersPopOver";
-import ResultTable from "./ResultTable";
+import ResultTable from "./filters/ResultTable";
 
 import plausibleEvent from "../../services/plausible";
 import { useHistory, Link } from "react-router-dom";

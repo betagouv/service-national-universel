@@ -12,8 +12,7 @@ import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDat
 import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2";
 
 import ListFiltersPopOver from "./filters/ListFiltersPopOver";
-import ResultTable from "./ResultTable";
-import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
+import ResultTable from "./filters/ResultTable";
 
 const FILTERS = [
   "DOMAIN",

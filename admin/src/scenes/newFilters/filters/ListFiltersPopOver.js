@@ -328,7 +328,7 @@ export default function ListFiltersPopOver({
       </div>
 
       <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-        {/* icon de save */}
+        {/* icon de save + logique */}
         {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} saveFilter={saveFilter} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
         {/* Display des filtres sélectionnés */}
         {filtersVisible
@@ -340,6 +340,7 @@ export default function ListFiltersPopOver({
               className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
               <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
               {selectedFilters[filter.name].filter.map((item, index) => {
+                // on affiche que les 2 premiers filtres, apres on affiche "+x"
                 if (index > 2) {
                   if (index === selectedFilters[filter.name].filter.length - 1) {
                     return (
