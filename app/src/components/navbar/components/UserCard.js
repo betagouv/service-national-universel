@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import { setYoung } from "../../../redux/auth/actions";
 import API from "../../../services/api";
+import { permissionPhase2 } from "../../../utils";
 
 export default function User() {
   const user = useSelector((state) => state.Auth.young);
@@ -39,16 +40,18 @@ export default function User() {
   return (
     <div className="relative w-full h-16 flex md:border-t-[1px] border-[#1A243C] px-3 md:p-6 gap-3 items-center cursor-default justify-end md:justify-between">
       <nav
-        className={`rounded-lg w-56 bg-white transition-all absolute right-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-center ease-in-out duration-200 ${
+        className={`rounded-lg w-56 bg-white transition-all absolute right-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
           open ? "h-28" : "h-0"
         }`}
         ref={menuRef}>
         <Link to="account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
           Mon profil
         </Link>
-        <Link to="preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
-          Mes préférences de mission
-        </Link>
+        {permissionPhase2(user) && (
+          <Link to="preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+            Mes préférences de mission
+          </Link>
+        )}
         <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
           Se déconnecter
         </button>

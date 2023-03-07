@@ -4,6 +4,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import API from "../../../services/api";
 import MenuLink from "./MenuLink";
 import MenuButton from "./MenuButton";
+import { permissionPhase2 } from "../../../utils";
 
 export default function UserMenu({ setIsOpen }) {
   const dispatch = useDispatch();
@@ -25,7 +26,7 @@ export default function UserMenu({ setIsOpen }) {
       </div>
       <ul>
         <MenuLink setOpen={setIsOpen} to="account" text="Mon Profil" />
-        <MenuLink setOpen={setIsOpen} to="preferences" text="Mes préférences de mission" />
+        {permissionPhase2(user) && <MenuLink setOpen={setIsOpen} to="preferences" text="Mes préférences de mission" />}
         <MenuButton onClick={logout} text="Déconnexion" />
       </ul>
     </nav>

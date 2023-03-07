@@ -10,7 +10,7 @@ import { setYoung } from "./redux/auth/actions";
 
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Header from "./components/header";
+import Header from "./components/header/index";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -102,7 +102,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className="main flex flex-col justify-between h-screen">
+        <div className={`${environment === "production" ? "main" : "flex flex-col justify-between h-screen"}`}>
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
