@@ -1,5 +1,5 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, sessions2023 } from "snu-lib";
 export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
@@ -148,3 +148,11 @@ export const getDistance = (lat1, lon1, lat2, lon2) => {
 };
 
 export const regexPhoneFrenchCountries = /^((00|\+)(33|590|594|262|596|269|687|689|508|681)|0)[1-9]?(\d{8})$/;
+
+export const canYoungResumePhase1 = (y) => {
+  return (
+    sessions2023.map((e) => e.name).includes(y.cohort) &&
+    y.status === YOUNG_STATUS.WITHDRAWN &&
+    [YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(y.statusPhase1)
+  );
+};

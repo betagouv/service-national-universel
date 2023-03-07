@@ -48,9 +48,9 @@ import api, { initApi } from "./services/api";
 import { toastr } from "react-redux-toastr";
 import GoogleTags from "./components/GoogleTags";
 import "./index.css";
-import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
@@ -159,7 +159,7 @@ const Espace = () => {
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
-    if (young && young.acceptCGU === "true" && young.status === YOUNG_STATUS.WITHDRAWN) {
+    if (young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       setModal({
         isOpen: true,
         title: "Reprendre mon parcours",
