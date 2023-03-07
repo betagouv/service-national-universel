@@ -103,7 +103,7 @@ export default function List() {
             esId="mission"
             defaultQuery={getDefaultQuery()}
             filters={filterArray}
-            getCount={setCount}
+            setCount={setCount}
             setData={(value) => setData(value)}
             searchBarObject={searchBarObject}
             page={page}

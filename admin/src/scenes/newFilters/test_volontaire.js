@@ -306,7 +306,7 @@ export default function test_volontaire() {
             esId="young"
             defaultQuery={getDefaultQuery()}
             filters={filterArray}
-            getCount={setCount}
+            setCount={setCount}
             setData={(value) => setData(value)}
             searchBarObject={searchBarObject}
             selectedFilters={selectedFilters}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ES_NO_LIMIT, translate, translateField, translateIndexes } from "snu-lib";
+import { translate, translateField, translateIndexes } from "snu-lib";
 import ExportFieldCard from "../../../components/ExportFieldCard";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import plausibleEvent from "../../../services/plausible";
@@ -8,11 +8,8 @@ import ExportComponent from "./ExportXlsxV2";
 
 export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, defaultQuery }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
-  console.log("exportFields", exportFields);
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
   const [hasFilter, setHasFilter] = useState(false);
-  console.log(Object.keys(selectedFilters));
-  console.log(selectedFilters);
 
   useEffect(() => {
     setHasFilter(Object.keys(selectedFilters).filter((e) => selectedFilters[e]?.filter?.length).length > 0);
@@ -83,39 +80,3 @@ export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exp
     </ModalTailwind>
   );
 }
-
-const buildExportQuery = ({ selectedFilters, defaultQuery, filterArray }) => {
-  let query = {};
-  if (!defaultQuery) {
-    query = { query: { bool: { must: [{ match_all: {} }] } } };
-  } else {
-    query = structuredClone(defaultQuery.query);
-  }
-
-  let bodyQuery = {
-    query: query,
-    size: ES_NO_LIMIT,
-    // track_total_hits: true,
-  };
-
-  if (selectedFilters && Object.keys(selectedFilters).length) {
-    Object.keys(selectedFilters).forEach((key) => {
-      if (selectedFilters[key].customQuery) {
-        // on a une custom query
-        console.log("CUSTOM");
-        //body.query.bool.must.push(selectedFilters[key].customQuery);
-      } else if (selectedFilters[key].filter.length > 0) {
-        let datafield = filterArray.find((f) => f.name === key).datafield;
-        bodyQuery.query.bool.must.push({ terms: { [datafield]: selectedFilters[key].filter } });
-      }
-    });
-  }
-
-  // if (search) {
-  //   bodyQuery.query.bool.must.push({
-  //     multi_match: { query: search, fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
-  //   });
-  // }
-
-  return bodyQuery;
-};

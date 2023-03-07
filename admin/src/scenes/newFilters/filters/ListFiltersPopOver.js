@@ -29,7 +29,7 @@ export default function ListFiltersPopOver({
   pageId,
   filters,
   defaultQuery,
-  getCount,
+  setCount,
   searchBarObject = null,
   setData,
   page = 1,
@@ -76,7 +76,7 @@ export default function ListFiltersPopOver({
 
   React.useEffect(() => {
     // send count back to parent on every count updates
-    getCount(count);
+    setCount(count);
   }, [count]);
 
   React.useEffect(() => {

@@ -110,9 +110,6 @@ export default function test_volontaire() {
       track_total_hits: true,
     };
   };
-  const getCount = (value) => {
-    setCount(value);
-  };
 
   //extract dans utils ou logique du filtre ?
 
@@ -126,7 +123,7 @@ export default function test_volontaire() {
           esId="plandetransport"
           defaultQuery={getDefaultQuery()}
           filters={filterArray}
-          getCount={getCount}
+          setCount={setCount}
           setData={(value) => setData(value)}
           searchBarObject={searchBarObject}
           page={page}
