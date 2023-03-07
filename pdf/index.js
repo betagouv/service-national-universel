@@ -64,6 +64,7 @@ app.get("/", (req, res) => {
 
 app.post("/render", async (req, res) => {
   try {
+    console.log("req", req);
     const buffer = await renderFromHtml(
       req.body.html.replace(
         /http(.*?)\/css\/style\.css/,
@@ -71,6 +72,7 @@ app.post("/render", async (req, res) => {
       ),
       req.body.options || {}
     );
+    console.log("buffer", buffer);
     if (!buffer)
       throw new Error("No buffer returned : " + JSON.stringify(req.body));
     // console.log(`${req.body.html} generated`);
