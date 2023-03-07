@@ -1,3 +1,16 @@
+# [1.228.0](https://github.com/betagouv/service-national-universel/compare/v1.227.0...v1.228.0) (2023-03-07)
+
+
+### Bug Fixes
+
+* **app:** Fixes to new navbar ([#2340](https://github.com/betagouv/service-national-universel/issues/2340)) ([ad83367](https://github.com/betagouv/service-national-universel/commit/ad8336747d0803fae85bebc1b21a8e31db06c3ab))
+* **pdf:** pdf style ([0329053](https://github.com/betagouv/service-national-universel/commit/03290535465eab49e1aa4535ec730508e6ca3737))
+
+
+### Features
+
+* **app:** refonte de la barre de navigation (staging only) ([#2322](https://github.com/betagouv/service-national-universel/issues/2322)) ([a3e2a40](https://github.com/betagouv/service-national-universel/commit/a3e2a401000a3b12401ffec43eb940f6573ff155))
+
 # [1.227.0](https://github.com/betagouv/service-national-universel/compare/v1.226.0...v1.227.0) (2023-03-06)
 
 
