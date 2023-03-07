@@ -47,7 +47,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
       <div className="border-[rgba(0, 0, 0, 0.1)] mt-10 mb-12 w-full border-t-2"></div>
       <ToastContainer />
-      {environment !== "production" && !hasSubmitted && (
+      {!hasSubmitted && (
         <>
           {feedback.isPositive && (
             <div className="flex  h-48 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">

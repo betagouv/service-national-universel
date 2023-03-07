@@ -1,3 +1,11 @@
+# [1.227.0](https://github.com/betagouv/service-national-universel/compare/v1.226.0...v1.227.0) (2023-03-06)
+
+
+### Features
+
+* **admin:** ajout sélecteur de départements sur page schema repartition pour référents départementaux ayant plusieurs départements ([#2325](https://github.com/betagouv/service-national-universel/issues/2325)) ([caf643c](https://github.com/betagouv/service-national-universel/commit/caf643cc79fdd078ee688865c89e0cf4abca4c84))
+* **kb:** mep feedbacks ([fc2e2ae](https://github.com/betagouv/service-national-universel/commit/fc2e2ae6d241efdd03ac8be08fcab29e2bca98bd))
+
 # [1.226.0](https://github.com/betagouv/service-national-universel/compare/v1.225.1...v1.226.0) (2023-03-03)
 
 
