@@ -13,7 +13,7 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib/constants");
 
 const {
@@ -78,6 +78,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!canCreateOrUpdateSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await SessionPhase1Model.create(value);
+    await updateHeadCenter(data.headCenterId, req.user);
+
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
@@ -183,8 +185,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    let oldHeadCenterId = sessionPhase1.headCenterId;
+    const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
+
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
+    await updateHeadCenter(sessionPhase1.headCenterId, req.user);
+    if (hasHeadCenterChanged) {
+      await updateHeadCenter(oldHeadCenterId, req.user);
+    }
 
     const data = await updatePlacesSessionPhase1(sessionPhase1, req.user);
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
@@ -318,7 +327,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
     cohesionCenter.save({ fromUser: req.user });
+
     await sessionPhase1.remove();
+    await updateHeadCenter(sessionPhase1.headCenterId, req.user);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -493,6 +504,7 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
 
     sessionPhase1.set({ headCenterId: checkedIdHeadCenter });
     await sessionPhase1.save({ fromUser: req.user });
+    await updateHeadCenter(checkedIdHeadCenter, req.user);
 
     res.status(200).send({ ok: true });
   } catch (error) {
@@ -510,9 +522,11 @@ router.delete("/:id/headCenter", passport.authenticate("referent", { session: fa
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const oldHeadCenterId = sessionPhase1.headCenterId;
 
     sessionPhase1.set({ headCenterId: undefined });
     await sessionPhase1.save({ fromUser: req.user });
+    await updateHeadCenter(oldHeadCenterId, req.user);
 
     res.status(200).send({ ok: true });
   } catch (error) {

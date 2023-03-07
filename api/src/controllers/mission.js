@@ -121,9 +121,23 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
+    const oldName = mission.name;
+    const oldDepartment = mission.department;
+    const oldRegion = mission.region;
+
     const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });
+
+    // if there is a name, department , region update the application
+    if (oldName !== mission.name || oldDepartment !== mission.department || oldRegion !== mission.region) {
+      // fetch all applications
+      const applications = await ApplicationObject.find({ missionId: mission._id });
+      for (const application of applications) {
+        application.set({ missionName: mission.name, missionDepartment: mission.department, missionRegion: mission.region });
+        await application.save({ fromUser: req.user });
+      }
+    }
 
     // if there is a status change, update the application
     if (oldStatus !== mission.status) {

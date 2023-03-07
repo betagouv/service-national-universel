@@ -5,6 +5,12 @@ import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
 
+function addOneDay(date) {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + 1);
+  return newDate;
+}
+
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
   const schema = new PasswordValidator();
@@ -31,10 +37,25 @@ const permissionApp = (y) => {
   return y?.status !== YOUNG_STATUS.REFUSED;
 };
 
+export function wasYoungExcluded(y) {
+  return y?.departSejourMotif === "Exclusion";
+}
+
+export function permissionChangeCohort(y, date) {
+  if (!permissionApp(y)) return false;
+  if (wasYoungExcluded(y)) return false;
+  const now = new Date();
+  const limit = addOneDay(date);
+  if (y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && now < limit) return false;
+  return true;
+}
+
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
   return (
-    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(y.status) ||
+    (![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(y.status) &&
+      y.statusPhase1 !== YOUNG_STATUS_PHASE1.NOT_DONE &&
+      !wasYoungExcluded(y)) ||
     y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE
   );
 }

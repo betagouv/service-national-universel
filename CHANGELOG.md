@@ -1,3 +1,70 @@
+# [1.227.0](https://github.com/betagouv/service-national-universel/compare/v1.226.0...v1.227.0) (2023-03-06)
+
+
+### Features
+
+* **admin:** ajout sélecteur de départements sur page schema repartition pour référents départementaux ayant plusieurs départements ([#2325](https://github.com/betagouv/service-national-universel/issues/2325)) ([caf643c](https://github.com/betagouv/service-national-universel/commit/caf643cc79fdd078ee688865c89e0cf4abca4c84))
+* **kb:** mep feedbacks ([fc2e2ae](https://github.com/betagouv/service-national-universel/commit/fc2e2ae6d241efdd03ac8be08fcab29e2bca98bd))
+
+# [1.226.0](https://github.com/betagouv/service-national-universel/compare/v1.225.1...v1.226.0) (2023-03-03)
+
+
+### Bug Fixes
+
+* **admin:** Tableau des établissements pb de comptage jeunes ds depart ([92fcc9c](https://github.com/betagouv/service-national-universel/commit/92fcc9c368ddb462781ff67ad2ef489083046752))
+* **analytics:** Dependabot issues fix sequelize ([570c22c](https://github.com/betagouv/service-national-universel/commit/570c22c1b72353514b053fdb2a429200457647ed))
+* **api:** Change in lib in dev mode auto refresh ([#2332](https://github.com/betagouv/service-national-universel/issues/2332)) ([1763715](https://github.com/betagouv/service-national-universel/commit/1763715b303be8191af0d115cd738778b63fe39e))
+
+
+### Features
+
+* **admin:** CENTRE - Consultation des utilisateurs (autres chefs de centre) [#2334](https://github.com/betagouv/service-national-universel/issues/2334) ([b6a552e](https://github.com/betagouv/service-national-universel/commit/b6a552e0bef01836be17c27d91229b7284d51869))
+* **api:** ajout de la liste des cohortes dans le modèle référent (chef de centre) ([#2310](https://github.com/betagouv/service-national-universel/issues/2310)) ([2cf74f6](https://github.com/betagouv/service-national-universel/commit/2cf74f655ec7240dfd5199d9a4cf0537efd04c24))
+* **app:** Permettre aux volontaires en statut "Phase 1 non réalisée" de choisir un autre séjour ([#2326](https://github.com/betagouv/service-national-universel/issues/2326)) ([e7ad8df](https://github.com/betagouv/service-national-universel/commit/e7ad8dfd45fb19376b1a7add798926ca7f16a595))
+
+## [1.225.1](https://github.com/betagouv/service-national-universel/compare/v1.225.0...v1.225.1) (2023-03-03)
+
+
+### Bug Fixes
+
+* **admin:** aggregation volontaire-responsible Mes candidatures ([30f285f](https://github.com/betagouv/service-national-universel/commit/30f285f71a1063d509cd62977fd083571ec9072b))
+* **admin:** remove code centre 2021 export volontaire ([6daa256](https://github.com/betagouv/service-national-universel/commit/6daa256cb505938c39a43fc313186873baa63b04))
+* **admin:** typo session-phase1-partage ([38ac90f](https://github.com/betagouv/service-national-universel/commit/38ac90fd61feb278f65c64a5290d22ae4662d073))
+* **api:** import PDT correspondance ([075ef63](https://github.com/betagouv/service-national-universel/commit/075ef6392230b14819793c77138bf658c508db94))
+* **lib:** sameGeography ([8b80577](https://github.com/betagouv/service-national-universel/commit/8b8057724f2a41444b3932bac380b94510e3aa4e))
+
+# [1.225.0](https://github.com/betagouv/service-national-universel/compare/v1.224.1...v1.225.0) (2023-03-01)
+
+
+### Bug Fixes
+
+* **admin:** add redirect to modification on list modification ([b3fd308](https://github.com/betagouv/service-national-universel/commit/b3fd308341d201afef1984b05dd9562ddd1e5fd6))
+* **admin:** aggregationSize volontaire responsible Mes candidatures ([fac5b6d](https://github.com/betagouv/service-national-universel/commit/fac5b6dedc5217e9a799f82db2167feeacb44c88))
+* **admin:** cohort query param plan de transport ([208b664](https://github.com/betagouv/service-national-universel/commit/208b6646dd40d55f4dc456dd7fe5857a9c0b7340))
+* **admin:** correction du selecteur de cohort sur schema et table repartition et gestion des droits ([#2309](https://github.com/betagouv/service-national-universel/issues/2309)) ([d79b74f](https://github.com/betagouv/service-national-universel/commit/d79b74f5d5513af886f66415128608bed9849f18))
+* **api:** pause dej plan de transport ([cc3adbd](https://github.com/betagouv/service-national-universel/commit/cc3adbdcd5b9dff26ba36dab101c42884545e980))
+* **api:** plan de transport import ([c80f379](https://github.com/betagouv/service-national-universel/commit/c80f379891efdade984f8e58675108bf2a61a765))
+* **app:** Changement d'épaisseur de texte sur les boutons suppression de compte et changement de séjour ([#2324](https://github.com/betagouv/service-national-universel/issues/2324)) ([72f2c09](https://github.com/betagouv/service-national-universel/commit/72f2c09c323dd5f85c94cbc54e506337566cd6aa))
+
+
+### Features
+
+* **admin:** ajouter les infos sur les sessions dans le panneau des chefs de centre ([#2302](https://github.com/betagouv/service-national-universel/issues/2302)) ([4779a0b](https://github.com/betagouv/service-national-universel/commit/4779a0b5af4b8c6e0ae3bbe570070216b293c34a))
+* **api:** Ajout d'envoi notification par email au transporteur à l'ouverture nouvelle demande de modification sur plan de transport ([#2316](https://github.com/betagouv/service-national-universel/issues/2316)) ([927ce96](https://github.com/betagouv/service-national-universel/commit/927ce96fa10a86cf64939d2d1d1d585b84d23943))
+
+## [1.224.1](https://github.com/betagouv/service-national-universel/compare/v1.224.0...v1.224.1) (2023-02-28)
+
+
+### Bug Fixes
+
+* **admin:** mission superviseur, probleme taille liste ([e615d5b](https://github.com/betagouv/service-national-universel/commit/e615d5be33fd1971dba5c051a016e8b5fc177a98))
+* **admin:** track total hits volontaire responsible mission ([a2f2afc](https://github.com/betagouv/service-national-universel/commit/a2f2afc65403035eb9ea741204392aff98611cf3))
+* **admin:** Update applications informations on mission update ([571ad04](https://github.com/betagouv/service-national-universel/commit/571ad040afb11e67504eb9d9624245746ebe4373))
+* **admin:** volontaire-responsible filters visible on missionName searchParams ([82b13ec](https://github.com/betagouv/service-national-universel/commit/82b13ec572545920ec6602a88be4076c40f04f7e))
+* **api:** enregistrement du schoolId dans l'édition phase 0 ([eb65873](https://github.com/betagouv/service-national-universel/commit/eb65873c9cac51ad3fd56bd875b802988da6aa09))
+* **api:** Update check PDT on colums and duplicate PDR ([#2321](https://github.com/betagouv/service-national-universel/issues/2321)) ([39bee2e](https://github.com/betagouv/service-national-universel/commit/39bee2e65acffd95a5e3c76fbd8095e1b912befb))
+* **app:** Mise en place bouton suppression du compte et ajout du bouton changement de séjour dans page de profil  ([#2318](https://github.com/betagouv/service-national-universel/issues/2318)) ([dcd1e0e](https://github.com/betagouv/service-national-universel/commit/dcd1e0ea5e02a9ff7cfd7fffa39ea9463784f492))
+
 # [1.224.0](https://github.com/betagouv/service-national-universel/compare/v1.223.1...v1.224.0) (2023-02-27)
 
 

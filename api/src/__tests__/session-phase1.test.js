@@ -9,6 +9,8 @@ const { createSessionWithCohesionCenter } = require("./helpers/cohesionCenter");
 
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib/roles");
+const getNewReferentFixture = require("./fixtures/referent");
+const { createReferentHelper } = require("./helpers/referent");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -28,7 +30,9 @@ afterAll(dbClose);
 describe("Session Phase 1", () => {
   describe("POST /session-phase1", () => {
     it("should return 200", async () => {
-      const res = await request(getAppHelper()).post("/session-phase1").send(getNewSessionPhase1Fixture());
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
+      const session = getNewSessionPhase1Fixture({ headCenterId: referent.id });
+      const res = await request(getAppHelper()).post("/session-phase1").send(session);
       expect(res.status).toBe(200);
     });
     it("should only not be accessible by responsible", async () => {
@@ -59,7 +63,8 @@ describe("Session Phase 1", () => {
       expect(res.status).toBe(404);
     });
     it("should return 200 when session-phase1 is found and updated", async () => {
-      const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture());
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
+      const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture({ headCenterId: referent.id }));
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)
         .send({ cohort: "2020", cohesionCenterId: sessionPhase1.cohesionCenterId, status: "WAITING_VALIDATION" });
@@ -89,7 +94,8 @@ describe("Session Phase 1", () => {
       expect(res.status).toBe(404);
     });
     it("should return 200 when session-phase1 is found", async () => {
-      const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture());
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
+      const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture({ headCenterId: referent.id }));
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();

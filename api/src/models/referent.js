@@ -114,6 +114,15 @@ const Schema = new mongoose.Schema({
       description: "Rôle de l'utilisateur sur l'app",
     },
   },
+
+  subRole: {
+    type: String,
+    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"],
+  },
+
+  // Specific fields
+
+  // Regional and departmental referent
   region: {
     type: String,
     default: "",
@@ -127,16 +136,31 @@ const Schema = new mongoose.Schema({
       description: "Département de l'utilisateur, si applicable",
     },
   },
-  subRole: {
+
+  // Responsible and Supervisor
+  structureId: {
     type: String,
-    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"],
+    documentation: {
+      description: "Identifiant de la structure de l'utilisateur, si applicable",
+    },
   },
+
+  // Head center
   sessionPhase1Id: {
     type: String,
     documentation: {
       description: "Id de la session de cohésion d'accueil pour la phase 1",
     },
   },
+  cohorts: {
+    type: [String],
+    documentation: {
+      description: "Identifiant des cohortes du chef de centre",
+    },
+  },
+
+  // End specific fields
+
   // *** START LEGACY COHESION CENTER ***
   cohesionCenterId: {
     type: String,
@@ -161,13 +185,6 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Numéro de portable",
-    },
-  },
-
-  structureId: {
-    type: String,
-    documentation: {
-      description: "Identifiant de la structrue de l'utilisateur, si applicable",
     },
   },
 

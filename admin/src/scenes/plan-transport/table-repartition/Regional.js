@@ -25,7 +25,7 @@ export default function Regional() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Table de répartition", to: "/table-repartition" }, { label: region }]} />
+      <Breadcrumbs items={[{ label: "Table de répartition", to: `/table-repartition${cohort && `?cohort=${cohort}`}` }, { label: region }]} />
       <div className="flex flex-col w-full px-8 pb-8 ">
         {/* HEADER */}
         <div className="py-8 flex items-center justify-between">

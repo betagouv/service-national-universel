@@ -15,7 +15,7 @@ import FrenchMap from "../../../assets/icons/FrenchMap";
 import { capture } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
-import { region2department, ROLES } from "snu-lib";
+import { department2region, region2department, ROLES } from "snu-lib";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 import * as XLSX from "xlsx";
@@ -42,6 +42,14 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
+
+  const departementsList =
+    user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1
+      ? user.department.map((dept) => ({
+          label: dept,
+          value: dept,
+        }))
+      : [];
 
   useEffect(() => {
     setIsNational(!region && !department);
@@ -141,6 +149,9 @@ export default function SchemaRepartition({ region, department }) {
   function goToNational() {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
+    }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
     }
   }
 
@@ -282,9 +293,27 @@ export default function SchemaRepartition({ region, department }) {
     return { workbook, fileName };
   }
 
+  const getSchemaRepartitionRoute = () => {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+      return `/schema-repartition?cohort=${cohort}`;
+    }
+    if (region && user.role === ROLES.REFERENT_REGION) {
+      return `/schema-repartition/${region}?cohort=${cohort}`;
+    }
+  };
+
+  const handleChangeCohort = (value) => {
+    setCohort(value);
+    history.replace({ pathname: location.pathname, search: `?cohort=${value}` });
+  };
+
+  const handleChangeDepartment = (value) => {
+    history.push(`/schema-repartition/${department2region[value]}/${value}?cohort=${cohort}`);
+  };
+
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Schéma de répartition" }]} />
+      <Breadcrumbs items={[{ label: "Schéma de répartition", to: getSchemaRepartitionRoute() }]} />
       <div className="p-[30px]">
         <div className="flex items-center justify-between">
           <PlanTransportBreadcrumb
@@ -293,7 +322,10 @@ export default function SchemaRepartition({ region, department }) {
             onGoToNational={goToNational}
             onGoToRegion={goToRegion}
           />
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <div className="flex gap-4">
+            {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
+            <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
+          </div>
         </div>
         <div className="flex my-[40px]">
           <div className="flex flex-col grow">

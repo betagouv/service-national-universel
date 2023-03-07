@@ -149,9 +149,9 @@ const ErrorBlock = ({ column, errors }) => {
           <div className="text-sm leading-5 font-bold text-white">
             {errorList.length + (errorList.length > 1 ? " erreurs" : " erreur")} - {colName}
           </div>
-          <div className="text-xs leading-5 font-normal text-white w-[200px]">Colonne {column}</div>
+          <div className="text-xs leading-5 font-normal text-white">Colonne {column}</div>
         </div>
-        <HiOutlineChevronDown className={`text-white h-5 w-5 ${open ? "transform rotate-180" : ""}`} />
+        <HiOutlineChevronDown className={`text-white h-5 w-5 ml-2 ${open ? "transform rotate-180" : ""}`} />
       </button>
 
       <div className={`${open ? "block" : "hidden "} border-b-[1px] border-r-[1px] border-l-[1px] rounded-b-lg border-gray-200 w-full`}>
