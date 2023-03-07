@@ -64,18 +64,9 @@ app.get("/", (req, res) => {
 
 app.post("/render", async (req, res) => {
   try {
-    console.log("req", req);
-    const buffer = await renderFromHtml(
-      req.body.html.replace(
-        /http(.*?)\/css\/style\.css/,
-        "https://app-a2524146-ef53-4802-9027-80e4e0e79565.cleverapps.io/style.css"
-      ),
-      req.body.options || {}
-    );
-    console.log("buffer", buffer);
+    const buffer = await renderFromHtml(req.body.html, req.body.options || {});
     if (!buffer)
       throw new Error("No buffer returned : " + JSON.stringify(req.body));
-    // console.log(`${req.body.html} generated`);
     if (GENERATE_LOCALLY)
       fs.writeFileSync(
         `generated/${new Date().toISOString()}_test.pdf`,
