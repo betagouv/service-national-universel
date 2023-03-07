@@ -8,7 +8,9 @@ import IconHelp from "../assets/IconHelp";
 import Socials from "./Socials";
 import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../utils";
 import Diagoriente from "./Diagoriente";
-import MenuItem from "./MenuItem";
+import MenuLink from "./MenuLink";
+import { environment } from "../../../config";
+import { GoTools } from "react-icons/go";
 
 export default function NavigationMenu({ setIsOpen = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
@@ -16,12 +18,13 @@ export default function NavigationMenu({ setIsOpen = () => {} }) {
   return (
     <nav className="p-[24px] md:p-[8px] md:pb-[24px] bg-[#212B44] w-full transition-all flex-none md:flex-1 flex flex-col">
       <ul>
-        <MenuItem setOpen={setIsOpen} to="/" icon={<IconHome />} text="Accueil" />
-        <MenuItem setOpen={setIsOpen} to="phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} />
-        <MenuItem setOpen={setIsOpen} to="phase2" icon={<IconPhase2 />} text="Phase 2 - MIG" enabled={permissionPhase2(young)} status={young.statusPhase2} />
-        <MenuItem setOpen={setIsOpen} to="phase3" icon={<IconPhase3 />} text="Phase 3 - Engagement" enabled={permissionPhase3(young)} status={young.statusPhase3} />
+        <MenuLink setOpen={setIsOpen} to="/" icon={<IconHome />} text="Accueil" />
+        <MenuLink setOpen={setIsOpen} to="phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} />
+        <MenuLink setOpen={setIsOpen} to="phase2" icon={<IconPhase2 />} text="Phase 2 - MIG" enabled={permissionPhase2(young)} status={young.statusPhase2} />
+        <MenuLink setOpen={setIsOpen} to="phase3" icon={<IconPhase3 />} text="Phase 3 - Engagement" enabled={permissionPhase3(young)} status={young.statusPhase3} />
         <div className="m-8" />
-        <MenuItem setOpen={setIsOpen} to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
+        <MenuLink setOpen={setIsOpen} to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
+        {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Development assets" />}
       </ul>
       <div className="flex flex-col h-auto flex-none md:flex-1">
         <Diagoriente />

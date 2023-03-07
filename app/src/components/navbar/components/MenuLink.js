@@ -2,10 +2,10 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import StatusPill from "./StatusPill";
 
-export default function MenuItem({ to, onClick, enabled = true, icon, text, status, setOpen }) {
+export default function MenuItem({ to, enabled = true, icon, text, status, setOpen }) {
   const isActive = location.pathname.includes(to);
 
-  if (enabled && to) {
+  if (enabled) {
     return (
       <li className="flex items-center">
         <NavLink
@@ -14,24 +14,10 @@ export default function MenuItem({ to, onClick, enabled = true, icon, text, stat
           exact
           className="my-[2px] px-2 py-3 w-full rounded-md flex gap-4 text-[#D1DAEF] hover:bg-[#1B243D] hover:text-[#D1DAEF] items-center transition-colors duration-200"
           activeClassName="bg-[#344264] text-[#67A4FF] hover:bg-[#344264] hover:text-[#67A4FF]">
-          {icon && <div className={`${isActive ? "text-[#67A4FF]" : "text-[#7A90C3]"}`}>{icon}</div>}
+          {icon && <div className={`w-5 ${isActive ? "text-[#67A4FF]" : "text-[#7A90C3]"}`}>{icon}</div>}
           {text && <span>{text}</span>}
           {status && <StatusPill status={status} />}
         </NavLink>
-      </li>
-    );
-  }
-
-  if (enabled && onClick) {
-    return (
-      <li className="flex items-center">
-        <button
-          onClick={onClick}
-          className="my-[2px] px-2 py-3 w-full rounded-md flex gap-4 text-[#D1DAEF] hover:bg-[#1B243D] hover:text-[#D1DAEF] items-center transition-colors duration-200">
-          {icon && <div className="text-[#7A90C3]">{icon}</div>}
-          {text && <span>{text}</span>}
-          {status && <StatusPill status={status} />}
-        </button>
       </li>
     );
   }

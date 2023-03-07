@@ -110,12 +110,6 @@ ul {
   flex-direction: column;
 }
 
-.main {
-  /* min-height: 100vh;
-  flex-direction: column;
-  display: flex; */
-}
-
 input:focus,
 textarea:focus,
 select:focus {

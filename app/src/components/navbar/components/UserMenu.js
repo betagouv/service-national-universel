@@ -2,7 +2,8 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import API from "../../../services/api";
-import MenuItem from "./MenuItem";
+import MenuLink from "./MenuLink";
+import MenuButton from "./MenuButton";
 
 export default function UserMenu({ setIsOpen }) {
   const dispatch = useDispatch();
@@ -23,9 +24,9 @@ export default function UserMenu({ setIsOpen }) {
         </div>
       </div>
       <ul>
-        <MenuItem setOpen={setIsOpen} to="account" text="Mon Profil" />
-        <MenuItem setOpen={setIsOpen} to="preferences" text="Mes préférences de mission" />
-        <MenuItem onClick={logout} text="Déconnexion" />
+        <MenuLink setOpen={setIsOpen} to="account" text="Mon Profil" />
+        <MenuLink setOpen={setIsOpen} to="preferences" text="Mes préférences de mission" />
+        <MenuButton onClick={logout} text="Déconnexion" />
       </ul>
     </nav>
   );
