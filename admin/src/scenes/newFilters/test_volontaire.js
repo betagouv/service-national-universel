@@ -40,10 +40,10 @@ export default function test_volontaire() {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
   const [selectedFilters, setSelectedFilters] = React.useState({});
+  const size = 20;
 
   // filtre non obligatoire
   const [selectedSort, setSelectedSort] = React.useState({});
-  const size = 20;
 
   const [volontaire, setVolontaire] = useState(null);
 
@@ -315,7 +315,6 @@ export default function test_volontaire() {
             setPage={setPage}
             size={size}
             sortOptions={sortOptions}
-            exportComponent="test"
             transform={transformVolontaires}
             exportFields={youngExportFields}
           />

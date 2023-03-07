@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch, ReactiveComponent } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { BsDownload } from "react-icons/bs";
 import ExportComponent from "../../components/ExportXlsx";
@@ -30,8 +30,6 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { useHistory } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
-import { BaseFilter } from "../../components/filters/BaseFilter";
-//import MultiDropDownItem from "./MultiDropDownItem";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022", "TIMESCHEDULE"];
 
