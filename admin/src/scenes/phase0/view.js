@@ -397,7 +397,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
           message: `Souhaitez-vous confirmer l'action ?`,
           type: "SESSION_FULL",
           infoLink: {
-            to: "/dashboard",
+            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
             text: "Des questions sur ce fonctionnement ?",
           },
         });
@@ -413,7 +413,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
         message: `Souhaitez-vous confirmer l'action ?`,
         type: "VALIDATED",
         infoLink: {
-          to: "/dashboard",
+          href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
           text: "Des questions sur ce fonctionnement ?",
         },
       });
@@ -535,11 +535,13 @@ function FooterNoRequest({ processing, onProcess, young }) {
               </div>
               {confirmModal.infoLink && (
                 <div className="flex items-center justify-center pt-6">
-                  <Link
+                  <a
                     href={confirmModal.infoLink.href}
+                    target="_blank"
+                    rel="noreferrer"
                     className="px-3 py-2 drop-shadow-sm disabled:opacity-60 bg-transparent text-blue-600 hover:text-blue-700 hover:underline hover:cursor-pointer disabled:hover:text-blue-600 disabled:hover:no-underline">
                     {confirmModal.infoLink.text}
-                  </Link>
+                  </a>
                 </div>
               )}
             </Modal.Footer>
