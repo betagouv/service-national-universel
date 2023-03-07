@@ -10,7 +10,7 @@ import { setYoung } from "./redux/auth/actions";
 
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Header from "./components/header/index";
+import Header from "./components/header";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -28,6 +28,7 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
+import Navbar from "./components/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
@@ -41,7 +42,7 @@ import RepresentantsLegaux from "./scenes/representants-legaux";
 import SupportCenter from "./scenes/support-center";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import { appURL, maintenance } from "./config";
+import { appURL, environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
 import { toastr } from "react-redux-toastr";
@@ -101,7 +102,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className="main">
+        <div className="main flex flex-col justify-between h-screen">
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
@@ -176,32 +177,70 @@ const Espace = () => {
     (inscriptionModificationOpenForYoungs(young.cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
-  return (
-    <>
-      <div style={{ display: "flex" }}>
-        <Drawer open={menuVisible} onOpen={setMenuVisible} />
-        <Content>
-          <Header
-            onClickBurger={() => {
-              setMenuVisible(!menuVisible);
+  if (environment === "production") {
+    return (
+      <>
+        <div style={{ display: "flex" }}>
+          <Drawer open={menuVisible} onOpen={setMenuVisible} />
+          <Content>
+            <Header
+              onClickBurger={() => {
+                setMenuVisible(!menuVisible);
+              }}
+            />
+            <Switch>
+              <SentryRoute path="/account" component={Account} />
+              <SentryRoute path="/phase1" component={Phase1} />
+              <SentryRoute path="/phase2" component={Phase2} />
+              <SentryRoute path="/phase3" component={Phase3} />
+              <SentryRoute path="/les-programmes" component={Engagement} />
+              <SentryRoute path="/preferences" component={Preferences} />
+              <SentryRoute path="/mission" component={Missions} />
+              <SentryRoute path="/candidature" component={Candidature} />
+              <SentryRoute path="/desistement" component={Desistement} />
+              <SentryRoute path="/diagoriente" component={Diagoriente} />
+              {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+              {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+              <SentryRoute path="/" component={Home} />
+            </Switch>
+          </Content>
+          <ModalCGU
+            isOpen={modal?.isOpen}
+            title={modal?.title}
+            message={modal?.message}
+            confirmText={modal?.confirmText}
+            onConfirm={() => {
+              modal?.onConfirm();
+              setModal({ isOpen: false, onConfirm: null });
             }}
           />
-          <Switch>
-            <SentryRoute path="/account" component={Account} />
-            <SentryRoute path="/phase1" component={Phase1} />
-            <SentryRoute path="/phase2" component={Phase2} />
-            <SentryRoute path="/phase3" component={Phase3} />
-            <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/preferences" component={Preferences} />
-            <SentryRoute path="/mission" component={Missions} />
-            <SentryRoute path="/candidature" component={Candidature} />
-            <SentryRoute path="/desistement" component={Desistement} />
-            <SentryRoute path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-            {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-            <SentryRoute path="/" component={Home} />
-          </Switch>
-        </Content>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className="block md:flex">
+      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
+        <Navbar />
+      </div>
+      <div className="flex-1 mt-16 md:mt-0 md:ml-64">
+        <Switch>
+          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/phase1" component={Phase1} />
+          <SentryRoute path="/phase2" component={Phase2} />
+          <SentryRoute path="/phase3" component={Phase3} />
+          <SentryRoute path="/les-programmes" component={Engagement} />
+          <SentryRoute path="/preferences" component={Preferences} />
+          <SentryRoute path="/mission" component={Missions} />
+          <SentryRoute path="/candidature" component={Candidature} />
+          <SentryRoute path="/desistement" component={Desistement} />
+          <SentryRoute path="/diagoriente" component={Diagoriente} />
+          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+          <SentryRoute path="/" component={Home} />
+        </Switch>
+
         <ModalCGU
           isOpen={modal?.isOpen}
           title={modal?.title}
@@ -213,7 +252,7 @@ const Espace = () => {
           }}
         />
       </div>
-    </>
+    </div>
   );
 };
 

@@ -96,6 +96,7 @@ body {
   font-weight: 400;
   background-color: #f4f5f7;
   font-family: "Marianne", sans-serif;
+  /* position: fixed;  */
 }
 
 ul {
@@ -107,12 +108,6 @@ ul {
 #root {
   display: flex;
   flex-direction: column;
-}
-
-.main {
-  min-height: 100vh;
-  flex-direction: column;
-  display: flex;
 }
 
 input:focus,
