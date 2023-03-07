@@ -329,7 +329,7 @@ export default function Done() {
             <div className="relative" ref={refAttestationButton}>
               <button
                 disabled={loading}
-                className="flex  z-10 justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
                 onClick={() => setOpenAttestationButton((e) => !e)}>
                 <div className="flex items-center gap-2">
                   <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Attestation de réalisation phase 1</span>

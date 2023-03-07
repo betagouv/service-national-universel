@@ -39,17 +39,19 @@ export default function User() {
   return (
     <div className="relative w-full h-16 flex md:border-t-[1px] border-[#1A243C] px-3 md:p-6 gap-3 items-center cursor-default justify-end md:justify-between">
       <nav
-        className={`rounded-lg w-56 bg-white transition-all absolute right-4 shadow overflow-hidden z-10 bottom-20 ease-in-out duration-200 ${open ? "h-28" : "h-0"}`}
+        className={`rounded-lg w-56 bg-white transition-all absolute right-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-center ease-in-out duration-200 ${
+          open ? "h-28" : "h-0"
+        }`}
         ref={menuRef}>
         <Link to="account">
-          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 text-gray-900">Mon profil</p>
+          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900">Mon profil</p>
         </Link>
         <Link to="preferences">
-          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 text-gray-900">Mes préférences de mission</p>
+          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900">Mes préférences de mission</p>
         </Link>
-        <Link to="#" onClick={logout}>
-          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 text-gray-900">Se déconnecter</p>
-        </Link>
+        <button onClick={logout}>
+          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900">Se déconnecter</p>
+        </button>
       </nav>
       <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user.firstName[0] + user.lastName[0]}</p>
       <div className="hidden md:block">

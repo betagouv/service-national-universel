@@ -45,8 +45,8 @@ function MobileNavbar() {
   return (
     <header className="text-[#D2DAEF] text-sm" ref={ref}>
       <div className="w-full h-16 grid md:hidden grid-cols-3 bg-[#212B44] items-center z-20">
-        <div className="h-16 p-3">
-          <button onClick={handleClick} className="">
+        <div>
+          <button onClick={handleClick} className="h-16 w-16 p-3">
             <Hamburger className="text-[#828EAC]" />
           </button>
         </div>

@@ -102,7 +102,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className="main overscroll-none">
+        <div className="main flex flex-col justify-between h-screen">
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
@@ -126,7 +126,7 @@ export default function App() {
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
-          {/* <Footer /> */}
+          <Footer />
         </div>
       </Router>
     </Sentry.ErrorBoundary>
@@ -240,7 +240,6 @@ const Espace = () => {
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <SentryRoute path="/" component={Home} />
         </Switch>
-        <Footer />
 
         <ModalCGU
           isOpen={modal?.isOpen}
