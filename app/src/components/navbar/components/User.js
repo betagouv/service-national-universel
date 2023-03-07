@@ -43,14 +43,14 @@ export default function User() {
           open ? "h-28" : "h-0"
         }`}
         ref={menuRef}>
-        <Link to="account">
-          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900">Mon profil</p>
+        <Link to="account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+          Mon profil
         </Link>
-        <Link to="preferences">
-          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900">Mes préférences de mission</p>
+        <Link to="preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+          Mes préférences de mission
         </Link>
-        <button onClick={logout}>
-          <p className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900">Se déconnecter</p>
+        <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+          Se déconnecter
         </button>
       </nav>
       <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user.firstName[0] + user.lastName[0]}</p>
