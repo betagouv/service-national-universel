@@ -24,7 +24,7 @@ export default function NavigationMenu({ setIsOpen = () => {} }) {
         <MenuLink setOpen={setIsOpen} to="phase3" icon={<IconPhase3 />} text="Phase 3 - Engagement" enabled={permissionPhase3(young)} status={young.statusPhase3} />
         <div className="m-8" />
         <MenuLink setOpen={setIsOpen} to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
-        {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Development assets" />}
+        {environment === "development" && <MenuLink setOpen={setIsOpen} to="develop-assets" icon={<GoTools />} text="Development assets" />}
       </ul>
       <div className="flex flex-col h-auto flex-none md:flex-1">
         <Diagoriente />
