@@ -105,6 +105,12 @@ ul {
   margin: 0;
 }
 
+.main {
+  min-height: 100vh;
+  flex-direction: column;
+  display: flex;
+}
+
 #root {
   display: flex;
   flex-direction: column;
