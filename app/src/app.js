@@ -50,7 +50,7 @@ import GoogleTags from "./components/GoogleTags";
 import "./index.css";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
+import { inscriptionModificationOpenForYoungs, youngCanChangeSession, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
@@ -157,6 +157,15 @@ const Espace = () => {
           return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
         },
         confirmText: "J'accepte les conditions générales d'utilisation",
+      });
+    }
+    if (young && young.acceptCGU === "true" && young.status === YOUNG_STATUS.WITHDRAWN) {
+      setModal({
+        isOpen: true,
+        title: "Reprendre mon parcours",
+        message: "Vous vous êtes désisté du SNU. Vous avez changé d’avis ? Vous pouvez reprendre votre parcours SNU en vous inscrivant à un prochain séjour.",
+        onConfirm: () => history.push("/changer-de-sejour"),
+        confirmText: "Choisir un nouveau séjour",
       });
     }
   }, [young]);
