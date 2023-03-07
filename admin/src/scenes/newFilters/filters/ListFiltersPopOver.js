@@ -124,7 +124,6 @@ export default function ListFiltersPopOver({
   };
 
   const getData = async () => {
-    console.log("getData", selectedFilters);
     const res = await buildQuery(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject, sortSelected);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -172,7 +171,7 @@ export default function ListFiltersPopOver({
       setModalSaveVisible(false);
       return res;
     } catch (error) {
-      console.log("???", error);
+      console.log(error);
       if (error.code === "ALREADY_EXISTS") return toastr.error("Oops, le filtre existe déjà");
       return error;
     }
@@ -197,7 +196,6 @@ export default function ListFiltersPopOver({
     urlParams.forEach((value, key) => {
       filters[key] = { filter: value.split(",") };
     });
-    console.log("filters", filters);
     setSelectedFilters(filters);
     setIsShowing(false);
   };
@@ -208,7 +206,6 @@ export default function ListFiltersPopOver({
   };
 
   const handleCustomComponent = (query, f) => {
-    console.log("handleCustomComponent? in listeFiltersPopover", query, f);
     setSelectedFilters({ ...selectedFilters, [f?.name]: { filter: query.value, customComponentQuery: query } });
   };
 

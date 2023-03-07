@@ -86,8 +86,6 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
     if (!bodyQuery.query.bool?.must) bodyQuery.query.bool.must = [];
     if (!bodyQuery.query.bool?.should) bodyQuery.query.bool.should = [];
 
-    //
-
     Object.keys(selectedFilters).forEach((key) => {
       if (key === "searchbar") return;
       const currentFilter = filterArray.find((f) => f.name === key);
@@ -167,7 +165,6 @@ export const getURLParam = (urlParams, setPage, filters) => {
     } else {
       // on check si c'est un custom component
       const customComponent = filters.find((f) => f.customComponent === key);
-      console.log("custom component", customComponent, key, value.split(","));
       if (customComponent) {
         localFilters[key] = { filter: value.split(",") };
       } else {
@@ -209,7 +206,6 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
-  console.log(bodyAggs);
 
   if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
   if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
