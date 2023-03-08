@@ -66,7 +66,7 @@ export default function List() {
       customComponent: "fromDate",
       translate: formatDateFR,
     },
-    { title: "Date de fin", name: "toDate", datafield: "toDate.keyword", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "toDate" },
+    { title: "Date de fin", name: "toDate", datafield: "toDate.keyword", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "toDate", translate: formatDateFR },
   ];
 
   const getDefaultQuery = () => {
