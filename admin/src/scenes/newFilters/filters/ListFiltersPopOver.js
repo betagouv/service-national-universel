@@ -350,7 +350,7 @@ export default function ListFiltersPopOver({
                 }
                 return (
                   <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
-                    {item}
+                    {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
                   </div>
                 );
               })}
@@ -368,7 +368,7 @@ const ToolTipView = ({ selectedFilters, filter }) => {
       <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
         {selectedFilters[filter.name].filter.map((item) => (
           <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
-            {item}
+            {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
           </div>
         ))}
       </div>

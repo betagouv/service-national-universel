@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { HiOutlineLockClosed } from "react-icons/hi";
-import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translateMission, translatePhase2 } from "snu-lib";
+import { formatDateFR, formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translateMission, translatePhase2 } from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
@@ -57,7 +57,15 @@ export default function List() {
   };
   const filterArray = [
     { title: "Statut", name: "statut", datafield: "status.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée", translate: translate },
-    { title: "Date de début", name: "fromDate", datafield: "fromDate.keyword", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "fromDate" },
+    {
+      title: "Date de début",
+      name: "fromDate",
+      datafield: "fromDate.keyword",
+      parentGroup: "Date",
+      missingLabel: "Non renseignée",
+      customComponent: "fromDate",
+      translate: formatDateFR,
+    },
     { title: "Date de fin", name: "toDate", datafield: "toDate.keyword", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "toDate" },
   ];
 
