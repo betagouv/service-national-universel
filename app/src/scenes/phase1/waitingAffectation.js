@@ -2,6 +2,7 @@ import React from "react";
 import { youngCanChangeSession } from "snu-lib";
 import clock from "../../assets/clock.svg";
 import hero from "../../assets/hero.png";
+import WaitFor from "../../assets/icons/WaitFor";
 import { supportURL } from "../../config";
 import { translateCohort } from "../../utils";
 import ChangeStayLink from "./components/ChangeStayLink";
@@ -20,15 +21,39 @@ export default function WaitingAffectation({ young }) {
               <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
-            <p className="text-gray-600 text-base md:text-xl">
+            <div className="bg-white drop-shadow border-[1px] border-gray-200 p-6 flex gap-4 items-center rounded-lg">
+              <div className="w-[42px] h-[42px]">
+                <WaitFor />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold m-0 mb-1">Vous êtes en attente d&apos;affectation à un centre</h2>
+                <p className="text-sm">
+                  Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
+                  préparer votre fiche sanitaire ci-dessous !
+                </p>
+              </div>
+            </div>
+            {/* <p className="text-gray-600 text-base md:text-xl">
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes pour créer ainsi des liens nouveaux et
               développer votre culture de l&apos;engagement et ainsi affirmer votre place dans la société.
-            </p>
+            </p> */}
           </article>
           <img src={hero} />
         </section>
         <Files young={young} />
-        <hr className="max-w-[95%] my-8 mx-auto" />
+        <hr className="w-full mt-12 mb-7 mx-auto" />
+        <section className="mb-12">
+          <h2 className="text-sm font-medium m-0">Vérifiez vos spams ! </h2>
+          <p className="text-gray-500 text-sm">
+            Pensez à vérifier vos spams et courriers indésirables pour vous assurer que vous recevez bien les communications de la plateforme.
+          </p>
+        </section>
+        {/* 
+			Section FAQ
+		*/}
+        {/* 
+			Section Ils racontent leur séjour
+		*/}
         <section className="flex items-center">
           <img src={clock} />
           <article className="ml-4">
