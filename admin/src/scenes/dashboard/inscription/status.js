@@ -144,7 +144,7 @@ export default function Status({ filter }) {
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}
           color={YOUNG_STATUS_COLORS.VALIDATED}>
-          <CardTitle>Validées</CardTitle>
+          <CardTitle>Validées sur liste principale</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.VALIDATED || 0}</CardValue>
             <CardPercentage>
@@ -172,7 +172,7 @@ export default function Status({ filter }) {
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] })}
           color={YOUNG_STATUS_COLORS.WAITING_LIST}>
-          <CardTitle>Liste complémentaire</CardTitle>
+          <CardTitle>Validées sur liste complémentaire</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.WAITING_LIST || 0}</CardValue>
             <CardPercentage>

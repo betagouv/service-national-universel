@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import YoungHeader from "./components/YoungHeader";
-import { PlainButton, RoundButton, BorderButton } from "./components/Buttons";
+import { RoundButton, BorderButton, PlainButton } from "./components/Buttons";
 import Pencil from "../../assets/icons/Pencil";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import { MiniTitle } from "./components/commons";
@@ -26,10 +26,10 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
 import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
+import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import HourGlass from "../../assets/icons/HourGlass";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
@@ -45,6 +45,9 @@ import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
 import { capture } from "../../sentry";
+import Modal from "../../components/ui/modals/Modal";
+import ButtonLight from "../../components/ui/buttons/ButtonLight";
+import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -72,7 +75,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [oldCohort, setOldCohort] = useState(false);
-  const [action, setAction] = useState();
 
   useEffect(() => {
     if (young) {
@@ -190,7 +192,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   async function processRegistration(state, data) {
     setProcessing(true);
     try {
-      if (state === "SESSION_FULL") state = action;
+      if (state === "SESSION_FULL") state = "WAITING_LIST";
 
       let body = {
         lastStatusAt: Date.now(),
@@ -207,7 +209,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       }
 
       await api.put(`/referent/young/${young._id}`, body);
-      if (action === "WAITING_LIST") await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
 
       //Notify young
       switch (state) {
@@ -215,6 +216,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
           break;
         case "WAITING_LIST":
+          await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
           break;
         case "VALIDATED":
@@ -273,7 +275,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
             <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
           )}
           {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} action={action} setAction={setAction} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
         </>
       )}
     </>
@@ -371,7 +373,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
+function FooterNoRequest({ processing, onProcess, young }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
@@ -379,37 +381,45 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
 
   async function validate() {
     try {
-      const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?getAllSessions=true`);
+      const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
       if (!res.ok) throw new Error(res);
-      const session = res.data.find(({ name }) => name === young.cohort);
-      if (session?.isFull) {
+      const fillingRate = res.data;
+      if (fillingRate >= 1.05) {
         return setConfirmModal({
-          icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-          title: "Objectif d'inscription régional atteint",
-          message:
-            "L'objectif d'inscription de votre région a été atteint. Merci de placer le jeune sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider son inscription.",
+          icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+          title: (
+            <span>
+              L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+              <strong className="text-bold">validé sur liste complémentaire</strong>.
+            </span>
+          ),
+          message: `Souhaitez-vous confirmer l'action ?`,
           type: "SESSION_FULL",
+          infoLink: {
+            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
+            text: "Des questions sur ce fonctionnement ?",
+          },
         });
       }
       return setConfirmModal({
-        icon: <CheckCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-        title: "Valider le dossier",
-        message: `Vous vous apprêtez à valider le dossier d’inscription de ${young.firstName} ${young.lastName}. Un email sera automatiquement envoyé au volontaire.`,
+        icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+        title: (
+          <span>
+            L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+            <strong className="text-bold">validé sur liste principale</strong>.
+          </span>
+        ),
+        message: `Souhaitez-vous confirmer l'action ?`,
         type: "VALIDATED",
+        infoLink: {
+          href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
+          text: "Des questions sur ce fonctionnement ?",
+        },
       });
     } catch (e) {
       capture(e);
       toastr.error(e.message);
     }
-  }
-
-  function waitingList() {
-    setConfirmModal({
-      icon: <HourGlass className="text-[#D1D5DB] w-[36px] h-[36px]" />,
-      title: "Valider le dossier (liste complémentaire)",
-      message: `Vous vous apprêtez à valider le dossier d'inscription de ${young.firstName} ${young.lastName}. Il sera placé sur liste complémentaire. Un email sera automatiquement envoyé au volontaire.`,
-      type: "WAITING_LIST",
-    });
   }
 
   const rejectionReasonOptions = [
@@ -427,18 +437,6 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
     </option>,
   ];
 
-  const actions = [
-    <option value="NO_CHOICE" key="NO_CHOICE">
-      Que souhaitez-vous faire ?{" "}
-    </option>,
-    <option value="WAITING_LIST" key="WAITING_LIST">
-      Placer sur liste complémentaire
-    </option>,
-    <option value="VALIDATED" key="VALIDATED">
-      Inscrire le volontaire
-    </option>,
-  ];
-
   function reject() {
     setRejectionReason("");
     setRejectionMessage("");
@@ -449,7 +447,7 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       message: `Vous vous apprêtez à refuser le dossier d’inscription de ${young.firstName} ${young.lastName}. Dites-lui pourquoi ci-dessous. Un email sera automatiquement envoyé au volontaire.`,
       type: "REFUSED",
       confirmLabel: "Confirmer le refus",
-      confirmColor: "red",
+      confirmColor: "danger",
     });
   }
 
@@ -464,9 +462,6 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
       } else {
         setError(null);
       }
-    }
-    if (confirmModal.type === "SESSION_FULL" && (!action || action === "NO_CHOICE")) {
-      return toastr.error("Veuillez choisir un statut", "Merci de choisir entre valider l'inscription ou placer le volontaire sur liste complémentaire.");
     }
     onProcess(
       confirmModal.type,
@@ -486,9 +481,9 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
         <div className="flex items-center">
           <span className="text-[#242526] text-[18px] font-medium leading-snug">Le dossier est-il conforme&nbsp;?</span>
         </div>
-        <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d’inscription.</p>
+        <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d&apos;inscription.</p>
       </div>
-      <div className="flex">
+      <div className="flex gap-2">
         <PlainButton spinner={processing} onClick={validate} mode="green" className="ml-[8px]">
           <CheckCircle className="text-[#10B981]" />
           Valider
@@ -497,52 +492,61 @@ function FooterNoRequest({ processing, onProcess, young, action, setAction }) {
           <XCircle className="text-[#EF4444]" />
           Refuser
         </PlainButton>
-        <PlainButton spinner={processing} onClick={waitingList} mode="white" className="ml-[8px]">
-          Placer sur liste complémentaire
-        </PlainButton>
       </div>
-      {confirmModal && (
-        <ConfirmationModal
-          isOpen={true}
-          icon={confirmModal.icon}
-          title={confirmModal.title}
-          message={confirmModal.message}
-          confirmText={confirmModal.confirmLabel || "Confirmer"}
-          confirmMode={confirmModal.confirmColor || "blue"}
-          onCancel={() => setConfirmModal(null)}
-          onConfirm={confirm}>
-          {confirmModal.type === "REFUSED" && (
-            <div className="mt-[24px]">
-              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
-                <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
-                  {rejectionReasonOptions}
-                </select>
-                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
-              </div>
-              {rejectionReason === "OTHER" && (
-                <textarea
-                  value={rejectionMessage}
-                  onChange={(e) => setRejectionMessage(e.target.value)}
-                  className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
-                  rows="5"
-                  placeholder="Précisez la raison de votre refus ici"
-                />
+      <Modal isOpen={confirmModal ? true : false}>
+        {confirmModal && (
+          <>
+            <Modal.Header className="flex-col">
+              {confirmModal.icon && <div className="flex justify-center mb-auto">{confirmModal.icon}</div>}
+              <h2 className="leading-7 text-xl text-center m-0">{confirmModal.title}</h2>
+            </Modal.Header>
+            <Modal.Content>
+              {(confirmModal.type === "VALIDATED" || confirmModal.type === "SESSION_FULL") && <p className="leading-7 text-xl mb-0 text-center">{confirmModal.message}</p>}
+              {confirmModal.type === "REFUSED" && (
+                <div className="mt-[24px]">
+                  <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+                    <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
+                      {rejectionReasonOptions}
+                    </select>
+                    <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+                  </div>
+                  {rejectionReason === "OTHER" && (
+                    <textarea
+                      value={rejectionMessage}
+                      onChange={(e) => setRejectionMessage(e.target.value)}
+                      className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+                      rows="5"
+                      placeholder="Précisez la raison de votre refus ici"
+                    />
+                  )}
+                  {error && <div className="text-[#EF4444]">{error}</div>}
+                </div>
               )}
-              {error && <div className="text-[#EF4444]">{error}</div>}
-            </div>
-          )}
-          {confirmModal.type === "SESSION_FULL" && (
-            <div className="mt-[24px]">
-              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
-                <select value={action} onChange={(e) => setAction(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
-                  {actions}
-                </select>
-                <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
+            </Modal.Content>
+            <Modal.Footer>
+              <div className="flex gap-2 items-center justify-between">
+                <ButtonLight className="grow" onClick={() => setConfirmModal(null)}>
+                  Annuler
+                </ButtonLight>
+                <ButtonPrimary onClick={confirm} className="grow">
+                  {confirmModal.confirmLabel || "Confirmer"}
+                </ButtonPrimary>
               </div>
-            </div>
-          )}
-        </ConfirmationModal>
-      )}
+              {confirmModal.infoLink && (
+                <div className="flex items-center justify-center pt-6">
+                  <a
+                    href={confirmModal.infoLink.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 drop-shadow-sm disabled:opacity-60 bg-transparent text-blue-600 hover:text-blue-700 hover:underline hover:cursor-pointer disabled:hover:text-blue-600 disabled:hover:no-underline">
+                    {confirmModal.infoLink.text}
+                  </a>
+                </div>
+              )}
+            </Modal.Footer>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }
