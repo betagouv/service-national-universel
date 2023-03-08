@@ -230,42 +230,40 @@ const Espace = () => {
   }
 
   return (
-    <>
-      <div className="block md:flex">
-        <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
-          <Navbar />
-        </div>
-        <div className="flex-1 mt-16 md:mt-0 md:ml-64">
-          <Switch>
-            <SentryRoute path="/account" component={Account} />
-            <SentryRoute path="/phase1" component={Phase1} />
-            <SentryRoute path="/phase2" component={Phase2} />
-            <SentryRoute path="/phase3" component={Phase3} />
-            <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/preferences" component={Preferences} />
-            <SentryRoute path="/mission" component={Missions} />
-            <SentryRoute path="/candidature" component={Candidature} />
-            <SentryRoute path="/desistement" component={Desistement} />
-            <SentryRoute path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-            {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-            <SentryRoute path="/" component={Home} />
-          </Switch>
-
-          <ModalCGU
-            isOpen={modal?.isOpen}
-            title={modal?.title}
-            message={modal?.message}
-            confirmText={modal?.confirmText}
-            onConfirm={() => {
-              modal?.onConfirm();
-              setModal({ isOpen: false, onConfirm: null });
-            }}
-          />
-        </div>
+    <div className="block md:flex">
+      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
+        <Navbar />
       </div>
-      <ModalResumePhase1 isOpen={modalResume} onClose={() => setModalResume(false)} />
-    </>
+      <div className="flex-1 mt-16 md:mt-0 md:ml-64">
+        <Switch>
+          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/phase1" component={Phase1} />
+          <SentryRoute path="/phase2" component={Phase2} />
+          <SentryRoute path="/phase3" component={Phase3} />
+          <SentryRoute path="/les-programmes" component={Engagement} />
+          <SentryRoute path="/preferences" component={Preferences} />
+          <SentryRoute path="/mission" component={Missions} />
+          <SentryRoute path="/candidature" component={Candidature} />
+          <SentryRoute path="/desistement" component={Desistement} />
+          <SentryRoute path="/diagoriente" component={Diagoriente} />
+          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+          <SentryRoute path="/" component={Home} />
+        </Switch>
+
+        <ModalCGU
+          isOpen={modal?.isOpen}
+          title={modal?.title}
+          message={modal?.message}
+          confirmText={modal?.confirmText}
+          onConfirm={() => {
+            modal?.onConfirm();
+            setModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+        <ModalResumePhase1 isOpen={modalResume} onClose={() => setModalResume(false)} />
+      </div>
+    </div>
   );
 };
 
