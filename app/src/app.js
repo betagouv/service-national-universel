@@ -28,6 +28,7 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
+import ModalResumePhase1 from "./components/modals/ModalResumePhase1";
 import Navbar from "./components/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
@@ -136,6 +137,7 @@ export default function App() {
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalResume, setModalResume] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   useEffect(() => {
@@ -160,14 +162,13 @@ const Espace = () => {
       });
     }
     if (young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
-      setModal({
-        isOpen: true,
-        title: "Reprendre mon parcours",
-        message: "Vous vous êtes désisté du SNU. Vous avez changé d’avis ? Vous pouvez reprendre votre parcours SNU en vous inscrivant à un prochain séjour.",
-        onConfirm: () => history.push("/changer-de-sejour"),
-        confirmText: "Choisir un nouveau séjour",
-      });
+      console.log("🚀 ~ file: app.js:166 ~ useEffect ~ canYoungResumePhase1(young):", canYoungResumePhase1(young));
+      setModalResume(true);
     }
+    return () => {
+      setModal({ isOpen: false, onConfirm: null });
+      setModalResume(false);
+    };
   }, [young]);
 
   if (!young) {
@@ -229,39 +230,42 @@ const Espace = () => {
   }
 
   return (
-    <div className="block md:flex">
-      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
-        <Navbar />
-      </div>
-      <div className="flex-1 mt-16 md:mt-0 md:ml-64">
-        <Switch>
-          <SentryRoute path="/account" component={Account} />
-          <SentryRoute path="/phase1" component={Phase1} />
-          <SentryRoute path="/phase2" component={Phase2} />
-          <SentryRoute path="/phase3" component={Phase3} />
-          <SentryRoute path="/les-programmes" component={Engagement} />
-          <SentryRoute path="/preferences" component={Preferences} />
-          <SentryRoute path="/mission" component={Missions} />
-          <SentryRoute path="/candidature" component={Candidature} />
-          <SentryRoute path="/desistement" component={Desistement} />
-          <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-          <SentryRoute path="/" component={Home} />
-        </Switch>
+    <>
+      <div className="block md:flex">
+        <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
+          <Navbar />
+        </div>
+        <div className="flex-1 mt-16 md:mt-0 md:ml-64">
+          <Switch>
+            <SentryRoute path="/account" component={Account} />
+            <SentryRoute path="/phase1" component={Phase1} />
+            <SentryRoute path="/phase2" component={Phase2} />
+            <SentryRoute path="/phase3" component={Phase3} />
+            <SentryRoute path="/les-programmes" component={Engagement} />
+            <SentryRoute path="/preferences" component={Preferences} />
+            <SentryRoute path="/mission" component={Missions} />
+            <SentryRoute path="/candidature" component={Candidature} />
+            <SentryRoute path="/desistement" component={Desistement} />
+            <SentryRoute path="/diagoriente" component={Diagoriente} />
+            {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+            {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+            <SentryRoute path="/" component={Home} />
+          </Switch>
 
-        <ModalCGU
-          isOpen={modal?.isOpen}
-          title={modal?.title}
-          message={modal?.message}
-          confirmText={modal?.confirmText}
-          onConfirm={() => {
-            modal?.onConfirm();
-            setModal({ isOpen: false, onConfirm: null });
-          }}
-        />
+          <ModalCGU
+            isOpen={modal?.isOpen}
+            title={modal?.title}
+            message={modal?.message}
+            confirmText={modal?.confirmText}
+            onConfirm={() => {
+              modal?.onConfirm();
+              setModal({ isOpen: false, onConfirm: null });
+            }}
+          />
+        </div>
       </div>
-    </div>
+      <ModalResumePhase1 isOpen={modalResume} onClose={() => setModalResume(false)} />
+    </>
   );
 };
 
