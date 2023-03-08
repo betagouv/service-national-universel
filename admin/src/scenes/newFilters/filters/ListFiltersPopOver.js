@@ -29,6 +29,7 @@ export default function ListFiltersPopOver({
   pageId,
   filters,
   defaultQuery,
+  count,
   setCount,
   searchBarObject = null,
   setData,
@@ -56,8 +57,6 @@ export default function ListFiltersPopOver({
 
   const [savedView, setSavedView] = React.useState([]);
 
-  const [count, setCount] = React.useState(0);
-
   const urlParams = new URLSearchParams(window.location.search);
   const history = useHistory();
 
@@ -73,11 +72,6 @@ export default function ListFiltersPopOver({
     const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
     setFiltersVisible(newFilters);
   }, [search]);
-
-  React.useEffect(() => {
-    // send count back to parent on every count updates
-    setCount(count);
-  }, [count]);
 
   React.useEffect(() => {
     init();

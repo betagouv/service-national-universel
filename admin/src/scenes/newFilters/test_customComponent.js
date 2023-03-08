@@ -104,6 +104,7 @@ export default function List() {
             defaultQuery={getDefaultQuery()}
             filters={filterArray}
             setCount={setCount}
+            count={count}
             setData={(value) => setData(value)}
             searchBarObject={searchBarObject}
             page={page}
