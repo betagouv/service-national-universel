@@ -3,10 +3,14 @@ import { youngCanChangeSession } from "snu-lib";
 import clock from "../../assets/clock.svg";
 import hero from "../../assets/hero.png";
 import WaitFor from "../../assets/icons/WaitFor";
+import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import { supportURL } from "../../config";
 import { translateCohort } from "../../utils";
 import ChangeStayLink from "./components/ChangeStayLink";
+import CheckYourSpamSection from "./components/CheckYourSpamSection";
 import Container from "./components/Container";
+import FaqSection from "./components/FaqSection";
+import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 
 export default function WaitingAffectation({ young }) {
@@ -33,28 +37,15 @@ export default function WaitingAffectation({ young }) {
                 </p>
               </div>
             </div>
-            {/* <p className="text-gray-600 text-base md:text-xl">
-              Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes pour créer ainsi des liens nouveaux et
-              développer votre culture de l&apos;engagement et ainsi affirmer votre place dans la société.
-            </p> */}
           </article>
           <img src={hero} />
         </section>
         <Files young={young} />
         <hr className="w-full mt-12 mb-7 mx-auto" />
-        <section className="mb-12">
-          <h2 className="text-sm font-medium m-0">Vérifiez vos spams ! </h2>
-          <p className="text-gray-500 text-sm">
-            Pensez à vérifier vos spams et courriers indésirables pour vous assurer que vous recevez bien les communications de la plateforme.
-          </p>
-        </section>
-        {/* 
-			Section FAQ
-		*/}
-        {/* 
-			Section Ils racontent leur séjour
-		*/}
-        <section className="flex items-center">
+        <CheckYourSpamSection />
+        <FaqSection />
+        <TestimonialsSection />
+        {/* <section className="flex items-center">
           <img src={clock} />
           <article className="ml-4">
             <strong className="text-xl">Vous êtes en attente d&apos;affectation à un centre</strong>
@@ -68,6 +59,12 @@ export default function WaitingAffectation({ young }) {
               . Merci de votre patience. L&apos;équipe SNU
             </span>
           </article>
+        </section> */}
+        <section className="mt-32">
+          <h2 className="text-xl font-bold mb-8 text-center">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
+          <div className="flex justify-center">
+            <ButtonPrimary className="w-52">Découvrir</ButtonPrimary>
+          </div>
         </section>
         <div className="thumb" />
       </Container>

@@ -4,8 +4,6 @@ import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
 import MedicalFile from "./MedicalFile";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
-import { Link } from "react-router-dom";
-import ChevronRight from "../../assets/icons/ChevronRight";
 
 export default function DocumentsPhase1({ young }) {
   const [isOpenMed, setIsOpenMed] = useState(false);
@@ -25,12 +23,9 @@ export default function DocumentsPhase1({ young }) {
 
   return (
     <section>
-      <h2 className="text-lg font-medium mb-1">Documents à préparer</h2>
-      <p className="text-sm mb-2">Renseignez votre fiche sanitaire et remettez la à votre arrivée au centre de séjour.</p>
-      <Link to="/" className="d-flex gap-2 items-center text-blue-600 text-xs mb-7">
-        Voir le mode d&apos;emploi <ChevronRight className="mt-1" />
-      </Link>
-      <ScrollSection className={`flex flex-col md:flex-row items-center ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x`}>
+      <h3 className="text-2xl font-medium">Ma fiche sanitaire</h3>
+      <ScrollSection
+        className={`flex flex-col md:flex-row items-center ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
         {youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
           <>
             <FileCard

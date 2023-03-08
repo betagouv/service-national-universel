@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@appbaseio/reactivesearch": "3.42.1",
+    "@headlessui/react": "^1.7.13",
     "@sentry/integrations": "^7.17.4",
     "@sentry/react": "^7.17.4",
     "@sentry/tracing": "^7.17.4",
