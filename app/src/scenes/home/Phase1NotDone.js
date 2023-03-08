@@ -11,6 +11,7 @@ import Loader from "../../components/Loader";
 import ChevronRight from "../../assets/icons/ChevronRight";
 import Engagement from "./components/Engagement";
 import dayjs from "dayjs";
+import { environment } from "../../config";
 
 export default function Phase1NotDone() {
   const [loading, setLoading] = useState(false);
@@ -174,7 +175,7 @@ function ChangeCohortPrompt() {
         Choisir un nouveau séjour
       </Link>
       <div className="text-xs text-blue-600">
-        <Link to="desistement" className="flex items-center justify-center md:justify-start gap-4">
+        <Link to={environment === "production" ? "desistement" : "account?desistement=1"} className="flex items-center justify-center md:justify-start gap-4">
           <span>Se désister du SNU</span>
           <ChevronRight />
         </Link>
