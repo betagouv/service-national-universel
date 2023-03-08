@@ -385,7 +385,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
       const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
       if (!res.ok) throw new Error(res);
       const fillingRate = res.data;
-      if (fillingRate) {
+      if (fillingRate >= 1.05) {
         return setConfirmModal({
           icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
           title: (
