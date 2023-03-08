@@ -55,6 +55,7 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
       if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
       dispatch(setYoung(data));
       onCancel();
+      history.push("/");
     } catch (e) {
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
     }

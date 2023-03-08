@@ -52,9 +52,8 @@ export function permissionChangeCohort(y, date) {
 
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
-  if (y.status === YOUNG_STATUS.WITHDRAWN) return false;
   return (
-    (![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status) &&
+    (![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(y.status) &&
       y.statusPhase1 !== YOUNG_STATUS_PHASE1.NOT_DONE &&
       !wasYoungExcluded(y)) ||
     y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE
