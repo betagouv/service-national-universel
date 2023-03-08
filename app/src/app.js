@@ -161,8 +161,7 @@ const Espace = () => {
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
-    if (young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
-      console.log("🚀 ~ file: app.js:166 ~ useEffect ~ canYoungResumePhase1(young):", canYoungResumePhase1(young));
+    if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       setModalResume(true);
     }
     return () => {

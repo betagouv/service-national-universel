@@ -3,7 +3,7 @@ import ButtonCancel from "../buttons/ButtonCancel";
 import LinkPrimary from "../buttons/LinkPrimary";
 import ModalTailwind from "./ModalTailwind";
 
-export default function ModalResume({ isOpen, onClose }) {
+export default function ModalResumePhase1({ isOpen, onClose }) {
   return (
     <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
       <p className="text-center text-xl text-gray-900 leading-7 font-medium">Reprendre mon parcours</p>
