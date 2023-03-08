@@ -11,6 +11,7 @@ import { setYoung } from "../../../../redux/auth/actions";
 import api from "../../../../services/api";
 import { translateCohort } from "../../../../utils";
 import plausibleEvent from "../../../../services/plausible";
+import { environment } from "../../../../config";
 
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);
@@ -138,7 +139,9 @@ const content = ({ handleSubmit, young }) => {
           Changer de séjour &gt;
         </Link>
         <p className="pb-3 text-sm text-gray-600">Je ne souhaite plus participer au SNU</p>
-        <Link to="/desistement" className="text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
+        <Link
+          to={environment === "production" ? "desistement" : "account?desistement=1"}
+          className="text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
           Me désister &gt;
         </Link>
       </div>
