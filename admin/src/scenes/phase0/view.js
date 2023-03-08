@@ -48,7 +48,6 @@ import { capture } from "../../sentry";
 import Modal from "../../components/ui/modals/Modal";
 import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
-import { Link } from "react-router-dom";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -496,7 +495,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
       </div>
       <Modal isOpen={confirmModal ? true : false}>
         {confirmModal && (
-          <div className="bg-white rounded-lg">
+          <>
             <Modal.Header className="flex-col">
               {confirmModal.icon && <div className="flex justify-center mb-auto">{confirmModal.icon}</div>}
               <h2 className="leading-7 text-xl text-center m-0">{confirmModal.title}</h2>
@@ -545,7 +544,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
                 </div>
               )}
             </Modal.Footer>
-          </div>
+          </>
         )}
       </Modal>
     </div>
