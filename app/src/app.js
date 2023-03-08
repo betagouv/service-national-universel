@@ -161,7 +161,7 @@ const Espace = () => {
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
-    if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
+    if (environment !== "production" && location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       setModalResume(true);
     }
     return () => {
