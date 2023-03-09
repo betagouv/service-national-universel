@@ -156,7 +156,7 @@ export default function ListFiltersPopOver({
     try {
       const res = await api.post("/filters", {
         page: pageId,
-        url: currentFilterAsUrl(),
+        url: currentFilterAsUrl(selectedFilters, page),
         name: name,
       });
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");
