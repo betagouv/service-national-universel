@@ -34,12 +34,6 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
     ? ACTION_ABANDON
     : ACTION_WITHDRAW;
 
-  async function logout() {
-    await api.post(`/young/logout`);
-    history.push("/");
-    dispatch(setYoung(null));
-  }
-
   const onConfirm = async () => {
     const status = action === ACTION_DELETE_ACCOUNT ? YOUNG_STATUS.DELETED : action === ACTION_WITHDRAW ? YOUNG_STATUS.WITHDRAWN : YOUNG_STATUS.ABANDONED;
     // @todo: is it useful?
@@ -51,9 +45,15 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
       note: withdrawnMessage && withdrawnReason ? WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label + " " + withdrawnMessage : null,
     });
     try {
-      const { ok, code } = await api.put(`/young`, { status, lastStatusAt: Date.now(), ...(withdrawnMessage && withdrawnReason ? { withdrawnMessage, withdrawnReason } : {}) });
+      const { ok, data, code } = await api.put(`/young`, {
+        status,
+        lastStatusAt: Date.now(),
+        ...(withdrawnMessage && withdrawnReason ? { withdrawnMessage, withdrawnReason } : {}),
+      });
       if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      logout();
+      dispatch(setYoung(data));
+      onCancel();
+      history.push("/");
     } catch (e) {
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
     }

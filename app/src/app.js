@@ -28,6 +28,7 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
+import ModalResumePhase1ForWithdrawn from "./components/ui/modals/ModalResumePhase1ForWithdrawn";
 import Navbar from "./components/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
@@ -49,12 +50,13 @@ import api, { initApi } from "./services/api";
 import { toastr } from "react-redux-toastr";
 import GoogleTags from "./components/GoogleTags";
 import "./index.css";
-import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
+import { getAvailableSessions } from "./services/cohort.service";
 
 initSentry();
 initApi();
@@ -140,6 +142,7 @@ export default function App() {
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalResume, setModalResume] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   useEffect(() => {
@@ -163,6 +166,15 @@ const Espace = () => {
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
+    if (environment !== "production" && location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
+      getAvailableSessions(young).then((sessions) => {
+        if (sessions.length) setModalResume(true);
+      });
+    }
+    return () => {
+      setModal({ isOpen: false, onConfirm: null });
+      setModalResume(false);
+    };
   }, [young]);
 
   if (!young) {
@@ -255,6 +267,7 @@ const Espace = () => {
             setModal({ isOpen: false, onConfirm: null });
           }}
         />
+        <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
       </div>
     </div>
   );
