@@ -49,7 +49,7 @@ import api, { initApi } from "./services/api";
 import { toastr } from "react-redux-toastr";
 import GoogleTags from "./components/GoogleTags";
 import "./index.css";
-import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { canYoungResumePhase1, ENABLE_PM, getAvailableSessions, YOUNG_STATUS } from "./utils";
 
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
@@ -162,7 +162,9 @@ const Espace = () => {
       });
     }
     if (environment !== "production" && location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
-      setModalResume(true);
+      getAvailableSessions(young).then((sessions) => {
+        if (sessions.length) setModalResume(true);
+      });
     }
     return () => {
       setModal({ isOpen: false, onConfirm: null });

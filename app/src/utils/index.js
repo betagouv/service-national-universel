@@ -4,6 +4,7 @@ export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
+import API from "../services/api";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -155,4 +156,10 @@ export const canYoungResumePhase1 = (y) => {
     y.status === YOUNG_STATUS.WITHDRAWN &&
     ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
   );
+};
+
+export const getAvailableSessions = async (young) => {
+  const res = await API.post(`/cohort-session/eligibility/2023/${young._id}`);
+  if (!res.ok) return [];
+  return res.data;
 };
