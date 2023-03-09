@@ -139,6 +139,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTab to="/dsnj-export" title="Export DSNJ" onClick={onClick} />
+      {environment === "development" && <DrawerTab to="/develop-assets" title="🤖 Develop Assets" onClick={onClick} />}
 
       <DrawerConnectToZammood title="Boîte de réception" history={history}>
         {!tickets ? (

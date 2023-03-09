@@ -14,6 +14,7 @@ import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
+import { YOUNG_STATUS } from "snu-lib";
 
 export default function changeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -139,7 +140,7 @@ export default function changeSejour() {
                         </DropdownToggle>
                         <DropdownMenu>
                           {sejours
-                            .filter((e) => e !== young.cohort)
+                            .filter((e) => (young.status === YOUNG_STATUS.WITHDRAWN ? e : e !== young.cohort))
                             .map((status) => {
                               return (
                                 <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
