@@ -19,3 +19,10 @@ export function PlainButton({ className, children, onClick = () => {} }) {
     </button>
   );
 }
+export function CancelButton({ className, children = "Annuler", onClick = () => {} }) {
+  return (
+    <button className={`border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full ${className}`} onClick={onClick}>
+      {children}
+    </button>
+  );
+}

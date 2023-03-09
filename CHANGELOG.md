@@ -1,3 +1,32 @@
+# [1.229.0](https://github.com/betagouv/service-national-universel/compare/v1.228.0...v1.229.0) (2023-03-08)
+
+
+### Bug Fixes
+
+* **admin:** validation du dossier des jeunes inscrits d'après l'objectif départemental ([#2331](https://github.com/betagouv/service-national-universel/issues/2331)) ([1b564fc](https://github.com/betagouv/service-national-universel/commit/1b564fc5add02aa22ddd166e06665b7cd3cf65ae))
+* **api:** add try catch franconnect ([9278420](https://github.com/betagouv/service-national-universel/commit/9278420c54b0991bb59cc25d317eaa936d6c40aa))
+* **api:** autoValidationSessionPhase1Young ([5a057ad](https://github.com/betagouv/service-national-universel/commit/5a057ad823b4debb1c5d96c83f07efd86b4bd143))
+* **app:** Modification design bouton Changer de séjour - Volontaire Phase 1 ([#2336](https://github.com/betagouv/service-national-universel/issues/2336)) ([4d5b4bf](https://github.com/betagouv/service-national-universel/commit/4d5b4bfa2b4e3c3a844e19f63c2e343ce4f7a312))
+* **lib:** permission geography referent structure ([1f0a912](https://github.com/betagouv/service-national-universel/commit/1f0a9127939312658cb91a3fac341ac7a797a4bf))
+
+
+### Features
+
+* **app:** new withdrawal modal with possibility to change stay [#2335](https://github.com/betagouv/service-national-universel/issues/2335) ([c377554](https://github.com/betagouv/service-national-universel/commit/c377554a57d191853e2fe341197bda5dc8762455))
+
+# [1.228.0](https://github.com/betagouv/service-national-universel/compare/v1.227.0...v1.228.0) (2023-03-07)
+
+
+### Bug Fixes
+
+* **app:** Fixes to new navbar ([#2340](https://github.com/betagouv/service-national-universel/issues/2340)) ([ad83367](https://github.com/betagouv/service-national-universel/commit/ad8336747d0803fae85bebc1b21a8e31db06c3ab))
+* **pdf:** pdf style ([0329053](https://github.com/betagouv/service-national-universel/commit/03290535465eab49e1aa4535ec730508e6ca3737))
+
+
+### Features
+
+* **app:** refonte de la barre de navigation (staging only) ([#2322](https://github.com/betagouv/service-national-universel/issues/2322)) ([a3e2a40](https://github.com/betagouv/service-national-universel/commit/a3e2a401000a3b12401ffec43eb940f6573ff155))
+
 # [1.227.0](https://github.com/betagouv/service-national-universel/compare/v1.226.0...v1.227.0) (2023-03-06)
 
 

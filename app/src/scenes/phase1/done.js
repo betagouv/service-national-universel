@@ -340,7 +340,7 @@ export default function Done() {
               <div
                 className={`${
                   openAttestationButton ? "block" : "hidden"
-                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-0 top-[40px]`}>
                 <div
                   key="download"
                   onClick={() => {
