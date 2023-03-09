@@ -1,3 +1,20 @@
+# [1.230.0](https://github.com/betagouv/service-national-universel/compare/v1.229.0...v1.230.0) (2023-03-09)
+
+
+### Bug Fixes
+
+* **admin:** fix des titres du statut de validation ([#2344](https://github.com/betagouv/service-national-universel/issues/2344)) ([5a37fc2](https://github.com/betagouv/service-national-universel/commit/5a37fc263676867efa1c8b88838205563a31e6c4))
+* **api:** update permission ref --> head_center ([cefccf9](https://github.com/betagouv/service-national-universel/commit/cefccf9a9164bb0b2be60289a7adc47110e03df8))
+* **app:** ajout de la nouvelle modale sur la home legacy ([e2e2f2e](https://github.com/betagouv/service-national-universel/commit/e2e2f2ef9cd4ced28fa24acc3340b084481fe907))
+* **app:** style modal withdrawn ([4fc3bff](https://github.com/betagouv/service-national-universel/commit/4fc3bff3769d3252677bda207a08caebfcf37455))
+
+
+### Features
+
+* **admin/app:** Pages de présentation des assets ([#2339](https://github.com/betagouv/service-national-universel/issues/2339)) ([94ca9e7](https://github.com/betagouv/service-national-universel/commit/94ca9e76b0dcdb06462bf4dd1a4c1bb0222326ee))
+* **app:** Ajout d'une modale menant au choix de cohorte pour les désistés (staging) ([#2342](https://github.com/betagouv/service-national-universel/issues/2342)) ([c58d334](https://github.com/betagouv/service-national-universel/commit/c58d33480854a943fbd947e5178cc9d8e7bd25f5))
+* **app:** MEP modale de changement de sejour pour desistes ([c74a3e7](https://github.com/betagouv/service-national-universel/commit/c74a3e79ac2572b26626145e42512a7ab8d75ab7))
+
 # [1.229.0](https://github.com/betagouv/service-national-universel/compare/v1.228.0...v1.229.0) (2023-03-08)
 
 
