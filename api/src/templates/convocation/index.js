@@ -112,7 +112,7 @@ const render = async (young) => {
           `<li>en fonction des consignes sanitaires le jour du départ, 2 masques jetables à usage médical pour le transport en commun${ligneBus.lunchBreak ? "," : "."}</li>`,
         ),
       )
-      .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas du midi.</li>` : ""));
+      .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
   } catch (e) {
     throw e;
   }
