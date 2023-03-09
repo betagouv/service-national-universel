@@ -49,12 +49,13 @@ import api, { initApi } from "./services/api";
 import { toastr } from "react-redux-toastr";
 import GoogleTags from "./components/GoogleTags";
 import "./index.css";
-import { canYoungResumePhase1, ENABLE_PM, getAvailableSessions, YOUNG_STATUS } from "./utils";
+import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
+import { getAvailableSessions } from "./services/cohort.service";
 
 initSentry();
 initApi();
