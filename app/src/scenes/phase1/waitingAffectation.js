@@ -2,6 +2,8 @@ import React from "react";
 import { youngCanChangeSession } from "snu-lib";
 import clock from "../../assets/clock.svg";
 import hero from "../../assets/hero.png";
+import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
+import DiscoverStay from "../../assets/icons/DiscoverStay";
 import WaitFor from "../../assets/icons/WaitFor";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import { supportURL } from "../../config";
@@ -60,10 +62,16 @@ export default function WaitingAffectation({ young }) {
             </span>
           </article>
         </section> */}
-        <section className="mt-32">
+        <section className="mt-32 relative pb-32">
           <h2 className="text-xl font-bold mb-8 text-center">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
           <div className="flex justify-center">
             <ButtonPrimary className="w-52">Découvrir</ButtonPrimary>
+          </div>
+          <div className="absolute left-10 md:left-auto md:right-[150px] xl:right-[180px] 2xl:right-[208px] bottom-0 md:bottom-[40px]">
+            <div className="rotate-180 md:rotate-0 w-fit">
+              <CurvedArrowLeft />
+            </div>
+            <DiscoverStay />
           </div>
         </section>
         <div className="thumb" />
