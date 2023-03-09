@@ -36,7 +36,6 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
 
   const onConfirm = async () => {
     const status = action === ACTION_DELETE_ACCOUNT ? YOUNG_STATUS.DELETED : action === ACTION_WITHDRAW ? YOUNG_STATUS.WITHDRAWN : YOUNG_STATUS.ABANDONED;
-    const statusPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) ? young.statusPhase1 : YOUNG_STATUS_PHASE1.WITHDRAWN;
     // @todo: is it useful?
     young.historic.push({
       phase: young.phase,
@@ -48,7 +47,6 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
     try {
       const { ok, data, code } = await api.put(`/young`, {
         status,
-        statusPhase1,
         lastStatusAt: Date.now(),
         ...(withdrawnMessage && withdrawnReason ? { withdrawnMessage, withdrawnReason } : {}),
       });

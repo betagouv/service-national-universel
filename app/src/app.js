@@ -28,7 +28,7 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
-import ModalResumePhase1 from "./components/modals/ModalResumePhase1";
+import ModalResumePhase1ForWithdrawn from "./components/ui/modals/ModalResumePhase1ForWithdrawn";
 import Navbar from "./components/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
@@ -260,7 +260,7 @@ const Espace = () => {
             setModal({ isOpen: false, onConfirm: null });
           }}
         />
-        <ModalResumePhase1 isOpen={modalResume} onClose={() => setModalResume(false)} />
+        <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
       </div>
     </div>
   );

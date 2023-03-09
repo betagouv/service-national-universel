@@ -153,6 +153,6 @@ export const canYoungResumePhase1 = (y) => {
   return (
     sessions2023.map((e) => e.name).includes(y.cohort) &&
     y.status === YOUNG_STATUS.WITHDRAWN &&
-    [YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(y.statusPhase1)
+    ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
   );
 };
