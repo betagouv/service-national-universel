@@ -184,14 +184,8 @@ export default function ListFiltersPopOver({
   };
 
   const handleSelectUrl = (url) => {
-    history.replace({ search: url });
-    const urlParams = new URLSearchParams(window.location.search);
-    const filters = {};
-    urlParams.forEach((value, key) => {
-      filters[key] = { filter: value.split(",") };
-    });
-    setSelectedFilters(filters);
-    setIsShowing(false);
+    history.push({ search: url });
+    return history.go(0);
   };
 
   const handleFilterShowing = (value) => {
