@@ -225,6 +225,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       youngCheckinForHeadOfCenter: Joi.boolean().required(),
       youngCheckinForRegionReferent: Joi.boolean().required(),
       youngCheckinForDepartmentReferent: Joi.boolean().required(),
+      uselessInformation: Joi.object().allow(null),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);
@@ -236,6 +237,12 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     const cohort = await CohortModel.findOne({ name: cohortName });
 
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    //set to 23h59 certains dates
+    const valueToSet = ["pdrChoiceLimitDate", "validationDate", "validationDateForTerminaleGrade"];
+    valueToSet.forEach((key) => {
+      if (body[key]) body[key].setHours(23, 59, 59, 999);
+    });
 
     cohort.set({
       dateStart: formatDateTimeZone(body.dateStart),
@@ -251,6 +258,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       youngCheckinForHeadOfCenter: body.youngCheckinForHeadOfCenter,
       youngCheckinForRegionReferent: body.youngCheckinForRegionReferent,
       youngCheckinForDepartmentReferent: body.youngCheckinForDepartmentReferent,
+      uselessInformation: body.uselessInformation,
     });
 
     await cohort.save({ fromUser: req.user });
@@ -262,9 +270,9 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
 });
 
 const formatDateTimeZone = (date) => {
-  //remove timezones
-  const d = new Date(date);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  //set timezone to UTC
+  let d = new Date(date);
+  d.toISOString();
   return d;
 };
 

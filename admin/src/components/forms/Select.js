@@ -19,7 +19,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
     <Listbox value={selected} onChange={setSelected}>
       {({ open }) => (
         <>
-          <div className="relative">
+          <div className="relative w-full">
             <Listbox.Button className="relative w-full text-left">
               <div className={` ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(open)} bg-white py-2 px-2.5 items-center space-y-0 gap-0 flex rounded-lg border-[1px]`}>
                 {icon && icon}
