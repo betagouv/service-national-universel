@@ -19,7 +19,7 @@ import ScholarshipGrade from "./scolarshipGrade";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
-import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
+import { YOUNG_STATUS, translateInscriptionStatus, ROLES, academyList } from "../../../utils";
 
 export default function Index({ onChangeFilter = () => {} }) {
   const [filter, setFilter] = useState();
@@ -54,7 +54,7 @@ export default function Index({ onChangeFilter = () => {} }) {
   }, [filter]);
 
   const getOptionsStatus = () => {
-    let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
+    let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translateInscriptionStatus(YOUNG_STATUS[s]), value: s }));
     if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["NOT_ELIGIBLE"].includes(e.value));
     return STATUS;
   };

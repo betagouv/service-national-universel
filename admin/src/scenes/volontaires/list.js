@@ -17,6 +17,7 @@ import Panel from "./panel";
 import Badge from "../../components/Badge";
 import {
   translate,
+  translateInscriptionStatus,
   translatePhase1,
   getFilterLabel,
   YOUNG_STATUS_COLORS,
@@ -515,7 +516,7 @@ export default function VolontaireList() {
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateInscriptionStatus(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}

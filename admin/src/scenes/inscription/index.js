@@ -4,7 +4,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { HiAdjustments } from "react-icons/hi";
@@ -13,10 +13,11 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL, appURL, environment, supportURL } from "../../config";
+import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
 import {
   translate,
+  translateInscriptionStatus,
   getFilterLabel,
   formatStringLongDate,
   YOUNG_STATUS,
@@ -70,7 +71,6 @@ const FILTERS = [
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
   const user = useSelector((state) => state.Auth.user);
-  const history = useHistory();
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -351,7 +351,7 @@ export default function Inscription() {
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateInscriptionStatus(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
