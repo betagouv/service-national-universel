@@ -7,7 +7,7 @@ const TestimonialCard = ({ title, description, picture, readingTime, isVideo = f
   };
 
   return (
-    <article role="button" onClick={handleOpenLink} className="rounded-lg overflow-hidden bg-gray-50 w-60">
+    <article role="button" onClick={handleOpenLink} className="rounded-lg overflow-hidden bg-gray-50 min-w-[240px] w-60">
       <div className="relative h-[150px] overflow-hidden">
         <img src={picture} alt="Témoignage" />
         <div className="absolute bottom-4 right-4 text-xs bg-white/60 px-[6px] py-[5px] rounded-[4px] backdrop-blur-sm">{readingTime}</div>

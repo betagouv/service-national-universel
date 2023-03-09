@@ -62,16 +62,26 @@ export default function WaitingAffectation({ young }) {
             </span>
           </article>
         </section> */}
-        <section className="mt-32 relative pb-32">
+        <section className="mt-32 pb-32">
           <h2 className="text-xl font-bold mb-8 text-center">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
           <div className="flex justify-center">
             <ButtonPrimary className="w-52">Découvrir</ButtonPrimary>
           </div>
-          <div className="absolute left-10 md:left-auto md:right-[150px] xl:right-[180px] 2xl:right-[208px] bottom-0 md:bottom-[40px]">
+          {/* <div className="absolute left-10 md:left-auto md:right-[150px] xl:right-[180px] 2xl:right-[208px] bottom-0 md:bottom-[40px]">
             <div className="rotate-180 md:rotate-0 w-fit">
               <CurvedArrowLeft />
             </div>
-            <DiscoverStay />
+            <div className="-mt-8">
+              <DiscoverStay />
+            </div>
+          </div> */}
+          <div className="relative">
+            <div className="absolute rotate-180 md:rotate-0 w-fit top-5 left-10 md:left-auto md:top-auto md:right-[288px] lg:right-[308px] xl:right-[348px] 2xl:right-[408px] md:bottom-[-10px]">
+              <CurvedArrowLeft />
+            </div>
+            <div className="absolute top-4 left-24 md:left-auto md:top-auto md:right-[128px] lg:right-[168px] xl:right-[188px] 2xl:right-[248px]">
+              <DiscoverStay />
+            </div>
           </div>
         </section>
         <div className="thumb" />

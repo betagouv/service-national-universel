@@ -41,7 +41,7 @@ const TestimonialsSection = () => {
   return (
     <section>
       <h2 className="font-bold text-xl m-0 mb-4">Ils racontent leur séjour</h2>
-      <div className="flex gap-4 justify-between">
+      <div className="flex gap-4 justify-between overflow-x-scroll">
         {testimonials.map((testimonial, index) => (
           <TestimonialCard key={index} {...testimonial} />
         ))}
