@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
 import MedicalFile from "./MedicalFile";
@@ -24,8 +23,7 @@ export default function DocumentsPhase1({ young }) {
   return (
     <section>
       <h3 className="text-2xl font-medium">Ma fiche sanitaire</h3>
-      <ScrollSection
-        className={`flex flex-col md:flex-row items-center ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
+      <div className={`flex flex-col md:flex-row items-center ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
         {youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
           <>
             <FileCard
@@ -40,22 +38,8 @@ export default function DocumentsPhase1({ young }) {
             />
           </>
         ) : null}
-      </ScrollSection>
+      </div>
       <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
     </section>
   );
 }
-
-const ScrollSection = styled.div`
-  ::-webkit-scrollbar {
-    height: 10px; /* height of horizontal scrollbar ← You're missing this */
-    border: 2px solid #fff;
-    background: rgb(249 250 251);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb {
-    height: 5px;
-    background-color: #d5d5d5;
-    border-radius: 10px;
-  }
-`;

@@ -19,7 +19,6 @@ const FaqSection = () => {
               </p>
             </>
           }
-          readMoreLink="/"
         />
         <QuestionBlock
           questionText="Comment se passe le transport ?"
@@ -45,10 +44,14 @@ const FaqSection = () => {
             </p>
           }
         />
-        <button className="rounded-lg border-[1px] border-gray-200 py-[22px] px-6 flex justify-between w-full items-center">
+        <a
+          className="rounded-lg border-[1px] border-gray-200 py-[22px] px-6 flex justify-between w-full items-center hover:text-inherit"
+          href="https://support.snu.gouv.fr/base-de-connaissance/phase-1-le-sejour-de-cohesion"
+          target="_blank"
+          rel="noreferrer">
           <span className="font-bold">J&apos;ai des questions sur le séjour</span>
           <ArrowUpRight />
-        </button>
+        </a>
       </div>
     </section>
   );

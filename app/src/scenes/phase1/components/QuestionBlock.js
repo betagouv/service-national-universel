@@ -15,7 +15,7 @@ const QuestionBlock = ({ questionText = "", answerText = "", readMoreLink = null
           {answerText}
           {readMoreLink && (
             <div className="flex justify-end pt-2">
-              <a to={readMoreLink} rel="noreferrer" target="_blank" className="d-flex gap-2 items-center text-blue-600 text-xs">
+              <a href={readMoreLink} rel="noreferrer" target="_blank" className="d-flex gap-2 items-center text-blue-600 text-xs">
                 Lire plus <ChevronRight className="mt-1" />
               </a>
             </div>
