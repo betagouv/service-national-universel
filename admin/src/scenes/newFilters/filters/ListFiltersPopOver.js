@@ -102,8 +102,10 @@ export default function ListFiltersPopOver({
   }, [filtersVisible]);
 
   React.useEffect(() => {
-    getData();
-    setURL();
+    if (mounted.current) {
+      getData();
+      setURL();
+    }
   }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
