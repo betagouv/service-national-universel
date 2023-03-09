@@ -40,6 +40,7 @@ import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import SupportCenter from "./scenes/support-center";
+import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
 import { appURL, environment, maintenance } from "./config";
@@ -123,6 +124,9 @@ export default function App() {
               <SentryRoute path="/auth" component={AuthV2} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
               <SentryRoute path="/public-engagements" component={AllEngagements} />
+
+              {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
