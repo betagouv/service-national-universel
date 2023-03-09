@@ -9,6 +9,8 @@ const srcDir = path.join(projectDir, "src");
 const destinationPath = path.join(srcDir, "scenes", "develop", "AssetsPresentationPage.js");
 let uniqueId = 0;
 
+const ASSET_COUNT_PER_LINE = 8;
+
 (async function () {
   console.log("-------------------------------------------------------");
   console.log("🤖 Generating Assets presentation page...");
@@ -79,7 +81,7 @@ function addComponent(file, dir, uniqueId) {
 
 const pageClass = "p-8";
 const titleClass = "text-3xl font-bold text-[#000000] my-8";
-const itemsListClass = "grid grid-cols-6 gap-4";
+const itemsListClass = `grid grid-cols-${ASSET_COUNT_PER_LINE} gap-4`;
 const itemClass = "border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center";
 const imageClass = "";
 const itemNameClass = "absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]";
@@ -98,7 +100,12 @@ function createView(context) {
     "</div>";
 
   return (
-    `/* eslint-disable prettier/prettier */\nimport React, { useState, useEffect } from "react";\n${imports.join("\n")}\n\n` +
+    "/* eslint-disable prettier/prettier */\n\n" +
+    "/* ------------------------------------------------------\n" +
+    "   Cette Page est générée automatiquement par le script\n" +
+    "   /utils/generate-assets-presentation-page.js\n" +
+    "   ------------------------------------------------------ */\n\n" +
+    `import React, { useState, useEffect } from "react";\n${imports.join("\n")}\n\n` +
     "export default function AssetsPresentationPage() {\n" +
     'const [filter, setFilter] = useState("");\n' +
     "\tuseEffect(() => {\n" +
