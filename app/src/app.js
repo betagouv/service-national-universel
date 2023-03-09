@@ -228,6 +228,7 @@ const Espace = () => {
               setModal({ isOpen: false, onConfirm: null });
             }}
           />
+          <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
         </div>
       </>
     );
