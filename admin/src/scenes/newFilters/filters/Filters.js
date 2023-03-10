@@ -198,7 +198,7 @@ export default function ListFiltersPopOver({
           .filter((f) => f.customComponent)
           .map((filter) => {
             return (
-              <div className="" key={filter.name}>
+              <div className="hidden" key={filter.name}>
                 {filter.customComponent((value) => handleCustomComponent(value, filter), selectedFilters[filter?.name]?.filter)}
               </div>
             );
