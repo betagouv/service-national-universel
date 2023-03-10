@@ -27,9 +27,11 @@ const download = async (file) => {
   try {
     const s3Id = file.path.split("/")[1];
     const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
+    if (!ok) throw new Error("Le fichier n'a pas pu être téléchargé");
     FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
   } catch (e) {
-    toast.error("Le fichier n'a pas pu être téléchargé");
+    capture(e);
+    toastr.error("Le fichier n'a pas pu être téléchargé");
   }
 };
 
