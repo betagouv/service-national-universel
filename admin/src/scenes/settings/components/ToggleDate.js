@@ -9,12 +9,12 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, label }) {
+export default function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, label, readOnly = false }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2">
       <div className="flex items-center justify-between">
         <p className="text-gray-800 text-sm  text-left">{label}</p>
-        <Toggle disabled={disabled} value={value} onChange={onChange} />
+        <Toggle disabled={disabled || readOnly} value={value} onChange={onChange} />
       </div>
       <div className="flex items-center justify-between">
         <p className="text-gray-500 text-xs text-left">
@@ -26,10 +26,11 @@ export default function ToggleDate({ value, onChange, range, onChangeRange, disa
         <Popover className="relative">
           {({ open }) => (
             <>
-              <Popover.Button className="cursor-pointer outline-none flex items-center">
+              <Popover.Button
+                className={classNames(disabled && "cursor-not-allowed", readOnly && "cursor-default", "cursor-pointer outline-none flex items-center")}
+                disabled={disabled || readOnly}>
                 <DateIcon className={classNames(open ? "text-blue-600" : "text-gray-500")} />
               </Popover.Button>
-
               <Transition
                 as={Fragment}
                 show={open}

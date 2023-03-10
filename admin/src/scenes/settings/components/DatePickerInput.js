@@ -8,12 +8,19 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, placeholder = "Date" }) {
+export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, placeholder = "Date", readOnly = false }) {
   return (
     <Popover className="relative w-full">
       {({ open }) => (
         <>
-          <Popover.Button className={classNames(open ? "ring-2 ring-blue-500 ring-offset-2" : "", "cursor-pointer outline-none rounded-lg w-full")}>
+          <Popover.Button
+            disabled={disabled || readOnly}
+            className={classNames(
+              open ? "ring-2 ring-blue-500 ring-offset-2" : "",
+              disabled && "cursor-not-allowed",
+              readOnly && "cursor-default",
+              "outline-none rounded-lg w-full cursor-pointer ",
+            )}>
             <div
               className={`flex items-center justify-between border-[1px] w-full py-2 px-2.5 rounded-lg bg-white ${disabled ? "border-gray-200" : "border-gray-300"} ${
                 error ? "border-red-500" : ""
@@ -30,7 +37,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                 </div>
                 {error && <div className="text-[#EF4444]">{error}</div>}
               </div>
-              <DateIcon className="flex text-gray-500" />
+              <DateIcon className={`flex ${disabled ? "text-gray-400" : "text-gray-500"}`} />
             </div>
           </Popover.Button>
 

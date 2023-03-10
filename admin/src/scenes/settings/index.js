@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { isSuperAdmin } from "snu-lib";
+import { isSuperAdmin, ROLES } from "snu-lib";
 import logo from "../../assets/logo-snu.png";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
@@ -32,6 +32,7 @@ export default function Settings() {
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
+  const readOnly = isSuperAdmin(user) ? false : true;
   const [noChange, setNoChange] = React.useState(true);
   const history = useHistory();
   const [mounted, setMounted] = React.useState(false);
@@ -98,7 +99,7 @@ export default function Settings() {
     }
   };
 
-  if (!isSuperAdmin(user))
+  if (user.role !== ROLES.ADMIN)
     return (
       <div className="flex flex-col h-100 items-center justify-center m-6">
         <img src={logo} alt="logo" className="w-56 pb-8" />
@@ -111,8 +112,6 @@ export default function Settings() {
         </div>
       </div>
     );
-
-  console.log("data", data);
 
   return (
     <>
@@ -162,8 +161,15 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Début" value={data.dateStart} onChange={(e) => setData({ ...data, dateStart: e })} />
-                      <DatePickerInput mode="single" label="Fin" value={data.dateEnd} onChange={(e) => setData({ ...data, dateEnd: e })} />
+                      <DatePickerInput
+                        mode="single"
+                        label="Début"
+                        value={data.dateStart}
+                        onChange={(e) => setData({ ...data, dateStart: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
+                      <DatePickerInput mode="single" label="Fin" value={data.dateEnd} onChange={(e) => setData({ ...data, dateEnd: e })} readOnly={readOnly} disabled={isLoading} />
                     </div>
                   </div>
                 </div>
@@ -182,6 +188,7 @@ export default function Settings() {
                     <InputText
                       placeholder="Indiquez l’URL d’un article de la BDC"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.uselessInformation?.toolkit || ""}
                       onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, toolkit: e.target.value } })}
                     />
@@ -199,6 +206,7 @@ export default function Settings() {
                     <InputTextarea
                       placeholder="Précisez en quelques mots"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data?.uselessInformation?.zones || ""}
                       onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, zones: e.target.value } })}
                     />
@@ -216,6 +224,7 @@ export default function Settings() {
                     <InputTextarea
                       placeholder="Précisez en quelques mots"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data?.uselessInformation?.eligibility || ""}
                       onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, eligibility: e.target.value } })}
                     />
@@ -242,8 +251,8 @@ export default function Settings() {
                         </ul>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput mode="single" label="Ouverture" />
-                    <DatePickerInput mode="range" label="Fermeture" />
+                    <DatePickerInput mode="single" label="Ouverture" disabled={isLoading} readOnly={readOnly} />
+                    <DatePickerInput mode="range" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
@@ -271,7 +280,7 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" />
+                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
@@ -286,7 +295,7 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" />
+                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
                     </div>
                   </div>
                 </div>
@@ -313,13 +322,13 @@ export default function Settings() {
                     </div>
                     <SimpleToggle
                       label="Référents régionaux"
-                      disabled={isLoading}
+                      disabled={isLoading || readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                     />
                     <SimpleToggle
                       label="Référents départementaux"
-                      disabled={isLoading}
+                      disabled={isLoading || readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                     />
@@ -336,13 +345,13 @@ export default function Settings() {
                     </div>
                     <SimpleToggle
                       label="Référents régionaux"
-                      disabled={isLoading}
+                      disabled={isLoading || readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                     />
                     <SimpleToggle
                       label="Référents départementaux"
-                      disabled={isLoading}
+                      disabled={isLoading || readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                     />
@@ -365,6 +374,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Référents régionaux"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                     />
@@ -382,6 +392,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Transporteur"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                       range={{ from: data?.fromRange || undefined, to: data?.toRange || undefined }}
@@ -404,6 +415,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Référents régionaux"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                     />
@@ -433,6 +445,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Volontaires"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.isAssignmentAnnouncementsOpenForYoung}
                       onChange={() => setData({ ...data, isAssignmentAnnouncementsOpenForYoung: !data.isAssignmentAnnouncementsOpenForYoung })}
                       range={{
@@ -467,6 +480,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Modérateurs"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
                       range={{
@@ -487,6 +501,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Référents régionaux"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.manualAffectionOpenForReferentRegion}
                       onChange={() => setData({ ...data, manualAffectionOpenForReferentRegion: !data.manualAffectionOpenForReferentRegion })}
                       range={{
@@ -507,6 +522,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Référents départementaux"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.manualAffectionOpenForReferentDepartment}
                       onChange={() => setData({ ...data, manualAffectionOpenForReferentDepartment: !data.manualAffectionOpenForReferentDepartment })}
                       range={{
@@ -543,6 +559,7 @@ export default function Settings() {
                       mode="single"
                       label="Fin"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.pdrChoiceLimitDate}
                       onChange={(value) => setData({ ...data, pdrChoiceLimitDate: value })}
                     />
@@ -570,6 +587,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Tout utilisateur"
                       disabled={isLoading}
+                       readOnly={readOnly}
                       value={""}
                       onChange={() => setData({ ...data })}
                       range={{ from: undefined, to: undefined }}
@@ -591,6 +609,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Chefs de centre"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.youngCheckinForHeadOfCenter}
                       onChange={() => setData({ ...data, youngCheckinForHeadOfCenter: !data.youngCheckinForHeadOfCenter })}
                       range={{
@@ -611,6 +630,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Modérateurs"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.youngCheckinForAdmin}
                       onChange={() => setData({ ...data, youngCheckinForAdmin: !data.youngCheckinForAdmin })}
                       range={{
@@ -631,6 +651,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Référents régionaux"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.youngCheckinForRegionReferent}
                       onChange={() => setData({ ...data, youngCheckinForRegionReferent: !data.youngCheckinForRegionReferent })}
                       range={{
@@ -651,6 +672,7 @@ export default function Settings() {
                     <ToggleDate
                       label="Référents départementaux"
                       disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.youngCheckinForDepartmentReferent}
                       onChange={() => setData({ ...data, youngCheckinForDepartmentReferent: !data.youngCheckinForDepartmentReferent })}
                       range={{
@@ -677,10 +699,19 @@ export default function Settings() {
                         <p className="text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput mode="single" label="Volontaires (non Terminales)" value={data.validationDate} onChange={(e) => setData({ ...data, validationDate: e })} />
+                    <DatePickerInput
+                      mode="single"
+                      label="Volontaires (non Terminales)"
+                      value={data.validationDate}
+                      disabled={isLoading}
+                      readOnly={readOnly}
+                      onChange={(e) => setData({ ...data, validationDate: e })}
+                    />
                     <DatePickerInput
                       mode="single"
                       label="Volontaires (Terminales)"
+                      disabled={isLoading}
+                      readOnly={readOnly}
                       value={data.validationDateForTerminaleGrade}
                       onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
                     />
@@ -689,13 +720,14 @@ export default function Settings() {
               </div>
             </div>
           </div>
-
-          <div className="flex items-center justify-center gap-3 ">
-            <ButtonPrimary disabled={isLoading || noChange} className="w-[300px] h-[50px]" onClick={onSubmit}>
-              {isLoading && <BiLoaderAlt className="animate-spin h-4 w-4" />}
-              Enregistrer
-            </ButtonPrimary>
-          </div>
+          {!readOnly && (
+            <div className="flex items-center justify-center gap-3 ">
+              <ButtonPrimary disabled={isLoading || noChange} className="w-[300px] h-[50px]" onClick={onSubmit}>
+                {isLoading && <BiLoaderAlt className="animate-spin h-4 w-4" />}
+                Enregistrer
+              </ButtonPrimary>
+            </div>
+          )}
         </div>
       </div>
     </>
