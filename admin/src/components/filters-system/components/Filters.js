@@ -113,7 +113,7 @@ export default function Filters({
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     setCount(res.count);
-    if (count !== res.count) setPage(0);
+    if (count !== res.count && !firstLoad) setPage(0);
     setData(res.data);
     if (firstLoad) setFirstLoad(false);
   };
