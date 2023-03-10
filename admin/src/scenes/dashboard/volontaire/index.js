@@ -8,7 +8,7 @@ import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 import SubTab from "./status";
 
-import { YOUNG_STATUS, ROLES, translate } from "../../../utils";
+import { YOUNG_STATUS, ROLES, translateInscriptionStatus } from "../../../utils";
 import { useLocation } from "react-router-dom";
 
 export default function Index() {
@@ -39,7 +39,7 @@ export default function Index() {
   const getOptionsStatus = () => {
     let STATUS = Object.keys(YOUNG_STATUS)
       .filter((e) => [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.DELETED].includes(e))
-      .map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
+      .map((s) => ({ label: translateInscriptionStatus(YOUNG_STATUS[s]), value: s }));
     return STATUS;
   };
 

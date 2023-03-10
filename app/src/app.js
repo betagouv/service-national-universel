@@ -28,6 +28,8 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
+import ModalResumePhase1ForWithdrawn from "./components/ui/modals/ModalResumePhase1ForWithdrawn";
+import Navbar from "./components/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
@@ -39,20 +41,22 @@ import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import SupportCenter from "./scenes/support-center";
+import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import { appURL, maintenance } from "./config";
+import { appURL, environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
 import { toastr } from "react-redux-toastr";
 import GoogleTags from "./components/GoogleTags";
 import "./index.css";
-import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
+import { getAvailableSessions } from "./services/cohort.service";
 
 initSentry();
 initApi();
@@ -101,7 +105,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className="main">
+        <div className={`${environment === "production" ? "main" : "flex flex-col justify-between h-screen"}`}>
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
@@ -122,6 +126,7 @@ export default function App() {
               <SentryRoute path="/auth" component={AuthV2} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
               <SentryRoute path="/public-engagements" component={AllEngagements} />
+              {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
@@ -135,6 +140,7 @@ export default function App() {
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalResume, setModalResume] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   useEffect(() => {
@@ -158,6 +164,15 @@ const Espace = () => {
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
+    if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
+      getAvailableSessions(young).then((sessions) => {
+        if (sessions.length) setModalResume(true);
+      });
+    }
+    return () => {
+      setModal({ isOpen: false, onConfirm: null });
+      setModalResume(false);
+    };
   }, [young]);
 
   if (!young) {
@@ -176,32 +191,71 @@ const Espace = () => {
     (inscriptionModificationOpenForYoungs(young.cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
-  return (
-    <>
-      <div style={{ display: "flex" }}>
-        <Drawer open={menuVisible} onOpen={setMenuVisible} />
-        <Content>
-          <Header
-            onClickBurger={() => {
-              setMenuVisible(!menuVisible);
+  if (environment === "production") {
+    return (
+      <>
+        <div style={{ display: "flex" }}>
+          <Drawer open={menuVisible} onOpen={setMenuVisible} />
+          <Content>
+            <Header
+              onClickBurger={() => {
+                setMenuVisible(!menuVisible);
+              }}
+            />
+            <Switch>
+              <SentryRoute path="/account" component={Account} />
+              <SentryRoute path="/phase1" component={Phase1} />
+              <SentryRoute path="/phase2" component={Phase2} />
+              <SentryRoute path="/phase3" component={Phase3} />
+              <SentryRoute path="/les-programmes" component={Engagement} />
+              <SentryRoute path="/preferences" component={Preferences} />
+              <SentryRoute path="/mission" component={Missions} />
+              <SentryRoute path="/candidature" component={Candidature} />
+              <SentryRoute path="/desistement" component={Desistement} />
+              <SentryRoute path="/diagoriente" component={Diagoriente} />
+              {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+              {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+              <SentryRoute path="/" component={Home} />
+            </Switch>
+          </Content>
+          <ModalCGU
+            isOpen={modal?.isOpen}
+            title={modal?.title}
+            message={modal?.message}
+            confirmText={modal?.confirmText}
+            onConfirm={() => {
+              modal?.onConfirm();
+              setModal({ isOpen: false, onConfirm: null });
             }}
           />
-          <Switch>
-            <SentryRoute path="/account" component={Account} />
-            <SentryRoute path="/phase1" component={Phase1} />
-            <SentryRoute path="/phase2" component={Phase2} />
-            <SentryRoute path="/phase3" component={Phase3} />
-            <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/preferences" component={Preferences} />
-            <SentryRoute path="/mission" component={Missions} />
-            <SentryRoute path="/candidature" component={Candidature} />
-            <SentryRoute path="/desistement" component={Desistement} />
-            <SentryRoute path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-            {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-            <SentryRoute path="/" component={Home} />
-          </Switch>
-        </Content>
+          <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className="block md:flex">
+      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
+        <Navbar />
+      </div>
+      <div className="flex-1 mt-16 md:mt-0 md:ml-64">
+        <Switch>
+          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/phase1" component={Phase1} />
+          <SentryRoute path="/phase2" component={Phase2} />
+          <SentryRoute path="/phase3" component={Phase3} />
+          <SentryRoute path="/les-programmes" component={Engagement} />
+          <SentryRoute path="/preferences" component={Preferences} />
+          <SentryRoute path="/mission" component={Missions} />
+          <SentryRoute path="/candidature" component={Candidature} />
+          <SentryRoute path="/desistement" component={Desistement} />
+          <SentryRoute path="/diagoriente" component={Diagoriente} />
+          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+          <SentryRoute path="/" component={Home} />
+        </Switch>
+
         <ModalCGU
           isOpen={modal?.isOpen}
           title={modal?.title}
@@ -212,8 +266,9 @@ const Espace = () => {
             setModal({ isOpen: false, onConfirm: null });
           }}
         />
+        <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
       </div>
-    </>
+    </div>
   );
 };
 

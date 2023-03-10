@@ -3,15 +3,14 @@ import { BsArrowUpShort } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import Iceberg from "../../assets/Iceberg.js";
-import edit from "../../assets/editIcon.svg";
 import { AlertBoxInformation } from "../../components/Content";
 import { supportURL } from "../../config";
 import api from "../../services/api";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import StepsAffected from "./components/StepsAffected";
 import { RiErrorWarningLine } from "react-icons/ri";
-import { Link } from "react-router-dom";
 import Loader from "../../components/Loader";
+import ChangeStayLink from "./components/ChangeStayLink.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -92,28 +91,13 @@ export default function Affected() {
           <section className="content">
             <section>
               <article className="flex flex-col items-between lg:flex-row lg:items-center">
-                <div className="hidden md:flex flex-col mb-4 mr-8">
-                  <h1 className="text-5xl">Mon séjour de cohésion</h1>
-                  <div className="flex flex-row items-center">
-                    <h1 className="text-5xl">
-                      <strong>{translateCohort(young.cohort)}</strong>
-                    </h1>
-                    {youngCanChangeSession(young) ? (
-                      <Link to="/changer-de-sejour">
-                        <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
-                      </Link>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="flex md:hidden flex-col mb-4">
-                  <h1 className="text-2xl font-bold text-gray-600">
-                    <span className="mr-2 inline">Séjour {translateCohort(young.cohort)}</span>
-                    {youngCanChangeSession(young) ? (
-                      <Link to="/changer-de-sejour" className="inline-block align-middle">
-                        <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
-                      </Link>
-                    ) : null}
+                <div>
+                  <h1 className="text-2xl md:text-5xl mb-4">
+                    Mon séjour de cohésion
+                    <br />
+                    <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
                   </h1>
+                  {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[18px]" /> : null}
                 </div>
                 <div className="flex flex-1 flex-row items-start justify-end">
                   <div className="bg-gray-100 md:bg-gray-50 rounded-2xl flex py-2 px-2 md:px-8 flex-row-reverse md:flex-row w-full md:w-auto justify-between">

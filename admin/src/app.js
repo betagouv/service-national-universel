@@ -33,6 +33,7 @@ import TableDeRepartition from "./scenes/plan-transport/table-repartition";
 import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
 import DSNJExport from "./scenes/dsnj-export";
+import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -42,7 +43,7 @@ import Loader from "./components/Loader";
 import api, { initApi } from "./services/api";
 import { initSentry, SentryRoute, history } from "./sentry";
 
-import { adminURL } from "./config";
+import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
@@ -209,6 +210,9 @@ const Home = () => {
             <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+
+            {/* Only for developper eyes... */}
+            {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
 
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>

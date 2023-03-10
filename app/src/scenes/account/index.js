@@ -1,30 +1,35 @@
 import React, { useState } from "react";
 import { Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
-import api from "../services/api";
-import { setYoung } from "../redux/auth/actions";
-import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
-import { getPasswordErrorMessage, translate } from "../utils";
+import api from "../../services/api";
+import { setYoung } from "../../redux/auth/actions";
+import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
+import { getPasswordErrorMessage, translate } from "../../utils";
 import validator from "validator";
-import AddressInputV2 from "../components/addressInputV2";
-import ModalConfirm from "../components/modals/ModalConfirm";
-import PasswordEye from "../components/PasswordEye";
-import { appURL } from "../config";
-import { putLocation } from "../services/api-adresse";
+import AddressInputV2 from "../../components/addressInputV2";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import PasswordEye from "../../components/PasswordEye";
+import { appURL, environment } from "../../config";
+import { putLocation } from "../../services/api-adresse";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import FormRow from "../components/forms/FormRow";
-import ContinueButton from "../components/buttons/ContinueButton";
-import DeleteAccountButton from "../components/buttons/DeleteAccountButton";
-import ChangeStayButton from "../components/buttons/ChangeStayButton";
+import FormRow from "../../components/forms/FormRow";
+import ContinueButton from "../../components/buttons/ContinueButton";
+import DeleteAccountButton from "../../components/buttons/DeleteAccountButton";
+import DeleteAccountButtonOld from "../../components/buttons/DeleteAccountButtonOld";
+import ChangeStayButton from "../../components/buttons/ChangeStayButton";
+import WithdrawalModal from "./components/WithdrawalModal";
 
 export default function Account() {
+  const search = useLocation().search;
+  const isWithdrawalModalOpenDefault = new URLSearchParams(search).get("desistement") === "1";
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, onConfirm: null });
+  const [isWithdrawalModalOpen, setWithdrawalModalOpen] = useState(isWithdrawalModalOpenDefault);
 
   const updateYoung = async (values) => {
     try {
@@ -148,7 +153,7 @@ export default function Account() {
         validateOnBlur={false}
         onSubmit={async (values) => {
           if (young.address !== values.address || young.city !== values.city || young.department !== values.department || young.region !== values.region) {
-            return setModal({
+            return setConfirmationModal({
               isOpen: true,
               title: "J’ai déménagé",
               message: (
@@ -277,25 +282,30 @@ export default function Account() {
               Enregistrer
             </ContinueButton>
             <ModalConfirm
-              isOpen={modal?.isOpen}
-              title={modal?.title}
-              message={modal?.message}
-              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+              isOpen={confirmationModal?.isOpen}
+              title={confirmationModal?.title}
+              message={confirmationModal?.message}
+              onCancel={() => setConfirmationModal({ isOpen: false, onConfirm: null })}
               onConfirm={() => {
-                modal?.onConfirm();
-                setModal({ isOpen: false, onConfirm: null });
+                confirmationModal?.onConfirm();
+                setConfirmationModal({ isOpen: false, onConfirm: null });
               }}
             />
+            {environment !== "production" && <WithdrawalModal isOpen={isWithdrawalModalOpen} onCancel={() => setWithdrawalModalOpen(false)} young={young} />}
           </>
         )}
       </Formik>
-      <div className="md:flex justify-center md:gap-8 mt-12 text-center">
+      <div className="flex flex-col md:flex-row justify-center md:gap-8 mt-12 text-center">
         {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
         [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
           <ChangeStayButton />
         ) : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
-          <DeleteAccountButton young={young} />
+          environment === "production" ? (
+            <DeleteAccountButtonOld young={young} />
+          ) : (
+            <DeleteAccountButton young={young} onClick={() => setWithdrawalModalOpen(true)} />
+          )
         ) : null}
       </div>
     </div>

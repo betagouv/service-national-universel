@@ -434,27 +434,32 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: template } = Joi.string().required().validate(req.params.template);
-  if (error) {
+  try {
+    const { error, value: template } = Joi.string().required().validate(req.params.template);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const toReferents = await getReferentManagerPhase2(req.user.department);
+    if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const mail = await sendTemplate(parseInt(template), {
+      emailTo: toReferents.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+    });
+    return res.status(200).send({ ok: true, data: mail });
+  } catch (error) {
     capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-
-  const toReferents = await getReferentManagerPhase2(req.user.department);
-  if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-  if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  }
-
-  const mail = await sendTemplate(parseInt(template), {
-    emailTo: toReferents.map((referent) => ({
-      name: `${referent.firstName} ${referent.lastName}`,
-      email: referent.email,
-    })),
-    params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
-  });
-  return res.status(200).send({ ok: true, data: mail });
 });
 
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
