@@ -1,7 +1,7 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
-import Field from "../../../components/forms/Field";
-import FloppyDisk from "../../../assets/icons/FloppyDisk";
+import Field from "../../../../components/forms/Field";
+import FloppyDisk from "../../../../assets/icons/FloppyDisk";
 
 export const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter }) => {
   // handle click outside

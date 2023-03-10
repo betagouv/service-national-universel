@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { translateGrade, youngExportFields } from "snu-lib";
-import Filters from "./filters/Filters";
-import ResultTable from "./filters/ResultTable";
+import { Filters, ResultTable } from "../../components/filters-system";
 
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";

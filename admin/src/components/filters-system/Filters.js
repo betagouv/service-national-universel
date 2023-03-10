@@ -1,22 +1,22 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
-import FilterSvg from "../../../assets/icons/Filter";
-import FilterPopOver from "./FilterPopOver";
+import FilterSvg from "../../assets/icons/Filter";
+import FilterPopOver from "./components/filters//FilterPopOver";
 
-import { SaveDisk } from "./Save";
+import { SaveDisk } from "./components/filters//Save";
 import { useHistory } from "react-router-dom";
 
 import { toastr } from "react-redux-toastr";
-import ViewPopOver from "./ViewPopOver";
+import ViewPopOver from "./components/filters/ViewPopOver";
 
-import api from "../../../services/api";
-import { buildQuery, getURLParam, currentFilterAsUrl, buildBodyAggs } from "./utils";
+import api from "../../services/api";
+import { buildQuery, getURLParam, currentFilterAsUrl, buildBodyAggs } from "./components/filters/utils";
 
 import ReactTooltip from "react-tooltip";
 
-import { SortOptionComponent } from "./SortOptionComponent";
+import { SortOptionComponent } from "./components/filters//SortOptionComponent";
 
-import ModalExport from "../export/ModalExportV2";
+import ModalExport from "./components/export/ModalExportV2";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { translate, translateField, translateIndexes } from "snu-lib";
-import ExportFieldCard from "../../../components/ExportFieldCard";
-import ModalTailwind from "../../../components/modals/ModalTailwind";
-import plausibleEvent from "../../../services/plausible";
-import { capitalizeFirstLetter } from "../../../utils";
+import ExportFieldCard from "../../../ExportFieldCard";
+import ModalTailwind from "../../../modals/ModalTailwind";
+import plausibleEvent from "../../../../services/plausible";
+import { capitalizeFirstLetter } from "../../../../utils";
 import ExportComponent from "./ExportXlsxV2";
 
 export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, defaultQuery }) {

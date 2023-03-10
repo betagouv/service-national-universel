@@ -2,10 +2,10 @@ import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
-import LoadingButton from "../../../components/buttons/LoadingButton";
-import LoadingButtonV2 from "../../../components/buttons/LoadingButtonV2";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import api from "../../../services/api";
+import LoadingButton from "../../../buttons/LoadingButton";
+import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
+import ModalConfirm from "../../../modals/ModalConfirm";
+import api from "../../../../services/api";
 
 export default function ExportComponent({
   handleClick,

@@ -11,11 +11,10 @@ import api from "../../services/api";
 import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, ROLES, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2";
 
-import Filters from "./filters/Filters";
-import ResultTable from "./filters/ResultTable";
+import { Filters, ResultTable } from "../../components/filters-system";
 
-import FromDate, { getQuery } from "./customFilter/FromDate";
-import ToDate, { getQuery as getQueryToDate } from "./customFilter/ToDate";
+import FromDate, { getQuery } from "../../components/filters-system/components/customComponent/FromDate";
+import ToDate, { getQuery as getQueryToDate } from "../../components/filters-system/components/customComponent/ToDate";
 
 const FILTERS = [
   "DOMAIN",

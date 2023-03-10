@@ -2,8 +2,8 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 
 import { BsChevronRight } from "react-icons/bs";
-import Trash from "../../../assets/icons/Trash";
-import FloppyDisk from "../../../assets/icons/FloppyDisk";
+import Trash from "../../../../assets/icons/Trash";
+import FloppyDisk from "../../../../assets/icons/FloppyDisk";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

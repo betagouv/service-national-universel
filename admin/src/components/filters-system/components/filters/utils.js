@@ -1,5 +1,5 @@
 import { ES_NO_LIMIT } from "snu-lib";
-import api from "../../../services/api";
+import api from "../../../../services/api";
 
 /* 
 
