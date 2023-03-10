@@ -10,25 +10,25 @@ const { ERRORS } = require("../utils");
 
 // Update all inscription goals for a cohort
 router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  // Validate cohort...
-  const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-  if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-  // ... then body
-  const { error, value: inscriptionsGoals } = Joi.array()
-    .items({
-      department: Joi.string().required(),
-      region: Joi.string(),
-      max: Joi.number().allow(null),
-    })
-    .validate(req.body, { stripUnknown: true });
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-  }
-
-  if (!canUpdateInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
   try {
+    // Validate cohort...
+    const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    // ... then body
+    const { error, value: inscriptionsGoals } = Joi.array()
+      .items({
+        department: Joi.string().required(),
+        region: Joi.string(),
+        max: Joi.number().allow(null),
+      })
+      .validate(req.body, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canUpdateInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const promises = inscriptionsGoals.map((item) => {
       return InscriptionGoalModel.findOneAndUpdate(
         // 2021 can be empty in database. This could be removed once all data is migrated.
@@ -65,15 +65,15 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 });
 
 router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-  }
-
-  if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
   try {
+    const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).count();
     const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).count();
     const yWL = await YoungModel.find({ status: "WAITING_LIST", department: value.department }).count();
@@ -86,15 +86,15 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
 });
 
 router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-  }
-
-  if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
   try {
+    const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const { department, cohort } = value;
     const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).count();
     const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });

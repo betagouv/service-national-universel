@@ -722,23 +722,28 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
 
 // Get authorization from France Connect.
 router.post("/france-connect/authorization-url", async (req, res) => {
-  const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  }
+  try {
+    const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
-  const query = {
-    scope: `openid given_name family_name email`,
-    redirect_uri: `${config.APP_URL}/${value.callback}`,
-    response_type: "code",
-    client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-    state: "home",
-    nonce: crypto.randomBytes(20).toString("hex"),
-    acr_values: "eidas1",
-  };
-  const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
-  res.status(200).send({ ok: true, data: { url } });
+    const query = {
+      scope: `openid given_name family_name email`,
+      redirect_uri: `${config.APP_URL}/${value.callback}`,
+      response_type: "code",
+      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+      state: "home",
+      nonce: crypto.randomBytes(20).toString("hex"),
+      acr_values: "eidas1",
+    };
+    const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
+    return res.status(200).send({ ok: true, data: { url } });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 // Get user information for authorized user on France Connect.

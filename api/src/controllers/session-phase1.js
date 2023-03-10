@@ -88,8 +88,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 });
 
 router.get("/:id/schema-repartition", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   try {
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const { error, value: id } = validateId(req.params.id);
     if (error) {
       capture(error);
@@ -156,8 +157,8 @@ router.get("/:id", passport.authenticate(["referent"], { session: false, failWit
 });
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   try {
+    if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await SessionPhase1Model.find({});
     return res.status(200).send({ ok: true, data: data.map(serializeSessionPhase1) });
   } catch (error) {
