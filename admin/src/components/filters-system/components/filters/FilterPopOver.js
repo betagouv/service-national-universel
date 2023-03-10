@@ -3,6 +3,8 @@ import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 
+// file used to show the popover for the all the possible values of a filter
+
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }

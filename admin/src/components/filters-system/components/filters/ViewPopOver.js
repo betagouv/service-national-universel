@@ -5,6 +5,8 @@ import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import FloppyDisk from "../../../../assets/icons/FloppyDisk";
 
+// File used to show the popover for the saved views (the one from the DB)
+
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
