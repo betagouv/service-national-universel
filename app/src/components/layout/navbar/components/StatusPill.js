@@ -5,10 +5,10 @@ const statusActive = [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_
 
 export default function StatusPill({ status }) {
   if (status && statusActive.includes(status)) {
-    return <span className="bg-[#2563EB] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm ml-auto">En cours</span>;
+    return <p className="bg-[#2563EB] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm text-center w-fit">En cours</p>;
   }
   if (status && status === "EXEMPTED") {
-    return <span className="bg-[#1E3A8A] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm ml-auto">Dispensé</span>;
+    return <p className="bg-[#1E3A8A] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm text-center">Dispensé</p>;
   }
   return null;
 }

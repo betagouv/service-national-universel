@@ -87,13 +87,15 @@ function MobileDrawer({ children, isOpen, setIsOpen }) {
 function DesktopNavbar() {
   return (
     <header className="text-[#D2DAEF] text-sm w-64 h-screen z-50 bg-[#212B44] hidden md:flex flex-col justify-start">
-      <div className="md:border-b-[1px] border-[#2A3655] h-24">
+      <div className="border-b-[1px] border-[#2A3655] h-24 flex-none">
         <Logo />
       </div>
 
-      <NavigationMenu />
+      <div className="flex-grow overflow-auto">
+        <NavigationMenu />
+      </div>
 
-      <div className="mt-auto">
+      <div className="flex-none">
         <UserCard />
       </div>
     </header>

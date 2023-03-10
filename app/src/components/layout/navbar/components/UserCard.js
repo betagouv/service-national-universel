@@ -38,17 +38,32 @@ export default function User() {
   }
 
   return (
-    <div className="relative w-full h-16 flex md:border-t-[1px] border-[#1A243C] px-3 md:p-6 gap-3 items-center cursor-default justify-end md:justify-between">
+    <>
+      <div className="relative w-full h-16 flex border-t-[1px] border-[#1A243C] px-3 md:p-6 items-center cursor-default justify-between ">
+        <Link to="/account" className="flex gap-3">
+          <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user.firstName[0] + user.lastName[0]}</p>
+          <div>
+            <p className="font-semibold hover:text-[#D2DAEF]">{user.firstName}</p>
+            <p className="text-xs text-[#768BAC]">Volontaire</p>
+          </div>
+        </Link>
+        <button
+          ref={buttonRef}
+          className={`flex rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 text-center items-center justify-center transition-all duration-200 ${!open && "rotate-180"}`}
+          onClick={handleClick}>
+          <ChevronDown />
+        </button>
+      </div>
       <nav
         className={`rounded-lg w-56 bg-white transition-all absolute right-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
           open ? "h-28" : "h-0"
         }`}
         ref={menuRef}>
-        <Link to="account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+        <Link to="/account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
           Mon profil
         </Link>
         {permissionPhase2(user) && (
-          <Link to="preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+          <Link to="/preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
             Mes préférences de mission
           </Link>
         )}
@@ -56,19 +71,6 @@ export default function User() {
           Se déconnecter
         </button>
       </nav>
-      <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user.firstName[0] + user.lastName[0]}</p>
-      <div className="hidden md:block">
-        <p className="font-semibold">{user.firstName}</p>
-        <p className="text-xs text-[#768BAC]">Volontaire</p>
-      </div>
-      <button
-        ref={buttonRef}
-        className={`hidden md:flex ml-auto rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 text-center items-center justify-center transition-all duration-200 ${
-          !open && "rotate-180"
-        }`}
-        onClick={handleClick}>
-        <ChevronDown />
-      </button>
-    </div>
+    </>
   );
 }

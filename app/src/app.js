@@ -29,7 +29,7 @@ import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
 import ModalResumePhase1ForWithdrawn from "./components/ui/modals/ModalResumePhase1ForWithdrawn";
-import Navbar from "./components/navbar";
+import Navbar from "./components/layout/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
@@ -126,9 +126,6 @@ export default function App() {
               <SentryRoute path="/auth" component={AuthV2} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
               <SentryRoute path="/public-engagements" component={AllEngagements} />
-
-              {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
@@ -251,6 +248,7 @@ const Espace = () => {
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
           <SentryRoute path="/desistement" component={Desistement} />
+          {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
