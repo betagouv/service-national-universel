@@ -26,12 +26,30 @@ export default function Presentation({ step, parentId }) {
 
   if (!young) return <Loader />;
 
+  const translateNonNecessary = (status) => {
+    if (status === "NOT_ELIGIBLE") return "est non éligible";
+    if (status === "ABANDONED") return "a abandonné son inscription";
+    if (status === "REFUSED") return "est refusé";
+  };
+
   const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
 
   function onSubmit() {
     const route = parentId === 2 ? "verification-parent2" : "verification";
     history.push(`/representants-legaux/${route}?token=${token}`);
   }
+  if (["NOT_ELIGIBLE", "ABANDONED", "REFUSED"].includes(young.status))
+    return (
+      <>
+        <div className="bg-white p-4 text-[#161616]">
+          <div className="flex flex-col gap-4">
+            <h1 className="text-[22px] font-bold">Votre accord n&apos;est plus requis</h1>
+            <div>Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</div>
+          </div>
+        </div>
+        <Footer marginBottom="mb-[135px]" />
+      </>
+    );
   return (
     <>
       <Navbar step={step} />
