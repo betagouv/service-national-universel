@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import FilterSvg from "../../../assets/icons/Filter";
 import FilterPopOver from "./FilterPopOver";
 
@@ -16,7 +16,6 @@ import ReactTooltip from "react-tooltip";
 
 import { SortOptionComponent } from "./SortOptionComponent";
 
-import ExportComponent from "../export/ExportXlsxV2";
 import ModalExport from "../export/ModalExportV2";
 
 function classNames(...classes) {
@@ -47,7 +46,6 @@ export default function ListFiltersPopOver({
   const [dataFilter, setDataFilter] = React.useState([]);
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
-  const mounted = React.useRef(false);
   const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
   const [selectedFilters, setSelectedFilters] = React.useState({});
 
