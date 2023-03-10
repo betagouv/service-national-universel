@@ -1,5 +1,5 @@
 require("dotenv").config({ path: "./.env-staging" });
-const { initSentry } = require("./sentry");
+const { initSentry, capture } = require("./sentry");
 
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -111,6 +111,16 @@ app.get("/", async (req, res) => {
 
   const d = new Date();
   res.status(200).send("SNU " + d.toLocaleString());
+});
+
+app.get("/testsentry", async (req, res) => {
+  try {
+    throw new Error("Intentional error");
+  } catch (error) {
+    console.log("Error ");
+    capture(error);
+    return res.status(500).send({ ok: false, code: "hihi" });
+  }
 });
 
 registerSentryErrorHandler();
