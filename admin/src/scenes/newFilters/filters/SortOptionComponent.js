@@ -4,15 +4,16 @@ import { BiChevronDown } from "react-icons/bi";
 export const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const ref = React.useRef();
+  const refOptions = React.useRef();
 
   const handleClick = (value) => {
     setSortSelected(value);
     setIsOpen(false);
   };
   React.useEffect(() => {
-    if (!ref) return;
+    if (!ref || !refOptions) return;
     const handleClickOutside = (event) => {
-      if (ref?.current && !ref.current.contains(event.target)) {
+      if (ref?.current && !ref.current.contains(event.target) && refOptions?.current && !refOptions.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
@@ -22,13 +23,13 @@ export const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected
     };
   }, []);
   return (
-    <div className="relative" ref={ref}>
-      <div className="flex flex-row items-center gap-2 cursor-pointer" onClick={() => setIsOpen((isOpen) => !isOpen)}>
+    <div className="relative">
+      <div className="flex flex-row items-center gap-2 cursor-pointer  w-fit" onClick={() => setIsOpen((isOpen) => !isOpen)} ref={ref}>
         <div>{sortSelected.label}</div>
         <BiChevronDown size={20} />
       </div>
       {isOpen && (
-        <div className="absolute bg-white shadow-sm">
+        <div className="absolute bg-white shadow-sm" ref={refOptions}>
           {sortOptions.map((item) => (
             <div key={item.value} onClick={() => handleClick(item)} className="flex flex-row items-center gap-2 p-2 cursor-pointer hover:bg-gray-100">
               <div>{item.label}</div>
