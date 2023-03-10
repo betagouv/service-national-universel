@@ -15,7 +15,6 @@ import { buildQuery, getURLParam, currentFilterAsUrl, buildBodyAggs } from "./ut
 import ReactTooltip from "react-tooltip";
 
 import { SortOptionComponent } from "./SortOptionComponent";
-import { getCustomComponent } from "../customFilter";
 
 import ExportComponent from "../export/ExportXlsxV2";
 import ModalExport from "../export/ModalExportV2";
@@ -36,8 +35,6 @@ export default function ListFiltersPopOver({
   page = 1,
   size = 25,
   setPage,
-  selectedFilters,
-  setSelectedFilters,
   sortOptions = null,
   transform,
   exportFields = "*",
@@ -52,6 +49,7 @@ export default function ListFiltersPopOver({
   const [categories, setCategories] = React.useState([]);
   const mounted = React.useRef(false);
   const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
+  const [selectedFilters, setSelectedFilters] = React.useState({});
 
   const [modalExportVisible, setModalExportVisible] = React.useState(false);
 
@@ -201,7 +199,7 @@ export default function ListFiltersPopOver({
 
   return (
     <div>
-      {/* TRICK DE FOU FURIEUX POUR RENDER LES CUSTOM COMPONENTS AU LOADING ET EXECUTER LA QUERY*/}
+      {/* TRICK DE FOU FURIEUX POUR RENDER LES CUSTOM COMPONENTS AU LOADING ET EXECUTER LA QUERY
       {selectedFilters &&
         filters
           .filter((f) => f.customComponent)
@@ -212,6 +210,7 @@ export default function ListFiltersPopOver({
               </div>
             );
           })}
+          */}
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row items-center justify-start gap-2">
           {searchBarObject && (

@@ -2,7 +2,6 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../assets/icons/Trash";
-import { getCustomComponent } from "../customFilter";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -82,7 +81,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                     <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
                   </div>
                   {filter?.customComponent ? (
-                    getCustomComponent(filter?.customComponent, handleCustomComponent, selectedFilters[filter?.name])
+                    <>{filter.customComponent(handleCustomComponent, selectedFilters[filter?.name])}</>
                   ) : (
                     <>
                       <input

@@ -39,7 +39,6 @@ export default function test_volontaire() {
   const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
-  const [selectedFilters, setSelectedFilters] = React.useState({});
   const size = 20;
 
   // filtre non obligatoire
@@ -56,7 +55,6 @@ export default function test_volontaire() {
     { title: "Région", name: "region", datafield: "region.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
     { title: "Département", name: "department", datafield: "department.keyword", parentGroup: "Général", missingLabel: "Non renseignée" },
     { title: "Classe", name: "grade", datafield: "grade.keyword", parentGroup: "Dossier", translate: translateGrade, missingLabel: "Non renseignée" },
-    { title: "Custom", name: "example", datafield: "example.keyword", parentGroup: "Dossier", customComponent: "example" },
   ];
 
   const sortOptions = [
@@ -310,8 +308,6 @@ export default function test_volontaire() {
             count={count}
             setData={(value) => setData(value)}
             searchBarObject={searchBarObject}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
             page={page}
             setPage={setPage}
             size={size}

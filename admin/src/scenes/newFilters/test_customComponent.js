@@ -14,6 +14,9 @@ import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2"
 import ListFiltersPopOver from "./filters/ListFiltersPopOver";
 import ResultTable from "./filters/ResultTable";
 
+import FromDate from "./customFilter/FromDate";
+import ToDate from "./customFilter/ToDate";
+
 const FILTERS = [
   "DOMAIN",
   "SEARCH",
@@ -46,8 +49,6 @@ export default function List() {
   const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
-  const [selectedFilters, setSelectedFilters] = React.useState({});
-
   // filtre non obligatoire
   const size = 20;
 
@@ -63,10 +64,18 @@ export default function List() {
       datafield: "fromDate.keyword",
       parentGroup: "Date",
       missingLabel: "Non renseignée",
-      customComponent: "fromDate",
+      customComponent: (setQuery, filter) => <FromDate setQuery={setQuery} filter={filter} />,
       translate: formatDateFR,
     },
-    { title: "Date de fin", name: "toDate", datafield: "toDate.keyword", parentGroup: "Date", missingLabel: "Non renseignée", customComponent: "toDate", translate: formatDateFR },
+    {
+      title: "Date de fin",
+      name: "toDate",
+      datafield: "toDate.keyword",
+      parentGroup: "Date",
+      missingLabel: "Non renseignée",
+      customComponent: (setQuery, filter) => <ToDate setQuery={setQuery} filter={filter} />,
+      translate: formatDateFR,
+    },
   ];
 
   const getDefaultQuery = () => {
@@ -117,8 +126,6 @@ export default function List() {
             searchBarObject={searchBarObject}
             page={page}
             size={size}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
             setPage={setPage}
           />
           <div className="reactive-result">
