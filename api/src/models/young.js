@@ -865,6 +865,12 @@ const Schema = new mongoose.Schema({
       description: "Nom de l'établissement du volontaire",
     },
   },
+  schoolNameOld: {
+    type: String,
+    documentation: {
+      description: "Nom de l'établissement du volontaire si schoolName amonymisé",
+    },
+  },
   schoolType: {
     type: String,
     documentation: {
