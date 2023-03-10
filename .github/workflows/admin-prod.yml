@@ -60,6 +60,7 @@ jobs:
           sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./admin/package.json
 
       # ! A CHANGER !!!
+      # https://dev.to/limal/simplify-your-monorepo-with-npm-7-workspaces-5gmj
 
       - name: Push
         working-directory: ${{ env.SUBFOLDER_NAME }}
