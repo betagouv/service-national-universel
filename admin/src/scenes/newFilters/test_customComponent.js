@@ -14,8 +14,8 @@ import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2"
 import Filters from "./filters/Filters";
 import ResultTable from "./filters/ResultTable";
 
-import FromDate from "./customFilter/FromDate";
-import ToDate from "./customFilter/ToDate";
+import FromDate, { getQuery } from "./customFilter/FromDate";
+import ToDate, { getQuery as getQueryToDate } from "./customFilter/ToDate";
 
 const FILTERS = [
   "DOMAIN",
@@ -65,6 +65,8 @@ export default function List() {
       parentGroup: "Date",
       missingLabel: "Non renseignée",
       customComponent: (setQuery, filter) => <FromDate setQuery={setQuery} value={filter} />,
+      //getQuery is needed only if you want to use customComponent
+      getQuery: (value) => getQuery(value),
       translate: formatDateFR,
     },
     {
@@ -74,6 +76,7 @@ export default function List() {
       parentGroup: "Date",
       missingLabel: "Non renseignée",
       customComponent: (setQuery, filter) => <ToDate setQuery={setQuery} value={filter} />,
+      getQuery: (value) => getQueryToDate(value),
       translate: formatDateFR,
     },
   ];

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import DateFilter from "../../../components/filters/DatePickerList";
 
-export default function DatePickerWrapper(props) {
+export default function ToDate(props) {
   const [toDate, setToDate] = useState("");
   const isFirstRun = useRef(true);
 
@@ -27,20 +27,9 @@ export default function DatePickerWrapper(props) {
   }, [props.value]);
 
   useEffect(() => {
-    console.log("FROM DATE", toDate);
-    let query = null;
-    let value = [];
-    query = {
-      query: {
-        bool: {
-          filter: [{ range: { startAt: { gte: null } } }, { range: { endAt: { gte: toDate } } }],
-        },
-      },
-    };
-    if (toDate === "") return;
-    value = [toDate];
-    // a executer seulement si value !== props.value
-    props.setQuery({ query, value });
+    const result = getQuery(toDate);
+    if (!result) return;
+    props.setQuery(result);
   }, [toDate]);
 
   return (
@@ -49,3 +38,19 @@ export default function DatePickerWrapper(props) {
     </>
   );
 }
+
+export const getQuery = (toDate) => {
+  let query = null;
+  let value = [];
+  query = {
+    query: {
+      bool: {
+        filter: [{ range: { startAt: { gte: null } } }, { range: { endAt: { gte: toDate } } }],
+      },
+    },
+  };
+  if (toDate === "") return;
+  value = [toDate];
+  // a executer seulement si value !== props.value
+  return { query, value };
+};

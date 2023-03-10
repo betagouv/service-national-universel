@@ -40,8 +40,6 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
   let query = structuredClone(defaultQuery.query);
   let aggsQuery = structuredClone(defaultQuery.query);
 
-  console.log(selectedFilters, "selectedFilters");
-
   let bodyQuery = {
     query: query,
     aggs: {},
@@ -166,9 +164,9 @@ export const getURLParam = (urlParams, setPage, filters) => {
       setPage(int - 1);
     } else {
       // on check si c'est un custom component
-      const customComponent = filters.find((f) => f.customComponent === key);
-      if (customComponent) {
-        localFilters[key] = { filter: value.split(",") };
+      const customComponent = filters.find((f) => f.name === key);
+      if (customComponent?.getQuery) {
+        localFilters[key] = { filter: value.split(","), customComponentQuery: customComponent.getQuery(value.split(",")[0]) };
       } else {
         localFilters[key] = { filter: value.split(",") };
       }

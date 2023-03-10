@@ -22,7 +22,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ListFiltersPopOver({
+export default function Filters({
   esId,
   pageId,
   filters,
@@ -185,25 +185,8 @@ export default function ListFiltersPopOver({
     setModalSaveVisible(false);
   };
 
-  const handleCustomComponent = (query, f) => {
-    setSelectedFilters({ ...selectedFilters, [f?.name]: { filter: query.value, customComponentQuery: query } });
-  };
-
   return (
     <div>
-      {/* TRICK DE FOU FURIEUX POUR RENDER LES CUSTOM COMPONENTS AU LOADING ET EXECUTER LA QUERY*/}
-      {firstLoad &&
-        selectedFilters &&
-        filters
-          .filter((f) => f.customComponent)
-          .map((filter) => {
-            return (
-              <div className="hidden" key={filter.name}>
-                {filter.customComponent((value) => handleCustomComponent(value, filter), selectedFilters[filter?.name]?.filter)}
-              </div>
-            );
-          })}
-
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row items-center justify-start gap-2">
           {searchBarObject && (
