@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { translateGrade } from "snu-lib";
-import ListFiltersPopOver from "./filters/ListFiltersPopOver";
+import Filters from "./filters/Filters";
 import ResultTable from "./filters/ResultTable";
 
 import plausibleEvent from "../../services/plausible";
@@ -118,7 +118,7 @@ export default function test_volontaire() {
       <div className="flex flex-col gap-8 m-4">
         <div>{count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
-        <ListFiltersPopOver
+        <Filters
           pageId="plandetransport"
           esId="plandetransport"
           defaultQuery={getDefaultQuery()}

@@ -40,6 +40,8 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
   let query = structuredClone(defaultQuery.query);
   let aggsQuery = structuredClone(defaultQuery.query);
 
+  console.log(selectedFilters, "selectedFilters");
+
   let bodyQuery = {
     query: query,
     aggs: {},

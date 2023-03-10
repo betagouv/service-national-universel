@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { translateGrade, youngExportFields } from "snu-lib";
-import ListFiltersPopOver from "./filters/ListFiltersPopOver";
+import Filters from "./filters/Filters";
 import ResultTable from "./filters/ResultTable";
 
 import Chevron from "../../components/Chevron";
@@ -299,7 +299,7 @@ export default function test_volontaire() {
         <div>{count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <div className="p-[15px]">
-          <ListFiltersPopOver
+          <Filters
             pageId="young"
             esId="young"
             defaultQuery={getDefaultQuery()}

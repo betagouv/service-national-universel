@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, ROLES, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2";
 
-import ListFiltersPopOver from "./filters/ListFiltersPopOver";
+import Filters from "./filters/Filters";
 import ResultTable from "./filters/ResultTable";
 
 import FromDate from "./customFilter/FromDate";
@@ -64,7 +64,7 @@ export default function List() {
       datafield: "fromDate.keyword",
       parentGroup: "Date",
       missingLabel: "Non renseignée",
-      customComponent: (setQuery, filter) => <FromDate setQuery={setQuery} filter={filter} />,
+      customComponent: (setQuery, filter) => <FromDate setQuery={setQuery} value={filter} />,
       translate: formatDateFR,
     },
     {
@@ -73,7 +73,7 @@ export default function List() {
       datafield: "toDate.keyword",
       parentGroup: "Date",
       missingLabel: "Non renseignée",
-      customComponent: (setQuery, filter) => <ToDate setQuery={setQuery} filter={filter} />,
+      customComponent: (setQuery, filter) => <ToDate setQuery={setQuery} value={filter} />,
       translate: formatDateFR,
     },
   ];
@@ -115,7 +115,7 @@ export default function List() {
       <div className="flex flex-row mb-8" style={{ fontFamily: "Marianne" }}>
         <div className="flex flex-1 flex-col w-full px-8">
           <div className="text-2xl font-bold text-[#242526] leading-7">Missions</div>
-          <ListFiltersPopOver
+          <Filters
             pageId="mission"
             esId="mission"
             defaultQuery={getDefaultQuery()}

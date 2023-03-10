@@ -80,9 +80,8 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                     <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
                     <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
                   </div>
-
                   {filter?.customComponent ? (
-                    filter.customComponent(handleCustomComponent, selectedFilters[filter?.name])
+                    filter.customComponent(handleCustomComponent, selectedFilters[filter?.name]?.filter)
                   ) : (
                     <>
                       <input

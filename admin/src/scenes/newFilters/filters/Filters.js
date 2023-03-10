@@ -63,8 +63,9 @@ export default function ListFiltersPopOver({
   const refFilter = React.useRef(null);
 
   const hasSomeFilterSelected = Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
-
   const [sortSelected, setSortSelected] = React.useState(sortOptions ? sortOptions[0] : null);
+
+  const [firstLoad, setFirstLoad] = React.useState(true);
 
   React.useEffect(() => {
     const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
@@ -100,21 +101,13 @@ export default function ListFiltersPopOver({
   }, [filtersVisible]);
 
   React.useEffect(() => {
-    if (mounted.current) {
-      getData();
-      setURL();
-    }
+    getData();
+    setURL();
   }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
     const initialFilters = getURLParam(urlParams, setPage, filters);
     setSelectedFilters(initialFilters);
-    const res = await buildQuery(esId, initialFilters, page, size, defaultQuery, filters, searchBarObject);
-    if (!res) return;
-    setDataFilter({ ...dataFilter, ...res.newFilters });
-    setData(res.data);
-    setCount(res.count);
-    mounted.current = true;
   };
 
   const getData = async () => {
@@ -124,6 +117,7 @@ export default function ListFiltersPopOver({
     setCount(res.count);
     if (count !== res.count) setPage(0);
     setData(res.data);
+    if (firstLoad) setFirstLoad(false);
   };
 
   const setURL = () => {
@@ -199,18 +193,19 @@ export default function ListFiltersPopOver({
 
   return (
     <div>
-      {/* TRICK DE FOU FURIEUX POUR RENDER LES CUSTOM COMPONENTS AU LOADING ET EXECUTER LA QUERY
-      {selectedFilters &&
+      {/* TRICK DE FOU FURIEUX POUR RENDER LES CUSTOM COMPONENTS AU LOADING ET EXECUTER LA QUERY*/}
+      {firstLoad &&
+        selectedFilters &&
         filters
           .filter((f) => f.customComponent)
-          .map((f) => {
+          .map((filter) => {
             return (
-              <div className="hidden" key={f.name}>
-                {getCustomComponent(f.customComponent, (value) => handleCustomComponent(value, f), selectedFilters[f?.name])}
+              <div className="" key={filter.name}>
+                {filter.customComponent((value) => handleCustomComponent(value, filter), selectedFilters[filter?.name]?.filter)}
               </div>
             );
           })}
-          */}
+
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row items-center justify-start gap-2">
           {searchBarObject && (

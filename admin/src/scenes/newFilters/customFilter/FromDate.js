@@ -27,7 +27,7 @@ export default function DatePickerWrapper(props) {
   }, [props.value]);
 
   useEffect(() => {
-    console.log("FROM DATE", fromDate);
+    console.log("FROM DATE", props);
     let query = null;
     let value = [];
     query = {
