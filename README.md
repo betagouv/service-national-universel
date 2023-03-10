@@ -1,17 +1,24 @@
 # Plateforme du Service National Universel
+
 ![CI](https://github.com/betagouv/service-national-universel/actions/workflows/api.yml/badge.svg)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e0ab1d5e42da84f6b38d/test_coverage)](https://codeclimate.com/github/betagouv/service-national-universel/test_coverage)
 
-Code source de la [Plateforme du Service National Universel](https://www.snu.gouv.fr/), organisé en plusieurs services : 
- - [Interface publique](https://github.com/betagouv/service-national-universel/tree/master/app)
- - [Interface de gestion](https://github.com/betagouv/service-national-universel/tree/master/admin)
- - [API](https://github.com/betagouv/service-national-universel/tree/master/api) 
+Code source de la [Plateforme du Service National Universel](https://www.snu.gouv.fr/), organisé en plusieurs services :
+
+- [Interface publique](https://github.com/betagouv/service-national-universel/tree/master/app)
+- [Interface de gestion](https://github.com/betagouv/service-national-universel/tree/master/admin)
+- [API](https://github.com/betagouv/service-national-universel/tree/master/api)
 
 Il est conseillé de lire le fichier `README.md` de chacun de ces services.
 
 ## Installation et utilisation
 
 Voir le `README.md` de chacun des services.
+
+Pour run les principales app :
+npm i -g turborepo
+npm i
+turbo build
 
 ## Tests et déploiement
 

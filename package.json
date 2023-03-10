@@ -1,0 +1,9 @@
+{
+  "name": "service-national-universel",
+  "workspaces": [
+    "lib",
+    "app",
+    "admin",
+    "api"
+  ]
+}
