@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { translateGrade, youngExportFields } from "snu-lib";
-import { Filters, ResultTable } from "../../components/filters-system";
 
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
@@ -14,6 +13,8 @@ import { useHistory, Link } from "react-router-dom";
 import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 
 import Badge from "../../components/Badge";
+
+import { Filters, ResultTable, getDefaultQuery } from "../../components/filters-system";
 
 import {
   translate,
@@ -66,13 +67,6 @@ export default function test_volontaire() {
     { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
     { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
   ];
-
-  const getDefaultQuery = () => {
-    return {
-      query: { bool: { must: [{ match_all: {} }] } },
-    };
-  };
-  //extract dans utils ou logique du filtre ?
 
   async function transformVolontaires(data, values) {
     let all = data;
