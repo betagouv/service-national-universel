@@ -19,6 +19,8 @@ import Header from "../../components/header";
 import HeaderMenu from "../../components/headerMenu";
 import Footer from "../../components/footerV2";
 
+import testString from "@snu/common-ui";
+
 const Render = ({ screen }) => {
   const device = useDevice();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -35,6 +37,7 @@ const Render = ({ screen }) => {
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderScreen(screen)}
+      <span>{testString}</span>
       {device === "desktop" && <Footer marginBottom={"0px"} />}
     </div>
   );
