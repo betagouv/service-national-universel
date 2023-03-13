@@ -165,17 +165,10 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
   return bodyAggs;
 };
 
-export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
   const bodyQuery = buildBody(esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
-  return { bodyAggs, bodyQuery };
-};
-
-export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
-  const { bodyAggs, bodyQuery } = buildBodyAggs(esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
-
-  //maybe piquet le cal de l'api engagement pour dexu body en une req
   const resAggs = await api.esQuery(esId, bodyAggs);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 

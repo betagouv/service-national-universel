@@ -10,13 +10,12 @@ import { toastr } from "react-redux-toastr";
 import ViewPopOver from "./filters/ViewPopOver";
 
 import api from "../../../services/api";
-import { buildQuery, getURLParam, currentFilterAsUrl, buildBodyAggs } from "./filters/utils";
+import { buildQuery, getURLParam, currentFilterAsUrl } from "./filters/utils";
 
 import ReactTooltip from "react-tooltip";
 
 import { SortOptionComponent } from "./filters/SortOptionComponent";
 
-import ModalExport from "./export/ModalExportV2";
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -46,8 +45,6 @@ export default function Filters({
   const [categories, setCategories] = React.useState([]);
   const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
   const [selectedFilters, setSelectedFilters] = React.useState({});
-
-  const [modalExportVisible, setModalExportVisible] = React.useState(false);
 
   const [savedView, setSavedView] = React.useState([]);
 

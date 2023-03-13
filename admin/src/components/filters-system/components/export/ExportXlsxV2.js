@@ -7,6 +7,10 @@ import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
 import ModalConfirm from "../../../modals/ModalConfirm";
 import api from "../../../../services/api";
 
+import { buildBody } from "../filters/utils";
+import { getDefaultQuery } from "../../index";
+import { ES_NO_LIMIT } from "snu-lib/constants";
+
 export default function ExportComponent({
   handleClick,
   title,
@@ -14,11 +18,13 @@ export default function ExportComponent({
   index,
   transform,
   searchType = "export",
-  defaultQuery = () => ({ query: { query: { match_all: {} } } }),
+  defaultQuery = getDefaultQuery(),
   fieldsToExport = "*",
   setIsOpen,
   css = { override: false },
   icon,
+  filters,
+  selectedFilters,
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -37,9 +43,7 @@ export default function ExportComponent({
   };
 
   useEffect(() => {
-    if (searchType === "_msearch") {
-      query.current = defaultQuery.query;
-    }
+    query.current = buildBody(index, selectedFilters, 1, ES_NO_LIMIT, defaultQuery, filters);
   }, [defaultQuery]);
 
   if (exporting) {
