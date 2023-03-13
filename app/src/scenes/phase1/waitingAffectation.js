@@ -5,7 +5,6 @@ import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
 import DiscoverStay from "../../assets/icons/DiscoverStay";
 import WaitFor from "../../assets/icons/WaitFor";
-import ButtonLinkPrimary from "../../components/ui/buttons/ButtonLinkPrimary";
 import { environment, supportURL } from "../../config";
 import { translateCohort } from "../../utils";
 import ChangeStayLink from "./components/ChangeStayLink";
@@ -15,6 +14,7 @@ import FaqSection from "./components/FaqSection";
 import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import clock from "../../assets/clock.svg";
+import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 
 export default function WaitingAffectation({ young }) {
   return (
@@ -92,9 +92,9 @@ export default function WaitingAffectation({ young }) {
             <section className="mt-32 pb-32">
               <h2 className="text-xl font-bold mb-8 text-center">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
               <div className="flex justify-center">
-                <ButtonLinkPrimary href="https://www.snu.gouv.fr/phase-1-sejour-cohesion/" rel="noreferrer" className="w-52">
+                <ButtonExternalLinkPrimary href="https://www.snu.gouv.fr/phase-1-sejour-cohesion/" rel="noreferrer" className="w-52">
                   Découvrir
-                </ButtonLinkPrimary>
+                </ButtonExternalLinkPrimary>
               </div>
               <div className="relative">
                 <div className="absolute rotate-180 md:rotate-0 w-fit top-5 left-10 md:left-auto md:top-auto md:right-[288px] lg:right-[308px] xl:right-[348px] 2xl:right-[408px] md:bottom-[-10px]">

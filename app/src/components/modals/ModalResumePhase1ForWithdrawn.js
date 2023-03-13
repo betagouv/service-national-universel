@@ -1,7 +1,7 @@
 import React from "react";
-import ButtonCancel from "../buttons/ButtonCancel";
-import LinkPrimary from "../buttons/LinkPrimary";
-import Modal from "./Modal";
+import ButtonLight from "../ui/buttons/ButtonLight";
+import ButtonLinkPrimary from "../ui/buttons/ButtonLinkPrimary";
+import Modal from "../ui/modals/Modal";
 
 export default function ModalResumePhase1ForWithdrawn({ isOpen, onClose }) {
   return (
@@ -15,10 +15,10 @@ export default function ModalResumePhase1ForWithdrawn({ isOpen, onClose }) {
         Vous pouvez reprendre votre parcours en vous inscrivant à un prochain séjour.
       </p>
       <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-3 mt-12">
-        <LinkPrimary to="changer-de-sejour" className="md:order-last" onClick={onClose}>
+        <ButtonLinkPrimary to="changer-de-sejour" className="md:order-last drop-shadow-none shadow-ninaBlue" onClick={onClose}>
           Choisir un nouveau séjour
-        </LinkPrimary>
-        <ButtonCancel onClick={onClose}>Quitter</ButtonCancel>
+        </ButtonLinkPrimary>
+        <ButtonLight onClick={onClose}>Quitter</ButtonLight>
       </div>
     </Modal>
   );
