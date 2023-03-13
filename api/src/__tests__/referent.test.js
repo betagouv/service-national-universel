@@ -102,9 +102,9 @@ describe("Referent", () => {
       );
       expect(response.statusCode).toEqual(200);
       expect(young.status).toEqual("WITHDRAWN");
-      expect(young.statusPhase1).toEqual("WITHDRAWN");
-      expect(young.statusPhase2).toEqual("WITHDRAWN");
-      expect(young.statusPhase3).toEqual("WITHDRAWN");
+      expect(young.statusPhase1).toEqual("AFFECTED");
+      expect(young.statusPhase2).toEqual("WAITING_REALISATION");
+      expect(young.statusPhase3).toEqual("WAITING_REALISATION");
     });
     it("should not cascade status to WITHDRAWN if validated", async () => {
       const { young, response } = await createYoungThenUpdate(
@@ -120,7 +120,7 @@ describe("Referent", () => {
       expect(response.statusCode).toEqual(200);
       expect(young.status).toEqual("WITHDRAWN");
       expect(young.statusPhase1).toEqual("DONE");
-      expect(young.statusPhase2).toEqual("WITHDRAWN");
+      expect(young.statusPhase2).toEqual("WAITING_REALISATION");
       expect(young.statusPhase3).toEqual("VALIDATED");
     });
     it("should update young statuses when sending cohection stay presence true", async () => {

@@ -10,7 +10,7 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { canEditPresenceYoung, ROLES, canAssignManually } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
@@ -18,7 +18,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const CohortModel = require("../../models/cohort");
-const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, isReferent } = require("../../utils");
+const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -51,6 +51,8 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     // check if referent is allowed to edit this young --> Todo with cohort
     if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -78,8 +80,6 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (young.status === "WAITING_LIST") {
       young.set({ status: "VALIDATED" });
     }
-
-    console.log("euh ?? ", young.statusPhase1, young.status);
 
     young.set({
       statusPhase1: "AFFECTED",
@@ -145,7 +145,6 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
 
     young.set({ statusPhase1MotifDetail, statusPhase1Motif, statusPhase1: "EXEMPTED" });
     await young.save({ fromUser: req.user });
-    console.log(young);
     return res.status(200).send({ data: serializeYoung(young, req.user), ok: true });
   } catch (error) {
     capture(error);

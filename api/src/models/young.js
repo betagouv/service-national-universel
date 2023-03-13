@@ -274,6 +274,7 @@ const Schema = new mongoose.Schema({
   statusPhase1: {
     type: String,
     default: "WAITING_AFFECTATION",
+    //WITHDRAWN is legacy
     enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
     documentation: {
       description: "Statut du volontaire lié à la première phase",
@@ -302,6 +303,7 @@ const Schema = new mongoose.Schema({
   statusPhase2: {
     type: String,
     default: "WAITING_REALISATION",
+    //WITHDRAWN is legacy
     enum: ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"],
     documentation: {
       description: "Statut du volontaire lié à la seconde phase",
@@ -330,6 +332,7 @@ const Schema = new mongoose.Schema({
   statusPhase3: {
     type: String,
     default: "WAITING_REALISATION",
+    //WITHDRAWN is legacy
     enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"],
     documentation: {
       description: "Statut du volontaire lié à la troisième phase",
