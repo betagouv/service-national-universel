@@ -125,6 +125,7 @@ export default function test_volontaire() {
           defaultQuery={getDefaultQuery()}
           filters={filterArray}
           setCount={setCount}
+          count={count}
           setData={(value) => setData(value)}
           searchBarObject={searchBarObject}
           page={page}

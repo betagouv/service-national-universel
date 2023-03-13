@@ -130,6 +130,7 @@ export const buildBody = (esId, selectedFilters, page, size, defaultQuery, filte
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+  return bodyQuery;
 };
 
 const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) => {
