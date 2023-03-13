@@ -1,9 +1,11 @@
 {
   "name": "service-national-universel",
   "scripts": {
-    "dev": "turbo run dev"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "start": "turbo run start"
   },
-  "devDependencies": {
+  "dependencies": {
     "turbo": "1.2.5"
   },
   "workspaces": [
