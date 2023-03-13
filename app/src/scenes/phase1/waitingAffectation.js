@@ -1,6 +1,7 @@
 import React from "react";
 import { youngCanChangeSession } from "snu-lib";
 import hero from "../../assets/hero.png";
+import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
 import DiscoverStay from "../../assets/icons/DiscoverStay";
@@ -61,20 +62,24 @@ export default function WaitingAffectation({ young }) {
             <img src={heroBanner} />
           </div>
           <Container>
-            <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center mb-8 lg:mb-0">
+            <section className="flex flex-col-reverse items-center justify-between lg:flex-row lg:items-center mb-8 lg:mb-0">
               <article>
-                <h1 className="text-3xl md:text-5xl mb-4">
-                  Mon séjour de cohésion
-                  <br />
+                <h1 className="text-2xl md:text-[44px] leading-7 md:leading-12 flex flex-col md:gap-3 md:text-5xl mb-4">
+                  <span>Mon séjour de cohésion</span>
                   <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
                 </h1>
                 {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
-                <div className="bg-white drop-shadow border-[1px] border-gray-200 p-6 flex gap-4 items-center rounded-lg">
-                  <div className="w-[42px] h-[42px]">
+                <div className="bg-white drop-shadow border-[1px] border-gray-200 p-[22px] flex gap-4 items-center rounded-lg max-w-[688px]">
+                  <div className="hidden w-[42px] h-[42px]">
                     <WaitFor />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold m-0 mb-1">Vous êtes en attente d&apos;affectation à un centre</h2>
+                    <div className="flex gap-4 items-center mb-4 md:mb-1">
+                      <div className="md:hidden">
+                        <WaitFor />
+                      </div>
+                      <h2 className="text-lg font-bold m-0">Vous êtes en attente d&apos;affectation à un centre</h2>
+                    </div>
                     <p className="text-sm">
                       Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
                       préparer votre fiche sanitaire ci-dessous !
@@ -82,17 +87,17 @@ export default function WaitingAffectation({ young }) {
                   </div>
                 </div>
               </article>
-              <img src={hero} className="hidden md:block" />
+              <img src={hero2} className="hidden md:block -mt-4 -mr-4" width={437} />
             </section>
             <Files young={young} />
             <hr className="w-full mt-12 mb-7 mx-auto" />
             <CheckYourSpamSection />
             <FaqSection />
             <TestimonialsSection />
-            <section className="mt-32 pb-32">
+            <section className="mt-12 md:mt-32 pb-32">
               <h2 className="text-xl font-bold mb-8 text-center">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
               <div className="flex justify-center">
-                <ButtonExternalLinkPrimary href="https://www.snu.gouv.fr/phase-1-sejour-cohesion/" rel="noreferrer" className="w-52">
+                <ButtonExternalLinkPrimary href="https://www.snu.gouv.fr/phase-1-sejour-cohesion/" target="_blank" rel="noreferrer" className="w-52">
                   Découvrir
                 </ButtonExternalLinkPrimary>
               </div>
