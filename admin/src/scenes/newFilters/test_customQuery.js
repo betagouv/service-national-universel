@@ -95,6 +95,7 @@ export default function test_volontaire() {
       parentGroup: "Modification de Statut",
       missingLabel: "Non renseigné",
       translate: (value) => translateStatus(value),
+      defaultValue: ["ACCEPTED", "REJECTED"],
     },
   ];
 

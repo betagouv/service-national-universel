@@ -104,8 +104,24 @@ export default function Filters({
   }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
+    // load des defaults value des filtres
+    const defaultFilters = getDefaultFilters();
     const initialFilters = getURLParam(urlParams, setPage, filters);
-    setSelectedFilters(initialFilters);
+    setSelectedFilters({ ...defaultFilters, ...initialFilters });
+  };
+
+  const getDefaultFilters = () => {
+    const newFilters = {};
+    filters
+      .filter((f) => f?.defaultValue)
+      .map((f) => {
+        if (f?.customComponent?.getQuery) {
+          newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery(f.defaultValue) };
+        } else {
+          newFilters[f.name] = { filter: f.defaultValue };
+        }
+      });
+    return newFilters;
   };
 
   const getData = async () => {
