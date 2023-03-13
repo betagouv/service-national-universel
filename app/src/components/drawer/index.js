@@ -216,6 +216,7 @@ export default function Drawer(props) {
             )}
             <SocialMedia />
           </div>
+          {environment === "development" && <NavLink to="/develop-assets">🤖 Develop Assets</NavLink>}
         </MyNav>
       </Sidebar>
     </>

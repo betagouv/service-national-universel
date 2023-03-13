@@ -743,38 +743,42 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 
 // Get user information for authorized user on France Connect.
 router.post("/france-connect/user-info", async (req, res) => {
-  const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  try {
+    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    // Get token…
+    const body = {
+      grant_type: "authorization_code",
+      redirect_uri: `${config.APP_URL}/${value.callback}`,
+      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+      client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
+      code: value.code,
+    };
+    const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: queryString.stringify(body),
+    });
+    const token = await tokenResponse.json();
+
+    if (!token["access_token"] || !token["id_token"]) {
+      return res.sendStatus(403, token);
+    }
+
+    // … then get user info.
+    const userInfoResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/userinfo`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token["access_token"]}` },
+    });
+    const userInfo = await userInfoResponse.json();
+    res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-
-  // Get token…
-  const body = {
-    grant_type: "authorization_code",
-    redirect_uri: `${config.APP_URL}/${value.callback}`,
-    client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-    client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
-    code: value.code,
-  };
-  const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: queryString.stringify(body),
-  });
-  const token = await tokenResponse.json();
-
-  if (!token["access_token"] || !token["id_token"]) {
-    return res.sendStatus(403, token);
-  }
-
-  // … then get user info.
-  const userInfoResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/userinfo`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token["access_token"]}` },
-  });
-  const userInfo = await userInfoResponse.json();
-  res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
 });
 
 // Delete one user (only admin can delete user)
