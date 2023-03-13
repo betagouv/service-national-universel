@@ -30,7 +30,7 @@ export default function NavigationMenu({ setIsOpen = () => {} }) {
         </MenuGroup>
         <div className="m-8" />
         <MenuLink setIsOpen={setIsOpen} to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
-        {environment === "development" && <MenuLink setOpen={setIsOpen} to="develop-assets" icon={<GoTools />} text="Dev tools" />}
+        {environment === "development" && <MenuLink setIsOpen={setIsOpen} to="develop-assets" icon={<GoTools />} text="Dev tools" />}
       </ul>
       <Diagoriente />
       <Socials />
