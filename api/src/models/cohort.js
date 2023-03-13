@@ -61,23 +61,24 @@ const Schema = new mongoose.Schema({
 
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
+
   pdrChoiceLimitDate: {
     type: Date,
     documentation: {
-      description: "Date limite de choix du PDR par le jeune",
+      description: "Date limite de choix du PDR par le jeune, par defaut 23h59",
     },
   },
 
   validationDate: {
     type: Date,
     documentation: {
-      description: "Date d'autoValidation du jeune (apèrs cette date, sa phase 1 est validée)",
+      description: "Date d'autoValidation du jeune (apèrs cette date, sa phase 1 est validée), par defaut 23h59",
     },
   },
   validationDateForTerminaleGrade: {
     type: Date,
     documentation: {
-      description: "Date d'autoValidation d'un jeune en terminale (apèrs cette date, sa phase 1 est validée)",
+      description: "Date d'autoValidation d'un jeune en terminale (apèrs cette date, sa phase 1 est validée), par defaut 23h59",
     },
   },
 
@@ -103,6 +104,14 @@ const Schema = new mongoose.Schema({
     type: Boolean,
     documentation: {
       description: "Ouverture du pointage des volontaires pour les référents départementaux",
+    },
+  },
+
+  //information n'impactant le fonctionnement de l'application
+  uselessInformation: {
+    type: mongoose.Schema.Types.Mixed,
+    documentation: {
+      description: "Information complémentaire non utilisée par l'application",
     },
   },
 
