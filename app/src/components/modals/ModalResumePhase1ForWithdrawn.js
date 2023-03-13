@@ -1,5 +1,5 @@
 import React from "react";
-import ButtonCancel from "../ui/buttons/ButtonCancel";
+import ButtonLight from "../ui/buttons/ButtonLight";
 import ButtonLinkPrimary from "../ui/buttons/ButtonLinkPrimary";
 import Modal from "../ui/modals/Modal";
 
@@ -18,7 +18,7 @@ export default function ModalResumePhase1ForWithdrawn({ isOpen, onClose }) {
         <ButtonLinkPrimary to="changer-de-sejour" className="md:order-last drop-shadow-none shadow-ninaBlue" onClick={onClose}>
           Choisir un nouveau séjour
         </ButtonLinkPrimary>
-        <ButtonCancel onClick={onClose}>Quitter</ButtonCancel>
+        <ButtonLight onClick={onClose}>Quitter</ButtonLight>
       </div>
     </Modal>
   );
