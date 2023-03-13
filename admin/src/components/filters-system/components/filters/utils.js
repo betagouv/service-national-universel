@@ -28,7 +28,7 @@ import api from "../../../../services/api";
   },
 
   transformData: prend en paramètre { key: <string>, doc_count: <number> } et doit retourner { key: <string>, doc_count: <number> }
-  customQuery: prend en paramètre <string> et doit retourner { query: <object> } (query ES)
+  customQuery: prend en paramètre Array<string> et doit retourner { query: <object> } (query ES)
 
 
   - Filtre avec custom component ex : 
@@ -42,6 +42,7 @@ import api from "../../../../services/api";
   },
 
   Pour un custom component les querys sont gérées dans le composant lui même.
+  (voir exemple sur src/components/filters-system/components/filters/custom-components/)
 
   /!\
   Un custom component doit avoir/exporter : 
@@ -72,10 +73,8 @@ import api from "../../../../services/api";
 
 */
 
-export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+export const buildBody = (esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected) => {
   let query = structuredClone(defaultQuery.query);
-  let aggsQuery = structuredClone(defaultQuery.query);
-
   let bodyQuery = {
     query: query,
     aggs: {},
@@ -84,35 +83,6 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
     sort: sortSelected ? [{ [sortSelected.dataField]: { order: sortSelected.sortBy } }] : [{ createdAt: { order: "desc" } }],
     track_total_hits: true,
   };
-
-  let bodyAggs = {
-    query: aggsQuery,
-    aggs: {},
-    size: 0,
-    track_total_hits: true,
-  };
-  //ajouter les aggregations pour count
-  filterArray.map((f) => {
-    const currentFilter = filterArray.find((e) => f.name === e.name);
-    if (currentFilter.customComponent) return;
-    if (currentFilter.datafield.includes(".keyword")) {
-      bodyAggs.aggs[f.name] = {
-        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
-        aggs: {
-          names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: "N/A", size: ES_NO_LIMIT } },
-        },
-      };
-    } else {
-      bodyAggs.aggs[f.name] = {
-        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
-        aggs: {
-          names: {
-            histogram: { field: filterArray.find((e) => f.name === e.name).datafield, interval: 1, min_doc_count: 1 },
-          },
-        },
-      };
-    }
-  });
 
   //apply filters to query
   if (selectedFilters && Object.keys(selectedFilters).length) {
@@ -160,6 +130,45 @@ export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = 
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+};
+
+const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) => {
+  let aggsQuery = structuredClone(defaultQuery.query);
+  let bodyAggs = {
+    query: aggsQuery,
+    aggs: {},
+    size: 0,
+    track_total_hits: true,
+  };
+  //ajouter les aggregations pour count
+  filterArray.map((f) => {
+    const currentFilter = filterArray.find((e) => f.name === e.name);
+    if (currentFilter.customComponent) return;
+    if (currentFilter.datafield.includes(".keyword")) {
+      bodyAggs.aggs[f.name] = {
+        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
+        aggs: {
+          names: { terms: { field: filterArray.find((e) => f.name === e.name).datafield, missing: "N/A", size: ES_NO_LIMIT } },
+        },
+      };
+    } else {
+      bodyAggs.aggs[f.name] = {
+        filter: { ...getAggsFilters(f.name, selectedFilters, searchBarObject, bodyAggs, filterArray) },
+        aggs: {
+          names: {
+            histogram: { field: filterArray.find((e) => f.name === e.name).datafield, interval: 1, min_doc_count: 1 },
+          },
+        },
+      };
+    }
+  });
+  return bodyAggs;
+};
+
+export const buildBodyAggs = (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+  const bodyQuery = buildBody(esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
+  const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
+
   return { bodyAggs, bodyQuery };
 };
 

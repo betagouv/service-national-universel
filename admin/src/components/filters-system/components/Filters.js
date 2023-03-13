@@ -17,7 +17,6 @@ import ReactTooltip from "react-tooltip";
 import { SortOptionComponent } from "./filters/SortOptionComponent";
 
 import ModalExport from "./export/ModalExportV2";
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -35,8 +34,7 @@ export default function Filters({
   size = 25,
   setPage,
   sortOptions = null,
-  transform,
-  exportFields = "*",
+  getSelectedFilters = null,
 }) {
   // search for filters
   const [search, setSearch] = React.useState("");
@@ -101,6 +99,7 @@ export default function Filters({
   React.useEffect(() => {
     getData();
     setURL();
+    if (getSelectedFilters) getSelectedFilters(selectedFilters);
   }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
@@ -292,23 +291,6 @@ export default function Filters({
             )}
           </Popover>
         </div>
-        {/* Export Component */}
-        {transform && (
-          <>
-            <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
-            <ModalExport
-              isOpen={modalExportVisible}
-              setIsOpen={setModalExportVisible}
-              index={esId}
-              selectedFilters={selectedFilters}
-              defaultQuery={buildBodyAggs(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject, sortSelected)}
-              exportTitle="candidatures"
-              showTotalHits={false}
-              transform={transform}
-              exportFields={exportFields}
-            />
-          </>
-        )}
       </div>
 
       <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">

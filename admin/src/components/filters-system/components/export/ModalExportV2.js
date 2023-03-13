@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { translate, translateField, translateIndexes } from "snu-lib";
+import { translate, translateField, translateIndexes, ES_NO_LIMIT } from "snu-lib";
 import ExportFieldCard from "../../../ExportFieldCard";
 import ModalTailwind from "../../../modals/ModalTailwind";
 import plausibleEvent from "../../../../services/plausible";
 import { capitalizeFirstLetter } from "../../../../utils";
 import ExportComponent from "./ExportXlsxV2";
+import { buildBody } from "../filters/utils";
 
-export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, defaultQuery }) {
+export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, defaultQuery, filters }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
   const [hasFilter, setHasFilter] = useState(false);
@@ -63,7 +64,7 @@ export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exp
           <ExportComponent
             handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
             title={`Exporter les ${exportTitle || translateIndexes(index)}`}
-            defaultQuery={defaultQuery.bodyQuery}
+            defaultQuery={buildBody(index, selectedFilters, 1, ES_NO_LIMIT, defaultQuery, filters)}
             exportTitle={exportTitle ? capitalizeFirstLetter(exportTitle) : capitalizeFirstLetter(translateIndexes(index))}
             index={index}
             transform={(data) => transform(data, selectedFields)}

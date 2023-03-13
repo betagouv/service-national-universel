@@ -14,7 +14,7 @@ import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 
 import Badge from "../../components/Badge";
 
-import { Filters, ResultTable, getDefaultQuery } from "../../components/filters-system";
+import { Filters, ResultTable, getDefaultQuery, ModalExportV2 } from "../../components/filters-system";
 
 import {
   translate,
@@ -43,6 +43,8 @@ export default function test_volontaire() {
 
   // filtre non obligatoire
   const [selectedSort, setSelectedSort] = React.useState({});
+  const [modalExportVisible, setModalExportVisible] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState({});
 
   const [volontaire, setVolontaire] = useState(null);
 
@@ -305,10 +307,23 @@ export default function test_volontaire() {
             setPage={setPage}
             size={size}
             sortOptions={sortOptions}
-            transform={transformVolontaires}
-            exportFields={youngExportFields}
+            getSelectedFilters={setSelectedFilters}
           />
         </div>
+
+        <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
+
+        <ModalExportV2
+          isOpen={modalExportVisible}
+          setIsOpen={setModalExportVisible}
+          index="young"
+          selectedFilters={selectedFilters}
+          defaultQuery={getDefaultQuery()}
+          exportTitle="candidatures"
+          showTotalHits={false}
+          transform={transformVolontaires}
+          exportFields={youngExportFields}
+        />
 
         <ResultTable
           setPage={setPage}
