@@ -15,7 +15,7 @@ const TestimonialsSection = () => {
       readingTime: "1mn de lecture",
     },
     {
-      title: "A votre avis quelle la meilleure raison d'avoir fait le SNU pour Judie et Mehdy ?",
+      title: "A votre avis quelle la meilleure raison d'avoir fait le SNU pour Judie et Mehdy&nbsp?",
       description: "Judie et Mehdi vous parlent de tous les bénéfices de faire le SNU.",
       picture: temoignageJulie,
       link: "https://www.snu.gouv.fr/a-votre-avis-quelle-la-meilleure-raison-davoir-fait-le-snu-pour-judie-et-mehdy/",
