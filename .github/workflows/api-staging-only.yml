@@ -19,10 +19,6 @@ on:
     paths:
       - api/**
       - lib/**
-  pull_request:
-    paths:
-      - api/**
-      - lib/**
 
 jobs:
   deploy:
