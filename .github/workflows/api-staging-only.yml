@@ -1,7 +1,7 @@
 env:
-  SUBFOLDER_NAME: admin
-  APP_NAME: snu-stag-admin
-  ENVIRONMENT_NAME: snu-admin-staging
+  SUBFOLDER_NAME: api
+  APP_NAME: snu-api
+  ENVIRONMENT_NAME: snu-api
 
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   SLACK_COLOR: "#3278BD"
@@ -10,32 +10,40 @@ env:
   MSG_MINIMAL: true
   SLACK_FOOTER: ""
 
-name: Deploy staging admin
+name: Test & Deploy API
 
 on:
   push:
     branches:
-      - main
       - staging
     paths:
-      - admin/**
+      - api/**
       - lib/**
-  workflow_dispatch:
+  pull_request:
+    paths:
+      - api/**
+      - lib/**
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x]
-
     steps:
-      - uses: actions/checkout@v2
+      - name: Git checkout
+        uses: actions/checkout@v2
 
-      - name: Node ${{ matrix.node-version }}
+      - name: Node 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
+
+      - name: Add lib into current folder
+        run: |
+          cp -Rf ./lib ./api/snu-lib
+          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
+
+      - name: Install packages
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        run: npm install
 
       - name: Create SSH key
         run: |
@@ -58,8 +66,8 @@ jobs:
 
       - name: Add lib into current folder
         run: |
-          cp -Rf ./lib ./admin/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./admin/package.json
+          cp -Rf ./lib ./api/snu-lib
+          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
 
       - name: Push
         working-directory: ${{ env.SUBFOLDER_NAME }}
@@ -67,21 +75,21 @@ jobs:
           git init
           git config user.email "github.deployer@gmail.com"
           git config user.name "Github Deployer"
-          git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
+          git remote add cloudstaging "$CLEVER_CLOUD_GIT_REMOTE_STAGING"
           git add .
           git commit -m "For deploy"
-          git push -f -u cloud master
+          git push -f -u cloudstaging master
         env:
-          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_ADMIN_STAGING }}
+          CLEVER_CLOUD_GIT_REMOTE_STAGING: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_STAGING }}
 
       - name: Notification on failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@master
         env:
-          SLACK_TITLE: Failed to deploy staging admin
+          SLACK_TITLE: Failed to deploy api
 
       - name: Notification on success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@master
         env:
-          SLACK_TITLE: admin staging deployed
+          SLACK_TITLE: api deployed
