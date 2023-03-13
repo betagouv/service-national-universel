@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import StatusPill from "./StatusPill";
 
 export default function MenuItem({ to, enabled = true, icon, text, status, onClose }) {
-  const isActive = location.pathname.includes(to);
+  const isActive = location.pathname.includes(to) && (to !== "/" || location.pathname === "/");
 
   if (enabled) {
     return (
