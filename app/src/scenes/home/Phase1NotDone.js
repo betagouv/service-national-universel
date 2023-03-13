@@ -169,7 +169,7 @@ function ChangeCohortPrompt() {
     <div className="space-y-10 md:space-y-12 w-fit">
       <div className="font-bold leading-7 mt-8 space-y-2">
         <p className="text-lg md:text-xl m-0">Votre phase 1 n’est donc pas validée.</p>
-        <p className="text-gray-700 text-sm max-w-sm leading-6">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
+        <p className="text-gray-700 text-base max-w-sm leading-6">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
       </div>
       <Link
         to="changer-de-sejour"
