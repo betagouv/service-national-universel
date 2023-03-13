@@ -2,14 +2,14 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import StatusPill from "./StatusPill";
 
-export default function MenuItem({ to, enabled = true, icon, text, status, setIsOpen }) {
+export default function MenuItem({ to, enabled = true, icon, text, status, onClose }) {
   const isActive = location.pathname.includes(to);
 
   if (enabled) {
     return (
       <li className="flex items-center">
         <NavLink
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
           to={to}
           exact
           className="my-[2px] px-2 py-3 gap-3 w-full rounded-md flex text-[#D1DAEF] hover:bg-[#1B243D] hover:text-[#D1DAEF] items-center transition-colors duration-200"

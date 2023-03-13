@@ -11,7 +11,6 @@ export default function User() {
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef();
   const buttonRef = React.useRef();
-  const dispatch = useDispatch();
 
   function handleClick() {
     if (open) {
@@ -23,18 +22,17 @@ export default function User() {
     }
   }
 
-  const isOutside = (event) => menuRef.current && !menuRef.current.contains(event.target) && event.target && buttonRef.current && !buttonRef.current.contains(event.target);
+  const isOutside = (event) => {
+    if (!menuRef.current || !buttonRef.current) return false;
+    if (menuRef.current.contains(event.target) || buttonRef.current.contains(event.target)) return false;
+    return true;
+  };
 
   function handleClickOutside(event) {
     if (isOutside(event)) {
       setOpen(false);
       document.removeEventListener("click", handleClickOutside, true);
     }
-  }
-
-  async function logout() {
-    await API.post(`/young/logout`);
-    dispatch(setYoung(null));
   }
 
   return (
@@ -54,23 +52,36 @@ export default function User() {
           <ChevronDown />
         </button>
       </div>
-      <nav
-        className={`rounded-lg w-56 bg-white transition-all absolute left-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
-          open ? "h-28" : "h-0"
-        }`}
-        ref={menuRef}>
-        <Link to="/account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
-          Mon profil
-        </Link>
-        {permissionPhase2(user) && (
-          <Link to="/preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
-            Mes préférences de mission
-          </Link>
-        )}
-        <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
-          Se déconnecter
-        </button>
-      </nav>
+      <Menu open={open} menuRef={menuRef} user={user} />
     </>
+  );
+}
+
+function Menu({ open, menuRef, user }) {
+  const dispatch = useDispatch();
+
+  async function logout() {
+    await API.post(`/young/logout`);
+    dispatch(setYoung(null));
+  }
+
+  return (
+    <nav
+      className={`rounded-lg w-56 bg-white transition-all absolute left-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
+        open ? `h-${permissionPhase2(user) ? "28" : "20"}` : "h-0"
+      }`}
+      ref={menuRef}>
+      <Link to="/account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+        Mon profil
+      </Link>
+      {permissionPhase2(user) && (
+        <Link to="/preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+          Mes préférences de mission
+        </Link>
+      )}
+      <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+        Se déconnecter
+      </button>
+    </nav>
   );
 }

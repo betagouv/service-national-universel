@@ -6,7 +6,7 @@ import MenuLink from "./MenuLink";
 import MenuButton from "./MenuButton";
 import { permissionPhase2 } from "../../../../utils";
 
-export default function UserMenu({ setIsOpen }) {
+export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
 
@@ -25,8 +25,8 @@ export default function UserMenu({ setIsOpen }) {
         </div>
       </div>
       <ul>
-        <MenuLink setOpen={setIsOpen} to="account" text="Mon Profil" />
-        {permissionPhase2(user) && <MenuLink setOpen={setIsOpen} to="preferences" text="Mes préférences de mission" />}
+        <MenuLink onClose={onClose} to="account" text="Mon Profil" />
+        {permissionPhase2(user) && <MenuLink onClose={onClose} to="preferences" text="Mes préférences de mission" />}
         <MenuButton onClick={logout} text="Déconnexion" />
       </ul>
     </nav>

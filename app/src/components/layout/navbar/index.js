@@ -19,67 +19,50 @@ export default function Navbar() {
 }
 
 function MobileNavbar() {
-  const [isNavOpen, setIsNavOpen] = React.useState(false);
-  const [isUserOpen, setIsUserOpen] = React.useState(false);
   const ref = React.useRef();
   const user = useSelector((state) => state.Auth.young);
+  const [drawer, setDrawer] = React.useState({ open: false, content: null });
+
+  function openDrawer(Content) {
+    setDrawer({ open: true, content: <Content onClose={onClose} /> });
+    document.addEventListener("click", handleClickOutside, true);
+  }
+
+  function onClose() {
+    return setDrawer({ ...drawer, open: false });
+  }
 
   function handleClickOutside(event) {
-    if (ref.current && !ref.current.contains(event.target)) {
-      setIsNavOpen(false);
-      setIsUserOpen(false);
-    }
+    if (ref.current && !ref.current.contains(event.target)) onClose();
     document.removeEventListener("click", handleClickOutside, true);
   }
 
-  function handleMenuClick() {
-    setIsNavOpen(true);
-    document.addEventListener("click", handleClickOutside, true);
-  }
-
-  function handleUserClick() {
-    setIsUserOpen(true);
-    document.addEventListener("click", handleClickOutside, true);
-  }
-
   return (
-    <header className="text-[#D2DAEF] text-sm" ref={ref}>
-      <div className="w-full h-16 grid md:hidden grid-cols-3 bg-[#212B44] items-center z-20">
-        <div>
-          <button onClick={handleMenuClick} className="h-16 w-16 p-3">
-            <Hamburger className="text-[#828EAC]" />
-          </button>
-        </div>
+    <header ref={ref} className="text-[#D2DAEF] text-sm w-full h-16 grid grid-cols-3 bg-[#212B44] items-center z-20">
+      <button onClick={() => openDrawer(NavigationMenu)} className="h-16 w-16 p-3">
+        <Hamburger className="text-[#828EAC]" />
+      </button>
 
-        <div className="h-16">
-          <Logo />
-        </div>
+      <Logo />
 
-        <button onClick={handleUserClick} className="flex justify-end pr-4">
-          <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user?.firstName[0] + user?.lastName[0]}</p>
-        </button>
-      </div>
+      <button onClick={() => openDrawer(UserMenu)} className="flex justify-end pr-4">
+        <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user?.firstName[0] + user?.lastName[0]}</p>
+      </button>
 
-      <MobileDrawer isOpen={isNavOpen} setIsOpen={setIsNavOpen}>
-        <NavigationMenu setIsOpen={setIsNavOpen} />
-      </MobileDrawer>
-
-      <MobileDrawer isOpen={isUserOpen} setIsOpen={setIsUserOpen}>
-        <UserMenu setIsOpen={setIsUserOpen} />
-      </MobileDrawer>
+      <MobileDrawer open={drawer.open} onClose={onClose} content={drawer.content} />
     </header>
   );
 }
 
-function MobileDrawer({ children, isOpen, setIsOpen }) {
+function MobileDrawer({ open, onClose, content }) {
   return (
-    <div className={`fixed top-0 w-full z-50 ease-in-out duration-200 ${isOpen ? "translate-y-0" : "-translate-y-full"}`}>
+    <div className={`fixed top-0 w-full z-10 ease-in-out duration-200 ${open ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="bg-[#212B44] h-16 flex justify-end items-center">
-        <button onClick={() => setIsOpen(false)} className="pr-4 pl-6 h-full">
+        <button onClick={onClose} className="pr-4 pl-6 h-full">
           <Close className="text-[#828EAC]" />
         </button>
       </div>
-      {children}
+      {content}
     </div>
   );
 }
