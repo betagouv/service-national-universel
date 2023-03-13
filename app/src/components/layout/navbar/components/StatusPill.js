@@ -8,7 +8,7 @@ export default function StatusPill({ status }) {
     return <p className="bg-[#2563EB] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm text-center w-fit">En cours</p>;
   }
   if (status && status === "EXEMPTED") {
-    return <p className="bg-[#1E3A8A] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm text-center">Dispensé</p>;
+    return <p className="bg-[#1E3A8A] rounded-full text-xs text-[#D1DAEF] px-2 py-0.5 shadow-sm text-center w-fit">Dispensé</p>;
   }
   return null;
 }

@@ -18,26 +18,22 @@ export default function NavigationMenu({ setIsOpen = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
 
   return (
-    <nav className="p-[24px] md:p-[8px] md:pb-[24px] bg-[#212B44] w-full transition-all md:flex-1 flex flex-col">
+    <nav className="p-[24px] md:p-[8px] md:pb-[24px] bg-[#212B44] w-full transition-all md:flex-1 flex flex-col justify-between h-full">
       <ul>
-        <MenuLink setOpen={setIsOpen} to="/" icon={<IconHome />} text="Accueil" />
-        <MenuLink setOpen={setIsOpen} to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} />
-        <MenuLink setOpen={setIsOpen} to="/phase2" icon={<IconPhase2 />} text="Phase 2 - MIG" enabled={permissionPhase2(young)} status={young.statusPhase2} />
+        <MenuLink setIsOpen={setIsOpen} to="/" icon={<IconHome />} text="Accueil" />
+        <MenuLink setIsOpen={setIsOpen} to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} />
+        <MenuLink setIsOpen={setIsOpen} to="/phase2" icon={<IconPhase2 />} text="Phase 2 - MIG" enabled={permissionPhase2(young)} status={young.statusPhase2} />
         <MenuGroup icon={<IconPhase3 />} text="Phase 3 - Engagement" enabled={permissionPhase3(young)} status={young.statusPhase3}>
-          <MenuLink setOpen={setIsOpen} to="/phase3/les-programmes" text="Les programmes" />
-          <MenuLink setOpen={setIsOpen} to="/phase3/mission" text="Trouver une mission" />
-          <MenuLink setOpen={setIsOpen} to="/phase3/valider" text="Valider ma phase 3" />
+          <MenuLink setIsOpen={setIsOpen} to="/phase3/les-programmes" text="Les programmes" />
+          <MenuLink setIsOpen={setIsOpen} to="/phase3/mission" text="Trouver une mission" />
+          <MenuLink setIsOpen={setIsOpen} to="/phase3/valider" text="Valider ma phase 3" />
         </MenuGroup>
         <div className="m-8" />
-        <MenuLink setOpen={setIsOpen} to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
+        <MenuLink setIsOpen={setIsOpen} to="/public-besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" />
         {environment === "development" && <MenuLink setOpen={setIsOpen} to="develop-assets" icon={<GoTools />} text="Dev tools" />}
       </ul>
-      {/* <div className="flex flex-col h-auto flex-none md:flex-1"> */}
       <Diagoriente />
-      {/* <div className="md:pr-4 mt-auto"> */}
       <Socials />
-      {/* </div> */}
-      {/* </div> */}
     </nav>
   );
 }

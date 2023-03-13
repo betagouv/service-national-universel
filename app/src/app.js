@@ -129,7 +129,6 @@ export default function App() {
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
-          <Footer />
         </div>
       </Router>
     </Sentry.ErrorBoundary>
@@ -233,11 +232,11 @@ const Espace = () => {
   }
 
   return (
-    <div className="block md:flex">
-      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
+    <>
+      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto  w-screen md:w-64">
         <Navbar />
       </div>
-      <div className="flex-1 mt-16 md:mt-0 md:ml-64">
+      <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/phase1" component={Phase1} />
@@ -254,20 +253,20 @@ const Espace = () => {
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <SentryRoute path="/" component={Home} />
         </Switch>
-
-        <ModalCGU
-          isOpen={modal?.isOpen}
-          title={modal?.title}
-          message={modal?.message}
-          confirmText={modal?.confirmText}
-          onConfirm={() => {
-            modal?.onConfirm();
-            setModal({ isOpen: false, onConfirm: null });
-          }}
-        />
-        <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
-      </div>
-    </div>
+      </main>
+      <Footer />
+      <ModalCGU
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        confirmText={modal?.confirmText}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
+    </>
   );
 };
 

@@ -105,10 +105,12 @@ const FooterContainer = styled.footer`
   font-size: 1rem;
   @media (max-width: 768px) {
     font-size: 0.8rem;
+    margin-left: 0;
   }
   padding: 5px 0;
   background: #fff;
   margin-top: auto;
+  margin-left: 16rem;
   position: relative;
   z-index: 2;
   ul {

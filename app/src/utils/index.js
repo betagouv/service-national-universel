@@ -4,8 +4,6 @@ export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
-import API from "../services/api";
-
 function addOneDay(date) {
   const newDate = new Date(date);
   newDate.setDate(newDate.getDate() + 1);
@@ -65,9 +63,10 @@ export function permissionPhase2(y) {
   if (!permissionPhase1(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
-      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1))) ||
-    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ||
-    y.cohesionStayPresence === "true"
+      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
+        [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1) ||
+        y.cohesionStayPresence === "true")) ||
+    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
   );
 }
 

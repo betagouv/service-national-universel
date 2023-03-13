@@ -55,7 +55,7 @@ export default function User() {
         </button>
       </div>
       <nav
-        className={`rounded-lg w-56 bg-white transition-all absolute right-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
+        className={`rounded-lg w-56 bg-white transition-all absolute left-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
           open ? "h-28" : "h-0"
         }`}
         ref={menuRef}>

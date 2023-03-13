@@ -10,7 +10,7 @@ export default function MenuGroup({ children, icon, text, enabled = true, status
       <>
         <button
           onClick={() => setOpen(!open)}
-          className="my-[2px] px-2 py-3 w-full space-y-2 rounded-md text-[#D1DAEF] hover:bg-[#1B243D] hover:text-[#D1DAEF] transition-colors duration-200">
+          className="my-[2px] px-2 py-3 w-full rounded-md text-[#D1DAEF] hover:bg-[#1B243D] hover:text-[#D1DAEF] transition-colors duration-200">
           <div className="flex items-center">
             <div className="w-5 mr-3 text-[#7A90C3]">{icon}</div>
             <p className="text-left">{text}</p>
@@ -18,9 +18,13 @@ export default function MenuGroup({ children, icon, text, enabled = true, status
               <ChevronDown />
             </div>
           </div>
-          <div className="ml-8">{status && <StatusPill status={status} />}</div>
+          {status && (
+            <div className="ml-8 mt-2">
+              <StatusPill status={status} />
+            </div>
+          )}
         </button>
-        {children && <div className={`ml-8 overflow-hidden transition-all ease-in-out duration-200 ${open ? "h-44" : "h-0"}`}>{children}</div>}
+        {children && <div className={`ml-8 overflow-hidden transition-all ease-in-out duration-200 ${open ? `h-${children.length * 16}` : "h-0"}`}>{children}</div>}
       </>
     );
   }
