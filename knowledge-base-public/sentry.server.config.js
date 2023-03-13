@@ -8,7 +8,7 @@ const SENTRY_DSN = process.env.SENTRY_DSN;
 const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE;
 
 Sentry.init({
-  enabled: Boolean(SENTRY_DSN),
+  enabled: false && Boolean(SENTRY_DSN),
   dsn: SENTRY_DSN,
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.01),
