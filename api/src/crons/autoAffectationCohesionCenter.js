@@ -19,6 +19,7 @@ const clean = async () => {
     if (young.statusPhase1 === "WAITING_ACCEPTATION") {
       console.log(`${young._id} ${young.firstName} ${young.lastName} auto withdrawn.`);
       // withdrawn young
+      // ! Que faire ici ?
       young.set({ statusPhase1: "WITHDRAWN" });
       countAutoWithdrawn++;
       // send mail saying it is too late :(
