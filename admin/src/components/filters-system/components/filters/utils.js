@@ -28,7 +28,7 @@ import api from "../../../../services/api";
   },
 
   transformData: prend en paramètre { key: <string>, doc_count: <number> } et doit retourner { key: <string>, doc_count: <number> }
-  customQuery: prend en paramètre <string> et doit retourner { query: <object> }
+  customQuery: prend en paramètre <string> et doit retourner { query: <object> } (query ES)
 
 
   - Filtre avec custom component ex : 
