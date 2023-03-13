@@ -88,4 +88,4 @@ jobs:
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@master
         env:
-          SLACK_TITLE: api deployed
+          SLACK_TITLE: api staging deployed
