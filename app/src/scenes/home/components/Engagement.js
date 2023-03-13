@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
+import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue.js";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 
 export default function Engagement() {
-  const [isOpen, setIsOpen] = useState(false);
-
   const engagementPrograms = [
     {
       title: "Service civique",
@@ -41,80 +39,53 @@ export default function Engagement() {
   ];
 
   return (
-    <>
-      <div className="hidden md:block">
-        <div className="text-lg font-bold mb-4 mt-12">Découvrez d’autres formes d’engagement</div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 overflow-x-auto flex-wrap justify-between gap-5">
-          {engagementPrograms.map((program, index) => {
-            return (
-              <div key={index} className="flex col-span-1">
-                <div className="w-full h-min-[700px] ">
-                  <div className="w-full h-[155px] ">
-                    <a href={program.link} target="_blank" rel="noreferrer">
-                      <img src={program.picture} className="object-cover w-full h-full" />
-                    </a>
-                  </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[index] && "h-[250px]"} overflow-hidden`}>
-                    <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen[index] && "h-[70px] text-ellipsis overflow-hidden"}`}>
-                      <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-                        {program.description}
-                      </a>
-                    </div>
-                    <div
-                      className="text-[13px] flex justify-between pr-2 cursor-pointer"
-                      onClick={() => {
-                        setIsOpen({ ...isOpen, [index]: !isOpen[index] });
-                      }}>
-                      <div>{isOpen[index] ? "Lire moins" : "Lire plus"}</div>
-                      <img src={arrowRightBlue} className="w-3" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+    <section>
+      <p className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</p>
+      <div className="overflow-x-auto flex gap-6">
+        {engagementPrograms.map((program) => {
+          return <EngagementCard key={program.title} program={program} />;
+        })}
+      </div>
+      <div className="mx-auto my-8 w-fit">
+        <Link
+          className="text-[#000091] text-center border-[1px] border-[#000091] px-3 py-2 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover"
+          to="/public-engagements">
+          Voir plus de formes d’engagement
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function EngagementCard({ program }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="w-60 flex-none border">
+      <div className="w-full h-32">
+        <a href={program.link} target="_blank" rel="noreferrer">
+          <img src={program.picture} className="object-cover w-full h-full" />
+        </a>
+      </div>
+
+      <div className="h-fit p-6 space-y-4">
+        <div>
+          <p className="font-medium leading-6 h-12">{program.title}</p>
+          <p className={`text-gray-700 text-sm leading-6 text-ellipsis overflow-hidden ${isOpen ? "h-auto" : "h-[72px]"}`}>{program.description}</p>
         </div>
-        <div className="flex justify-center my-8">
-          <div className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%] p-2 cursor-pointer">
-            <Link to="public-engagements">Voir plus de formes d’engagement</Link>
-          </div>
+        <div className="flex justify-between items-center">
+          <button
+            className="text-xs text-gray-500"
+            onClick={() => {
+              setIsOpen(!isOpen);
+            }}>
+            {isOpen ? "Lire moins" : "Lire plus"}
+          </button>
+          <a href={program.link} target="_blank" rel="noreferrer">
+            <ArrowRightBlue className="w-3 text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
+          </a>
         </div>
       </div>
-      <div className="md:hidden">
-        <div className="text-lg font-bold mb-4 mt-12">Découvrez d’autres formes d’engagement</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 overflow-x-auto flex-wrap justify-between gap-5">
-          {engagementPrograms.map((program, index) => {
-            return (
-              <div key={index} className="flex col-span-1">
-                <div className="w-full h-min-[700px] ">
-                  <div className="w-full h-[155px] ">
-                    <a href={program.link} target="_blank" rel="noreferrer">
-                      <img src={program.picture} className="object-cover w-full h-full" />
-                    </a>
-                  </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[index] && "h-[250px]"} overflow-hidden`}>
-                    <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen[index] && "h-[70px] text-ellipsis overflow-hidden"}`}>
-                      <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-                        {program.description}
-                      </a>
-                    </div>
-                    <div
-                      className="text-[13px] flex justify-between pr-2 cursor-pointer"
-                      onClick={() => {
-                        setIsOpen({ ...isOpen, [index]: !isOpen[index] });
-                      }}>
-                      <div>{isOpen[index] ? "Lire moins" : "Lire plus"}</div>
-                      <img src={arrowRightBlue} className="w-3" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
