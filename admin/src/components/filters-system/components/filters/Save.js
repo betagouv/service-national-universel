@@ -40,7 +40,7 @@ export const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, sav
       <ReactTooltip id="tooltip-saveFilter" className="bg-white !rounded-lg shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
         <div>
           <div className="text-xs text-gray-600">Enregistrer cette vue...</div>
-          <div className="text-gray-600 font-bold">{saveTitle.join(", ")}</div>
+          <div className="text-gray-600 font-bold">{saveTitle().join(", ")}</div>
         </div>
       </ReactTooltip>
       <div className="relative">

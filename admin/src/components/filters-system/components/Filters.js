@@ -12,9 +12,8 @@ import ViewPopOver from "./filters/ViewPopOver";
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl } from "./filters/utils";
 
-import ReactTooltip from "react-tooltip";
-
 import { SortOptionComponent } from "./filters/SortOptionComponent";
+import SelectedFilters from "./filters/SelectedFilters";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -134,19 +133,23 @@ export default function Filters({
     history.replace({ search: `?${currentFilterAsUrl(selectedFilters, page)}` });
   };
 
+  const saveTitle = () => {
+    const object = Object.keys(selectedFilters)
+      .map((key) => {
+        if (key === "searchbar") {
+          if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
+          return;
+        }
+        if (selectedFilters[key]?.filter?.length > 0) {
+          console.log(selectedFilters[key]?.filter, selectedFilters[key]?.filter.length);
+          return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
+        }
+      })
+      .filter((item) => item !== undefined);
+    return object;
+  };
+
   // text for tooltip save
-  const saveTitle = Object.keys(selectedFilters)
-    .map((key) => {
-      if (key === "searchbar") {
-        if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
-        return;
-      }
-      if (selectedFilters[key]?.filter?.length > 0) {
-        console.log(selectedFilters[key]?.filter, selectedFilters[key]?.filter.length);
-        return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
-      }
-    })
-    .filter((item) => item !== undefined);
 
   const getDBFilters = async () => {
     try {
@@ -294,53 +297,9 @@ export default function Filters({
         {/* icon de save + logique */}
         {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} saveFilter={saveFilter} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
         {/* Display des filtres sélectionnés */}
-        {filtersVisible
-          .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
-          .map((filter) => (
-            <div
-              key={filter.title}
-              onClick={() => handleFilterShowing(filter.name)}
-              className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
-              <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
-              {selectedFilters[filter.name].filter.map((item, index) => {
-                // on affiche que les 2 premiers filtres, apres on affiche "+x"
-                if (index > 2) {
-                  if (index === selectedFilters[filter.name].filter.length - 1) {
-                    return (
-                      <div key={item}>
-                        <ToolTipView selectedFilters={selectedFilters} filter={filter} />
-                        <div data-tip="" data-for="tooltip-filtre" className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
-                          +{index - 2}
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }
-                return (
-                  <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
-                    {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+        <SelectedFilters filtersVisible={filtersVisible} selectedFilters={selectedFilters} handleFilterShowing={handleFilterShowing} />
       </div>
       {sortOptions && <SortOptionComponent sortOptions={sortOptions} sortSelected={sortSelected} setSortSelected={setSortSelected} />}
     </div>
   );
 }
-
-const ToolTipView = ({ selectedFilters, filter }) => {
-  return (
-    <ReactTooltip id="tooltip-filtre" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
-      <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
-        {selectedFilters[filter.name].filter.map((item) => (
-          <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
-            {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
-          </div>
-        ))}
-      </div>
-    </ReactTooltip>
-  );
-};
