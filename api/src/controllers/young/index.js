@@ -455,12 +455,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       await young.save({ fromUser: req.user });
     }
 
-    // if withdrawn from phase1 -> run the script that find a replacement for this young
-    // if (young.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(req.user.statusPhase1) && req.user.cohesionCenterId) {
-    // disable the 08 jun 21
-    // await assignNextYoungFromWaitingList(young);
-    // }
-
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
