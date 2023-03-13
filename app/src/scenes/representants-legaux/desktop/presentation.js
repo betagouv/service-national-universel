@@ -27,10 +27,25 @@ export default function Presentation({ step, parentId }) {
 
   const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
 
+  const translateNonNecessary = (status) => {
+    if (status === "NOT_ELIGIBLE") return "est non éligible";
+    if (status === "ABANDONED") return "a abandonné son inscription";
+    if (status === "REFUSED") return "est refusé";
+  };
+
   function onSubmit() {
     const route = parentId === 2 ? "verification-parent2" : "verification";
     history.push(`/representants-legaux/${route}?token=${token}`);
   }
+  if (["NOT_ELIGIBLE", "ABANDONED", "REFUSED"].includes(young.status))
+    return (
+      <div className="bg-[#f9f6f2] flex justify-center py-10">
+        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
+          <h1 className="text-[31px] font-bold leading-40 text-[#21213F] mb-2">Votre accord n&apos;est plus requis</h1>
+          <div>Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</div>
+        </div>
+      </div>
+    );
   return (
     <>
       <Navbar step={step} />

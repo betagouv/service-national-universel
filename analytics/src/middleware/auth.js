@@ -1,5 +1,6 @@
 const { JWT_SECRET, SECRET_API_KEY } = require("../config");
 const jwt = require("jsonwebtoken");
+const { capture } = require("../sentry");
 
 module.exports = (req, res, next) => {
   const accessToken = req.header("x-access-token");
@@ -10,6 +11,7 @@ module.exports = (req, res, next) => {
       return res.status(401).send("INVALID_TOKEN");
     }
   } catch (error) {
+    capture(error);
     return res.status(401).send("INVALID_TOKEN");
   }
   next();

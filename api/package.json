@@ -9,7 +9,7 @@
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
-    "dev": "nodemon --watch ../lib ./src/index.js",
+    "dev": "nodemon --watch ../lib --watch .env-staging ./src/index.js",
     "debug": "DEBUG=express:* nodemon ./src/index.js",
     "start": "node ./src/index.js",
     "test": "jest --silent --runInBand",

@@ -162,7 +162,7 @@ const Espace = () => {
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
-    if (environment !== "production" && location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
+    if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setModalResume(true);
       });
@@ -226,6 +226,7 @@ const Espace = () => {
               setModal({ isOpen: false, onConfirm: null });
             }}
           />
+          <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
         </div>
       </>
     );

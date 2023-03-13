@@ -618,7 +618,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
-    if (!data.phone || !validator.isMobilePhone(data.phone, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (!data.phone || !validator.matches(data.phone, regexPhoneFrenchCountries)) {
       errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
       result = false;
     }

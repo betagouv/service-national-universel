@@ -1,31 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { toastr } from "react-redux-toastr";
-import { useDispatch, useSelector } from "react-redux";
-import { useHistory, Link } from "react-router-dom";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import React, { useEffect, useState } from "react";
 import { HiLogin, HiUserAdd } from "react-icons/hi";
+import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
-import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent, canDeleteReferent } from "../../utils";
-import api from "../../services/api";
-import { apiURL } from "../../config";
-import Panel from "./panel";
-import Loader from "../../components/Loader";
-const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT"];
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
-import ExportComponent from "../../components/ExportXlsx";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import plausibleEvent from "../../services/plausible";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
+import Chevron from "../../components/Chevron";
+import ExportComponent from "../../components/ExportXlsx";
+import { DepartmentFilter, RegionFilter } from "../../components/filters";
+import { ActionBox, Filter, FilterRow, Header, MultiLine, ResultTable, Table, Title } from "../../components/list";
+import Loader from "../../components/Loader";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
+import { apiURL } from "../../config";
+import { setUser } from "../../redux/auth/actions";
+import api from "../../services/api";
+import plausibleEvent from "../../services/plausible";
+import { canDeleteReferent, canUpdateReferent, ES_NO_LIMIT, formatLongDateFR, formatStringLongDate, getFilterLabel, ROLES, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
+import Panel from "./panel";
+
+const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT", "COHORT"];
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -179,6 +180,22 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fonction")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Cohorte"
+                  componentId="COHORT"
+                  dataField="cohorts.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
                 />
                 <DeleteFilters />
               </FilterRow>
