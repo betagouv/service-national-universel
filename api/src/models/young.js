@@ -282,6 +282,7 @@ const Schema = new mongoose.Schema({
   statusPhase1Tmp: {
     type: String,
     enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
+    // ! Petit commentaire comme quoi WITHDRAWN est devenu legacy ici ?
     documentation: {
       description: "Statut du volontaire lié à la première phase",
     },

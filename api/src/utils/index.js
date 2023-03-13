@@ -427,6 +427,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
 
     young.set({ statusPhase2UpdatedAt: Date.now() });
 
+    // ! Comment on gère ici ?
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
       // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
       young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
