@@ -5,19 +5,48 @@ import api from "../../../../services/api";
 
   3 GRANDS cas de filtres : 
 
-  - Filtre simple ex : { title: "Statut", name: "statut", datafield: "status.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée", translate: translate },
-  - Filtre avec custom query ex : { title: "Type de mission", name: "type", datafield: "type.keyword", parentGroup: "Ligne de Bus", missingLabel: "Non renseignée", customQuery: (value) => customQuery(value), translate: translate },
-  - Filtre avec custom component ex : { 
-      title: "Type de mission", 
-      name: "type", datafield: "type.keyword", 
-      parentGroup: "Ligne de Bus",
-      missingLabel: "Non renseignée", 
-      customComponent: (setQuery, filter) => <CustomComponent setQuery={setQuery} value={filter} />,
-      getQuery: (value) => getQuery(value), translate: translate 
-    },
+  - Filtre simple ex : 
+  { 
+    title: "Statut", 
+    name: "statut", 
+    datafield: "status.keyword", 
+    parentGroup: "Ligne de Bus", 
+    missingLabel: "Non renseignée", 
+    translate: translate,
+    defaultValue: ["value par défaut 1", "value par défaut 2", ...]
+    isSingle: true/false (si true, le filtre ne peut avoir qu'une seule valeur)
+  },
+  - Filtre avec custom query ex : 
+  { 
+    title: "Type de mission", 
+    name: "type", 
+    datafield: "type.keyword", 
+    parentGroup: "Ligne de Bus", m
+    issingLabel: "Non renseignée", 
+    customQuery: (value) => customQuery(value), 
+    translate: translate 
+  },
 
-  Les customs components doivent être définis dans customFilter/index.js. Pour un custom component les querys sont gérées dans le composant lui même.
+  transformData: prend en paramètre { key: <string>, doc_count: <number> } et doit retourner { key: <string>, doc_count: <number> }
+  customQuery: prend en paramètre <string> et doit retourner { query: <object>, aggregations: <object> }
 
+
+  - Filtre avec custom component ex : 
+  { 
+    title: "Type de mission", 
+    name: "type", datafield: "type.keyword", 
+    parentGroup: "Ligne de Bus",
+    missingLabel: "Non renseignée", 
+    customComponent: (setQuery, filter) => <CustomComponent setQuery={setQuery} value={filter} />,
+    getQuery: (value) => getQuery(value), translate: translate,
+  },
+
+  Pour un custom component les querys sont gérées dans le composant lui même.
+
+  /!\
+  Un custom component doit avoir/exporter : 
+    - une fonction getQuery
+    - le composent lui même
     
   - Query vers ES pour récupérer les données + aggregations
       const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected)

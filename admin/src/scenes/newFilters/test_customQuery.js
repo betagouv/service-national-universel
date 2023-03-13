@@ -96,6 +96,7 @@ export default function test_volontaire() {
       missingLabel: "Non renseigné",
       translate: (value) => translateStatus(value),
       defaultValue: ["ACCEPTED", "REJECTED"],
+      isSingle: true,
     },
   ];
 
