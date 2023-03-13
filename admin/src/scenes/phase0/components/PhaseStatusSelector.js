@@ -41,13 +41,13 @@ export default function PhaseStatusSelector({ young, onChange }) {
     let tags;
     switch (statusOpened) {
       case 1:
-        tags = ["AFFECTED", "WAITING_AFFECTATION", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN"]; //"WAITING_LIST", "WAITING_ACCEPTATION", "CANCEL"
+        tags = ["AFFECTED", "WAITING_AFFECTATION", "EXEMPTED", "DONE", "NOT_DONE"]; //"WAITING_LIST", "WAITING_ACCEPTATION", "CANCEL", "WITHDRAWN"
         break;
       case 2:
-        tags = ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"];
+        tags = ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"]; //, "WITHDRAWN"
         break;
       case 3:
-        tags = ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"];
+        tags = ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"]; //, "WITHDRAWN"
         break;
       default:
         tags = [];
