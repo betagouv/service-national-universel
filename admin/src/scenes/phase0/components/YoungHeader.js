@@ -44,7 +44,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+            if (user.role === ROLES.REFERENT_DEPARTMENT) {
+              options = [YOUNG_STATUS.WITHDRAWN];
+            } else {
+              options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+            }
             break;
           case YOUNG_STATUS.WITHDRAWN:
             if (user.role === ROLES.ADMIN) {
