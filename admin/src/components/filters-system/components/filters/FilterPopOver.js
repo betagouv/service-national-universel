@@ -23,6 +23,8 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
   }, [search]);
 
   const handleSelect = (value) => {
+    // check si c'est un isSingle (un seul filtre possible)
+    if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [value] } });
     let newFilters = [];
     // store localement les filtres
     if (selectedFilters[filter?.name]) {
