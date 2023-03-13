@@ -123,15 +123,18 @@ export default function Filters({
   };
 
   // text for tooltip save
-  const saveTitle = Object.keys(selectedFilters).map((key) => {
-    if (key === "searchbar") {
-      if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
-      return;
-    }
-    if (selectedFilters[key]?.filter?.length > 0) {
-      return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
-    }
-  });
+  const saveTitle = Object.keys(selectedFilters)
+    .map((key) => {
+      if (key === "searchbar") {
+        if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
+        return;
+      }
+      if (selectedFilters[key]?.filter?.length > 0) {
+        console.log(selectedFilters[key]?.filter, selectedFilters[key]?.filter.length);
+        return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
+      }
+    })
+    .filter((item) => item !== undefined);
 
   const getDBFilters = async () => {
     try {

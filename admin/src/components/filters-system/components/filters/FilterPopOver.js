@@ -90,7 +90,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="mx-3 px-3 py-2 bg-gray-100 rounded-lg mb-2 placeholder:text-gray-600 text-sm text-gray-900"
+                        className="mx-3 px-3 py-2 bg-gray-100 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900 truncate"
                         placeholder={`Rechercher un(e) ${filter?.title.toLowerCase()}...`}
                       />
                       <div className="flex flex-col max-h-[400px] overflow-y-auto">
