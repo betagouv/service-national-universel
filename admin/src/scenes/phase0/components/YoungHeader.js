@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { canViewEmailHistory, canViewNotes, ROLES, SENDINBLUE_TEMPLATES, translate, WITHRAWN_REASONS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
+import { canViewEmailHistory, canViewNotes, ROLES, SENDINBLUE_TEMPLATES, translate, translateInscriptionStatus, WITHRAWN_REASONS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
 import Bin from "../../../assets/Bin";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import History from "../../../assets/icons/History";
@@ -60,7 +60,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
             break;
         }
       }
-      setStatusOptions(options.map((opt) => ({ value: opt, label: translate(opt) })));
+      setStatusOptions(options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) })));
     } else {
       setStatusOptions([]);
     }
@@ -301,7 +301,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               mode="edition"
               name="status"
               label={translate(phase)}
-              value={young.status}
+              value={translateInscriptionStatus(young.status)}
               transformer={translate}
               type="select"
               options={statusOptions}
