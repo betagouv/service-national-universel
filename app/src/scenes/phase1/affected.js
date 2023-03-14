@@ -6,24 +6,30 @@ import { AlertBoxInformation } from "../../components/Content";
 import api from "../../services/api";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import { RiErrorWarningLine } from "react-icons/ri";
+import { getCohortDetail } from "../../utils/cohorts.js";
 
 import ChangeStayLink from "./components/ChangeStayLink.js";
 import FaqAffected from "./components/FaqAffected.js";
 import Loader from "../../components/Loader";
 import StepsAffected from "./components/StepsAffected";
+import dayjs from "dayjs";
+import LongArrow from "../../assets/icons/LongArrow.js";
+import SnuBackPack from "../../assets/SnuBackPack.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
+  console.log("🚀 ~ file: affected.js:19 ~ Affected ~ meetingPoint:", meetingPoint);
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const cohortDetails = getCohortDetail(young.cohort);
   const areStepsDone =
     young && young.meetingPointId && young.youngPhase1Agreement === "true" && young.convocationFileDownload === "true" && young.cohesionStayMedicalFileDownload === "true";
   console.log("🚀 ~ file: affected.js:22 ~ Affected ~ areStepsDone:", areStepsDone);
 
   const getMeetingPoint = async () => {
-    const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement`);
+    const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
     if (!ok) setMeetingPoint(null);
     setMeetingPoint(data);
   };
@@ -54,7 +60,7 @@ export default function Affected() {
 
   return (
     <div className="md:m-10">
-      <div className="max-w-[80rem] rounded-xl shadow my-0 md:mx-auto px-4 md:!px-8 lg:!px-16 py-8 relative overflow-hidden justify-between bg-gray-50 md:bg-white mb-4">
+      <div className="max-w-[80rem] rounded-xl shadow my-0 md:mx-auto px-4 md:!px-8 lg:!px-16 py-8 lg:!py-16 relative overflow-hidden justify-between bg-gray-50 md:bg-white mb-4">
         {showInfoMessage ? (
           <AlertBoxInformation
             title="Information"
@@ -75,18 +81,16 @@ export default function Affected() {
               </div>
 
               <LieuAffectation center={center} />
-              <ResumeDuVoyage open={areStepsDone} />
             </article>
-            {/* <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} /> */}
+
+            <div className="flex flex-col md:flex-row gap-12 md:gap-32">
+              <ResumeDuVoyage open={areStepsDone} meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+              <DansMonSac open={areStepsDone} />
+            </div>
           </section>
           <StepsAffected young={young} center={center} meetingPoint={meetingPoint} />
 
-          {/* FAQ */}
           <FaqAffected />
-          {/* Files */}
-          {/* <div className="bg-white py-6 -mx-6 px-4 rounded-lg">
-                <Files young={young} />
-              </div>*/}
         </div>
       </div>
       <div className="flex justify-end pt-4 pb-8 pr-8">
@@ -147,6 +151,104 @@ function LieuAffectation({ center }) {
   );
 }
 
-function ResumeDuVoyage({ open }) {
-  return <div className={`${open ? "h-auto" : "h-0"}`}>Wesh</div>;
+function ResumeDuVoyage({ open, meetingPoint, cohortDetails }) {
+  if (!meetingPoint || !cohortDetails) {
+    return <></>;
+  }
+
+  return (
+    <div className={`${open ? "h-auto" : "h-0"}`}>
+      <h1 className="text-xl font-bold m-4">Résumé du voyage</h1>
+      <div className="border-l-4 border-gray-500 pl-4 space-y-4 my-2">
+        <div>
+          <p className="flex gap-2 items-center">
+            <strong>Aller</strong>
+            <span>
+              <LongArrow className="text-gray-500" />
+            </span>
+          </p>
+          <p className="leading-relaxed text-sm">
+            <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
+            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint.ligneToPoint.departureHour}
+            <br />
+            {meetingPoint.name},
+            <br />
+            {meetingPoint.address}
+          </p>
+        </div>
+
+        <div>
+          <p className="flex gap-2 items-center">
+            <strong>Retour</strong>
+            <span>
+              <LongArrow className="text-gray-500 rotate-180" />
+            </span>
+          </p>
+          <p className="leading-relaxed text-sm">
+            <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
+            à {meetingPoint.ligneToPoint.returnHour}
+            <br />
+            {meetingPoint.name},
+            <br />
+            {meetingPoint.address}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DansMonSac({ open }) {
+  const persistedTodo = JSON.parse(localStorage.getItem("todo")) || {
+    convocation: false,
+    identite: false,
+    sanitaire: false,
+    masques: false,
+    collation: false,
+  };
+
+  const [todo, setTodo] = useState(persistedTodo);
+
+  function handleCheck(e) {
+    setTodo({
+      ...todo,
+      [e.target.name]: e.target.checked,
+    });
+    localStorage.setItem("todo", JSON.stringify(todo));
+  }
+
+  return (
+    <div className={`relative bg-white rounded-xl shadow-nina p-4 ${open ? "h-auto" : "h-0"}`}>
+      <SnuBackPack className="absolute right-0" />
+      <h1 className="text-xl font-bold mb-4">Dans mon sac...</h1>
+      <input type="checkbox" name="convocation" id="convocation" checked={todo.convocation} onChange={handleCheck} />
+      <label htmlFor="convocation" className="ml-2">
+        Votre convocation
+      </label>
+
+      <br />
+      <input type="checkbox" name="identite" id="identite" checked={todo.identite} onChange={handleCheck} />
+      <label htmlFor="identite" className="ml-2">
+        Votre <strong>pièce d&apos;identité</strong>
+      </label>
+
+      <br />
+      <input type="checkbox" name="sanitaire" id="sanitaire" checked={todo.sanitaire} onChange={handleCheck} />
+      <label htmlFor="sanitaire" className="ml-2">
+        La <strong>fiche sanitaire</strong> complétée, sous enveloppe destinée au référent sanitaire
+      </label>
+
+      <br />
+      <input type="checkbox" name="masques" id="masques" checked={todo.masques} onChange={handleCheck} />
+      <label htmlFor="masques" className="ml-2">
+        Deux <strong>masques jetables</strong> à usage médical pour le transport en commun
+      </label>
+
+      <br />
+      <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
+      <label htmlFor="collation" className="ml-2">
+        Une <strong>collation ou un déjeuner froid</strong> pour le repas.
+      </label>
+    </div>
+  );
 }
