@@ -62,7 +62,7 @@ export default function WaitingAffectation({ young }) {
             <img src={heroBanner} />
           </div>
           <Container>
-            <section className="flex flex-col-reverse items-center justify-between lg:flex-row lg:items-center mb-8 lg:mb-0">
+            <section className="flex flex-col-reverse items-center justify-between lg:flex-row lg:items-center mb-8 lg:mb-11">
               <article>
                 <h1 className="text-2xl md:text-[44px] leading-7 md:leading-12 flex flex-col md:gap-3 md:text-5xl mb-4">
                   <span>Mon séjour de cohésion</span>
@@ -74,7 +74,7 @@ export default function WaitingAffectation({ young }) {
                     <WaitFor />
                   </div>
                   <div>
-                    <div className="flex gap-4 items-center mb-4 md:mb-1">
+                    <div className="flex gap-4 items-center mb-[1rem] md:mb-1">
                       <div className="md:hidden">
                         <WaitFor />
                       </div>
@@ -87,7 +87,7 @@ export default function WaitingAffectation({ young }) {
                   </div>
                 </div>
               </article>
-              <img src={hero2} className="hidden md:block -mt-4 -mr-4" width={437} />
+              <img src={hero2} className="hidden md:block -mr-4" width={344} />
             </section>
             <Files young={young} />
             <hr className="w-full mt-12 mb-7 mx-auto" />

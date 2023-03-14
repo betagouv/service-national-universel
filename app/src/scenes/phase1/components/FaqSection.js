@@ -12,10 +12,8 @@ const FaqSection = () => {
           answerText={
             <>
               <p className="m-0 text-sm">
-                Quelques semaines avant votre départ, vous recevrez un email pour vous indiquer que votre affectation est disponible sur votre compte volontaire.
-              </p>
-              <p className="m-0 text-sm">
-                Le séjour approche et vous ne connaissez pas votre lieu d&apos;affectation ? Pas d&apos;inquiétude, nous ne vous avons pas oublié. Les affectations sont en cours.
+                Quelques semaines avant votre départ, vous recevrez un email pour vous indiquer que votre affectation est disponible sur votre compte volontaire. Le séjour approche
+                et vous ne connaissez pas votre lieu d&apos;affectation ? Pas d&apos;inquiétude, nous ne vous avons pas oublié. Les affectations sont en cours.
               </p>
             </>
           }
@@ -26,10 +24,8 @@ const FaqSection = () => {
             <>
               <p className="m-0 text-sm">
                 Vous serez pris en charge d&apos;un point de rassemblement situé au sein de votre département jusqu&apos;à votre centre du séjour de cohésion à l&apos;aller et au
-                retour.
-              </p>
-              <p className="m-0 text-sm">
-                Si exceptionnellement vous êtes affecté au sein de votre département, vous devrez vous rendre au centre du séjour de cohésion et en revenir par vos propres moyens.
+                retour. Si exceptionnellement vous êtes affecté au sein de votre département, vous devrez vous rendre au centre du séjour de cohésion et en revenir par vos propres
+                moyens.
               </p>
             </>
           }
