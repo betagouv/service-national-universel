@@ -3,9 +3,6 @@ import { FiChevronDown, FiMail } from "react-icons/fi";
 import { RiErrorWarningFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
-import { youngCanChangeSession } from "snu-lib";
-import edit from "../../assets/editIcon.svg";
 import CheckCircleFill from "../../assets/icons/CheckCircleFill";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
@@ -18,6 +15,7 @@ import InfoConvocation from "./components/modals/InfoConvocation";
 import plausibleEvent from "../../services/plausible";
 import { capture } from "../../sentry";
 import { isCohortDone } from "../../utils/cohorts";
+import ButtonLinkPrimary from "../../components/ui/buttons/ButtonLinkPrimary";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -30,7 +28,6 @@ export default function Done() {
   const [loading, setLoading] = React.useState(false);
 
   const refAttestationButton = React.useRef();
-  const history = useHistory();
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -73,7 +70,7 @@ export default function Done() {
     <>
       {/* DESKTOP VIEW*/}
       <div className="hidden md:flex flex-col">
-        <div className="flex flex-col rounded-lg bg-white mx-4 my-8">
+        <div className="flex flex-col rounded-xl bg-white mx-4 my-8 shadow-ninaBlock">
           <div className="flex px-8 pt-4 justify-between flex-col-reverse items-start lg:!flex-row">
             <div className="flex flex-col w-full lg:w-2/3 py-5">
               <div className="flex items-center lg:items-start">
@@ -82,11 +79,6 @@ export default function Done() {
                     <div>
                       <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
                     </div>
-                    {youngCanChangeSession(young) ? (
-                      <Link to="/changer-de-sejour">
-                        <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
-                      </Link>
-                    ) : null}
                   </div>
                   <div className="text-sm leading-5 font-normal text-gray-500">
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
@@ -287,18 +279,18 @@ export default function Done() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col lg:flex-row text-center gap-4 lg:!text-left items-center rounded-lg justify-between bg-white mx-4 mb-4 px-10 py-5">
-          <div className="w-full lg:w-2/3 text-xl leading-7 font-bold">
+        <div className="flex flex-col lg:flex-row text-center gap-4 lg:!text-left items-center rounded-xl shadow-ninaBlock justify-between bg-white mx-4 mb-4 px-10 py-5">
+          <p className="w-full lg:w-2/3 text-xl leading-7 font-bold">
             Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
-          </div>
-          <button
-            className="bg-blue-600 border-[1px] border-blue-600 hover:bg-white text-white hover:!text-blue-600 text-sm leading-5 font-medium py-2 px-4 rounded-lg transition duration-100 ease-in-out"
+          </p>
+          <ButtonLinkPrimary
+            to="/phase2"
+            className="shadow-ninaBlue"
             onClick={() => {
               plausibleEvent("Phase 2/CTA - Realiser ma mission");
-              history.push("/phase2");
             }}>
             Je trouve une mission d’intérêt général
-          </button>
+          </ButtonLinkPrimary>
         </div>
       </div>
 
@@ -309,11 +301,6 @@ export default function Done() {
             <div>
               <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
             </div>
-            {youngCanChangeSession(young) ? (
-              <Link to="/changer-de-sejour">
-                <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
-              </Link>
-            ) : null}
           </div>
           <div className="text-xs leading-5 font-normal text-gray-500 mt-2">
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
@@ -510,14 +497,14 @@ export default function Done() {
           <div className="w-full lg:w-2/3 text-xl leading-7 font-bold">
             Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
           </div>
-          <button
-            className="bg-blue-600 border-[1px] border-blue-600 hover:bg-white text-white hover:!text-blue-600 text-sm leading-5 font-medium py-2 px-4 rounded-lg transition duration-100 ease-in-out"
+          <ButtonLinkPrimary
+            to="/phase2"
+            className="shadow-ninaBlue"
             onClick={() => {
-              plausibleEvent("Phase2/CTA - Realiser ma mission");
-              history.push("/phase2");
+              plausibleEvent("Phase 2/CTA - Realiser ma mission");
             }}>
             Je trouve une mission d’intérêt général
-          </button>
+          </ButtonLinkPrimary>
         </div>
       </div>
       <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} />
