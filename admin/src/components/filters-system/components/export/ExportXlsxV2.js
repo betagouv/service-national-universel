@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import LoadingButton from "../../../buttons/LoadingButton";
 import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
@@ -25,10 +25,10 @@ export default function ExportComponent({
   icon,
   filters,
   selectedFilters,
+  searchBarObject,
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const query = useRef(defaultQuery.query);
   let loading = false;
 
   const onClick = () => {
@@ -42,14 +42,10 @@ export default function ExportComponent({
     });
   };
 
-  useEffect(() => {
-    query.current = buildBody(index, selectedFilters, 1, ES_NO_LIMIT, defaultQuery, filters);
-  }, [defaultQuery]);
-
   if (exporting) {
     return (
       <Loading
-        currentQuery={query.current}
+        currentQuery={buildBody(selectedFilters, 0, ES_NO_LIMIT, defaultQuery, filters, searchBarObject).query}
         loading={loading}
         onFinish={() => {
           setExporting(false);
@@ -145,6 +141,7 @@ async function toArrayOfArray(results, transform) {
 }
 
 async function getAllResults(index, query, searchType, fieldsToExport) {
+  console.log("getAllResults", query);
   let result;
   if (searchType === "_msearch") {
     result = await api.esQuery(index, query);

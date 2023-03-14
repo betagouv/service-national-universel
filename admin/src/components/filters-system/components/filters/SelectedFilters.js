@@ -1,10 +1,10 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 
-export default function SelectedFilters({ filtersVisible, selectedFilters, handleFilterShowing }) {
+export default function SelectedFilters({ filterArray, selectedFilters, handleFilterShowing = () => null }) {
   return (
     <>
-      {filtersVisible
+      {filterArray
         .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
         .map((filter) => (
           <div

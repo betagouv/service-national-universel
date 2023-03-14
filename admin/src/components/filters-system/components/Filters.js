@@ -3,7 +3,6 @@ import React, { Fragment } from "react";
 import FilterSvg from "../../../assets/icons/Filter";
 import FilterPopOver from "./filters/FilterPopOver";
 
-import { SaveDisk } from "./filters/Save";
 import { useHistory } from "react-router-dom";
 
 import { toastr } from "react-redux-toastr";
@@ -11,9 +10,6 @@ import ViewPopOver from "./filters/ViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl } from "./filters/utils";
-
-import { SortOptionComponent } from "./filters/SortOptionComponent";
-import SelectedFilters from "./filters/SelectedFilters";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -31,8 +27,9 @@ export default function Filters({
   page = 1,
   size = 25,
   setPage,
-  sortOptions = null,
-  getSelectedFilters = null,
+  selectedFilters,
+  setSelectedFilters,
+  sortSelected = null,
 }) {
   // search for filters
   const [search, setSearch] = React.useState("");
@@ -43,7 +40,6 @@ export default function Filters({
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
   const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
-  const [selectedFilters, setSelectedFilters] = React.useState({});
 
   const [savedView, setSavedView] = React.useState([]);
 
@@ -54,8 +50,7 @@ export default function Filters({
   const ref = React.useRef(null);
   const refFilter = React.useRef(null);
 
-  const hasSomeFilterSelected = Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
-  const [sortSelected, setSortSelected] = React.useState(sortOptions ? sortOptions[0] : null);
+  const hasSomeFilterSelected = selectedFilters && Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
 
   const [firstLoad, setFirstLoad] = React.useState(true);
 
@@ -93,9 +88,9 @@ export default function Filters({
   }, [filtersVisible]);
 
   React.useEffect(() => {
+    if (!selectedFilters) return;
     getData();
     setURL();
-    if (getSelectedFilters) getSelectedFilters(selectedFilters);
   }, [selectedFilters, page, sortSelected]);
 
   const init = async () => {
@@ -133,22 +128,6 @@ export default function Filters({
     history.replace({ search: `?${currentFilterAsUrl(selectedFilters, page)}` });
   };
 
-  const saveTitle = () => {
-    const object = Object.keys(selectedFilters)
-      .map((key) => {
-        if (key === "searchbar") {
-          if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
-          return;
-        }
-        if (selectedFilters[key]?.filter?.length > 0) {
-          console.log(selectedFilters[key]?.filter, selectedFilters[key]?.filter.length);
-          return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
-        }
-      })
-      .filter((item) => item !== undefined);
-    return object;
-  };
-
   // text for tooltip save
 
   const getDBFilters = async () => {
@@ -159,25 +138,6 @@ export default function Filters({
     } catch (error) {
       console.log(error);
       toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
-    }
-  };
-
-  const saveFilter = async (name) => {
-    try {
-      const res = await api.post("/filters", {
-        page: pageId,
-        url: currentFilterAsUrl(selectedFilters, page),
-        name: name,
-      });
-      if (!res.ok) return toastr.error("Oops, une erreur est survenue");
-      toastr.success("Filtre sauvegardé avec succès");
-      getDBFilters();
-      setModalSaveVisible(false);
-      return res;
-    } catch (error) {
-      console.log(error);
-      if (error.code === "ALREADY_EXISTS") return toastr.error("Oops, le filtre existe déjà");
-      return error;
     }
   };
 
@@ -213,7 +173,9 @@ export default function Filters({
                 name={"searchbar"}
                 placeholder={searchBarObject.placeholder}
                 value={selectedFilters?.searchbar?.filter[0] || ""}
-                onChange={(e) => setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value?.trim()] } })}
+                onChange={(e) => {
+                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value?.trim()] } });
+                }}
                 className={`w-full h-full text-xs text-gray-600`}
               />
             </div>
@@ -292,14 +254,6 @@ export default function Filters({
           </Popover>
         </div>
       </div>
-
-      <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-        {/* icon de save + logique */}
-        {hasSomeFilterSelected && <SaveDisk saveTitle={saveTitle} saveFilter={saveFilter} modalSaveVisible={modalSaveVisible} setModalSaveVisible={setModalSaveVisible} />}
-        {/* Display des filtres sélectionnés */}
-        <SelectedFilters filtersVisible={filtersVisible} selectedFilters={selectedFilters} handleFilterShowing={handleFilterShowing} />
-      </div>
-      {sortOptions && <SortOptionComponent sortOptions={sortOptions} sortSelected={sortSelected} setSortSelected={setSortSelected} />}
     </div>
   );
 }

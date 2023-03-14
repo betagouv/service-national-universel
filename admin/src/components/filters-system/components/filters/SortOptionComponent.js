@@ -1,7 +1,7 @@
 import React from "react";
 import { BiChevronDown } from "react-icons/bi";
 
-export const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected }) => {
+const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const ref = React.useRef();
   const refOptions = React.useRef();
@@ -11,6 +11,7 @@ export const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected
     setIsOpen(false);
   };
   React.useEffect(() => {
+    if (!sortSelected) setSortSelected(sortOptions[0]);
     if (!ref || !refOptions) return;
     const handleClickOutside = (event) => {
       if (ref?.current && !ref.current.contains(event.target) && refOptions?.current && !refOptions.current.contains(event.target)) {
@@ -25,7 +26,7 @@ export const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected
   return (
     <div className="relative">
       <div className="flex flex-row items-center gap-2 cursor-pointer  w-fit" onClick={() => setIsOpen((isOpen) => !isOpen)} ref={ref}>
-        <div>{sortSelected.label}</div>
+        <div>{sortSelected?.label}</div>
         <BiChevronDown size={20} />
       </div>
       {isOpen && (
@@ -40,3 +41,5 @@ export const SortOptionComponent = ({ sortOptions, sortSelected, setSortSelected
     </div>
   );
 };
+
+export default SortOptionComponent;

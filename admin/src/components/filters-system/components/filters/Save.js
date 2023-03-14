@@ -2,13 +2,19 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import Field from "../../../../components/forms/Field";
 import FloppyDisk from "../../../../assets/icons/FloppyDisk";
+import { saveTitle, currentFilterAsUrl } from "./utils";
+import { toastr } from "react-redux-toastr";
+import api from "../../../../services/api";
+import { useHistory } from "react-router-dom";
 
-export const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, saveFilter }) => {
+export default function Save({ filterArray, selectedFilters, page = 1, pageId }) {
   // handle click outside
   const ref = React.useRef();
   const [nameView, setNameView] = React.useState("");
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
+  const history = useHistory();
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -25,6 +31,25 @@ export const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, sav
     if (nameView) return setError("");
   }, [nameView]);
 
+  const saveFilter = async (name) => {
+    try {
+      const res = await api.post("/filters", {
+        page: pageId,
+        url: currentFilterAsUrl(selectedFilters, page),
+        name: name,
+      });
+      if (!res.ok) return toastr.error("Oops, une erreur est survenue");
+      toastr.success("Filtre sauvegardé avec succès");
+      setModalSaveVisible(false);
+      history.go(0);
+      return res;
+    } catch (error) {
+      console.log(error);
+      if (error.code === "ALREADY_EXISTS") return toastr.error("Oops, le filtre existe déjà");
+      return error;
+    }
+  };
+
   const handleSave = async () => {
     if (loading) return;
     if (!nameView) return setError("Veuillez saisir un nom pour votre vue");
@@ -34,13 +59,17 @@ export const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, sav
     if (res.ok) setNameView("");
     setLoading(false);
   };
+  const title = saveTitle(selectedFilters, filterArray).join(", ");
+
+  // pas de titre === pas de fitlre selectionné
+  if (!title) return null;
 
   return (
     <>
       <ReactTooltip id="tooltip-saveFilter" className="bg-white !rounded-lg shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
         <div>
           <div className="text-xs text-gray-600">Enregistrer cette vue...</div>
-          <div className="text-gray-600 font-bold">{saveTitle().join(", ")}</div>
+          <div className="text-gray-600 font-bold">{saveTitle(selectedFilters, filterArray).join(", ")}</div>
         </div>
       </ReactTooltip>
       <div className="relative">
@@ -67,4 +96,4 @@ export const SaveDisk = ({ saveTitle, modalSaveVisible, setModalSaveVisible, sav
       </div>
     </>
   );
-};
+}

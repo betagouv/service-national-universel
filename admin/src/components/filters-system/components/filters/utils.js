@@ -73,7 +73,7 @@ import api from "../../../../services/api";
 
 */
 
-export const buildBody = (esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected) => {
+export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray, searchBarObject = null, sortSelected = null) => {
   let query = structuredClone(defaultQuery.query);
   let bodyQuery = {
     query: query,
@@ -130,6 +130,8 @@ export const buildBody = (esId, selectedFilters, page, size, defaultQuery, filte
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
+  console.log("bodyQuery", bodyQuery);
+
   return bodyQuery;
 };
 
@@ -167,7 +169,7 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
 };
 
 export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
-  const bodyQuery = buildBody(esId, selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
+  const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
   const resAggs = await api.esQuery(esId, bodyAggs);
@@ -292,5 +294,21 @@ const setPropertyToObject = (currentQuery, object) => {
       object.bool[key] = currentQuery.bool[key];
     }
   });
+  return object;
+};
+
+export const saveTitle = (selectedFilters, filters) => {
+  const object = Object.keys(selectedFilters)
+    .map((key) => {
+      if (key === "searchbar") {
+        if (selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.trim() !== "") return selectedFilters[key]?.filter[0];
+        return;
+      }
+      if (selectedFilters[key]?.filter?.length > 0) {
+        console.log(selectedFilters[key]?.filter, selectedFilters[key]?.filter.length);
+        return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
+      }
+    })
+    .filter((item) => item !== undefined);
   return object;
 };

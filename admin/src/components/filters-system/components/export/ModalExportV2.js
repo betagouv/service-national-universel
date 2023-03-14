@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { translate, translateField, translateIndexes, ES_NO_LIMIT } from "snu-lib";
+import { translate, translateField, translateIndexes } from "snu-lib";
 import ExportFieldCard from "../../../ExportFieldCard";
 import ModalTailwind from "../../../modals/ModalTailwind";
 import plausibleEvent from "../../../../services/plausible";
 import { capitalizeFirstLetter } from "../../../../utils";
 import ExportComponent from "./ExportXlsxV2";
-import { buildBody } from "../filters/utils";
 
-export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters, defaultQuery, filters }) {
+export default function ModalExportV2({
+  isOpen,
+  setIsOpen,
+  index,
+  transform,
+  exportFields,
+  exportTitle = "",
+  totalHits = false,
+  selectedFilters,
+  filters,
+  defaultQuery,
+  searchBarObject = null,
+}) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
   const [hasFilter, setHasFilter] = useState(false);
@@ -15,6 +26,8 @@ export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exp
   useEffect(() => {
     setHasFilter(Object.keys(selectedFilters).filter((e) => selectedFilters[e]?.filter?.length).length > 0);
   }, [selectedFilters]);
+
+  console.log(selectedFilters);
 
   return (
     <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[900px]">
@@ -25,7 +38,7 @@ export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exp
             <p className="text-center text-sm text-gray-400">Rappel des filtres appliqués</p>
             <p className="text-center text-sm text-gray-600">
               {Object.keys(selectedFilters)
-                .filter((e) => selectedFilters[e]?.filter?.length)
+                .filter((e) => selectedFilters[e]?.filter?.length && selectedFilters[e]?.filter[0] !== "")
                 .map((e) => `${translateField(e)} : ${translate(selectedFilters[e]?.filter)}`)
                 .join(" • ")}
             </p>
@@ -64,11 +77,14 @@ export default function ModalExportV2({ isOpen, setIsOpen, index, transform, exp
           <ExportComponent
             handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
             title={`Exporter les ${exportTitle || translateIndexes(index)}`}
-            defaultQuery={buildBody(index, selectedFilters, 1, ES_NO_LIMIT, defaultQuery, filters)}
+            defaultQuery={defaultQuery}
             exportTitle={exportTitle ? capitalizeFirstLetter(exportTitle) : capitalizeFirstLetter(translateIndexes(index))}
             index={index}
             transform={(data) => transform(data, selectedFields)}
             fieldsToExport={fieldsToExport}
+            selectedFilters={selectedFilters}
+            searchBarObject={searchBarObject}
+            filters={filters}
             setIsOpen={setIsOpen}
             css={{
               override: true,

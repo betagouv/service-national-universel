@@ -14,7 +14,7 @@ import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 
 import Badge from "../../components/Badge";
 
-import { Filters, ResultTable, getDefaultQuery, ModalExportV2 } from "../../components/filters-system";
+import { Filters, ResultTable, getDefaultQuery, ModalExportV2, Save, SelectedFilters, SortOptionComponent } from "../../components/filters-system";
 
 import {
   translate,
@@ -42,7 +42,7 @@ export default function test_volontaire() {
   const size = 20;
 
   // filtre non obligatoire
-  const [selectedSort, setSelectedSort] = React.useState({});
+
   const [modalExportVisible, setModalExportVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({});
 
@@ -69,6 +69,7 @@ export default function test_volontaire() {
     { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
     { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
   ];
+  const [sortSelected, setSortSelected] = React.useState(null);
 
   async function transformVolontaires(data, values) {
     let all = data;
@@ -307,22 +308,31 @@ export default function test_volontaire() {
             setPage={setPage}
             size={size}
             sortOptions={sortOptions}
-            getSelectedFilters={setSelectedFilters}
+            sortSelected={sortSelected}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
           />
         </div>
 
-        <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
+        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={page} pageId="young" />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} />
+        </div>
+        <SortOptionComponent sortOptions={sortOptions} sortSelected={sortSelected} setSortSelected={setSortSelected} />
 
+        <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
         <ModalExportV2
           isOpen={modalExportVisible}
           setIsOpen={setModalExportVisible}
           index="young"
-          selectedFilters={selectedFilters}
           defaultQuery={getDefaultQuery()}
           exportTitle="candidatures"
           showTotalHits={false}
           transform={transformVolontaires}
           exportFields={youngExportFields}
+          searchBarObject={searchBarObject}
+          selectedFilters={selectedFilters}
+          filters={filterArray}
         />
 
         <ResultTable
