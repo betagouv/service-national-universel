@@ -40,7 +40,6 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
       });
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");
       toastr.success("Filtre sauvegardé avec succès");
-      setModalSaveVisible(false);
       history.go(0);
       return res;
     } catch (error) {

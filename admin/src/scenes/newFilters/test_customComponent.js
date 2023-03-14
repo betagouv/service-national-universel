@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, ROLES, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2";
 
-import { Filters, ResultTable } from "../../components/filters-system";
+import { Filters, ResultTable, SelectedFilters, Save } from "../../components/filters-system";
 
 import FromDate, { getQuery } from "../../components/filters-system/components/customComponent/FromDate";
 import ToDate, { getQuery as getQueryToDate } from "../../components/filters-system/components/customComponent/ToDate";
@@ -45,11 +45,13 @@ export default function List() {
   const user = useSelector((state) => state.Auth.user);
 
   // States for filters
-  const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
-  const [page, setPage] = useState(0);
-  // filtre non obligatoire
-  const size = 20;
+
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    size: 20,
+    page: 0,
+  });
 
   const searchBarObject = {
     placeholder: "Rechercher une ligne (numéro, ville, region)",
@@ -121,22 +123,23 @@ export default function List() {
             pageId="mission"
             esId="mission"
             defaultQuery={getDefaultQuery()}
-            filters={filterArray}
-            setCount={setCount}
-            count={count}
             setData={(value) => setData(value)}
+            filters={filterArray}
             searchBarObject={searchBarObject}
-            page={page}
-            size={size}
-            setPage={setPage}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
           />
+          <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="mission" />
+            <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} paramData={paramData} />
+          </div>
           <div className="reactive-result">
             <ResultTable
-              setPage={setPage}
-              count={count}
+              paramData={paramData}
+              setParamData={setParamData}
               currentEntryOnPage={data?.length}
-              size={size}
-              page={page}
               render={
                 <div className="flex w-full flex-col mt-6 mb-2 divide-y divide-gray-100 border-y-[1px] border-gray-100">
                   <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 ">

@@ -37,12 +37,10 @@ import {
 
 export default function test_volontaire() {
   const [data, setData] = useState([]);
-
   const [paramData, setParamData] = useState({
     size: 20,
     page: 0,
   });
-
   // filtre non obligatoire
 
   const [modalExportVisible, setModalExportVisible] = useState(false);

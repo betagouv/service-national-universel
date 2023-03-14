@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { translateGrade } from "snu-lib";
-import { Filters, ResultTable } from "../../components/filters-system";
+import { Filters, ResultTable, SelectedFilters, Save } from "../../components/filters-system";
 
 import plausibleEvent from "../../services/plausible";
 import { useHistory, Link } from "react-router-dom";
@@ -13,10 +13,11 @@ import Comment from "../../assets/comment";
 import { getTransportIcon } from "../plan-transport/util";
 
 export default function test_volontaire() {
-  const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(20);
+  const [paramData, setParamData] = useState({
+    size: 20,
+    page: 0,
+  });
 
   const [currentTab, setCurrentTab] = React.useState("aller");
   const [selectedFilters, setSelectedFilters] = React.useState({});
@@ -117,29 +118,28 @@ export default function test_volontaire() {
   return (
     <div className="bg-white h-full">
       <div className="flex flex-col gap-8 m-4">
-        <div>{count} résultats aa</div>
+        <div>{paramData?.count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <Filters
           pageId="plandetransport"
           esId="plandetransport"
           defaultQuery={getDefaultQuery()}
-          filters={filterArray}
-          setCount={setCount}
-          count={count}
           setData={(value) => setData(value)}
+          filters={filterArray}
           searchBarObject={searchBarObject}
-          page={page}
-          size={size}
           selectedFilters={selectedFilters}
           setSelectedFilters={setSelectedFilters}
-          setPage={setPage}
+          paramData={paramData}
+          setParamData={setParamData}
         />
+        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="plandetransport" />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} paramData={paramData} />
+        </div>
         <ResultTable
-          setPage={setPage}
-          count={count}
+          paramData={paramData}
+          setParamData={setParamData}
           currentEntryOnPage={data?.length}
-          size={size}
-          page={page}
           render={
             <div className="flex w-full flex-col mt-6 mb-2">
               <hr />
