@@ -12,7 +12,7 @@ const FaqSection = () => {
           answerText={
             <>
               <p className="m-0 text-sm">
-                Dans les semaines qui précèdent le départ, vous recevrez un email dès que votre affectation sera disponible sur votre compte volontaire.
+                Quelques semaines avant votre départ, vous recevrez un email pour vous indiquer que votre affectation est disponible sur votre compte volontaire.
               </p>
               <p className="m-0 text-sm">
                 Le séjour approche et vous ne connaissez pas votre lieu d&apos;affectation ? Pas d&apos;inquiétude, nous ne vous avons pas oublié. Les affectations sont en cours.
@@ -39,8 +39,8 @@ const FaqSection = () => {
           questionText="Pourquoi est-ce que je ne peux pas demander à être avec un(e) ami(e) ?"
           answerText={
             <p className="m-0 text-sm">
-              Les principes du SNU étant la mixité et le brassage social et territorial, il n&pos;est pas possible de constituer des binômes ou des équipes définies. Rassurez-vous,
-              tous les volontaires sont dans la même situation. Vous verrez, vous vous lierez d&apos;amitié rapidement avec d&apos;autres volontaires sur place !
+              Les principes du SNU étant la mixité et le brassage social et territorial, il n&apos;est pas possible de constituer des binômes ou des équipes définies.
+              Rassurez-vous, tous les volontaires sont dans la même situation. Vous verrez, vous vous lierez d&apos;amitié rapidement avec d&apos;autres volontaires sur place !
             </p>
           }
         />
@@ -50,7 +50,9 @@ const FaqSection = () => {
           target="_blank"
           rel="noreferrer">
           <span className="font-bold">J&apos;ai des questions sur le séjour</span>
-          <ArrowUpRight />
+          <span className="text-gray-400">
+            <ArrowUpRight />
+          </span>
         </a>
       </div>
     </section>

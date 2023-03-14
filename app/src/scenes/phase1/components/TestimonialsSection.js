@@ -15,7 +15,7 @@ const TestimonialsSection = () => {
       readingTime: "1mn de lecture",
     },
     {
-      title: "A votre avis quelle la meilleure raison d'avoir fait le SNU pour Judie et Mehdy&nbsp?",
+      title: "A votre avis quelle est la meilleure raison d'avoir fait le SNU pour Judie et Mehdy ?",
       description: "Judie et Mehdi vous parlent de tous les bénéfices de faire le SNU.",
       picture: temoignageJulie,
       link: "https://www.snu.gouv.fr/a-votre-avis-quelle-la-meilleure-raison-davoir-fait-le-snu-pour-judie-et-mehdy/",
@@ -23,15 +23,15 @@ const TestimonialsSection = () => {
       isVideo: true,
     },
     {
-      title: "Le SNU s'adresse bien à tous selon Samuel, Leïla et Élisa.",
-      description: "Samuel, Leïla et Élisa vous expliquent pourquoi vous inscrire au SNU.",
+      title: "Activité Théâtre pour Elly",
+      description: "Pour moi, le SNU est un engagement important, basé sur un principe de solidarité entre camarades et encadrants. Il permet de tisser des liens...",
       picture: temoignageElly,
       link: "https://www.snu.gouv.fr/activite-theatre-pour-elly/",
       readingTime: "1mn de lecture",
     },
     {
-      title: "Oriane et Maëlle racontent leur jour 1",
-      description: "Pas facile d'arriver sans repère et sans connaissance mais dès l'installation dans nos chambres, nous avons rencontré nos...",
+      title: "Le SNU s'adresse bien à tous selon Samuel, Leïla et Élisa.",
+      description: "Samuel, Leïla et Élisa vous expliquent pourquoi vous inscrire au SNU.",
       picture: temoignageLeilaSamuelElisa,
       link: "https://www.snu.gouv.fr/aucun-doute-la-snu-sadresse-bien-a-tous-selon-samuel-leila-et-elisa/",
       readingTime: "24 secondes",
