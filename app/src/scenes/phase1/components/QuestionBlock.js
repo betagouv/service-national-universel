@@ -13,7 +13,7 @@ const QuestionBlock = ({ questionText = "", answerText = "", readMoreLink = null
             <ChevronDown />
           </span>
         </Disclosure.Button>
-        <Disclosure.Panel className="text-gray-500 pb-[22px] px-6">
+        <Disclosure.Panel className="text-gray-900 pb-[22px] px-6">
           {answerText}
           {readMoreLink && (
             <div className="flex justify-end pt-2">
