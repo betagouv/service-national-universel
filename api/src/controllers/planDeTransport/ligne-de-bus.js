@@ -340,6 +340,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
       ...pointDeRassemblement._doc,
       busArrivalHour: ligneToPoint.busArrivalHour,
       meetingHour: ligneToPoint.meetingHour,
+      departureHour: ligneToPoint.departureHour,
       returnHour: ligneToPoint.returnHour,
       transportType: ligneToPoint.transportType,
     });
