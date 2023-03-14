@@ -70,7 +70,7 @@ export default function WaitingAffectation({ young }) {
                 </h1>
                 {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
                 <div className="bg-white drop-shadow border-[1px] border-gray-200 p-[22px] flex gap-4 items-center rounded-lg max-w-[688px]">
-                  <div className="hidden w-[42px] h-[42px]">
+                  <div className="hidden md:block w-[42px] h-[42px]">
                     <WaitFor />
                   </div>
                   <div>
