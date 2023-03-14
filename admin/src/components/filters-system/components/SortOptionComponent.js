@@ -7,7 +7,7 @@ const SortOptionComponent = ({ sortOptions, paramData, setParamData }) => {
   const refOptions = React.useRef();
 
   const handleClick = (value) => {
-    setParamData((old) => ({ ...old, sort: value.value }));
+    setParamData((old) => ({ ...old, sort: value }));
     setIsOpen(false);
   };
   React.useEffect(() => {
