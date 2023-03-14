@@ -2,24 +2,11 @@ import React from "react";
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import QuestionBlock from "./QuestionBlock";
 
-const FaqSection = () => {
+const FaqAffected = () => {
   return (
     <section className="mb-14">
       <h2 className="font-bold text-xl m-0 mb-4">F.A.Q</h2>
       <div className="flex flex-col gap-4">
-        <QuestionBlock
-          questionText="Quand vais-je connaître mon lieu d'affectation ?"
-          answerText={
-            <>
-              <p className="m-0 text-sm">
-                Quelques semaines avant votre départ, vous recevrez un email pour vous indiquer que votre affectation est disponible sur votre compte volontaire.
-              </p>
-              <p className="m-0 text-sm">
-                Le séjour approche et vous ne connaissez pas votre lieu d&apos;affectation ? Pas d&apos;inquiétude, nous ne vous avons pas oublié. Les affectations sont en cours.
-              </p>
-            </>
-          }
-        />
         <QuestionBlock
           questionText="Comment se passe le transport ?"
           answerText={
@@ -35,15 +22,18 @@ const FaqSection = () => {
           }
           readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/le-transport"
         />
+
         <QuestionBlock
-          questionText="Pourquoi est-ce que je ne peux pas demander à être avec un(e) ami(e) ?"
+          questionText="Que prendre dans ma valise ?"
           answerText={
-            <p className="m-0 text-sm">
-              Les principes du SNU étant la mixité et le brassage social et territorial, il n&apos;est pas possible de constituer des binômes ou des équipes définies.
-              Rassurez-vous, tous les volontaires sont dans la même situation. Vous verrez, vous vous lierez d&apos;amitié rapidement avec d&apos;autres volontaires sur place !
+            <p>
+              Une tenue complète vous sera donnée à votre arrivée sur le centre de séjour. Cette tenue est à compléter avec vos effets personnels. Vous pouvez consulter la liste
+              des affaires à apporter en cliquant sur “Lire plus”.
             </p>
           }
+          readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/dans-ma-valise-materiel-trousseau"
         />
+
         <a
           className="rounded-lg border-[1px] border-gray-200 py-[22px] px-6 flex justify-between w-full items-center hover:text-inherit"
           href="https://support.snu.gouv.fr/base-de-connaissance/phase-1-le-sejour-de-cohesion"
@@ -54,9 +44,20 @@ const FaqSection = () => {
             <ArrowUpRight />
           </span>
         </a>
+
+        <a
+          className="rounded-lg border-[1px] border-gray-200 py-[22px] px-6 flex justify-between w-full items-center hover:text-inherit"
+          href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur-2022-2023.pdf"
+          target="_blank"
+          rel="noreferrer">
+          <span className="font-bold">Lire le règlement intérieur</span>
+          <span className="text-gray-400">
+            <ArrowUpRight />
+          </span>
+        </a>
       </div>
     </section>
   );
 };
 
-export default FaqSection;
+export default FaqAffected;
