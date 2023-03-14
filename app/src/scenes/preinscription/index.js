@@ -53,16 +53,6 @@ export default function Index() {
 
   if (young) return <Redirect to="/" />;
 
-  if (environment === "production")
-    return (
-      <PreInscriptionContextProvider>
-        <Switch>
-          <SentryRoute path="/preinscription/:step" component={Step} />;
-          <SentryRoute path="/preinscription" component={Step} />;
-        </Switch>
-      </PreInscriptionContextProvider>
-    );
-
   return (
     <PreInscriptionContextProvider>
       <div className="flex flex-col min-h-screen justify-between bg-beige-gris-galet-975">
