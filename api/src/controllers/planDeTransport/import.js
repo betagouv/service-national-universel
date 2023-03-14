@@ -503,6 +503,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             meetingPointId: ltp.meetingPointId,
             busArrivalHour: ltp.busArrivalHour,
             meetingHour: ltp.meetingHour,
+            departureHour: ltp.departureHour,
             returnHour: ltp.returnHour,
             transportType: ltp.transportType,
           });

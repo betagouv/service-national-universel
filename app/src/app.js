@@ -4,13 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
 import queryString from "query-string";
-import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
 
-import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Header from "./components/header/index";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -48,7 +45,6 @@ import { appURL, environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
 import { toastr } from "react-redux-toastr";
-import GoogleTags from "./components/GoogleTags";
 import "./index.css";
 import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
@@ -136,7 +132,6 @@ export default function App() {
 }
 
 const Espace = () => {
-  const [menuVisible, setMenuVisible] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalResume, setModalResume] = useState(false);
 
@@ -189,49 +184,6 @@ const Espace = () => {
     (inscriptionModificationOpenForYoungs(young.cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
-  if (environment === "production") {
-    return (
-      <>
-        <div style={{ display: "flex" }}>
-          <Drawer open={menuVisible} onOpen={setMenuVisible} />
-          <Content>
-            <Header
-              onClickBurger={() => {
-                setMenuVisible(!menuVisible);
-              }}
-            />
-            <Switch>
-              <SentryRoute path="/account" component={Account} />
-              <SentryRoute path="/phase1" component={Phase1} />
-              <SentryRoute path="/phase2" component={Phase2} />
-              <SentryRoute path="/phase3" component={Phase3} />
-              <SentryRoute path="/les-programmes" component={Engagement} />
-              <SentryRoute path="/preferences" component={Preferences} />
-              <SentryRoute path="/mission" component={Missions} />
-              <SentryRoute path="/candidature" component={Candidature} />
-              <SentryRoute path="/desistement" component={Desistement} />
-              <SentryRoute path="/diagoriente" component={Diagoriente} />
-              {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-              {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-              <SentryRoute path="/" component={Home} />
-            </Switch>
-          </Content>
-          <ModalCGU
-            isOpen={modal?.isOpen}
-            title={modal?.title}
-            message={modal?.message}
-            confirmText={modal?.confirmText}
-            onConfirm={() => {
-              modal?.onConfirm();
-              setModal({ isOpen: false, onConfirm: null });
-            }}
-          />
-          <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
       <div className="fixed top-0 left-0 z-10 right-0 md:right-auto  w-screen md:w-64">
@@ -283,15 +235,3 @@ function ScrollToTop() {
 
   return null;
 }
-
-const Content = styled.div`
-  margin-left: auto;
-  width: 85%;
-  max-width: calc(100% - 250px);
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 0;
-    overflow-x: hidden;
-    max-width: 100%;
-  }
-`;

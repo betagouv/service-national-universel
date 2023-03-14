@@ -25,6 +25,7 @@ import ModalWithdrawn from "./modals/ModalWithdrawn";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 import ModalConfirmMultiAction from "./modals/ModalConfirmMultiAction";
+import { translateInscriptionStatus } from "snu-lib";
 
 const lookUpAuthorizedStatus = ({ status, role }) => {
   switch (status) {
@@ -175,6 +176,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       return translatePhase1(status);
     } else if (statusName === "statusPhase2") {
       return translatePhase2(status);
+    } else if (statusName === "status") {
+      return translateInscriptionStatus(status);
     } else {
       return translate(status);
     }

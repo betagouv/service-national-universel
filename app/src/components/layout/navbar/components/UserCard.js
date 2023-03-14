@@ -12,10 +12,14 @@ export default function User() {
   const menuRef = React.useRef();
   const buttonRef = React.useRef();
 
+  function onClose() {
+    setOpen(false);
+    document.removeEventListener("click", handleClickOutside, true);
+  }
+
   function handleClick() {
     if (open) {
-      setOpen(false);
-      document.removeEventListener("click", handleClickOutside, true);
+      onClose();
     } else {
       setOpen(true);
       document.addEventListener("click", handleClickOutside, true);
@@ -30,8 +34,7 @@ export default function User() {
 
   function handleClickOutside(event) {
     if (isOutside(event)) {
-      setOpen(false);
-      document.removeEventListener("click", handleClickOutside, true);
+      onClose();
     }
   }
 
@@ -52,12 +55,12 @@ export default function User() {
           <ChevronDown />
         </button>
       </div>
-      <Menu open={open} menuRef={menuRef} user={user} />
+      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} />
     </>
   );
 }
 
-function Menu({ open, menuRef, user }) {
+function Menu({ open, menuRef, user, onClose }) {
   const dispatch = useDispatch();
 
   async function logout() {
@@ -68,14 +71,14 @@ function Menu({ open, menuRef, user }) {
   return (
     <nav
       className={`rounded-lg w-56 bg-white transition-all absolute left-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
-        open ? `h-${permissionPhase2(user) ? "28" : "20"}` : "h-0"
+        open ? (permissionPhase2(user) ? "h-28" : "h-20") : "h-0"
       }`}
       ref={menuRef}>
-      <Link to="/account" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+      <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
         Mon profil
       </Link>
       {permissionPhase2(user) && (
-        <Link to="/preferences" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+        <Link to="/preferences" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
           Mes préférences de mission
         </Link>
       )}

@@ -28,7 +28,7 @@ export default function WaitingList() {
                   <Check className="text-gray-600" />
                 </div>
                 <div className="text-[#6B7280] text-sm leading-5 flex-1">
-                  Votre dossier a été traité. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel. Vous
+                  Votre dossier a été validé. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel. Vous
                   pouvez également vous positionner sur un autre séjour dès maintenant.
                 </div>
               </div>
@@ -64,7 +64,7 @@ export default function WaitingList() {
                 <Check className="text-gray-600" />
               </div>
               <div className="text-[#738297] text-sm flex-1">
-                Votre dossier a été traité. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel. Vous
+                Votre dossier a été validé. L’administration du SNU vous contactera au plus vite pour vous informer de votre participation au Service National Universel. Vous
                 pouvez également vous positionner sur un autre séjour dès maintenant.
               </div>
             </div>

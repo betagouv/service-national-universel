@@ -1,3 +1,26 @@
+# [1.232.0](https://github.com/betagouv/service-national-universel/compare/v1.231.0...v1.232.0) (2023-03-13)
+
+
+### Bug Fixes
+
+* **admin:** referent dep liste statut ([60df9f0](https://github.com/betagouv/service-national-universel/commit/60df9f07cf048391db1e173e1f1061b196705c25))
+* **api:** Correction du bug supprimant les cohortes des invités ([#2359](https://github.com/betagouv/service-national-universel/issues/2359)) ([010984d](https://github.com/betagouv/service-national-universel/commit/010984d45e5eaa326ab9ce79d3860cb5656c3257))
+* **api:** correction du style de la convocation et correction des infos concernant le déjeuner à l'aller ([#2343](https://github.com/betagouv/service-national-universel/issues/2343)) ([067a949](https://github.com/betagouv/service-national-universel/commit/067a949ced765a16601e8d30451c8d76bbc51edc))
+* **api/admin:** WITHDRAW logic ([#2357](https://github.com/betagouv/service-national-universel/issues/2357)) ([93024cc](https://github.com/betagouv/service-national-universel/commit/93024cca3d88fa93510f9925dcc2dd26f781860f))
+* **app:** change font size not done ([b807965](https://github.com/betagouv/service-national-universel/commit/b807965b8af7f4a9c4e062f0add17aac26790759))
+* **app:** refonte de la page en attente d’affectation ([#2346](https://github.com/betagouv/service-national-universel/issues/2346)) ([5a98cdd](https://github.com/betagouv/service-national-universel/commit/5a98cdd4f03a6f0a9a9313569feeec6e371cd65e))
+* **app:** retours navbars part 2 ([87975da](https://github.com/betagouv/service-national-universel/commit/87975da4f7334b856be767e8e7e9640b39767959))
+* **app:** Retours sur nouvelle navbar ([#2348](https://github.com/betagouv/service-national-universel/issues/2348)) ([0f51293](https://github.com/betagouv/service-national-universel/commit/0f51293579d8f2f1d53c89b8c9a1c3498b0717ee))
+* **deploy:** Do not triger staging api on pull request ([34ed791](https://github.com/betagouv/service-national-universel/commit/34ed7919172e61b193feef284d15855e5aa2d265))
+* **deploy:** Notif slack api staging ([9842e21](https://github.com/betagouv/service-national-universel/commit/9842e214cf477d0a838ed2499de0aa8ffbaee3dd))
+* **kb:** Disable Sentry for KB ([988fac2](https://github.com/betagouv/service-national-universel/commit/988fac2dcb62b2064f68424ba59526efe9a2fa5e))
+
+
+### Features
+
+* **admin:** refacto page settings ([#2349](https://github.com/betagouv/service-national-universel/issues/2349)) ([1f21995](https://github.com/betagouv/service-national-universel/commit/1f21995f79eff2873d7bdf22effecde5f906aed8))
+* **admin:** Search for parents emails as well ([dd31998](https://github.com/betagouv/service-national-universel/commit/dd31998f90899f3439a08207f7a2c65073af8028))
+
 # [1.231.0](https://github.com/betagouv/service-national-universel/compare/v1.230.0...v1.231.0) (2023-03-10)
 
 
