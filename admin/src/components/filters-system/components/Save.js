@@ -1,10 +1,10 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
-import Field from "../../../../components/forms/Field";
-import FloppyDisk from "../../../../assets/icons/FloppyDisk";
-import { saveTitle, currentFilterAsUrl } from "./utils";
+import Field from "../../forms/Field";
+import FloppyDisk from "../../../assets/icons/FloppyDisk";
+import { saveTitle, currentFilterAsUrl } from "./filters/utils";
 import { toastr } from "react-redux-toastr";
-import api from "../../../../services/api";
+import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
 
 export default function Save({ filterArray, selectedFilters, page = 1, pageId }) {

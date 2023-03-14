@@ -39,7 +39,6 @@ export default function Filters({
   const [dataFilter, setDataFilter] = React.useState([]);
   const [filtersVisible, setFiltersVisible] = React.useState(filters);
   const [categories, setCategories] = React.useState([]);
-  const [modalSaveVisible, setModalSaveVisible] = React.useState(false);
 
   const [savedView, setSavedView] = React.useState([]);
 
@@ -160,7 +159,6 @@ export default function Filters({
 
   const handleFilterShowing = (value) => {
     setIsShowing(value);
-    setModalSaveVisible(false);
   };
 
   return (
