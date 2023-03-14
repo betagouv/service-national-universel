@@ -124,6 +124,9 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (err) {
     capture(err);
+    if (err.code === 11000) {
+      return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+    }
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });

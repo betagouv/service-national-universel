@@ -600,10 +600,12 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
           setSectionMode(globalMode);
           onChange();
         } else {
+          if (result.code === "ALREADY_EXISTS") {
+            return toastr.error("Erreur !", "Email déjà existant.");
+          }
           toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
         }
       } catch (err) {
-        console.log(err);
         toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
       }
     }
