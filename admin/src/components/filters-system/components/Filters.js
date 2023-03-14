@@ -15,22 +15,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Filters({
-  esId,
-  pageId,
-  filters,
-  defaultQuery,
-  count,
-  setCount,
-  searchBarObject = null,
-  setData,
-  page = 1,
-  size = 25,
-  setPage,
-  selectedFilters,
-  setSelectedFilters,
-  sortSelected = null,
-}) {
+export default function Filters({ esId, pageId, filters, defaultQuery, searchBarObject = null, setData, selectedFilters, setSelectedFilters, paramData, setParamData }) {
   // search for filters
   const [search, setSearch] = React.useState("");
 
@@ -90,13 +75,14 @@ export default function Filters({
     if (!selectedFilters) return;
     getData();
     setURL();
-  }, [selectedFilters, page, sortSelected]);
+  }, [selectedFilters, paramData.page, paramData.sort]);
 
   const init = async () => {
     // load des defaults value des filtres
     const defaultFilters = getDefaultFilters();
-    const initialFilters = getURLParam(urlParams, setPage, filters);
+    const initialFilters = getURLParam(urlParams, setParamData, filters);
     setSelectedFilters({ ...defaultFilters, ...initialFilters });
+    setParamData((paramData) => ({ ...paramData, handleFilterShowing: (value) => handleFilterShowing(value) }));
   };
 
   const getDefaultFilters = () => {
@@ -114,17 +100,20 @@ export default function Filters({
   };
 
   const getData = async () => {
-    const res = await buildQuery(esId, selectedFilters, page, size, defaultQuery, filters, searchBarObject, sortSelected);
+    const res = await buildQuery(esId, selectedFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
-    setCount(res.count);
-    if (count !== res.count && !firstLoad) setPage(0);
+    const newParamData = {
+      count: res.count,
+    };
+    if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
+    setParamData((paramData) => ({ ...paramData, ...newParamData }));
     setData(res.data);
     if (firstLoad) setFirstLoad(false);
   };
 
   const setURL = () => {
-    history.replace({ search: `?${currentFilterAsUrl(selectedFilters, page)}` });
+    history.replace({ search: `?${currentFilterAsUrl(selectedFilters, paramData?.page)}` });
   };
 
   // text for tooltip save

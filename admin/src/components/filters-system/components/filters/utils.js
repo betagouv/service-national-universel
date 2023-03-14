@@ -168,7 +168,15 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
   return bodyAggs;
 };
 
-export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+  console.log("selectedFilters", selectedFilters);
+  console.log("page", page);
+  console.log("size", size);
+  console.log("defaultQuery", defaultQuery);
+  console.log("filterArray", filterArray);
+  console.log("searchBarObject", searchBarObject);
+  console.log("sortSelected", sortSelected);
+
   const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
@@ -197,12 +205,14 @@ export const buildQuery = async (esId, selectedFilters, page, size, defaultQuery
   return { data, count, newFilters };
 };
 
-export const getURLParam = (urlParams, setPage, filters) => {
+export const getURLParam = (urlParams, setParamData, filters) => {
   const localFilters = {};
   urlParams.forEach((value, key) => {
     if (key === "page") {
       const int = parseInt(value.split(",")[0]);
-      setPage(int - 1);
+      setParamData((paramData) => {
+        return { ...paramData, page: int - 1 };
+      });
     } else {
       // on check si c'est un custom component
       const customComponent = filters.find((f) => f.name === key);

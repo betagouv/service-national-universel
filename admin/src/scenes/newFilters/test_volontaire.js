@@ -36,10 +36,12 @@ import {
 } from "../../utils";
 
 export default function test_volontaire() {
-  const [count, setCount] = useState(0);
   const [data, setData] = useState([]);
-  const [page, setPage] = useState(0);
-  const size = 20;
+
+  const [paramData, setParamData] = useState({
+    size: 20,
+    page: 0,
+  });
 
   // filtre non obligatoire
 
@@ -69,7 +71,6 @@ export default function test_volontaire() {
     { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
     { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
   ];
-  const [sortSelected, setSortSelected] = React.useState(null);
 
   async function transformVolontaires(data, values) {
     let all = data;
@@ -292,33 +293,28 @@ export default function test_volontaire() {
   return (
     <div className="bg-white h-full">
       <div className="flex flex-col  m-4">
-        <div>{count} résultats aa</div>
+        <div>{paramData?.count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <div className="p-[15px]">
           <Filters
             pageId="young"
             esId="young"
             defaultQuery={getDefaultQuery()}
-            filters={filterArray}
-            setCount={setCount}
-            count={count}
             setData={(value) => setData(value)}
+            filters={filterArray}
             searchBarObject={searchBarObject}
-            page={page}
-            setPage={setPage}
-            size={size}
-            sortOptions={sortOptions}
-            sortSelected={sortSelected}
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
           />
         </div>
 
         <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={page} pageId="young" />
-          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} paramData={paramData} />
         </div>
-        <SortOptionComponent sortOptions={sortOptions} sortSelected={sortSelected} setSortSelected={setSortSelected} />
+        <SortOptionComponent sortOptions={sortOptions} paramData={paramData} setParamData={setParamData} />
 
         <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
         <ModalExportV2
@@ -334,13 +330,10 @@ export default function test_volontaire() {
           selectedFilters={selectedFilters}
           filters={filterArray}
         />
-
         <ResultTable
-          setPage={setPage}
-          count={count}
+          paramData={paramData}
+          setParamData={setParamData}
           currentEntryOnPage={data?.length}
-          size={size}
-          page={page}
           render={
             <Table>
               <thead>

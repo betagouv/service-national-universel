@@ -1,7 +1,8 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 
-export default function SelectedFilters({ filterArray, selectedFilters, handleFilterShowing = () => null }) {
+export default function SelectedFilters({ filterArray, selectedFilters, paramData }) {
+  console.log("parma data", paramData);
   return (
     <>
       {filterArray
@@ -9,7 +10,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, handleFi
         .map((filter) => (
           <div
             key={filter.title}
-            onClick={() => handleFilterShowing(filter.name)}
+            onClick={() => paramData?.handleFilterShowing(filter.name)}
             className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
             <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
             {selectedFilters[filter.name].filter.map((item, index) => {
