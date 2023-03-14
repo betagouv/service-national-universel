@@ -512,8 +512,6 @@ function validateYoung(young, user) {
     consentment: Joi.string().allow(null, ""),
     imageRight: Joi.string().allow(null, ""),
     imageRightFiles: Joi.array().items(Joi.string().allow(null, "")),
-    autoTestPCR: Joi.string().allow(null, ""),
-    autoTestPCRFiles: Joi.array().items(Joi.string().allow(null, "")),
     rulesYoung: Joi.string().allow(null, ""),
     rulesParent1: Joi.string().allow(null, ""),
     rulesParent2: Joi.string().allow(null, ""),
@@ -659,11 +657,6 @@ function validateSelf(referent) {
 
 function validatePhase1Document(phase1document, key) {
   switch (key) {
-    case "autoTestPCR":
-      return Joi.object({
-        autoTestPCR: Joi.string().trim().required().valid("true", "false"),
-        autoTestPCRFiles: Joi.array().items(Joi.string().required()).required().min(1),
-      }).validate(phase1document);
     case "imageRight":
       return Joi.object({
         imageRight: Joi.string().trim().required().valid("true", "false"),

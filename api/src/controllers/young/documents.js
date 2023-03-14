@@ -57,7 +57,6 @@ function getMailParams(type, template, young, contract) {
 
   //todo: add other templates
   // if (type === "form" && template === "imageRight") return { object: "", message: "" };
-  // if (type === "form" && template === "autotestPCR") return { object: "", message: "" };
   // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
