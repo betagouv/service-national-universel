@@ -1,7 +1,7 @@
 import React from "react";
 import { BiChevronDown } from "react-icons/bi";
 
-const SortOptionComponent = ({ sortOptions, paramData, setParamData }) => {
+const SortOption = ({ sortOptions, paramData, setParamData }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const ref = React.useRef();
   const refOptions = React.useRef();
@@ -42,4 +42,4 @@ const SortOptionComponent = ({ sortOptions, paramData, setParamData }) => {
   );
 };
 
-export default SortOptionComponent;
+export default SortOption;

@@ -14,7 +14,7 @@ import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 
 import Badge from "../../components/Badge";
 
-import { Filters, ResultTable, getDefaultQuery, ModalExportV2, Save, SelectedFilters, SortOptionComponent } from "../../components/filters-system";
+import { Filters, ResultTable, getDefaultQuery, ModalExportV2, Save, SelectedFilters, SortOption } from "../../components/filters-system";
 
 import {
   translate,
@@ -312,7 +312,7 @@ export default function test_volontaire() {
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} paramData={paramData} />
         </div>
-        <SortOptionComponent sortOptions={sortOptions} paramData={paramData} setParamData={setParamData} />
+        <SortOption sortOptions={sortOptions} paramData={paramData} setParamData={setParamData} />
 
         <div onClick={() => setModalExportVisible(true)}>Exporter les candidatures</div>
         <ModalExportV2
