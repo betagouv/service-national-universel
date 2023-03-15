@@ -203,7 +203,7 @@ const Espace = () => {
       </main>
       <Footer />
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
-      <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIResumePhase1WithdrawnModalOpen(false)} />
+      <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
     </>
   );
 };
