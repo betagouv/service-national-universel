@@ -1,16 +1,16 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-export default function DashboardContainer({ active = "general", navChildren, children }) {
+export default function DashboardContainer({ active = "general", availableTab, navChildren, children }) {
   const history = useHistory();
   return (
     <div className="flex flex-col gap-12 mt-8 w-full">
       <div className="flex justify-between items-center border-bottom px-8">
         <div className="flex justify-left items-center gap-8">
-          <TabItem id="general" active={active} label="Vue générale" onClick={() => history.push("/dashboard")} />
-          <TabItem id="inscription" active={active} label="Inscriptions" onClick={() => history.push("/dashboard/inscription")} />
-          <TabItem id="sejour" active={active} label="Séjour" onClick={() => history.push("/dashboard/sejour")} />
-          <TabItem id="engagement" active={active} label="Engagement" onClick={() => history.push("/dashboard/engagement")} />
+          {availableTab.includes("general") && <TabItem id="general" active={active} label="Vue générale" onClick={() => history.push("/dashboard")} />}
+          {availableTab.includes("inscription") && <TabItem id="inscription" active={active} label="Inscriptions" onClick={() => history.push("/dashboard/inscription")} />}
+          {availableTab.includes("sejour") && <TabItem id="sejour" active={active} label="Séjour" onClick={() => history.push("/dashboard/sejour")} />}
+          {availableTab.includes("engagement") && <TabItem id="engagement" active={active} label="Engagement" onClick={() => history.push("/dashboard/engagement")} />}
         </div>
         <div>{navChildren}</div>
       </div>

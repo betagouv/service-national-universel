@@ -1,11 +1,12 @@
 import React from "react";
-import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
-import DashboardContainer from "../../components/DashboardContainer";
+import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
+import DashboardContainer from "../../../components/DashboardContainer";
 
 export default function Index() {
   return (
     <DashboardContainer
       active="inscription"
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ButtonPrimary className="text-sm">
@@ -16,7 +17,7 @@ export default function Index() {
           </ButtonPrimary>
         </div>
       }>
-      <div className="rounded-lg w-full bg-white p-8">Inscription</div>
+      <div>Inscription</div>
     </DashboardContainer>
   );
 }

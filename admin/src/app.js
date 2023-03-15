@@ -9,7 +9,6 @@ import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
 import Dashboard from "./scenes/dashboard";
-import DashboardV2 from "./scenes/dashboardV2";
 import DashboardVisitor from "./scenes/dashboard-visitor";
 import DashboardResponsible from "./scenes/dashboard-responsible";
 import DashboardHeadCenter from "./scenes/dashboard-head-center";
@@ -35,6 +34,12 @@ import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
 import DSNJExport from "./scenes/dsnj-export";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+
+//DashboardV2
+import DashboardV2 from "./scenes/dashboardV2/moderator-ref";
+import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
+import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
+import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -124,9 +129,9 @@ const Home = () => {
 
   const renderDashboardV2 = () => {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
-    // if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
-    // if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
-    // if (user?.role === ROLES.VISITOR) return <DashboardVisitor />;
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsibleV2 />;
+    if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenterV2 />;
+    if (user?.role === ROLES.VISITOR) return <DashboardVisitorV2 />;
     return null;
   };
 

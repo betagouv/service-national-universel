@@ -1,7 +1,7 @@
 import React from "react";
 import { Switch, useHistory, useLocation } from "react-router-dom";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { SentryRoute } from "../../sentry";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { SentryRoute } from "../../../sentry";
 
 import Engagement from "./subscenes/engagement";
 import General from "./subscenes/general";

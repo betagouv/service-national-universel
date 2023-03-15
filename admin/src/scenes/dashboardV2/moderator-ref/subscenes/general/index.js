@@ -3,7 +3,7 @@ import React from "react";
 import { Doughnut } from "react-chartjs-2";
 // eslint-disable-next-line import/namespace
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import DashboardContainer from "../../components/DashboardContainer";
+import DashboardContainer from "../../../components/DashboardContainer";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -25,7 +25,7 @@ export const data = {
 
 export default function Index() {
   return (
-    <DashboardContainer active="general">
+    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
       <div className="w-[400px] bg-white mt-8">
         <Doughnut
           data={data}
