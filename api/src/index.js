@@ -134,7 +134,7 @@ if (process.env.STAGING === "true") {
   app.get("/error1", (req, res) => {
     try {
       setTimeout(function () {
-        throw new Error("APPP CRASH ERROR");
+        throw new Error("APPP CRASH ERROR !!");
       }, 10);
     } catch (e) {
       console.log("error", e);
