@@ -121,6 +121,15 @@ const Home = () => {
     if (user?.role === ROLES.VISITOR) return <DashboardVisitor />;
     return null;
   };
+
+  const renderDashboardV2 = () => {
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
+    // if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
+    // if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
+    // if (user?.role === ROLES.VISITOR) return <DashboardVisitor />;
+    return null;
+  };
+
   const renderVolontaire = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
@@ -201,7 +210,7 @@ const Home = () => {
                 <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
               </>
             ) : (
-              <RestrictedRoute path="/dashboard" component={DashboardV2} />
+              <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
             )}
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
@@ -218,8 +227,7 @@ const Home = () => {
 
             {/* Only for developper eyes... */}
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-
-            <RestrictedRoute path="/" component={renderDashboard} />
+            {environment === "production" ? <RestrictedRoute path="/" component={renderDashboard} /> : <RestrictedRoute path="/" component={renderDashboardV2} />}
           </Switch>
         </div>
       </div>

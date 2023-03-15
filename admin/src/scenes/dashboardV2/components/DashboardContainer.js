@@ -2,7 +2,6 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 
 export default function DashboardContainer({ active = "general", navChildren, children }) {
-  console.log(navChildren);
   const history = useHistory();
   return (
     <div className="flex flex-col gap-12 mt-8 w-full">

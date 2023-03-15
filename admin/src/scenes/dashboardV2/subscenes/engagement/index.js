@@ -1,6 +1,6 @@
 import React from "react";
-import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import DashboardContainer from "../components/DashboardContainer";
+import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
+import DashboardContainer from "../../components/DashboardContainer";
 
 export default function Index() {
   return (
