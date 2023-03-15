@@ -36,7 +36,7 @@ const Modal = ({ isOpen = false, onClose = () => {}, children = null, className 
 
 const ModalHeader = ({ className, children, ...rest }) => {
   return (
-    <div className={`px-6 pt-6 text-gray-900 flex gap-6 items-center ${className}`} {...rest}>
+    <div className={`px-6 pt-6 text-gray-900 flex flex-col gap-7 items-center ${className}`} {...rest}>
       {children}
     </div>
   );
