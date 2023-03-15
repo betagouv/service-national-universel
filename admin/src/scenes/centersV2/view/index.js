@@ -108,7 +108,6 @@ export default function Index({ ...props }) {
     })();
   };
   useEffect(() => {
-    if (!canCreateOrUpdateCohesionCenter(user)) return;
     getCenter();
   }, [center]);
 
