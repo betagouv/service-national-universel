@@ -1,11 +1,11 @@
 import React from "react";
 import Modal from "../ui/modals/Modal";
-import ButtonLinkPrimary from "../ui/buttons/ButtonLinkPrimary";
+import ButtonPrimary from "../ui/buttons/ButtonPrimary";
 import YellowWarning from "../../assets/YellowWarning";
 import ExternalLinkPrimary from "../ui/links/ExternalLinkPrimary";
 import { appURL } from "../../config";
 
-const ModalCGU = ({ isOpen, onAccept: handleAccept }) => (
+const ModalCGU = ({ isOpen = false, onAccept: handleAccept = () => {} }) => (
   <Modal isOpen={isOpen} className="w-[512px] bg-white rounded-xl p-6">
     <Modal.Header>
       <YellowWarning />
@@ -18,9 +18,9 @@ const ModalCGU = ({ isOpen, onAccept: handleAccept }) => (
       </p>
     </Modal.Content>
     <Modal.Footer>
-      <ButtonLinkPrimary to="changer-de-sejour" className="drop-shadow-none shadow-ninaBlue" onClick={handleAccept}>
+      <ButtonPrimary className="drop-shadow-none shadow-ninaBlue w-full" onClick={handleAccept}>
         J&apos;accepte les conditions générales d&apos;utilisation
-      </ButtonLinkPrimary>
+      </ButtonPrimary>
     </Modal.Footer>
   </Modal>
 );

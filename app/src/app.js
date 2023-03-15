@@ -148,7 +148,7 @@ const Espace = () => {
   };
 
   useEffect(() => {
-    if (young && young.acceptCGU !== "true") {
+    if (young && young.acceptCGU === "true") {
       setIsModalCGUOpen(true);
     }
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
