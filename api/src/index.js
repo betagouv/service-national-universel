@@ -128,13 +128,13 @@ app.get("/testsentry", async (req, res) => {
 if (process.env.STAGING === "true") {
   app.get("/error", (req, res) => {
     res.send("Hello World!");
-    res.send("HELLO WORL 2");
+    res.send("Hello World! 2");
   });
 
   app.get("/error1", (req, res) => {
     try {
       setTimeout(function () {
-        throw new Error("APPP CRASH ERROR  3");
+        throw new Error("APPP CRASH ERROR");
       }, 10);
     } catch (e) {
       console.log("error", e);
