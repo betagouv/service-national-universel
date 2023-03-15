@@ -9,6 +9,7 @@ import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
 import Dashboard from "./scenes/dashboard";
+import DashboardV2 from "./scenes/dashboardV2";
 import DashboardVisitor from "./scenes/dashboard-visitor";
 import DashboardResponsible from "./scenes/dashboard-responsible";
 import DashboardHeadCenter from "./scenes/dashboard-head-center";
@@ -194,8 +195,14 @@ const Home = () => {
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-            <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
-            <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+            {environment === "production" ? (
+              <>
+                <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
+                <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+              </>
+            ) : (
+              <RestrictedRoute path="/dashboard" component={DashboardV2} />
+            )}
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
 
