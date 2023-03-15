@@ -1,3 +1,14 @@
+## [1.233.1](https://github.com/betagouv/service-national-universel/compare/v1.233.0...v1.233.1) (2023-03-15)
+
+
+### Bug Fixes
+
+* **admin:** application translation statut ([cc6cce7](https://github.com/betagouv/service-national-universel/commit/cc6cce748d90f5b8d98a7d273e6f5089f02477c0))
+* **api:** Fix warning node event emitter ([#2371](https://github.com/betagouv/service-national-universel/issues/2371)) ([8f017df](https://github.com/betagouv/service-national-universel/commit/8f017df715c56897acd90cbb1a48bb6627562c25))
+* **app:** loading infini parent consent ([5a7f277](https://github.com/betagouv/service-national-universel/commit/5a7f2777a824a7efdc5e1969e2a907531d82cf07))
+* **app:** ModalResumePhase1ForWithdrawn ([29a0b8d](https://github.com/betagouv/service-national-universel/commit/29a0b8d69417072be90705adc408cfe1311981f8))
+* type and mobile design ([#2373](https://github.com/betagouv/service-national-universel/issues/2373)) ([22f7519](https://github.com/betagouv/service-national-universel/commit/22f7519481db1e81a4b755d3388a3de760af4ac9))
+
 # [1.233.0](https://github.com/betagouv/service-national-universel/compare/v1.232.0...v1.233.0) (2023-03-14)
 
 
