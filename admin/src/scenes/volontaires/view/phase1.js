@@ -21,14 +21,12 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
 import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
 import Refresh from "../../../assets/icons/Refresh";
-import { BiChevronDown } from "react-icons/bi";
-import { CiMail } from "react-icons/ci";
-import { BsDownload } from "react-icons/bs";
 import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { adminURL } from "../../../config";
 import Warning from "../../../assets/icons/Warning";
+import DocumentSelect from "../components/DocumentSelect";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -50,6 +48,18 @@ export default function Phase1(props) {
   const [cohort, setCohort] = useState();
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState(false);
 
+  const isStayOver = () => {
+    if (cohort && cohort.dateEnd) {
+      const now = new Date();
+      const stayEndDate = new Date(cohort.dateEnd);
+      if (now < stayEndDate) {
+        return true;
+      }
+      return false;
+    }
+    return false;
+  };
+
   function getDisplayCenterButton() {
     if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED")) {
       setCohortOpenForAffection(false);
@@ -60,7 +70,7 @@ export default function Phase1(props) {
     }
   }
 
-  const sendMail = async () => {
+  const handleSendAttestationByEmail = async () => {
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/${young._id}/documents/certificate/1/send-email`, {
@@ -75,9 +85,33 @@ export default function Phase1(props) {
       toastr.error("Erreur lors de l'envoie du document", e.message);
     }
   };
-  const onClickPdf = async () => {
+
+  const handleDownloadAttestationPdfFile = async () => {
     await downloadPDF({
       url: `/young/${young._id}/documents/certificate/1`,
+      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
+    });
+  };
+
+  const handleSendConvocationByEmail = async () => {
+    try {
+      setLoading(true);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/convocation/cohesion/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - convocation.pdf`,
+      });
+      setLoading(false);
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      setLoading(false);
+      toastr.error("Erreur lors de l'envoie du document", e.message);
+    }
+  };
+
+  const handleDownloadConvocationPdfFile = async () => {
+    await downloadPDF({
+      url: `/young/${young._id}/documents/convocation/cohesion`,
       fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
     });
   };
@@ -125,12 +159,11 @@ export default function Phase1(props) {
     })();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getDisplayCenterButton();
 
     if (cohort) {
       const field = youngCheckinField[user.role];
-      console.log("youngCheckinField: ", field, cohort);
       if (field) {
         setIsYoungCheckinOpen(cohort[field] ? cohort[field] : false);
       } else {
@@ -168,6 +201,7 @@ export default function Phase1(props) {
     setModalPointagePresenceJDM({ isOpen: false, value: null });
     setModalPointageDepart({ isOpen: false, value: null });
   };
+
   const EditTop = () => {
     return (
       <>
@@ -195,6 +229,7 @@ export default function Phase1(props) {
       </>
     );
   };
+
   return (
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
@@ -210,15 +245,30 @@ export default function Phase1(props) {
                   // icon={young.statusPhase1 === "AFFECTED" && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm mr-1" />}
                   color={YOUNG_STATUS_COLORS[young.statusPhase1]}
                 />
+                {(young.statusPhase1 === "AFFECTED" || ((young.statusPhase1 === "DONE" || young.statusPhase1 === "NOT_DONE") && isStayOver())) && (
+                  <DocumentSelect
+                    title="Convocation"
+                    onClickPdf={handleDownloadConvocationPdfFile}
+                    onClickMail={() =>
+                      setModal({
+                        isOpen: true,
+                        title: "Envoie de document par mail",
+                        message: `Êtes-vous sûr de vouloir transmettre le document Convocation par mail à ${young.email} ?`,
+                        onConfirm: handleSendConvocationByEmail,
+                      })
+                    }
+                  />
+                )}
                 {young.statusPhase1 === "DONE" && (
-                  <AttestationSelect
-                    onClickPdf={onClickPdf}
+                  <DocumentSelect
+                    title="Attestation de réalisation phase 1"
+                    onClickPdf={handleDownloadAttestationPdfFile}
                     onClickMail={() =>
                       setModal({
                         isOpen: true,
                         title: "Envoie de document par mail",
                         message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
-                        onConfirm: sendMail,
+                        onConfirm: handleSendAttestationByEmail,
                       })
                     }
                   />
@@ -490,56 +540,6 @@ const Field = ({ title, value, externalLink }) => {
       ) : (
         <div className="text-gray-800 text-sm h-[20px]">{value}</div>
       )}
-    </div>
-  );
-};
-
-const AttestationSelect = ({ onClickMail, onClickPdf }) => {
-  const ref = React.useRef();
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-  return (
-    <div className="relative" ref={ref}>
-      <div
-        onClick={() => setOpen((open) => !open)}
-        className="cursor-pointer flex flex-row justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-3 py-2 ml-2">
-        <div className="text-xs font-medium">Attestation de réalisation phase 1</div>
-        <BiChevronDown />
-      </div>
-      <div
-        className={`absolute ${
-          open ? "flex" : "hidden"
-        } flex-col items-center justify-center bg-white border-[1px] border-gray-300 rounded-md text-gray-700 z-10 mt-2 overflow-hidden`}>
-        <div
-          onClick={() => {
-            onClickPdf();
-            setOpen(false);
-          }}
-          className="flex flex-row justify-start items-center gap-2 w-64 py-2.5 px-2 border-b-[1px] hover:text-white hover:bg-blue-600 cursor-pointer">
-          <BsDownload />
-          <div>Télécharger</div>
-        </div>
-        <div
-          className="flex flex-row justify-start items-center gap-2 w-64 py-2.5 px-2 hover:text-white hover:bg-blue-600 cursor-pointer"
-          onClick={() => {
-            onClickMail();
-            setOpen(false);
-          }}>
-          <CiMail />
-          <div>Envoyer par mail</div>
-        </div>
-      </div>
     </div>
   );
 };
