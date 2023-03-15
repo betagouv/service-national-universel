@@ -25,7 +25,7 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
 
   function goToNext(e) {
     e.preventDefault();
-    if (lastItem < count) {
+    if (currentPage < pageCount) {
       changePage && changePage(currentPage + 1);
     }
   }
