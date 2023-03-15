@@ -133,7 +133,7 @@ export default function App() {
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
-  const [isResumePhase1WithdrawnModalOpen, setIResumePhase1WithdrawnModalOpen] = useState(false);
+  const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
 
