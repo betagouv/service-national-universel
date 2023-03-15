@@ -108,6 +108,7 @@ export default function Index({ ...props }) {
     })();
   };
   useEffect(() => {
+    if (!canCreateOrUpdateCohesionCenter(user)) return;
     getCenter();
   }, [center]);
 
@@ -180,7 +181,7 @@ export default function Index({ ...props }) {
     }
   }
 
-  if (!center || !focusedSession) return <Loader />;
+  if (!center) return <Loader />;
   return (
     <>
       <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
