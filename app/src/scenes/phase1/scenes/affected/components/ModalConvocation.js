@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../../../redux/auth/actions";
+import { setYoung } from "../../../../../redux/auth/actions";
 import { translate } from "snu-lib";
-import { capture } from "../../../../sentry";
-import API from "../../../../services/api";
-import plausibleEvent from "../../../../services/plausible";
+import { capture } from "../../../../../sentry";
+import API from "../../../../../services/api";
+import plausibleEvent from "../../../../../services/plausible";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
 
-import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
-import ButtonPrimaryOutline from "../../../../components/ui/buttons/ButtonPrimaryOutline";
-import CloseSvg from "../../../../assets/Close";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import ModalTailwind from "../../../../components/ui/modals/Modal";
+import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
+import ButtonPrimaryOutline from "../../../../../components/ui/buttons/ButtonPrimaryOutline";
+import CloseSvg from "../../../../../assets/Close";
+import ModalConfirm from "../../../../../components/modals/ModalConfirm";
+import ModalTailwind from "../../../../../components/ui/modals/Modal";
 
 export function ModalConvocation({ open, setOpen }) {
   const young = useSelector((state) => state.Auth.young);
