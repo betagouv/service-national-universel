@@ -37,7 +37,7 @@ export default function SimpleSelect({ value, transformer, options, onChange }) 
 
   return (
     <div>
-      <div className={`flex items-center justify-between cursor-pointer p-[5px]`} onClick={toggleSelectOptions}>
+      <div className={`flex items-center justify-between cursor-pointer`} onClick={toggleSelectOptions}>
         <div className={`font-normal text-[14px] leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer ? transformer(value) : value}</div>
         <ChevronDown className="text-gray-500 w-4" />
       </div>

@@ -8,13 +8,13 @@ const ConfirmationModalContent = ({ onConfirm, onBack, title, subTitle }) => {
     <>
       <Title>{title}</Title>
       <SubTitle>{subTitle}</SubTitle>
-      <div className="flex mt-3 w-full gap-3">
+      <div className="flex flex-col md:flex-row mt-3 w-full gap-3">
+        <PlainButton mode="red" className="flex-1 md:order-last" onClick={onConfirm}>
+          Confirmer
+        </PlainButton>
         <CancelButton className="flex-1" onClick={onBack}>
           Retour
         </CancelButton>
-        <PlainButton mode="red" className="flex-1" onClick={onConfirm}>
-          Confirmer
-        </PlainButton>
       </div>
     </>
   );
