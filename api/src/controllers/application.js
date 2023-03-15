@@ -600,14 +600,20 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
           type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
         };
       } else {
-        emailTo = [{ name: young.firstName, lastName: young.lastName, email: young.email }];
-        params = {
-          ...params,
-          cta: `${APP_URL}/mission/${mission.structureId}`,
-          firstName: referent.firstName,
-          lastName: referent.lastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-        };
+        // envoyer le mail au jeune / RP
+        if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
+          // envoyer à tuteur de mission + jeune // RP
+          emailTo = [{ name: young.firstName, lastName: young.lastName, email: young.email }];
+          params = {
+            ...params,
+            cta: `${APP_URL}/mission/${mission.structureId}`,
+            firstName: referent.firstName,
+            lastName: referent.lastName,
+            type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
+          };
+        } else if (req.user.role === ROLES.RESPONSIBLE) {
+        } else if (req.user.role === ROLES.ADMIN) {
+        }
       }
     } else {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
