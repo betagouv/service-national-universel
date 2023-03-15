@@ -1,54 +1,28 @@
-import React, { useState } from "react";
-import { Modal } from "reactstrap";
-import styled from "styled-components";
-
-import { ModalContainer, Content, Footer } from "./Modal";
-import { colors } from "../../utils";
-import ModalButton from "../buttons/ModalButton";
+import React from "react";
+import Modal from "../ui/modals/Modal";
+import ButtonLinkPrimary from "../ui/buttons/ButtonLinkPrimary";
 import YellowWarning from "../../assets/YellowWarning";
+import ExternalLinkPrimary from "../ui/links/ExternalLinkPrimary";
+import { appURL } from "../../config";
 
-export default function ModalConfirm({ isOpen, title, message, onConfirm, confirmText = "Confirmer" }) {
-  const [sending, setSending] = useState(false);
+const ModalCGU = ({ isOpen, onAccept: handleAccept }) => (
+  <Modal isOpen={isOpen} className="w-[512px] bg-white rounded-xl p-6">
+    <Modal.Header>
+      <YellowWarning />
+      <h2 className="my-0 text-xl font-bold">Conditions générales d&apos;utilisation</h2>
+    </Modal.Header>
+    <Modal.Content>
+      <p className="mb-1">Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
+      <p>
+        <ExternalLinkPrimary title="Consulter les CGU" href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" />
+      </p>
+    </Modal.Content>
+    <Modal.Footer>
+      <ButtonLinkPrimary to="changer-de-sejour" className="drop-shadow-none shadow-ninaBlue" onClick={handleAccept}>
+        J&apos;accepte les conditions générales d&apos;utilisation
+      </ButtonLinkPrimary>
+    </Modal.Footer>
+  </Modal>
+);
 
-  const submit = async () => {
-    setSending(true);
-    onConfirm();
-    setSending(false);
-  };
-
-  return (
-    <Modal centered isOpen={isOpen}>
-      <ModalContainer>
-        <IconContent>
-          <YellowWarning />
-          <Text>
-            <h1>{title}</h1>
-            <article>{message}</article>
-          </Text>
-        </IconContent>
-        <Footer>
-          <ModalButton loading={sending} disabled={sending} onClick={submit} primary>
-            {confirmText}
-          </ModalButton>
-        </Footer>
-      </ModalContainer>
-    </Modal>
-  );
-}
-
-const IconContent = styled(Content)`
-  display: grid;
-  grid-template-columns: 70px 2fr;
-  align-items: flex-start;
-`;
-
-const Text = styled.section`
-  text-align: left;
-  p {
-    margin-bottom: 0;
-  }
-  a {
-    color: ${colors.grey};
-    font-size: 1rem;
-  }
-`;
+export default ModalCGU;
