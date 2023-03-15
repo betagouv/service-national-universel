@@ -158,7 +158,7 @@ const Espace = () => {
     }
     return () => {
       setIsModalCGUOpen(false);
-      setIResumePhase1WithdrawnModalOpen(false);
+      setIsResumePhase1WithdrawnModalOpen(false);
     };
   }, [young]);
 
