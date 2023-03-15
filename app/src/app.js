@@ -4,13 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
 import queryString from "query-string";
-import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
 
-import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Header from "./components/header/index";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -28,8 +25,8 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
-import ModalResumePhase1ForWithdrawn from "./components/ui/modals/ModalResumePhase1ForWithdrawn";
-import Navbar from "./components/navbar";
+import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
+import Navbar from "./components/layout/navbar";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
@@ -44,11 +41,10 @@ import SupportCenter from "./scenes/support-center";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import { appURL, environment, maintenance } from "./config";
+import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
 import { toastr } from "react-redux-toastr";
-import GoogleTags from "./components/GoogleTags";
 import "./index.css";
 import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
@@ -126,11 +122,9 @@ export default function App() {
               <SentryRoute path="/auth" component={AuthV2} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
               <SentryRoute path="/public-engagements" component={AllEngagements} />
-              {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
               <SentryRoute path="/" component={Espace} />
             </Switch>
           )}
-          <Footer />
         </div>
       </Router>
     </Sentry.ErrorBoundary>
@@ -138,40 +132,33 @@ export default function App() {
 }
 
 const Espace = () => {
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalResume, setModalResume] = useState(false);
+  const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
+  const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
+
+  const handleModalCGUConfirm = async () => {
+    setIsModalCGUOpen(false);
+    const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
+    if (!ok) {
+      setIsModalCGUOpen(true);
+      return toastr.error(`Une erreur est survenue : ${code}`);
+    }
+    return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
+  };
+
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
-      setModal({
-        isOpen: true,
-        title: "Conditions générales d'utilisation",
-        message: (
-          <>
-            <p>Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
-            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-              Consulter les CGU ›
-            </a>
-          </>
-        ),
-        onConfirm: async () => {
-          const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
-          if (!ok) return toastr.error(`Une erreur est survenue : ${code}`);
-          return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
-        },
-        confirmText: "J'accepte les conditions générales d'utilisation",
-      });
+      setIsModalCGUOpen(true);
     }
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
-        if (sessions.length) setModalResume(true);
+        if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
     return () => {
-      setModal({ isOpen: false, onConfirm: null });
-      setModalResume(false);
+      setIsModalCGUOpen(false);
+      setIsResumePhase1WithdrawnModalOpen(false);
     };
   }, [young]);
 
@@ -191,54 +178,12 @@ const Espace = () => {
     (inscriptionModificationOpenForYoungs(young.cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
-  if (environment === "production") {
-    return (
-      <>
-        <div style={{ display: "flex" }}>
-          <Drawer open={menuVisible} onOpen={setMenuVisible} />
-          <Content>
-            <Header
-              onClickBurger={() => {
-                setMenuVisible(!menuVisible);
-              }}
-            />
-            <Switch>
-              <SentryRoute path="/account" component={Account} />
-              <SentryRoute path="/phase1" component={Phase1} />
-              <SentryRoute path="/phase2" component={Phase2} />
-              <SentryRoute path="/phase3" component={Phase3} />
-              <SentryRoute path="/les-programmes" component={Engagement} />
-              <SentryRoute path="/preferences" component={Preferences} />
-              <SentryRoute path="/mission" component={Missions} />
-              <SentryRoute path="/candidature" component={Candidature} />
-              <SentryRoute path="/desistement" component={Desistement} />
-              <SentryRoute path="/diagoriente" component={Diagoriente} />
-              {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
-              {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-              <SentryRoute path="/" component={Home} />
-            </Switch>
-          </Content>
-          <ModalCGU
-            isOpen={modal?.isOpen}
-            title={modal?.title}
-            message={modal?.message}
-            confirmText={modal?.confirmText}
-            onConfirm={() => {
-              modal?.onConfirm();
-              setModal({ isOpen: false, onConfirm: null });
-            }}
-          />
-        </div>
-      </>
-    );
-  }
-
   return (
-    <div className="block md:flex">
-      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto">
+    <>
+      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto  w-screen md:w-64">
         <Navbar />
       </div>
-      <div className="flex-1 mt-16 md:mt-0 md:ml-64">
+      <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/phase1" component={Phase1} />
@@ -249,25 +194,17 @@ const Espace = () => {
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
           <SentryRoute path="/desistement" component={Desistement} />
+          {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <SentryRoute path="/" component={Home} />
         </Switch>
-
-        <ModalCGU
-          isOpen={modal?.isOpen}
-          title={modal?.title}
-          message={modal?.message}
-          confirmText={modal?.confirmText}
-          onConfirm={() => {
-            modal?.onConfirm();
-            setModal({ isOpen: false, onConfirm: null });
-          }}
-        />
-        <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
-      </div>
-    </div>
+      </main>
+      <Footer />
+      <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
+      <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIResumePhase1WithdrawnModalOpen(false)} />
+    </>
   );
 };
 
@@ -283,15 +220,3 @@ function ScrollToTop() {
 
   return null;
 }
-
-const Content = styled.div`
-  margin-left: auto;
-  width: 85%;
-  max-width: calc(100% - 250px);
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 0;
-    overflow-x: hidden;
-    max-width: 100%;
-  }
-`;

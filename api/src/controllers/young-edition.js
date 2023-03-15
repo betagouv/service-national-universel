@@ -124,6 +124,9 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (err) {
     capture(err);
+    if (err.code === 11000) {
+      return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+    }
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
@@ -224,9 +227,9 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- validate data
     const bodySchema = Joi.object().keys({
-      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN"), // "WAITING_LIST"
-      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"),
-      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"),
+      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE"), // "WAITING_LIST"
+      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"),
+      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"),
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;

@@ -282,24 +282,29 @@ router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent
 });
 
 router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  }
-
-  if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
   try {
-    const center = await CohesionCenterModel.findById(value.id);
-    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
-    const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
+    try {
+      const center = await CohesionCenterModel.findById(value.id);
+      if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: { youngs, sessionPhase1 } });
+      const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+      if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
+
+      return res.status(200).send({ ok: true, data: { youngs, sessionPhase1 } });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -330,8 +335,8 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
 });
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   try {
+    if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await CohesionCenterModel.find({});
     return res.status(200).send({ ok: true, data: data.map(serializeCohesionCenter) });
   } catch (error) {

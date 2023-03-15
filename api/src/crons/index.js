@@ -88,11 +88,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     jeVeuxAiderDaily.handler();
   });
 
-  //every hour
-  // cron.schedule(EVERY_HOUR, () => {
-  //   autoAffectationCohesionCenter.handler();
-  // });
-
   cron.schedule("0 6 * * *", () => {
     contratRelance.handler();
   });

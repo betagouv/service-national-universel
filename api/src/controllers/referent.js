@@ -330,7 +330,6 @@ router.post("/signup_invite", async (req, res) => {
       lastName: Joi.string().allow(null, ""),
       invitationToken: Joi.string().required(),
       acceptCGU: Joi.string().required(),
-      cohorts: Joi.array().items(Joi.string().required()),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
@@ -338,7 +337,7 @@ router.post("/signup_invite", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { email, password, firstName, lastName, invitationToken, acceptCGU, cohorts } = value;
+    const { email, password, firstName, lastName, invitationToken, acceptCGU } = value;
 
     const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
@@ -354,7 +353,6 @@ router.post("/signup_invite", async (req, res) => {
       invitationToken: "",
       invitationExpires: null,
       acceptCGU,
-      cohorts,
     });
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
@@ -403,13 +401,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
-
-    // if withdrawn, cascade withdrawn on every status
-    if (newYoung.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-      if (young.statusPhase1 !== "DONE") newYoung.statusPhase1 = "WITHDRAWN";
-      if (young.statusPhase2 !== "VALIDATED") newYoung.statusPhase2 = "WITHDRAWN";
-      if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
-    }
 
     if (newYoung.status === "REINSCRIPTION") {
       newYoung.reinscriptionStep2023 = STEPS2023REINSCRIPTION.ELIGIBILITE;

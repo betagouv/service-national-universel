@@ -14,7 +14,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
     try {
       const res = await apiAdress(`${encodeURIComponent(text)}`);
 
-      const arr = res?.features.filter((e) => e.properties.type !== "municipality");
+      const arr = res?.features;
 
       setLoading(false);
       if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });

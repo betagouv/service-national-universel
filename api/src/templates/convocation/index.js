@@ -105,7 +105,14 @@ const render = async (young) => {
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
-      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()))
+      .replace(
+        /{{SANITARY_INSTRUCTIONS}}/g,
+        sanitizeAll(
+          `<li>en fonction des consignes sanitaires le jour du départ, 2 masques jetables à usage médical pour le transport en commun${ligneBus.lunchBreak ? "," : "."}</li>`,
+        ),
+      )
+      .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
   } catch (e) {
     throw e;
   }

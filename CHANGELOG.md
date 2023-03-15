@@ -1,3 +1,81 @@
+# [1.233.0](https://github.com/betagouv/service-national-universel/compare/v1.232.0...v1.233.0) (2023-03-14)
+
+
+### Bug Fixes
+
+* **admin/api:** Add departureHour to model ([#2366](https://github.com/betagouv/service-national-universel/issues/2366)) ([6142143](https://github.com/betagouv/service-national-universel/commit/6142143beb9646ddcf9cd78f6ff3e3127eaa8646))
+* **api:** Add departureHour to plan de transport model ([b7df75d](https://github.com/betagouv/service-national-universel/commit/b7df75dbd61f52de241db9d4f0c17bc51fe6433b))
+* **api/admin:** fix duplicate email error message ([#2369](https://github.com/betagouv/service-national-universel/issues/2369)) ([d7e44e2](https://github.com/betagouv/service-national-universel/commit/d7e44e2884bcc3fb1d47c79cd61a97f8bf15d57f))
+* **app:** ajustement design page en attente d'affectation ([#2364](https://github.com/betagouv/service-national-universel/issues/2364)) ([24f37d9](https://github.com/betagouv/service-national-universel/commit/24f37d9d2602d3fb5580e05581873dfede4b108a))
+* **app:** correction de la traduction du statut d'inscription ([#2362](https://github.com/betagouv/service-national-universel/issues/2362)) ([4035ea9](https://github.com/betagouv/service-national-universel/commit/4035ea9539b47ff0ac9dabde4829740da3c3f577))
+* **app:** correction du design de la page en attente d'affectation ([#2367](https://github.com/betagouv/service-national-universel/issues/2367)) ([eccda45](https://github.com/betagouv/service-national-universel/commit/eccda451f083704164f1f27ab84bb6751d75b4a5))
+* **app:** remove production condition ([2f293a7](https://github.com/betagouv/service-national-universel/commit/2f293a7060325eeccc888b60a15994e3e2f8b722))
+
+
+### Features
+
+* **app:** déploiement de la nouvelle page "en attente d'affectation" ([#2368](https://github.com/betagouv/service-national-universel/issues/2368)) ([0ee6283](https://github.com/betagouv/service-national-universel/commit/0ee6283d1ee0aa096d80e8778f3d946efa427d1d))
+* **app:** Mise en production nouvelle navbar [#2363](https://github.com/betagouv/service-national-universel/issues/2363) ([6bd9289](https://github.com/betagouv/service-national-universel/commit/6bd9289dfb3afe7f5246f013a36550efcfcf9b5c))
+
+# [1.232.0](https://github.com/betagouv/service-national-universel/compare/v1.231.0...v1.232.0) (2023-03-13)
+
+
+### Bug Fixes
+
+* **admin:** referent dep liste statut ([60df9f0](https://github.com/betagouv/service-national-universel/commit/60df9f07cf048391db1e173e1f1061b196705c25))
+* **api:** Correction du bug supprimant les cohortes des invités ([#2359](https://github.com/betagouv/service-national-universel/issues/2359)) ([010984d](https://github.com/betagouv/service-national-universel/commit/010984d45e5eaa326ab9ce79d3860cb5656c3257))
+* **api:** correction du style de la convocation et correction des infos concernant le déjeuner à l'aller ([#2343](https://github.com/betagouv/service-national-universel/issues/2343)) ([067a949](https://github.com/betagouv/service-national-universel/commit/067a949ced765a16601e8d30451c8d76bbc51edc))
+* **api/admin:** WITHDRAW logic ([#2357](https://github.com/betagouv/service-national-universel/issues/2357)) ([93024cc](https://github.com/betagouv/service-national-universel/commit/93024cca3d88fa93510f9925dcc2dd26f781860f))
+* **app:** change font size not done ([b807965](https://github.com/betagouv/service-national-universel/commit/b807965b8af7f4a9c4e062f0add17aac26790759))
+* **app:** refonte de la page en attente d’affectation ([#2346](https://github.com/betagouv/service-national-universel/issues/2346)) ([5a98cdd](https://github.com/betagouv/service-national-universel/commit/5a98cdd4f03a6f0a9a9313569feeec6e371cd65e))
+* **app:** retours navbars part 2 ([87975da](https://github.com/betagouv/service-national-universel/commit/87975da4f7334b856be767e8e7e9640b39767959))
+* **app:** Retours sur nouvelle navbar ([#2348](https://github.com/betagouv/service-national-universel/issues/2348)) ([0f51293](https://github.com/betagouv/service-national-universel/commit/0f51293579d8f2f1d53c89b8c9a1c3498b0717ee))
+* **deploy:** Do not triger staging api on pull request ([34ed791](https://github.com/betagouv/service-national-universel/commit/34ed7919172e61b193feef284d15855e5aa2d265))
+* **deploy:** Notif slack api staging ([9842e21](https://github.com/betagouv/service-national-universel/commit/9842e214cf477d0a838ed2499de0aa8ffbaee3dd))
+* **kb:** Disable Sentry for KB ([988fac2](https://github.com/betagouv/service-national-universel/commit/988fac2dcb62b2064f68424ba59526efe9a2fa5e))
+
+
+### Features
+
+* **admin:** refacto page settings ([#2349](https://github.com/betagouv/service-national-universel/issues/2349)) ([1f21995](https://github.com/betagouv/service-national-universel/commit/1f21995f79eff2873d7bdf22effecde5f906aed8))
+* **admin:** Search for parents emails as well ([dd31998](https://github.com/betagouv/service-national-universel/commit/dd31998f90899f3439a08207f7a2c65073af8028))
+
+# [1.231.0](https://github.com/betagouv/service-national-universel/compare/v1.230.0...v1.231.0) (2023-03-10)
+
+
+### Bug Fixes
+
+* **admin:** disabled demande de modif for fev et avril - A ([f6796a2](https://github.com/betagouv/service-national-universel/commit/f6796a2404bb8046cc47923654b0a9f25c74cb1d))
+* **admin:** regex compatible DOMs ([486ac28](https://github.com/betagouv/service-national-universel/commit/486ac283596a52f47c30ab033fff7d1007c07d63))
+* **api:** add missing try catch ([#2345](https://github.com/betagouv/service-national-universel/issues/2345)) ([2d159f5](https://github.com/betagouv/service-national-universel/commit/2d159f5e1fd350eb9eb84f40a8c1b088b39fd86a))
+* **app:** fix withdrawal button width in profile page ([#2347](https://github.com/betagouv/service-national-universel/issues/2347)) ([dcd83da](https://github.com/betagouv/service-national-universel/commit/dcd83da17d5fd1fbadb06bd1c8ed1c41f105c608))
+* **app:** style home non realise ([010e9f8](https://github.com/betagouv/service-national-universel/commit/010e9f8a5bc7a02ae3c25316f4c8ec3f95500f28))
+* **app/admin:** delete jquery ([#2341](https://github.com/betagouv/service-national-universel/issues/2341)) ([0a8c9a5](https://github.com/betagouv/service-national-universel/commit/0a8c9a5b3130a94f1fd53e3599486b69535fafff))
+
+
+### Features
+
+* **admin:** add filter cohort for user ([6173c4d](https://github.com/betagouv/service-national-universel/commit/6173c4d08c1780e22218910eefa92d32b6843bb8))
+* **analytics/api:** add sentry & testroute sentry ([#2351](https://github.com/betagouv/service-national-universel/issues/2351)) ([3498725](https://github.com/betagouv/service-national-universel/commit/34987257054acc1fd8ec729a4c7b71e9428b4965))
+* **app:** Formulaire RL not needed ([f6509b1](https://github.com/betagouv/service-national-universel/commit/f6509b15c0c9c588be9a2cb7a6a399d690dab5e7))
+
+# [1.230.0](https://github.com/betagouv/service-national-universel/compare/v1.229.0...v1.230.0) (2023-03-09)
+
+
+### Bug Fixes
+
+* **admin:** fix des titres du statut de validation ([#2344](https://github.com/betagouv/service-national-universel/issues/2344)) ([5a37fc2](https://github.com/betagouv/service-national-universel/commit/5a37fc263676867efa1c8b88838205563a31e6c4))
+* **api:** update permission ref --> head_center ([cefccf9](https://github.com/betagouv/service-national-universel/commit/cefccf9a9164bb0b2be60289a7adc47110e03df8))
+* **app:** ajout de la nouvelle modale sur la home legacy ([e2e2f2e](https://github.com/betagouv/service-national-universel/commit/e2e2f2ef9cd4ced28fa24acc3340b084481fe907))
+* **app:** style modal withdrawn ([4fc3bff](https://github.com/betagouv/service-national-universel/commit/4fc3bff3769d3252677bda207a08caebfcf37455))
+
+
+### Features
+
+* **admin/app:** Pages de présentation des assets ([#2339](https://github.com/betagouv/service-national-universel/issues/2339)) ([94ca9e7](https://github.com/betagouv/service-national-universel/commit/94ca9e76b0dcdb06462bf4dd1a4c1bb0222326ee))
+* **app:** Ajout d'une modale menant au choix de cohorte pour les désistés (staging) ([#2342](https://github.com/betagouv/service-national-universel/issues/2342)) ([c58d334](https://github.com/betagouv/service-national-universel/commit/c58d33480854a943fbd947e5178cc9d8e7bd25f5))
+* **app:** MEP modale de changement de sejour pour desistes ([c74a3e7](https://github.com/betagouv/service-national-universel/commit/c74a3e79ac2572b26626145e42512a7ab8d75ab7))
+
 # [1.229.0](https://github.com/betagouv/service-national-universel/compare/v1.228.0...v1.229.0) (2023-03-08)
 
 

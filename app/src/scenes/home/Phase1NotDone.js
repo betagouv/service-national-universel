@@ -50,12 +50,12 @@ export default function Phase1NotDone() {
   return (
     <>
       {/* DESKTOP */}
-      <div className="relative hidden lg:flex justify-between m-10 rounded-xl shadow-md bg-white overflow-hidden min-h-[700px]">
+      <div className="relative hidden lg:flex justify-between m-10 rounded-xl shadow-md bg-white overflow-hidden min-h-[450px]">
         {wasYoungExcluded(young) ? (
           <div className="m-16 space-y-10">
             <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
               <strong>{young.firstName}, </strong>
-              votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion
+              votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion.
             </p>
             <p>
               <strong>Vous ne pouvez donc pas poursuivre votre parcours d’engagement au sein du SNU.</strong>
@@ -66,10 +66,10 @@ export default function Phase1NotDone() {
           </div>
         ) : (
           <>
-            <div className="z-10 ml-16 my-16 space-y-10">
+            <div className="ml-16 my-16 space-y-6 ">
               <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-lg">
                 <strong>{young.firstName}, </strong>
-                vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
+                vous n&apos;avez pas réalisé votre séjour de cohésion.
               </p>
               {permissionChangeCohort(young, sessionEndDate) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
@@ -104,7 +104,9 @@ export default function Phase1NotDone() {
                 </div>
               )}
             </div>
-            <img className="absolute right-0 object-fit h-full" src={require("../../assets/homePhase2Desktop.png")} alt="" />
+            <div className="hidden xl:block flex-none">
+              <img className="object-" src={require("../../assets/homePhase2Desktop.png")} alt="" />
+            </div>
           </>
         )}
       </div>
@@ -114,7 +116,7 @@ export default function Phase1NotDone() {
           <div className="p-4 space-y-10">
             <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
               <strong>{young.firstName}, </strong>
-              votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion
+              votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion.
             </p>
             <p>
               <strong>Vous ne pouvez donc pas poursuivre votre parcours d’engagement au sein du SNU.</strong>
@@ -127,7 +129,7 @@ export default function Phase1NotDone() {
           <>
             <div className="px-4 pb-4">
               <p className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName}, </strong> vous n&apos;avez pas réalisé votre séjour de cohésion&nbsp;
+                <strong>{young.firstName}, </strong> vous n&apos;avez pas réalisé votre séjour de cohésion.
               </p>
               {permissionChangeCohort(young, sessionEndDate) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
@@ -164,14 +166,14 @@ export default function Phase1NotDone() {
 
 function ChangeCohortPrompt() {
   return (
-    <div className="space-y-10 md:space-y-16 w-fit">
+    <div className="space-y-10 md:space-y-12 w-fit">
       <div className="font-bold leading-7 mt-8 space-y-2">
-        <p className="text-lg md:text-xl">Votre phase 1 n’est donc pas validée.</p>
-        <p className="text-gray-500 text-sm max-w-sm">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
+        <p className="text-lg md:text-xl m-0">Votre phase 1 n’est donc pas validée.</p>
+        <p className="text-gray-700 text-base max-w-sm leading-6">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
       </div>
       <Link
         to="changer-de-sejour"
-        className="w-full md:w-auto bg-blue-600 rounded-md text-white text-sm px-3 py-2 hover:brightness-110 active:brightness-125 shadow-ninaBlue transition flex justify-center items-center">
+        className="w-full md:w-fit bg-blue-600 rounded-md text-white text-sm px-3 py-2 hover:brightness-110 active:brightness-125 shadow-ninaBlue transition flex justify-center items-center">
         Choisir un nouveau séjour
       </Link>
       <div className="text-xs text-blue-600">

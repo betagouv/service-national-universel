@@ -5,6 +5,8 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import ReduxToastr from "react-redux-toastr";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
+import "react-day-picker/dist/style.css";
+
 import store from "./redux/store";
 import App from "./app";
 

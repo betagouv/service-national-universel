@@ -10,7 +10,7 @@ const DeleteAccountButton = ({ young, onClick }) => {
 
   return (
     <button
-      className="my-4 md:my-0 h-fit border-[1px] border-red-500 text-red-500 outline-none rounded-md font-medium text-sm block w-auto py-[10px] px-10 hover:text-red-500"
+      className="my-2 md:my-0 h-fit border-[1px] border-red-500 text-red-500 outline-none rounded-md font-medium text-sm block w-auto py-[10px] px-10 hover:text-red-500"
       onClick={onClick}>
       {getLabel()}
     </button>

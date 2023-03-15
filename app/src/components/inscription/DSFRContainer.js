@@ -12,7 +12,7 @@ export default function DSFRContainer({ title, subtitle, children, onSave, suppo
           {title && (
             <>
               <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold m-o">{title}</h1>
+                <h1 className="text-xl font-bold m-0">{title}</h1>
                 <a href={supportLink} target="_blank" rel="noreferrer">
                   <QuestionMarkBlueCircle />
                 </a>

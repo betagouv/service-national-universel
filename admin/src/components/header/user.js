@@ -62,11 +62,11 @@ export default function HeaderUser() {
               </div>
             </NavLink>
           ) : null}
-          {isSuperAdmin(user) && (
+          {[ROLES.ADMIN].includes(user.role) && (
             <NavLink to="/settings">
               <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
                 <FiSettings className=" group-hover:scale-110" />
-                Settings
+                Paramétrage dynamique
               </div>
             </NavLink>
           )}

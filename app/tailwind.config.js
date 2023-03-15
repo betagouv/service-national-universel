@@ -23,6 +23,9 @@ module.exports = {
       print: { raw: "print" },
     },
     extend: {
+      lineHeight: {
+        12: "3rem",
+      },
       backgroundImage: {
         "hero-pattern":
           "linear-gradient(0deg, rgba(66, 56, 157, 1) 0%, rgba(66, 56, 157, 0.8575805322128851) 24%, rgba(66, 56, 157, 0.5606617647058824) 79%, rgba(0, 212, 255, 0) 100%), url('/src/assets/phase3.jpg')",

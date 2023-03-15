@@ -464,7 +464,7 @@ export default function VolontaireList() {
                   showIcon={false}
                   placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
