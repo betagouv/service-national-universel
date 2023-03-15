@@ -2,10 +2,10 @@ import React from "react";
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import QuestionBlock from "./QuestionBlock";
 
-const FaqAffected = () => {
+const FaqAffected = ({ className }) => {
   return (
-    <section className="mb-14">
-      <h2 className="font-bold text-xl m-0 mb-4">F.A.Q</h2>
+    <section className={`my-8 ${className}`}>
+      <h2 className="font-bold text-xl my-4">F.A.Q</h2>
       <div className="flex flex-col gap-4">
         <QuestionBlock
           questionText="Comment se passe le transport ?"
