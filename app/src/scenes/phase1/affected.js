@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import dayjs from "dayjs";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
@@ -16,15 +16,8 @@ import { RiErrorWarningLine } from "react-icons/ri";
 import StepsAffected from "./components/StepsAffected";
 import LongArrow from "../../assets/icons/LongArrow.js";
 import SnuBackPack from "../../assets/SnuBackPack.js";
-import ModalTailwind from "../../components/ui/modals/Modal.js";
-import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
-import { setYoung } from "../../redux/auth/actions.js";
-import { capture } from "../../sentry.js";
-import ModalConfirm from "../../components/modals/ModalConfirm.js";
-import downloadPDF from "../../utils/download-pdf.js";
-import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary.js";
-import CloseSvg from "../../assets/Close.js";
-import ButtonPrimaryOutline from "../../components/ui/buttons/ButtonPrimaryOutline.js";
+import { ModalConvocation } from "./components/modals/ModalConvocation.js";
+import JDMA from "../../components/JDMA.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -92,28 +85,31 @@ export default function Affected() {
 
         <header className="flex flex-col items-between lg:justify-between lg:flex-row order-1">
           <div>
-            <h1 className="text-2xl md:text-5xl space-y-4">
+            <h1 className="text-2xl md:text-5xl md:space-y-4">
               Mon séjour de cohésion
               <br />
               <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
             </h1>
-            {youngCanChangeSession(young) ? <ChangeStayLink className="my-8 md:mb-[18px]" /> : null}
+            {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
 
           <LieuAffectation center={center} />
         </header>
 
-        <div className="flex flex-col md:flex-row gap-12 md:gap-32 order-2">
-          <ResumeDuVoyage open={areStepsDone} meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-          <DansMonSac open={areStepsDone} setModalConvocationOpen={setModalConvocationOpen} />
+        <div
+          className={`border flex flex-col md:flex-row flex-none
+          gap-12 md:gap-32 order-2 overflow-hidden transition-all ease-in-out duration-500
+          ${areStepsDone ? "h-[800px] md:h-[400px]" : "h-0"}`}>
+          <ResumeDuVoyage meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+          <DansMonSac setModalConvocationOpen={setModalConvocationOpen} />
         </div>
 
         <StepsAffected young={young} center={center} nbvalid={nbvalid} />
 
-        <FaqAffected className={`${areStepsDone ? "order-3" : "order-4"}`} />
+        <FaqAffected className={`transition-all ${areStepsDone ? "order-3" : "order-4"}`} />
       </div>
 
-      <JeDonneMonAvis id="3504" />
+      <JDMA id="3504" />
 
       <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
     </div>
@@ -169,13 +165,13 @@ function LieuAffectation({ center }) {
   );
 }
 
-function ResumeDuVoyage({ open, meetingPoint, cohortDetails }) {
+function ResumeDuVoyage({ meetingPoint, cohortDetails }) {
   if (!meetingPoint || !cohortDetails) {
     return <></>;
   }
 
   return (
-    <div className={`${open ? "h-auto" : "h-0"}`}>
+    <div>
       <h1 className="text-xl font-bold m-4">Résumé du voyage</h1>
       <div className="border-l-4 border-gray-500 pl-4 space-y-4 my-2">
         <div>
@@ -216,7 +212,7 @@ function ResumeDuVoyage({ open, meetingPoint, cohortDetails }) {
   );
 }
 
-function DansMonSac({ open, setModalConvocationOpen }) {
+function DansMonSac({ setModalConvocationOpen }) {
   const persistedTodo = JSON.parse(localStorage.getItem("todo")) || {
     convocation: false,
     identite: false,
@@ -239,127 +235,48 @@ function DansMonSac({ open, setModalConvocationOpen }) {
   }
 
   return (
-    <div className={`relative bg-white rounded-xl shadow-nina md:shadow-none p-4 space-y-4 ${open ? "h-auto" : "h-0"}`}>
+    <div className="border relative bg-white rounded-xl shadow-nina md:shadow-none p-[1rem] md:p-[0rem] md:w-full">
       <SnuBackPack className="absolute right-0" />
-      <h1 className="text-xl font-bold mb-4">Dans mon sac...</h1>
-
-      <div className="flex gap-4 items-center">
-        <input type="checkbox" name="convocation" id="convocation" checked={todo.convocation} onChange={handleCheck} />
-        <label htmlFor="convocation">
-          Votre{" "}
-          <button onClick={() => setModalConvocationOpen(true)} className="font-semibold underline-offset-4 underline decoration-2">
-            convocation
-          </button>
-        </label>
-      </div>
-
-      <div className="flex gap-4 items-center">
-        <input type="checkbox" name="identite" id="identite" checked={todo.identite} onChange={handleCheck} />
-        <label htmlFor="identite">
-          Votre <strong>pièce d&apos;identité</strong>
-        </label>
-      </div>
-
-      <div className="flex gap-4 items-center">
-        <input type="checkbox" name="sanitaire" id="sanitaire" checked={todo.sanitaire} onChange={handleCheck} />
-        <label htmlFor="sanitaire">
-          La <strong>fiche sanitaire</strong> complétée, sous enveloppe destinée au référent sanitaire
-        </label>
-      </div>
-
-      <div className="flex gap-4 items-center">
-        <input type="checkbox" name="masques" id="masques" checked={todo.masques} onChange={handleCheck} />
-        <label htmlFor="masques">
-          Deux <strong>masques jetables</strong> à usage médical pour le transport en commun
-        </label>
-      </div>
-
-      <div className="flex gap-4 items-center">
-        <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
-        <label htmlFor="collation">
-          Une <strong>collation ou un déjeuner froid</strong> pour le repas.
-        </label>
-      </div>
-    </div>
-  );
-}
-
-function JeDonneMonAvis({ id }) {
-  return (
-    <div className="flex justify-end pt-4 pb-8 pr-8">
-      <a href={`https://jedonnemonavis.numerique.gouv.fr/Demarches/${id}?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f`}>
-        <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" className="h-[60px]" />
-      </a>
-    </div>
-  );
-}
-
-function ModalConvocation({ open, setOpen }) {
-  const young = useSelector((state) => state.Auth.young);
-  const dispatch = useDispatch();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
-  const handleDownload = async () => {
-    if (young?.convocationFileDownload === "true") return;
-    const { data } = await api.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
-    plausibleEvent("affecté_step3");
-    dispatch(setYoung(data));
-  };
-
-  const handleMail = async () => {
-    try {
-      let template = "cohesion";
-      let type = "convocation";
-      const { ok, code } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
-        fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
-      });
-      if (!ok) throw new Error(translate(code));
-      toastr.success(`Document envoyé à ${young.email}`);
-      setOpen(false);
-      setModal({ isOpen: false, onConfirm: null });
-    } catch (e) {
-      capture(e);
-      toastr.error("Erreur lors de l'envoie du document : ", e.message);
-      setOpen(false);
-      setModal({ isOpen: false, onConfirm: null });
-    }
-  };
-
-  return (
-    <ModalTailwind isOpen={open} onClose={() => setOpen(false)}>
-      <div className="bg-white p-4 space-y-2 rounded-md w-full md:w-auto">
-        <div className="flex gap-4 justify-between">
-          <h1 className="text-gray-900 text-lg font-semibold m-0">Choisissez une option de téléchargement</h1>
-          <CloseSvg className="close-icon hover:cursor-pointer" height={16} width={16} onClick={() => setOpen(false)} />
+      <div className="max-w-lg bg-cyan-200 space-y-4">
+        <h1 className="text-xl font-bold mb-4 md:pt-2">Dans mon sac...</h1>
+        <div className="flex gap-4 items-center">
+          <input type="checkbox" name="convocation" id="convocation" checked={todo.convocation} onChange={handleCheck} />
+          <label htmlFor="convocation">
+            Votre{" "}
+            <button onClick={() => setModalConvocationOpen(true)} className="font-semibold underline-offset-4 underline decoration-2">
+              convocation
+            </button>
+          </label>
         </div>
 
-        <br />
-        <ButtonPrimary onClick={handleDownload} className="w-full">
-          <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
-          Télécharger
-        </ButtonPrimary>
+        <div className="flex gap-4 items-center">
+          <input type="checkbox" name="identite" id="identite" checked={todo.identite} onChange={handleCheck} />
+          <label htmlFor="identite">
+            Votre <strong>pièce d&apos;identité</strong>
+          </label>
+        </div>
 
-        <ButtonPrimaryOutline
-          onClick={() =>
-            setModal({
-              isOpen: true,
-              onConfirm: handleMail,
-              title: "Envoi de document par mail",
-              message: `Vous allez recevoir votre convocation par mail à l'adresse ${young.email}.`,
-            })
-          }
-          className="w-full">
-          <HiOutlineMail className="h-5 w-5 mr-2" />
-          Recevoir par mail
-        </ButtonPrimaryOutline>
+        <div className="flex gap-4 items-center">
+          <input type="checkbox" name="sanitaire" id="sanitaire" checked={todo.sanitaire} onChange={handleCheck} />
+          <label htmlFor="sanitaire">
+            La <strong>fiche sanitaire</strong> complétée, sous enveloppe destinée au référent sanitaire
+          </label>
+        </div>
+
+        <div className="flex gap-4 items-center">
+          <input type="checkbox" name="masques" id="masques" checked={todo.masques} onChange={handleCheck} />
+          <label htmlFor="masques">
+            Deux <strong>masques jetables</strong> à usage médical pour le transport en commun
+          </label>
+        </div>
+
+        <div className="flex gap-4 items-center">
+          <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
+          <label htmlFor="collation">
+            Une <strong>collation ou un déjeuner froid</strong> pour le repas.
+          </label>
+        </div>
       </div>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => modal?.onConfirm()}
-      />
-    </ModalTailwind>
+    </div>
   );
 }
