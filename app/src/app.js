@@ -153,7 +153,7 @@ const Espace = () => {
     }
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
-        if (sessions.length) setIResumePhase1WithdrawnModalOpen(true);
+        if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
     return () => {
