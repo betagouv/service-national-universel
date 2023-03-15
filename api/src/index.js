@@ -31,17 +31,17 @@ app.use(logger("dev"));
 // }
 
 // eslint-disable-next-line no-unused-vars
-// function handleError(err, req, res, next) {
-//   const output = {
-//     error: {
-//       name: err.name,
-//       message: err.message,
-//       text: err.toString(),
-//     },
-//   };
-//   const statusCode = err.status || 500;
-//   res.status(statusCode).json(output);
-// }
+function handleError(err, req, res, next) {
+  const output = {
+    error: {
+      name: err.name,
+      message: err.message,
+      text: err.toString(),
+    },
+  };
+  const statusCode = err.status || 500;
+  res.status(statusCode).json(output);
+}
 
 const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
 
@@ -117,7 +117,7 @@ app.get("/", async (req, res) => {
 
 app.get("/testsentry", async (req, res) => {
   try {
-    throw new Error("Intentional error 5");
+    throw new Error("Intentional error");
   } catch (error) {
     console.log("Error ");
     capture(error);
@@ -125,41 +125,25 @@ app.get("/testsentry", async (req, res) => {
   }
 });
 
-app.get("/error", (req, res) => {
-  res.send("Hello World!");
-  res.send("HELLO WORL 2");
-});
+if (process.env.STAGING === "true") {
+  app.get("/error", (req, res) => {
+    res.send("Hello World!");
+    res.send("HELLO WORL 2");
+  });
 
-app.get("/error1", (req, res) => {
-  throw new Error("APPP CRASH ERROR 1");
-});
-
-app.get("/error2", (req, res) => {
-  setTimeout(function () {
-    throw new Error("APPP CRASH ERROR 2");
-  }, 10);
-});
-
-app.get("/error3", (req, res) => {
-  try {
-    setTimeout(function () {
-      throw new Error("APPP CRASH ERROR  3");
-    }, 10);
-  } catch (e) {
-    console.log("error", e);
-  }
-});
-
-app.get("/error4", (req, res) => {
-  try {
-    throw new Error("APPP CRASH ERROR 4");
-  } catch (error) {
-    console.log("hihihi", error);
-  }
-});
+  app.get("/error1", (req, res) => {
+    try {
+      setTimeout(function () {
+        throw new Error("APPP CRASH ERROR  3");
+      }, 10);
+    } catch (e) {
+      console.log("error", e);
+    }
+  });
+}
 
 registerSentryErrorHandler();
-// app.use(handleError);
+app.use(handleError);
 
 require("./passport")();
 
