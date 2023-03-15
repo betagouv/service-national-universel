@@ -133,7 +133,7 @@ export default function App() {
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
-  const [isResumePhase1WithdrawnModalOpen, setIResumePhase1WithdrawnModalOpen] = useState(false);
+  const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
 
@@ -153,12 +153,12 @@ const Espace = () => {
     }
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
-        if (sessions.length) setIResumePhase1WithdrawnModalOpen(true);
+        if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
     return () => {
       setIsModalCGUOpen(false);
-      setIResumePhase1WithdrawnModalOpen(false);
+      setIsResumePhase1WithdrawnModalOpen(false);
     };
   }, [young]);
 
