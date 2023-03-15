@@ -27,6 +27,7 @@ import Toggle from "../../../components/Toggle";
 import plausibleEvent from "../../../services/plausible";
 import ReactLoading from "react-loading";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
+import { translateApplication } from "snu-lib";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
@@ -565,9 +566,9 @@ export default function CustomMission({ young, onChange }) {
             <CustomSelect
               error={errors.applicationStatus}
               options={[
-                { value: "DONE", label: translate("DONE") },
-                { value: "VALIDATED", label: translate("VALIDATED") },
-                { value: "IN_PROGRESS", label: translate("IN_PROGRESS") },
+                { value: "DONE", label: translateApplication("DONE") },
+                { value: "VALIDATED", label: translateApplication("VALIDATED") },
+                { value: "IN_PROGRESS", label: translateApplication("IN_PROGRESS") },
               ]}
               placeholder={"Statut de la candidature"}
               onChange={(e) => setValues({ ...values, applicationStatus: e.value })}
