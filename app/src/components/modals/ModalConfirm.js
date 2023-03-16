@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal } from "reactstrap";
-
 import { ModalContainer, Content, Footer, Header } from "./Modal";
+
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
 

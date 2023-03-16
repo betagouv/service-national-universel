@@ -3,16 +3,16 @@ import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
 import { useDispatch } from "react-redux";
 import { Modal } from "reactstrap";
-import CloseSvg from "../../../../assets/Close";
-import { ModalContainer } from "../../../../components/modals/Modal";
-import WithTooltip from "../../../../components/WithTooltip";
-import { setYoung } from "../../../../redux/auth/actions";
-import api from "../../../../services/api";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import { SENDINBLUE_TEMPLATES } from "../../../../utils";
+import CloseSvg from "../../../../../../assets/Close";
+import { ModalContainer } from "../../../../../../components/modals/Modal";
+import WithTooltip from "../../../../../../components/WithTooltip";
+import { setYoung } from "../../../../../../redux/auth/actions";
+import api from "../../../../../../services/api";
+import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
+import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
 import { toastr } from "react-redux-toastr";
-import plausibleEvent from "../../../../services/plausible";
-import { CDN_BASE_URL } from "../../../representants-legaux/commons";
+import plausibleEvent from "../../../../../../services/plausible";
+import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
 
 export default function StepMedicalField({ young }) {
   const [stateMobil, setStateMobil] = useState(false);

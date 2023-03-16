@@ -5,16 +5,16 @@ import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import CloseSvg from "../../../../assets/Close";
-import DownloadConvocationButton from "../../../../components/buttons/DownloadConvocationButton";
-import { ModalContainer } from "../../../../components/modals/Modal";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import WithTooltip from "../../../../components/WithTooltip";
-import { setYoung } from "../../../../redux/auth/actions";
-import api from "../../../../services/api";
+import CloseSvg from "../../../../../../assets/Close";
+import DownloadConvocationButton from "../../../../../../components/buttons/DownloadConvocationButton";
+import { ModalContainer } from "../../../../../../components/modals/Modal";
+import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
+import WithTooltip from "../../../../../../components/WithTooltip";
+import { setYoung } from "../../../../../../redux/auth/actions";
+import api from "../../../../../../services/api";
 import Convocation from "../Convocation";
-import plausibleEvent from "../../../../services/plausible";
-import { capture } from "../../../../sentry";
+import plausibleEvent from "../../../../../../services/plausible";
+import { capture } from "../../../../../../sentry";
 import { translate } from "snu-lib";
 
 export default function StepConvocation({ young }) {

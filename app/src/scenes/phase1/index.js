@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 import Done from "./done.js";
-import Affected from "./affected.js";
+import Affected from "./scenes/affected/index.js";
 import Cancel from "./cancel.js";
 import NotDone from "./notDone.js";
 import WaitingAffectation from "./waitingAffectation.js";

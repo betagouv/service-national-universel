@@ -9,7 +9,7 @@ import { translateCohort } from "../../utils";
 import ChangeStayLink from "./components/ChangeStayLink";
 import CheckYourSpamSection from "./components/CheckYourSpamSection";
 import Container from "./components/Container";
-import FaqSection from "./components/FaqSection";
+import FaqSection from "./components/FaqWaitingAffectation";
 import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";

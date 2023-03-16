@@ -41,7 +41,7 @@ import SupportCenter from "./scenes/support-center";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import { appURL, environment, maintenance } from "./config";
+import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
 import { toastr } from "react-redux-toastr";
@@ -132,39 +132,33 @@ export default function App() {
 }
 
 const Espace = () => {
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalResume, setModalResume] = useState(false);
+  const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
+  const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
+
+  const handleModalCGUConfirm = async () => {
+    setIsModalCGUOpen(false);
+    const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
+    if (!ok) {
+      setIsModalCGUOpen(true);
+      return toastr.error(`Une erreur est survenue : ${code}`);
+    }
+    return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
+  };
+
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
-      setModal({
-        isOpen: true,
-        title: "Conditions générales d'utilisation",
-        message: (
-          <>
-            <p>Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
-            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-              Consulter les CGU ›
-            </a>
-          </>
-        ),
-        onConfirm: async () => {
-          const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
-          if (!ok) return toastr.error(`Une erreur est survenue : ${code}`);
-          return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
-        },
-        confirmText: "J'accepte les conditions générales d'utilisation",
-      });
+      setIsModalCGUOpen(true);
     }
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
-        if (sessions.length) setModalResume(true);
+        if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
     return () => {
-      setModal({ isOpen: false, onConfirm: null });
-      setModalResume(false);
+      setIsModalCGUOpen(false);
+      setIsResumePhase1WithdrawnModalOpen(false);
     };
   }, [young]);
 
@@ -208,17 +202,8 @@ const Espace = () => {
         </Switch>
       </main>
       <Footer />
-      <ModalCGU
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        confirmText={modal?.confirmText}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
-      <ModalResumePhase1ForWithdrawn isOpen={modalResume} onClose={() => setModalResume(false)} />
+      <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
+      <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
     </>
   );
 };
