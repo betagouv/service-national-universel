@@ -139,9 +139,7 @@ const content = ({ handleSubmit, young }) => {
           Changer de séjour &gt;
         </Link>
         <p className="pb-3 text-sm text-gray-600">Je ne souhaite plus participer au SNU</p>
-        <Link
-          to={environment === "production" ? "desistement" : "account?desistement=1"}
-          className="text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
+        <Link to="account?desistement=1" className="text-sm text-blue-600 whitespace-nowrap hover:underline hover:underline-offset-2">
           Me désister &gt;
         </Link>
       </div>

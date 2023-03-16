@@ -17,7 +17,6 @@ import Candidature from "./scenes/candidature";
 import CGU from "./scenes/CGU";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
-import Desistement from "./scenes/desistement";
 import Diagoriente from "./scenes/diagoriente";
 import Engagement from "./scenes/engagement";
 import Home from "./scenes/home";
@@ -193,7 +192,6 @@ const Espace = () => {
           <SentryRoute path="/preferences" component={Preferences} />
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
-          <SentryRoute path="/desistement" component={Desistement} />
           {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}

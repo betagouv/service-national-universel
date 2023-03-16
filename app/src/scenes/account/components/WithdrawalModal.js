@@ -63,7 +63,7 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
   const { content, title, subTitle, confirmButtonName } = steps[action][step];
 
   return (
-    <Modal isOpen={isOpen} onClose={onCancel} className="bg-white">
+    <Modal isOpen={isOpen} onClose={onCancel} className="bg-white w-full md:w-[512px]">
       <div className="p-6 flex flex-col md:items-center">
         <Close height={10} width={10} onClick={onCancel} className="self-end md:hidden" />
         {content === CONTENT_CHANGE_DATE && (

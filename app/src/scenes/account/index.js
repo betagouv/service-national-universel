@@ -18,7 +18,6 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import FormRow from "../../components/forms/FormRow";
 import ContinueButton from "../../components/buttons/ContinueButton";
 import DeleteAccountButton from "../../components/buttons/DeleteAccountButton";
-import DeleteAccountButtonOld from "../../components/buttons/DeleteAccountButtonOld";
 import ChangeStayButton from "../../components/buttons/ChangeStayButton";
 import WithdrawalModal from "./components/WithdrawalModal";
 
@@ -291,7 +290,7 @@ export default function Account() {
                 setConfirmationModal({ isOpen: false, onConfirm: null });
               }}
             />
-            {environment !== "production" && <WithdrawalModal isOpen={isWithdrawalModalOpen} onCancel={() => setWithdrawalModalOpen(false)} young={young} />}
+            <WithdrawalModal isOpen={isWithdrawalModalOpen} onCancel={() => setWithdrawalModalOpen(false)} young={young} />
           </>
         )}
       </Formik>
@@ -301,11 +300,7 @@ export default function Account() {
           <ChangeStayButton />
         ) : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
-          environment === "production" ? (
-            <DeleteAccountButtonOld young={young} />
-          ) : (
-            <DeleteAccountButton young={young} onClick={() => setWithdrawalModalOpen(true)} />
-          )
+          <DeleteAccountButton young={young} onClick={() => setWithdrawalModalOpen(true)} />
         ) : null}
       </div>
     </div>
