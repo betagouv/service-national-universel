@@ -572,6 +572,29 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         params = { ...params, cta: `${ADMIN_URL}/volontaire${application.youngId}/phase2` };
       }
     } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
+      // get CC of young
+      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+      params = {
+        firstName: application.youngFirstName,
+        lastName: application.youngLastName,
+        type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
+      };
+      const sendYoungRPMail = async () => {
+        // prevenir jeune / RP
+        emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+        params = {
+          ...params,
+          cta: `${APP_URL}/volontaire/${application.youngId}/phase2`,
+        };
+
+        const mail = await sendTemplate(template, {
+          emailTo,
+          params,
+          cc,
+        });
+        return res.status(200).send({ ok: true, data: mail });
+      };
       if (isYoung(req.user)) {
         //second email
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
@@ -580,20 +603,55 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
           email: referent.email,
         }));
         emailTo.push({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email });
-        params = {
-          ...params,
-          cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
-          firstName: application.youngFirstName,
-          lastName: application.youngLastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-        };
+
+        const mail = await sendTemplate(template, {
+          emailTo,
+          params,
+        });
+        return res.status(200).send({ ok: true, data: mail });
       } else {
         // envoyer le mail au jeune / RP
         if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
-          // envoyer à tuteur de mission + jeune // RP
+          // prevenir tuteur mission
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+          params = {
+            ...params,
+            cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
+          };
+          await sendTemplate(template, {
+            emailTo,
+            params,
+          });
+
+          await sendYoungRPMail();
         } else if (req.user.role === ROLES.RESPONSIBLE) {
+          // prevenir referent departement pahse 2
+          const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
+          emailTo = referentManagerPhase2.map((referent) => ({
+            name: `${referent.firstName} ${referent.lastName}`,
+            email: referent.email,
+          }));
+          params = {
+            ...params,
+            cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
+          };
+          await sendTemplate(template, {
+            emailTo,
+            params,
+          });
+          await sendYoungRPMail();
         } else if (req.user.role === ROLES.ADMIN || req.user.role === ROLES.REFERENT_REGION) {
+          // prevenir tutor
+          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+          params = {
+            ...params,
+            cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
+          };
+          await sendTemplate(template, {
+            emailTo,
+            params,
+          });
+          await sendYoungRPMail();
         }
       }
     } else {
