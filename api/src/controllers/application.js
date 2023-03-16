@@ -584,11 +584,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       const sendYoungRPMail = async () => {
         // prevenir jeune / RP
         emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-        params = {
-          ...params,
-          cta: `${APP_URL}/mission/${application.missionId}`,
-        };
-
+        params.cta = `${APP_URL}/mission/${application.missionId}`;
         const mail = await sendTemplate(template, {
           emailTo,
           params,
@@ -615,10 +611,8 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
           // prevenir tuteur mission
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-          params = {
-            ...params,
-            cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
-          };
+          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+
           await sendTemplate(template, {
             emailTo,
             params,
@@ -632,10 +626,8 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
             name: `${referent.firstName} ${referent.lastName}`,
             email: referent.email,
           }));
-          params = {
-            ...params,
-            cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
-          };
+          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+
           await sendTemplate(template, {
             emailTo,
             params,
@@ -644,10 +636,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         } else if (req.user.role === ROLES.ADMIN || req.user.role === ROLES.REFERENT_REGION) {
           // prevenir tutor
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-          params = {
-            ...params,
-            cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
-          };
+          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
           await sendTemplate(template, {
             emailTo,
             params,
