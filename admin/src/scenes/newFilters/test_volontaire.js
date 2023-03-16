@@ -310,7 +310,7 @@ export default function test_volontaire() {
 
         <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
-          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} paramData={paramData} />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
         <SortOption sortOptions={sortOptions} paramData={paramData} setParamData={setParamData} />
 

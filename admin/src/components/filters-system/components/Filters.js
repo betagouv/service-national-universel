@@ -6,7 +6,7 @@ import FilterPopOver from "./filters/FilterPopOver";
 import { useHistory } from "react-router-dom";
 
 import { toastr } from "react-redux-toastr";
-import ViewPopOver from "./filters/ViewPopOver";
+import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl } from "./filters/utils";
@@ -82,7 +82,6 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
     const defaultFilters = getDefaultFilters();
     const initialFilters = getURLParam(urlParams, setParamData, filters);
     setSelectedFilters({ ...defaultFilters, ...initialFilters });
-    setParamData((paramData) => ({ ...paramData, handleFilterShowing: (value) => handleFilterShowing(value) }));
   };
 
   const getDefaultFilters = () => {
@@ -105,6 +104,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
     setDataFilter({ ...dataFilter, ...res.newFilters });
     const newParamData = {
       count: res.count,
+      filters: { ...dataFilter, ...res.newFilters },
     };
     if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
     setParamData((paramData) => ({ ...paramData, ...newParamData }));

@@ -133,8 +133,8 @@ export default function test_volontaire() {
           setParamData={setParamData}
         />
         <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="plandetransport" />
-          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} paramData={paramData} />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
         <ResultTable
           paramData={paramData}

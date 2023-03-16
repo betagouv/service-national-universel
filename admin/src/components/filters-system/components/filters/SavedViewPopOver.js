@@ -25,7 +25,7 @@ export default function ViewPopOver({ setIsShowing, isShowing, savedView, handle
             <div className="flex flex-row items-center gap-2">
               <FloppyDisk />
               <p className="text-gray-700 text-sm leading-5">
-                Vues enregistrées <span className="font-bold">({savedView.length})</span>
+                Vues enregistrées <span className="font-bold">({savedView?.length})</span>
               </p>
             </div>
 
