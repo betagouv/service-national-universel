@@ -37,7 +37,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                 </div>
                 {error && <div className="text-[#EF4444]">{error}</div>}
               </div>
-              <DateIcon className={`flex ${disabled ? "text-gray-400" : "text-gray-500"}`} />
+              <DateIcon className={`flex mr-1 ${disabled ? "text-gray-400" : "text-gray-500"}`} />
             </div>
           </Popover.Button>
 
