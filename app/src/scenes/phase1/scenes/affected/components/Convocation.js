@@ -4,13 +4,13 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import Loader from "../../../components/Loader";
-import api from "../../../services/api";
-import { translate, htmlCleaner } from "../../../utils";
-import { Hero, Content } from "../../../components/Content";
-import { supportURL } from "../../../config";
+import Loader from "../../../../../components/Loader";
+import api from "../../../../../services/api";
+import { translate, htmlCleaner } from "../../../../../utils";
+import { Hero, Content } from "../../../../../components/Content";
+import { supportURL } from "../../../../../config";
 
-import { getCohortDetail } from "../../../utils/cohorts";
+import { getCohortDetail } from "../../../../../utils/cohorts";
 import dayjs from "dayjs";
 
 export default function Convocation() {

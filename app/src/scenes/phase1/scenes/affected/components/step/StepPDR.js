@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getCohortDetail, getMeetingPointChoiceLimitDateForCohort } from "../../../../utils/cohorts";
+import { getCohortDetail, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
 import dayjs from "dayjs";
-import CohortDateSummary from "../../../inscription2023/components/CohortDateSummary";
-import Loader from "../../../../components/Loader";
-import { capture } from "../../../../sentry";
-import api from "../../../../services/api";
-import LinearMap from "../../../../assets/icons/LinearMap";
-import { BorderButton } from "../../../../components/buttons/SimpleButtons";
+import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
+import Loader from "../../../../../../components/Loader";
+import { capture } from "../../../../../../sentry";
+import api from "../../../../../../services/api";
+import LinearMap from "../../../../../../assets/icons/LinearMap";
+import { BorderButton } from "../../../../../../components/buttons/SimpleButtons";
 import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../../../redux/auth/actions";
+import { setYoung } from "../../../../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
-import Check from "../../../../assets/icons/Check";
-import CloseSvg from "../../../../assets/Close";
-import { ModalContainer } from "../../../../components/modals/Modal";
+import Check from "../../../../../../assets/icons/Check";
+import CloseSvg from "../../../../../../assets/Close";
+import { ModalContainer } from "../../../../../../components/modals/Modal";
 import { Modal } from "reactstrap";
 
-import ConfirmationModal from "../modals/ConfirmationModal";
-import Warning from "../../../../assets/icons/Warning";
+import ConfirmationModal from "../../../../components/modals/ConfirmationModal";
+import Warning from "../../../../../../assets/icons/Warning";
 
 const ALONE_ARRIVAL_HOUR = "16h";
 const ALONE_DEPARTURE_HOUR = "11h";

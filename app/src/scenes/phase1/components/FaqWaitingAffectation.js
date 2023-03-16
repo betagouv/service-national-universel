@@ -2,7 +2,7 @@ import React from "react";
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import QuestionBlock from "./QuestionBlock";
 
-const FaqSection = () => {
+const FaqWaitingAffectation = () => {
   return (
     <section className="mb-14">
       <h2 className="font-bold text-xl m-0 mb-4">F.A.Q</h2>
@@ -55,4 +55,4 @@ const FaqSection = () => {
   );
 };
 
-export default FaqSection;
+export default FaqWaitingAffectation;
