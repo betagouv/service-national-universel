@@ -1115,7 +1115,7 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
 
 router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules"];
+    const keys = ["cohesionStayMedical", "imageRight", "rules"];
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
@@ -1126,7 +1126,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let value;
-    if (["autoTestPCR", "imageRight"].includes(document)) {
+    if (["imageRight"].includes(document)) {
       const { error: bodyError, value: tempValue } = Joi.object({
         [`${document}FilesStatus`]: Joi.string()
           .trim()
@@ -1167,7 +1167,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+    if (["imageRight", "rules"].includes(document)) {
       if ([FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED].includes(value[`${document}FilesStatus`])) {
         const statusToMail = {
           WAITING_VERIFICATION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION,

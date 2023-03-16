@@ -65,7 +65,7 @@ describe("Young", () => {
     });
     it("should return the form", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const forms = ["imageRight", "autotestPCR"];
+      const forms = ["imageRight"];
       for (const form of forms) {
         const res = await request(getAppHelper())
           .post("/young/" + young._id + "/documents/form/" + form)

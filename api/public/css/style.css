@@ -43,48 +43,6 @@ img.bg {
   margin-top: 20px;
 }
 
-#autotestPCR > .name {
-  position: absolute;
-  left: 105px;
-  top: 557px;
-}
-
-#autotestPCR > .parent1FirstName {
-  position: absolute;
-  left: 170px;
-  top: 283px;
-}
-#autotestPCR > .parent1LastName {
-  position: absolute;
-  left: 170px;
-  top: 318px;
-}
-#autotestPCR > .parentPhone {
-  position: absolute;
-  left: 550px;
-  top: 353px;
-}
-#autotestPCR > .parent2FirstName {
-  position: absolute;
-  left: 170px;
-  top: 449px;
-}
-#autotestPCR > .parent2LastName {
-  position: absolute;
-  left: 170px;
-  top: 484px;
-}
-#autotestPCR > .consentment-true {
-  position: absolute;
-  left: 124px;
-  top: 591px;
-}
-#autotestPCR > .consentment-false {
-  position: absolute;
-  left: 124px;
-  top: 764px;
-}
-
 #imageRight > .name {
   position: absolute;
   left: 490px;
